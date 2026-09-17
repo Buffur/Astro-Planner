@@ -16,6 +16,13 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Session Planner'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Import Metadata',
+            onPressed: () => context.push('/metadata'),
+          ),
+        ],
       ),
       body: target == null || equipment == null
           ? const Center(child: CircularProgressIndicator())
@@ -60,6 +67,63 @@ class HomeScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               'Dew Warning: Temperature is close to dew point. Activate dew heaters!',
+                              style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Sky Conditions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Moon Illumination:'),
+                            Text('${(viewModel.lunarIllumination * 100).toStringAsFixed(1)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Bortle Class:'),
+                            DropdownButton<int>(
+                              value: viewModel.bortleClass,
+                              items: List.generate(9, (index) => DropdownMenuItem(
+                                value: index + 1,
+                                child: Text('Class ${index + 1}'),
+                              )),
+                              onChanged: (val) {
+                                if (val != null) viewModel.setBortleClass(val);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (viewModel.skyDarknessWarning)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    color: Colors.orange.shade100,
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.deepOrange),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Sky Warning: High light pollution or bright Moon will wash out faint targets!',
                               style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
                             ),
                           ),

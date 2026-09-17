@@ -25,6 +25,8 @@ class PlannerViewModel extends ChangeNotifier {
   int _lightFrames = 100;
   final int _exposureSeconds = 60;
 
+  int _bortleClass = 4; // Default to Suburban Transition
+
   PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository) {
     _init();
   }
@@ -52,6 +54,7 @@ class PlannerViewModel extends ChangeNotifier {
   DateTime get sessionDate => _sessionDate;
   int get lightFrames => _lightFrames;
   int get exposureSeconds => _exposureSeconds;
+  int get bortleClass => _bortleClass;
 
   void setLightFrames(int frames) {
     _lightFrames = frames;
@@ -68,7 +71,20 @@ class PlannerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setBortleClass(int bortle) {
+    _bortleClass = bortle;
+    notifyListeners();
+  }
+
   // Calculations exposed to the UI
+
+  double get lunarIllumination {
+    return VisibilityCalculator.calculateLunarIllumination(_sessionDate);
+  }
+
+  bool get skyDarknessWarning {
+    return lunarIllumination > 0.8 || _bortleClass >= 7;
+  }
 
   double? get currentAltitude {
     if (_selectedTarget == null) return null;
