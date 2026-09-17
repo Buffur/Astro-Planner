@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/equipment/equipment_selection_screen.dart';
+import '../screens/target/target_selection_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -8,6 +10,14 @@ class AppRouter {
       GoRoute(
         path: '/',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/equipment',
+        builder: (context, state) => const EquipmentSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/target',
+        builder: (context, state) => const TargetSelectionScreen(),
       ),
     ],
   );
