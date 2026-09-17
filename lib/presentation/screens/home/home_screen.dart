@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../../domain/repositories/logbook_repository.dart';
+import '../../../domain/models/session_log.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,6 +19,11 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Session Planner'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.book),
+            tooltip: 'Logbook',
+            onPressed: () => context.push('/logbook'),
+          ),
           IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: 'Import Metadata',
@@ -167,6 +174,30 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final log = SessionLog(
+                      id: 0,
+                      targetName: target.commonName ?? target.catalogId,
+                      equipmentName: equipment.name,
+                      sessionDate: viewModel.sessionDate,
+                      plannedLightFrames: viewModel.lightFrames,
+                    );
+                    await context.read<LogbookRepository>().addLog(log);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Session saved to Logbook!')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save Session'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                  ),
+                ),
+                const SizedBox(height: 32),
               ],
             ),
     );

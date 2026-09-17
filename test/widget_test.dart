@@ -8,7 +8,9 @@ import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/domain/repositories/logbook_repository.dart';
 import 'package:astroplan/domain/models/weather_conditions.dart';
+import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
@@ -25,6 +27,17 @@ class MockWeatherRepository implements WeatherRepository {
   }
 }
 
+class MockLogbookRepository implements LogbookRepository {
+  @override
+  Future<List<domain.SessionLog>> getAllLogs() async => [];
+  @override
+  Future<void> addLog(domain.SessionLog log) async {}
+  @override
+  Future<void> updateLog(domain.SessionLog log) async {}
+  @override
+  Future<void> deleteLog(int id) async {}
+}
+
 void main() {
   testWidgets('App should boot and show session planner', (WidgetTester tester) async {
     final database = AppDatabase(NativeDatabase.memory());
@@ -37,6 +50,7 @@ void main() {
     await eqSeeder.seedIfNeeded();
 
     final weatherRepo = MockWeatherRepository();
+    final logbookRepo = MockLogbookRepository();
 
     await tester.pumpWidget(
       MultiProvider(
@@ -45,6 +59,7 @@ void main() {
           Provider<TargetRepository>.value(value: targetRepo),
           Provider<EquipmentRepository>.value(value: eqRepo),
           Provider<WeatherRepository>.value(value: weatherRepo),
+          Provider<LogbookRepository>.value(value: logbookRepo),
           ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, eqRepo, weatherRepo)),
         ],
         child: const AstroPlanApp(),

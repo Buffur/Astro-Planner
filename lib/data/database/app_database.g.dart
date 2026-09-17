@@ -1392,6 +1392,607 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
   }
 }
 
+class $SessionLogsTable extends SessionLogs
+    with TableInfo<$SessionLogsTable, SessionLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SessionLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _targetNameMeta = const VerificationMeta(
+    'targetName',
+  );
+  @override
+  late final GeneratedColumn<String> targetName = GeneratedColumn<String>(
+    'target_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _equipmentNameMeta = const VerificationMeta(
+    'equipmentName',
+  );
+  @override
+  late final GeneratedColumn<String> equipmentName = GeneratedColumn<String>(
+    'equipment_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sessionDateMeta = const VerificationMeta(
+    'sessionDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> sessionDate = GeneratedColumn<DateTime>(
+    'session_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _plannedLightFramesMeta =
+      const VerificationMeta('plannedLightFrames');
+  @override
+  late final GeneratedColumn<int> plannedLightFrames = GeneratedColumn<int>(
+    'planned_light_frames',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actualLightFramesMeta = const VerificationMeta(
+    'actualLightFrames',
+  );
+  @override
+  late final GeneratedColumn<int> actualLightFrames = GeneratedColumn<int>(
+    'actual_light_frames',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _rejectedFramesMeta = const VerificationMeta(
+    'rejectedFrames',
+  );
+  @override
+  late final GeneratedColumn<int> rejectedFrames = GeneratedColumn<int>(
+    'rejected_frames',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _environmentalNotesMeta =
+      const VerificationMeta('environmentalNotes');
+  @override
+  late final GeneratedColumn<String> environmentalNotes =
+      GeneratedColumn<String>(
+        'environmental_notes',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _processingNotesMeta = const VerificationMeta(
+    'processingNotes',
+  );
+  @override
+  late final GeneratedColumn<String> processingNotes = GeneratedColumn<String>(
+    'processing_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    targetName,
+    equipmentName,
+    sessionDate,
+    plannedLightFrames,
+    actualLightFrames,
+    rejectedFrames,
+    environmentalNotes,
+    processingNotes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'session_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SessionLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('target_name')) {
+      context.handle(
+        _targetNameMeta,
+        targetName.isAcceptableOrUnknown(data['target_name']!, _targetNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_targetNameMeta);
+    }
+    if (data.containsKey('equipment_name')) {
+      context.handle(
+        _equipmentNameMeta,
+        equipmentName.isAcceptableOrUnknown(
+          data['equipment_name']!,
+          _equipmentNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_equipmentNameMeta);
+    }
+    if (data.containsKey('session_date')) {
+      context.handle(
+        _sessionDateMeta,
+        sessionDate.isAcceptableOrUnknown(
+          data['session_date']!,
+          _sessionDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionDateMeta);
+    }
+    if (data.containsKey('planned_light_frames')) {
+      context.handle(
+        _plannedLightFramesMeta,
+        plannedLightFrames.isAcceptableOrUnknown(
+          data['planned_light_frames']!,
+          _plannedLightFramesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_plannedLightFramesMeta);
+    }
+    if (data.containsKey('actual_light_frames')) {
+      context.handle(
+        _actualLightFramesMeta,
+        actualLightFrames.isAcceptableOrUnknown(
+          data['actual_light_frames']!,
+          _actualLightFramesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rejected_frames')) {
+      context.handle(
+        _rejectedFramesMeta,
+        rejectedFrames.isAcceptableOrUnknown(
+          data['rejected_frames']!,
+          _rejectedFramesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('environmental_notes')) {
+      context.handle(
+        _environmentalNotesMeta,
+        environmentalNotes.isAcceptableOrUnknown(
+          data['environmental_notes']!,
+          _environmentalNotesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('processing_notes')) {
+      context.handle(
+        _processingNotesMeta,
+        processingNotes.isAcceptableOrUnknown(
+          data['processing_notes']!,
+          _processingNotesMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SessionLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SessionLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      targetName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_name'],
+      )!,
+      equipmentName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}equipment_name'],
+      )!,
+      sessionDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}session_date'],
+      )!,
+      plannedLightFrames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}planned_light_frames'],
+      )!,
+      actualLightFrames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}actual_light_frames'],
+      ),
+      rejectedFrames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rejected_frames'],
+      ),
+      environmentalNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}environmental_notes'],
+      ),
+      processingNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}processing_notes'],
+      ),
+    );
+  }
+
+  @override
+  $SessionLogsTable createAlias(String alias) {
+    return $SessionLogsTable(attachedDatabase, alias);
+  }
+}
+
+class SessionLog extends DataClass implements Insertable<SessionLog> {
+  final int id;
+  final String targetName;
+  final String equipmentName;
+  final DateTime sessionDate;
+  final int plannedLightFrames;
+  final int? actualLightFrames;
+  final int? rejectedFrames;
+  final String? environmentalNotes;
+  final String? processingNotes;
+  const SessionLog({
+    required this.id,
+    required this.targetName,
+    required this.equipmentName,
+    required this.sessionDate,
+    required this.plannedLightFrames,
+    this.actualLightFrames,
+    this.rejectedFrames,
+    this.environmentalNotes,
+    this.processingNotes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['target_name'] = Variable<String>(targetName);
+    map['equipment_name'] = Variable<String>(equipmentName);
+    map['session_date'] = Variable<DateTime>(sessionDate);
+    map['planned_light_frames'] = Variable<int>(plannedLightFrames);
+    if (!nullToAbsent || actualLightFrames != null) {
+      map['actual_light_frames'] = Variable<int>(actualLightFrames);
+    }
+    if (!nullToAbsent || rejectedFrames != null) {
+      map['rejected_frames'] = Variable<int>(rejectedFrames);
+    }
+    if (!nullToAbsent || environmentalNotes != null) {
+      map['environmental_notes'] = Variable<String>(environmentalNotes);
+    }
+    if (!nullToAbsent || processingNotes != null) {
+      map['processing_notes'] = Variable<String>(processingNotes);
+    }
+    return map;
+  }
+
+  SessionLogsCompanion toCompanion(bool nullToAbsent) {
+    return SessionLogsCompanion(
+      id: Value(id),
+      targetName: Value(targetName),
+      equipmentName: Value(equipmentName),
+      sessionDate: Value(sessionDate),
+      plannedLightFrames: Value(plannedLightFrames),
+      actualLightFrames: actualLightFrames == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualLightFrames),
+      rejectedFrames: rejectedFrames == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rejectedFrames),
+      environmentalNotes: environmentalNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(environmentalNotes),
+      processingNotes: processingNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(processingNotes),
+    );
+  }
+
+  factory SessionLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SessionLog(
+      id: serializer.fromJson<int>(json['id']),
+      targetName: serializer.fromJson<String>(json['targetName']),
+      equipmentName: serializer.fromJson<String>(json['equipmentName']),
+      sessionDate: serializer.fromJson<DateTime>(json['sessionDate']),
+      plannedLightFrames: serializer.fromJson<int>(json['plannedLightFrames']),
+      actualLightFrames: serializer.fromJson<int?>(json['actualLightFrames']),
+      rejectedFrames: serializer.fromJson<int?>(json['rejectedFrames']),
+      environmentalNotes: serializer.fromJson<String?>(
+        json['environmentalNotes'],
+      ),
+      processingNotes: serializer.fromJson<String?>(json['processingNotes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'targetName': serializer.toJson<String>(targetName),
+      'equipmentName': serializer.toJson<String>(equipmentName),
+      'sessionDate': serializer.toJson<DateTime>(sessionDate),
+      'plannedLightFrames': serializer.toJson<int>(plannedLightFrames),
+      'actualLightFrames': serializer.toJson<int?>(actualLightFrames),
+      'rejectedFrames': serializer.toJson<int?>(rejectedFrames),
+      'environmentalNotes': serializer.toJson<String?>(environmentalNotes),
+      'processingNotes': serializer.toJson<String?>(processingNotes),
+    };
+  }
+
+  SessionLog copyWith({
+    int? id,
+    String? targetName,
+    String? equipmentName,
+    DateTime? sessionDate,
+    int? plannedLightFrames,
+    Value<int?> actualLightFrames = const Value.absent(),
+    Value<int?> rejectedFrames = const Value.absent(),
+    Value<String?> environmentalNotes = const Value.absent(),
+    Value<String?> processingNotes = const Value.absent(),
+  }) => SessionLog(
+    id: id ?? this.id,
+    targetName: targetName ?? this.targetName,
+    equipmentName: equipmentName ?? this.equipmentName,
+    sessionDate: sessionDate ?? this.sessionDate,
+    plannedLightFrames: plannedLightFrames ?? this.plannedLightFrames,
+    actualLightFrames: actualLightFrames.present
+        ? actualLightFrames.value
+        : this.actualLightFrames,
+    rejectedFrames: rejectedFrames.present
+        ? rejectedFrames.value
+        : this.rejectedFrames,
+    environmentalNotes: environmentalNotes.present
+        ? environmentalNotes.value
+        : this.environmentalNotes,
+    processingNotes: processingNotes.present
+        ? processingNotes.value
+        : this.processingNotes,
+  );
+  SessionLog copyWithCompanion(SessionLogsCompanion data) {
+    return SessionLog(
+      id: data.id.present ? data.id.value : this.id,
+      targetName: data.targetName.present
+          ? data.targetName.value
+          : this.targetName,
+      equipmentName: data.equipmentName.present
+          ? data.equipmentName.value
+          : this.equipmentName,
+      sessionDate: data.sessionDate.present
+          ? data.sessionDate.value
+          : this.sessionDate,
+      plannedLightFrames: data.plannedLightFrames.present
+          ? data.plannedLightFrames.value
+          : this.plannedLightFrames,
+      actualLightFrames: data.actualLightFrames.present
+          ? data.actualLightFrames.value
+          : this.actualLightFrames,
+      rejectedFrames: data.rejectedFrames.present
+          ? data.rejectedFrames.value
+          : this.rejectedFrames,
+      environmentalNotes: data.environmentalNotes.present
+          ? data.environmentalNotes.value
+          : this.environmentalNotes,
+      processingNotes: data.processingNotes.present
+          ? data.processingNotes.value
+          : this.processingNotes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionLog(')
+          ..write('id: $id, ')
+          ..write('targetName: $targetName, ')
+          ..write('equipmentName: $equipmentName, ')
+          ..write('sessionDate: $sessionDate, ')
+          ..write('plannedLightFrames: $plannedLightFrames, ')
+          ..write('actualLightFrames: $actualLightFrames, ')
+          ..write('rejectedFrames: $rejectedFrames, ')
+          ..write('environmentalNotes: $environmentalNotes, ')
+          ..write('processingNotes: $processingNotes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    targetName,
+    equipmentName,
+    sessionDate,
+    plannedLightFrames,
+    actualLightFrames,
+    rejectedFrames,
+    environmentalNotes,
+    processingNotes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SessionLog &&
+          other.id == this.id &&
+          other.targetName == this.targetName &&
+          other.equipmentName == this.equipmentName &&
+          other.sessionDate == this.sessionDate &&
+          other.plannedLightFrames == this.plannedLightFrames &&
+          other.actualLightFrames == this.actualLightFrames &&
+          other.rejectedFrames == this.rejectedFrames &&
+          other.environmentalNotes == this.environmentalNotes &&
+          other.processingNotes == this.processingNotes);
+}
+
+class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
+  final Value<int> id;
+  final Value<String> targetName;
+  final Value<String> equipmentName;
+  final Value<DateTime> sessionDate;
+  final Value<int> plannedLightFrames;
+  final Value<int?> actualLightFrames;
+  final Value<int?> rejectedFrames;
+  final Value<String?> environmentalNotes;
+  final Value<String?> processingNotes;
+  const SessionLogsCompanion({
+    this.id = const Value.absent(),
+    this.targetName = const Value.absent(),
+    this.equipmentName = const Value.absent(),
+    this.sessionDate = const Value.absent(),
+    this.plannedLightFrames = const Value.absent(),
+    this.actualLightFrames = const Value.absent(),
+    this.rejectedFrames = const Value.absent(),
+    this.environmentalNotes = const Value.absent(),
+    this.processingNotes = const Value.absent(),
+  });
+  SessionLogsCompanion.insert({
+    this.id = const Value.absent(),
+    required String targetName,
+    required String equipmentName,
+    required DateTime sessionDate,
+    required int plannedLightFrames,
+    this.actualLightFrames = const Value.absent(),
+    this.rejectedFrames = const Value.absent(),
+    this.environmentalNotes = const Value.absent(),
+    this.processingNotes = const Value.absent(),
+  }) : targetName = Value(targetName),
+       equipmentName = Value(equipmentName),
+       sessionDate = Value(sessionDate),
+       plannedLightFrames = Value(plannedLightFrames);
+  static Insertable<SessionLog> custom({
+    Expression<int>? id,
+    Expression<String>? targetName,
+    Expression<String>? equipmentName,
+    Expression<DateTime>? sessionDate,
+    Expression<int>? plannedLightFrames,
+    Expression<int>? actualLightFrames,
+    Expression<int>? rejectedFrames,
+    Expression<String>? environmentalNotes,
+    Expression<String>? processingNotes,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (targetName != null) 'target_name': targetName,
+      if (equipmentName != null) 'equipment_name': equipmentName,
+      if (sessionDate != null) 'session_date': sessionDate,
+      if (plannedLightFrames != null)
+        'planned_light_frames': plannedLightFrames,
+      if (actualLightFrames != null) 'actual_light_frames': actualLightFrames,
+      if (rejectedFrames != null) 'rejected_frames': rejectedFrames,
+      if (environmentalNotes != null) 'environmental_notes': environmentalNotes,
+      if (processingNotes != null) 'processing_notes': processingNotes,
+    });
+  }
+
+  SessionLogsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? targetName,
+    Value<String>? equipmentName,
+    Value<DateTime>? sessionDate,
+    Value<int>? plannedLightFrames,
+    Value<int?>? actualLightFrames,
+    Value<int?>? rejectedFrames,
+    Value<String?>? environmentalNotes,
+    Value<String?>? processingNotes,
+  }) {
+    return SessionLogsCompanion(
+      id: id ?? this.id,
+      targetName: targetName ?? this.targetName,
+      equipmentName: equipmentName ?? this.equipmentName,
+      sessionDate: sessionDate ?? this.sessionDate,
+      plannedLightFrames: plannedLightFrames ?? this.plannedLightFrames,
+      actualLightFrames: actualLightFrames ?? this.actualLightFrames,
+      rejectedFrames: rejectedFrames ?? this.rejectedFrames,
+      environmentalNotes: environmentalNotes ?? this.environmentalNotes,
+      processingNotes: processingNotes ?? this.processingNotes,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (targetName.present) {
+      map['target_name'] = Variable<String>(targetName.value);
+    }
+    if (equipmentName.present) {
+      map['equipment_name'] = Variable<String>(equipmentName.value);
+    }
+    if (sessionDate.present) {
+      map['session_date'] = Variable<DateTime>(sessionDate.value);
+    }
+    if (plannedLightFrames.present) {
+      map['planned_light_frames'] = Variable<int>(plannedLightFrames.value);
+    }
+    if (actualLightFrames.present) {
+      map['actual_light_frames'] = Variable<int>(actualLightFrames.value);
+    }
+    if (rejectedFrames.present) {
+      map['rejected_frames'] = Variable<int>(rejectedFrames.value);
+    }
+    if (environmentalNotes.present) {
+      map['environmental_notes'] = Variable<String>(environmentalNotes.value);
+    }
+    if (processingNotes.present) {
+      map['processing_notes'] = Variable<String>(processingNotes.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('targetName: $targetName, ')
+          ..write('equipmentName: $equipmentName, ')
+          ..write('sessionDate: $sessionDate, ')
+          ..write('plannedLightFrames: $plannedLightFrames, ')
+          ..write('actualLightFrames: $actualLightFrames, ')
+          ..write('rejectedFrames: $rejectedFrames, ')
+          ..write('environmentalNotes: $environmentalNotes, ')
+          ..write('processingNotes: $processingNotes')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1401,6 +2002,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $AstroTargetsTable astroTargets = $AstroTargetsTable(this);
+  late final $SessionLogsTable sessionLogs = $SessionLogsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1409,6 +2011,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     equipmentProfiles,
     locationProfiles,
     astroTargets,
+    sessionLogs,
   ];
 }
 
@@ -2174,6 +2777,301 @@ typedef $$AstroTargetsTableProcessedTableManager =
       AstroTarget,
       PrefetchHooks Function()
     >;
+typedef $$SessionLogsTableCreateCompanionBuilder =
+    SessionLogsCompanion Function({
+      Value<int> id,
+      required String targetName,
+      required String equipmentName,
+      required DateTime sessionDate,
+      required int plannedLightFrames,
+      Value<int?> actualLightFrames,
+      Value<int?> rejectedFrames,
+      Value<String?> environmentalNotes,
+      Value<String?> processingNotes,
+    });
+typedef $$SessionLogsTableUpdateCompanionBuilder =
+    SessionLogsCompanion Function({
+      Value<int> id,
+      Value<String> targetName,
+      Value<String> equipmentName,
+      Value<DateTime> sessionDate,
+      Value<int> plannedLightFrames,
+      Value<int?> actualLightFrames,
+      Value<int?> rejectedFrames,
+      Value<String?> environmentalNotes,
+      Value<String?> processingNotes,
+    });
+
+class $$SessionLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $SessionLogsTable> {
+  $$SessionLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetName => $composableBuilder(
+    column: $table.targetName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get equipmentName => $composableBuilder(
+    column: $table.equipmentName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get sessionDate => $composableBuilder(
+    column: $table.sessionDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedLightFrames => $composableBuilder(
+    column: $table.plannedLightFrames,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get actualLightFrames => $composableBuilder(
+    column: $table.actualLightFrames,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get environmentalNotes => $composableBuilder(
+    column: $table.environmentalNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get processingNotes => $composableBuilder(
+    column: $table.processingNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SessionLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SessionLogsTable> {
+  $$SessionLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetName => $composableBuilder(
+    column: $table.targetName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get equipmentName => $composableBuilder(
+    column: $table.equipmentName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get sessionDate => $composableBuilder(
+    column: $table.sessionDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plannedLightFrames => $composableBuilder(
+    column: $table.plannedLightFrames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get actualLightFrames => $composableBuilder(
+    column: $table.actualLightFrames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get environmentalNotes => $composableBuilder(
+    column: $table.environmentalNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get processingNotes => $composableBuilder(
+    column: $table.processingNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SessionLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SessionLogsTable> {
+  $$SessionLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get targetName => $composableBuilder(
+    column: $table.targetName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get equipmentName => $composableBuilder(
+    column: $table.equipmentName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get sessionDate => $composableBuilder(
+    column: $table.sessionDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plannedLightFrames => $composableBuilder(
+    column: $table.plannedLightFrames,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get actualLightFrames => $composableBuilder(
+    column: $table.actualLightFrames,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get environmentalNotes => $composableBuilder(
+    column: $table.environmentalNotes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get processingNotes => $composableBuilder(
+    column: $table.processingNotes,
+    builder: (column) => column,
+  );
+}
+
+class $$SessionLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SessionLogsTable,
+          SessionLog,
+          $$SessionLogsTableFilterComposer,
+          $$SessionLogsTableOrderingComposer,
+          $$SessionLogsTableAnnotationComposer,
+          $$SessionLogsTableCreateCompanionBuilder,
+          $$SessionLogsTableUpdateCompanionBuilder,
+          (
+            SessionLog,
+            BaseReferences<_$AppDatabase, $SessionLogsTable, SessionLog>,
+          ),
+          SessionLog,
+          PrefetchHooks Function()
+        > {
+  $$SessionLogsTableTableManager(_$AppDatabase db, $SessionLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SessionLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SessionLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SessionLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> targetName = const Value.absent(),
+                Value<String> equipmentName = const Value.absent(),
+                Value<DateTime> sessionDate = const Value.absent(),
+                Value<int> plannedLightFrames = const Value.absent(),
+                Value<int?> actualLightFrames = const Value.absent(),
+                Value<int?> rejectedFrames = const Value.absent(),
+                Value<String?> environmentalNotes = const Value.absent(),
+                Value<String?> processingNotes = const Value.absent(),
+              }) => SessionLogsCompanion(
+                id: id,
+                targetName: targetName,
+                equipmentName: equipmentName,
+                sessionDate: sessionDate,
+                plannedLightFrames: plannedLightFrames,
+                actualLightFrames: actualLightFrames,
+                rejectedFrames: rejectedFrames,
+                environmentalNotes: environmentalNotes,
+                processingNotes: processingNotes,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String targetName,
+                required String equipmentName,
+                required DateTime sessionDate,
+                required int plannedLightFrames,
+                Value<int?> actualLightFrames = const Value.absent(),
+                Value<int?> rejectedFrames = const Value.absent(),
+                Value<String?> environmentalNotes = const Value.absent(),
+                Value<String?> processingNotes = const Value.absent(),
+              }) => SessionLogsCompanion.insert(
+                id: id,
+                targetName: targetName,
+                equipmentName: equipmentName,
+                sessionDate: sessionDate,
+                plannedLightFrames: plannedLightFrames,
+                actualLightFrames: actualLightFrames,
+                rejectedFrames: rejectedFrames,
+                environmentalNotes: environmentalNotes,
+                processingNotes: processingNotes,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SessionLogsTable, SessionLog>(table),
+                  BaseReferences<_$AppDatabase, $SessionLogsTable, SessionLog>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SessionLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SessionLogsTable,
+      SessionLog,
+      $$SessionLogsTableFilterComposer,
+      $$SessionLogsTableOrderingComposer,
+      $$SessionLogsTableAnnotationComposer,
+      $$SessionLogsTableCreateCompanionBuilder,
+      $$SessionLogsTableUpdateCompanionBuilder,
+      (
+        SessionLog,
+        BaseReferences<_$AppDatabase, $SessionLogsTable, SessionLog>,
+      ),
+      SessionLog,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2184,4 +3082,6 @@ class $AppDatabaseManager {
       $$LocationProfilesTableTableManager(_db, _db.locationProfiles);
   $$AstroTargetsTableTableManager get astroTargets =>
       $$AstroTargetsTableTableManager(_db, _db.astroTargets);
+  $$SessionLogsTableTableManager get sessionLogs =>
+      $$SessionLogsTableTableManager(_db, _db.sessionLogs);
 }

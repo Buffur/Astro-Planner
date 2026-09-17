@@ -12,6 +12,8 @@ import 'domain/repositories/equipment_repository.dart';
 import 'data/services/equipment_seeder.dart';
 import 'data/repositories/open_meteo_weather_repository.dart';
 import 'domain/repositories/weather_repository.dart';
+import 'data/repositories/drift_logbook_repository.dart';
+import 'domain/repositories/logbook_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,7 @@ void main() async {
   final targetRepo = DriftTargetRepository(database);
   final equipmentRepo = DriftEquipmentRepository(database);
   final weatherRepo = OpenMeteoWeatherRepository();
+  final logbookRepo = DriftLogbookRepository(database);
   
   final targetSeeder = CatalogSeeder(targetRepo);
   await targetSeeder.seedIfNeeded();
@@ -33,6 +36,7 @@ void main() async {
         Provider<TargetRepository>.value(value: targetRepo),
         Provider<EquipmentRepository>.value(value: equipmentRepo),
         Provider<WeatherRepository>.value(value: weatherRepo),
+        Provider<LogbookRepository>.value(value: logbookRepo),
         ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, equipmentRepo, weatherRepo)),
       ],
       child: const AstroPlanApp(),
