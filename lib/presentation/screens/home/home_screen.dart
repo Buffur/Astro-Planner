@@ -38,6 +38,35 @@ class HomeScreen extends StatelessWidget {
                   },
                   onTap: () => context.push('/equipment'),
                 ),
+                if (viewModel.currentWeather != null)
+                  PlannerSummaryCard(
+                    title: 'Current Weather (London)',
+                    data: {
+                      'Temperature': '${viewModel.currentWeather!.temperature.toStringAsFixed(1)}°C',
+                      'Cloud Cover': '${viewModel.currentWeather!.cloudCover.toStringAsFixed(0)}%',
+                      'Dew Point': '${viewModel.currentWeather!.dewPoint.toStringAsFixed(1)}°C',
+                    },
+                  ),
+                if (viewModel.currentWeather?.dewWarning == true)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    color: Colors.orange.shade100,
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.deepOrange),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Dew Warning: Temperature is close to dew point. Activate dew heaters!',
+                              style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: Padding(

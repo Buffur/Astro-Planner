@@ -3,16 +3,21 @@ import '../../domain/models/astro_target.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/repositories/equipment_repository.dart';
+import '../../domain/repositories/weather_repository.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
+import '../../domain/models/weather_conditions.dart';
 
 class PlannerViewModel extends ChangeNotifier {
   final TargetRepository _targetRepository;
   final EquipmentRepository _equipmentRepository;
+  final WeatherRepository _weatherRepository;
 
   AstroTarget? _selectedTarget;
   EquipmentProfile? _selectedEquipment;
+  WeatherConditions? _currentWeather;
+  
   final DateTime _sessionDate = DateTime.now().toUtc();
   final double _latitude = 51.5072; // London default
   final double _longitude = -0.1276;
@@ -20,7 +25,7 @@ class PlannerViewModel extends ChangeNotifier {
   int _lightFrames = 100;
   final int _exposureSeconds = 60;
 
-  PlannerViewModel(this._targetRepository, this._equipmentRepository) {
+  PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository) {
     _init();
   }
 
@@ -35,11 +40,15 @@ class PlannerViewModel extends ChangeNotifier {
       // Default to the first phone in the catalog
       _selectedEquipment = equipment.first;
     }
+    
+    _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
+    
     notifyListeners();
   }
 
   AstroTarget? get selectedTarget => _selectedTarget;
   EquipmentProfile? get selectedEquipment => _selectedEquipment;
+  WeatherConditions? get currentWeather => _currentWeather;
   DateTime get sessionDate => _sessionDate;
   int get lightFrames => _lightFrames;
   int get exposureSeconds => _exposureSeconds;
