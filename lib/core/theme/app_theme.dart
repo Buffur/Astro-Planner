@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+import 'app_colors.dart';
+
+class AppTheme {
+  static final ThemeData light = ThemeData(
+    brightness: Brightness.light,
+    primaryColor: AppColors.lightTextPrimary,
+    scaffoldBackgroundColor: AppColors.lightBackground,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.lightBackground,
+      foregroundColor: AppColors.lightTextPrimary,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: AppColors.lightTextPrimary,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    colorScheme: const ColorScheme.light(
+      primary: AppColors.lightTextPrimary,
+      secondary: AppColors.lightTextSecondary,
+      surface: AppColors.lightSurface,
+    ),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.lightBorder,
+      thickness: 1,
+      space: 1,
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.lightSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+        side: const BorderSide(color: AppColors.lightBorder),
+      ),
+      margin: EdgeInsets.zero,
+    ),
+  );
+
+  static final ThemeData dark = ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: AppColors.darkTextPrimary,
+    scaffoldBackgroundColor: AppColors.darkBackground,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.darkBackground,
+      foregroundColor: AppColors.darkTextPrimary,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      titleTextStyle: TextStyle(
+        color: AppColors.darkTextPrimary,
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    colorScheme: const ColorScheme.dark(
+      primary: AppColors.darkTextPrimary,
+      secondary: AppColors.darkTextSecondary,
+      surface: AppColors.darkSurface,
+    ),
+    dividerTheme: const DividerThemeData(
+      color: AppColors.darkBorder,
+      thickness: 1,
+      space: 1,
+    ),
+    cardTheme: CardThemeData(
+      color: AppColors.darkSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(6),
+        side: const BorderSide(color: AppColors.darkBorder),
+      ),
+      margin: EdgeInsets.zero,
+    ),
+  );
+}
+

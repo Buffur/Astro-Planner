@@ -1,0 +1,46 @@
+GEMINI.md
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will automatically add this to its gitignore in its next sync
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows, Linux, and macOS local artifacts
+/windows/flutter/ephemeral/
+/windows/runner/Debug/
+/windows/runner/Release/
+/linux/flutter/ephemeral/
+/macos/Flutter/ephemeral/
+
