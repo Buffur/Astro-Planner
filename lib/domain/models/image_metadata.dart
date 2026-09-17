@@ -6,6 +6,7 @@ class ImageMetadata {
   final String? exposureTime;
   final String? iso;
   final String? dateTimeOriginal;
+  final Map<String, String> rawTags;
 
   const ImageMetadata({
     this.cameraMake,
@@ -15,5 +16,6 @@ class ImageMetadata {
     this.exposureTime,
     this.iso,
     this.dateTimeOriginal,
+    this.rawTags = const {},
   });
 }

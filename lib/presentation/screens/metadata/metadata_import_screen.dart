@@ -81,6 +81,19 @@ class _MetadataImportScreenState extends State<MetadataImportScreen> {
                         'ISO': _metadata!.iso ?? 'Unknown',
                       },
                     ),
+                    if (_metadata!.rawTags.isNotEmpty)
+                      Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: ExpansionTile(
+                          title: const Text('Raw EXIF Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                          children: _metadata!.rawTags.entries
+                              .map((e) => ListTile(
+                                    title: Text(e.key, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    subtitle: Text(e.value, style: const TextStyle(fontSize: 12)),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
                   ],
                 ),
               ),

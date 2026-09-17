@@ -14,6 +14,7 @@ import 'data/repositories/open_meteo_weather_repository.dart';
 import 'domain/repositories/weather_repository.dart';
 import 'data/repositories/drift_logbook_repository.dart';
 import 'domain/repositories/logbook_repository.dart';
+import 'presentation/viewmodels/theme_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,7 @@ void main() async {
         Provider<WeatherRepository>.value(value: weatherRepo),
         Provider<LogbookRepository>.value(value: logbookRepo),
         ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, equipmentRepo, weatherRepo)),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
     ),
@@ -49,10 +51,13 @@ class AstroPlanApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeVM = context.watch<ThemeViewModel>();
+    
     return MaterialApp.router(
       title: 'AstroPlan',
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.light,
+      darkTheme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.dark,
+      themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );

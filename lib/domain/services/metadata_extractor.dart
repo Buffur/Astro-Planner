@@ -20,6 +20,7 @@ class MetadataExtractor {
         exposureTime: tags['EXIF ExposureTime']?.printable,
         iso: tags['EXIF ISOSpeedRatings']?.printable,
         dateTimeOriginal: tags['EXIF DateTimeOriginal']?.printable,
+        rawTags: tags.map((k, v) => MapEntry(k, v.printable)),
       );
     } catch (e) {
       return null;

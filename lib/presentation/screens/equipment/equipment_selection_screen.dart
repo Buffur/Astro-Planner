@@ -5,9 +5,14 @@ import '../../../domain/repositories/equipment_repository.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
-class EquipmentSelectionScreen extends StatelessWidget {
+class EquipmentSelectionScreen extends StatefulWidget {
   const EquipmentSelectionScreen({super.key});
 
+  @override
+  State<EquipmentSelectionScreen> createState() => _EquipmentSelectionScreenState();
+}
+
+class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final repo = context.read<EquipmentRepository>();
@@ -58,6 +63,69 @@ class EquipmentSelectionScreen extends StatelessWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddEquipmentDialog(context),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showAddEquipmentDialog(BuildContext context) {
+    final nameCtrl = TextEditingController();
+    final focalLengthCtrl = TextEditingController();
+    final apertureCtrl = TextEditingController();
+    final sensorWidthCtrl = TextEditingController();
+    final sensorHeightCtrl = TextEditingController();
+    final pixelCtrl = TextEditingController();
+    final resWidthCtrl = TextEditingController();
+    final resHeightCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Custom Equipment'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name (e.g. My Lens)')),
+                TextField(controller: focalLengthCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Focal Length (mm)')),
+                TextField(controller: apertureCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Aperture (f/)')),
+                TextField(controller: sensorWidthCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Sensor Width (mm)')),
+                TextField(controller: sensorHeightCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Sensor Height (mm)')),
+                TextField(controller: pixelCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Pixel Pitch (µm)')),
+                TextField(controller: resWidthCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Resolution Width (px)')),
+                TextField(controller: resHeightCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Resolution Height (px)')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final eq = EquipmentProfile(
+                  id: 0,
+                  name: nameCtrl.text,
+                  focalLength: double.tryParse(focalLengthCtrl.text) ?? 50.0,
+                  aperture: double.tryParse(apertureCtrl.text) ?? 2.8,
+                  sensorWidth: double.tryParse(sensorWidthCtrl.text) ?? 36.0,
+                  sensorHeight: double.tryParse(sensorHeightCtrl.text) ?? 24.0,
+                  pixelPitch: double.tryParse(pixelCtrl.text) ?? 3.76,
+                  resolutionWidth: int.tryParse(resWidthCtrl.text) ?? 6000,
+                  resolutionHeight: int.tryParse(resHeightCtrl.text) ?? 4000,
+                );
+                await context.read<EquipmentRepository>().insertEquipment(eq);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  setState(() {});
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

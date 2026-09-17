@@ -8,7 +8,7 @@ class OpenMeteoWeatherRepository implements WeatherRepository {
   Future<WeatherConditions?> getCurrentWeather(double latitude, double longitude) async {
     try {
       final uri = Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=\&longitude=\&current=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover',
+        'https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current=temperature_2m,relative_humidity_2m,dew_point_2m,cloud_cover',
       );
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
 

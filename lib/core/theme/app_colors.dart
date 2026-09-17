@@ -14,4 +14,11 @@ class AppColors {
   static const Color darkTextPrimary = Color(0xFFFFFFFF);
   static const Color darkTextSecondary = Color(0xFF9B9B9B);
   static const Color darkBorder = Color(0xFF2F2F2F);
+
+  // Field Mode (Red)
+  static const Color fieldBackground = Color(0xFF000000);
+  static const Color fieldSurface = Color(0xFF110000);
+  static const Color fieldTextPrimary = Color(0xFFFF0000);
+  static const Color fieldTextSecondary = Color(0xFFAA0000);
+  static const Color fieldBorder = Color(0xFF330000);
 }

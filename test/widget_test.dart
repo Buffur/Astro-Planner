@@ -12,8 +12,10 @@ import 'package:astroplan/domain/repositories/logbook_repository.dart';
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockWeatherRepository implements WeatherRepository {
   @override
@@ -40,10 +42,13 @@ class MockLogbookRepository implements LogbookRepository {
 
 void main() {
   testWidgets('App should boot and show session planner', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    
     final database = AppDatabase(NativeDatabase.memory());
+    
     final targetRepo = DriftTargetRepository(database);
-    final seeder = CatalogSeeder(targetRepo);
-    await seeder.seedIfNeeded();
+    final targetSeeder = CatalogSeeder(targetRepo);
+    await targetSeeder.seedIfNeeded();
 
     final eqRepo = DriftEquipmentRepository(database);
     final eqSeeder = EquipmentSeeder(eqRepo);
@@ -61,6 +66,7 @@ void main() {
           Provider<WeatherRepository>.value(value: weatherRepo),
           Provider<LogbookRepository>.value(value: logbookRepo),
           ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, eqRepo, weatherRepo)),
+          ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
       ),

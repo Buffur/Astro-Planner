@@ -1,13 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
 import '../../../domain/repositories/logbook_repository.dart';
 import '../../../domain/models/session_log.dart';
+import '../../viewmodels/theme_viewmodel.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _showLocationDialog(BuildContext context, PlannerViewModel viewModel) {
+    final latCtrl = TextEditingController(text: viewModel.latitude.toString());
+    final lonCtrl = TextEditingController(text: viewModel.longitude.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Set Location (Lat, Lon)'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: latCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: const InputDecoration(labelText: 'Latitude'),
+              ),
+              TextField(
+                controller: lonCtrl,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: const InputDecoration(labelText: 'Longitude'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final lat = double.tryParse(latCtrl.text);
+                final lon = double.tryParse(lonCtrl.text);
+                if (lat != null && lon != null) {
+                  viewModel.setLocation(lat, lon);
+                }
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +67,11 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Session Planner'),
         actions: [
+          IconButton(
+            icon: Icon(context.watch<ThemeViewModel>().isFieldMode ? Icons.wb_sunny : Icons.nightlight_round),
+            tooltip: 'Toggle Field Mode',
+            onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
+          ),
           IconButton(
             icon: const Icon(Icons.book),
             tooltip: 'Logbook',
@@ -49,17 +102,20 @@ class HomeScreen extends StatelessWidget {
                   title: 'Equipment: ${equipment.name}',
                   data: {
                     'Pixel Scale': '${viewModel.pixelScale?.toStringAsFixed(2)} arcsec/px',
+                    'Aperture': 'f/${equipment.aperture.toStringAsFixed(1)}',
+                    'Sensor': '${equipment.sensorWidth}x${equipment.sensorHeight}mm (${equipment.pixelPitch}µm pixels)',
                   },
                   onTap: () => context.push('/equipment'),
                 ),
                 if (viewModel.currentWeather != null)
                   PlannerSummaryCard(
-                    title: 'Current Weather (London)',
+                    title: 'Weather (${viewModel.latitude.toStringAsFixed(2)}, ${viewModel.longitude.toStringAsFixed(2)})',
                     data: {
                       'Temperature': '${viewModel.currentWeather!.temperature.toStringAsFixed(1)}°C',
                       'Cloud Cover': '${viewModel.currentWeather!.cloudCover.toStringAsFixed(0)}%',
                       'Dew Point': '${viewModel.currentWeather!.dewPoint.toStringAsFixed(1)}°C',
                     },
+                    onTap: () => _showLocationDialog(context, viewModel),
                   ),
                 if (viewModel.currentWeather?.dewWarning == true)
                   Card(
@@ -140,6 +196,35 @@ class HomeScreen extends StatelessWidget {
                   ),
                 Card(
                   margin: const EdgeInsets.only(bottom: 16),
+                  color: Theme.of(context).cardTheme.color,
+                  child: InkWell(
+                    onTap: () async {
+                      final url = Uri.parse('https://www.lightpollutionmap.info/#zoom=4.00&lat=45.8720&lon=14.5470&state=eyJiYXNlbWFwIjoiTGF5ZXJCaW5nUm9hZCIsIm92ZXJsYXkiOiJzYl8yMDI1Iiwib3ZlcmxheWNvbG9yIjpmYWxzZSwib3ZlcmxheW9wYWNpdHkiOiI2MCIsImZlYXR1cmVzb3BhY2l0eSI6Ijg1In0=');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.map_outlined),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Open Light Pollution Map',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Icon(Icons.open_in_browser),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -155,12 +240,69 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => viewModel.setLightFrames(viewModel.lightFrames - 10 > 0 ? viewModel.lightFrames - 10 : 1),
+                                  onPressed: () => viewModel.setLightFrames(viewModel.lightFrames - 10 > 0 ? viewModel.lightFrames - 10 : 0),
                                 ),
                                 Text('${viewModel.lightFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
                                 IconButton(
                                   icon: const Icon(Icons.add_circle_outline),
                                   onPressed: () => viewModel.setLightFrames(viewModel.lightFrames + 10),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Dark Frames:'),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () => viewModel.setDarkFrames(viewModel.darkFrames - 10 > 0 ? viewModel.darkFrames - 10 : 0),
+                                ),
+                                Text('${viewModel.darkFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () => viewModel.setDarkFrames(viewModel.darkFrames + 10),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Flat Frames:'),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () => viewModel.setFlatFrames(viewModel.flatFrames - 10 > 0 ? viewModel.flatFrames - 10 : 0),
+                                ),
+                                Text('${viewModel.flatFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () => viewModel.setFlatFrames(viewModel.flatFrames + 10),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Bias Frames:'),
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_circle_outline),
+                                  onPressed: () => viewModel.setBiasFrames(viewModel.biasFrames - 10 > 0 ? viewModel.biasFrames - 10 : 0),
+                                ),
+                                Text('${viewModel.biasFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline),
+                                  onPressed: () => viewModel.setBiasFrames(viewModel.biasFrames + 10),
                                 ),
                               ],
                             )

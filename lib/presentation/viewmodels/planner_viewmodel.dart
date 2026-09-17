@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/repositories/target_repository.dart';
@@ -19,28 +20,47 @@ class PlannerViewModel extends ChangeNotifier {
   WeatherConditions? _currentWeather;
   
   final DateTime _sessionDate = DateTime.now().toUtc();
-  final double _latitude = 51.5072; // London default
-  final double _longitude = -0.1276;
+  double _latitude = 51.5072;
+  double _longitude = -0.1276;
   
   int _lightFrames = 100;
+  int _darkFrames = 20;
+  int _flatFrames = 20;
+  int _biasFrames = 20;
   final int _exposureSeconds = 60;
-
-  int _bortleClass = 4; // Default to Suburban Transition
+  int _bortleClass = 4;
 
   PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository) {
     _init();
   }
 
   Future<void> _init() async {
-    final targets = await _targetRepository.searchTargets('M42');
-    if (targets.isNotEmpty) {
-      _selectedTarget = targets.first;
+    final prefs = await SharedPreferences.getInstance();
+    
+    _latitude = prefs.getDouble('latitude') ?? 51.5072;
+    _longitude = prefs.getDouble('longitude') ?? -0.1276;
+    _lightFrames = prefs.getInt('lightFrames') ?? 100;
+    _darkFrames = prefs.getInt('darkFrames') ?? 20;
+    _flatFrames = prefs.getInt('flatFrames') ?? 20;
+    _biasFrames = prefs.getInt('biasFrames') ?? 20;
+    _bortleClass = prefs.getInt('bortleClass') ?? 4;
+    
+    final targetId = prefs.getInt('targetId');
+    if (targetId != null) {
+      _selectedTarget = await _targetRepository.getTargetById(targetId);
+    }
+    if (_selectedTarget == null) {
+      final targets = await _targetRepository.searchTargets('M42');
+      if (targets.isNotEmpty) _selectedTarget = targets.first;
     }
     
-    final equipment = await _equipmentRepository.getAllEquipment();
-    if (equipment.isNotEmpty) {
-      // Default to the first phone in the catalog
-      _selectedEquipment = equipment.first;
+    final eqId = prefs.getInt('equipmentId');
+    if (eqId != null) {
+      _selectedEquipment = await _equipmentRepository.getEquipmentById(eqId);
+    }
+    if (_selectedEquipment == null) {
+      final equipment = await _equipmentRepository.getAllEquipment();
+      if (equipment.isNotEmpty) _selectedEquipment = equipment.first;
     }
     
     _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
@@ -52,28 +72,72 @@ class PlannerViewModel extends ChangeNotifier {
   EquipmentProfile? get selectedEquipment => _selectedEquipment;
   WeatherConditions? get currentWeather => _currentWeather;
   DateTime get sessionDate => _sessionDate;
+  double get latitude => _latitude;
+  double get longitude => _longitude;
   int get lightFrames => _lightFrames;
+  int get darkFrames => _darkFrames;
+  int get flatFrames => _flatFrames;
+  int get biasFrames => _biasFrames;
   int get exposureSeconds => _exposureSeconds;
   int get bortleClass => _bortleClass;
 
-  void setLightFrames(int frames) {
+  Future<void> setLocation(double lat, double lon) async {
+    _latitude = lat;
+    _longitude = lon;
+    _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('latitude', lat);
+    await prefs.setDouble('longitude', lon);
+  }
+
+  Future<void> setLightFrames(int frames) async {
     _lightFrames = frames;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('lightFrames', _lightFrames);
+  }
+
+  Future<void> setDarkFrames(int frames) async {
+    _darkFrames = frames;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('darkFrames', _darkFrames);
+  }
+
+  Future<void> setFlatFrames(int frames) async {
+    _flatFrames = frames;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('flatFrames', _flatFrames);
+  }
+
+  Future<void> setBiasFrames(int frames) async {
+    _biasFrames = frames;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('biasFrames', _biasFrames);
   }
   
-  void setEquipment(EquipmentProfile profile) {
+  Future<void> setEquipment(EquipmentProfile profile) async {
     _selectedEquipment = profile;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('equipmentId', profile.id);
   }
 
-  void setTarget(AstroTarget target) {
+  Future<void> setTarget(AstroTarget target) async {
     _selectedTarget = target;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('targetId', target.id);
   }
 
-  void setBortleClass(int bortle) {
+  Future<void> setBortleClass(int bortle) async {
     _bortleClass = bortle;
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('bortleClass', _bortleClass);
   }
 
   // Calculations exposed to the UI
@@ -114,7 +178,8 @@ class PlannerViewModel extends ChangeNotifier {
       resolutionHeight: _selectedEquipment!.resolutionHeight,
       bitDepth: 16,
     );
-    return singleFrame * _lightFrames;
+    final totalFrames = _lightFrames + _darkFrames + _flatFrames + _biasFrames;
+    return singleFrame * totalFrames;
   }
 
   double get relativeStackingGain {

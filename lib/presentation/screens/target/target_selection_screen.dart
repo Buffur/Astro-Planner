@@ -96,6 +96,60 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddTargetDialog(context),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showAddTargetDialog(BuildContext context) {
+    final catalogIdCtrl = TextEditingController();
+    final commonNameCtrl = TextEditingController();
+    final typeCtrl = TextEditingController(text: 'Custom Object');
+    final raCtrl = TextEditingController();
+    final decCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Custom Target'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: catalogIdCtrl, decoration: const InputDecoration(labelText: 'Catalog ID (e.g. C-1)')),
+                TextField(controller: commonNameCtrl, decoration: const InputDecoration(labelText: 'Common Name')),
+                TextField(controller: typeCtrl, decoration: const InputDecoration(labelText: 'Type')),
+                TextField(controller: raCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Right Ascension (Decimal Degrees)')),
+                TextField(controller: decCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true), decoration: const InputDecoration(labelText: 'Declination (Decimal Degrees)')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                final target = AstroTarget(
+                  id: 0,
+                  catalogId: catalogIdCtrl.text,
+                  commonName: commonNameCtrl.text.isEmpty ? null : commonNameCtrl.text,
+                  type: typeCtrl.text,
+                  rightAscension: double.tryParse(raCtrl.text) ?? 0.0,
+                  declination: double.tryParse(decCtrl.text) ?? 0.0,
+                );
+                await context.read<TargetRepository>().insertTarget(target);
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  setState(() {}); // Refresh list
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
