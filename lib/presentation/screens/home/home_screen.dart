@@ -90,11 +90,13 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               children: [
                 PlannerSummaryCard(
-                  title: 'Target: ${target.commonName} (${target.catalogId})',
+                  title: (target.commonName != null && target.commonName != target.catalogId)
+                      ? 'Target: ${target.commonName} (${target.catalogId})'
+                      : 'Target: ${target.commonName ?? target.catalogId}',
                   data: {
                     'Type': target.type,
-                    'Current Altitude': '${viewModel.currentAltitude?.toStringAsFixed(1)}°',
-                    'Max Altitude': '${viewModel.maxAltitude?.toStringAsFixed(1)}°',
+                    if (viewModel.currentAltitude != null) 'Current Altitude': '${viewModel.currentAltitude?.toStringAsFixed(1)}°',
+                    if (viewModel.maxAltitude != null) 'Max Altitude': '${viewModel.maxAltitude?.toStringAsFixed(1)}°',
                   },
                   onTap: () => context.push('/target'),
                 ),

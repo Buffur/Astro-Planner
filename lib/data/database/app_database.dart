@@ -26,7 +26,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -35,8 +35,21 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from == 1) {
+        if (from < 2) {
           await m.createTable(sessionLogs);
+        }
+        if (from < 3) {
+          // Additive migration — adds Stellarium-compatible fields to equipment_profiles.
+          // Existing rows keep all data; new columns default to NULL.
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN manufacturer TEXT;',
+          );
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN camera_model TEXT;',
+          );
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN rotation REAL;',
+          );
         }
       },
     );

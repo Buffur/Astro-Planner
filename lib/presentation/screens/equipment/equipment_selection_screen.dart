@@ -5,20 +5,24 @@ import '../../../domain/repositories/equipment_repository.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
-class EquipmentSelectionScreen extends StatefulWidget {
-  const EquipmentSelectionScreen({super.key});
+class EquipmentSelectionSheet extends StatefulWidget {
+  const EquipmentSelectionSheet({super.key});
 
   @override
-  State<EquipmentSelectionScreen> createState() => _EquipmentSelectionScreenState();
+  State<EquipmentSelectionSheet> createState() => _EquipmentSelectionSheetState();
 }
 
-class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
+class _EquipmentSelectionSheetState extends State<EquipmentSelectionSheet> {
   @override
   Widget build(BuildContext context) {
     final repo = context.read<EquipmentRepository>();
     final planner = context.watch<PlannerViewModel>();
 
-    return Scaffold(
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.9,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        child: Scaffold(
       appBar: AppBar(
         title: const Text('Select Equipment'),
       ),
@@ -40,7 +44,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               final eq = equipmentList[index];
               final isSelected = eq.id == planner.selectedEquipment?.id;
 
-              return Card(
+              final card = Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 shape: RoundedRectangleBorder(
                   side: BorderSide(
@@ -59,6 +63,39 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                   },
                 ),
               );
+
+              return Dismissible(
+                key: ValueKey('eq_${eq.id}'),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade400,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 16),
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                confirmDismiss: (direction) async {
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Equipment?'),
+                      content: Text('Are you sure you want to delete ${eq.name}?'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                        TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+                      ],
+                    ),
+                  );
+                },
+                onDismissed: (direction) async {
+                  await repo.deleteEquipment(eq.id);
+                  setState(() {});
+                },
+                child: card,
+              );
             },
           );
         },
@@ -66,6 +103,8 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddEquipmentDialog(context),
         child: const Icon(Icons.add),
+      ),
+        ),
       ),
     );
   }

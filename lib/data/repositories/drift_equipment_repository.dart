@@ -51,4 +51,9 @@ class DriftEquipmentRepository implements EquipmentRepository {
       ),
     );
   }
+
+  @override
+  Future<void> deleteEquipment(int id) async {
+    await (_db.delete(_db.equipmentProfiles)..where((t) => t.id.equals(id))).go();
+  }
 }

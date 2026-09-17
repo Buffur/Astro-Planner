@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import '../screens/home/home_screen.dart';
-import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/target/target_selection_screen.dart';
+import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
 
@@ -14,12 +14,12 @@ class AppRouter {
         builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
-        path: '/equipment',
-        builder: (context, state) => const EquipmentSelectionScreen(),
-      ),
-      GoRoute(
         path: '/target',
         builder: (context, state) => const TargetSelectionScreen(),
+      ),
+      GoRoute(
+        path: '/equipment',
+        builder: (context, state) => const EquipmentSelectionSheet(),
       ),
       GoRoute(
         path: '/metadata',

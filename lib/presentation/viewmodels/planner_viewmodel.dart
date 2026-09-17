@@ -152,6 +152,8 @@ class PlannerViewModel extends ChangeNotifier {
 
   double? get currentAltitude {
     if (_selectedTarget == null) return null;
+    if (_selectedTarget!.rightAscension == 0.0 && _selectedTarget!.declination == 0.0) return null;
+    
     final jd = AstronomicalEngine.calculateJulianDate(_sessionDate);
     final gmst = AstronomicalEngine.calculateGMST(jd);
     final lst = AstronomicalEngine.calculateLST(gmst, _longitude);
@@ -161,6 +163,8 @@ class PlannerViewModel extends ChangeNotifier {
 
   double? get maxAltitude {
     if (_selectedTarget == null) return null;
+    if (_selectedTarget!.rightAscension == 0.0 && _selectedTarget!.declination == 0.0) return null;
+    
     return VisibilityCalculator.calculateAltitude(lha: 0.0, declination: _selectedTarget!.declination, latitude: _latitude);
   }
 

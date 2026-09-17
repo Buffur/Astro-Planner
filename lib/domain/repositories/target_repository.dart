@@ -13,4 +13,10 @@ abstract class TargetRepository {
 
   /// Inserts a new target into the catalog (e.g., during seeding or custom user input).
   Future<int> insertTarget(AstroTarget target);
+
+  /// Deletes a target by its internal ID.
+  Future<void> deleteTarget(int id);
+
+  /// Updates an existing target.
+  Future<void> updateTarget(AstroTarget target);
 }

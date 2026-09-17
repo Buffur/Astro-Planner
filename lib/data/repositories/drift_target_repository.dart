@@ -52,4 +52,22 @@ class DriftTargetRepository implements TargetRepository {
         .get();
     return dbTargets.map(_mapToDomain).toList();
   }
+
+  @override
+  Future<void> deleteTarget(int id) async {
+    await (_db.delete(_db.astroTargets)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> updateTarget(domain.AstroTarget target) async {
+    await (_db.update(_db.astroTargets)..where((t) => t.id.equals(target.id))).write(
+      AstroTargetsCompanion(
+        catalogId: Value(target.catalogId),
+        commonName: Value(target.commonName),
+        rightAscension: Value(target.rightAscension),
+        declination: Value(target.declination),
+        type: Value(target.type),
+      ),
+    );
+  }
 }
