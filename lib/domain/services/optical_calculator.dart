@@ -59,6 +59,19 @@ class OpticalCalculator {
     return bits / (8 * 1024 * 1024);
   }
 
+  /// Estimates empirical frame size for an uncompressed RAW file.
+  /// Most cameras store 12-bit and 14-bit pixels inside 16-bit (2 byte) memory blocks.
+  /// This includes a small constant overhead for EXIF and embedded JPEG thumbnails.
+  static double estimateEmpiricalFrameSizeMB({
+    required int resolutionWidth,
+    required int resolutionHeight,
+  }) {
+    // 2 bytes per pixel for 16-bit word padding
+    final payloadBytes = resolutionWidth * resolutionHeight * 2;
+    // Base payload size + ~1.5 MB for metadata/embedded JPEG
+    return (payloadBytes / (1024 * 1024)) + 1.5;
+  }
+
   /// Calculates the NPF rule exposure limit for untracked astrophotography.
   /// This calculates the maximum recommended exposure time to limit visible star trailing.
   /// 

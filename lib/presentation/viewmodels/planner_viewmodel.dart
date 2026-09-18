@@ -455,6 +455,16 @@ class PlannerViewModel extends ChangeNotifier {
     return singleFrame * totalFrames;
   }
 
+  double? get empiricalStorageMB {
+    if (_selectedEquipment == null) return null;
+    final singleFrame = OpticalCalculator.estimateEmpiricalFrameSizeMB(
+      resolutionWidth: _selectedEquipment!.resolutionWidth,
+      resolutionHeight: _selectedEquipment!.resolutionHeight,
+    );
+    final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
+    return singleFrame * totalFrames;
+  }
+
   double get relativeStackingGain {
     final lights = _captureBlocks.where((b) => b.frameType == FrameType.light).fold(0, (sum, b) => sum + b.frameCount); return OpticalCalculator.calculateRelativeStackingGain(lights);
   }

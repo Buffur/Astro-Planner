@@ -68,8 +68,8 @@ class VisibilityCalculator {
   /// Calculates approximate lunar illumination percentage (0.0 to 1.0).
   /// Based on a known new moon epoch.
   static double calculateLunarIllumination(DateTime utcTime) {
-    // Known New Moon: Jan 6, 2000, 18:14 UTC
-    final newMoonEpoch = DateTime.utc(2000, 1, 6, 18, 14);
+    // Known New Moon: Jan 11, 2024, 11:57 UTC (Updated to reduce phase drift)
+    final newMoonEpoch = DateTime.utc(2024, 1, 11, 11, 57);
     final diffSeconds = utcTime.difference(newMoonEpoch).inSeconds;
     
     // Lunar synodic month = 29.530588 days

@@ -157,7 +157,7 @@ class CapturePlanWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Estimated Storage', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(viewModel.theoreticalStorageMB != null ? '${viewModel.theoreticalStorageMB!.toStringAsFixed(1)} MB' : 'N/A', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                Text(viewModel.empiricalStorageMB != null ? '${viewModel.empiricalStorageMB!.toStringAsFixed(1)} MB' : 'N/A', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
               ],
             ),
           ],
