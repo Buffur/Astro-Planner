@@ -51,9 +51,6 @@ class SkyDarknessWidget extends StatelessWidget {
               ],
             ),
             
-            const SizedBox(height: 12),
-            _BortleDetails(bortleClass: viewModel.bortleClass),
-            
             const SizedBox(height: 16),
             
             // Night Timeline
@@ -202,76 +199,4 @@ class _TimelinePoint extends StatelessWidget {
   }
 }
 
-class _BortleDetails extends StatelessWidget {
-  final int bortleClass;
-  
-  const _BortleDetails({required this.bortleClass});
 
-  @override
-  Widget build(BuildContext context) {
-    String sqm = '';
-    String milkyWay = '';
-    String stars = '';
-    
-    switch (bortleClass) {
-      case 1: sqm = '21.99 - 22.00'; milkyWay = 'Excellent - Highly detailed'; stars = '7,000+'; break;
-      case 2: sqm = '21.89 - 21.99'; milkyWay = 'Great - Highly structured'; stars = '5,000 - 7,000'; break;
-      case 3: sqm = '21.69 - 21.89'; milkyWay = 'Good - Complex structure'; stars = '4,000 - 5,000'; break;
-      case 4: sqm = '21.30 - 21.69'; milkyWay = 'Fair - Lacks detail'; stars = '3,000 - 4,000'; break;
-      case 5: sqm = '20.80 - 21.30'; milkyWay = 'Poor - Washed out'; stars = '1,500 - 3,000'; break;
-      case 6: sqm = '20.10 - 20.80'; milkyWay = 'Very Poor - Faint at zenith'; stars = '1,000 - 1,500'; break;
-      case 7: sqm = '19.50 - 20.10'; milkyWay = 'Invisible'; stars = '500 - 1,000'; break;
-      case 8: sqm = '18.50 - 19.50'; milkyWay = 'Invisible'; stars = '200 - 500'; break;
-      case 9: sqm = '< 18.50'; milkyWay = 'Invisible'; stars = '< 200'; break;
-      default: sqm = 'N/A'; milkyWay = 'Unknown'; stars = 'Unknown'; break;
-    }
-
-    final theme = Theme.of(context);
-    
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          _DetailRow(label: 'SQM', value: sqm),
-          const SizedBox(height: 6),
-          _DetailRow(label: 'Milky Way', value: milkyWay),
-          const SizedBox(height: 6),
-          _DetailRow(label: 'Visible Stars', value: stars),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-  
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-            letterSpacing: 0.5,
-          ),
-        ),
-        Text(
-          value,
-          style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-        ),
-      ],
-    );
-  }
-}

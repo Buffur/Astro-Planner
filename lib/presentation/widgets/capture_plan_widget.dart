@@ -144,6 +144,22 @@ class CapturePlanWidget extends StatelessWidget {
                 Text(viewModel.totalIntegrationTime, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
               ],
             ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Stacking Gain (Relative SNR)', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('${viewModel.relativeStackingGain.toStringAsFixed(1)}x', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.teal)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Estimated Storage', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(viewModel.theoreticalStorageMB != null ? '${viewModel.theoreticalStorageMB!.toStringAsFixed(1)} MB' : 'N/A', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+              ],
+            ),
           ],
         ),
       ),
