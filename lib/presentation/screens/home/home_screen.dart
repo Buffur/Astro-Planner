@@ -8,55 +8,12 @@ import '../../../domain/repositories/logbook_repository.dart';
 import '../../../domain/models/session_log.dart';
 import '../../viewmodels/theme_viewmodel.dart';
 import '../../widgets/capture_plan_widget.dart';
+import '../../widgets/altitude_chart_widget.dart';
+import '../../widgets/sky_darkness_widget.dart';
+import '../../widgets/weather_forecast_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  void _showLocationDialog(BuildContext context, PlannerViewModel viewModel) {
-    final latCtrl = TextEditingController(text: viewModel.latitude.toString());
-    final lonCtrl = TextEditingController(text: viewModel.longitude.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Set Location (Lat, Lon)'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: latCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                decoration: const InputDecoration(labelText: 'Latitude'),
-              ),
-              TextField(
-                controller: lonCtrl,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
-                decoration: const InputDecoration(labelText: 'Longitude'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final lat = double.tryParse(latCtrl.text);
-                final lon = double.tryParse(lonCtrl.text);
-                if (lat != null && lon != null) {
-                  viewModel.setLocation(lat, lon);
-                }
-                Navigator.of(context).pop();
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +47,27 @@ class HomeScreen extends StatelessWidget {
           : ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: ListTile(
+                    leading: const Icon(Icons.calendar_month),
+                    title: const Text('Session Date'),
+                    subtitle: Text('${viewModel.sessionDate.year}-${viewModel.sessionDate.month.toString().padLeft(2, '0')}-${viewModel.sessionDate.day.toString().padLeft(2, '0')} (Night)'),
+                    trailing: const Icon(Icons.edit, size: 16),
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: viewModel.sessionDate,
+                        firstDate: DateTime(now.year - 1, now.month, now.day),
+                        lastDate: DateTime(now.year + 5, now.month, now.day),
+                      );
+                      if (picked != null) {
+                        viewModel.setSessionDate(picked);
+                      }
+                    },
+                  ),
+                ),
                 PlannerSummaryCard(
                   title: (target.commonName != null && target.commonName != target.catalogId)
                       ? 'Target: ${target.commonName} (${target.catalogId})'
@@ -101,6 +79,20 @@ class HomeScreen extends StatelessWidget {
                   },
                   onTap: () => context.push('/target'),
                 ),
+                Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  clipBehavior: Clip.antiAlias,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: AltitudeChartWidget(
+                      target: target,
+                      latitude: viewModel.latitude,
+                      longitude: viewModel.longitude,
+                      sessionDate: viewModel.sessionDate,
+                      minAltitude: viewModel.minAltitude,
+                    ),
+                  ),
+                ),
                 PlannerSummaryCard(
                   title: 'Equipment: ${equipment.name}',
                   data: {
@@ -111,52 +103,20 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => context.push('/equipment'),
                 ),
                 if (viewModel.currentWeather != null)
+                  WeatherForecastWidget(
+                    weather: viewModel.currentWeather!,
+                    onTap: () => context.push('/location'),
+                  )
+                else
                   PlannerSummaryCard(
-                    title: 'Weather (${viewModel.latitude.toStringAsFixed(2)}, ${viewModel.longitude.toStringAsFixed(2)})',
+                    title: 'Location: ${viewModel.locationName ?? "Custom"}',
                     data: {
-                      'Temperature': '${viewModel.currentWeather!.temperature.toStringAsFixed(1)}°C',
-                      'Cloud Cover': '${viewModel.currentWeather!.cloudCover.toStringAsFixed(0)}%',
-                      'Dew Point': '${viewModel.currentWeather!.dewPoint.toStringAsFixed(1)}°C',
+                      'Latitude': viewModel.latitude.toStringAsFixed(4),
+                      'Longitude': viewModel.longitude.toStringAsFixed(4),
                     },
-                    onTap: () => _showLocationDialog(context, viewModel),
+                    onTap: () => context.push('/location'),
                   ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Sky Conditions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Moon Illumination:'),
-                            Text('${(viewModel.lunarIllumination * 100).toStringAsFixed(1)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Bortle Class:'),
-                            DropdownButton<int>(
-                              value: viewModel.bortleClass,
-                              items: List.generate(9, (index) => DropdownMenuItem(
-                                value: index + 1,
-                                child: Text('Class ${index + 1}'),
-                              )),
-                              onChanged: (val) {
-                                if (val != null) viewModel.setBortleClass(val);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                const SkyDarknessWidget(),
                 if (viewModel.skyDarknessWarning)
                   Card(
                     margin: const EdgeInsets.only(bottom: 16),
