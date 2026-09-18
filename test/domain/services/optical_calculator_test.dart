@@ -46,5 +46,32 @@ void main() {
       );
       expect(sizeMB, closeTo(49.77, 0.01));
     });
+
+    test('calculates NPF exposure accurately', () {
+      // f/4, 3.76um pixels, 400mm focal length, dec 0
+      // (16.856*4 + 13.713*3.76 + 90) / (400 * cos(0))
+      // (67.424 + 51.56096 + 90) / 400
+      // 208.98496 / 400 = 0.522
+      
+      final npf = OpticalCalculator.calculateNPFExposure(
+        apertureFNumber: 4.0,
+        pixelPitch: 3.76,
+        effectiveFocalLength: 400.0,
+        declinationDegrees: 0.0,
+      );
+      
+      expect(npf, closeTo(0.522, 0.01));
+      
+      // Higher declination (e.g. 60 deg -> cos(60) = 0.5)
+      // 208.98496 / 200 = 1.044
+      final npfHighDec = OpticalCalculator.calculateNPFExposure(
+        apertureFNumber: 4.0,
+        pixelPitch: 3.76,
+        effectiveFocalLength: 400.0,
+        declinationDegrees: 60.0,
+      );
+      
+      expect(npfHighDec, closeTo(1.044, 0.01));
+    });
   });
 }

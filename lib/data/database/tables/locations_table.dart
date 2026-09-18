@@ -6,4 +6,5 @@ class LocationProfiles extends Table {
   RealColumn get latitude => real()();
   RealColumn get longitude => real()();
   RealColumn get elevation => real()();
+  IntColumn get bortleClass => integer().withDefault(const Constant(4))();
 }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../domain/repositories/target_repository.dart';
@@ -87,6 +87,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
     );
     String selectedType = existing?.type ?? _kObjectTypes.first;
     final isEdit = existing != null;
+    final formKey = GlobalKey<FormState>();
 
     await showDialog(
       context: context,
@@ -96,19 +97,22 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
             return AlertDialog(
               title: Text(isEdit ? 'Edit Target' : 'Add Custom Target'),
               content: SingleChildScrollView(
-                child: Column(
+                child: Form(
+                  key: formKey,
+                  child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(
+                    TextFormField(
                       controller: nameCtrl,
                       decoration: const InputDecoration(
-                        labelText: 'Target Name',
+                        labelText: 'Target Name *',
                         hintText: 'e.g. Andromeda Galaxy',
                       ),
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: selectedType,
+                      initialValue: selectedType,
                       decoration: const InputDecoration(labelText: 'Object Type'),
                       items: _kObjectTypes
                           .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -118,36 +122,41 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    ExpansionTile(
-                      title: const Text(
-                        'Advanced Settings (Optional)',
-                        style: TextStyle(fontSize: 14),
+                    TextFormField(
+                      controller: raCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true, signed: false),
+                      decoration: const InputDecoration(
+                        labelText: 'Right Ascension (Degrees) *',
+                        hintText: '0.0 to 360.0',
                       ),
-                      childrenPadding:
-                          const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                      tilePadding: EdgeInsets.zero,
-                      children: [
-                        TextField(
-                          controller: raCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true, signed: true),
-                          decoration: const InputDecoration(
-                            labelText: 'Right Ascension (Degrees)',
-                            hintText: '0.0',
-                          ),
-                        ),
-                        TextField(
-                          controller: decCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true, signed: true),
-                          decoration: const InputDecoration(
-                            labelText: 'Declination (Degrees)',
-                            hintText: '0.0',
-                          ),
-                        ),
-                      ],
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'Required';
+                        final n = double.tryParse(v);
+                        if (n == null) return 'Must be a number';
+                        if (n < 0.0 || n >= 360.0) return 'Must be 0.0 to 360.0';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: decCtrl,
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true, signed: true),
+                      decoration: const InputDecoration(
+                        labelText: 'Declination (Degrees) *',
+                        hintText: '-90.0 to +90.0',
+                      ),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return 'Required';
+                        final n = double.tryParse(v);
+                        if (n == null) return 'Must be a number';
+                        if (n < -90.0 || n > 90.0) return 'Must be -90.0 to +90.0';
+                        return null;
+                      },
                     ),
                   ],
+                ),
                 ),
               ),
               actions: [
@@ -157,6 +166,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
                     final repo = context.read<TargetRepository>();
@@ -165,8 +175,8 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       catalogId: name,
                       commonName: name,
                       type: selectedType,
-                      rightAscension: double.tryParse(raCtrl.text) ?? 0.0,
-                      declination: double.tryParse(decCtrl.text) ?? 0.0,
+                      rightAscension: double.parse(raCtrl.text),
+                      declination: double.parse(decCtrl.text),
                     );
                     if (isEdit) {
                       await repo.updateTarget(target);

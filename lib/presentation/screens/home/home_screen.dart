@@ -7,6 +7,7 @@ import '../../widgets/planner_summary_card.dart';
 import '../../../domain/repositories/logbook_repository.dart';
 import '../../../domain/models/session_log.dart';
 import '../../viewmodels/theme_viewmodel.dart';
+import '../../widgets/capture_plan_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -119,26 +120,6 @@ class HomeScreen extends StatelessWidget {
                     },
                     onTap: () => _showLocationDialog(context, viewModel),
                   ),
-                if (viewModel.currentWeather?.dewWarning == true)
-                  Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    color: Colors.orange.shade100,
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.warning_amber_rounded, color: Colors.deepOrange),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Dew Warning: Temperature is close to dew point. Activate dew heaters!',
-                              style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                 Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: Padding(
@@ -225,99 +206,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Card(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Capture Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Light Frames:'),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => viewModel.setLightFrames(viewModel.lightFrames - 10 > 0 ? viewModel.lightFrames - 10 : 0),
-                                ),
-                                Text('${viewModel.lightFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () => viewModel.setLightFrames(viewModel.lightFrames + 10),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Dark Frames:'),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => viewModel.setDarkFrames(viewModel.darkFrames - 10 > 0 ? viewModel.darkFrames - 10 : 0),
-                                ),
-                                Text('${viewModel.darkFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () => viewModel.setDarkFrames(viewModel.darkFrames + 10),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Flat Frames:'),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => viewModel.setFlatFrames(viewModel.flatFrames - 10 > 0 ? viewModel.flatFrames - 10 : 0),
-                                ),
-                                Text('${viewModel.flatFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () => viewModel.setFlatFrames(viewModel.flatFrames + 10),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Bias Frames:'),
-                            Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => viewModel.setBiasFrames(viewModel.biasFrames - 10 > 0 ? viewModel.biasFrames - 10 : 0),
-                                ),
-                                Text('${viewModel.biasFrames}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () => viewModel.setBiasFrames(viewModel.biasFrames + 10),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Total Integration: ${viewModel.totalIntegrationTime}'),
-                        Text('Stacking Gain: ${viewModel.relativeStackingGain.toStringAsFixed(1)}x'),
-                        Text('Estimated Storage: ${viewModel.theoreticalStorageMB?.toStringAsFixed(1)} MB'),
-                      ],
-                    ),
-                  ),
-                ),
+                const CapturePlanWidget(),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -326,7 +215,8 @@ class HomeScreen extends StatelessWidget {
                       targetName: target.commonName ?? target.catalogId,
                       equipmentName: equipment.name,
                       sessionDate: viewModel.sessionDate,
-                      plannedLightFrames: viewModel.lightFrames,
+                      plannedLightFrames: 0,
+                      captureBlocks: viewModel.captureBlocks,
                     );
                     await context.read<LogbookRepository>().addLog(log);
                     if (context.mounted) {

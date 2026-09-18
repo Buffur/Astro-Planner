@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/data/database/app_database.dart';
 
@@ -32,5 +33,31 @@ void main() {
     expect(profile.name, 'ZWO ASI2600MC Pro');
     expect(profile.sensorWidth, 23.5);
     expect(profile.resolutionWidth, 6248);
+  });
+
+  test('can insert and retrieve expanded SessionLog', () async {
+    final date = DateTime.now();
+    final id = await database.into(database.sessionLogs).insert(
+      SessionLogsCompanion.insert(
+        targetName: 'M31',
+        equipmentName: 'Test Rig',
+        sessionDate: date,
+        locationName: const Value('Backyard'),
+        bortleScale: const Value(4.5),
+        plannedLightFrames: 100,
+        plannedDarkFrames: const Value(20),
+        integrationTimeSeconds: const Value(3600.0),
+        temperature: const Value(-2.5),
+      ),
+    );
+
+    final log = await (database.select(database.sessionLogs)..where((t) => t.id.equals(id))).getSingle();
+
+    expect(log.targetName, 'M31');
+    expect(log.locationName, 'Backyard');
+    expect(log.bortleScale, 4.5);
+    expect(log.plannedDarkFrames, 20);
+    expect(log.integrationTimeSeconds, 3600.0);
+    expect(log.temperature, -2.5);
   });
 }

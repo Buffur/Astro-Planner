@@ -57,15 +57,20 @@ class _LogbookScreenState extends State<LogbookScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
+                int? actualFrames = int.tryParse(actualFramesCtrl.text);
+                int? rejectedFrames = actualFrames != null
+                    ? (log.plannedLightFrames > actualFrames ? log.plannedLightFrames - actualFrames : 0)
+                    : null;
+
                 final updated = SessionLog(
                   id: log.id,
                   targetName: log.targetName,
                   equipmentName: log.equipmentName,
                   sessionDate: log.sessionDate,
                   plannedLightFrames: log.plannedLightFrames,
-                  actualLightFrames: int.tryParse(actualFramesCtrl.text),
+                  actualLightFrames: actualFrames,
                   environmentalNotes: notesCtrl.text,
-                  rejectedFrames: log.rejectedFrames,
+                  rejectedFrames: rejectedFrames,
                   processingNotes: log.processingNotes,
                 );
                 await context.read<LogbookRepository>().updateLog(updated);
@@ -131,6 +136,8 @@ class _LogbookScreenState extends State<LogbookScreen> {
                         Text('Planned Frames: ${log.plannedLightFrames}'),
                         if (log.actualLightFrames != null)
                           Text('Actual Frames: ${log.actualLightFrames}'),
+                        if (log.rejectedFrames != null && log.rejectedFrames! > 0)
+                          Text('Rejected Frames: ${log.rejectedFrames}', style: const TextStyle(color: Colors.red)),
                       ],
                     ),
                     trailing: Row(

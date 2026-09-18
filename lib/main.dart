@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
@@ -14,6 +15,9 @@ import 'data/repositories/open_meteo_weather_repository.dart';
 import 'domain/repositories/weather_repository.dart';
 import 'data/repositories/drift_logbook_repository.dart';
 import 'domain/repositories/logbook_repository.dart';
+import 'data/repositories/drift_location_repository.dart';
+import 'domain/repositories/location_repository.dart';
+import 'data/repositories/light_pollution_repository.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 
 void main() async {
@@ -23,12 +27,11 @@ void main() async {
   final equipmentRepo = DriftEquipmentRepository(database);
   final weatherRepo = OpenMeteoWeatherRepository();
   final logbookRepo = DriftLogbookRepository(database);
+  final locationRepo = DriftLocationRepository(database);
+  final lightPollutionRepo = LightPollutionRepository();
   
   final targetSeeder = CatalogSeeder(targetRepo);
-  await targetSeeder.seedIfNeeded();
-
   final equipmentSeeder = EquipmentSeeder(equipmentRepo);
-  await equipmentSeeder.seedIfNeeded();
 
   runApp(
     MultiProvider(
@@ -38,12 +41,24 @@ void main() async {
         Provider<EquipmentRepository>.value(value: equipmentRepo),
         Provider<WeatherRepository>.value(value: weatherRepo),
         Provider<LogbookRepository>.value(value: logbookRepo),
-        ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, equipmentRepo, weatherRepo)),
+        Provider<LocationRepository>.value(value: locationRepo),
+        Provider<LightPollutionRepository>.value(value: lightPollutionRepo),
+        ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, equipmentRepo, weatherRepo, locationRepo, lightPollutionRepo)),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
     ),
   );
+
+  // Run seeding asynchronously after app boot to prevent black screens on hot restart
+  Future.microtask(() async {
+    try {
+      await targetSeeder.seedIfNeeded();
+      await equipmentSeeder.seedIfNeeded();
+    } catch (e) {
+      debugPrint('Seeding error: $e');
+    }
+  });
 }
 
 class AstroPlanApp extends StatelessWidget {

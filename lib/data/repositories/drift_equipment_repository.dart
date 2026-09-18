@@ -8,52 +8,159 @@ class DriftEquipmentRepository implements EquipmentRepository {
 
   DriftEquipmentRepository(this._db);
 
-  domain.EquipmentProfile _mapToDomain(EquipmentProfile dbProfile) {
+  domain.EquipmentProfile _mapToDomain(TypedResult row) {
+    final rig = row.readTable(_db.opticalRigs);
+    final cam = row.readTable(_db.cameraModules);
+    final dev = row.readTable(_db.devices);
+
     return domain.EquipmentProfile(
-      id: dbProfile.id,
-      name: dbProfile.name,
-      sensorWidth: dbProfile.sensorWidth,
-      sensorHeight: dbProfile.sensorHeight,
-      pixelPitch: dbProfile.pixelPitch,
-      resolutionWidth: dbProfile.resolutionWidth,
-      resolutionHeight: dbProfile.resolutionHeight,
-      focalLength: dbProfile.focalLength,
-      aperture: dbProfile.aperture,
-      opticalMultiplier: dbProfile.opticalMultiplier,
+      id: rig.id,
+      name: rig.name,
+      manufacturer: dev.manufacturer,
+      cameraModel: cam.model,
+      sensorWidth: cam.sensorWidthMm,
+      sensorHeight: cam.sensorHeightMm,
+      pixelPitch: cam.pixelPitchUm,
+      resolutionWidth: cam.resolutionWidthPx,
+      resolutionHeight: cam.resolutionHeightPx,
+      focalLength: rig.focalLengthMm,
+      aperture: rig.aperture,
+      opticalMultiplier: rig.opticalMultiplier,
+      bitDepth: cam.bitDepth ?? 14,
+      rotation: rig.rotationDegrees,
     );
   }
 
   @override
   Future<List<domain.EquipmentProfile>> getAllEquipment() async {
-    final dbProfiles = await _db.select(_db.equipmentProfiles).get();
-    return dbProfiles.map(_mapToDomain).toList();
+    final query = _db.select(_db.opticalRigs).join([
+      innerJoin(_db.cameraModules,
+          _db.cameraModules.id.equalsExp(_db.opticalRigs.cameraModuleId)),
+      innerJoin(_db.devices,
+          _db.devices.id.equalsExp(_db.cameraModules.deviceId)),
+    ]);
+    final rows = await query.get();
+    return rows.map(_mapToDomain).toList();
   }
 
   @override
   Future<domain.EquipmentProfile?> getEquipmentById(int id) async {
-    final dbProfile = await (_db.select(_db.equipmentProfiles)..where((t) => t.id.equals(id))).getSingleOrNull();
-    return dbProfile != null ? _mapToDomain(dbProfile) : null;
+    final query = _db.select(_db.opticalRigs).join([
+      innerJoin(_db.cameraModules,
+          _db.cameraModules.id.equalsExp(_db.opticalRigs.cameraModuleId)),
+      innerJoin(_db.devices,
+          _db.devices.id.equalsExp(_db.cameraModules.deviceId)),
+    ])..where(_db.opticalRigs.id.equals(id));
+    
+    final row = await query.getSingleOrNull();
+    return row != null ? _mapToDomain(row) : null;
   }
 
   @override
   Future<int> insertEquipment(domain.EquipmentProfile profile) async {
-    return _db.into(_db.equipmentProfiles).insert(
-      EquipmentProfilesCompanion.insert(
-        name: profile.name,
-        sensorWidth: profile.sensorWidth,
-        sensorHeight: profile.sensorHeight,
-        pixelPitch: profile.pixelPitch,
-        resolutionWidth: profile.resolutionWidth,
-        resolutionHeight: profile.resolutionHeight,
-        focalLength: profile.focalLength,
-        aperture: profile.aperture,
-        opticalMultiplier: Value(profile.opticalMultiplier),
-      ),
-    );
+    return await _db.transaction(() async {
+      final deviceId = await _db.into(_db.devices).insert(
+            DevicesCompanion.insert(
+              name: profile.name,
+              manufacturer: Value(profile.manufacturer),
+            ),
+          );
+
+      final camId = await _db.into(_db.cameraModules).insert(
+            CameraModulesCompanion.insert(
+              deviceId: deviceId,
+              name: '${profile.name} Camera',
+              manufacturer: Value(profile.manufacturer),
+              model: Value(profile.cameraModel),
+              sensorWidthMm: profile.sensorWidth,
+              sensorHeightMm: profile.sensorHeight,
+              resolutionWidthPx: profile.resolutionWidth,
+              resolutionHeightPx: profile.resolutionHeight,
+              pixelPitchUm: profile.pixelPitch,
+              bitDepth: Value(profile.bitDepth),
+            ),
+          );
+
+      final rigId = await _db.into(_db.opticalRigs).insert(
+            OpticalRigsCompanion.insert(
+              name: profile.name,
+              cameraModuleId: camId,
+              focalLengthMm: profile.focalLength,
+              aperture: profile.aperture,
+              opticalMultiplier: Value(profile.opticalMultiplier),
+              rotationDegrees: Value(profile.rotation),
+            ),
+          );
+
+      return rigId;
+    });
   }
 
   @override
   Future<void> deleteEquipment(int id) async {
-    await (_db.delete(_db.equipmentProfiles)..where((t) => t.id.equals(id))).go();
+    await _db.transaction(() async {
+      final rig = await (_db.select(_db.opticalRigs)
+            ..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+      if (rig == null) return;
+
+      final cam = await (_db.select(_db.cameraModules)
+            ..where((t) => t.id.equals(rig.cameraModuleId)))
+          .getSingleOrNull();
+
+      await (_db.delete(_db.opticalRigs)..where((t) => t.id.equals(id))).go();
+      
+      if (cam != null) {
+        await (_db.delete(_db.cameraModules)..where((t) => t.id.equals(cam.id))).go();
+        await (_db.delete(_db.devices)..where((t) => t.id.equals(cam.deviceId))).go();
+      }
+    });
+  }
+
+  @override
+  Future<void> updateEquipment(domain.EquipmentProfile profile) async {
+    await _db.transaction(() async {
+      final rig = await (_db.select(_db.opticalRigs)
+            ..where((t) => t.id.equals(profile.id)))
+          .getSingleOrNull();
+      if (rig == null) return;
+
+      final cam = await (_db.select(_db.cameraModules)
+            ..where((t) => t.id.equals(rig.cameraModuleId)))
+          .getSingleOrNull();
+
+      await (_db.update(_db.opticalRigs)..where((t) => t.id.equals(rig.id))).write(
+        OpticalRigsCompanion(
+          name: Value(profile.name),
+          focalLengthMm: Value(profile.focalLength),
+          aperture: Value(profile.aperture),
+          opticalMultiplier: Value(profile.opticalMultiplier),
+          rotationDegrees: Value(profile.rotation),
+        ),
+      );
+
+      if (cam != null) {
+        await (_db.update(_db.cameraModules)..where((t) => t.id.equals(cam.id))).write(
+          CameraModulesCompanion(
+            name: Value('${profile.name} Camera'),
+            manufacturer: Value(profile.manufacturer),
+            model: Value(profile.cameraModel),
+            sensorWidthMm: Value(profile.sensorWidth),
+            sensorHeightMm: Value(profile.sensorHeight),
+            resolutionWidthPx: Value(profile.resolutionWidth),
+            resolutionHeightPx: Value(profile.resolutionHeight),
+            pixelPitchUm: Value(profile.pixelPitch),
+            bitDepth: Value(profile.bitDepth),
+          ),
+        );
+
+        await (_db.update(_db.devices)..where((t) => t.id.equals(cam.deviceId))).write(
+          DevicesCompanion(
+            name: Value(profile.name),
+            manufacturer: Value(profile.manufacturer),
+          ),
+        );
+      }
+    });
   }
 }

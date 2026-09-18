@@ -58,4 +58,35 @@ class OpticalCalculator {
     final bits = resolutionWidth * resolutionHeight * bitDepth;
     return bits / (8 * 1024 * 1024);
   }
+
+  /// Calculates the NPF rule exposure limit for untracked astrophotography.
+  /// This calculates the maximum recommended exposure time to limit visible star trailing.
+  /// 
+  /// Formula: t = (16.856 * N + 13.713 * p + 90) / (f * cos(declination))
+  /// N = aperture (f-number)
+  /// p = pixel pitch (microns)
+  /// f = effective focal length (mm)
+  /// declination = target declination (degrees)
+  /// Output: exposure time in seconds.
+  static double calculateNPFExposure({
+    required double apertureFNumber,
+    required double pixelPitch,
+    required double effectiveFocalLength,
+    required double declinationDegrees,
+  }) {
+    if (effectiveFocalLength <= 0) throw ArgumentError('Effective focal length must be positive.');
+    if (apertureFNumber <= 0) throw ArgumentError('Aperture must be positive.');
+    
+    // declination in radians
+    final declinationRadians = declinationDegrees * (math.pi / 180.0);
+    
+    // Limit declination to avoid division by zero near poles
+    final clampedDec = math.min(declinationRadians.abs(), 89.9 * (math.pi / 180.0));
+
+    final n = apertureFNumber;
+    final p = pixelPitch;
+    final f = effectiveFocalLength;
+    
+    return (16.856 * n + 13.713 * p + 90.0) / (f * math.cos(clampedDec));
+  }
 }
