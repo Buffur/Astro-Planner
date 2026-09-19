@@ -39,7 +39,6 @@ void main() {
         resolutionWidthPx: 8160,
         resolutionHeightPx: 6144,
         pixelPitchUm: 1.2,
-        bitDepth: 14,
       ),
     );
 
@@ -60,7 +59,6 @@ void main() {
 
     expect(devices.single.name, 'Xiaomi 14T Pro');
     expect(modules.single.name, 'Main Camera');
-    expect(modules.single.bitDepth, 14);
     expect(rigs.single.trackingState, 'untracked');
   });
 }

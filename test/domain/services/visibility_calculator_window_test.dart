@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
-import 'package:astroplan/domain/models/visibility_window.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
 import 'package:astroplan/domain/services/astronomical_engine.dart';
 
@@ -30,7 +29,6 @@ void main() {
       expect(windows.length, 1);
       final win = windows.first;
       
-      print('Winter Window: ${win.start} to ${win.end} (duration: ${win.duration.inHours}h ${win.duration.inMinutes % 60}m)');
       
       // M45 rises high in winter night, so window should be quite long (e.g. > 8 hours)
       expect(win.duration.inHours, greaterThan(8));
@@ -74,7 +72,6 @@ void main() {
 
       // Sun reaches about -15° in London summer, so -12° should give a window
       expect(windows, isNotEmpty);
-      print('Summer Nautical Window: ${windows.first.start} to ${windows.first.end}');
     });
 
     test('Multiple segments for a circumpolar target dipping below minAltitude', () {
@@ -105,9 +102,7 @@ void main() {
         minAltitude: 20.0, // Should dip below this during the long winter night
       );
 
-      print('Multiple segments windows:');
-      for (var w in windows) print(w);
-
+      
       // Expect two windows (one in evening, one in morning) separated by the dip
       expect(windows.length, 2);
     });

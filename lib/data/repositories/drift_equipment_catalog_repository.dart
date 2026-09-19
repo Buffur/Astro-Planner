@@ -33,7 +33,7 @@ class DriftEquipmentCatalogRepository implements EquipmentCatalogRepository {
       resolutionWidthPx: row.resolutionWidthPx,
       resolutionHeightPx: row.resolutionHeightPx,
       pixelPitchUm: row.pixelPitchUm,
-      bitDepth: row.bitDepth ?? 14,
+      averageRawFileSizeMB: row.averageRawFileSizeMB,
     );
   }
 
@@ -44,7 +44,6 @@ class DriftEquipmentCatalogRepository implements EquipmentCatalogRepository {
       cameraModuleId: row.cameraModuleId,
       focalLengthMm: row.focalLengthMm,
       aperture: row.aperture,
-      opticalMultiplier: row.opticalMultiplier,
       trackingState: row.trackingState,
       rotationDegrees: row.rotationDegrees,
     );
@@ -93,7 +92,7 @@ class DriftEquipmentCatalogRepository implements EquipmentCatalogRepository {
             resolutionWidthPx: module.resolutionWidthPx,
             resolutionHeightPx: module.resolutionHeightPx,
             pixelPitchUm: module.pixelPitchUm,
-            bitDepth: Value(module.bitDepth),
+            averageRawFileSizeMB: Value(module.averageRawFileSizeMB),
           ),
         );
   }
@@ -118,7 +117,6 @@ class DriftEquipmentCatalogRepository implements EquipmentCatalogRepository {
             cameraModuleId: rig.cameraModuleId,
             focalLengthMm: rig.focalLengthMm,
             aperture: rig.aperture,
-            opticalMultiplier: Value(rig.opticalMultiplier),
             trackingState: Value(rig.trackingState),
             rotationDegrees: Value(rig.rotationDegrees),
           ),

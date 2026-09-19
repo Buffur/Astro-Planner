@@ -19,7 +19,7 @@ import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/session_calculator.dart';
-
+import '../../domain/models/session_log.dart';
 class PlannerViewModel extends ChangeNotifier {
   final TargetRepository _targetRepository;
   final EquipmentRepository _equipmentRepository;
@@ -27,18 +27,23 @@ class PlannerViewModel extends ChangeNotifier {
   final LocationRepository _locationRepository;
   final LightPollutionRepository _lightPollutionRepository;
 
+  bool _isLoading = true;
   AstroTarget? _selectedTarget;
   EquipmentProfile? _selectedEquipment;
   WeatherConditions? _currentWeather;
   String? _locationName;
   
-  DateTime _sessionDate = DateTime.now();
+  DateTime _sessionDate = DateTime.now().toUtc();
   double _latitude = 51.5072;
   double _longitude = -0.1276;
   
   List<CaptureBlock> _captureBlocks = [];
   int _bortleClass = 4;
   double _dewPointThreshold = 2.0;
+
+  SessionLog? _activeSessionLog;
+  int? get activeSessionId => _activeSessionLog?.id;
+  SessionLog? get activeSessionLog => _activeSessionLog;
 
   /// Minimum usable altitude in degrees.
   ///
@@ -118,9 +123,11 @@ class PlannerViewModel extends ChangeNotifier {
     _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
     unawaited(_reverseGeocode(_latitude, _longitude));
     
+    _isLoading = false;
     notifyListeners();
   }
 
+  bool get isLoading => _isLoading;
   AstroTarget? get selectedTarget => _selectedTarget;
   EquipmentProfile? get selectedEquipment => _selectedEquipment;
   WeatherConditions? get currentWeather => _currentWeather;
@@ -363,6 +370,46 @@ class PlannerViewModel extends ChangeNotifier {
     await prefs.setDouble('dewPointThreshold', _dewPointThreshold);
   }
 
+  Future<void> loadSession(SessionLog log) async {
+    _activeSessionLog = log;
+    _sessionDate = log.sessionDate;
+    
+    // Look up target
+    final targets = await _targetRepository.searchTargets(log.targetName);
+    if (targets.isNotEmpty) {
+      try {
+        _selectedTarget = targets.firstWhere((t) => (t.commonName ?? t.catalogId).toLowerCase() == log.targetName.toLowerCase());
+      } catch (e) {
+        _selectedTarget = targets.first;
+      }
+    }
+    
+    // Look up equipment
+    final equipments = await _equipmentRepository.getAllEquipment();
+    if (equipments.isNotEmpty) {
+      try {
+        _selectedEquipment = equipments.firstWhere((e) => e.name.toLowerCase() == log.equipmentName.toLowerCase());
+      } catch (e) {
+        // Keep current or clear
+      }
+    }
+
+    if (log.captureBlocks.isNotEmpty) {
+      _captureBlocks = List.from(log.captureBlocks);
+      await _saveBlocks();
+    }
+    
+    notifyListeners();
+  }
+
+  void newSession() {
+    _activeSessionLog = null;
+    _sessionDate = DateTime.now().toUtc();
+    // we could also clear capture blocks or target if desired, but retaining them might be fine.
+    // The requirement says "resets the planner state." 
+    notifyListeners();
+  }
+
   // Calculations exposed to the UI
 
   Map<String, DateTime?> get nightTimeline {
@@ -416,7 +463,7 @@ class PlannerViewModel extends ChangeNotifier {
     return OpticalCalculator.calculateNPFExposure(
       apertureFNumber: _selectedEquipment!.aperture,
       pixelPitch: _selectedEquipment!.pixelPitch,
-      effectiveFocalLength: _selectedEquipment!.focalLength * _selectedEquipment!.opticalMultiplier,
+      effectiveFocalLength: _selectedEquipment!.focalLength,
       declinationDegrees: _selectedTarget!.declination,
     );
   }
@@ -443,25 +490,13 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  double? get theoreticalStorageMB {
+  double? get estimatedStorageMB {
     if (_selectedEquipment == null) return null;
-    final singleFrame = OpticalCalculator.estimateTheoreticalFrameSizeMB(
-      resolutionWidth: _selectedEquipment!.resolutionWidth,
-      resolutionHeight: _selectedEquipment!.resolutionHeight,
-      bitDepth: _selectedEquipment!.bitDepth,
-    );
     final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
-    return singleFrame * totalFrames;
-  }
-
-  double? get empiricalStorageMB {
-    if (_selectedEquipment == null) return null;
-    final singleFrame = OpticalCalculator.estimateEmpiricalFrameSizeMB(
-      resolutionWidth: _selectedEquipment!.resolutionWidth,
-      resolutionHeight: _selectedEquipment!.resolutionHeight,
+    return OpticalCalculator.estimateStorageRequirement(
+      averageRawFileSizeMB: _selectedEquipment!.averageRawFileSizeMB,
+      frameCount: totalFrames,
     );
-    final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
-    return singleFrame * totalFrames;
   }
 
   double get relativeStackingGain {
@@ -472,7 +507,6 @@ class PlannerViewModel extends ChangeNotifier {
     if (_selectedEquipment == null) return null;
     final efl = OpticalCalculator.calculateEffectiveFocalLength(
       focalLength: _selectedEquipment!.focalLength,
-      opticalMultiplier: _selectedEquipment!.opticalMultiplier,
     );
     return OpticalCalculator.calculatePixelScale(pixelPitch: _selectedEquipment!.pixelPitch, effectiveFocalLength: efl);
   }

@@ -130,18 +130,16 @@ class $EquipmentProfilesTable extends EquipmentProfiles
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _opticalMultiplierMeta = const VerificationMeta(
-    'opticalMultiplier',
-  );
+  static const VerificationMeta _averageRawFileSizeMBMeta =
+      const VerificationMeta('averageRawFileSizeMB');
   @override
-  late final GeneratedColumn<double> opticalMultiplier =
+  late final GeneratedColumn<double> averageRawFileSizeMB =
       GeneratedColumn<double>(
-        'optical_multiplier',
+        'average_raw_file_size_m_b',
         aliasedName,
-        false,
+        true,
         type: DriftSqlType.double,
         requiredDuringInsert: false,
-        defaultValue: const Constant(1.0),
       );
   static const VerificationMeta _rotationMeta = const VerificationMeta(
     'rotation',
@@ -167,7 +165,7 @@ class $EquipmentProfilesTable extends EquipmentProfiles
     resolutionHeight,
     focalLength,
     aperture,
-    opticalMultiplier,
+    averageRawFileSizeMB,
     rotation,
   ];
   @override
@@ -282,12 +280,12 @@ class $EquipmentProfilesTable extends EquipmentProfiles
     } else if (isInserting) {
       context.missing(_apertureMeta);
     }
-    if (data.containsKey('optical_multiplier')) {
+    if (data.containsKey('average_raw_file_size_m_b')) {
       context.handle(
-        _opticalMultiplierMeta,
-        opticalMultiplier.isAcceptableOrUnknown(
-          data['optical_multiplier']!,
-          _opticalMultiplierMeta,
+        _averageRawFileSizeMBMeta,
+        averageRawFileSizeMB.isAcceptableOrUnknown(
+          data['average_raw_file_size_m_b']!,
+          _averageRawFileSizeMBMeta,
         ),
       );
     }
@@ -350,10 +348,10 @@ class $EquipmentProfilesTable extends EquipmentProfiles
         DriftSqlType.double,
         data['${effectivePrefix}aperture'],
       )!,
-      opticalMultiplier: attachedDatabase.typeMapping.read(
+      averageRawFileSizeMB: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
-        data['${effectivePrefix}optical_multiplier'],
-      )!,
+        data['${effectivePrefix}average_raw_file_size_m_b'],
+      ),
       rotation: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}rotation'],
@@ -380,7 +378,7 @@ class EquipmentProfile extends DataClass
   final int resolutionHeight;
   final double focalLength;
   final double aperture;
-  final double opticalMultiplier;
+  final double? averageRawFileSizeMB;
   final double? rotation;
   const EquipmentProfile({
     required this.id,
@@ -394,7 +392,7 @@ class EquipmentProfile extends DataClass
     required this.resolutionHeight,
     required this.focalLength,
     required this.aperture,
-    required this.opticalMultiplier,
+    this.averageRawFileSizeMB,
     this.rotation,
   });
   @override
@@ -415,7 +413,9 @@ class EquipmentProfile extends DataClass
     map['resolution_height'] = Variable<int>(resolutionHeight);
     map['focal_length'] = Variable<double>(focalLength);
     map['aperture'] = Variable<double>(aperture);
-    map['optical_multiplier'] = Variable<double>(opticalMultiplier);
+    if (!nullToAbsent || averageRawFileSizeMB != null) {
+      map['average_raw_file_size_m_b'] = Variable<double>(averageRawFileSizeMB);
+    }
     if (!nullToAbsent || rotation != null) {
       map['rotation'] = Variable<double>(rotation);
     }
@@ -439,7 +439,9 @@ class EquipmentProfile extends DataClass
       resolutionHeight: Value(resolutionHeight),
       focalLength: Value(focalLength),
       aperture: Value(aperture),
-      opticalMultiplier: Value(opticalMultiplier),
+      averageRawFileSizeMB: averageRawFileSizeMB == null && nullToAbsent
+          ? const Value.absent()
+          : Value(averageRawFileSizeMB),
       rotation: rotation == null && nullToAbsent
           ? const Value.absent()
           : Value(rotation),
@@ -463,7 +465,9 @@ class EquipmentProfile extends DataClass
       resolutionHeight: serializer.fromJson<int>(json['resolutionHeight']),
       focalLength: serializer.fromJson<double>(json['focalLength']),
       aperture: serializer.fromJson<double>(json['aperture']),
-      opticalMultiplier: serializer.fromJson<double>(json['opticalMultiplier']),
+      averageRawFileSizeMB: serializer.fromJson<double?>(
+        json['averageRawFileSizeMB'],
+      ),
       rotation: serializer.fromJson<double?>(json['rotation']),
     );
   }
@@ -482,7 +486,7 @@ class EquipmentProfile extends DataClass
       'resolutionHeight': serializer.toJson<int>(resolutionHeight),
       'focalLength': serializer.toJson<double>(focalLength),
       'aperture': serializer.toJson<double>(aperture),
-      'opticalMultiplier': serializer.toJson<double>(opticalMultiplier),
+      'averageRawFileSizeMB': serializer.toJson<double?>(averageRawFileSizeMB),
       'rotation': serializer.toJson<double?>(rotation),
     };
   }
@@ -499,7 +503,7 @@ class EquipmentProfile extends DataClass
     int? resolutionHeight,
     double? focalLength,
     double? aperture,
-    double? opticalMultiplier,
+    Value<double?> averageRawFileSizeMB = const Value.absent(),
     Value<double?> rotation = const Value.absent(),
   }) => EquipmentProfile(
     id: id ?? this.id,
@@ -513,7 +517,9 @@ class EquipmentProfile extends DataClass
     resolutionHeight: resolutionHeight ?? this.resolutionHeight,
     focalLength: focalLength ?? this.focalLength,
     aperture: aperture ?? this.aperture,
-    opticalMultiplier: opticalMultiplier ?? this.opticalMultiplier,
+    averageRawFileSizeMB: averageRawFileSizeMB.present
+        ? averageRawFileSizeMB.value
+        : this.averageRawFileSizeMB,
     rotation: rotation.present ? rotation.value : this.rotation,
   );
   EquipmentProfile copyWithCompanion(EquipmentProfilesCompanion data) {
@@ -545,9 +551,9 @@ class EquipmentProfile extends DataClass
           ? data.focalLength.value
           : this.focalLength,
       aperture: data.aperture.present ? data.aperture.value : this.aperture,
-      opticalMultiplier: data.opticalMultiplier.present
-          ? data.opticalMultiplier.value
-          : this.opticalMultiplier,
+      averageRawFileSizeMB: data.averageRawFileSizeMB.present
+          ? data.averageRawFileSizeMB.value
+          : this.averageRawFileSizeMB,
       rotation: data.rotation.present ? data.rotation.value : this.rotation,
     );
   }
@@ -566,7 +572,7 @@ class EquipmentProfile extends DataClass
           ..write('resolutionHeight: $resolutionHeight, ')
           ..write('focalLength: $focalLength, ')
           ..write('aperture: $aperture, ')
-          ..write('opticalMultiplier: $opticalMultiplier, ')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
           ..write('rotation: $rotation')
           ..write(')'))
         .toString();
@@ -585,7 +591,7 @@ class EquipmentProfile extends DataClass
     resolutionHeight,
     focalLength,
     aperture,
-    opticalMultiplier,
+    averageRawFileSizeMB,
     rotation,
   );
   @override
@@ -603,7 +609,7 @@ class EquipmentProfile extends DataClass
           other.resolutionHeight == this.resolutionHeight &&
           other.focalLength == this.focalLength &&
           other.aperture == this.aperture &&
-          other.opticalMultiplier == this.opticalMultiplier &&
+          other.averageRawFileSizeMB == this.averageRawFileSizeMB &&
           other.rotation == this.rotation);
 }
 
@@ -619,7 +625,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
   final Value<int> resolutionHeight;
   final Value<double> focalLength;
   final Value<double> aperture;
-  final Value<double> opticalMultiplier;
+  final Value<double?> averageRawFileSizeMB;
   final Value<double?> rotation;
   const EquipmentProfilesCompanion({
     this.id = const Value.absent(),
@@ -633,7 +639,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
     this.resolutionHeight = const Value.absent(),
     this.focalLength = const Value.absent(),
     this.aperture = const Value.absent(),
-    this.opticalMultiplier = const Value.absent(),
+    this.averageRawFileSizeMB = const Value.absent(),
     this.rotation = const Value.absent(),
   });
   EquipmentProfilesCompanion.insert({
@@ -648,7 +654,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
     required int resolutionHeight,
     required double focalLength,
     required double aperture,
-    this.opticalMultiplier = const Value.absent(),
+    this.averageRawFileSizeMB = const Value.absent(),
     this.rotation = const Value.absent(),
   }) : name = Value(name),
        sensorWidth = Value(sensorWidth),
@@ -670,7 +676,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
     Expression<int>? resolutionHeight,
     Expression<double>? focalLength,
     Expression<double>? aperture,
-    Expression<double>? opticalMultiplier,
+    Expression<double>? averageRawFileSizeMB,
     Expression<double>? rotation,
   }) {
     return RawValuesInsertable({
@@ -685,7 +691,8 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
       if (resolutionHeight != null) 'resolution_height': resolutionHeight,
       if (focalLength != null) 'focal_length': focalLength,
       if (aperture != null) 'aperture': aperture,
-      if (opticalMultiplier != null) 'optical_multiplier': opticalMultiplier,
+      if (averageRawFileSizeMB != null)
+        'average_raw_file_size_m_b': averageRawFileSizeMB,
       if (rotation != null) 'rotation': rotation,
     });
   }
@@ -702,7 +709,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
     Value<int>? resolutionHeight,
     Value<double>? focalLength,
     Value<double>? aperture,
-    Value<double>? opticalMultiplier,
+    Value<double?>? averageRawFileSizeMB,
     Value<double?>? rotation,
   }) {
     return EquipmentProfilesCompanion(
@@ -717,7 +724,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
       resolutionHeight: resolutionHeight ?? this.resolutionHeight,
       focalLength: focalLength ?? this.focalLength,
       aperture: aperture ?? this.aperture,
-      opticalMultiplier: opticalMultiplier ?? this.opticalMultiplier,
+      averageRawFileSizeMB: averageRawFileSizeMB ?? this.averageRawFileSizeMB,
       rotation: rotation ?? this.rotation,
     );
   }
@@ -758,8 +765,10 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
     if (aperture.present) {
       map['aperture'] = Variable<double>(aperture.value);
     }
-    if (opticalMultiplier.present) {
-      map['optical_multiplier'] = Variable<double>(opticalMultiplier.value);
+    if (averageRawFileSizeMB.present) {
+      map['average_raw_file_size_m_b'] = Variable<double>(
+        averageRawFileSizeMB.value,
+      );
     }
     if (rotation.present) {
       map['rotation'] = Variable<double>(rotation.value);
@@ -781,7 +790,7 @@ class EquipmentProfilesCompanion extends UpdateCompanion<EquipmentProfile> {
           ..write('resolutionHeight: $resolutionHeight, ')
           ..write('focalLength: $focalLength, ')
           ..write('aperture: $aperture, ')
-          ..write('opticalMultiplier: $opticalMultiplier, ')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
           ..write('rotation: $rotation')
           ..write(')'))
         .toString();
@@ -1251,17 +1260,17 @@ class $CameraModulesTable extends CameraModules
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _bitDepthMeta = const VerificationMeta(
-    'bitDepth',
-  );
+  static const VerificationMeta _averageRawFileSizeMBMeta =
+      const VerificationMeta('averageRawFileSizeMB');
   @override
-  late final GeneratedColumn<int> bitDepth = GeneratedColumn<int>(
-    'bit_depth',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
+  late final GeneratedColumn<double> averageRawFileSizeMB =
+      GeneratedColumn<double>(
+        'average_raw_file_size_m_b',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1274,7 +1283,7 @@ class $CameraModulesTable extends CameraModules
     resolutionWidthPx,
     resolutionHeightPx,
     pixelPitchUm,
-    bitDepth,
+    averageRawFileSizeMB,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1377,10 +1386,13 @@ class $CameraModulesTable extends CameraModules
     } else if (isInserting) {
       context.missing(_pixelPitchUmMeta);
     }
-    if (data.containsKey('bit_depth')) {
+    if (data.containsKey('average_raw_file_size_m_b')) {
       context.handle(
-        _bitDepthMeta,
-        bitDepth.isAcceptableOrUnknown(data['bit_depth']!, _bitDepthMeta),
+        _averageRawFileSizeMBMeta,
+        averageRawFileSizeMB.isAcceptableOrUnknown(
+          data['average_raw_file_size_m_b']!,
+          _averageRawFileSizeMBMeta,
+        ),
       );
     }
     return context;
@@ -1432,9 +1444,9 @@ class $CameraModulesTable extends CameraModules
         DriftSqlType.double,
         data['${effectivePrefix}pixel_pitch_um'],
       )!,
-      bitDepth: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}bit_depth'],
+      averageRawFileSizeMB: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}average_raw_file_size_m_b'],
       ),
     );
   }
@@ -1456,7 +1468,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
   final int resolutionWidthPx;
   final int resolutionHeightPx;
   final double pixelPitchUm;
-  final int? bitDepth;
+  final double? averageRawFileSizeMB;
   const CameraModule({
     required this.id,
     required this.deviceId,
@@ -1468,7 +1480,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     required this.resolutionWidthPx,
     required this.resolutionHeightPx,
     required this.pixelPitchUm,
-    this.bitDepth,
+    this.averageRawFileSizeMB,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1487,8 +1499,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     map['resolution_width_px'] = Variable<int>(resolutionWidthPx);
     map['resolution_height_px'] = Variable<int>(resolutionHeightPx);
     map['pixel_pitch_um'] = Variable<double>(pixelPitchUm);
-    if (!nullToAbsent || bitDepth != null) {
-      map['bit_depth'] = Variable<int>(bitDepth);
+    if (!nullToAbsent || averageRawFileSizeMB != null) {
+      map['average_raw_file_size_m_b'] = Variable<double>(averageRawFileSizeMB);
     }
     return map;
   }
@@ -1509,9 +1521,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       resolutionWidthPx: Value(resolutionWidthPx),
       resolutionHeightPx: Value(resolutionHeightPx),
       pixelPitchUm: Value(pixelPitchUm),
-      bitDepth: bitDepth == null && nullToAbsent
+      averageRawFileSizeMB: averageRawFileSizeMB == null && nullToAbsent
           ? const Value.absent()
-          : Value(bitDepth),
+          : Value(averageRawFileSizeMB),
     );
   }
 
@@ -1531,7 +1543,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       resolutionWidthPx: serializer.fromJson<int>(json['resolutionWidthPx']),
       resolutionHeightPx: serializer.fromJson<int>(json['resolutionHeightPx']),
       pixelPitchUm: serializer.fromJson<double>(json['pixelPitchUm']),
-      bitDepth: serializer.fromJson<int?>(json['bitDepth']),
+      averageRawFileSizeMB: serializer.fromJson<double?>(
+        json['averageRawFileSizeMB'],
+      ),
     );
   }
   @override
@@ -1548,7 +1562,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       'resolutionWidthPx': serializer.toJson<int>(resolutionWidthPx),
       'resolutionHeightPx': serializer.toJson<int>(resolutionHeightPx),
       'pixelPitchUm': serializer.toJson<double>(pixelPitchUm),
-      'bitDepth': serializer.toJson<int?>(bitDepth),
+      'averageRawFileSizeMB': serializer.toJson<double?>(averageRawFileSizeMB),
     };
   }
 
@@ -1563,7 +1577,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     int? resolutionWidthPx,
     int? resolutionHeightPx,
     double? pixelPitchUm,
-    Value<int?> bitDepth = const Value.absent(),
+    Value<double?> averageRawFileSizeMB = const Value.absent(),
   }) => CameraModule(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -1575,7 +1589,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     resolutionWidthPx: resolutionWidthPx ?? this.resolutionWidthPx,
     resolutionHeightPx: resolutionHeightPx ?? this.resolutionHeightPx,
     pixelPitchUm: pixelPitchUm ?? this.pixelPitchUm,
-    bitDepth: bitDepth.present ? bitDepth.value : this.bitDepth,
+    averageRawFileSizeMB: averageRawFileSizeMB.present
+        ? averageRawFileSizeMB.value
+        : this.averageRawFileSizeMB,
   );
   CameraModule copyWithCompanion(CameraModulesCompanion data) {
     return CameraModule(
@@ -1601,7 +1617,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       pixelPitchUm: data.pixelPitchUm.present
           ? data.pixelPitchUm.value
           : this.pixelPitchUm,
-      bitDepth: data.bitDepth.present ? data.bitDepth.value : this.bitDepth,
+      averageRawFileSizeMB: data.averageRawFileSizeMB.present
+          ? data.averageRawFileSizeMB.value
+          : this.averageRawFileSizeMB,
     );
   }
 
@@ -1618,7 +1636,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ..write('resolutionWidthPx: $resolutionWidthPx, ')
           ..write('resolutionHeightPx: $resolutionHeightPx, ')
           ..write('pixelPitchUm: $pixelPitchUm, ')
-          ..write('bitDepth: $bitDepth')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB')
           ..write(')'))
         .toString();
   }
@@ -1635,7 +1653,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     resolutionWidthPx,
     resolutionHeightPx,
     pixelPitchUm,
-    bitDepth,
+    averageRawFileSizeMB,
   );
   @override
   bool operator ==(Object other) =>
@@ -1651,7 +1669,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           other.resolutionWidthPx == this.resolutionWidthPx &&
           other.resolutionHeightPx == this.resolutionHeightPx &&
           other.pixelPitchUm == this.pixelPitchUm &&
-          other.bitDepth == this.bitDepth);
+          other.averageRawFileSizeMB == this.averageRawFileSizeMB);
 }
 
 class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
@@ -1665,7 +1683,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
   final Value<int> resolutionWidthPx;
   final Value<int> resolutionHeightPx;
   final Value<double> pixelPitchUm;
-  final Value<int?> bitDepth;
+  final Value<double?> averageRawFileSizeMB;
   const CameraModulesCompanion({
     this.id = const Value.absent(),
     this.deviceId = const Value.absent(),
@@ -1677,7 +1695,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.resolutionWidthPx = const Value.absent(),
     this.resolutionHeightPx = const Value.absent(),
     this.pixelPitchUm = const Value.absent(),
-    this.bitDepth = const Value.absent(),
+    this.averageRawFileSizeMB = const Value.absent(),
   });
   CameraModulesCompanion.insert({
     this.id = const Value.absent(),
@@ -1690,7 +1708,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     required int resolutionWidthPx,
     required int resolutionHeightPx,
     required double pixelPitchUm,
-    this.bitDepth = const Value.absent(),
+    this.averageRawFileSizeMB = const Value.absent(),
   }) : deviceId = Value(deviceId),
        name = Value(name),
        sensorWidthMm = Value(sensorWidthMm),
@@ -1709,7 +1727,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Expression<int>? resolutionWidthPx,
     Expression<int>? resolutionHeightPx,
     Expression<double>? pixelPitchUm,
-    Expression<int>? bitDepth,
+    Expression<double>? averageRawFileSizeMB,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1723,7 +1741,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       if (resolutionHeightPx != null)
         'resolution_height_px': resolutionHeightPx,
       if (pixelPitchUm != null) 'pixel_pitch_um': pixelPitchUm,
-      if (bitDepth != null) 'bit_depth': bitDepth,
+      if (averageRawFileSizeMB != null)
+        'average_raw_file_size_m_b': averageRawFileSizeMB,
     });
   }
 
@@ -1738,7 +1757,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Value<int>? resolutionWidthPx,
     Value<int>? resolutionHeightPx,
     Value<double>? pixelPitchUm,
-    Value<int?>? bitDepth,
+    Value<double?>? averageRawFileSizeMB,
   }) {
     return CameraModulesCompanion(
       id: id ?? this.id,
@@ -1751,7 +1770,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       resolutionWidthPx: resolutionWidthPx ?? this.resolutionWidthPx,
       resolutionHeightPx: resolutionHeightPx ?? this.resolutionHeightPx,
       pixelPitchUm: pixelPitchUm ?? this.pixelPitchUm,
-      bitDepth: bitDepth ?? this.bitDepth,
+      averageRawFileSizeMB: averageRawFileSizeMB ?? this.averageRawFileSizeMB,
     );
   }
 
@@ -1788,8 +1807,10 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     if (pixelPitchUm.present) {
       map['pixel_pitch_um'] = Variable<double>(pixelPitchUm.value);
     }
-    if (bitDepth.present) {
-      map['bit_depth'] = Variable<int>(bitDepth.value);
+    if (averageRawFileSizeMB.present) {
+      map['average_raw_file_size_m_b'] = Variable<double>(
+        averageRawFileSizeMB.value,
+      );
     }
     return map;
   }
@@ -1807,7 +1828,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           ..write('resolutionWidthPx: $resolutionWidthPx, ')
           ..write('resolutionHeightPx: $resolutionHeightPx, ')
           ..write('pixelPitchUm: $pixelPitchUm, ')
-          ..write('bitDepth: $bitDepth')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB')
           ..write(')'))
         .toString();
   }
@@ -1877,19 +1898,6 @@ class $OpticalRigsTable extends OpticalRigs
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _opticalMultiplierMeta = const VerificationMeta(
-    'opticalMultiplier',
-  );
-  @override
-  late final GeneratedColumn<double> opticalMultiplier =
-      GeneratedColumn<double>(
-        'optical_multiplier',
-        aliasedName,
-        false,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-        defaultValue: const Constant(1.0),
-      );
   static const VerificationMeta _trackingStateMeta = const VerificationMeta(
     'trackingState',
   );
@@ -1920,7 +1928,6 @@ class $OpticalRigsTable extends OpticalRigs
     cameraModuleId,
     focalLengthMm,
     aperture,
-    opticalMultiplier,
     trackingState,
     rotationDegrees,
   ];
@@ -1977,15 +1984,6 @@ class $OpticalRigsTable extends OpticalRigs
     } else if (isInserting) {
       context.missing(_apertureMeta);
     }
-    if (data.containsKey('optical_multiplier')) {
-      context.handle(
-        _opticalMultiplierMeta,
-        opticalMultiplier.isAcceptableOrUnknown(
-          data['optical_multiplier']!,
-          _opticalMultiplierMeta,
-        ),
-      );
-    }
     if (data.containsKey('tracking_state')) {
       context.handle(
         _trackingStateMeta,
@@ -2033,10 +2031,6 @@ class $OpticalRigsTable extends OpticalRigs
         DriftSqlType.double,
         data['${effectivePrefix}aperture'],
       )!,
-      opticalMultiplier: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}optical_multiplier'],
-      )!,
       trackingState: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tracking_state'],
@@ -2060,7 +2054,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
   final int cameraModuleId;
   final double focalLengthMm;
   final double aperture;
-  final double opticalMultiplier;
   final String trackingState;
   final double? rotationDegrees;
   const OpticalRig({
@@ -2069,7 +2062,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     required this.cameraModuleId,
     required this.focalLengthMm,
     required this.aperture,
-    required this.opticalMultiplier,
     required this.trackingState,
     this.rotationDegrees,
   });
@@ -2081,7 +2073,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     map['camera_module_id'] = Variable<int>(cameraModuleId);
     map['focal_length_mm'] = Variable<double>(focalLengthMm);
     map['aperture'] = Variable<double>(aperture);
-    map['optical_multiplier'] = Variable<double>(opticalMultiplier);
     map['tracking_state'] = Variable<String>(trackingState);
     if (!nullToAbsent || rotationDegrees != null) {
       map['rotation_degrees'] = Variable<double>(rotationDegrees);
@@ -2096,7 +2087,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       cameraModuleId: Value(cameraModuleId),
       focalLengthMm: Value(focalLengthMm),
       aperture: Value(aperture),
-      opticalMultiplier: Value(opticalMultiplier),
       trackingState: Value(trackingState),
       rotationDegrees: rotationDegrees == null && nullToAbsent
           ? const Value.absent()
@@ -2115,7 +2105,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       cameraModuleId: serializer.fromJson<int>(json['cameraModuleId']),
       focalLengthMm: serializer.fromJson<double>(json['focalLengthMm']),
       aperture: serializer.fromJson<double>(json['aperture']),
-      opticalMultiplier: serializer.fromJson<double>(json['opticalMultiplier']),
       trackingState: serializer.fromJson<String>(json['trackingState']),
       rotationDegrees: serializer.fromJson<double?>(json['rotationDegrees']),
     );
@@ -2129,7 +2118,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       'cameraModuleId': serializer.toJson<int>(cameraModuleId),
       'focalLengthMm': serializer.toJson<double>(focalLengthMm),
       'aperture': serializer.toJson<double>(aperture),
-      'opticalMultiplier': serializer.toJson<double>(opticalMultiplier),
       'trackingState': serializer.toJson<String>(trackingState),
       'rotationDegrees': serializer.toJson<double?>(rotationDegrees),
     };
@@ -2141,7 +2129,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     int? cameraModuleId,
     double? focalLengthMm,
     double? aperture,
-    double? opticalMultiplier,
     String? trackingState,
     Value<double?> rotationDegrees = const Value.absent(),
   }) => OpticalRig(
@@ -2150,7 +2137,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     cameraModuleId: cameraModuleId ?? this.cameraModuleId,
     focalLengthMm: focalLengthMm ?? this.focalLengthMm,
     aperture: aperture ?? this.aperture,
-    opticalMultiplier: opticalMultiplier ?? this.opticalMultiplier,
     trackingState: trackingState ?? this.trackingState,
     rotationDegrees: rotationDegrees.present
         ? rotationDegrees.value
@@ -2167,9 +2153,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           ? data.focalLengthMm.value
           : this.focalLengthMm,
       aperture: data.aperture.present ? data.aperture.value : this.aperture,
-      opticalMultiplier: data.opticalMultiplier.present
-          ? data.opticalMultiplier.value
-          : this.opticalMultiplier,
       trackingState: data.trackingState.present
           ? data.trackingState.value
           : this.trackingState,
@@ -2187,7 +2170,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           ..write('cameraModuleId: $cameraModuleId, ')
           ..write('focalLengthMm: $focalLengthMm, ')
           ..write('aperture: $aperture, ')
-          ..write('opticalMultiplier: $opticalMultiplier, ')
           ..write('trackingState: $trackingState, ')
           ..write('rotationDegrees: $rotationDegrees')
           ..write(')'))
@@ -2201,7 +2183,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     cameraModuleId,
     focalLengthMm,
     aperture,
-    opticalMultiplier,
     trackingState,
     rotationDegrees,
   );
@@ -2214,7 +2195,6 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           other.cameraModuleId == this.cameraModuleId &&
           other.focalLengthMm == this.focalLengthMm &&
           other.aperture == this.aperture &&
-          other.opticalMultiplier == this.opticalMultiplier &&
           other.trackingState == this.trackingState &&
           other.rotationDegrees == this.rotationDegrees);
 }
@@ -2225,7 +2205,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
   final Value<int> cameraModuleId;
   final Value<double> focalLengthMm;
   final Value<double> aperture;
-  final Value<double> opticalMultiplier;
   final Value<String> trackingState;
   final Value<double?> rotationDegrees;
   const OpticalRigsCompanion({
@@ -2234,7 +2213,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.cameraModuleId = const Value.absent(),
     this.focalLengthMm = const Value.absent(),
     this.aperture = const Value.absent(),
-    this.opticalMultiplier = const Value.absent(),
     this.trackingState = const Value.absent(),
     this.rotationDegrees = const Value.absent(),
   });
@@ -2244,7 +2222,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     required int cameraModuleId,
     required double focalLengthMm,
     required double aperture,
-    this.opticalMultiplier = const Value.absent(),
     this.trackingState = const Value.absent(),
     this.rotationDegrees = const Value.absent(),
   }) : name = Value(name),
@@ -2257,7 +2234,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Expression<int>? cameraModuleId,
     Expression<double>? focalLengthMm,
     Expression<double>? aperture,
-    Expression<double>? opticalMultiplier,
     Expression<String>? trackingState,
     Expression<double>? rotationDegrees,
   }) {
@@ -2267,7 +2243,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       if (cameraModuleId != null) 'camera_module_id': cameraModuleId,
       if (focalLengthMm != null) 'focal_length_mm': focalLengthMm,
       if (aperture != null) 'aperture': aperture,
-      if (opticalMultiplier != null) 'optical_multiplier': opticalMultiplier,
       if (trackingState != null) 'tracking_state': trackingState,
       if (rotationDegrees != null) 'rotation_degrees': rotationDegrees,
     });
@@ -2279,7 +2254,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Value<int>? cameraModuleId,
     Value<double>? focalLengthMm,
     Value<double>? aperture,
-    Value<double>? opticalMultiplier,
     Value<String>? trackingState,
     Value<double?>? rotationDegrees,
   }) {
@@ -2289,7 +2263,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       cameraModuleId: cameraModuleId ?? this.cameraModuleId,
       focalLengthMm: focalLengthMm ?? this.focalLengthMm,
       aperture: aperture ?? this.aperture,
-      opticalMultiplier: opticalMultiplier ?? this.opticalMultiplier,
       trackingState: trackingState ?? this.trackingState,
       rotationDegrees: rotationDegrees ?? this.rotationDegrees,
     );
@@ -2313,9 +2286,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     if (aperture.present) {
       map['aperture'] = Variable<double>(aperture.value);
     }
-    if (opticalMultiplier.present) {
-      map['optical_multiplier'] = Variable<double>(opticalMultiplier.value);
-    }
     if (trackingState.present) {
       map['tracking_state'] = Variable<String>(trackingState.value);
     }
@@ -2333,7 +2303,6 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
           ..write('cameraModuleId: $cameraModuleId, ')
           ..write('focalLengthMm: $focalLengthMm, ')
           ..write('aperture: $aperture, ')
-          ..write('opticalMultiplier: $opticalMultiplier, ')
           ..write('trackingState: $trackingState, ')
           ..write('rotationDegrees: $rotationDegrees')
           ..write(')'))
@@ -4920,7 +4889,7 @@ typedef $$EquipmentProfilesTableCreateCompanionBuilder =
       required int resolutionHeight,
       required double focalLength,
       required double aperture,
-      Value<double> opticalMultiplier,
+      Value<double?> averageRawFileSizeMB,
       Value<double?> rotation,
     });
 typedef $$EquipmentProfilesTableUpdateCompanionBuilder =
@@ -4936,7 +4905,7 @@ typedef $$EquipmentProfilesTableUpdateCompanionBuilder =
       Value<int> resolutionHeight,
       Value<double> focalLength,
       Value<double> aperture,
-      Value<double> opticalMultiplier,
+      Value<double?> averageRawFileSizeMB,
       Value<double?> rotation,
     });
 
@@ -5004,8 +4973,8 @@ class $$EquipmentProfilesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
+  ColumnFilters<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5079,8 +5048,8 @@ class $$EquipmentProfilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
+  ColumnOrderings<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5148,8 +5117,8 @@ class $$EquipmentProfilesTableAnnotationComposer
   GeneratedColumn<double> get aperture =>
       $composableBuilder(column: $table.aperture, builder: (column) => column);
 
-  GeneratedColumn<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
+  GeneratedColumn<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
     builder: (column) => column,
   );
 
@@ -5208,7 +5177,7 @@ class $$EquipmentProfilesTableTableManager
                 Value<int> resolutionHeight = const Value.absent(),
                 Value<double> focalLength = const Value.absent(),
                 Value<double> aperture = const Value.absent(),
-                Value<double> opticalMultiplier = const Value.absent(),
+                Value<double?> averageRawFileSizeMB = const Value.absent(),
                 Value<double?> rotation = const Value.absent(),
               }) => EquipmentProfilesCompanion(
                 id: id,
@@ -5222,7 +5191,7 @@ class $$EquipmentProfilesTableTableManager
                 resolutionHeight: resolutionHeight,
                 focalLength: focalLength,
                 aperture: aperture,
-                opticalMultiplier: opticalMultiplier,
+                averageRawFileSizeMB: averageRawFileSizeMB,
                 rotation: rotation,
               ),
           createCompanionCallback:
@@ -5238,7 +5207,7 @@ class $$EquipmentProfilesTableTableManager
                 required int resolutionHeight,
                 required double focalLength,
                 required double aperture,
-                Value<double> opticalMultiplier = const Value.absent(),
+                Value<double?> averageRawFileSizeMB = const Value.absent(),
                 Value<double?> rotation = const Value.absent(),
               }) => EquipmentProfilesCompanion.insert(
                 id: id,
@@ -5252,7 +5221,7 @@ class $$EquipmentProfilesTableTableManager
                 resolutionHeight: resolutionHeight,
                 focalLength: focalLength,
                 aperture: aperture,
-                opticalMultiplier: opticalMultiplier,
+                averageRawFileSizeMB: averageRawFileSizeMB,
                 rotation: rotation,
               ),
           withReferenceMapper: (p0) => p0
@@ -5601,7 +5570,7 @@ typedef $$CameraModulesTableCreateCompanionBuilder =
       required int resolutionWidthPx,
       required int resolutionHeightPx,
       required double pixelPitchUm,
-      Value<int?> bitDepth,
+      Value<double?> averageRawFileSizeMB,
     });
 typedef $$CameraModulesTableUpdateCompanionBuilder =
     CameraModulesCompanion Function({
@@ -5615,7 +5584,7 @@ typedef $$CameraModulesTableUpdateCompanionBuilder =
       Value<int> resolutionWidthPx,
       Value<int> resolutionHeightPx,
       Value<double> pixelPitchUm,
-      Value<int?> bitDepth,
+      Value<double?> averageRawFileSizeMB,
     });
 
 final class $$CameraModulesTableReferences
@@ -5716,8 +5685,8 @@ class $$CameraModulesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get bitDepth => $composableBuilder(
-    column: $table.bitDepth,
+  ColumnFilters<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5824,8 +5793,8 @@ class $$CameraModulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get bitDepth => $composableBuilder(
-    column: $table.bitDepth,
+  ColumnOrderings<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5901,8 +5870,10 @@ class $$CameraModulesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<int> get bitDepth =>
-      $composableBuilder(column: $table.bitDepth, builder: (column) => column);
+  GeneratedColumn<double> get averageRawFileSizeMB => $composableBuilder(
+    column: $table.averageRawFileSizeMB,
+    builder: (column) => column,
+  );
 
   $$DevicesTableAnnotationComposer get deviceId {
     final $$DevicesTableAnnotationComposer composer = $composerBuilder(
@@ -5991,7 +5962,7 @@ class $$CameraModulesTableTableManager
                 Value<int> resolutionWidthPx = const Value.absent(),
                 Value<int> resolutionHeightPx = const Value.absent(),
                 Value<double> pixelPitchUm = const Value.absent(),
-                Value<int?> bitDepth = const Value.absent(),
+                Value<double?> averageRawFileSizeMB = const Value.absent(),
               }) => CameraModulesCompanion(
                 id: id,
                 deviceId: deviceId,
@@ -6003,7 +5974,7 @@ class $$CameraModulesTableTableManager
                 resolutionWidthPx: resolutionWidthPx,
                 resolutionHeightPx: resolutionHeightPx,
                 pixelPitchUm: pixelPitchUm,
-                bitDepth: bitDepth,
+                averageRawFileSizeMB: averageRawFileSizeMB,
               ),
           createCompanionCallback:
               ({
@@ -6017,7 +5988,7 @@ class $$CameraModulesTableTableManager
                 required int resolutionWidthPx,
                 required int resolutionHeightPx,
                 required double pixelPitchUm,
-                Value<int?> bitDepth = const Value.absent(),
+                Value<double?> averageRawFileSizeMB = const Value.absent(),
               }) => CameraModulesCompanion.insert(
                 id: id,
                 deviceId: deviceId,
@@ -6029,7 +6000,7 @@ class $$CameraModulesTableTableManager
                 resolutionWidthPx: resolutionWidthPx,
                 resolutionHeightPx: resolutionHeightPx,
                 pixelPitchUm: pixelPitchUm,
-                bitDepth: bitDepth,
+                averageRawFileSizeMB: averageRawFileSizeMB,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -6125,7 +6096,6 @@ typedef $$OpticalRigsTableCreateCompanionBuilder =
       required int cameraModuleId,
       required double focalLengthMm,
       required double aperture,
-      Value<double> opticalMultiplier,
       Value<String> trackingState,
       Value<double?> rotationDegrees,
     });
@@ -6136,7 +6106,6 @@ typedef $$OpticalRigsTableUpdateCompanionBuilder =
       Value<int> cameraModuleId,
       Value<double> focalLengthMm,
       Value<double> aperture,
-      Value<double> opticalMultiplier,
       Value<String> trackingState,
       Value<double?> rotationDegrees,
     });
@@ -6190,11 +6159,6 @@ class $$OpticalRigsTableFilterComposer
 
   ColumnFilters<double> get aperture => $composableBuilder(
     column: $table.aperture,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6261,11 +6225,6 @@ class $$OpticalRigsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get trackingState => $composableBuilder(
     column: $table.trackingState,
     builder: (column) => ColumnOrderings(column),
@@ -6322,11 +6281,6 @@ class $$OpticalRigsTableAnnotationComposer
 
   GeneratedColumn<double> get aperture =>
       $composableBuilder(column: $table.aperture, builder: (column) => column);
-
-  GeneratedColumn<double> get opticalMultiplier => $composableBuilder(
-    column: $table.opticalMultiplier,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<String> get trackingState => $composableBuilder(
     column: $table.trackingState,
@@ -6395,7 +6349,6 @@ class $$OpticalRigsTableTableManager
                 Value<int> cameraModuleId = const Value.absent(),
                 Value<double> focalLengthMm = const Value.absent(),
                 Value<double> aperture = const Value.absent(),
-                Value<double> opticalMultiplier = const Value.absent(),
                 Value<String> trackingState = const Value.absent(),
                 Value<double?> rotationDegrees = const Value.absent(),
               }) => OpticalRigsCompanion(
@@ -6404,7 +6357,6 @@ class $$OpticalRigsTableTableManager
                 cameraModuleId: cameraModuleId,
                 focalLengthMm: focalLengthMm,
                 aperture: aperture,
-                opticalMultiplier: opticalMultiplier,
                 trackingState: trackingState,
                 rotationDegrees: rotationDegrees,
               ),
@@ -6415,7 +6367,6 @@ class $$OpticalRigsTableTableManager
                 required int cameraModuleId,
                 required double focalLengthMm,
                 required double aperture,
-                Value<double> opticalMultiplier = const Value.absent(),
                 Value<String> trackingState = const Value.absent(),
                 Value<double?> rotationDegrees = const Value.absent(),
               }) => OpticalRigsCompanion.insert(
@@ -6424,7 +6375,6 @@ class $$OpticalRigsTableTableManager
                 cameraModuleId: cameraModuleId,
                 focalLengthMm: focalLengthMm,
                 aperture: aperture,
-                opticalMultiplier: opticalMultiplier,
                 trackingState: trackingState,
                 rotationDegrees: rotationDegrees,
               ),

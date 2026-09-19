@@ -27,9 +27,9 @@ class MockTargetRepository implements TargetRepository {
   @override
   Future<void> deleteTarget(int id) async {}
 
-  @override
   Future<void> clearAll() async {}
 
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -45,6 +45,7 @@ class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
     notifyListeners();
   }
 
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

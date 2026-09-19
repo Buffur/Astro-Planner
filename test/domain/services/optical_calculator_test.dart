@@ -6,9 +6,8 @@ void main() {
     test('calculates effective focal length correctly', () {
       final efl = OpticalCalculator.calculateEffectiveFocalLength(
         focalLength: 400.0,
-        opticalMultiplier: 0.8,
       );
-      expect(efl, 320.0);
+      expect(efl, 400.0);
     });
 
     test('calculates pixel scale accurately (ASI2600MC on 400mm)', () {
@@ -38,13 +37,12 @@ void main() {
       expect(gain, 10.0);
     });
 
-    test('estimates theoretical frame size correctly', () {
-      final sizeMB = OpticalCalculator.estimateTheoreticalFrameSizeMB(
-        resolutionWidth: 6248,
-        resolutionHeight: 4176,
-        bitDepth: 16,
+    test('estimates storage requirement correctly', () {
+      final sizeMB = OpticalCalculator.estimateStorageRequirement(
+        averageRawFileSizeMB: 50.0,
+        frameCount: 10,
       );
-      expect(sizeMB, closeTo(49.77, 0.01));
+      expect(sizeMB, closeTo(500.0, 0.01));
     });
 
     test('calculates NPF exposure accurately', () {

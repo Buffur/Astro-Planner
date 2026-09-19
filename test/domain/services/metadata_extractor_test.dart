@@ -10,11 +10,21 @@ void main() {
     await file.writeAsString(padded);
     
     final metadata = await MetadataExtractor.extractFromFile(file);
-    print(metadata?.cameraModel);
-    print(metadata?.exposureTime);
-    
+    expect(metadata, isNotNull);
+    expect(metadata?.cameraModel, 'ZWO ASI2600MC Pro');
+    expect(metadata?.exposureTime, '60.0');
     if (file.existsSync()) {
       await file.delete();
     }
+  });
+
+  test('EXIF FocalLength rational parsing', () {
+    expect(MetadataExtractor.parseRational('4000/10'), 400.0);
+    expect(MetadataExtractor.parseRational('400/1'), 400.0);
+    expect(MetadataExtractor.parseRational('50'), 50.0);
+    expect(MetadataExtractor.parseRational('0'), isNull);
+    expect(MetadataExtractor.parseRational('0/10'), isNull);
+    expect(MetadataExtractor.parseRational(''), isNull);
+    expect(MetadataExtractor.parseRational(null), isNull);
   });
 }

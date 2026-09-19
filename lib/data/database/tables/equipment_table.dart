@@ -14,7 +14,7 @@ class EquipmentProfiles extends Table {
   // Optics
   RealColumn get focalLength => real()();
   RealColumn get aperture => real()();
-  RealColumn get opticalMultiplier => real().withDefault(const Constant(1.0))();
+  RealColumn get averageRawFileSizeMB => real().nullable()();
   // Optional rotation in degrees (Stellarium field)
   RealColumn get rotation => real().nullable()();
 }

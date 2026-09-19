@@ -25,8 +25,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
       resolutionHeight: cam.resolutionHeightPx,
       focalLength: rig.focalLengthMm,
       aperture: rig.aperture,
-      opticalMultiplier: rig.opticalMultiplier,
-      bitDepth: cam.bitDepth ?? 14,
+      averageRawFileSizeMB: cam.averageRawFileSizeMB,
       rotation: rig.rotationDegrees,
     );
   }
@@ -77,7 +76,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
               resolutionWidthPx: profile.resolutionWidth,
               resolutionHeightPx: profile.resolutionHeight,
               pixelPitchUm: profile.pixelPitch,
-              bitDepth: Value(profile.bitDepth),
+              averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
             ),
           );
 
@@ -87,7 +86,6 @@ class DriftEquipmentRepository implements EquipmentRepository {
               cameraModuleId: camId,
               focalLengthMm: profile.focalLength,
               aperture: profile.aperture,
-              opticalMultiplier: Value(profile.opticalMultiplier),
               rotationDegrees: Value(profile.rotation),
             ),
           );
@@ -134,7 +132,6 @@ class DriftEquipmentRepository implements EquipmentRepository {
           name: Value(profile.name),
           focalLengthMm: Value(profile.focalLength),
           aperture: Value(profile.aperture),
-          opticalMultiplier: Value(profile.opticalMultiplier),
           rotationDegrees: Value(profile.rotation),
         ),
       );
@@ -150,7 +147,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
             resolutionWidthPx: Value(profile.resolutionWidth),
             resolutionHeightPx: Value(profile.resolutionHeight),
             pixelPitchUm: Value(profile.pixelPitch),
-            bitDepth: Value(profile.bitDepth),
+            averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
           ),
         );
 

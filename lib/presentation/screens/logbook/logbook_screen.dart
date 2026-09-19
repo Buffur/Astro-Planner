@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:go_router/go_router.dart';
 import '../../../domain/models/session_log.dart';
 import '../../../domain/repositories/logbook_repository.dart';
+import '../../viewmodels/planner_viewmodel.dart';
 
 class LogbookScreen extends StatefulWidget {
   const LogbookScreen({super.key});
@@ -25,64 +27,6 @@ class _LogbookScreenState extends State<LogbookScreen> {
     setState(() {
       _logsFuture = repo.getAllLogs();
     });
-  }
-
-  void _showEditDialog(BuildContext context, SessionLog log) {
-    final actualFramesCtrl = TextEditingController(text: log.actualLightFrames?.toString() ?? '');
-    final notesCtrl = TextEditingController(text: log.environmentalNotes ?? '');
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Session'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: actualFramesCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Actual Frames'),
-              ),
-              TextField(
-                controller: notesCtrl,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                int? actualFrames = int.tryParse(actualFramesCtrl.text);
-                int? rejectedFrames = actualFrames != null
-                    ? (log.plannedLightFrames > actualFrames ? log.plannedLightFrames - actualFrames : 0)
-                    : null;
-
-                final updated = SessionLog(
-                  id: log.id,
-                  targetName: log.targetName,
-                  equipmentName: log.equipmentName,
-                  sessionDate: log.sessionDate,
-                  plannedLightFrames: log.plannedLightFrames,
-                  actualLightFrames: actualFrames,
-                  environmentalNotes: notesCtrl.text,
-                  rejectedFrames: rejectedFrames,
-                  processingNotes: log.processingNotes,
-                );
-                await context.read<LogbookRepository>().updateLog(updated);
-                if (context.mounted) Navigator.of(context).pop();
-                _refreshLogs();
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -124,6 +68,12 @@ class _LogbookScreenState extends State<LogbookScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16.0),
+                    onTap: () async {
+                      await context.read<PlannerViewModel>().loadSession(log);
+                      if (context.mounted) {
+                        context.go('/');
+                      }
+                    },
                     title: Text(
                       '${log.sessionDate.toLocal().toString().split(' ')[0]} - ${log.targetName}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -143,12 +93,6 @@ class _LogbookScreenState extends State<LogbookScreen> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            _showEditDialog(context, log);
-                          },
-                        ),
                         IconButton(
                           icon: const Icon(Icons.share),
                           onPressed: () {

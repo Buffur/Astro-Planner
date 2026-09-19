@@ -27,7 +27,6 @@ class MockEquipmentRepository implements EquipmentRepository {
   @override
   Future<void> deleteEquipment(int id) async {}
 
-  @override
   Future<void> clearAll() async {}
 }
 
@@ -43,6 +42,7 @@ class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
     notifyListeners();
   }
 
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
@@ -140,9 +140,8 @@ void main() {
     final pixelH = find.widgetWithText(TextFormField, '3.76').last;
     final sensorW = find.widgetWithText(TextFormField, '23.50');
     final sensorH = find.widgetWithText(TextFormField, '15.70');
-    final focal = find.widgetWithText(TextFormField, 'Focal Length (mm)');
-    final aperture = find.widgetWithText(TextFormField, 'Aperture (f/)');
-    final multiplier = find.widgetWithText(TextFormField, 'Optical Multiplier');
+    final focal = find.widgetWithText(TextFormField, 'Effective Focal Length (mm)');
+    final aperture = find.widgetWithText(TextFormField, 'Effective Aperture (f/)');
 
     await tester.enterText(resW, '6000');
     await tester.enterText(resH, '4000');
@@ -152,7 +151,6 @@ void main() {
     await tester.enterText(sensorH, '15.7');
     await tester.enterText(focal, '400');
     await tester.enterText(aperture, '5.6');
-    await tester.enterText(multiplier, '1.0');
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();

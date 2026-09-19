@@ -80,9 +80,9 @@ class SessionLog {
     }
     
     buffer.writeln('\n--- Environment ---');
-    if (temperature != null) buffer.writeln('Temperature: ${temperature}°C');
-    if (humidity != null) buffer.writeln('Humidity: ${humidity}%');
-    if (cloudCover != null) buffer.writeln('Cloud Cover: ${cloudCover}%');
+    if (temperature != null) buffer.writeln('Temperature: $temperature°C');
+    if (humidity != null) buffer.writeln('Humidity: $humidity%');
+    if (cloudCover != null) buffer.writeln('Cloud Cover: $cloudCover%');
     if (bortleScale != null) buffer.writeln('Bortle Scale: $bortleScale');
     if (environmentalNotes != null && environmentalNotes!.isNotEmpty) {
       buffer.writeln('Conditions Notes: $environmentalNotes');
@@ -142,6 +142,54 @@ class SessionLog {
         'processing_notes': processingNotes,
       },
     };
+  }
+
+  SessionLog copyWith({
+    int? id,
+    String? targetName,
+    String? equipmentName,
+    DateTime? sessionDate,
+    String? locationName,
+    double? bortleScale,
+    List<CaptureBlock>? captureBlocks,
+    int? plannedLightFrames,
+    int? plannedDarkFrames,
+    int? plannedFlatFrames,
+    int? plannedBiasFrames,
+    double? integrationTimeSeconds,
+    double? focalLength,
+    double? aperture,
+    double? temperature,
+    double? humidity,
+    int? cloudCover,
+    int? actualLightFrames,
+    int? rejectedFrames,
+    String? environmentalNotes,
+    String? processingNotes,
+  }) {
+    return SessionLog(
+      id: id ?? this.id,
+      targetName: targetName ?? this.targetName,
+      equipmentName: equipmentName ?? this.equipmentName,
+      sessionDate: sessionDate ?? this.sessionDate,
+      locationName: locationName ?? this.locationName,
+      bortleScale: bortleScale ?? this.bortleScale,
+      captureBlocks: captureBlocks ?? this.captureBlocks,
+      plannedLightFrames: plannedLightFrames ?? this.plannedLightFrames,
+      plannedDarkFrames: plannedDarkFrames ?? this.plannedDarkFrames,
+      plannedFlatFrames: plannedFlatFrames ?? this.plannedFlatFrames,
+      plannedBiasFrames: plannedBiasFrames ?? this.plannedBiasFrames,
+      integrationTimeSeconds: integrationTimeSeconds ?? this.integrationTimeSeconds,
+      focalLength: focalLength ?? this.focalLength,
+      aperture: aperture ?? this.aperture,
+      temperature: temperature ?? this.temperature,
+      humidity: humidity ?? this.humidity,
+      cloudCover: cloudCover ?? this.cloudCover,
+      actualLightFrames: actualLightFrames ?? this.actualLightFrames,
+      rejectedFrames: rejectedFrames ?? this.rejectedFrames,
+      environmentalNotes: environmentalNotes ?? this.environmentalNotes,
+      processingNotes: processingNotes ?? this.processingNotes,
+    );
   }
 
   factory SessionLog.fromJson(Map<String, dynamic> json) {

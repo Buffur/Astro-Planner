@@ -28,7 +28,6 @@ class EquipmentSeeder {
         resolutionHeight: 6048,
         focalLength: 6.86,
         aperture: 1.78,
-        bitDepth: 14,
       ),
       const EquipmentProfile(
         id: 0,
@@ -42,7 +41,6 @@ class EquipmentSeeder {
         resolutionHeight: 6144,
         focalLength: 6.9,
         aperture: 1.68,
-        bitDepth: 14,
       ),
       const EquipmentProfile(
         id: 0,
@@ -56,7 +54,6 @@ class EquipmentSeeder {
         resolutionHeight: 6144,
         focalLength: 8.7,
         aperture: 1.63,
-        bitDepth: 14,
       ),
       const EquipmentProfile(
         id: 0,
@@ -70,7 +67,6 @@ class EquipmentSeeder {
         resolutionHeight: 6144,
         focalLength: 8.7,
         aperture: 1.75,
-        bitDepth: 14,
       ),
       const EquipmentProfile(
         id: 0,
@@ -84,7 +80,6 @@ class EquipmentSeeder {
         resolutionHeight: 4176,
         focalLength: 400.0,
         aperture: 72.0,
-        bitDepth: 16,
       ),
     ];
 

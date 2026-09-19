@@ -2,15 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/planner_viewmodel.dart';
 import '../../domain/models/capture_block.dart';
+import '../../domain/services/session_calculator.dart';
 
 class CapturePlanWidget extends StatelessWidget {
   const CapturePlanWidget({super.key});
 
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    return '${hours}h ${minutes}m';
+  }
+
+  String _formatFeasibility(FeasibilityState state) {
+    switch (state) {
+      case FeasibilityState.feasible:
+        return 'Feasible';
+      case FeasibilityState.tight:
+        return 'Tight';
+      case FeasibilityState.infeasible:
+        return 'Infeasible';
+    }
+  }
+
+  Color _feasibilityColor(FeasibilityState state) {
+    switch (state) {
+      case FeasibilityState.feasible:
+        return Colors.green;
+      case FeasibilityState.tight:
+        return Colors.orange;
+      case FeasibilityState.infeasible:
+        return Colors.red;
+    }
+  }
+
   void _showAddBlockDialog(BuildContext context, PlannerViewModel viewModel) {
     FrameType selectedType = FrameType.light;
     String filter = 'L';
-    double exposure = 60.0;
-    int count = 30;
+    final exposureController = TextEditingController();
+    final countController = TextEditingController();
 
     showDialog(
       context: context,
@@ -40,16 +69,20 @@ class CapturePlanWidget extends StatelessWidget {
                       },
                     ),
                   TextFormField(
-                    initialValue: exposure.toString(),
-                    decoration: const InputDecoration(labelText: 'Exposure (seconds)'),
+                    controller: exposureController,
+                    decoration: const InputDecoration(
+                      labelText: 'Exposure (seconds)',
+                      hintText: 'e.g. 60',
+                    ),
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => exposure = double.tryParse(v) ?? 60.0,
                   ),
                   TextFormField(
-                    initialValue: count.toString(),
-                    decoration: const InputDecoration(labelText: 'Frame Count'),
+                    controller: countController,
+                    decoration: const InputDecoration(
+                      labelText: 'Frame Count',
+                      hintText: 'e.g. 30',
+                    ),
                     keyboardType: TextInputType.number,
-                    onChanged: (v) => count = int.tryParse(v) ?? 30,
                   ),
                 ],
               ),
@@ -57,6 +90,9 @@ class CapturePlanWidget extends StatelessWidget {
                 TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
                 ElevatedButton(
                   onPressed: () {
+                    final exposure = double.tryParse(exposureController.text.trim()) ?? 60.0;
+                    final count = int.tryParse(countController.text.trim()) ?? 30;
+                    
                     viewModel.addCaptureBlock(CaptureBlock(
                       frameType: selectedType,
                       filterName: (selectedType == FrameType.light || selectedType == FrameType.flat) ? filter : null,
@@ -79,6 +115,7 @@ class CapturePlanWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<PlannerViewModel>();
     final blocks = viewModel.captureBlocks;
+    final feasibility = viewModel.sessionFeasibility;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -89,6 +126,9 @@ class CapturePlanWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- INPUTS SECTION ---
+            const Text('Inputs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.indigo)),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -136,7 +176,31 @@ class CapturePlanWidget extends StatelessWidget {
                   );
                 },
               ),
+            
+            const SizedBox(height: 16),
             const Divider(),
+            const SizedBox(height: 16),
+
+            // --- OUTPUTS SECTION ---
+            const Text('Outputs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.indigo)),
+            const SizedBox(height: 16),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Session Duration', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(_formatDuration(viewModel.estimatedRequiredTime), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Feasibility', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(_formatFeasibility(feasibility.state), style: TextStyle(fontWeight: FontWeight.bold, color: _feasibilityColor(feasibility.state))),
+              ],
+            ),
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -157,7 +221,7 @@ class CapturePlanWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Estimated Storage', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(viewModel.empiricalStorageMB != null ? '${viewModel.empiricalStorageMB!.toStringAsFixed(1)} MB' : 'N/A', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                Text(viewModel.estimatedStorageMB != null ? '${viewModel.estimatedStorageMB!.toStringAsFixed(1)} MB' : 'N/A', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
               ],
             ),
           ],

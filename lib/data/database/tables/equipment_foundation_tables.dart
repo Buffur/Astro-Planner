@@ -19,7 +19,7 @@ class CameraModules extends Table {
   IntColumn get resolutionWidthPx => integer()();
   IntColumn get resolutionHeightPx => integer()();
   RealColumn get pixelPitchUm => real()();
-  IntColumn get bitDepth => integer().nullable()();
+  RealColumn get averageRawFileSizeMB => real().nullable()();
 }
 
 class OpticalRigs extends Table {
@@ -28,7 +28,6 @@ class OpticalRigs extends Table {
   IntColumn get cameraModuleId => integer().references(CameraModules, #id)();
   RealColumn get focalLengthMm => real()();
   RealColumn get aperture => real()();
-  RealColumn get opticalMultiplier => real().withDefault(const Constant(1.0))();
   TextColumn get trackingState =>
       text().withDefault(const Constant('unknown'))();
   RealColumn get rotationDegrees => real().nullable()();

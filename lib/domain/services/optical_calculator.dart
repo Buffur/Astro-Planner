@@ -3,13 +3,12 @@ import 'dart:math' as math;
 /// Service for calculating optical parameters and equipment capabilities.
 class OpticalCalculator {
   /// Calculates the effective focal length of the optical system.
-  /// Inputs: native focal length (mm), optical multiplier (e.g. 0.8x reducer).
+  /// Inputs: native focal length (mm).
   /// Output: Effective focal length (mm).
   static double calculateEffectiveFocalLength({
     required double focalLength,
-    double opticalMultiplier = 1.0,
   }) {
-    return focalLength * opticalMultiplier;
+    return focalLength;
   }
 
   /// Calculates the pixel scale (image resolution) in arcseconds per pixel.
@@ -47,29 +46,14 @@ class OpticalCalculator {
     return math.sqrt(lightFrames);
   }
 
-  /// Estimates theoretical payload size for a single raw frame.
-  /// Inputs: width (pixels), height (pixels), bitDepth (e.g., 14, 16).
+  /// Estimates the storage requirement for a given number of frames.
+  /// Inputs: averageRawFileSizeMB, frameCount.
   /// Output: Estimated size in Megabytes (MB).
-  static double estimateTheoreticalFrameSizeMB({
-    required int resolutionWidth,
-    required int resolutionHeight,
-    required int bitDepth,
+  static double estimateStorageRequirement({
+    required double? averageRawFileSizeMB,
+    required int frameCount,
   }) {
-    final bits = resolutionWidth * resolutionHeight * bitDepth;
-    return bits / (8 * 1024 * 1024);
-  }
-
-  /// Estimates empirical frame size for an uncompressed RAW file.
-  /// Most cameras store 12-bit and 14-bit pixels inside 16-bit (2 byte) memory blocks.
-  /// This includes a small constant overhead for EXIF and embedded JPEG thumbnails.
-  static double estimateEmpiricalFrameSizeMB({
-    required int resolutionWidth,
-    required int resolutionHeight,
-  }) {
-    // 2 bytes per pixel for 16-bit word padding
-    final payloadBytes = resolutionWidth * resolutionHeight * 2;
-    // Base payload size + ~1.5 MB for metadata/embedded JPEG
-    return (payloadBytes / (1024 * 1024)) + 1.5;
+    return (averageRawFileSizeMB ?? 0.0) * frameCount;
   }
 
   /// Calculates the NPF rule exposure limit for untracked astrophotography.

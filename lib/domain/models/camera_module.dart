@@ -9,7 +9,7 @@ class CameraModule {
   final int resolutionWidthPx;
   final int resolutionHeightPx;
   final double pixelPitchUm;
-  final int bitDepth;
+  final double? averageRawFileSizeMB;
 
   const CameraModule({
     required this.id,
@@ -22,6 +22,6 @@ class CameraModule {
     required this.resolutionWidthPx,
     required this.resolutionHeightPx,
     required this.pixelPitchUm,
-    this.bitDepth = 14,
+    this.averageRawFileSizeMB,
   });
 }

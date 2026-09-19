@@ -23,7 +23,7 @@ class MetadataExtractor {
       return ImageMetadata(
         cameraMake: tags['Image Make']?.printable ?? tags['Image Make']?.toString(),
         cameraModel: tags['Image Model']?.printable ?? tags['Image Model']?.toString(),
-        focalLength: tags['EXIF FocalLength']?.printable ?? tags['EXIF FocalLength']?.toString(),
+        focalLength: parseRational(tags['EXIF FocalLength']?.printable ?? tags['EXIF FocalLength']?.toString())?.toString(),
         aperture: tags['EXIF FNumber']?.printable ?? tags['EXIF FNumber']?.toString(),
         exposureTime: tags['EXIF ExposureTime']?.printable ?? tags['EXIF ExposureTime']?.toString(),
         iso: tags['EXIF ISOSpeedRatings']?.printable ?? tags['EXIF ISOSpeedRatings']?.toString(),
@@ -81,5 +81,29 @@ class MetadataExtractor {
     } catch (e) {
       return null;
     }
+  }
+
+  static double? parseRational(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    
+    double? parsedValue;
+    if (value.contains('/')) {
+      final parts = value.split('/');
+      if (parts.length == 2) {
+        final num = double.tryParse(parts[0].trim());
+        final den = double.tryParse(parts[1].trim());
+        if (num != null && den != null && den != 0) {
+          parsedValue = num / den;
+        }
+      }
+    } else {
+      parsedValue = double.tryParse(value.trim());
+    }
+
+    if (parsedValue == null || parsedValue == 0) {
+      return null;
+    }
+
+    return parsedValue;
   }
 }

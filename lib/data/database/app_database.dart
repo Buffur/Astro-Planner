@@ -67,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -112,6 +112,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 8) {
           await m.createTable(captureBlocks);
+        }
+        if (from < 9) {
+          await m.addColumn(equipmentProfiles, equipmentProfiles.averageRawFileSizeMB);
+          await m.addColumn(cameraModules, cameraModules.averageRawFileSizeMB);
         }
       },
     );

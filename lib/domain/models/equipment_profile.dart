@@ -21,11 +21,9 @@ class EquipmentProfile {
   // Optics
   final double focalLength;
   final double aperture;
-  final double opticalMultiplier;
 
-  // RAW/DNG bit depth (e.g. 12, 14, 16).
-  // Determines dynamic range and drives theoretical file size calculations.
-  final int bitDepth;
+  // Average estimated RAW file size for storage calculations
+  final double? averageRawFileSizeMB;
 
   // Optional rotation in degrees (Stellarium field)
   final double? rotation;
@@ -42,8 +40,7 @@ class EquipmentProfile {
     required this.resolutionHeight,
     required this.focalLength,
     required this.aperture,
-    this.opticalMultiplier = 1.0,
-    this.bitDepth = 14,
+    this.averageRawFileSizeMB,
     this.rotation,
   });
 }

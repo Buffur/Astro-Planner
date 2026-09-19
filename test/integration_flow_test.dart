@@ -12,7 +12,6 @@ import 'package:astroplan/domain/repositories/logbook_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
 import 'package:astroplan/data/repositories/light_pollution_repository.dart';
-import 'package:astroplan/data/repositories/open_meteo_weather_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
@@ -61,7 +60,7 @@ void main() {
     testEquip = domain.EquipmentProfile(
       id: 1, name: 'ASI2600MC', aperture: 4.0, focalLength: 400.0,
       sensorWidth: 23.5, sensorHeight: 15.6, resolutionWidth: 6000, resolutionHeight: 4000,
-      pixelPitch: 3.76, opticalMultiplier: 1.0
+      pixelPitch: 3.76, averageRawFileSizeMB: 50.0
     );
     await equipmentRepo.insertEquipment(testEquip);
 

@@ -75,13 +75,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
         text: existing != null ? existing.focalLength.toString() : '');
     final apertureCtrl = TextEditingController(
         text: existing != null ? existing.aperture.toString() : '');
-    final multiplierCtrl = TextEditingController(
-        text: existing != null ? existing.opticalMultiplier.toString() : '1.0');
+    final averageRawFileSizeMBCtrl = TextEditingController(
+        text: existing?.averageRawFileSizeMB != null ? existing!.averageRawFileSizeMB!.toString() : '');
     final rotationCtrl = TextEditingController(
         text: existing?.rotation != null
             ? existing!.rotation!.toString()
             : '');
-    int selectedBitDepth = existing?.bitDepth ?? 14;
 
     /// Auto-compute sensor size from resolution × pixel pitch.
     void autoSensorSize() {
@@ -289,24 +288,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                         ),
                   ),
                   const SizedBox(height: 12),
-                  DropdownButtonFormField<int>(
-                    initialValue: selectedBitDepth,
-                    decoration: const InputDecoration(
-                      labelText: 'RAW Bit Depth',
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 8, child: Text('8-bit (JPEG/Video)')),
-                      DropdownMenuItem(value: 10, child: Text('10-bit')),
-                      DropdownMenuItem(value: 12, child: Text('12-bit')),
-                      DropdownMenuItem(value: 14, child: Text('14-bit')),
-                      DropdownMenuItem(value: 16, child: Text('16-bit')),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) {
-                        setDialogState(() => selectedBitDepth = v);
-                      }
-                    },
-                  ),
+                  // Bit Depth removed
                   const SizedBox(height: 20),
                   Text('Optics',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -323,7 +305,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
                           decoration: const InputDecoration(
-                              labelText: 'Focal Length (mm)'),
+                              labelText: 'Effective Focal Length (mm)'),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return 'Required';
                             final n = double.tryParse(v);
@@ -340,7 +322,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
                           decoration:
-                              const InputDecoration(labelText: 'Aperture (f/)'),
+                              const InputDecoration(labelText: 'Effective Aperture (f/)'),
                           validator: (v) {
                             if (v == null || v.trim().isEmpty) return 'Required';
                             final n = double.tryParse(v);
@@ -357,18 +339,16 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     children: [
                       Expanded(
                         child: TextFormField(
-                          controller: multiplierCtrl,
+                          controller: averageRawFileSizeMBCtrl,
                           keyboardType: const TextInputType.numberWithOptions(
                               decimal: true),
                           decoration: const InputDecoration(
-                            labelText: 'Optical Multiplier',
-                            hintText: '1.0',
+                            labelText: 'Average RAW File Size (MB)',
+                            hintText: 'e.g. 50.0',
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Required';
-                            final n = double.tryParse(v);
-                            if (n == null) return 'Invalid';
-                            if (n <= 0) return 'Must be > 0';
+                            if (v == null || v.trim().isEmpty) return null;
+                            if (double.tryParse(v) == null) return 'Invalid';
                             return null;
                           },
                         ),
@@ -431,12 +411,11 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       double.tryParse(focalCtrl.text) ?? 0.0,
                   aperture:
                       double.tryParse(apertureCtrl.text) ?? 0.0,
-                  opticalMultiplier:
-                      double.tryParse(multiplierCtrl.text) ?? 1.0,
+                  averageRawFileSizeMB:
+                      double.tryParse(averageRawFileSizeMBCtrl.text),
                   rotation: rotationCtrl.text.trim().isEmpty
                       ? null
                       : double.tryParse(rotationCtrl.text),
-                  bitDepth: selectedBitDepth,
                 );
                 if (isEdit) {
                   await repo.updateEquipment(profile);
