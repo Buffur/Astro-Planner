@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/capture_block.dart';
-import 'dart:convert';
 import '../../domain/models/weather_conditions.dart';
 import '../../domain/models/location_profile.dart';
 import '../../domain/models/visibility_window.dart';

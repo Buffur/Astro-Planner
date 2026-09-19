@@ -4,7 +4,7 @@ import '../viewmodels/planner_viewmodel.dart';
 import '../../domain/models/capture_block.dart';
 
 class CapturePlanWidget extends StatelessWidget {
-  const CapturePlanWidget({Key? key}) : super(key: key);
+  const CapturePlanWidget({super.key});
 
   void _showAddBlockDialog(BuildContext context, PlannerViewModel viewModel) {
     FrameType selectedType = FrameType.light;
@@ -23,7 +23,7 @@ class CapturePlanWidget extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<FrameType>(
-                    value: selectedType,
+                    initialValue: selectedType,
                     decoration: const InputDecoration(labelText: 'Frame Type'),
                     items: FrameType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name.toUpperCase()))).toList(),
                     onChanged: (v) {
@@ -32,7 +32,7 @@ class CapturePlanWidget extends StatelessWidget {
                   ),
                   if (selectedType == FrameType.light || selectedType == FrameType.flat)
                     DropdownButtonFormField<String>(
-                      value: filter,
+                      initialValue: filter,
                       decoration: const InputDecoration(labelText: 'Filter'),
                       items: ['L', 'R', 'G', 'B', 'Ha', 'OIII', 'SII', 'OSC', 'None'].map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
                       onChanged: (v) {
@@ -111,7 +111,7 @@ class CapturePlanWidget extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: blocks.length,
-                onReorder: (oldIndex, newIndex) {
+                onReorderItem: (oldIndex, newIndex) {
                   viewModel.reorderCaptureBlocks(oldIndex, newIndex);
                 },
                 itemBuilder: (context, index) {
