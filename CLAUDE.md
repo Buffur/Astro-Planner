@@ -1,0 +1,250 @@
+# AstroPlan — AI Engineering Guidelines
+
+## Project Purpose
+
+AstroPlan is a mobile application for astrophotographers. It helps users plan, execute, and document sessions by combining equipment profiles, target visibility, weather, moon conditions, and capture planning. It is designed to complement tools like Stellarium, not replace them (e.g., it is a planner/logbook, not a full planetarium).
+
+## Tech Stack
+
+- **Framework**: Flutter
+- **Language**: Dart
+- **State Management**: Provider with ViewModels
+- **Database**: SQLite (via Drift)
+- **Navigation**: go_router
+
+## Main Architectural Rules
+
+1. **Separation of Concerns**: Presentation -> ViewModels -> Repositories -> Data Sources/Services.
+2. **Domain Isolation**: Astronomy calculations must remain independent from Flutter UI code (pure Dart preferred).
+3. **Offline-First**: Core features (equipment, targets, calculations, logs) must work offline. External APIs (weather, geocoding) enrich but aren't strictly required.
+
+## Source-of-Truth Documents
+
+Read these before architectural or feature changes:
+
+- `docs/PROJECT_HANDOFF.md`: Entry point. Current project state (actual vs intended), traps, build/test baseline, document map.
+- `docs/ARCHITECTURE.md`: Design intent (Part A), current architecture (Part B), implementation deviations (Part C), target direction (Part D).
+- `docs/DATA_MODEL.md`: Design intent (Part A), current entities and migration history (Part B), required future domain concepts (Part C).
+- `docs/FEATURE_STATUS.md`: Per-feature status (Implemented / Partial / Prototype / Broken / Missing / Deprecated / Unknown) with known issues.
+- `docs/TECH_DEBT.md`: Debt register (`TD-###`) with evidence and proposed directions.
+- `docs/DECISIONS.md`: Accepted ADRs (verbatim), conformance audit, owner directives, open decisions (`PD-##`).
+- `docs/SCIENTIFIC_INTEGRITY.md`: Scientific issue register (`SI-###`) and calculation register.
+- `docs/PROJECT_AUDIT.md`: Point-in-time audit evidence, documentation discrepancy log, rule-conformance matrix. A snapshot: do not edit it to track later changes.
+
+Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/TEST_PLAN.md`, `.agents/rules/`.
+
+`docs/archive/` holds superseded documents. They are historical only and are known to be inaccurate; never use them as a source of truth.
+
+## Important Development Rules for Future Claude Agent
+
+1. **Inspect before modifying.**
+2. **Never guess about existing code.**
+3. **Read relevant files before making architectural claims.**
+4. **Prefer minimal changes.**
+5. **Avoid unnecessary rewrites.**
+6. **Do not introduce new architecture without justification.**
+7. **Do not add features outside the current task.**
+8. **Do not change working functionality without reason.**
+9. **Run appropriate tests after changes.**
+10. **Run analyzer/formatter after Dart changes where appropriate.**
+11. **Keep business logic testable and separated from UI.**
+12. **Keep astronomical calculations deterministic.**
+13. **Use explicit units for astronomy calculations.**
+14. **Handle UTC/local time carefully.**
+15. **Never hardcode external API secrets.**
+16. **Do not silently change formulas.**
+17. **Scientific assumptions must be documented.**
+18. **Never present relative stacking gain as absolute physical SNR.**
+19. **User-facing thresholds should be configurable where scientifically appropriate.**
+20. **Preserve Git checkpoints.**
+
+## Documentation Conventions (added 2026-09-21)
+
+- **The code is the source of truth for the ACTUAL state.** Design intent (`PRODUCT_SPEC.md`, `ROADMAP.md`, ADRs, Part A of `ARCHITECTURE.md` and `DATA_MODEL.md`) is kept separately and is **never rewritten to match the code**. Where the two differ, record an **IMPLEMENTATION DEVIATION** with: intended behavior, actual behavior, consequence.
+- **Status vocabulary:** *Intended / Planned*, *Implemented*, *Partial*, *Prototype*, *Broken*, *Missing*, *Deprecated*, *Unknown*. Do not call a feature Implemented if it does not work, and do not call it Missing if code for it exists. Do not hide identified issues.
+- **Stable IDs** are used across documents: `F-##` (features), `TD-###` (tech debt), `SI-###` (scientific issues), `DEV-A/D/P#` (implementation deviations), `PD-##` (open decisions), `OD-##` (owner directives). Reference them; never renumber.
+- **When a code change alters the actual state**, update in the same change: `FEATURE_STATUS.md`, `TECH_DEBT.md` (mark items resolved with date and commit — do not delete them), Part B of `ARCHITECTURE.md` / `DATA_MODEL.md`, `SCIENTIFIC_INTEGRITY.md` for any calculation, and `DECISIONS.md` for any formula or architectural decision. Refresh the verification stamp at the top of each file you touch.
+- **Record, don't fix on the way.** New findings go into `TECH_DEBT.md` / `SCIENTIFIC_INTEGRITY.md`; do not expand the current task to fix them (rule 7).
+- **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
+- **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
+
+## Current Baseline and Known Traps (as of 2026-09-21, commit `900b82a`)
+
+**Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
+
+- `flutter analyze --no-pub` — expected: no issues.
+- `flutter test --no-pub` — expected: **70 pass, 1 fails** (`test/integration_flow_test.dart`, pre-existing, root cause in `TD-003`: harness async zone plus an unguarded Geolocator call; it is **not** an HTTP problem).
+- After changing Drift tables: `dart run build_runner build --delete-conflicting-outputs` (standard step; not exercised in the audit). Every schema change needs a migration **and** a migration test.
+- Android build/run was **not** verified.
+
+**Reporting the red test:** until `TD-003` is fixed, `.agents/rules/03-testing.md` cannot be satisfied literally. Report the failure as pre-existing and confirm no *additional* test fails. Do not delete or weaken the test.
+
+**Owner directives currently in force** (`docs/DECISIONS.md` Part C):
+
+- No new feature, and specifically not `SessionNight`, is started until the documentation is reconciled and the Master Development Roadmap exists (OD-03).
+- Do not fix application code or scientific issues as part of documentation tasks; record them (OD-04).
+- Multi-file, architectural, database, or scope-affecting work: inspect, report a plan, wait for approval (`.agents/rules/00-project-governance.md`).
+- No roadmap phase is declared active yet (`PD-06`); features from Phases 10–15 already exist. Do not extend them without approval.
+
+**Traps that will bite (all verified):**
+
+1. `EquipmentProfile.id` is an **optical-rig id**; storage is normalized (Device → CameraModule → OpticalRig) but the domain/UI model is flat. The `equipment_profiles` table is orphaned.
+2. The default `sessionDate` is the **UTC** calendar date (wrong night for evenings west of UTC); the picker and loaded logs use **local** dates (`TD-001`).
+3. `aperture` means **f-number**; one seed stores a diameter (`SI-005`). Field names carry no units.
+4. Relative stacking gain is √N of light frames only; the UI label still says "Relative SNR" (`TD-009`). NPF exists but is wrong and not shown (`TD-007`).
+5. `PlannerViewModel` starts `_init()` from its constructor and cannot be awaited; seeding races it (`TD-002`). It also calls HTTP, GPS and SharedPreferences directly.
+6. `LightPollutionRepository` can never succeed (malformed URL); Bortle defaults to 4; the Bortle badge is hidden by `FeatureScope.lightPollutionContext`.
+7. `FeatureScope.fieldMode` is defined but never read; the map handoff and field-mode toggle are ungated (`TD-014`).
+8. Unknown data must not be shown as zero or a default (`SI-008`).
+9. Drift row classes share names with domain models; repositories import domain classes `as domain`.
+10. `AppRouter.router` is a static singleton; `Provider<AppDatabase>` is registered but never read.
+
+# Project Instructions
+
+## Project
+
+Flutter/Dart mobile application for astrophotography session planning.
+
+The product is centered around:
+
+Site → Target → Astronomical Conditions → Weather → Equipment → Imaging Opportunity → Capture Plan → Execution → Logbook.
+
+The application is not intended to replace Stellarium, Stargazing Hub, or dedicated telescope-control software.
+
+## Development Philosophy
+
+Inspect first. Plan second. Implement third. Verify fourth.
+
+Prefer the smallest correct change.
+
+Do not rewrite working systems without a demonstrated reason.
+
+Do not add speculative abstractions or features.
+
+Do not modify unrelated files.
+
+Do not silently change product behavior.
+
+## Architecture
+
+Keep astronomical/domain calculations separate from UI.
+
+Business logic must be deterministic and testable.
+
+Do not place non-trivial astronomy or capture calculations directly inside widgets.
+
+Use explicit units for astronomy calculations.
+
+Be careful with UTC, local time, time zones, and DST.
+
+## Product Constraints
+
+The central product concept is the connection between:
+
+available astronomical opportunity
+
+and
+
+realistic image-capture execution.
+
+Important concepts:
+
+- Astronomical Darkness
+
+- Target Visibility Window
+
+- Environmental Conditions
+
+- Imaging Opportunity
+
+- Integration Time
+
+- Acquisition Time
+
+- Total Session Budget
+
+Do not treat arbitrary thresholds as universal scientific laws.
+
+## SNR
+
+sqrt(N) may be used as a relative statistical stacking-gain approximation.
+
+Do not represent relative stacking gain as absolute physical SNR.
+
+Do not claim that ISO increases photon collection.
+
+Document assumptions behind scientific calculations.
+
+## Scope Control
+
+Do not implement:
+
+- planetarium engines;
+
+- 3D sky simulation;
+
+- telescope hardware control;
+
+- ASCOM/INDI integration;
+
+- social features;
+
+- authentication;
+
+- cloud infrastructure;
+
+unless explicitly requested.
+
+## Testing
+
+After modifying business logic:
+
+- run relevant unit tests;
+
+- run flutter analyze;
+
+- run relevant widget/integration tests when applicable.
+
+Do not remove tests merely to make a task pass.
+
+## Git
+
+Keep changes small and reversible.
+
+Create meaningful checkpoints.
+
+Never use destructive commands such as:
+
+- git reset --hard
+
+- force push
+
+- deleting unknown user files
+
+without explicit approval.
+
+## Source of Truth
+
+Read these files before making major architectural decisions:
+
+- docs/PROJECT_HANDOFF.md
+
+- docs/ARCHITECTURE.md
+
+- docs/FEATURE_STATUS.md
+
+- docs/DATA_MODEL.md
+
+- docs/TECH_DEBT.md
+
+- docs/DECISIONS.md
+
+- docs/SCIENTIFIC_INTEGRITY.md
+
+- docs/PROJECT_AUDIT.md
+
+The repository is the source of truth for implementation.
+
+If documentation and implementation disagree, investigate and update the documentation rather than guessing.
+
+Design intent is preserved separately from the actual state: never rewrite intent to match the code; record an IMPLEMENTATION DEVIATION instead.
