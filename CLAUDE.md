@@ -81,10 +81,11 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 
 **Owner directives currently in force** (`docs/DECISIONS.md` Part C):
 
-- No new feature, and specifically not `SessionNight`, is started until the documentation is reconciled and the Master Development Roadmap exists (OD-03).
+- **Scope = `docs/MASTER_ROADMAP.md`** (approved 2026-09-21, OD-06). Work one roadmap TASK per cycle, in order: READ → VERIFY → PLAN → IMPLEMENT → TEST → REVIEW → COMMIT → STOP. Never start the next task on your own; do not change the roadmap without owner approval; do not re-audit the whole repository. The current position is the "active task" line in `docs/ROADMAP.md` ("Adopted plan").
+- OD-03 (no new feature, specifically not `SessionNight`, before the docs are reconciled and the roadmap exists) has its condition met; `SessionNight` is roadmap group G2 and starts only when the roadmap reaches it and the owner gives the go-ahead.
 - Do not fix application code or scientific issues as part of documentation tasks; record them (OD-04).
 - Multi-file, architectural, database, or scope-affecting work: inspect, report a plan, wait for approval (`.agents/rules/00-project-governance.md`).
-- No roadmap phase is declared active yet (`PD-06`); features from Phases 10–15 already exist. Do not extend them without approval.
+- **`PD-06` resolved 2026-09-21** (`docs/DECISIONS.md` E.1): the logbook and text sharing stay visible; metadata import is hidden until G17, the light-pollution map card until TASK 7.4, the field-mode toggle until TASK 12.4. **The code does not enforce this yet** (`TD-014`); enforcement is TASK 4.3. Do not extend these ahead-of-phase features.
 
 **Traps that will bite (all verified):**
 

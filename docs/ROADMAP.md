@@ -136,11 +136,14 @@ with the approved phase boundaries.
 records what exists in the code. Status vocabulary: Implemented / Partial /
 Prototype / Broken / Missing (definitions in `docs/FEATURE_STATUS.md`).*
 
-**Active phase: not declared.** This roadmap says the active phase is the only
-approved scope but never names it. The `FeatureScope` gates (ADR-006) imply phases
-up to 10 were treated as approved and 11–15 as gated, but the gates are only
-partly enforced and two of them are now `true`. The owner must declare the active
-phase (`docs/DECISIONS.md` PD-06; `TECH_DEBT.md` TD-041).
+**Active phase: not declared — RESOLVED 2026-09-21.** *(Audit finding, kept for
+history.)* This roadmap says the active phase is the only approved scope but never
+names it. The `FeatureScope` gates (ADR-006) imply phases up to 10 were treated as
+approved and 11–15 as gated, but the gates are only partly enforced and two of them
+are now `true`. **Resolution:** the owner adopted `docs/MASTER_ROADMAP.md` as the
+approved scope and decided PD-06 (`docs/DECISIONS.md` PD-06 and E.1; `TECH_DEBT.md`
+TD-041). See "Adopted plan" at the end of this file. The table below records the
+audited status at commit `900b82a`; it is not updated by later tasks.
 
 | Phase | Actual status | Notes (feature IDs → `docs/FEATURE_STATUS.md`) |
 | --- | --- | --- |
@@ -164,3 +167,65 @@ phase (`docs/DECISIONS.md` PD-06; `TECH_DEBT.md` TD-041).
 
 Items that appear in the code or earlier notes but **not** in this roadmap: a
 "Custom Dashboard" (PD-14).
+
+---
+
+## Adopted plan: Master Development Roadmap (adopted 2026-09-21, TASK 0.2)
+
+*The Phase 0–16 definitions above remain the **design intent** and are unchanged.
+The detailed, approved work plan is `docs/MASTER_ROADMAP.md` (groups G0–G17, tasks
+0.1–17.3, milestones M0–M7). Design intent is amended only by owner approval, never
+rewritten to match the code.*
+
+### Approved scope and active task
+
+- **Approved scope:** the tasks of `docs/MASTER_ROADMAP.md`, executed **one task per
+  cycle, in roadmap order**, each only after the owner's explicit go-ahead. The
+  agent never starts the next task on its own (`docs/DECISIONS.md` OD-06). Any work
+  outside the current task needs owner approval (`.agents/rules/00-project-governance.md`).
+- **Active task line** *(update this line at the end of every task)*:
+  - Completed: **TASK 0.1** (commit `34a7157`, 2026-09-21); **TASK 0.2** (2026-09-21).
+  - **Next: TASK 0.3 — Repository hygiene.** Not started; each item needs explicit
+    owner approval.
+
+### Phase → group map
+
+The master roadmap is ordered foundation-first, so groups do not follow phase order
+(for example the capture budget, Phase 9, comes before weather, Phase 10). This maps
+each design-intent phase to the group(s) that deliver it.
+
+| Phase (design intent) | Delivered by (group · tasks) |
+| --- | --- |
+| 0 Project governance | G0 · 0.1–0.3 |
+| 1 Environment validation | G1 · 1.1, 1.3 (harness, CI); Android run verification in 0.3 and 16.4 |
+| 2 Architecture skeleton | G1 · 1.1–1.2 (platform seams, bootstrap); G12 · 12.2–12.3 (navigation shell, ViewModel decomposition) |
+| 3 Design system | G12 · 12.4 (semantic theme tokens) |
+| 4 Local database and domain models | G3 · 3.1–3.3; schema tasks 7.1, 8.4, 11.2 |
+| 5 Astronomical engine | G2 · 2.2–2.3; G6 · 6.2–6.4 |
+| 6 Equipment and optical calculator | G6 · 6.5 (NPF); G8 · 8.3–8.6 |
+| 7 Target catalog | G8 · 8.1–8.2 |
+| 8 Night timeline and visibility | G2 (SessionNight); G10 · 10.2–10.5 |
+| 9 Session planner | G5 (capture budget); G11 (Session aggregate) |
+| 10 Weather | G9 |
+| 11 Light pollution and sky darkness | G7 · 7.4 |
+| 12 Metadata import | G17 (v1.1, after Android 1.0) |
+| 13 Logbook | G13 · 13.4; G14 · 14.1–14.2 |
+| 14 Export and interoperability | G14 · 14.3–14.4 |
+| 15 Field mode | G12 · 12.4 (red mode); G13 (execution) |
+| 16 Hardening and beta | G15, G16 |
+| *Cross-cutting* | G4 (correctness and honesty fixes); G7 · 7.1–7.3 (sites) and G12 · 12.5 (Tonight dashboard) serve several phases |
+
+### Gate policy for features built ahead of their phase (PD-06, resolved 2026-09-21)
+
+Decision recorded in `docs/DECISIONS.md` E.1. **Enforcement is not part of this task:
+the code does not yet match this policy** (`FeatureScope.metadataImport` is `true`;
+the field-mode toggle and the map card are ungated — TD-014, DEV-P1). Enforcement is
+**TASK 4.3**.
+
+| Feature | Decision | Visible again / lifted by |
+| --- | --- | --- |
+| Logbook (F-40–F-42) | Stays visible (on the core path) | — |
+| Text sharing (F-44) | Stays visible (on the core path) | — |
+| Metadata import (F-45) | Hidden | G17 (v1.1) |
+| Light-pollution map card | Hidden | TASK 7.4 |
+| Field-mode toggle (F-46) | Hidden | TASK 12.4 |

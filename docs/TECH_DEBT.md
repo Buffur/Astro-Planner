@@ -2,7 +2,8 @@
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code unchanged since.
-> **Nothing listed here has been fixed.** Items marked *(verified)* were reproduced
+> **No code defect listed here has been fixed.** One governance item, TD-041, was
+> resolved on 2026-09-21 by TASK 0.2 (documentation only). Items marked *(verified)* were reproduced
 > by executing code; *(code reading)* means inferred from source and not executed.
 > Directions are **proposals** for the Master Development Roadmap, not approved
 > work; size tags are rough estimates: [S] hours, [M] days, [L] a week or more.
@@ -45,14 +46,14 @@
 | TD-011 | **Save Session creates duplicates and records no snapshot.** `home_screen.dart:201-247`; `addLog` returns `void` so the ViewModel never learns the id. *(verified)* two taps → two rows; location, temperature, focal length and integration stay null | Logbook fills with duplicates; sessions cannot be reproduced | Return the id / update state; fill snapshot fields; stable references (DEV-D3) [M] | DEV-D3, F-40 |
 | TD-012 | **Capture-plan input validation.** Empty/invalid input becomes 60 s × 30 (`capture_plan_widget.dart:93-94`); negatives accepted; no edit UI (`updateCaptureBlock` unused); binning and gain not exposed | Corrupt totals; silent defaults | Validators, edit dialog [S–M] | SI-008, F-35 |
 | TD-013 | **Unknown treated as zero / default as fact.** *(verified)* storage shows `0.0 MB` for all seeded gear; `null arcsec/px` (`home_screen.dart:104`); default plan and London shown as if user-chosen | Misleading numbers | Nullable values and explicit "unknown" UI (SI-008 rule) [M] | SI-008, SI-013, F-28 |
-| TD-014 | **`FeatureScope` gating incomplete** (DEV-P1): `fieldMode` never read; map handoff ungated with hard-coded Slovenia coordinates (`home_screen.dart:172`); Home pushes gated routes unconditionally; `metadataImport` / `logbook` are `true` without a recorded approval | Scope discipline not enforced; wrong-location link | PD-06, then enforce gates in routes **and** buttons [S] | DEV-P1, F-04, F-34, F-46 |
+| TD-014 | **`FeatureScope` gating incomplete** (DEV-P1): `fieldMode` never read; map handoff ungated with hard-coded Slovenia coordinates (`home_screen.dart:172`); Home pushes gated routes unconditionally; `metadataImport` / `logbook` are `true` without a recorded approval | Scope discipline not enforced; wrong-location link | PD-06 (decided 2026-09-21, `DECISIONS.md` E.1), then enforce gates in routes **and** buttons [S] — **still Open; enforcement is roadmap TASK 4.3** | DEV-P1, F-04, F-34, F-46 |
 | TD-017 | **Weather robustness and semantics.** Not date-aware; hourly array starts at local midnight; timestamps naive (`open_meteo_weather_repository.dart:47`), `utc_offset_seconds` discarded; cache has no staleness limit or indicator; parser assumes non-null arrays (fine for the live London query); model hard-coded (`:22`); no provenance; startup waits on it | Wrong-night/zone alignment; stale data shown as current | PD-02, PD-15; date-aware fetch; staleness indicator [M] | F-29, F-30, PD-15 |
 | TD-019 | **`PlannerViewModel` is a 513-line multi-responsibility class that breaks layering** (DEV-A1): `http`, `geolocator`, `shared_preferences`, concrete `LightPollutionRepository`; un-awaitable constructor init; getters recompute on every access | Untestable, hard to change, defects cluster here | Extract only along seams created by TD-002/TD-022/TD-020 work; incremental, test-first; no big-bang rewrite [L] | DEV-A1, ARCHITECTURE D2 |
 | TD-020 | **No site/time model.** Times shown in the device zone; naive weather times; no site time zone (`sky_darkness_widget.dart:137`) | Remote-site planning wrong; DST/zone bugs | PD-02; site time model in the domain [M] | SI-010, F-10 |
 | TD-022 | **Capture budget conflates integration, acquisition, calibration and total session.** `estimatedRequiredTime` sums all block types plus 5 s/frame (`planner_viewmodel.dart:478-484`) against the night window; `SessionCalculator.estimateTotalDuration` (15 % model) is dead and inconsistent; overhead not configurable | The central component cannot answer "what fits tonight?" correctly | PD-08; pure-Dart budget service with tests [M–L] | DEV-A4, F-36, F-39, PD-08 |
 | TD-025 | **Test gaps.** No tests for the live budget math, Home, Capture Plan, Sky, Weather, Altitude chart, Logbook, Location or Metadata screens; no migration tests; the NPF test mirrors the implementation; tested code (`estimateTotalDuration`, orphan table, catalog repository) is unused; ViewModel tests cover only the date and min-altitude setters | Regressions undetected | Reference-value tests; ViewModel/widget tests as areas are touched; see `docs/TEST_PLAN.md` [L] | F-48, TD-037 |
 | TD-032 | **Moon precision and geometry.** Illumination error up to 4.7 pp shown to 0.1 %; no Moon altitude, rise/set or Moon–target separation (PRODUCT_SPEC MVP); warning ignores Moon altitude | Overstated precision; missing MVP feature | SI-002 actions; PD-07 [L] | SI-002, F-15, F-16, DEV-P6 |
-| TD-041 | **No active roadmap phase is declared** (DEV-P3) while Phases 10–15 features exist | No authoritative scope | PD-06 (owner declares the active phase) [S] | DEV-P3, PD-06 |
+| TD-041 | **RESOLVED 2026-09-21 (TASK 0.2; documentation only, no code change).** *(Was: no active roadmap phase is declared (DEV-P3) while Phases 10–15 features exist.)* | *(Was: no authoritative scope.)* | *Resolution:* the owner adopted `docs/MASTER_ROADMAP.md` as the approved scope (OD-06) and decided PD-06 (`DECISIONS.md` E.1). The gates in the code are still unenforced: TD-014, TASK 4.3 | DEV-P3, PD-06 |
 
 ## Medium
 
@@ -113,7 +114,7 @@
 ## Dependency notes for roadmap sequencing (proposal)
 
 ```text
-PD-06 (declare active phase) ─────────────────────────► every roadmap decision
+PD-06 (declare active phase) [resolved 2026-09-21] ───► every roadmap decision
 PD-01 + PD-02 ─► TD-001 / TD-020 ─► TD-036 reference tests ─► Imaging Opportunity (F-38)
 PD-08 ─► TD-022 ─► capture-planner redesign (F-35..F-39)
 TD-002 + TD-003 ─► TD-019 (ViewModel seams) ─► TD-021, TD-028, TD-037

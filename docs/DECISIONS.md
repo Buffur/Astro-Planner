@@ -2,6 +2,8 @@
 
 > **Verification stamp:** conformance checked against code at commit `900b82a`
 > (2026-09-20), audited 2026-09-21. Application code unchanged since.
+> **Updated 2026-09-21 (TASK 0.2):** PD-06 resolved (E.1), PD-17–PD-21 registered,
+> OD-06 recorded, DEV-P3 marked resolved. No ADR in Part A was changed.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -143,6 +145,11 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
   were treated as approved.
 - **Consequence:** there is no authoritative basis for deciding what is in scope. The
   owner must declare the active phase (PD-06). TD-041.
+- **Status: RESOLVED 2026-09-21 (TASK 0.2).** The owner adopted
+  `docs/MASTER_ROADMAP.md` as the approved scope (OD-06) and decided PD-06 (E.1).
+  The Phase 0–16 text above and in `docs/ROADMAP.md` is unchanged design intent. The
+  *code* still shows the ahead-of-phase features ungated; that part is DEV-P1 / TD-014
+  and stays open until TASK 4.3.
 
 ## DEV-P4 — ADR-003: migrations, relationships and testability
 See DEV-D1 and DEV-D6 in `docs/DATA_MODEL.md` (no migration tests; v3 → v9 fails;
@@ -196,9 +203,10 @@ ADRs. They are recorded so later agents do not undo them.
 | --- | --- |
 | OD-01 | The code is the source of truth for the **actual** state; design intent is preserved separately and never rewritten to match the code. |
 | OD-02 | Source-of-truth documents **must be tracked by Git** (`CLAUDE.md`, `docs/PROJECT_HANDOFF.md`, `ARCHITECTURE.md`, `FEATURE_STATUS.md`, `DATA_MODEL.md`, `TECH_DEBT.md`, `DECISIONS.md`, `PROJECT_AUDIT.md`). The `.gitignore` rules that ignored them were removed. |
-| OD-03 | Do not implement `SessionNight` or add new features until the documentation is reconciled and the Master Development Roadmap exists. |
+| OD-03 | Do not implement `SessionNight` or add new features until the documentation is reconciled and the Master Development Roadmap exists. *(Condition met 2026-09-21: the docs are reconciled and committed, and `docs/MASTER_ROADMAP.md` exists. Work order is now governed by OD-06.)* |
 | OD-04 | Do not fix application code or scientific issues during documentation reconciliation; record them only. |
 | OD-05 | Do not hide identified issues; do not label a feature "implemented" if it does not work, nor "missing" if it exists in code. |
+| OD-06 | `docs/MASTER_ROADMAP.md` is the approved primary plan and the only approved scope (adopted 2026-09-21, TASK 0.2). Work proceeds in stages: **one roadmap TASK per cycle**, in roadmap order, as READ → VERIFY → PLAN → IMPLEMENT → TEST → REVIEW → COMMIT → STOP. Never start the next task on the agent's own initiative; do not change the roadmap without owner approval. Do not re-audit the whole repository; inspect the code only as far as the current task needs. |
 
 ---
 
@@ -226,8 +234,10 @@ verified status:
 
 # Part E — Open decisions register (Proposed / Pending — **NOT accepted**)
 
-Nothing below is approved. Recommendations are proposals from the audit. Decisions
-that block the Master Development Roadmap are marked **[roadmap-blocking]**.
+Nothing below is approved unless its row is marked **RESOLVED** (recorded in E.1).
+Recommendations are proposals from the audit. Decisions that block the Master
+Development Roadmap are marked **[roadmap-blocking]**. PD-17–PD-21 are placeholders
+registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROADMAP.md`.
 
 | ID | Decision needed | Evidence | Options | Recommendation (proposal) | Blocks |
 | --- | --- | --- | --- | --- | --- |
@@ -236,7 +246,7 @@ that block the Master Development Roadmap are marked **[roadmap-blocking]**.
 | PD-03 | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
 | PD-04 **[roadmap-blocking]** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules) | Any schema change |
 | PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
-| PD-06 **[roadmap-blocking]** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | Owner declares the active phase; align `FeatureScope` with approvals | The whole roadmap |
+| PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
 | PD-07 | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | Decide with the Moon-geometry requirement | Moon services, moving objects |
 | PD-08 **[roadmap-blocking]** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | Owner product decision; configurable overhead | Capture planner (central component) |
 | PD-09 | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | Decide with PD-04 | SI-011, SI-007 fixes |
@@ -247,3 +257,32 @@ that block the Master Development Roadmap are marked **[roadmap-blocking]**.
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
 | PD-15 | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | Hide until PD-07 | Target UI |
+| PD-17 *(placeholder, registered 2026-09-21)* | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | Decided in TASK 10.1. Roadmap's proposed starting point (not accepted): gates = Sun ≤ the darkness limit, target ≥ the minimum altitude, the horizon; annotations = Moon altitude, illumination and separation, cloud, dew; optional user-enabled Moon or cloud gates; explicitly no composite score | — | Opportunity calculator (10.2) |
+| PD-18 *(placeholder, registered 2026-09-21)* | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | Decided in TASK 11.1, before any migration | — | Session schema migration (11.2), information architecture (12.1) |
+| PD-19 *(placeholder, registered 2026-09-21)* | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | Decided in TASK 12.1. Roadmap's candidate (not accepted): bottom navigation Tonight · Sessions · Gear & Targets · Settings; execution as a full-screen route; PD-14 resolved as a fixed Tonight view, not a customizable dashboard | — | Navigation shell (12.2), execution and logbook screens |
+| PD-20 *(placeholder, registered 2026-09-21)* | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | Decided in TASK 13.1. Roadmap's candidate (not accepted): foreground only; progress derived from persisted UTC timestamps; every transition persisted; notifications deferred; no camera control, ASCOM or INDI. A wakelock dependency for keep-screen-on would need separate approval | — | Execution tasks 13.2–13.4 |
+| PD-21 *(placeholder, registered 2026-09-21)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
+
+## E.1 Resolved decisions
+
+### PD-06 — Active scope and gating of features built ahead of their phase (RESOLVED 2026-09-21)
+
+- **Decided by:** the project owner, in chat, on 2026-09-21: "Stick to the decision
+  from the roadmap and move on to the next task" — i.e. the recommendation in
+  MASTER_ROADMAP TASK 0.2 is adopted as written.
+- **Active scope:** the tasks of `docs/MASTER_ROADMAP.md`, one per cycle in roadmap
+  order (OD-06). No single "active phase" is named; the roadmap's current task is
+  the active scope (line maintained in `docs/ROADMAP.md`, "Adopted plan").
+- **Gate policy for features that already exist in the code:**
+  - **Stay visible** (they are on the core path): the **logbook** and **text sharing**.
+  - **Hidden** until their group: **metadata import** until G17 (v1.1); the
+    **light-pollution map card** until TASK 7.4; the **field-mode toggle** until TASK 12.4.
+- **Enforcement:** by TASK 4.3 — every entry point (buttons, cards, routes) gated
+  from one source (`FeatureScope`), with a test that a gated feature has no entry
+  point. **This decision is recorded only; no code was changed by TASK 0.2.**
+- **Consequence for the actual state:** the code still disagrees with the policy
+  (`metadataImport = true`; field-mode toggle and map card ungated; Home pushes
+  gated routes unconditionally). That remains DEV-P1 / TD-014, **open** until 4.3.
+  DEV-P3 and TD-041 (no declared scope) are resolved by this decision.
+- **Not decided here:** whether the manual Bortle badge and any other gated element
+  change visibility — not addressed by the roadmap text; revisit in TASK 7.4.
