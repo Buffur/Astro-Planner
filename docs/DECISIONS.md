@@ -3,7 +3,8 @@
 > **Verification stamp:** conformance checked against code at commit `900b82a`
 > (2026-09-20), audited 2026-09-21. Application code unchanged since.
 > **Updated 2026-09-21 (TASK 0.2):** PD-06 resolved (E.1), PD-17–PD-21 registered,
-> OD-06 recorded, DEV-P3 marked resolved. No ADR in Part A was changed.
+> OD-06 recorded, DEV-P3 marked resolved. **TASK 0.3:** PD-13 resolved (E.1),
+> DEV-P7 marked resolved. No ADR in Part A was changed.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -182,6 +183,10 @@ ViewModels).
 - **Consequence:** the Phase 0 exit criterion "AI rules exist" is met by
   `.agents/rules/` and `CLAUDE.md`, but the listed file is absent. Owner decision
   PD-13.
+- **Status: RESOLVED 2026-09-21 (TASK 0.3).** The owner decided to drop `GEMINI.md`
+  as a deliverable (PD-13, E.1). `CLAUDE.md` is the agent-instruction file, and the
+  `GEMINI.md` ignore rule was removed (commit `714426d`). The Phase 0 deliverable
+  list in `docs/ROADMAP.md` is annotated as amended; its original text is kept.
 
 ## DEV-P8 — The testing rule cannot currently be satisfied literally
 - **Intended behavior:** `.agents/rules/03-testing.md`: "Run `flutter analyze` and
@@ -253,7 +258,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-10 | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
 | PD-11 | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
-| PD-13 | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | Owner decision | — |
+| PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
 | PD-15 | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | Hide until PD-07 | Target UI |
@@ -286,3 +291,15 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   DEV-P3 and TD-041 (no declared scope) are resolved by this decision.
 - **Not decided here:** whether the manual Bortle badge and any other gated element
   change visibility — not addressed by the roadmap text; revisit in TASK 7.4.
+
+### PD-13 — `GEMINI.md` and the agent-instruction file policy (RESOLVED 2026-09-21)
+
+- **Decided by:** the project owner, in chat, on 2026-09-21 (TASK 0.3), choosing
+  "Drop GEMINI.md" from three offered options (restore as tracked / drop / keep ignored).
+- **Decision:** `GEMINI.md` is **not** a project deliverable. `CLAUDE.md` is the
+  agent-instruction file; `.agents/rules/` holds the shared rules.
+- **Actions taken:** the `GEMINI.md` line was removed from `.gitignore` (commit
+  `714426d`); the Phase 0 deliverable list in `docs/ROADMAP.md` is annotated as
+  amended (original text kept); DEV-P7 marked resolved.
+- **Not changed:** the audited-status table in `docs/ROADMAP.md` (a snapshot) and the
+  audit documents, which still describe `GEMINI.md` as "git-ignored and absent".

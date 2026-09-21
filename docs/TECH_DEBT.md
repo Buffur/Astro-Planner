@@ -2,8 +2,9 @@
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code unchanged since.
-> **No code defect listed here has been fixed.** One governance item, TD-041, was
-> resolved on 2026-09-21 by TASK 0.2 (documentation only). Items marked *(verified)* were reproduced
+> **No code defect listed here has been fixed.** Hygiene and governance items were
+> resolved on 2026-09-21: TD-041 (TASK 0.2, documentation only) and parts of TD-030
+> and TD-031 (TASK 0.3). Items marked *(verified)* were reproduced
 > by executing code; *(code reading)* means inferred from source and not executed.
 > Directions are **proposals** for the Master Development Roadmap, not approved
 > work; size tags are rough estimates: [S] hours, [M] days, [L] a week or more.
@@ -69,7 +70,7 @@
 | TD-027 | **Location handling:** `setLocation` overwrites the active saved profile (`planner_viewmodel.dart:216-255`); `_fetchBortle` reads `activeLocationId` while `setLocation` may still be inserting the row *(code reading)*; silent London default; no saved-location UI | Design saved locations with PD-02/PD-05 [M] | DEV-D4, F-06, F-07 |
 | TD-028 | **Stale selection** after deleting the selected target/rig (ViewModel not notified) *(code reading)* | Notify or clear selection [S] | DEV-A2 |
 | TD-029 | **Silent error swallowing / no error states:** reverse geocoding (`planner_viewmodel.dart:184`), weather (`open_meteo_weather_repository.dart:18,77,91`), metadata parsing (`metadata_extractor.dart:33,81`) and light pollution (`light_pollution_repository.dart:20`) all discard the error and return `null`/nothing; `_init` has no `try/catch` | Surface errors; add states [M] | F-29 |
-| TD-031 | **Dependency, platform and legal risks:** `sqlite3_flutter_libs 0.6.0+eol` (verify on device); OSM tiles without attribution and with a mismatched user-agent (`location_picker_screen.dart:101-102`); Nominatim usage policy; Open-Meteo free tier is non-commercial (verify); iOS `Info.plist` lacks location/photo strings; release signing uses the debug key; `sdk: ^3.13.3`; repository is GPL-3.0 | PD-12; verify before any release [M] | F-50, PD-12 |
+| TD-031 | **Dependency, platform and legal risks:** `sqlite3_flutter_libs 0.6.0+eol` (verify on device) *(2026-09-21 finding, TASK 0.3, recorded only — not changed: pub.dev marks 0.6.0+eol an end-of-life stub that "no longer does anything" and says it can be removed with `sqlite3` 3.x, locked at 3.5.2; removal deferred until an Android build and device smoke run are verified, G1/G16; the drift setup guide now lists `drift_flutter` for Flutter apps, not evaluated)*; `material_ui 1.3.0` reported as *retracted* by `pub get` (transitive, not investigated); the unused `cupertino_icons` dependency was **removed 2026-09-21** (commit `c8ad208`; analyze clean, tests 70/1 as baseline); OSM tiles without attribution and with a mismatched user-agent (`location_picker_screen.dart:101-102`); Nominatim usage policy; Open-Meteo free tier is non-commercial (verify); iOS `Info.plist` lacks location/photo strings; release signing uses the debug key; `sdk: ^3.13.3`; repository is GPL-3.0 | PD-12; verify before any release [M] | F-50, PD-12 |
 | TD-033 | **Hard-coded thresholds and the sky warning** (SI-006): Moon > 0.8 or Bortle ≥ 7; tight margin 85 %; overhead 5 s | Named, documented, configurable [M] | SI-006, F-18 |
 | TD-036 | **Undocumented astronomy simplifications and quantization** (SI-009); stale "refine to 1-minute" comment (`visibility_calculator.dart:103`); no reference-ephemeris tests | Document bounds; add USNO/JPL reference tests [M] | SI-009 |
 | TD-037 | **Test determinism:** real-time `Future.delayed(300 ms)` waits; static `AppRouter.router` singleton; tests need `activeLocationId` workaround to dodge Geolocator | Injectable clock/location; no sleeps [M] | DEV-A1 |
@@ -81,7 +82,7 @@
 
 | ID | Title and evidence | Direction (proposal) | Related |
 | --- | --- | --- | --- |
-| TD-030 | **Repository hygiene:** five committed one-off patch scripts with hard-coded absolute paths (`fix_sensor_size.py`, `patch_bitdepth.py`, `patch_db.py`, `patch_equipment.py`, `patch_target.py`, commit `d0b737f`); empty `package-lock.json`; `skills-lock.json` and `.agents/skills/` (third-party Flutter/Dart skills and an unrelated Google ADK skill); empty untracked `bin/` | Remove with owner approval (do not delete unknown files without approval) [S] | — |
+| TD-030 | **Repository hygiene — PARTLY RESOLVED 2026-09-21 (TASK 0.3).** *Removed, owner-approved (commit `ef20670`):* the five one-off patch scripts with hard-coded absolute paths (`fix_sensor_size.py`, `patch_bitdepth.py`, `patch_db.py`, `patch_equipment.py`, `patch_target.py`; recoverable from `d0b737f`), the empty `package-lock.json` and the empty untracked `bin/`. **Still open — not approved for removal:** `skills-lock.json` and `.agents/skills/` (third-party Flutter/Dart skills and an unrelated Google ADK skill, `google-agents-cli-adk-code`, referenced only by `skills-lock.json`) | Remove the remaining items only with owner approval (do not delete unknown files without approval) [S] | — |
 | TD-034 | **Decorative timeline bar:** a static gradient unrelated to the data (`sky_darkness_widget.dart:153-170`) contradicts `.agents/rules/05-ui-design.md` | Make data-driven or remove [S] | F-12 |
 | TD-035 | **Seeding is not idempotent per row:** re-seeds all defaults if the user deletes everything | Track seeded state [S] | F-05 |
 | TD-038 | **`analysis_options.yaml`** uses default `flutter_lints` only | Consider stricter rules (`unawaited_futures`, casts) [S] | — |
@@ -123,7 +124,9 @@ PD-05 ─► TD-006 (Bortle) ─► sky-darkness features
 SI-005 + PD-10 ─► TD-008 ─► NPF surfaced only after TD-007
 ```
 
-## Cleanup candidates identified but **not touched** (need owner approval)
+## Cleanup candidates (status after TASK 0.3, 2026-09-21)
 
-Patch scripts and lockfiles (TD-030); `docs/archive/` retention; the
-`GEMINI.md` `.gitignore` entry (PD-13); the untracked, empty `bin/` directory.
+**Done, owner-approved:** patch scripts, empty `package-lock.json` and empty `bin/`
+(`ef20670`); the `GEMINI.md` `.gitignore` entry (`714426d`, PD-13); `cupertino_icons`
+(`c8ad208`). **Not touched (need owner approval):** the Google ADK skill and its
+`skills-lock.json` entry; `docs/archive/` retention; `sqlite3_flutter_libs` (TD-031).

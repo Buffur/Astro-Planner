@@ -11,7 +11,8 @@ significant implementation.
 Deliverables:
 
 - `README.md`
-- `GEMINI.md`
+- `GEMINI.md` *(amended 2026-09-21, PD-13: dropped as a deliverable; `CLAUDE.md` is
+  the agent-instruction file — original entry kept for history)*
 - `docs/PRODUCT_SPEC.md`
 - `docs/ROADMAP.md`
 - `docs/ARCHITECTURE.md`
@@ -184,9 +185,11 @@ rewritten to match the code.*
   agent never starts the next task on its own (`docs/DECISIONS.md` OD-06). Any work
   outside the current task needs owner approval (`.agents/rules/00-project-governance.md`).
 - **Active task line** *(update this line at the end of every task)*:
-  - Completed: **TASK 0.1** (commit `34a7157`, 2026-09-21); **TASK 0.2** (2026-09-21).
-  - **Next: TASK 0.3 — Repository hygiene.** Not started; each item needs explicit
-    owner approval.
+  - Completed (all 2026-09-21): **TASK 0.1** (`34a7157`); **TASK 0.2** (`af076d9`);
+    **TASK 0.3** (`ef20670`, `c8ad208`, `714426d`, plus the docs commit that records them).
+    Group G0 is complete; milestone M0 also needs G1.
+  - **Next: TASK 1.1 — Repair the test harness; add platform seams.** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 
