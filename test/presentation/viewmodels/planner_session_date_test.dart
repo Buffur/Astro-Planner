@@ -1,9 +1,10 @@
 // Tests for Batch 3.1 — Session Date Selection
 //
 // Strategy:
-//   - ViewModel mutation/getter tests avoid Geolocator by inserting a
-//     saved location and setting 'activeLocationId' in SharedPreferences,
-//     so _init uses the saved loc and skips useCurrentLocation().
+//   - ViewModel mutation/getter tests inject a FakeLocationService, so no test
+//     touches GPS or platform channels, and wait on `vm.ready` instead of
+//     sleeping. A saved location is still inserted to give the ViewModel fixed
+//     coordinates.
 //   - Downstream recalculation tests use VisibilityCalculator directly —
 //     these are pure Dart functions with no platform-channel dependencies.
 
@@ -20,6 +21,7 @@ import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import '../../support/fake_location_service.dart';
 
 class _MockWeather implements WeatherRepository {
   @override
@@ -39,14 +41,12 @@ void main() {
       database = AppDatabase(NativeDatabase.memory());
       locationRepo = DriftLocationRepository(database);
 
-      // Insert a saved location so _init can resolve activeLocationId without GPS
       final locId = await locationRepo.insertLocation(
         const domain.LocationProfile(
           id: 0, name: 'Test Site',
           latitude: 51.5, longitude: -0.1, elevation: 10,
         ),
       );
-      // Telling _init about it means it will not call useCurrentLocation()
       SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
       vm = PlannerViewModel(
@@ -55,10 +55,10 @@ void main() {
         _MockWeather(),
         locationRepo,
         LightPollutionRepository(),
+        locationService: FakeLocationService(),
       );
 
-      // Let _init resolve
-      await Future.delayed(const Duration(milliseconds: 300));
+      await vm.ready;
     });
 
     tearDown(() async {

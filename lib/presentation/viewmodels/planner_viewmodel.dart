@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/capture_block.dart';
@@ -15,6 +14,8 @@ import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/weather_repository.dart';
 import '../../domain/repositories/location_repository.dart';
 import '../../data/repositories/light_pollution_repository.dart';
+import '../../data/services/geolocator_location_service.dart';
+import '../../domain/services/location_service.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
@@ -26,6 +27,12 @@ class PlannerViewModel extends ChangeNotifier {
   final WeatherRepository _weatherRepository;
   final LocationRepository _locationRepository;
   final LightPollutionRepository _lightPollutionRepository;
+  final LocationService _locationService;
+
+  /// Completes when the initial state (saved location, capture blocks, target,
+  /// equipment, weather) has loaded. It does not wait for the silent
+  /// first-launch position lookup or for reverse geocoding.
+  late final Future<void> ready;
 
   bool _isLoading = true;
   AstroTarget? _selectedTarget;
@@ -54,8 +61,9 @@ class PlannerViewModel extends ChangeNotifier {
   /// Valid range: 5° – 60°. User-configurable.
   double _minAltitude = 20.0;
 
-  PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository, this._locationRepository, this._lightPollutionRepository) {
-    _init();
+  PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository, this._locationRepository, this._lightPollutionRepository, {LocationService? locationService})
+      : _locationService = locationService ?? GeolocatorLocationService() {
+    ready = _init();
   }
 
   Future<void> _init() async {
@@ -255,27 +263,10 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   Future<void> useCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+    final position = await _locationService.getCurrentLocation();
+    if (position == null) {
       return;
     }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-    
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    } 
-
-    final position = await Geolocator.getCurrentPosition();
     await setLocation(position.latitude, position.longitude);
   }
 

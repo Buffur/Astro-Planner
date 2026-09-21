@@ -20,6 +20,7 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import '../../support/fake_location_service.dart';
 
 class _MockWeather implements WeatherRepository {
   @override
@@ -51,9 +52,10 @@ void main() {
       _MockWeather(),
       locationRepo,
       LightPollutionRepository(),
+      locationService: FakeLocationService(),
     );
 
-    await Future.delayed(const Duration(milliseconds: 300));
+    await vm.ready;
   });
 
   tearDown(() async {

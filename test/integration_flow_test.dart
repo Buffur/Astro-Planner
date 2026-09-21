@@ -20,6 +20,7 @@ import 'package:astroplan/domain/models/astro_target.dart' as domain;
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'support/fake_location_service.dart';
 
 class MockWeatherRepository implements WeatherRepository {
   @override
@@ -53,7 +54,8 @@ void main() {
     
     testTarget = domain.AstroTarget(
       id: 1, catalogId: 'M42', commonName: 'Orion Nebula', type: 'Nebula',
-      rightAscension: 5.59, declination: -5.45
+      rightAscension: 83.85, // degrees (5.59 h x 15)
+      declination: -5.45
     );
     await targetRepo.insertTarget(testTarget);
     
@@ -63,10 +65,6 @@ void main() {
       pixelPitch: 3.76, averageRawFileSizeMB: 50.0
     );
     await equipmentRepo.insertEquipment(testEquip);
-
-    plannerViewModel = PlannerViewModel(
-      targetRepo, equipmentRepo, MockWeatherRepository(), locationRepo, LightPollutionRepository()
-    );
   });
 
   tearDown(() async {
@@ -78,6 +76,16 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
+
+    // The ViewModel's async initialisation (SharedPreferences, in-memory Drift)
+    // needs the real event loop, which the fake-async test zone never runs.
+    await tester.runAsync(() async {
+      plannerViewModel = PlannerViewModel(
+        targetRepo, equipmentRepo, MockWeatherRepository(), locationRepo, LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await plannerViewModel.ready;
+    });
 
     await tester.pumpWidget(
       MultiProvider(

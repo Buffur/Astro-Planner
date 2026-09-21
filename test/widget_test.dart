@@ -19,6 +19,7 @@ import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'support/fake_location_service.dart';
 
 class MockWeatherRepository implements WeatherRepository {
   @override
@@ -84,7 +85,7 @@ void main() {
           Provider<LogbookRepository>.value(value: logbookRepo),
           Provider<LocationRepository>.value(value: locationRepo),
           Provider<LightPollutionRepository>(create: (_) => LightPollutionRepository()),
-          ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, eqRepo, weatherRepo, locationRepo, LightPollutionRepository())),
+          ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, eqRepo, weatherRepo, locationRepo, LightPollutionRepository(), locationService: FakeLocationService())),
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
