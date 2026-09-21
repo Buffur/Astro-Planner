@@ -34,7 +34,18 @@ The baseline project documents live in `docs/`:
 - `docs/TEST_PLAN.md`
 - `docs/DECISIONS.md`
 
+Documentation reconciled against the code on 2026-09-21 (design intent and actual
+state are kept separate). **Start with `docs/PROJECT_HANDOFF.md`**:
+
+- `docs/PROJECT_HANDOFF.md` — entry point and document map
+- `docs/FEATURE_STATUS.md` — per-feature status
+- `docs/TECH_DEBT.md` — debt register
+- `docs/SCIENTIFIC_INTEGRITY.md` — scientific issue and calculation register
+- `docs/PROJECT_AUDIT.md` — audit evidence and discrepancy log
+
 The AI collaboration structure lives in `.agents/`.
+
+Agent instructions are in `CLAUDE.md`.
 
 ## Current Status
 

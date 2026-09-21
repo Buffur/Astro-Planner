@@ -76,3 +76,26 @@ roadmap areas, including weather, metadata import, logbook, light-pollution
 handoff, field mode, and sharing. These features should be reviewed before
 further expansion to decide whether they are approved scope or should be
 temporarily hidden/rolled back.
+
+### Implementation status pointer (audited 2026-09-21)
+
+*The specification above is the design intent and is unchanged. Per-feature actual
+status lives in `docs/FEATURE_STATUS.md`; deviations from this specification are
+recorded in `docs/DECISIONS.md` (DEV-P6) and `docs/SCIENTIFIC_INTEGRITY.md`.*
+
+Verified status of the areas named in the note above: weather — Partial;
+metadata import — Prototype; logbook — Partial (plan-only); light-pollution
+handoff — Broken (hard-coded coordinates; the automatic Bortle fetch also fails);
+field mode — Prototype (ungated); sharing — text sharing works, the JSON manifest is
+test-only. Whether these are approved scope is **still an open owner decision**
+(`docs/DECISIONS.md` PD-06).
+
+MVP-scope items not yet met: tracking information (stored, not exposed); saved
+locations (no management UI); moonrise/moonset and Moon–target separation
+(missing); a curated catalog beyond 5 objects; storage estimates that distinguish
+theoretical payload from empirical size (only empirical exists, and unknown shows
+as 0.0 MB); NPF as a labelled recommendation (formula wrong, not surfaced);
+metadata import verified against real files (no samples exist).
+
+A "Custom Dashboard" appears in earlier working notes but is **not part of this
+specification** (`docs/DECISIONS.md` PD-14).
