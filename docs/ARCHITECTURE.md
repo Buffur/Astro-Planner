@@ -8,8 +8,13 @@
 > *(updated TASK 1.1)*/*(updated TASK 1.2)*. TASK 2.2 (2026-09-22) added pure-domain
 > time types, not yet used by the app; see B5 *(updated TASK 2.2)*. TASK 2.3
 > (2026-09-22, commit `de1792a`) made the calculators and the altitude chart consume
-> `SessionNight`; see B1, B2, DEV-A3 *(updated TASK 2.3)*. Line references into
-> `planner_viewmodel.dart` were taken at `900b82a` and are now off by more.
+> `SessionNight`; see B1, B2, DEV-A3 *(updated TASK 2.3)*. TASK 2.4 (2026-09-22,
+> commit `1e58fcf`) made `PlannerViewModel` and the UI (`home_screen.dart`,
+> `sky_darkness_widget.dart`, `altitude_chart_widget.dart`, `logbook_screen.dart`)
+> consume `SessionNight` through one `NightTimeFormatter`; see B4, B5, B11
+> *(updated TASK 2.4)*. Line references into `planner_viewmodel.dart` were taken at
+> `900b82a` and are now off by more; several were replaced with getter names in
+> TASK 2.4's edits.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -192,7 +197,7 @@ Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 | --- | --- | --- |
 | 1 | **Bootstrap / hydration** in `_init()`/`_loadInitialState()`, started from the constructor, awaitable via `ready` *(updated TASK 1.1)*: reads shared preferences, active location, capture plan, thresholds, selected target/equipment; a failure sets `hasBootstrapError` (retry via `retryBootstrap()`) instead of throwing unguarded; weather is **not** awaited here any more — it loads after the first frame *(updated TASK 1.2)*; fires reverse geocoding | `:81-172` |
 | 2 | **Selection state** — target and equipment, mirrored to shared preferences | `:330-342` |
-| 3 | **Session date** and **session loading** (`setSessionDate`, `newSession`, `loadSession`, `_activeSessionLog`); target/equipment re-matched from a log by **name** | `:137-141,373-411` |
+| 3 | **Session night** and **session loading** *(updated TASK 2.4)*: `sessionNight` resolves a `SessionNight` (default via `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)`, or a picked `CalendarDate` via `.forEveningDate(...)`; null without a site, ADR-007 §9); `setEveningDate`, `newSession` (clears the pick), `loadSession` (maps a legacy instant to its device-local evening date), `_activeSessionLog`; target/equipment re-matched from a log by **name** | `:sessionNight/eveningDate/setEveningDate/loadSession/newSession` |
 | 4 | **Location** — coordinates; `setLocation` (persists, and overwrites the active saved profile); `useCurrentLocation` (through the injected `LocationService`; *updated TASK 1.1*); default London until a position is obtained | `:216-280` |
 | 5 | **Reverse geocoding** — raw `http.get` to Nominatim, errors swallowed (the doc comment still says "Open-Meteo") | `:163-187` |
 | 6 | **Light pollution / Bortle** — `_fetchBortle` (calls the concrete repository), `setBortleClass`, default 4 | `:189-214,344-364` |
@@ -203,11 +208,12 @@ Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 
 State fields: `_isLoading`, `_bootstrapError`, `_usingDefaultLocation` *(both added
 TASK 1.2)*, `_selectedTarget`, `_selectedEquipment`, `_currentWeather`,
-`_weatherError` *(added TASK 1.2)*, `_locationName`, `_sessionDate` (default
-`DateTime.now().toUtc()`, `:36`), `_latitude`/`_longitude` (default London),
-`_captureBlocks`, `_bortleClass` (default 4), `_dewPointThreshold` (default 2.0),
-`_activeSessionLog`, `_minAltitude` (default 20.0). The `captureBlocks` getter
-exposes the internal mutable list.
+`_weatherError` *(added TASK 1.2)*, `_locationName`, `_pickedEveningDate`
+(a `CalendarDate?`, replacing `_sessionDate`; null = use the default night,
+*updated TASK 2.4*), `_clock` (a `Clock`, default `SystemClock`; *added TASK 2.4*),
+`_latitude`/`_longitude` (default London), `_captureBlocks`, `_bortleClass`
+(default 4), `_dewPointThreshold` (default 2.0), `_activeSessionLog`, `_minAltitude`
+(default 20.0). The `captureBlocks` getter exposes the internal mutable list.
 
 Direct imports that skip the intended layers: `package:http`,
 `package:shared_preferences`, the concrete
@@ -251,8 +257,9 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
   (`lib/domain/models/`), the `SiteTimeContext` seam with `MeanSolarTimeContext` and
   `FixedOffsetTimeContext` (`lib/domain/models/site_time_context.dart`), and the
   static, pure `SessionNightResolver` (`lib/domain/services/`).
-- **Not wired yet:** no ViewModel, widget or calculator uses these yet (TASKs
-  2.3–2.4), so the time-base table below still describes the running app.
+- **Wired (TASK 2.3, TASK 2.4):** the calculators, the altitude chart and now
+  `PlannerViewModel`/`home_screen.dart`/`sky_darkness_widget.dart`/
+  `logbook_screen.dart` all consume `SessionNight`. B11 below is updated to match.
 
 ## B6. Data layer (`lib/data/`)
 
@@ -328,18 +335,23 @@ active-location pointer, weather cache). Details, keys and migration history:
 
 ## B11. Time handling as built
 
+*(Table rewritten TASK 2.4 — the ViewModel and UI now go through `SessionNight`;
+see ADR-007 for the design.)*
+
 | Component | Time base |
 | --- | --- |
-| `_sessionDate` default | **UTC** (`DateTime.now().toUtc()`); the date picker yields a **local-midnight** non-UTC `DateTime` |
-| `calculateNightTimeline` / `calculateVisibilityWindows` | **Unchanged behavior, new implementation *(updated TASK 2.3)*:** still read Y/M/D of the input as the evening date, still return UTC — now via `SessionNightResolver.forEveningDate` with a `MeanSolarTimeContext`, instead of ad-hoc `12:00 UTC − longitude/15 h` math. A `SessionNight`-based sibling of each (`calculateNightTimelineForNight`, `calculateVisibilityWindowsForNight`) exists but nothing in the app calls it yet (TASK 2.4) |
+| `PlannerViewModel.sessionNight` | Default: `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)` — the window containing "now", via an injectable `Clock` (`SystemClock` in production). Picked: `.forEveningDate(_pickedEveningDate!, ...)`. Both use `MeanSolarTimeContext(_longitude)` (no IANA zone before TASK 7.1). Null without a site (ADR-007 §9) |
+| `calculateNightTimeline` / `calculateVisibilityWindows` | Deprecated DateTime-based wrappers (TASK 2.3); no longer called by the app. `PlannerViewModel` now calls `calculateNightTimelineForNight`/`calculateVisibilityWindowsForNight` directly with the resolved `SessionNight` |
 | `AstronomicalEngine.calculateJulianDate` | Requires UTC (throws otherwise) |
-| `AltitudeChartWidget` | *(updated TASK 2.3)* Starts at the **same mean-solar-noon window** as the calculators above (no longer device-local noon); x-axis labels still device-local (`instantUtc.toLocal()`) |
-| `SkyDarknessWidget` | Prints `dt.toLocal()` (**device** time zone) |
-| Weather | `timezone=auto` → naive site-local strings parsed as **device-local**; offset discarded; `lastUpdated` uses the device clock |
-| Sessions | Stored as epoch seconds, read back as local `DateTime`; `toJson` writes UTC ISO-8601; `toShareableText` prints local date |
+| `AltitudeChartWidget` | Takes the ViewModel's `SessionNight` directly (constructor changed, TASK 2.4) — no longer resolves its own |
+| `NightTimeFormatter` (new, TASK 2.4) | The one formatter for night-related instants (`home_screen.dart`, `sky_darkness_widget.dart`, `logbook_screen.dart`): every instant is converted with `.toLocal()` exactly once, inside the formatter, and labelled "device zone, UTC±HH:MM" (the site's own zone is not available before TASK 7.1); times after midnight carry a "+1" marker |
+| `PlannerViewModel.currentAltitude`/`maxAltitude` | Still call `_clock.nowUtc()` directly and run their own JD/GMST/LST/LHA pipeline, not the `AltitudeCurve` (TD-023, unresolved — out of TASK 2.4's roadmap scope) |
+| Weather | `timezone=auto` → naive site-local strings parsed as **device-local**; offset discarded; `lastUpdated` uses the device clock (unaffected by TASK 2.4; G9) |
+| Sessions | Stored as epoch seconds, read back as local `DateTime` (unchanged schema — G11/PD-18 decide persistence of `SessionNight` itself). `loadSession`/Save Session and `LogbookScreen` now map that legacy instant to its device-local evening date via `CalendarDate.fromDateTimeFields` at the same place, instead of three divergent ad-hoc `.toLocal()` calls (ADR-007 §10 "legacy rows") |
 
-Consequence (verified): the default night is wrong for evenings west of UTC — see
-SI-010 / TD-001. There is no notion of the **site's** time zone anywhere.
+Consequence: the default night defect (SI-010 / TD-001) is **fixed** as of TASK 2.4.
+There is still no notion of the **site's** time zone anywhere (TASK 7.1); every
+displayed time is the device's.
 
 ## B12. Test architecture
 

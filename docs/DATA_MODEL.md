@@ -6,7 +6,11 @@
 > B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change. **TASK 2.3
 > (2026-09-22, commit `de1792a`):** two more non-persisted types added
 > (`NightTimeline`/`SunThresholdResult`, `AltitudeCurve`/`AltitudeSample`);
-> `VisibilityWindow` gained two fields; no schema change.
+> `VisibilityWindow` gained two fields; no schema change. **TASK 2.4 (2026-09-22,
+> commit `1e58fcf`):** `CalendarDate` and `SessionNight` are now used by the running
+> app (`PlannerViewModel._pickedEveningDate`); still no schema change — a legacy
+> `SessionLog.sessionDate` instant maps to its device-local evening date at read
+> time (ADR-007 §10), it is not stored as a `CalendarDate` yet (G11, PD-18).
 >
 > This document keeps **three things separate** on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -155,11 +159,11 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | `WeatherConditions` | temperature (°C); cloudCover (%); humidity (%); dewPoint (°C); windSpeed (km/h, provider default); hourlyForecasts; lastUpdated (device clock) | shared preferences cache only | No provider/model, offset, validity window or staleness field |
 | `HourlyForecast` | time; temperature; cloudCover; dewPoint; humidity; precipitationProbability (%); windSpeed; isDaytime | inside the weather cache | `time` is a **naive site-local string parsed as device-local** (SI-010) |
 | `VisibilityWindow` | start, end (UTC); clippedAtStart, clippedAtEnd (bool) *(fields added TASK 2.3)* | not persisted | `duration` getter; value equality (now includes the clip flags). A window is clipped when it touches a `SessionNight` boundary in polar night (ADR-007 §9); always `false` for windows from the legacy DateTime-based API path, though that path can itself produce a clipped window (verified) since clipping depends only on the astronomy, not on which API computed it |
-| `NightTimeline` / `SunThresholdResult` *(TASK 2.3)* | night (`SessionNight`); four `SunThresholdResult` fields (sunriseSunset, civilTwilight, nauticalTwilight, astronomicalTwilight), each a `SunCrossing` (duskUtc?, dawnUtc?, belowAtStart, belowAtEnd), `SunNeverBelow` or `SunAlwaysBelow` | not persisted | Replaces the stringly-typed `Map<String, DateTime?>` (TD-024); "not reached" is never a bare null (SI-008). Built by `VisibilityCalculator.calculateNightTimelineForNight`; **not used by the app yet** (TASK 2.4) |
+| `NightTimeline` / `SunThresholdResult` *(TASK 2.3)* | night (`SessionNight`); four `SunThresholdResult` fields (sunriseSunset, civilTwilight, nauticalTwilight, astronomicalTwilight), each a `SunCrossing` (duskUtc?, dawnUtc?, belowAtStart, belowAtEnd), `SunNeverBelow` or `SunAlwaysBelow` | not persisted | Replaces the stringly-typed `Map<String, DateTime?>` (TD-024); "not reached" is never a bare null (SI-008). Built by `VisibilityCalculator.calculateNightTimelineForNight`; consumed by `sky_darkness_widget.dart` via sealed-class pattern matching *(wired TASK 2.4)* |
 | `AltitudeCurve` / `AltitudeSample` *(TASK 2.3)* | night (`SessionNight`); samples: List of {instantUtc, sunAltitudeDeg, targetAltitudeDeg}, 5-minute grid, 289 points inclusive of both ends | not persisted | Built by `VisibilityCalculator.calculateAltitudeCurve`; consumed by `AltitudeChartWidget`, the only current caller |
-| `CalendarDate` *(TASK 2.2)* | year; month; day (no time, no zone) | not persisted yet | Validated; ISO `YYYY-MM-DD` round trip; the intended persisted form of a night's evening date (ADR-007 §10, G11) |
+| `CalendarDate` *(TASK 2.2)* | year; month; day (no time, no zone) | not persisted yet | Validated; ISO `YYYY-MM-DD` round trip; the intended persisted form of a night's evening date (ADR-007 §10, G11). **Wired TASK 2.4:** `PlannerViewModel._pickedEveningDate` and `NightTimeFormatter.eveningDate` |
 | `SiteTimeContext` *(TASK 2.2)* | `id`; `offsetAt(utc)` | not persisted yet | `MeanSolarTimeContext` (id `solar`, offset `round(λ·240 000)` ms) and `FixedOffsetTimeContext` (id such as `UTC+14:00`); an IANA context arrives in TASK 7.1 |
-| `SessionNight` *(TASK 2.2)* | eveningDate (`CalendarDate`); startUtc; endUtc (= start + 24 h); latitude, longitude (deg, λ normalized to (−180, 180]); timeContextId | not persisted | Built by `SessionNightResolver` (ADR-007); **not used by the app yet** (TASK 2.4) |
+| `SessionNight` *(TASK 2.2)* | eveningDate (`CalendarDate`); startUtc; endUtc (= start + 24 h); latitude, longitude (deg, λ normalized to (−180, 180]); timeContextId | not persisted | Built by `SessionNightResolver` (ADR-007); consumed by `PlannerViewModel.sessionNight` and the UI *(wired TASK 2.4)* |
 | `SessionFeasibility`, `FeasibilityState` | totals + `feasible`/`tight`/`infeasible` | not persisted | Defined in `session_calculator.dart` |
 | `ImageMetadata` | all strings: make, model, focalLength, aperture, exposureTime, iso, dateTimeOriginal, rawTags | not persisted | Display-only |
 
@@ -174,7 +178,7 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | Aperture field | **f-number** (dimensionless) — one seed violates this (SI-005) |
 | Exposure | seconds |
 | Timestamps in domain math | UTC (`AstronomicalEngine` throws if not UTC; `SessionNightResolver` and `FixedClock` reject non-UTC inputs) |
-| Session-night evening date *(TASK 2.2, not wired)* | Civil calendar date at the site (`CalendarDate`), never an instant (ADR-007) |
+| Session-night evening date *(TASK 2.2; wired into the ViewModel TASK 2.4)* | Civil calendar date at the site (`CalendarDate`), never an instant (ADR-007) |
 | Timestamps in DB | epoch seconds (Drift default), read back as local `DateTime` |
 | Weather | Open-Meteo defaults: °C, %, km/h; hourly times are site-local naive strings |
 | Elevation | Unit unspecified (assumed metres); not used in any calculation |
@@ -364,7 +368,8 @@ camera module and device **without checking whether other rigs reference them**
   night, site, target, equipment (stable references), capture plan, weather
   snapshot, opportunity, execution state, log.
 - **Nearest:** `SessionLog` and the ViewModel's implicit "current session"
-  (`_activeSessionLog`, `_sessionDate`, selections) — **Partial**.
+  (`_activeSessionLog`, `_pickedEveningDate`/`sessionNight`, selections) —
+  **Partial**.
 - **Gaps:** no stable references (DEV-D3); no coordinates/time zone; plan, execution
   and log are conflated in one row; no identity feedback after Save (duplicates).
 - **Open decisions:** is Session the aggregate root; snapshot immutability;
@@ -440,9 +445,10 @@ camera module and device **without checking whether other rigs reference them**
 ## C11. Additional concepts identified by the audit (also **Missing**)
 - **SessionNight / time context** — the site-local noon-to-noon window and its
   time zone (SI-010; PD-01, PD-02). *Progress:* decided by ADR-007 (TASK 2.1) and
-  implemented as a non-persisted domain type, used by the calculators and the
-  altitude chart (TASK 2.2, 2.3; see Part B). **Still Missing** from the app's own
-  state: the ViewModel and the schema (TASK 2.4, G11).
+  implemented as a non-persisted domain type, used by the calculators, the
+  altitude chart (TASK 2.2, 2.3) and now the ViewModel and UI (TASK 2.4; see Part
+  B). **Still Missing:** persistence — the schema still stores a legacy instant,
+  mapped to its evening date at read time, not a `CalendarDate` of its own (G11).
 - **MoonConditions** — illumination, altitude, rise/set and separation over the
   window (SI-002).
 - **Provenance record** — source, version, date, confidence (DEV-D5).

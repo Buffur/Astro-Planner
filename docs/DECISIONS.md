@@ -13,7 +13,11 @@
 > (`visibility_calculator.dart`, `planner_viewmodel.dart`, `altitude_chart_widget.dart`,
 > `sky_darkness_widget.dart`, `home_screen.dart`, `open_meteo_weather_repository.dart`,
 > `session_log.dart`) at commit `56344e2`. **TASK 2.2 (2026-09-22):** ADR-007 status
-> line updated (domain part implemented).
+> line updated (domain part implemented). **TASK 2.3 (2026-09-22, `de1792a`):**
+> ADR-007 §8/§9 implemented (typed timeline, shared sampling grid, the altitude
+> chart made render-only). **TASK 2.4 (2026-09-22, `1e58fcf`):** ADR-007 §5/§6
+> implemented (`PlannerViewModel.sessionNight`, `NightTimeFormatter`); PD-01/PD-02
+> now fully realized in the running app, not just the domain layer.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -380,7 +384,27 @@ Status: accepted (owner, 2026-09-22, TASK 2.1). Resolves PD-01 and PD-02.
   altitude chart made render-only. The old DateTime-based `calculateNightTimeline`/
   `calculateVisibilityWindows` are now thin wrappers over the new API, so no caller
   needed to change.
-- **Not done yet:** ViewModel and UI (TASK 2.4), the IANA zone (TASK 7.1).
+- **Done (TASK 2.4, 2026-09-22, commit `1e58fcf`):** §5 (`PlannerViewModel.sessionNight`
+  resolves the default night through the injectable `Clock`, and a picked
+  `CalendarDate` through `forEveningDate`; `newSession()` clears back to the
+  default instead of re-setting a fixed UTC `DateTime`) and §6 (one
+  `NightTimeFormatter` — `home_screen.dart`, `sky_darkness_widget.dart` and
+  `logbook_screen.dart` no longer call `.toLocal()` ad hoc; every instant is
+  labelled "device zone, UTC±HH:MM" since the site's own zone is not available
+  before TASK 7.1; times after midnight carry a "+1" marker). §9's "no site set"
+  state is implemented (`sessionNight`/`eveningDate` return null without a site;
+  Home shows a "No site set" subtitle and a placeholder card instead of the
+  default London default). §9's Moon-illumination instant is used as an interim
+  choice (`startUtc + 12h`) — **G6 has not formally decided it**, so this is
+  recorded as provisional in `docs/SCIENTIFIC_INTEGRITY.md`, not as a closed
+  decision.
+- **Not done yet:** the IANA zone and per-site display zone (TASK 7.1); weather
+  alignment (G9); persisting `SessionNight` itself instead of mapping legacy
+  instant rows (G11, PD-18) — `home_screen.dart`'s Save Session still stores
+  local midnight of the picked evening date, per §10's "legacy rows" proposal;
+  `PlannerViewModel.currentAltitude`/`maxAltitude` still run their own
+  JD/GMST/LST/LHA pipeline rather than consuming the `AltitudeCurve` (TD-023,
+  out of TASK 2.4's roadmap scope).
 
 ### 1. Context
 

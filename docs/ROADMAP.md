@@ -205,8 +205,16 @@ rewritten to match the code.*
     shared 5-minute grid; the old DateTime-based calculators are now thin wrappers,
     so `planner_viewmodel.dart` and `sky_darkness_widget.dart` need no change yet
     (147 tests green). Not yet used by the ViewModel.
-  - **Next: TASK 2.4 — Planner and UI adopt SessionNight.** Not started; it begins
-    only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 2.4** (`1e58fcf`) — `PlannerViewModel` resolves a
+    real `SessionNight` (default via an injectable `Clock`, picked date via a
+    `CalendarDate`), fixing TD-001/SI-010's default-path defect at its source; the
+    date picker, Home, `sky_darkness_widget.dart`, `altitude_chart_widget.dart` and
+    `logbook_screen.dart` all consume it through one new `NightTimeFormatter`; a
+    "No site set" state replaces the silent default-London astronomy (ADR-007 §9);
+    the old defect-asserting test is replaced, with the reason recorded (152 tests
+    green). Group G2 is complete.
+  - **Next: TASK 3.1 — ADR: persistence baseline and provenance (PD-04, PD-09).**
+    Not started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

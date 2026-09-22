@@ -10,7 +10,14 @@
 > (commit `de1792a`):** CALC-10/CALC-11 reimplemented as wrappers over new
 > calculations CALC-22/CALC-23/CALC-24 (SessionNight-based timeline, windows,
 > altitude curve); same formulas, not yet used by the app either; SI-010 progress
-> extended.
+> extended. **TASK 2.4 (2026-09-22, commit `1e58fcf`):** SI-010 resolved — the
+> ViewModel now resolves a real `SessionNight` (see `docs/TECH_DEBT.md` TD-001).
+> `PlannerViewModel.lunarIllumination` (CALC-09's caller) now evaluates at
+> `sessionNight.startUtc + 12h` (mean solar midnight) instead of the old
+> `_sessionDate`; this is ADR-007 §9's suggested **candidate** instant for
+> night-level scalars, used here as an interim, documented choice — **G6 has not
+> formally decided the canonical evaluation instant**, so this is not a closed
+> scientific decision. See SI-002's update below.
 > **Nothing in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
@@ -47,7 +54,7 @@ Correct Interpretation → Required Future Action.**
 | SI-007 | Bortle default vs unknown | Broken (fetch), Partial (manual, hidden) | TD-006 |
 | SI-008 | Unknown treated as zero / default presented as fact | Partial | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
-| SI-010 | "Night" definition and date/time-zone semantics | Broken (default path) | TD-001, TD-020 |
+| SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
 | SI-011 | Seed equipment data provenance and internal consistency | Unknown / Partial | TD-008 |
 | SI-012 | Target coordinates, epoch and object types | Partial | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
@@ -138,8 +145,14 @@ geometry exists.
   - worst error at new/full: **0.8 percentage points**.
 - `SkyDarknessWidget` prints one decimal (e.g. `Moon Illumination: 45.3%`)
   (`lib/presentation/widgets/sky_darkness_widget.dart:15`).
-- Illumination is evaluated at the instant stored in `_sessionDate` (now, or the
-  picked date at local midnight), not over the imaging window.
+- Illumination is evaluated at one instant of the `SessionNight`, not over the
+  imaging window. **Updated TASK 2.4 (2026-09-22, commit `1e58fcf`):** that
+  instant is now `sessionNight.startUtc + 12h` (mean solar midnight), ADR-007
+  §9's candidate for night-level scalars — chosen as a documented interim value,
+  not a formal decision (G6 owns that decision). Before TASK 2.4 it was whatever
+  `_sessionDate` held (now, or the picked date at local midnight); `null` when
+  there is no site (SI-008), instead of silently evaluating at the default
+  London coordinates.
 - There is **no** Moon altitude, moonrise/moonset, or Moon–target angular
   separation anywhere in the code (all are in the `PRODUCT_SPEC.md` MVP scope).
 - `PlannerViewModel.skyDarknessWarning` uses `illumination > 0.8` regardless of
@@ -505,7 +518,21 @@ yet — `PlannerViewModel.sessionDate` is still the UTC calendar date, and both
 CALC-10/CALC-11's wrapper and the chart derive their window from that same wrong
 date. TASK 2.4 is what fixes the default itself.
 
-**Status:** Broken (default path). **Work items:** TD-001, TD-020.
+**RESOLVED 2026-09-22 (TASK 2.4, commit `1e58fcf`):** `PlannerViewModel.sessionNight`
+now calls `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)` for the
+default (or `.forEveningDate(...)` for a picked date) — CALC-21 directly, not the
+legacy UTC-date path. Verified against the ADR-007 T1 case (San Francisco,
+18:30 PDT on 2026-09-21) by both a ViewModel test and a Home widget test: the
+resolved evening date is 2026-09-21, not the 22nd. `home_screen.dart`,
+`sky_darkness_widget.dart`, `altitude_chart_widget.dart` and `logbook_screen.dart`
+all consume the same `SessionNight`/`NightTimeFormatter` (§6's "one formatter"),
+so the chart, timeline, header and logbook can no longer diverge from each other.
+Still device-zone display only (no site IANA zone; TASK 7.1) — that part of
+SI-010 stays open under TD-020.
+
+**Status:** Resolved (default path; TASK 2.4). **Open remainder:** site
+time-zone display (TD-020, TASK 7.1). **Work items:** ~~TD-001~~ (resolved),
+TD-020.
 
 ---
 
@@ -639,10 +666,10 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° → s | Deviates from published (SI-001) | Clamps abs(δ) to 89.9°; throws for f ≤ 0 or N ≤ 0; **not surfaced** | 1 (circular) | Fair |
 | CALC-18 | `SessionCalculator.calculateFeasibility` | windows, required duration → state + totals | Sum of windows; infeasible if required > available; tight if > 85 % | Arbitrary margin (SI-006); no Moon/weather | 5 | Fair |
 | CALC-19 | `SessionCalculator.estimateTotalDuration` | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | **Dead code** — nothing calls it | 1 | Good (but unused) |
-| CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good (**not yet used by the app**) |
+| CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good — consumed by `PlannerViewModel.sessionNight` (TASK 2.4) |
 | CALC-20 | `PlannerViewModel` derived getters | plan + site → various | `estimatedRequiredTime` = Σ(exposure×count over **all** block types) + 5 s × frames; `totalIntegrationTime` = Σ lights only; `maxAltitude` = altitude at LHA = 0 | Not restricted to the night; conflates integration, acquisition and calibration (TD-022) | **none** | Poor |
-| CALC-22 *(TASK 2.3)* | `VisibilityCalculator.calculateNightTimelineForNight` | `SessionNight` → `NightTimeline` | Same Sun-crossing scan as CALC-10, on `[night.startUtc, night.endUtc]` at the shared 5-min step; typed per threshold (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow`), never a bare null (SI-008) | Same as CALC-10 (SI-009); first crossing only per threshold | ADR-007 T13–T15 (polar cases), exact agreement with CALC-10 for a normal night | Good (**not yet used by the app** — TASK 2.4) |
-| CALC-23 *(TASK 2.3)* | `VisibilityCalculator.calculateVisibilityWindowsForNight` | `SessionNight`, target, minAltitude°, darknessLimitDeg° (−18) → list of `VisibilityWindow` | Same rule as CALC-11 (Sun ≤ limit and target ≥ minAltitude), sampled via CALC-24; a window touching the `SessionNight` boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9) | Same as CALC-11 | polar clip case (Tromsø circumpolar target), exact agreement with CALC-11 for a normal night | Good (**not yet used by the app** — TASK 2.4) |
+| CALC-22 *(TASK 2.3)* | `VisibilityCalculator.calculateNightTimelineForNight` | `SessionNight` → `NightTimeline` | Same Sun-crossing scan as CALC-10, on `[night.startUtc, night.endUtc]` at the shared 5-min step; typed per threshold (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow`), never a bare null (SI-008) | Same as CALC-10 (SI-009); first crossing only per threshold | ADR-007 T13–T15 (polar cases), exact agreement with CALC-10 for a normal night | Good — consumed by `sky_darkness_widget.dart` via `PlannerViewModel.nightTimeline` (TASK 2.4) |
+| CALC-23 *(TASK 2.3)* | `VisibilityCalculator.calculateVisibilityWindowsForNight` | `SessionNight`, target, minAltitude°, darknessLimitDeg° (−18) → list of `VisibilityWindow` | Same rule as CALC-11 (Sun ≤ limit and target ≥ minAltitude), sampled via CALC-24; a window touching the `SessionNight` boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9) | Same as CALC-11 | polar clip case (Tromsø circumpolar target), exact agreement with CALC-11 for a normal night | Good — consumed by `PlannerViewModel.visibilityWindows` (TASK 2.4) |
 | CALC-24 *(TASK 2.3)* | `VisibilityCalculator.calculateAltitudeCurve` | `SessionNight`, target → `AltitudeCurve` (289 samples) | Sun and target altitude (CALC-07, CALC-08) on the shared 5-min grid, `night.startUtc` to `night.endUtc` inclusive | Same simplifications as CALC-07/CALC-08 (no refraction, low-precision Sun) | grid spacing/count, agreement with CALC-22's crossing instant | Good — consumed by `AltitudeChartWidget`, the only current caller |
 
 ---

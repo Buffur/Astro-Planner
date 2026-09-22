@@ -8,7 +8,12 @@
 > `SessionNight` resolver and `Clock`, not yet used by the app; affected entries are
 > F-09, F-10 and F-48. **TASK 2.3 (2026-09-22, commit `de1792a`):** the calculators
 > and the altitude chart consume `SessionNight`; affected entries are F-12, F-13,
-> F-14 and F-48. Statuses were assigned from the code and
+> F-14 and F-48. **TASK 2.4 (2026-09-22, commit `1e58fcf`):** the ViewModel resolves
+> a real `SessionNight` (default = the window containing "now", via an injectable
+> `Clock`) instead of `DateTime.now().toUtc()`, and Home, the sky-darkness timeline,
+> the altitude chart and the logbook consume it through one shared
+> `NightTimeFormatter`; affected entries are F-08, F-09, F-12, F-13, F-14, F-15.
+> Statuses were assigned from the code and
 > from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -43,7 +48,7 @@ feature exists although its roadmap phase has not been reached in
 | F-06 | Active location (GPS, map, reverse geocoding) | Partial | 8 |
 | F-07 | Saved locations management | Partial | 4 |
 | F-08 | Session date selection (picker) | Partial | 8 |
-| F-09 | Default "tonight" resolution | **Broken** | 8 |
+| F-09 | Default "tonight" resolution | Implemented *(fixed TASK 2.4)* | 8 |
 | F-10 | Site time-zone handling | Partial | 8 |
 | F-11 | Astronomy core (JD, GMST, LST, altitude) | Implemented | 5 |
 | F-12 | Sun altitude and night timeline | Partial | 8 |
@@ -154,34 +159,34 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-08 — Session date selection (picker)
 - **Status:** Partial
-- **Current implementation:** date picker on Home sets `_sessionDate` to a local-midnight `DateTime`; the night computation treats its Y/M/D as the local solar date (correct semantics).
-- **Relevant files:** `home_screen.dart:111-131`, `planner_viewmodel.dart:137-141`.
-- **Known issues:** "updates weather" only refetches the same "now + 48 h" forecast; the displayed date is not labelled with a time zone; picker range is −1 to +5 years (weather is meaningless beyond ~2 days); `sessionDate` is UTC for the default but local after picking or loading a log (TD-001, TD-017).
+- **Current implementation (TASK 2.4):** the date picker sets `PlannerViewModel._pickedEveningDate` (a `CalendarDate`, not a `DateTime`); `viewModel.setEveningDate()` re-resolves the `SessionNight` through `SessionNightResolver.forEveningDate`. The Session Date subtitle reads "Night of <date>" via `NightTimeFormatter`, or "No site set" when there is no site (ADR-007 §9).
+- **Relevant files:** `home_screen.dart` (Session Date `ListTile`), `planner_viewmodel.dart` (`eveningDate`, `setEveningDate`).
+- **Known issues:** "updates weather" only refetches the same "now + 48 h" forecast (weather itself is still not date-aware, TD-017); picker range is −1 to +5 years (weather is meaningless beyond ~2 days); the picked date is not itself zone-labelled (only the resulting night's instants are, via `NightTimeFormatter`). *Resolved (TASK 2.4):* the default and the picked date used to go through inconsistent UTC/local `DateTime` paths — both now go through `CalendarDate` and one resolver.
 - **Dependencies:** F-12.
 - **Roadmap relevance:** Phase 8.
 
 ## F-09 — Default "tonight" resolution
-- **Status:** Broken
-- **Current implementation:** the ViewModel's default `_sessionDate` is `DateTime.now().toUtc()`.
-- **Relevant files:** `planner_viewmodel.dart:36`, `visibility_calculator.dart:85-90,139-151`.
-- **Known issues:** uses the **UTC calendar date**. Verified: at 18:30 PDT the app shows the next night's sunset 24.0 h late and the header reads tomorrow's date; the timeline, windows, chart and feasibility are all for the wrong night. Correct in Europe. Not covered by any test (SI-010; TD-001).
-- **Progress (TASK 2.2, 2026-09-22):** PD-01 and PD-02 are decided (ADR-007). A
-  correct, tested pure-domain resolver exists (`SessionNightResolver.resolveDefault`
-  in `lib/domain/services/session_night_resolver.dart`; the ADR-007 matrix passes,
-  including San Francisco at 18:30 PDT). **Nothing in the app uses it yet**, so the
-  status stays Broken until TASK 2.4 (the ViewModel) and TASK 2.3 (the calculators).
-- **Dependencies:** ~~decisions PD-01, PD-02~~ (resolved); TASKs 2.3 and 2.4.
-- **Roadmap relevance:** Phase 8; blocks Phases 9–10.
+- **Status:** Implemented *(fixed TASK 2.4, 2026-09-22, commit `1e58fcf`)*
+- **Current implementation:** `PlannerViewModel.sessionNight` calls `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)` when no evening date has been picked; `_clock` is an injectable `Clock` (`SystemClock` in production, `FixedClock` in tests), never `DateTime.now()` directly.
+- **Relevant files:** `planner_viewmodel.dart` (`sessionNight` getter), `lib/domain/services/session_night_resolver.dart`, `lib/core/time/clock.dart`.
+- **Verified:** a ViewModel test (`planner_session_date_test.dart`, San Francisco, `FixedClock(2026-09-22T01:30Z)` = 18:30 PDT on 2026-09-21) asserts `eveningDate == CalendarDate(2026, 9, 21)` — the night containing "now", not the UTC calendar date the old rule gave (2026-09-22). A matching Home widget test asserts the same case end-to-end through the "Night of ..." subtitle text.
+- **Known issues:** none open for this feature; the limitation at L4 (ADR-007 §5: from sunrise to solar noon the default still shows the night that just ended) is an accepted owner-approved behavior, not a defect.
+- **Dependencies:** ~~decisions PD-01, PD-02~~ (resolved); ~~TASKs 2.3 and 2.4~~ (done).
+- **Roadmap relevance:** Phase 8; unblocks Phases 9–10.
 
 ## F-10 — Site time-zone handling
 - **Status:** Partial *(was Missing; TASK 2.2, 2026-09-22)*
-- **Current implementation:** the domain now has a `SiteTimeContext` seam
+- **Current implementation:** the domain has a `SiteTimeContext` seam
   (`lib/domain/models/site_time_context.dart`), with a mean-solar fallback and a
-  fixed-offset implementation (ADR-007 §6). It is used only by `SessionNightResolver`
-  and its tests. There is still no per-site zone (TASK 7.1) and no zone-labelled
-  display (TASK 2.4). In the running app, as before: times are shown in the **device** zone; weather timestamps are naive; the provider's `utc_offset_seconds` is discarded.
-- **Relevant files:** — (see `sky_darkness_widget.dart:137`, `open_meteo_weather_repository.dart:47`).
-- **Known issues:** remote-site planning shows wrong clock times; weather and timeline can disagree by the zone difference (SI-010; TD-020).
+  fixed-offset implementation (ADR-007 §6), used by `SessionNightResolver`. **TASK
+  2.4:** all night-related times are now shown through one `NightTimeFormatter`,
+  labelled as the **device** zone (`deviceZoneCaption`, e.g. "device zone,
+  UTC−07:00") since the site's own zone is not available before TASK 7.1; times
+  after midnight carry a "+1" marker (ADR-007 §6). There is still no per-site zone.
+  Weather timestamps remain naive and the provider's `utc_offset_seconds` is
+  discarded (unaffected by this task; G9).
+- **Relevant files:** `lib/presentation/shared/night_time_formatter.dart`, `sky_darkness_widget.dart`, `open_meteo_weather_repository.dart:47`.
+- **Known issues:** remote-site planning shows the device's clock times, not the site's; weather and timeline can disagree by the zone difference (SI-010; TD-020).
 - **Dependencies:** decision PD-02.
 - **Roadmap relevance:** Phase 8, 10.
 
@@ -197,7 +202,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Status:** Partial
 - **Current implementation:** low-precision Sun altitude; sunset, civil/nautical/astronomical dusk and dawn, sunrise on a 5-minute scan. **New (TASK 2.3):** a `SessionNight`-based `calculateNightTimelineForNight` returns a typed `NightTimeline` (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow` per threshold, never a bare null); the old `Map<String, DateTime?>`-returning `calculateNightTimeline` is now a thin wrapper over it. UI (`sky_darkness_widget.dart`) still shows sunset, astro dusk/dawn, sunrise and a "True Night Window" from the old wrapper, unchanged.
 - **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/night_timeline.dart`, `lib/presentation/widgets/sky_darkness_widget.dart`.
-- **Known issues:** computed for the wrong night by default (F-09, still true: nothing in the app uses the typed API or a real `SessionNight` yet — TASK 2.4); 5-minute quantization (TD-036); times printed in the device zone; the gradient bar is decorative and unrelated to the data. *Resolved (TASK 2.3):* the stale "refine to 1-minute" comment is gone with the scan loop it was attached to (TD-024).
+- **Known issues:** 5-minute quantization (TD-036); the gradient bar is decorative and unrelated to the data. *Resolved (TASK 2.3):* the stale "refine to 1-minute" comment is gone with the scan loop it was attached to (TD-024). *Resolved (TASK 2.4):* wrong night by default (F-09); `sky_darkness_widget.dart` now consumes the typed `NightTimeline?` directly (sealed-class pattern matching, `null` when there is no site) instead of the deprecated `Map<String, DateTime?>` wrapper; times are labelled with the device zone via `NightTimeFormatter` instead of printed bare.
 - **Dependencies:** F-11, F-09.
 - **Roadmap relevance:** Phase 8.
 
@@ -205,25 +210,25 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Status:** Partial
 - **Current implementation:** windows where the Sun is below −18° (configurable) and the target is above a minimum altitude (default 20°); feeds feasibility. Handles multiple segments and high latitudes. **New (TASK 2.3):** a `SessionNight`-based `calculateVisibilityWindowsForNight`, sharing the 5-minute grid with the timeline and the altitude curve; a window touching the SessionNight boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9, verified for both the new API and the legacy wrapper). The old `calculateVisibilityWindows` is now a thin wrapper over it.
 - **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/visibility_window.dart`, `planner_viewmodel.dart:419-428`.
-- **Known issues:** wrong night by default (F-09, still true: the ViewModel isn't migrated — TASK 2.4); no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; the minimum altitude and Sun limit have no UI control; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009).
+- **Known issues:** no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; the minimum altitude and Sun limit have no UI control; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009). *Resolved (TASK 2.4):* wrong night by default (F-09) — `PlannerViewModel.visibilityWindows` now resolves a real `SessionNight` and returns `[]` without a site instead of silently using default London coordinates (SI-008).
 - **Dependencies:** F-11, F-12.
 - **Roadmap relevance:** Phase 8. Tests: 4 legacy window tests (UTC dates only) plus the TASK 2.3 SessionNight suite (polar cases, clip flags, exact agreement with the legacy wrapper).
 
 ## F-14 — Altitude chart
 - **Status:** Implemented
-- **Current implementation:** `CustomPaint` chart of target altitude over 24 h with day/twilight/night bands, a minimum-altitude line and a "now" marker. **TASK 2.3:** render-only — `build()` resolves a `SessionNight` and calls `VisibilityCalculator.calculateAltitudeCurve` once; the painter only maps the resulting samples (5-minute grid, 289 points, up from the old ad-hoc 96) to pixels, and no longer imports `astronomical_engine.dart` or calls raw astronomy. The chart now shares its window with the timeline/windows (same `SessionNight`), fixing the divergence DEV-A3 described. Constructor unchanged, so `home_screen.dart` needed no change.
-- **Relevant files:** `lib/presentation/widgets/altitude_chart_widget.dart`, `lib/domain/models/altitude_curve.dart`.
-- **Known issues:** shows the wrong night by default (F-09, still true: `sessionDate` is still the ViewModel's UTC-based date until TASK 2.4). *Resolved (TASK 2.3):* astronomy inside the painter and the device-local-noon divergence from the windows/timeline (DEV-A3, TD-023); a widget test now exists (3 tests: a normal night, a polar-night site, and a date with no "now" dot).
+- **Current implementation:** `CustomPaint` chart of target altitude over 24 h with day/twilight/night bands, a minimum-altitude line and a "now" marker. **TASK 2.3:** render-only — `build()` calls `VisibilityCalculator.calculateAltitudeCurve` once; the painter only maps the resulting samples (5-minute grid, 289 points, up from the old ad-hoc 96) to pixels, and no longer imports `astronomical_engine.dart` or calls raw astronomy. **TASK 2.4:** the widget takes a `SessionNight` directly (constructor changed: `night` replaces `latitude`/`longitude`/`sessionDate`) instead of resolving its own from raw coordinates and a `DateTime` — it now shares the exact `SessionNight` the ViewModel resolves, and `home_screen.dart` shows a "Set your site to see tonight's altitude chart." placeholder card instead of the chart when there is no site.
+- **Relevant files:** `lib/presentation/widgets/altitude_chart_widget.dart`, `lib/domain/models/altitude_curve.dart`, `home_screen.dart` (`_NoSiteCard`).
+- **Known issues:** none open for the wrong-night defect. *Resolved (TASK 2.3):* astronomy inside the painter and the device-local-noon divergence from the windows/timeline (DEV-A3, TD-023). *Resolved (TASK 2.4):* wrong night by default (F-09) and the interim self-resolved `SessionNight` from TASK 2.3. Widget tests updated to build a `SessionNight` via `SessionNightResolver.forEveningDate` and pass it in (3 tests: a normal night, a polar-night site, and a date with no "now" dot).
 - **Dependencies:** F-11, F-13.
 - **Roadmap relevance:** Phase 8.
 
 ## F-15 — Lunar illumination
 - **Status:** Partial
-- **Current implementation:** mean-synodic-month model; shown as `Moon Illumination: NN.N%`; feeds the sky warning.
-- **Relevant files:** `visibility_calculator.dart:70-81`, `sky_darkness_widget.dart:15`.
-- **Known issues:** error up to 4.7 percentage points vs USNO 2025; displayed to 0.1 %; evaluated at one instant, not the imaging window (SI-002; TD-032).
-- **Dependencies:** F-09 for the evaluation instant.
-- **Roadmap relevance:** Phase 8. Tests: 3 coarse tests.
+- **Current implementation:** mean-synodic-month model; shown as `Moon Illumination: NN.N%`, or `--` when there is no site; feeds the sky warning.
+- **Relevant files:** `visibility_calculator.dart:70-81`, `sky_darkness_widget.dart:15`, `planner_viewmodel.dart` (`lunarIllumination` getter).
+- **Known issues:** error up to 4.7 percentage points vs USNO 2025; displayed to 0.1 %; evaluated at one instant, not the imaging window (SI-002; TD-032). **TASK 2.4:** `lunarIllumination` is now `double?`, evaluated at `sessionNight.startUtc + 12h` (mean solar midnight — ADR-007 §9's candidate instant) and `null` without a site; the canonical evaluation instant for night-level scalars is not yet formally decided (G6) — see `docs/SCIENTIFIC_INTEGRITY.md`.
+- **Dependencies:** F-09 for the evaluation instant (resolved: now always the current `SessionNight`'s window, pending G6's final instant choice).
+- **Roadmap relevance:** Phase 8. Tests: 3 coarse tests (pure calculator) plus ViewModel null-without-site coverage.
 
 ## F-16 — Moon position, rise/set, Moon–target separation
 - **Status:** Missing
