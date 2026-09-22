@@ -138,20 +138,9 @@ class VisibilityCalculator {
     return calculateAltitude(lha: lha, declination: dec, latitude: latitude);
   }
 
-  /// Calculates approximate lunar illumination percentage (0.0 to 1.0).
-  /// Based on a known new moon epoch.
-  static double calculateLunarIllumination(DateTime utcTime) {
-    // Known New Moon: Jan 11, 2024, 11:57 UTC (Updated to reduce phase drift)
-    final newMoonEpoch = DateTime.utc(2024, 1, 11, 11, 57);
-    final diffSeconds = utcTime.difference(newMoonEpoch).inSeconds;
-
-    // Lunar synodic month = 29.530588 days
-    final lunarCycleSeconds = 29.530588 * 24 * 3600;
-    final phase = (diffSeconds % lunarCycleSeconds) / lunarCycleSeconds;
-
-    // Illumination = 0.5 * (1 - cos(phase * 2 * pi))
-    return 0.5 * (1 - math.cos(phase * 2 * math.pi));
-  }
+  // `calculateLunarIllumination` (the mean-synodic-month phase model, up to
+  // 4.7 percentage points off) was deleted in TASK 6.4; the Moon is
+  // `MoonCalculator` (ADR-010).
 
   /// Calculates the times for sunset, twilights, and sunrise.
   ///

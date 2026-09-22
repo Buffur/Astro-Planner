@@ -29,6 +29,7 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/domain/services/moon_calculator.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
@@ -240,7 +241,7 @@ void main() {
     });
 
     test('lunarIllumination is low near new moon (2025-01-29)', () {
-      final illum = VisibilityCalculator.calculateLunarIllumination(
+      final illum = MoonCalculator.illuminatedFraction(
         DateTime.utc(2025, 1, 29),
       );
       expect(
@@ -251,7 +252,7 @@ void main() {
     });
 
     test('lunarIllumination is high near full moon (2025-02-12)', () {
-      final illum = VisibilityCalculator.calculateLunarIllumination(
+      final illum = MoonCalculator.illuminatedFraction(
         DateTime.utc(2025, 2, 12),
       );
       expect(

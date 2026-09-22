@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:astroplan/domain/services/moon_calculator.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
 
 void main() {
@@ -16,7 +17,7 @@ void main() {
 
     test('calculates lunar illumination correctly at known new moon', () {
       final newMoon = DateTime.utc(2000, 1, 6, 18, 14);
-      final illum = VisibilityCalculator.calculateLunarIllumination(newMoon);
+      final illum = MoonCalculator.illuminatedFraction(newMoon);
       expect(illum, closeTo(0.0, 0.01));
     });
 
@@ -28,11 +29,11 @@ void main() {
         18,
         14,
       ).add(const Duration(days: 14, hours: 18, minutes: 22));
-      final illum = VisibilityCalculator.calculateLunarIllumination(fullMoon);
+      final illum = MoonCalculator.illuminatedFraction(fullMoon);
       expect(
         illum,
         closeTo(1.0, 0.05),
-      ); // allowing some margin for average synodic month approximation
+      ); // the mean-phase model was replaced by Meeus ch. 47/48 in TASK 6.4
     });
   });
 }

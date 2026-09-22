@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import '../../core/utils/astro_math.dart';
+import '../models/astro_target.dart';
+import '../models/moon_conditions.dart';
 import '../models/session_night.dart';
 import 'astronomical_engine.dart';
 import 'moon_series.dart';
@@ -243,9 +245,10 @@ class MoonCalculator {
     );
   }
 
-  /// Topocentric geometric (airless) altitude of the Moon's centre, degrees,
-  /// at a site on the ellipsoid at sea level (Meeus ch. 40 and 13).
-  static double topocentricAltitude(
+  /// The Moon's topocentric apparent RA and Dec of date, and its local hour
+  /// angle, degrees, for a site on the ellipsoid at sea level (Meeus
+  /// ch. 40: rigorous parallax correction; flattening b/a = 0.99664719).
+  static ({double raDeg, double decDeg, double hourAngleDeg}) topocentric(
     DateTime utc,
     double latitude,
     double longitude,
@@ -258,7 +261,6 @@ class MoonCalculator {
     final dec = AstroMath.degreesToRadians(p.declinationDeg);
     final sinPi = math.sin(AstroMath.degreesToRadians(p.horizontalParallaxDeg));
 
-    // Geocentric site coordinates, flattening b/a = 0.99664719 (Meeus 11).
     final u = math.atan(
       0.99664719 * math.tan(AstroMath.degreesToRadians(latitude)),
     );
@@ -273,11 +275,74 @@ class MoonCalculator {
       (math.sin(dec) - rhoSin * sinPi) * math.cos(dAlpha),
       math.cos(dec) - rhoCos * sinPi * math.cos(h),
     );
+    return (
+      raDeg: AstroMath.normalizeDegrees(
+        p.rightAscensionDeg + AstroMath.radiansToDegrees(dAlpha),
+      ),
+      decDeg: AstroMath.radiansToDegrees(decTopo),
+      hourAngleDeg: AstroMath.normalizeDegrees(
+        AstroMath.radiansToDegrees(h - dAlpha),
+      ),
+    );
+  }
+
+  /// Topocentric geometric (airless) altitude of the Moon's centre, degrees,
+  /// at a site on the ellipsoid at sea level (Meeus ch. 40 and 13).
+  static double topocentricAltitude(
+    DateTime utc,
+    double latitude,
+    double longitude,
+  ) {
+    final t = topocentric(utc, latitude, longitude);
     return VisibilityCalculator.calculateAltitude(
-      lha: AstroMath.normalizeDegrees(AstroMath.radiansToDegrees(h - dAlpha)),
-      declination: AstroMath.radiansToDegrees(decTopo),
+      lha: t.hourAngleDeg,
+      declination: t.decDeg,
       latitude: latitude,
     );
+  }
+
+  /// Angular distance between two equatorial positions, degrees (vector
+  /// form of Meeus ch. 17, stable for small and large angles).
+  static double angularSeparationDeg(
+    double ra1Deg,
+    double dec1Deg,
+    double ra2Deg,
+    double dec2Deg,
+  ) {
+    final d1 = AstroMath.degreesToRadians(dec1Deg);
+    final d2 = AstroMath.degreesToRadians(dec2Deg);
+    final da = AstroMath.degreesToRadians(ra2Deg - ra1Deg);
+    final y = math.sqrt(
+      math.pow(math.cos(d2) * math.sin(da), 2) +
+          math.pow(
+            math.cos(d1) * math.sin(d2) -
+                math.sin(d1) * math.cos(d2) * math.cos(da),
+            2,
+          ),
+    );
+    final x =
+        math.sin(d1) * math.sin(d2) +
+        math.cos(d1) * math.cos(d2) * math.cos(da);
+    return AstroMath.radiansToDegrees(math.atan2(y, x));
+  }
+
+  /// Topocentric Moon–target separation, degrees. The target's J2000
+  /// coordinates are precessed to the date first (Meeus ch. 21, TASK 6.2),
+  /// so both sit in the equinox of date (ADR-010 §2). Nutation and
+  /// aberration of the target are ignored (about 20–40″).
+  static double separationFromTarget(
+    AstroTarget target,
+    DateTime utc,
+    double latitude,
+    double longitude,
+  ) {
+    final m = topocentric(utc, latitude, longitude);
+    final (ra, dec) = AstronomicalEngine.precessJ2000ToDate(
+      target.rightAscension,
+      target.declination,
+      AstronomicalEngine.calculateJulianDate(utc),
+    );
+    return angularSeparationDeg(m.raDeg, m.decDeg, ra, dec);
   }
 
   /// The Sun's apparent geocentric ecliptic longitude (degrees) and
@@ -367,6 +432,67 @@ class MoonCalculator {
     return MoonRiseSet(
       events: List.unmodifiable(events),
       aboveAtStart: aboveAtStart,
+    );
+  }
+
+  /// Moon context for [night] (and [target], when given) on the night's
+  /// 5-minute grid (TASK 6.4; CALC-29).
+  static MoonConditions conditionsForNight(
+    SessionNight night, {
+    AstroTarget? target,
+  }) {
+    final samples = <MoonSample>[];
+    MoonApproach? closest;
+    for (
+      var elapsed = Duration.zero;
+      elapsed <= SessionNight.length;
+      elapsed += VisibilityCalculator.sampleStep
+    ) {
+      final t = night.startUtc.add(elapsed);
+      final topo = topocentric(t, night.latitude, night.longitude);
+      final moonAlt = VisibilityCalculator.calculateAltitude(
+        lha: topo.hourAngleDeg,
+        declination: topo.decDeg,
+        latitude: night.latitude,
+      );
+      double? separation;
+      double? targetAlt;
+      if (target != null) {
+        final (ra, dec) = AstronomicalEngine.precessJ2000ToDate(
+          target.rightAscension,
+          target.declination,
+          AstronomicalEngine.calculateJulianDate(t),
+        );
+        separation = angularSeparationDeg(topo.raDeg, topo.decDeg, ra, dec);
+        targetAlt = VisibilityCalculator.calculateTargetAltitude(
+          target,
+          t,
+          night.latitude,
+          night.longitude,
+        );
+        if (moonAlt > 0 &&
+            targetAlt > 0 &&
+            (closest == null || separation < closest.separationDeg)) {
+          closest = MoonApproach(separationDeg: separation, instantUtc: t);
+        }
+      }
+      samples.add(
+        MoonSample(
+          instantUtc: t,
+          altitudeDeg: moonAlt,
+          separationDeg: separation,
+          targetAltitudeDeg: targetAlt,
+        ),
+      );
+    }
+    return MoonConditions(
+      night: night,
+      samples: List.unmodifiable(samples),
+      riseSet: riseSetForNight(night),
+      illuminationAtMidnight: illuminatedFraction(
+        night.startUtc.add(const Duration(hours: 12)),
+      ),
+      closestApproachWhileBothUp: closest,
     );
   }
 }

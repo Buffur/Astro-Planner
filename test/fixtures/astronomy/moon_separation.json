@@ -1,0 +1,398 @@
+{
+ "source": "Geocentric: USNO celnav API v4 (Greenwich hour angle and declination of date for the Moon, the stars and Aries at one instant; RA = GHA(Aries) - GHA(object); responses from several sites merged, since the API omits objects below the local horizon and GHA/Dec do not depend on the site). Topocentric Moon: JPL Horizons quantity 2 (airless apparent RA/Dec of date) at geodetic sites, 0 m. Star J2000 inputs: usno_celnav_stars.json (SIMBAD).",
+ "retrieved": "2026-09-22T20:36Z",
+ "geocentric": [
+  {
+   "utc": "2026-03-01T22:00:00Z",
+   "queries": [
+    "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+   ],
+   "aries_gha": 129.71940613967087,
+   "moon": {
+    "gha": 345.077643,
+    "dec": 15.742577
+   },
+   "stars": {
+    "Alpheratz": {
+     "gha": 127.288035,
+     "dec": 29.234847
+    },
+    "Arcturus": {
+     "gha": 275.4999,
+     "dec": 19.041687
+    },
+    "Betelgeuse": {
+     "gha": 40.568289,
+     "dec": 7.410781
+    },
+    "Capella": {
+     "gha": 50.059145,
+     "dec": 46.026515
+    },
+    "Deneb": {
+     "gha": 179.145331,
+     "dec": 45.370194
+    },
+    "Polaris": {
+     "gha": 83.457923,
+     "dec": 89.379345
+    },
+    "Schedar": {
+     "gha": 119.227027,
+     "dec": 56.682781
+    },
+    "Sirius": {
+     "gha": 28.139727,
+     "dec": -16.754958
+    },
+    "Vega": {
+     "gha": 210.265641,
+     "dec": 38.802536
+    }
+   }
+  },
+  {
+   "utc": "2026-03-04T02:00:00Z",
+   "queries": [
+    "https://aa.usno.navy.mil/api/celnav?date=2026-03-04&time=02%3A00&coords=51.5%2C-0.1",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-03-04&time=02%3A00&coords=35.68%2C139.65",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-03-04&time=02%3A00&coords=-33.9%2C151.2",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-03-04&time=02%3A00&coords=40.7%2C-74.0"
+   ],
+   "aries_gha": 191.85491783289123,
+   "moon": {
+    "gha": 20.72592,
+    "dec": 2.645147
+   },
+   "stars": {
+    "Alpheratz": {
+     "gha": 189.423621,
+     "dec": 29.234735
+    },
+    "Arcturus": {
+     "gha": 337.635216,
+     "dec": 19.041682
+    },
+    "Betelgeuse": {
+     "gha": 102.703989,
+     "dec": 7.410791
+    },
+    "Capella": {
+     "gha": 112.194941,
+     "dec": 46.02654
+    },
+    "Deneb": {
+     "gha": 241.280682,
+     "dec": 45.370034
+    },
+    "Polaris": {
+     "gha": 145.612076,
+     "dec": 89.379272
+    },
+    "Schedar": {
+     "gha": 181.362733,
+     "dec": 56.68262
+    },
+    "Sirius": {
+     "gha": 90.275424,
+     "dec": -16.754986
+    },
+    "Vega": {
+     "gha": 272.400896,
+     "dec": 38.802434
+    }
+   }
+  },
+  {
+   "utc": "2026-09-22T02:00:00Z",
+   "queries": [
+    "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=-33.9%2C151.2",
+    "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=40.7%2C-74.0"
+   ],
+   "aries_gha": 30.95617147664545,
+   "moon": {
+    "gha": 83.624672,
+    "dec": -21.313141
+   },
+   "stars": {
+    "Alpheratz": {
+     "gha": 28.505447,
+     "dec": 29.240818
+    },
+    "Arcturus": {
+     "gha": 176.737742,
+     "dec": 19.045299
+    },
+    "Betelgeuse": {
+     "gha": 301.798801,
+     "dec": 7.413694
+    },
+    "Capella": {
+     "gha": 311.284924,
+     "dec": 46.022468
+    },
+    "Deneb": {
+     "gha": 80.365434,
+     "dec": 45.380195
+    },
+    "Polaris": {
+     "gha": 343.940198,
+     "dec": 89.372812
+    },
+    "Schedar": {
+     "gha": 20.437411,
+     "dec": 56.685291
+    },
+    "Sirius": {
+     "gha": 289.373835,
+     "dec": -16.748983
+    },
+    "Vega": {
+     "gha": 111.49289,
+     "dec": 38.812855
+    }
+   }
+  },
+  {
+   "utc": "2027-01-15T20:00:00Z",
+   "queries": [
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1",
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+   ],
+   "aries_gha": 55.04540474105754,
+   "moon": {
+    "gha": 33.525038,
+    "dec": 14.1346
+   },
+   "stars": {
+    "Alpheratz": {
+     "gha": 52.598096,
+     "dec": 29.242663
+    },
+    "Arcturus": {
+     "gha": 200.819508,
+     "dec": 19.037839
+    },
+    "Betelgeuse": {
+     "gha": 325.878001,
+     "dec": 7.411104
+    },
+    "Capella": {
+     "gha": 335.361991,
+     "dec": 46.026128
+    },
+    "Deneb": {
+     "gha": 104.463912,
+     "dec": 45.377901
+    },
+    "Polaris": {
+     "gha": 7.981979,
+     "dec": 89.382886
+    },
+    "Schedar": {
+     "gha": 44.532533,
+     "dec": 56.69084
+    },
+    "Sirius": {
+     "gha": 313.452295,
+     "dec": -16.754843
+    },
+    "Vega": {
+     "gha": 135.587164,
+     "dec": 38.806956
+    }
+   }
+  },
+  {
+   "utc": "2027-01-20T04:00:00Z",
+   "queries": [
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-20&time=04%3A00&coords=51.5%2C-0.1",
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-20&time=04%3A00&coords=35.68%2C139.65",
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-20&time=04%3A00&coords=-33.9%2C151.2",
+    "https://aa.usno.navy.mil/api/celnav?date=2027-01-20&time=04%3A00&coords=40.7%2C-74.0"
+   ],
+   "aries_gha": 179.31665924927424,
+   "moon": {
+    "gha": 93.090223,
+    "dec": 27.647584
+   },
+   "stars": {
+    "Alpheratz": {
+     "gha": 176.869473,
+     "dec": 29.24255
+    },
+    "Arcturus": {
+     "gha": 325.0901,
+     "dec": 19.037604
+    },
+    "Betelgeuse": {
+     "gha": 90.149184,
+     "dec": 7.41096
+    },
+    "Capella": {
+     "gha": 99.633235,
+     "dec": 46.026227
+    },
+    "Deneb": {
+     "gha": 228.73507,
+     "dec": 45.377612
+    },
+    "Polaris": {
+     "gha": 132.278941,
+     "dec": 89.383055
+    },
+    "Schedar": {
+     "gha": 168.804131,
+     "dec": 56.690748
+    },
+    "Sirius": {
+     "gha": 77.723459,
+     "dec": -16.755166
+    },
+    "Vega": {
+     "gha": 259.858049,
+     "dec": 38.806655
+    }
+   }
+  }
+ ],
+ "topocentricMoon": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "raDeg": 144.804805516,
+   "decDeg": 15.167361726,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-03-01+22%3A00%27&STOP_TIME=%272026-03-01+22%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-04T02:00:00Z",
+   "raDeg": 170.91685072,
+   "decDeg": 1.925515952,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-03-04+02%3A00%27&STOP_TIME=%272026-03-04+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "raDeg": 306.71977685,
+   "decDeg": -21.998324876,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-09-22+02%3A00%27&STOP_TIME=%272026-09-22+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "raDeg": 21.177096486,
+   "decDeg": 13.526142342,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272027-01-15+20%3A00%27&STOP_TIME=%272027-01-15+20%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-20T04:00:00Z",
+   "raDeg": 85.511288587,
+   "decDeg": 26.926183905,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272027-01-20+04%3A00%27&STOP_TIME=%272027-01-20+04%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "raDeg": 143.972793922,
+   "decDeg": 15.082746014,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-03-01+22%3A00%27&STOP_TIME=%272026-03-01+22%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-04T02:00:00Z",
+   "raDeg": 170.871345495,
+   "decDeg": 2.069427172,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-03-04+02%3A00%27&STOP_TIME=%272026-03-04+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "raDeg": 307.872618099,
+   "decDeg": -21.606992989,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-09-22+02%3A00%27&STOP_TIME=%272026-09-22+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "raDeg": 21.424813109,
+   "decDeg": 13.41552262,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272027-01-15+20%3A00%27&STOP_TIME=%272027-01-15+20%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-20T04:00:00Z",
+   "raDeg": 86.958445495,
+   "decDeg": 26.894838835,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272027-01-20+04%3A00%27&STOP_TIME=%272027-01-20+04%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "raDeg": 144.615390256,
+   "decDeg": 14.955744976,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-03-01+22%3A00%27&STOP_TIME=%272026-03-01+22%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-04T02:00:00Z",
+   "raDeg": 170.915090314,
+   "decDeg": 1.767538344,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-03-04+02%3A00%27&STOP_TIME=%272026-03-04+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "raDeg": 306.995689712,
+   "decDeg": -22.080086572,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-09-22+02%3A00%27&STOP_TIME=%272026-09-22+02%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "raDeg": 21.245140529,
+   "decDeg": 13.311638625,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272027-01-15+20%3A00%27&STOP_TIME=%272027-01-15+20%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-20T04:00:00Z",
+   "raDeg": 85.855023286,
+   "decDeg": 26.740939143,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272027-01-20+04%3A00%27&STOP_TIME=%272027-01-20+04%3A01%27&STEP_SIZE=%271m%27&QUANTITIES=%272%27&ANG_FORMAT=%27DEG%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&CSV_FORMAT=%27YES%27"
+  }
+ ]
+}

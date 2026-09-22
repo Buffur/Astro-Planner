@@ -32,7 +32,9 @@ import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
+import '../../domain/models/moon_conditions.dart';
 import '../../domain/services/fit_analyzer.dart';
+import '../../domain/services/moon_calculator.dart';
 import '../../domain/models/session_log.dart';
 
 class PlannerViewModel extends ChangeNotifier {
@@ -594,17 +596,28 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  /// Approximate lunar illumination for [sessionNight], evaluated at mean
-  /// solar midnight (`startUtc + 12h`) — ADR-007 §9's candidate instant for
-  /// night-level scalars; G6 has not formally decided this yet. Null when
-  /// there is no site.
-  double? get lunarIllumination {
+  /// Moon context for [sessionNight] and the selected target (ADR-010,
+  /// TASK 6.4), or null without a site. Cached per night and target: it
+  /// samples the Moon on the whole 5-minute grid.
+  MoonConditions? get moonConditions {
     final night = sessionNight;
     if (night == null) return null;
-    return VisibilityCalculator.calculateLunarIllumination(
-      night.startUtc.add(const Duration(hours: 12)),
-    );
+    final target = _selectedTarget;
+    final key = (night, target?.rightAscension, target?.declination);
+    if (_moonCacheKey != key) {
+      _moonCache = MoonCalculator.conditionsForNight(night, target: target);
+      _moonCacheKey = key;
+    }
+    return _moonCache;
   }
+
+  Object? _moonCacheKey;
+  MoonConditions? _moonCache;
+
+  /// Lunar illuminated fraction for [sessionNight] at mean solar midnight
+  /// (Meeus ch. 48 via [moonConditions]; the mean-phase model was retired in
+  /// TASK 6.4). Null when there is no site.
+  double? get lunarIllumination => moonConditions?.illuminationAtMidnight;
 
   bool get skyDarknessWarning {
     final illum = lunarIllumination;
