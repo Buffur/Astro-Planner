@@ -2,7 +2,10 @@
 
 > **Read this first.** It is the entry point for any new agent or developer.
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited and documented 2026-09-21. Application code unchanged since.
+> audited and documented 2026-09-21. Application code changed since only by TASK 1.1
+> (commit `2357755`: `LocationService` seam, `PlannerViewModel.ready`, test harness).
+> Work now follows `docs/MASTER_ROADMAP.md`; the current position is the "active
+> task" line in `docs/ROADMAP.md`.
 >
 > **The code is the source of truth for the ACTUAL state.** Design intent is kept
 > separately (in `PRODUCT_SPEC.md`, `ROADMAP.md`, `DECISIONS.md` Part A and Part A of
@@ -17,14 +20,15 @@
 
 1. Read this file, then `ARCHITECTURE.md` (Parts B–C), `FEATURE_STATUS.md`
    (summary table) and `TECH_DEBT.md` (Critical and High).
-2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **70 pass, 1
-   fails** (`test/integration_flow_test.dart`, a known pre-existing failure, see
-   TD-003). Report it as pre-existing; confirm no *additional* test fails.
-3. **No implementation work is approved yet.** The owner has directed that no new
-   feature (including `SessionNight`) is started until the documentation is
-   reconciled and the Master Development Roadmap exists (`DECISIONS.md` OD-03).
-   Multi-file, architectural, database or scope-affecting work requires a plan and
-   approval first (`.agents/rules/00-project-governance.md`).
+2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **73 pass,
+   0 fail** (green since TASK 1.1; TD-003 resolved). Treat any failure as a
+   regression.
+3. **Scope is `docs/MASTER_ROADMAP.md`** (approved 2026-09-21, OD-06): one roadmap
+   task per cycle, in order, each only after the owner's go-ahead. The condition of
+   OD-03 (docs reconciled, roadmap exists) is met; `SessionNight` is group G2 and
+   starts when the roadmap reaches it. Multi-file, architectural, database or
+   scope-affecting work outside the current task requires a plan and approval first
+   (`.agents/rules/00-project-governance.md`).
 4. Traps that will bite (all verified):
    - `EquipmentProfile.id` is an **optical-rig id**, not a profile id.
    - The default `sessionDate` is the **UTC** calendar date; the picker and loaded
@@ -35,8 +39,8 @@
    - Do not trust the archived documents in `docs/archive/` (known inaccuracies).
    - `light_pollution_repository.dart` can never succeed; the Bortle badge is hidden
      by a feature gate; `fieldMode` gate is defined but never read.
-5. Owner decisions that block the roadmap: PD-06, PD-01, PD-02, PD-04, PD-08
-   (`DECISIONS.md` Part E).
+5. Owner decisions that block the roadmap: PD-01, PD-02, PD-04, PD-08
+   (`DECISIONS.md` Part E). PD-06 was resolved on 2026-09-21 (E.1).
 
 ## 1. What the project is
 
@@ -89,7 +93,8 @@ Summary (full detail, diagrams and deviations: `ARCHITECTURE.md`):
 
 - **MVVM-style with Provider.** `Presentation → PlannerViewModel → repositories →
   Drift/HTTP`, but several screens call repositories directly and the ViewModel
-  itself calls HTTP, GPS and SharedPreferences (DEV-A1, DEV-A2).
+  itself calls HTTP and SharedPreferences; GPS is behind the injected
+  `LocationService` since TASK 1.1 (DEV-A1, DEV-A2).
 - **`PlannerViewModel`** (513 lines) owns bootstrap, selection, session date,
   location, reverse geocoding, Bortle, weather, the capture plan, thresholds and ten
   derived calculations. It is started from the constructor and cannot be awaited.
@@ -257,17 +262,18 @@ verification against real sample files, which the repository lacks (TD-018).
 
 ## 19. Tests
 
-71 tests in 21 files (1,757 lines): domain services (astronomy, optics, session
-feasibility, visibility windows, metadata parsing, session log), Drift repositories
-and database, the Open-Meteo repository (mocked client), form-validation widget tests
-for the Equipment and Target screens, two ViewModel setter suites, an app-boot
-widget test and one end-to-end flow.
+73 tests in 22 files: domain services (astronomy, optics, session feasibility,
+visibility windows, metadata parsing, session log), Drift repositories and database,
+the Open-Meteo repository (mocked client), form-validation widget tests for the
+Equipment and Target screens, three ViewModel suites (session date, minimum altitude,
+location), an app-boot widget test and one end-to-end flow. *(At the audit, 71 tests
+in 21 files, 1,757 lines; TASK 1.1 added the location suite.)*
 
-- **Result:** 70 pass, **1 fails** — `integration_flow_test.dart` at its first
-  `pumpAndSettle` (root cause: harness async zone + unguarded Geolocator; **not** HTTP).
+- **Result:** 73 pass, 0 fail (three consecutive full runs after TASK 1.1). The
+  audit's red `integration_flow_test.dart` (TD-003) was repaired, not weakened.
 - **Gaps:** no tests for the live budget math, Home, Capture Plan, Sky, Weather,
   Altitude, Logbook, Location or Metadata screens; no migration tests; the NPF test
-  is circular; ViewModel tests use real-time sleeps; no CI. See `TEST_PLAN.md`.
+  is circular; `AppRouter.router` is a shared static; no CI. See `TEST_PLAN.md`.
 
 ## 20. Build
 
@@ -275,7 +281,7 @@ widget test and one end-to-end flow.
 | --- | --- | --- |
 | Install dependencies | `flutter pub get` | Yes (implicitly) |
 | Analyze | `flutter analyze --no-pub` | **Yes** — clean |
-| Test | `flutter test --no-pub` | **Yes** — 70/71 |
+| Test | `flutter test --no-pub` | **Yes** — 73/73 (after TASK 1.1; was 70/71 at the audit) |
 | Regenerate Drift code after changing tables | `dart run build_runner build --delete-conflicting-outputs` | **No** (standard `drift_dev` step; not run) |
 | Run on Android | `flutter run` | **No** — no device/emulator run in the audit |
 | Release build | `flutter build apk` | **No** — release signing currently uses the debug key |
@@ -295,7 +301,7 @@ requires a very recent Dart.
 | path_provider, path | ^2.1.6, ^1.9.1 | DB file location | — |
 | http | ^1.6.0 | Weather, Nominatim, ClearOutside | Used inline in the ViewModel and repositories |
 | shared_preferences | ^2.5.5 | Plan, ids, thresholds, weather cache | Used inline |
-| geolocator | ^14.0.3 | GPS | Called in the ViewModel and the picker |
+| geolocator | ^14.0.3 | GPS | `GeolocatorLocationService` (behind `LocationService`, used by the ViewModel) and the picker |
 | flutter_map, latlong2 | ^8.3.2, ^0.10.1 | Map picker | OSM tiles, no attribution |
 | image_picker, exif | ^1.2.3, ^3.3.0 | Metadata import | Gallery only; no FITS |
 | share_plus | ^13.3.0 | Share log text | — |
@@ -386,9 +392,9 @@ Interpretation / Required Future Action): `SCIENTIFIC_INTEGRITY.md`.
 
 ## 27. Open decisions and proposed next steps
 
-Open decisions (owner): `DECISIONS.md` Part E — especially **PD-06** (declare the
-active phase), **PD-01/PD-02** (night and time zone), **PD-04** (persistence
-baseline), **PD-08** (capture-budget model).
+Open decisions (owner): `DECISIONS.md` Part E — especially **PD-01/PD-02** (night
+and time zone), **PD-04** (persistence baseline), **PD-08** (capture-budget model).
+(PD-06, the active scope, was resolved 2026-09-21.)
 
 Proposed sequence for the Master Development Roadmap (**not approved**):
 `PROJECT_AUDIT.md` §8 and `TECH_DEBT.md` dependency notes. In short: settle the time

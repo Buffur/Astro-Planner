@@ -70,6 +70,8 @@ is informational and should be rechecked after each change.
 
 ### Audited baseline (2026-09-21, commit `900b82a`)
 
+*(Superseded by TASK 1.1 below; kept for the record.)*
+
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues (default `flutter_lints` only) |
@@ -108,3 +110,33 @@ real-time sleeps — TD-037.
 Note: until TD-003 is fixed, the "run `flutter analyze` and `flutter test` before
 claiming completion" rule cannot be satisfied literally; report the failure as
 pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
+
+### Current baseline (2026-09-21, after TASK 1.1, commit `2357755`)
+
+| Check | Result |
+| --- | --- |
+| `flutter analyze --no-pub` | No issues |
+| `flutter test --no-pub` | **73 tests: 73 pass, 0 fail** (three consecutive full runs) |
+| CI | None configured (TD-046; roadmap TASK 1.3) |
+| Android build / device run | Not verified |
+
+**Resolved by TASK 1.1:** the red `integration_flow_test.dart` (TD-003) — repaired,
+not weakened: the ViewModel is now built and awaited (`ready`) inside
+`tester.runAsync`, and its RA fixture (5.59, hours, in a degrees field) was fixed to
+83.85°. Device location goes through an injectable `LocationService`
+(`lib/domain/services/location_service.dart`), implemented by
+`GeolocatorLocationService` in production and `FakeLocationService`
+(`test/support/`) in tests. The two `Future.delayed(300 ms)` waits and the
+`activeLocationId` GPS-avoidance workaround are gone (`await vm.ready` instead);
+new suite `planner_location_test.dart` covers permission-denied and
+position-granted paths (2 tests; total test files 22, total tests 73).
+
+**Still open** (`docs/TECH_DEBT.md` TD-025, TD-037): no tests for the live capture
+budget math, Home, Capture Plan, Sky, Weather, Altitude chart, Logbook, Location or
+Metadata screens; no migration tests; the NPF test is circular; `AppRouter.router` is
+a shared static; Nominatim and the light-pollution HTTP client are not injectable
+(tests only avoid the real network because the widget-test HTTP binding answers with
+400); no CI.
+
+Any test failure from here on is a regression, not a known pre-existing issue
+(`docs/DECISIONS.md` DEV-P8, resolved).

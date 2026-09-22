@@ -1,7 +1,8 @@
 # AstroPlan Feature Status
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code unchanged since. Statuses were assigned from
+> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
+> `2357755`); affected entries are F-06, F-48 and F-49. Statuses were assigned from
 > the code and from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -20,8 +21,9 @@ Rules applied: a feature is not "Implemented" unless it works; it is not "Missin
 if code for it exists. Design intent lives in `docs/PRODUCT_SPEC.md`,
 `docs/ROADMAP.md` and `docs/DECISIONS.md` (Part A); this file records only what
 exists. Roadmap phases refer to `docs/ROADMAP.md`. "Ahead of phase" means the
-feature exists although its roadmap phase is not declared active (see DEV-P1,
-DEV-P3).
+feature exists although its roadmap phase has not been reached in
+`docs/MASTER_ROADMAP.md` (see DEV-P1; the active-scope question DEV-P3 was resolved
+2026-09-21, PD-06).
 
 ## Summary
 
@@ -115,7 +117,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Current implementation:** four flags; two are honoured (`lightPollutionContext` for the Bortle badge, `metadataImport` / `logbook` for route creation).
 - **Relevant files:** `lib/core/config/feature_scope.dart`, `app_router.dart`, `sky_darkness_widget.dart`, `home_screen.dart`.
 - **Known issues:** `fieldMode` never read; map handoff ungated; Home buttons push gated routes unconditionally; `metadataImport` and `logbook` are `true` with no recorded approval (DEV-P1; TD-014).
-- **Dependencies:** decision PD-06.
+- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); the gate is enforced by roadmap TASK 4.3.
 - **Roadmap relevance:** governance (ADR-006).
 
 ## F-05 — Seed data and first-run bootstrap
@@ -130,9 +132,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-06 — Active location (GPS, map picker, reverse geocoding)
 - **Status:** Partial
-- **Current implementation:** `useCurrentLocation` (Geolocator), a `flutter_map` picker with a marker and "Current Location" button, Nominatim reverse geocoding for a place name; defaults to London until a location is set.
+- **Current implementation:** `useCurrentLocation` (through the injected `LocationService`, implemented by `GeolocatorLocationService`; *updated TASK 1.1*), a `flutter_map` picker with a marker and "Current Location" button, Nominatim reverse geocoding for a place name; defaults to London until a location is set.
 - **Relevant files:** `planner_viewmodel.dart:163-280`, `lib/presentation/screens/location/location_picker_screen.dart`.
-- **Known issues:** unhandled Geolocator exceptions (`unawaited`, no `try/catch`); silent London default; geocoding failures swallowed; Geolocator flow duplicated in the picker; `setLocation` overwrites the active saved profile; OSM tiles shown without attribution and with a mismatched user-agent; not run on a device in this audit (TD-002, TD-027, TD-031).
+- **Known issues:** unhandled platform-location exceptions on the startup path (`unawaited`, no `try/catch`); silent London default; geocoding failures swallowed; Geolocator flow duplicated in the picker; `setLocation` overwrites the active saved profile; OSM tiles shown without attribution and with a mismatched user-agent; not run on a device in this audit (TD-002, TD-027, TD-031).
 - **Dependencies:** geolocator, flutter_map, latlong2, http, network.
 - **Roadmap relevance:** Phase 8 (location + visibility).
 
@@ -463,7 +465,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Current implementation:** an app-bar toggle switches to `AppTheme.fieldTheme` (in-memory).
 - **Relevant files:** `theme_viewmodel.dart`, `main.dart:72-73`, `home_screen.dart:34-38`.
 - **Known issues:** ungated despite ADR-006; not persisted; no checklist or other field utilities (DEV-P1).
-- **Dependencies:** decision PD-06.
+- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); the gate is enforced by roadmap TASK 4.3.
 - **Roadmap relevance:** Phase 15 (ahead of phase).
 
 ## F-47 — Custom dashboard
@@ -478,9 +480,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-48 — Automated tests
 - **Status:** Partial
-- **Current implementation:** 71 tests in 21 files; 70 pass; `flutter analyze` clean.
+- **Current implementation:** 73 tests in 22 files; all pass (three consecutive full runs after TASK 1.1); `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`.
 - **Relevant files:** `test/` (see `docs/TEST_PLAN.md`).
-- **Known issues:** `integration_flow_test.dart` fails (harness async-zone problem + unguarded Geolocator, not HTTP); no test for the live capture-budget math, Home, Capture Plan, Sky, Weather, Altitude, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); ViewModel tests use real-time sleeps (TD-003, TD-025, TD-037).
+- **Known issues:** no test for the live capture-budget math, Home, Capture Plan, Sky, Weather, Altitude, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests.
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 
@@ -488,7 +490,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Status:** Missing
 - **Current implementation:** none: no CI configuration is tracked (previous docs referred to a "CI failure" that cannot exist).
 - **Relevant files:** —
-- **Known issues:** the known-red test is not gated by anything (TD-046).
+- **Known issues:** the suite is green (TASK 1.1) but nothing enforces it in CI (TD-046, roadmap TASK 1.3).
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 

@@ -1,7 +1,10 @@
 # AstroPlan Architecture
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code unchanged since.
+> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
+> `2357755`: `LocationService` seam, `PlannerViewModel.ready`); affected spots are
+> marked *(updated TASK 1.1)*. Line references into `planner_viewmodel.dart` were
+> taken at `900b82a` and are now off by up to ~15 lines.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -120,7 +123,7 @@ approval.
         │            └───────┬───────────┬───────────────┬──────────────┬─────────┘
         │                    │           │               │              │
         │              domain services  repository     SharedPreferences  direct: http (Nominatim),
-        │              (pure Dart)      interfaces      (plan, ids, keys)  Geolocator, concrete
+        │              (pure Dart)      interfaces      (plan, ids, keys)  (GPS: LocationService), concrete
         │                    │           │                                LightPollutionRepository
         │                    │           ▼
         │                    │     Drift repositories ──► SQLite (schema v9)
@@ -182,7 +185,7 @@ Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 | 1 | **Bootstrap / hydration** in `_init()`, started from the constructor, not awaitable: reads shared preferences, active location, capture plan, thresholds, selected target/equipment, then **awaits network weather** before clearing `isLoading`; fires reverse geocoding | `:61-128` |
 | 2 | **Selection state** — target and equipment, mirrored to shared preferences | `:330-342` |
 | 3 | **Session date** and **session loading** (`setSessionDate`, `newSession`, `loadSession`, `_activeSessionLog`); target/equipment re-matched from a log by **name** | `:137-141,373-411` |
-| 4 | **Location** — coordinates; `setLocation` (persists, and overwrites the active saved profile); `useCurrentLocation` (Geolocator); default London until GPS succeeds | `:216-280` |
+| 4 | **Location** — coordinates; `setLocation` (persists, and overwrites the active saved profile); `useCurrentLocation` (through the injected `LocationService`; *updated TASK 1.1*); default London until a position is obtained | `:216-280` |
 | 5 | **Reverse geocoding** — raw `http.get` to Nominatim, errors swallowed (the doc comment still says "Open-Meteo") | `:163-187` |
 | 6 | **Light pollution / Bortle** — `_fetchBortle` (calls the concrete repository), `setBortleClass`, default 4 | `:189-214,344-364` |
 | 7 | **Weather** — fetch and refresh; state | `:123,219,282-285` |
@@ -196,9 +199,12 @@ State fields: `_isLoading`, `_selectedTarget`, `_selectedEquipment`,
 (default 4), `_dewPointThreshold` (default 2.0), `_activeSessionLog`, `_minAltitude`
 (default 20.0). The `captureBlocks` getter exposes the internal mutable list.
 
-Direct imports that skip the intended layers: `package:http`, `package:geolocator`,
-`package:shared_preferences`, and the concrete
-`lib/data/repositories/light_pollution_repository.dart` (DEV-A1).
+Direct imports that skip the intended layers: `package:http`,
+`package:shared_preferences`, the concrete
+`lib/data/repositories/light_pollution_repository.dart`, and the concrete
+`lib/data/services/geolocator_location_service.dart` (used only as the constructor
+default for the injected `LocationService`) (DEV-A1). `package:geolocator` itself is
+no longer imported by the ViewModel *(updated TASK 1.1)*.
 
 ## B5. Domain layer (`lib/domain/`)
 
@@ -217,10 +223,15 @@ Per-function documentation: `docs/SCIENTIFIC_INTEGRITY.md` Part B.
 `EquipmentCatalogRepository` (**unused**), `LocationRepository`, `LogbookRepository`,
 `WeatherRepository`.
 
+**Abstracted (TASK 1.1):** device location for the ViewModel — the pure-Dart
+`LocationService` interface (`lib/domain/services/location_service.dart`),
+implemented by `GeolocatorLocationService` (`lib/data/services/`) and replaced by
+`FakeLocationService` in tests (`test/support/`).
+
 **Not abstracted (no interface exists):** light pollution (concrete class in the
-data layer), reverse geocoding (inline HTTP in the ViewModel), device location
-(Geolocator called inline in the ViewModel and in `LocationPickerScreen`),
-key-value preferences (inline), current time (`DateTime.now()` inline).
+data layer), reverse geocoding (inline HTTP in the ViewModel), device location in
+`LocationPickerScreen` (still calls Geolocator inline), key-value preferences
+(inline), current time (`DateTime.now()` inline).
 
 ## B6. Data layer (`lib/data/`)
 
@@ -291,7 +302,7 @@ active-location pointer, weather cache). Details, keys and migration history:
 | ClearOutside (HTML scrape) | Bortle class | `LightPollutionRepository` | None | Third-party scraping; ToS unknown; request URL is malformed so it never succeeds | Returns `null` |
 | OSM tile server | Map picker tiles | `LocationPickerScreen` | None | Tile usage policy requires attribution (none shown) and an accurate UA (`com.example.astroplan` ≠ real `applicationId` `com.astroplan.astroplan`) | Blank tiles |
 | lightpollutionmap.info | External map link via `url_launcher` | `HomeScreen` | None | Opens a URL with **hard-coded** Slovenia coordinates | — |
-| Geolocator (GPS) | Device location | VM and `LocationPickerScreen` | — | Permissions declared for Android; iOS `Info.plist` has no location usage strings | Exceptions unhandled in the VM path |
+| Geolocator (GPS) | Device location | `GeolocatorLocationService` (behind `LocationService`, used by the VM) and `LocationPickerScreen` | — | Permissions declared for Android; iOS `Info.plist` has no location usage strings | Platform errors still unhandled on the VM startup path |
 | `image_picker`, `share_plus` | Gallery pick; share sheet | Metadata screen; Logbook screen | — | `image_picker` cannot select FITS files | — |
 
 ## B11. Time handling as built
@@ -312,10 +323,11 @@ SI-010 / TD-001. There is no notion of the **site's** time zone anywhere.
 ## B12. Test architecture
 
 `flutter_test` + Drift `NativeDatabase.memory()` + hand-written mocks (no mocking
-package). ViewModel tests avoid Geolocator by pre-setting `activeLocationId` in mock
-preferences and wait with `Future.delayed(300 ms)`. `AppRouter.router` is a static
-singleton shared by widget tests in a file. No CI configuration exists in the
-repository. Details and gaps: `docs/TEST_PLAN.md`, `docs/PROJECT_HANDOFF.md`.
+package). ViewModel tests inject `FakeLocationService` (`test/support/`) and wait on
+`vm.ready`; the end-to-end test builds the ViewModel inside `tester.runAsync`
+*(updated TASK 1.1; the 300 ms sleeps and the `activeLocationId` workaround are
+gone)*. `AppRouter.router` is a static singleton shared by widget tests in a file. No
+CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`, `docs/PROJECT_HANDOFF.md`.
 
 ## B13. Architectural concerns (carried forward and corrected)
 
@@ -343,6 +355,14 @@ repository. Details and gaps: `docs/TEST_PLAN.md`, `docs/PROJECT_HANDOFF.md`.
   cause of the red `integration_flow_test.dart`); the other ViewModel tests need
   workarounds and real-time sleeps; startup depends on the network; it is hard to
   split safely. TD-003, TD-019.
+- **Status update (2026-09-21, TASK 1.1, commit `2357755`): PARTLY RESOLVED.**
+  `geolocator` was removed from the ViewModel (device location is behind
+  `LocationService`); `_init()` is awaitable via `PlannerViewModel.ready`; the
+  ViewModel tests need no workaround or sleep any more. **Still open:** `http`
+  (Nominatim), `shared_preferences` and the concrete `LightPollutionRepository` in the
+  ViewModel; the default `GeolocatorLocationService()` is built inside the ViewModel
+  constructor (a presentation → data import); `LocationPickerScreen` still calls
+  Geolocator directly; startup still waits on the network (DEV-A5, TASK 1.2).
 
 ## DEV-A2 — Presentation bypasses ViewModels
 - **Intended behavior:** `Presentation -> ViewModels -> Repositories`.
@@ -423,7 +443,7 @@ listed with its work item.
 | # | Proposal | Purpose | Work item |
 | --- | --- | --- | --- |
 | P1 | Pure-Dart **time and site model** ("session night", site time zone) in `domain/` | Correct "tonight"; one time base for timeline, windows, chart, weather, log | TD-001, TD-020 (PD-01, PD-02) |
-| P2 | **Interfaces for platform/IO**: device location, reverse geocoding, light-pollution source, key-value preferences, clock | Testability; remove `http`/`geolocator`/`shared_preferences` from the ViewModel | TD-019, TD-003 |
+| P2 | **Interfaces for platform/IO**: device location, reverse geocoding, light-pollution source, key-value preferences, clock | Testability; remove `http`/`geolocator`/`shared_preferences` from the ViewModel | TD-019, TD-003 *(device location: done in TASK 1.1; the rest is open)* |
 | P3 | **Deterministic bootstrap**: awaitable initialization; seeding completed before the first read; no network on the critical path; visible error/empty states with navigation | Startup robustness; offline-first | TD-002 |
 | P4 | **Capture-budget domain service** (pure Dart) separating integration, acquisition, calibration and total session budget, with configurable overhead | Central product component; testable | TD-022 (PD-08) |
 | P5 | **Typed value objects** for the night timeline and windows; one shared altitude function used by ViewModel, windows and chart | Remove triplication and stringly-typed maps | TD-023, TD-024 |

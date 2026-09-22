@@ -1,7 +1,8 @@
 # AstroPlan Decisions
 
 > **Verification stamp:** conformance checked against code at commit `900b82a`
-> (2026-09-20), audited 2026-09-21. Application code unchanged since.
+> (2026-09-20), audited 2026-09-21. Application code changed since only by TASK 1.1
+> (commit `2357755`).
 > **Updated 2026-09-21 (TASK 0.2):** PD-06 resolved (E.1), PD-17–PD-21 registered,
 > OD-06 recorded, DEV-P3 marked resolved. **TASK 0.3:** PD-13 resolved (E.1),
 > DEV-P7 marked resolved. No ADR in Part A was changed.
@@ -196,6 +197,10 @@ ViewModels).
   TD-003).
 - **Consequence:** until TD-003 is fixed, agents must report the failure as
   pre-existing and confirm that no *additional* test fails (recorded in `CLAUDE.md`).
+- **Status: RESOLVED 2026-09-21 (TASK 1.1, commit `2357755`).** TD-003 is fixed and
+  `flutter test` is green (73/73, three consecutive runs), so the rule can be
+  satisfied literally again. Any failing test is now a regression; `CLAUDE.md` was
+  updated.
 
 ---
 

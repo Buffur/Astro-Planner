@@ -1,7 +1,9 @@
 # AstroPlan — Scientific Integrity Register
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code has not changed since.
+> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
+> `2357755`); the only spot it touches here is the integration-test RA fixture
+> below.
 > **Nothing in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
@@ -519,8 +521,9 @@ object types and inconsistent RA units appear in tests.
   `AstroMath.raToDecimalDegrees`).
 - The custom-target dialog takes RA in **degrees** (label explicit,
   `target_selection_screen.dart:130`); astronomers usually quote RA in hours.
-- The integration test seeds Orion with `rightAscension: 5.59` (hours) in the
-  degrees domain (`test/integration_flow_test.dart`).
+- The integration test seeded Orion with `rightAscension: 5.59` (hours) in the
+  degrees domain; **fixed 2026-09-21 (roadmap TASK 1.1, commit `2357755`)** to
+  `83.85` (= 5.59 h × 15) (`test/integration_flow_test.dart`).
 - `_kObjectTypes` offers `Planet`, `Moon`, `Comet`, `Asteroid`
   (`target_selection_screen.dart:9-20`); these move, and cannot be represented by a
   fixed RA/Dec.
