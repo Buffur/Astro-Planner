@@ -40,6 +40,7 @@
 > **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`). Affected entries: F-35, F-39, F-48.
 > **TASK 5.4 (2026-09-22):** `CaptureBudgetCalculator` (CALC-25) implements the ADR-009 budget; the ViewModel only delegates; feasibility now uses the window load (calibration outside the window no longer counts against dark time); the dead `estimateTotalDuration` (CALC-19) was deleted. Affected entries: F-36, F-39, F-48.
 > **TASK 5.5 (2026-09-22):** `FitAnalyzer` (CALC-26) places the ADR-009 event sequence atomically into the windows and reports fits / tight / does not fit / no window / nothing to fit with a reason, end time, lost tails, unplaced frames, the inverse maximum and a similar-nights hint; the sum-of-windows `SessionCalculator` (CALC-18) was deleted. Affected entries: F-36, F-48.
+> **TASK 5.6 (2026-09-22):** the capture planner UI shows every ADR-009 line (integration, acquisition, calibration in/outside the window, setup, window load vs available, session budget), the fit with its reason and end time, a one-tap "fill / trim to tonight's window" action, √N per (filter, exposure) group with help text, storage or "Unknown", and an assumptions panel; the block editor sets the calibration policy, binning and a typed gain. `capture_plan_widget.dart` was split into `widgets/capture_plan/`. Group G5 is complete. F-35 and F-37 → Implemented; F-39 Missing → Partial; F-36 and F-48 updated.
 
 ## Status legend
 
@@ -99,11 +100,11 @@ feature exists although its roadmap phase has not been reached in
 | F-32 | Light-pollution auto-fetch (Bortle) | **Broken** | 11 (ahead) |
 | F-33 | Manual Bortle entry | Prototype | 11 (ahead) |
 | F-34 | External light-pollution map handoff | **Broken** | 11 (ahead) |
-| F-35 | Capture plan editor (blocks) | Partial | 9 |
+| F-35 | Capture plan editor (blocks) | Implemented | 9 |
 | F-36 | Session duration and feasibility | Partial | 9 |
-| F-37 | Integration time and relative stacking gain | Partial | 9 |
+| F-37 | Integration time and relative stacking gain | Implemented | 9 |
 | F-38 | Imaging Opportunity | Missing | 8–10 |
-| F-39 | Calibration-frame planning | Missing | 9 |
+| F-39 | Calibration-frame planning | Partial | 9 |
 | F-40 | Save session (planned) | Partial | 13 (ahead) |
 | F-41 | Logbook list / reload / delete / share | Partial | 13 (ahead) |
 | F-42 | Planned-versus-actual logging | Partial | 13 (ahead) |
@@ -422,7 +423,8 @@ see DATA_MODEL.md B2/B8.)
 - **Current implementation:** add, edit, delete, reorder (light/dark/flat/bias with a filter list); default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences. **TASK 4.1:** the add dialog is shared with a new edit dialog (opened by tapping a block), reachable at `updateCaptureBlock` for the first time; both reject invalid input (exposure > 0, frame count ≥ 1) via `Form` validators instead of silently defaulting; list items key on `ObjectKey(block)` instead of a hashCode+index combination that changed on every reorder. **TASK 4.4:** the Sequence Plan header carries an "Example plan" badge while the seeded default is unmodified, clearing on the first add/edit/remove/reorder or on loading a saved session.
 - **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart` (`reorderCaptureBlocks`, `updateCaptureBlock`, `isExampleCapturePlan`), `lib/domain/models/capture_block.dart`.
 - **TASK 5.3:** blocks are validated in the domain (exposure (0, 3600] s, count 1–100 000, binning 1–4); the dialog's validators match these bounds; order is persisted (`position`); each calibration block has a policy (default outside the window) and each block a typed gain.
-- **Known issues:** binning, gain and the calibration policy are not exposed in the UI yet (TASK 5.6). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope). *Resolved (TASK 4.4):* the default plan used to be shown with no distinction from the user's own plan (SI-008; TD-013).
+- **TASK 5.6:** the editor also sets binning, the calibration policy ("When is it taken?") and a typed sensitivity setting (ISO / camera gain / not recorded, labelled "recorded only"); list rows show each calibration block's policy; split into `lib/presentation/widgets/capture_plan/` (`capture_block_dialog.dart`, `capture_budget_summary.dart`, `capture_assumptions_panel.dart`).
+- **Known issues:** none specific to the editor. *Resolved (TASK 5.6):* binning, gain and the calibration policy were not exposed in the UI. *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope). *Resolved (TASK 4.4):* the default plan used to be shown with no distinction from the user's own plan (SI-008; TD-013).
 - **Dependencies:** F-03.
 - **Roadmap relevance:** Phase 9 (central component).
 
@@ -437,9 +439,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-37 — Integration time and relative stacking gain
 - **Status:** Partial
-- **Current implementation:** integration time = Σ light exposure × count; relative gain = √(light frames), shown as `10.0x` labeled "Relative stacking gain (√N vs one frame)" (TASK 4.4).
+- **Current implementation:** integration from `CaptureBudgetCalculator`; **since TASK 5.6** √N is shown **per group of light frames with the same filter and exposure** (e.g. "Ha · 300 s × 20 — 4.5x") under the heading "Relative stacking gain (√N vs one frame)", with help text saying it is not a signal-to-noise ratio of the image and only applies within a group (ADR-009 §7).
 - **Relevant files:** `planner_viewmodel.dart:471-476,502-504`, `optical_calculator.dart:44-47`, `capture_plan_widget.dart:206-218`.
-- **Known issues:** gain ignores sub-exposure length (100×60 s ≠ 20×300 s in the display though both are 6000 s) (SI-003). *Resolved (TASK 4.4):* the UI label used to say "Relative SNR" (ADR-005 deviation; TD-009).
+- **Known issues:** none known. *Resolved (TASK 5.6):* gain used to pool all light frames regardless of sub-exposure length and filter (SI-003). *Resolved (TASK 4.4):* the UI label used to say "Relative SNR" (ADR-005 deviation; TD-009).
 - **Dependencies:** F-35.
 - **Roadmap relevance:** Phase 9.
 
@@ -455,7 +457,8 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Partial *(was Missing; TASK 5.3)*
 - **Current implementation:** each dark/flat/bias block now carries a calibration policy (`inWindow` / `outsideWindow` / `library`, default `outsideWindow`, ADR-009 §3), persisted in the database and the plan JSON. Nothing uses it yet: the live required time still counts every block against the window until TASK 5.4, and there is no UI to change it until TASK 5.6.
 - **Relevant files:** `capture_block.dart`, `capture_plan_widget.dart`.
-- **Known issues:** calibration time is counted against the night window (F-36).
+- **TASK 5.6:** the policy is editable per block and drives the budget: "Calibration during the window" and "Calibration outside the window" are separate lines, library blocks are listed as needing no time.
+- **Known issues:** outside-window calibration is only totalled, not scheduled into twilight (ADR-009 L5). *Resolved (TASK 5.4–5.6):* calibration time was counted against the night window regardless of policy.
 - **Dependencies:** decision PD-08.
 - **Roadmap relevance:** Phase 9.
 

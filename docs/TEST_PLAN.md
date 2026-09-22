@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **282 tests: 282 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.5) |
+| `flutter test --no-pub` | **291 tests: 291 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.6) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -266,3 +266,18 @@ Any test failure from here on is a regression, not a known pre-existing issue
   timeline (−18° never reached; at −12° the target is the reason).
 - Removed with the deleted `SessionCalculator` (CALC-18): `session_calculator_test.dart`
   (7 tests of the sum-of-windows rule, superseded by the fit tests above).
+
+**Added by TASK 5.6** (capture planner UI), 9 tests:
+- `test/presentation/widgets/capture_plan_fill_test.dart` (new, 2): the acceptance
+  test — against real windows (London, M42, 2026-03-01, fixed clock) a 500 × 300 s
+  plan shows "Doesn't fit" with its reason and a similar-nights hint, and one tap on
+  the trim action makes it fit and shows the end time; a short plan offers "Fill
+  tonight's window" instead.
+- `capture_plan_widget_test.dart` (+2): the dialog saves a calibration policy and an
+  ISO gain; the breakdown lines, per-group √N row, gain help text and the
+  assumptions panel ("Not included" × 6, 5 s, 15 %) render. Its harness now wraps
+  the card in a `SingleChildScrollView`, as Home's `ListView` does, because the card
+  outgrew the 800×600 test surface.
+- `fit_analyzer_test.dart` (+5): `maxFramesForBlock` (alone = the inverse answer;
+  keeps the rest of the plan; non-light → null; no windows → 0), light grouping,
+  `setupStartUtc`.

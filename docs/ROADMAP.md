@@ -307,8 +307,12 @@ rewritten to match the code.*
   - Completed 2026-09-22: **TASK 5.5** — `FitAnalyzer` (atomic placement, reasons,
     end time, inverse maximum, similar-nights hint); ADR-009 E1b fit vector corrected
     by an erratum; the sum-of-windows `SessionCalculator` deleted. 282 tests green.
-  - **Next: TASK 5.6 — Capture planner UI.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-22: **TASK 5.6** — capture planner UI (full ADR-009 breakdown,
+    fit reason and end time, one-tap fill/trim, per-group √N with help, assumptions
+    panel, policy/binning/gain in the editor; widget split). 291 tests green.
+    **Group G5 is complete.**
+  - **Next: TASK 6.1 — ADR: ephemeris approach and moving objects (PD-07, PD-16).**
+    Not started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

@@ -39,6 +39,7 @@
 > and `visibility_window.dart` at commit `f8e1a98`.
 > **TASK 5.3 (2026-09-22):** ADR-009 status updated. ADR-008 §3 conformance improved: migration steps now run through Drift's generated per-version `migrationSteps` (`schema_versions.dart`), so no step rebuilds against the live tables any more; the owner approved dropping `capture_blocks.gain_iso` in v11.
 > **TASK 5.5 (2026-09-22):** ADR-009 status updated; an erratum corrects the E1b fit vector to match §4/§6 (no semantic change).
+> **TASK 5.6 (2026-09-22):** ADR-009 marked fully implemented (G5 complete).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1080,8 +1081,10 @@ E1–E7 reproduced exactly). **Dead-code note (TASK 5.4, as §11 required):**
 was deleted together with its test; nothing called it, and ADR-009 replaces it.
 TASK 5.5, the fit (`FitAnalyzer`, §5–§6; the superseded sum-of-windows
 `SessionCalculator.calculateFeasibility`, CALC-18, was deleted with its tests).
-**Not implemented yet:**
-- TASK 5.6: the UI.
+TASK 5.6, the UI (every §2 line, the fit with its reason and end time, per-group
+√N, storage or "Unknown", the assumptions panel, and a one-tap fill/trim action
+built on a domain `FitAnalyzer.maxFramesForBlock`). **ADR-009 is fully
+implemented** (G5 complete, 2026-09-22).
 
 ### 1. Context (verified for this ADR at commit `f8e1a98`)
 

@@ -34,6 +34,7 @@
 > **TASK 5.3 (2026-09-22):** SI-004 progress (typed, descriptive-only gain). No calculation changed.
 > **TASK 5.4 (2026-09-22):** CALC-25 implemented and verified against ADR-009 E1–E7; CALC-19 deleted; CALC-20 budget part replaced; SI-013 progress. The budget semantics are ADR-009, not a silent formula change.
 > **TASK 5.5 (2026-09-22):** CALC-26 implemented; CALC-18 deleted. The E1b vector erratum is recorded in ADR-009 §8.
+> **TASK 5.6 (2026-09-22):** SI-003 and SI-004 progress (per-group √N with help text; descriptive-only gain in the editor). No calculation changed.
 
 ## Purpose and authority
 
@@ -235,6 +236,8 @@ dark current) that the app does not have and has no data to build.
 4. Do not introduce a physical SNR model without an approved ADR and per-camera
    gain/read-noise data.
 
+**Progress 2026-09-22 (TASK 5.6):** √N is now shown per group of light frames with the same filter and exposure (never pooled across groups), with help text stating that it compares random noise with one frame of the same group, is not a signal-to-noise ratio of the image, and ignores sky brightness, the target and the camera (ADR-009 §7).
+
 **Status:** Partial (metric acceptable; label now correct as of TASK 4.4, assumption
 documentation still open). **Work item:** TD-009 (resolved for the label).
 
@@ -274,6 +277,8 @@ sensor-specific way (dual-gain and ISO-invariant sensors behave differently).
 (kind iso / gain / unknown + value), documented as descriptive only and used by no
 calculation. Legacy free text was migrated as kind "unknown" (never guessed as ISO
 or gain). Not yet editable or shown in the UI (TASK 5.6).
+
+**Progress 2026-09-22 (TASK 5.6):** the sensitivity setting is editable as ISO / camera gain / not recorded, labelled "for your records" with the helper "Recorded only; it does not change the plan." No text claims ISO or gain collects more light.
 
 **Status:** Prototype. **Work item:** TD-009 (tracked together with SI-003).
 
