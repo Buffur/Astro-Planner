@@ -36,6 +36,7 @@
 > **TASK 5.5 (2026-09-22):** CALC-26 implemented; CALC-18 deleted. The E1b vector erratum is recorded in ADR-009 §8.
 > **TASK 5.6 (2026-09-22):** SI-003 and SI-004 progress (per-group √N with help text; descriptive-only gain in the editor). No calculation changed.
 > **TASK 6.1 (2026-09-22, docs only):** ADR-010 decision notes on SI-002, SI-009 and SI-012. No calculation changed.
+> **TASK 6.2 (2026-09-22):** CALC-07/CALC-08 now reference-tested; new CALC-27 (precession) — a recorded formula change (ADR-010, TASK 6.2 decisions); SI-009 and SI-012 progress.
 
 ## Purpose and authority
 
@@ -484,6 +485,8 @@ should be included; correct the stale comment.
 
 **Decision 2026-09-22 (TASK 6.1):** ADR-010 §4 sets the measurement for the existing Sun formula (TASK 6.2, USNO events, [−2, +7] min on the 5-min grid); replacing it would need a new decision, never a silent change. Not implemented.
 
+**Progress 2026-09-22 (TASK 6.2):** Reference-tested against independent sources (USNO, JPL Horizons, SIMBAD; `test/fixtures/astronomy/`, each with source, query and retrieval date): Sun altitude ≤ 0.0097°, every twilight crossing within the grid tolerance, star altitudes ≤ 0.017°. The simplifications are now documented on each function (UTC ≈ UT1, mean sidereal time, airless altitudes, the −0.833° convention, the 5-minute grid). Precession is now applied (owner decision).
+
 **Status:** Implemented (undocumented). **Work item:** TD-036.
 
 ---
@@ -654,6 +657,8 @@ the `(0, 0)` sentinel; add angular size for FOV-fit.
 
 **Decision 2026-09-22 (TASK 6.1):** ADR-010 §3: the moving types (Planet, Moon, Comet, Asteroid) are hidden for new targets in 1.0 and existing ones are labelled "fixed coordinates — this object moves" (TASK 8.1). ADR-010 §2 also makes the J2000-vs-of-date frame explicit: separation waits for the TASK 6.2 precession decision. Not implemented.
 
+**Progress 2026-09-22 (TASK 6.2):** J2000 target coordinates are now precessed to the date (Meeus ch. 21, owner decision; 0.32° → 0.017° against USNO). Epoch is still not stored per target (TASK 8.1); the moving types are still offered (TASK 8.1).
+
 **Status:** Partial. **Work item:** TD-016.
 
 ---
@@ -700,8 +705,8 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-04 | `AstronomicalEngine.calculateJulianDate` | UTC `DateTime` → JD | Meeus ch. 7, Gregorian | Throws `ArgumentError` if not UTC; ignores sub-second | J2000 | Good |
 | CALC-05 | `calculateGMST` | JD → degrees | Meeus eq. 12.4 linear term | UTC ≈ UT1 (≤ 0.9 s) | J2000 | Fair |
 | CALC-06 | `calculateLST` | GMST°, longitude° (east +) → degrees | GMST + λ | — | 1 | Good |
-| CALC-07 | `VisibilityCalculator.calculateLHA`, `calculateAltitude` | LST°, RA°, Dec°, lat° → altitude° | `sin a = sin δ sin φ + cos δ cos φ cos H` | Geometric altitude, no refraction | culmination case | Good |
-| CALC-08 | `calculateSunAltitude` | UTC, lat°, lon° → degrees | Low-precision solar coordinates (USNO "Approximate Solar Coordinates") | See SI-009; no direct reference-value test | indirect | Fair |
+| CALC-07 | `VisibilityCalculator.calculateLHA`, `calculateAltitude`, `calculateTargetAltitude` *(TASK 6.2)*, `calculateCulminationAltitude` *(TASK 6.2)* | LST°, RA°, Dec°, lat° → altitude°; targets: J2000 RA/Dec, UTC, lat°, lon° | `sin a = sin δ sin φ + cos δ cos φ cos H` (Meeus eq. 13.6); **targets precessed J2000 → date first (CALC-27)** | Geometric altitude, no refraction (TASK 6.2 policy) | **reference:** 67 USNO computed star altitudes, max error 0.017° (tolerance 0.05°); without precession 0.32° | Good |
+| CALC-08 | `calculateSunAltitude` | UTC, lat°, lon° → degrees | Low-precision solar coordinates (USNO "Approximate Solar Coordinates") | Airless; no nutation/aberration; UTC ≈ UT1 | **reference:** 375 JPL Horizons airless elevations, max error 0.0097° (tolerance 0.02°); timeline crossings within [−2, +7] min of Horizons and USNO (TASK 6.2) | Good |
 | CALC-09 | `calculateLunarIllumination` | UTC → 0–1 | Mean synodic month from an epoch | SI-002 (≤ 4.7 pp error on 2025 samples) | 3 coarse | Fair |
 | CALC-10 | `calculateNightTimeline` | date (Y/M/D used as local solar date), lat, lon → `Map<String, DateTime?>` | Sun crossings −0.833/−6/−12/−18° on a 5-min scan | SI-009, SI-010; nulls at high latitude; first crossing only. *(TASK 2.3: now a thin wrapper over CALC-22, resolving the date through a `MeanSolarTimeContext`; numerically verified to agree exactly with the pre-2.3 scan for a normal night.)* | solstice comparison | Fair |
 | CALC-11 | `calculateVisibilityWindows` | date, lat, lon, target, minAltitude°, sunLimit° (−18) → list of UTC windows | Sun ≤ limit **and** target ≥ minAltitude, 5-min steps | Quantized; no Moon/weather/horizon; J2000 coordinates. *(TASK 2.3: now a thin wrapper over CALC-23; can report `clippedAtStart`/`clippedAtEnd` in polar night, verified.)* | 4 | Fair |
@@ -720,6 +725,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-24 *(TASK 2.3)* | `VisibilityCalculator.calculateAltitudeCurve` | `SessionNight`, target → `AltitudeCurve` (289 samples) | Sun and target altitude (CALC-07, CALC-08) on the shared 5-min grid, `night.startUtc` to `night.endUtc` inclusive | Same simplifications as CALC-07/CALC-08 (no refraction, low-precision Sun) | grid spacing/count, agreement with CALC-22's crossing instant | Good — consumed by `AltitudeChartWidget`, the only current caller |
 | CALC-25 *(ADR-009; implemented TASK 5.4)* | `CaptureBudgetCalculator.calculate` (`lib/domain/services/capture_budget_calculator.dart`) | blocks (type, filter, exposure s, count, calibration policy), overhead parameters (per-frame s; optional dither N and s, refocus T and s, filter change s, flip s, setup s), "transit in a window" flag → breakdown | Integration = Σ light exposure; acquisition = integration + per-frame × lights + in-window overhead events (one ordered sequence); window load = acquisition + in-window calibration; session budget = window load + outside-window calibration + setup; integer ms | Overhead defaults are assumptions (per-frame 5 s on; the rest off, shown as "not included"); ADR-009 L1–L6 | ADR-009 E1–E7 (independent scratch model) | Good — E1–E7 reproduced to the millisecond (`capture_budget_calculator_test.dart`) |
 | CALC-26 *(ADR-009; implemented TASK 5.5)* | `FitAnalyzer.analyze` / `maxPlaceableFrames` / `noWindowReason` (`lib/domain/services/fit_analyzer.dart`) | the CALC-25 event sequence, `List<VisibilityWindow>`, margin m (default 15 %), transit instant → fits / tight / does not fit / no window / nothing to fit, reason, end instant, unused time, lost tails, unplaced frames per block, flip applied/dropped, similar-nights hint; inverse maximum | Atomic events placed in order; an event that doesn't fit moves to the next window and the tail is lost; the flip is placed at the first boundary at/after transit or dropped if the plan ends first; tight if placed time > (1 − m) × Σ windows; nights = ⌈window load ÷ placed⌉ | One target per night; the margin labels only; transit to 5-min resolution | ADR-009 E1–E7 (E1b per the TASK 5.5 erratum), margin, inverse, no-window reasons | Good |
+| CALC-27 *(TASK 6.2)* | `AstronomicalEngine.precessJ2000ToDate` | J2000 RA°, Dec°, JD → RA°, Dec° of date | Meeus ch. 21, eq. 21.2 (IAU 1976 ζ, z, θ) and 21.4 (rigorous) | Mean equinox of date; no nutation, aberration or proper motion (about 20–40″) | identity at J2000.0; precessed Dec within 0.03° of USNO Dec of date for all 67 observations | Good |
 
 ---
 

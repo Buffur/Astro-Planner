@@ -26,6 +26,7 @@
 > **TASK 5.4 (2026-09-22):** `CaptureBudgetCalculator` (CALC-25) implements the ADR-009 budget; the ViewModel only delegates; feasibility now uses the window load (calibration outside the window no longer counts against dark time); the dead `estimateTotalDuration` (CALC-19) was deleted. Test baseline 268.
 > **TASK 5.5 (2026-09-22):** `FitAnalyzer` (CALC-26) places the ADR-009 event sequence atomically into the windows and reports fits / tight / does not fit / no window / nothing to fit with a reason, end time, lost tails, unplaced frames, the inverse maximum and a similar-nights hint; the sum-of-windows `SessionCalculator` (CALC-18) was deleted. Test baseline 282.
 > **TASK 5.6 (2026-09-22):** the capture planner UI shows every ADR-009 line (integration, acquisition, calibration in/outside the window, setup, window load vs available, session budget), the fit with its reason and end time, a one-tap "fill / trim to tonight's window" action, √N per (filter, exposure) group with help text, storage or "Unknown", and an assumptions panel; the block editor sets the calibration policy, binning and a typed gain. `capture_plan_widget.dart` was split into `widgets/capture_plan/`. Group G5 is complete. Test baseline 291.
+> **TASK 6.2 (2026-09-22):** independent reference fixtures (USNO events and celestial-navigation altitudes, JPL Horizons Sun elevations, SIMBAD J2000 star positions; `test/fixtures/astronomy/`) and tolerance tests; target coordinates are now precessed J2000 → date (Meeus ch. 21, owner decision) in the one domain target-altitude function; altitudes stay airless with the −0.833° sunrise/sunset convention (owner decision); source/units/error doc comments on the astronomy functions. Test baseline 299.
 
 ## 0. Start here (10-minute orientation)
 
@@ -290,7 +291,7 @@ added the location suite; TASK 1.2 added the bootstrap and Home suites; TASK 2.2
 added 52 session-night, calendar-date and clock tests; TASK 2.3 added 12 more —
 9 SessionNight-based calculator tests, 3 altitude-chart widget tests.)*
 
-- **Result:** 291 pass, 0 fail (`dart run tool/check.dart` after TASK 5.6; 282 after TASK 5.5; 268 after TASK 5.4; 249 after TASK 5.3; 229 after TASK 5.2; 147
+- **Result:** 299 pass, 0 fail (`dart run tool/check.dart` after TASK 6.2; 291 after TASK 5.6; 282 after TASK 5.5; 268 after TASK 5.4; 249 after TASK 5.3; 229 after TASK 5.2; 147
   after TASK 2.3; 135 after TASK 2.2; 83 after TASK 1.2). The
   audit's red `integration_flow_test.dart` (TD-003) was repaired, not weakened.
 - **Gaps:** no tests for the live budget math, Capture Plan, Sky, Altitude chart,

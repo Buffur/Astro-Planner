@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **291 tests: 291 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.6) |
+| `flutter test --no-pub` | **299 tests: 299 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -281,3 +281,25 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - `fit_analyzer_test.dart` (+5): `maxFramesForBlock` (alone = the inverse answer;
   keeps the rest of the plan; non-light → null; no windows → 0), light grouping,
   `setupStartUtc`.
+
+**Added by TASK 6.2** (independent astronomy references), 8 tests and 3 fixtures:
+- **Fixtures** in `test/fixtures/astronomy/`. Each file records its source, the
+  exact queries and the retrieval date, and none contains values computed by the
+  app:
+  - `usno_sun_moon_events.json`: USNO rstt/oneday, 3 sites × 5 nights × 2 UTC
+    dates; the Moon events are kept for TASK 6.3.
+  - `horizons_sun.json`: JPL Horizons airless Sun elevation at 1-min steps.
+    Threshold crossings are linearly interpolated between samples; hourly spot
+    values are kept unmodified.
+  - `usno_celnav_stars.json`: USNO celnav computed altitudes of 9 stars at 3 sites
+    and 3 instants, with SIMBAD J2000 inputs.
+- **`test/domain/services/astronomy_reference_test.dart`:**
+  - Sun altitude ≤ 0.02°;
+  - every Horizons crossing reported within [−2, +7] min on the grid;
+  - polar thresholds typed as never below / always below;
+  - every USNO rise/set and civil-twilight event within [−2.5, +7.5] min (USNO
+    rounds to the minute);
+  - stars within 0.05° with precession;
+  - precessed Dec within 0.03° of USNO's Dec of date;
+  - a regression guard that the unprecessed error exceeds 0.2°;
+  - precession is the identity at J2000.0.

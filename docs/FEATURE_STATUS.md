@@ -41,6 +41,7 @@
 > **TASK 5.4 (2026-09-22):** `CaptureBudgetCalculator` (CALC-25) implements the ADR-009 budget; the ViewModel only delegates; feasibility now uses the window load (calibration outside the window no longer counts against dark time); the dead `estimateTotalDuration` (CALC-19) was deleted. Affected entries: F-36, F-39, F-48.
 > **TASK 5.5 (2026-09-22):** `FitAnalyzer` (CALC-26) places the ADR-009 event sequence atomically into the windows and reports fits / tight / does not fit / no window / nothing to fit with a reason, end time, lost tails, unplaced frames, the inverse maximum and a similar-nights hint; the sum-of-windows `SessionCalculator` (CALC-18) was deleted. Affected entries: F-36, F-48.
 > **TASK 5.6 (2026-09-22):** the capture planner UI shows every ADR-009 line (integration, acquisition, calibration in/outside the window, setup, window load vs available, session budget), the fit with its reason and end time, a one-tap "fill / trim to tonight's window" action, √N per (filter, exposure) group with help text, storage or "Unknown", and an assumptions panel; the block editor sets the calibration policy, binning and a typed gain. `capture_plan_widget.dart` was split into `widgets/capture_plan/`. Group G5 is complete. F-35 and F-37 → Implemented; F-39 Missing → Partial; F-36 and F-48 updated.
+> **TASK 6.2 (2026-09-22):** independent reference fixtures (USNO events and celestial-navigation altitudes, JPL Horizons Sun elevations, SIMBAD J2000 star positions; `test/fixtures/astronomy/`) and tolerance tests; target coordinates are now precessed J2000 → date (Meeus ch. 21, owner decision) in the one domain target-altitude function; altitudes stay airless with the −0.833° sunrise/sunset convention (owner decision); source/units/error doc comments on the astronomy functions. Affected entries: F-11, F-13, F-14, F-48.
 
 ## Status legend
 
@@ -221,7 +222,8 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Implemented
 - **Current implementation:** Meeus-based Julian date, linear GMST, LST, LHA, geometric altitude; RA/Dec helpers.
 - **Relevant files:** `lib/domain/services/astronomical_engine.dart`, `visibility_calculator.dart`, `lib/core/utils/astro_math.dart`.
-- **Known issues:** simplifications undocumented (no precession, refraction; UTC ≈ UT1) (SI-009; TD-036); a stray escaped apostrophe in a comment (`astronomical_engine.dart:38`).
+- **TASK 6.2:** J2000 → date precession (Meeus ch. 21) in the single target-altitude function; reference-tested against USNO/JPL Horizons/SIMBAD fixtures (Sun ≤ 0.0097°, stars ≤ 0.017°); every simplification documented on its function.
+- **Known issues:** none open. *Resolved (TASK 6.2):* undocumented simplifications and missing precession (SI-009, TD-036); the stray escaped apostrophe in the GMST comment.
 - **Dependencies:** none (pure Dart).
 - **Roadmap relevance:** Phase 5. Tests: J2000 JD/GMST, LST, culmination altitude.
 

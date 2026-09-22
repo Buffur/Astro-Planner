@@ -315,8 +315,12 @@ rewritten to match the code.*
     objects; `docs/DECISIONS.md` Part F), resolving PD-07 and PD-16. The owner chose:
     in-house Meeus ch. 47 with the full tables; moving types hidden for new targets,
     existing ones labelled. Documentation only.
-  - **Next: TASK 6.2 — Independent reference fixtures; document simplifications.**
-    Not started; it begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 6.2** — USNO/JPL Horizons/SIMBAD reference fixtures
+    and tolerance tests; J2000 → date precession (owner: now) and the airless +
+    −0.833° refraction policy (owner); the Sun formula measured and kept. 299 tests
+    green.
+  - **Next: TASK 6.3 — Moon ephemeris.** Not started; it begins only on the owner's
+    go-ahead.
 
 ### Phase → group map
 

@@ -41,6 +41,7 @@
 > **TASK 5.5 (2026-09-22):** ADR-009 status updated; an erratum corrects the E1b fit vector to match §4/§6 (no semantic change).
 > **TASK 5.6 (2026-09-22):** ADR-009 marked fully implemented (G5 complete).
 > **TASK 6.1 (2026-09-22, documentation only, no code changed):** ADR-010 (ephemeris approach and moving objects) accepted in Part F; PD-07 and PD-16 resolved (E.1). Checked against `astronomical_engine.dart`, `visibility_calculator.dart` and `target_selection_screen.dart` at `a61459b`.
+> **TASK 6.2 (2026-09-22):** ADR-010 gained the owner's precession (formula change: J2000 → date, Meeus ch. 21) and refraction (airless + −0.833°) decisions and the Sun measurements.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1329,7 +1330,32 @@ rule 3).
 Status: accepted (owner, 2026-09-22, TASK 6.1). Resolves PD-07 and PD-16. It also
 answers the Phase 0 pending decision "Which astronomical engine/library/reference
 to use for future ephemeris work" (Part A, unchanged). **Not implemented yet:**
-TASKs 6.2–6.4 for the Moon, TASK 8.1 for the target types.
+TASKs 6.3–6.4 for the Moon, TASK 8.1 for the target types.
+
+**TASK 6.2 decisions (owner, 2026-09-22), recorded here as §2 required:**
+- **Precession — formula change** (rule 16, never silent).
+  - Fixed-target J2000.0 coordinates are now precessed to the date (Meeus ch. 21,
+    IAU 1976, eq. 21.2 and 21.4). This happens in the single domain function
+    `VisibilityCalculator.calculateTargetAltitude`, used by the altitude curve,
+    windows, chart and the ViewModel's current and culmination altitude.
+  - **Measured** against USNO computed altitudes of 9 stars at 3 sites: the maximum
+    error falls from **0.32°** to **0.017°**.
+  - **Effect:** windows can shift by up to about two minutes.
+  - **Not included:** nutation, aberration, proper motion (about 20–40″).
+  - This gives TASK 6.4's separation a shared (of-date) frame.
+- **Refraction policy.** Altitudes stay **geometric (airless)**; sunrise and sunset
+  keep the standard **−0.833°** (mean refraction plus semidiameter); twilight limits
+  are geometric by definition.
+  - **Rationale:** at imaging altitudes (≥ 5°, default 20°) refraction is
+    0.05–0.16°, smaller than the minimum-altitude preference's own uncertainty.
+  - No pressure or temperature assumptions are needed.
+- **Measurements of the existing Sun formula (§4).**
+  - Altitude is within **0.0097°** of JPL Horizons (375 samples).
+  - Every sunset, sunrise and civil, nautical and astronomical twilight crossing
+    falls **0.07 to 4.98 min** after Horizons' instant.
+  - Every USNO rise/set and civil-twilight event falls within the [−2, +7] min grid
+    tolerance.
+  - The formula meets §4 and **stays unchanged**; no ch. 25 replacement is needed.
 
 ### 1. Context (verified for this ADR at commit `a61459b`)
 
