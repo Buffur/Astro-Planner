@@ -68,12 +68,14 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-21, after TASK 1.2, commit `2e17093`)
+## Current Baseline and Known Traps (as of 2026-09-21, after TASK 1.3)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 
+- **`dart run tool/check.dart`** — the quality gate: `dart format --set-exit-if-changed`, `flutter analyze --no-pub`, `flutter test --no-pub` (all scoped to `lib`/`test`), in one command. Runs all three regardless of an earlier failure, then prints a pass/fail summary and exits non-zero if any failed. Run this before calling a change complete (TASK 1.3, TD-046).
 - `flutter analyze --no-pub` — expected: no issues.
 - `flutter test --no-pub` — expected: **83 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved). A failing test is now a regression.
+- `dart format lib test` — expected: no changes (the whole tree was formatted once, TASK 1.3). Formatting is not yet enforced in CI; `tool/check.dart` is the only current gate.
 - After changing Drift tables: `dart run build_runner build --delete-conflicting-outputs` (standard step; not exercised in the audit). Every schema change needs a migration **and** a migration test.
 - Android build/run was **not** verified.
 
