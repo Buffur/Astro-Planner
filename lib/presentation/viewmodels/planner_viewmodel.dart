@@ -30,7 +30,6 @@ import '../../data/services/geolocator_location_service.dart';
 import '../../domain/services/location_service.dart';
 import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
-import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/services/fit_analyzer.dart';
@@ -624,17 +623,11 @@ class PlannerViewModel extends ChangeNotifier {
   double? get currentAltitude {
     if (_selectedTarget == null || _usingDefaultLocation) return null;
 
-    final jd = AstronomicalEngine.calculateJulianDate(_clock.nowUtc());
-    final gmst = AstronomicalEngine.calculateGMST(jd);
-    final lst = AstronomicalEngine.calculateLST(gmst, _longitude);
-    final lha = VisibilityCalculator.calculateLHA(
-      lst,
-      _selectedTarget!.rightAscension,
-    );
-    return VisibilityCalculator.calculateAltitude(
-      lha: lha,
-      declination: _selectedTarget!.declination,
-      latitude: _latitude,
+    return VisibilityCalculator.calculateTargetAltitude(
+      _selectedTarget!,
+      _clock.nowUtc(),
+      _latitude,
+      _longitude,
     );
   }
 
@@ -643,10 +636,10 @@ class PlannerViewModel extends ChangeNotifier {
   double? get maxAltitude {
     if (_selectedTarget == null || _usingDefaultLocation) return null;
 
-    return VisibilityCalculator.calculateAltitude(
-      lha: 0.0,
-      declination: _selectedTarget!.declination,
-      latitude: _latitude,
+    return VisibilityCalculator.calculateCulminationAltitude(
+      _selectedTarget!,
+      _clock.nowUtc(),
+      _latitude,
     );
   }
 

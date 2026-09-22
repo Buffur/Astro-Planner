@@ -1,0 +1,782 @@
+{
+ "source": "Star J2000 (ICRS) coordinates: SIMBAD, CDS Strasbourg (TAP basic table). Computed altitude hc and azimuth zn: USNO celnav API v4 (https://aa.usno.navy.mil/data/api); hc is the computed altitude before refraction and other corrections (returned separately by the API).",
+ "retrieved": "2026-09-22T20:18Z",
+ "simbadQuery": "https://simbad.cds.unistra.fr/simbad/sim-tap/sync?request=doQuery&lang=adql&format=json&query=SELECT+i.id%2C+b.ra%2C+b.dec+FROM+basic+AS+b+JOIN+ident+AS+i+ON+i.oidref+%3D+b.oid+WHERE+i.id+IN+%28%27NAME+Vega%27%2C%27NAME+Sirius%27%2C%27NAME+Schedar%27%2C%27NAME+Alpheratz%27%2C%27NAME+Polaris%27%2C%27NAME+Arcturus%27%2C%27NAME+Capella%27%2C%27NAME+Deneb%27%2C%27NAME+Betelgeuse%27%29",
+ "stars": {
+  "Alpheratz": {
+   "raDeg": 2.0969161856756404,
+   "decDeg": 29.090431118059698
+  },
+  "Arcturus": {
+   "raDeg": 213.915300294925,
+   "decDeg": 19.1824091615312
+  },
+  "Betelgeuse": {
+   "raDeg": 88.79293899077537,
+   "decDeg": 7.407063995272694
+  },
+  "Capella": {
+   "raDeg": 79.17232794433404,
+   "decDeg": 45.99799146983673
+  },
+  "Deneb": {
+   "raDeg": 310.35797975307673,
+   "decDeg": 45.280338806527574
+  },
+  "Polaris": {
+   "raDeg": 37.954560670189856,
+   "decDeg": 89.26410896994187
+  },
+  "Schedar": {
+   "raDeg": 10.126846007691249,
+   "decDeg": 56.537329217042775
+  },
+  "Sirius": {
+   "raDeg": 101.28715533333335,
+   "decDeg": -16.71611586111111
+  },
+  "Vega": {
+   "raDeg": 279.234734787025,
+   "decDeg": 38.783688956244
+  }
+ },
+ "observations": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 3.088432,
+   "znDeg": 315.877606,
+   "decOfDateDeg": 29.234847,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 29.179441,
+   "znDeg": 326.663556,
+   "decOfDateDeg": 56.682781,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Capella",
+   "hcDeg": 57.275466,
+   "znDeg": 280.489793,
+   "decOfDateDeg": 46.026515,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 34.790271,
+   "znDeg": 231.600058,
+   "decOfDateDeg": 7.410781,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Sirius",
+   "hcDeg": 17.488209,
+   "znDeg": 208.160337,
+   "decOfDateDeg": -16.754958,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 18.101889,
+   "znDeg": 81.927209,
+   "decOfDateDeg": 19.041687,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Vega",
+   "hcDeg": 4.070197,
+   "znDeg": 23.116052,
+   "decOfDateDeg": 38.802536,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 6.873698,
+   "znDeg": 359.324483,
+   "decOfDateDeg": 45.370194,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 51.567612,
+   "znDeg": 359.008177,
+   "decOfDateDeg": 89.379345,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 59.325738,
+   "znDeg": 234.454384,
+   "decOfDateDeg": 29.240818,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 77.057116,
+   "znDeg": 301.542915,
+   "decOfDateDeg": 56.685291,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Capella",
+   "hcDeg": 57.974638,
+   "znDeg": 80.214526,
+   "decOfDateDeg": 46.022468,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 25.172833,
+   "znDeg": 111.21232,
+   "decOfDateDeg": 7.413694,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Vega",
+   "hcDeg": 18.275736,
+   "znDeg": 310.177316,
+   "decOfDateDeg": 38.812855,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 39.122465,
+   "znDeg": 296.829716,
+   "decOfDateDeg": 45.380195,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 52.102068,
+   "znDeg": 0.284172,
+   "decOfDateDeg": 89.372812,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 45.478973,
+   "znDeg": 260.840109,
+   "decOfDateDeg": 29.242663,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 63.916372,
+   "znDeg": 299.028927,
+   "decOfDateDeg": 56.69084,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Capella",
+   "hcDeg": 72.896358,
+   "znDeg": 98.904926,
+   "decOfDateDeg": 46.026128,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 37.689517,
+   "znDeg": 135.189724,
+   "decOfDateDeg": 7.411104,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Sirius",
+   "hcDeg": 10.579235,
+   "znDeg": 134.901858,
+   "decOfDateDeg": -16.754843,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Vega",
+   "hcDeg": 8.310429,
+   "znDeg": 326.487847,
+   "decOfDateDeg": 38.806956,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 26.650511,
+   "znDeg": 310.416057,
+   "decOfDateDeg": 45.377901,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 52.111204,
+   "znDeg": 359.862203,
+   "decOfDateDeg": 89.382886,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=51.5%2C-0.1"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 14.299768,
+   "znDeg": 64.058456,
+   "decOfDateDeg": 29.234847,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 23.660856,
+   "znDeg": 36.045001,
+   "decOfDateDeg": 56.682781,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 38.980745,
+   "znDeg": 266.309139,
+   "decOfDateDeg": 19.041687,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Vega",
+   "hcDeg": 81.392098,
+   "znDeg": 65.741296,
+   "decOfDateDeg": 38.802536,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 57.609531,
+   "znDeg": 59.759116,
+   "decOfDateDeg": 45.370194,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 35.225763,
+   "znDeg": 0.519213,
+   "decOfDateDeg": 89.379345,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 3.895879,
+   "znDeg": 349.193316,
+   "decOfDateDeg": 56.685291,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Capella",
+   "hcDeg": 24.237261,
+   "znDeg": 310.412355,
+   "decOfDateDeg": 46.022468,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 11.24654,
+   "znDeg": 271.098909,
+   "decOfDateDeg": 7.413694,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Sirius",
+   "hcDeg": 6.336265,
+   "znDeg": 244.107218,
+   "decOfDateDeg": -16.748983,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 48.266475,
+   "znDeg": 101.623188,
+   "decOfDateDeg": 19.045299,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Vega",
+   "hcDeg": 9.265182,
+   "znDeg": 48.341783,
+   "decOfDateDeg": 38.812855,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 35.33131,
+   "znDeg": 359.359593,
+   "decOfDateDeg": 89.372812,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 2.438967,
+   "znDeg": 2.297522,
+   "decOfDateDeg": 56.69084,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Capella",
+   "hcDeg": 10.444523,
+   "znDeg": 320.221848,
+   "decOfDateDeg": 46.026128,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 66.054566,
+   "znDeg": 128.863983,
+   "decOfDateDeg": 19.037839,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Vega",
+   "hcDeg": 25.043395,
+   "znDeg": 58.929588,
+   "decOfDateDeg": 38.806956,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 9.557309,
+   "znDeg": 39.854755,
+   "decOfDateDeg": 45.377901,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 35.158092,
+   "znDeg": 359.595908,
+   "decOfDateDeg": 89.382886,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=35.68%2C139.65"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 11.864444,
+   "znDeg": 330.303005,
+   "decOfDateDeg": 29.234847,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 39.875401,
+   "znDeg": 331.499091,
+   "decOfDateDeg": 56.682781,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Capella",
+   "hcDeg": 49.569954,
+   "znDeg": 271.517505,
+   "decOfDateDeg": 46.026515,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 17.206075,
+   "znDeg": 243.472714,
+   "decOfDateDeg": 7.410781,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 26.231803,
+   "znDeg": 106.416646,
+   "decOfDateDeg": 19.041687,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Vega",
+   "hcDeg": 24.238551,
+   "znDeg": 40.33217,
+   "decOfDateDeg": 38.802536,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 25.787457,
+   "znDeg": 14.032118,
+   "decOfDateDeg": 45.370194,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 69.507948,
+   "znDeg": 358.26834,
+   "decOfDateDeg": 89.379345,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-03-01&time=22%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 41.539025,
+   "znDeg": 239.205759,
+   "decOfDateDeg": 29.240818,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 68.607905,
+   "znDeg": 252.886452,
+   "decOfDateDeg": 56.685291,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Capella",
+   "hcDeg": 62.169591,
+   "znDeg": 132.42511,
+   "decOfDateDeg": 46.022468,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 22.833812,
+   "znDeg": 137.10658,
+   "decOfDateDeg": 7.413694,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Vega",
+   "hcDeg": 24.320975,
+   "znDeg": 319.408071,
+   "decOfDateDeg": 38.812855,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 38.886321,
+   "znDeg": 297.07079,
+   "decOfDateDeg": 45.380195,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T02:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 70.27636,
+   "znDeg": 359.905972,
+   "decOfDateDeg": 89.372812,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2026-09-22&time=02%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Alpheratz",
+   "hcDeg": 33.642507,
+   "znDeg": 263.868671,
+   "decOfDateDeg": 29.242663,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Schedar",
+   "hcDeg": 60.318574,
+   "znDeg": 277.055838,
+   "decOfDateDeg": 56.69084,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Capella",
+   "hcDeg": 66.207314,
+   "znDeg": 170.195941,
+   "decOfDateDeg": 46.026128,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Betelgeuse",
+   "hcDeg": 26.986586,
+   "znDeg": 163.078784,
+   "decOfDateDeg": 7.411104,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Sirius",
+   "hcDeg": 1.423723,
+   "znDeg": 153.667313,
+   "decOfDateDeg": -16.754843,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Arcturus",
+   "hcDeg": 3.049465,
+   "znDeg": 37.278923,
+   "decOfDateDeg": 19.037839,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Vega",
+   "hcDeg": 20.053335,
+   "znDeg": 339.113615,
+   "decOfDateDeg": 38.806956,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Deneb",
+   "hcDeg": 32.193442,
+   "znDeg": 316.150286,
+   "decOfDateDeg": 45.377901,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:00:00Z",
+   "star": "Polaris",
+   "hcDeg": 70.198246,
+   "znDeg": 359.17462,
+   "decOfDateDeg": 89.382886,
+   "query": "https://aa.usno.navy.mil/api/celnav?date=2027-01-15&time=20%3A00&coords=69.65%2C18.96"
+  }
+ ]
+}

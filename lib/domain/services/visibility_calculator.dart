@@ -13,15 +13,18 @@ import 'session_night_resolver.dart';
 
 /// Service for calculating target visibility, altitudes, and basic solar/lunar ephemerides.
 class VisibilityCalculator {
-  /// Calculates the Local Hour Angle (LHA) in degrees.
-  /// Inputs: Local Sidereal Time (degrees), Right Ascension (degrees).
+  /// Calculates the Local Hour Angle (LHA) in degrees, [0, 360).
+  /// Inputs: Local Sidereal Time (degrees), Right Ascension (degrees), both
+  /// in the same equinox (see [calculateTargetAltitude] for precession).
   static double calculateLHA(double lst, double ra) {
     return AstroMath.normalizeDegrees(lst - ra);
   }
 
   /// Calculates the altitude of a celestial object above the horizon.
   /// Inputs: LHA (degrees), Declination (degrees), Latitude (degrees).
-  /// Output: Altitude in degrees (-90 to +90).
+  /// Output: Altitude in degrees (-90 to +90), geometric (airless, no
+  /// refraction; TASK 6.2 policy).
+  /// Source: Meeus ch. 13, eq. 13.6 (spherical astronomy; exact).
   static double calculateAltitude({
     required double lha,
     required double declination,
@@ -38,8 +41,62 @@ class VisibilityCalculator {
     return AstroMath.radiansToDegrees(math.asin(sinAlt));
   }
 
+  /// A fixed target's geometric (airless) altitude at [utcTime], degrees.
+  ///
+  /// The target's J2000.0 coordinates are precessed to the date first
+  /// (Meeus ch. 21; TASK 6.2 decision). Refraction is not applied: altitudes
+  /// are geometric by policy (TASK 6.2), since at imaging altitudes it is
+  /// smaller than the minimum-altitude preference's own uncertainty.
+  static double calculateTargetAltitude(
+    AstroTarget target,
+    DateTime utcTime,
+    double latitude,
+    double longitude,
+  ) {
+    final jd = AstronomicalEngine.calculateJulianDate(utcTime);
+    final (ra, dec) = AstronomicalEngine.precessJ2000ToDate(
+      target.rightAscension,
+      target.declination,
+      jd,
+    );
+    final lst = AstronomicalEngine.calculateLST(
+      AstronomicalEngine.calculateGMST(jd),
+      longitude,
+    );
+    return calculateAltitude(
+      lha: calculateLHA(lst, ra),
+      declination: dec,
+      latitude: latitude,
+    );
+  }
+
+  /// A fixed target's culmination (upper transit) altitude at [utcTime]'s
+  /// date, degrees: LHA = 0 with the declination precessed to that date.
+  static double calculateCulminationAltitude(
+    AstroTarget target,
+    DateTime utcTime,
+    double latitude,
+  ) {
+    final (_, dec) = AstronomicalEngine.precessJ2000ToDate(
+      target.rightAscension,
+      target.declination,
+      AstronomicalEngine.calculateJulianDate(utcTime),
+    );
+    return calculateAltitude(lha: 0, declination: dec, latitude: latitude);
+  }
+
   /// Calculates the approximate altitude of the Sun.
   /// Useful for determining sunrise, sunset, and twilights.
+  ///
+  /// Output: geometric (airless) altitude in degrees; sunrise/sunset use the
+  /// standard −0.833° threshold, which includes mean refraction and the
+  /// semidiameter (TASK 6.2 policy).
+  /// Source: the low-precision solar coordinates published by USNO
+  /// ("Approximate Solar Coordinates"; stated accuracy about 0.01° within
+  /// two centuries of 2000): mean anomaly, two-term equation of centre,
+  /// linear obliquity; no nutation or aberration.
+  /// Measured (TASK 6.2, 2026-09-22): ≤ 0.0097° against JPL Horizons airless
+  /// elevations (375 samples, 3 sites, 5 nights; test/fixtures/astronomy).
   static double calculateSunAltitude(
     DateTime utcTime,
     double latitude,
@@ -217,14 +274,11 @@ class VisibilityCalculator {
         night.longitude,
       );
 
-      final jd = AstronomicalEngine.calculateJulianDate(instant);
-      final gmst = AstronomicalEngine.calculateGMST(jd);
-      final lst = AstronomicalEngine.calculateLST(gmst, night.longitude);
-      final lha = calculateLHA(lst, target.rightAscension);
-      final targetAlt = calculateAltitude(
-        lha: lha,
-        declination: target.declination,
-        latitude: night.latitude,
+      final targetAlt = calculateTargetAltitude(
+        target,
+        instant,
+        night.latitude,
+        night.longitude,
       );
 
       samples.add(

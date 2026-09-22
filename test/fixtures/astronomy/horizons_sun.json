@@ -1,0 +1,3337 @@
+{
+ "source": "JPL Horizons API (https://ssd.jpl.nasa.gov/api/horizons.api), target 10 (Sun), observer geodetic site at 0 m, QUANTITIES=4, APPARENT=AIRLESS (no refraction), 1-minute steps over the app's night window (mean solar noon + 24 h). Crossing instants are linear interpolations between the two bracketing Horizons samples; spot values are every 60th sample, unmodified.",
+ "retrieved": "2026-09-22T20:18Z",
+ "crossings": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "eveningDate": "2026-03-01",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-03-01+12%3A00%27&STOP_TIME=%272026-03-02+12%3A00%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-01T17:40:34Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-01T18:14:07Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-01T18:52:45Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-01T19:31:41Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-02T04:52:43Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-02T05:31:34Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-02T06:10:05Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-02T06:43:32Z"
+    }
+   ],
+   "minElevationDeg": -45.783514,
+   "maxElevationDeg": 31.342037
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "eveningDate": "2026-06-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-06-21+12%3A00%27&STOP_TIME=%272026-06-22+12%3A00%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-06-21T20:21:23Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-06-21T21:09:09Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-06-21T22:23:44Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-06-22T01:40:55Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-06-22T02:55:30Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-06-22T03:43:15Z"
+    }
+   ],
+   "minElevationDeg": -15.065829,
+   "maxElevationDeg": 61.936697
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "eveningDate": "2026-09-22",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-09-22+12%3A00%27&STOP_TIME=%272026-09-23+12%3A00%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-22T17:58:52Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-22T18:32:08Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-22T19:11:28Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-22T19:52:26Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-23T03:54:12Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-23T04:35:14Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-23T05:14:38Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-23T05:47:59Z"
+    }
+   ],
+   "minElevationDeg": -38.498596,
+   "maxElevationDeg": 38.673453
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "eveningDate": "2026-12-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272026-12-21+12%3A00%27&STOP_TIME=%272026-12-22+12%3A00%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-12-21T15:53:19Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-21T16:33:39Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-21T17:16:51Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-21T17:57:39Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-22T05:59:45Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-22T06:40:34Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-22T07:23:46Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-12-22T08:04:06Z"
+    }
+   ],
+   "minElevationDeg": -61.938451,
+   "maxElevationDeg": 15.061758
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "eveningDate": "2027-01-15",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27&START_TIME=%272027-01-15+12%3A00%27&STOP_TIME=%272027-01-16+12%3A00%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-15T16:20:20Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-15T16:58:52Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-15T17:40:44Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-15T18:20:45Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-16T05:58:35Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-16T06:38:31Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-16T07:20:16Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-16T07:58:40Z"
+    }
+   ],
+   "minElevationDeg": -59.518618,
+   "maxElevationDeg": 17.539863
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "eveningDate": "2026-03-01",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-03-01+02%3A41%27&STOP_TIME=%272026-03-02+02%3A41%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-01T08:36:04Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-01T09:01:43Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-01T09:31:19Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-01T10:00:54Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-01T19:45:59Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-01T20:15:31Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-01T20:45:04Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-01T21:10:40Z"
+    }
+   ],
+   "minElevationDeg": -61.75063,
+   "maxElevationDeg": 46.973972
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "eveningDate": "2026-06-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-06-21+02%3A41%27&STOP_TIME=%272026-06-22+02%3A41%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-06-21T10:00:27Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-06-21T10:30:33Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-06-21T11:07:53Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-06-21T11:49:23Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-06-21T17:37:06Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-06-21T18:18:35Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-06-21T18:55:55Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-06-21T19:26:01Z"
+    }
+   ],
+   "minElevationDeg": -30.884342,
+   "maxElevationDeg": 77.757211
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "eveningDate": "2026-09-22",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-09-22+02%3A41%27&STOP_TIME=%272026-09-23+02%3A41%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-22T08:38:59Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-22T09:04:26Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-22T09:34:10Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-22T10:04:17Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-22T19:04:20Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-22T19:34:29Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-22T20:04:15Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-22T20:29:44Z"
+    }
+   ],
+   "minElevationDeg": -54.167104,
+   "maxElevationDeg": 54.630712
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "eveningDate": "2026-12-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272026-12-21+02%3A41%27&STOP_TIME=%272026-12-22+02%3A41%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-12-21T07:31:30Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-21T07:59:59Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-21T08:31:58Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-21T09:03:07Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-21T20:15:55Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-21T20:47:03Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-21T21:19:03Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-12-21T21:47:32Z"
+    }
+   ],
+   "minElevationDeg": -77.757238,
+   "maxElevationDeg": 30.881281
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "eveningDate": "2027-01-15",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27&START_TIME=%272027-01-15+02%3A41%27&STOP_TIME=%272027-01-16+02%3A41%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-15T07:50:43Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-15T08:18:32Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-15T08:49:56Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-15T09:20:37Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-15T20:20:40Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-15T20:51:19Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-15T21:22:40Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-15T21:50:26Z"
+    }
+   ],
+   "minElevationDeg": -75.410241,
+   "maxElevationDeg": 33.271398
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "eveningDate": "2026-03-01",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-03-01+10%3A44%27&STOP_TIME=%272026-03-02+10%3A44%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-01T15:44:26Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-01T16:45:35Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-01T17:55:07Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-01T19:09:10Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-03-02T02:42:01Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-03-02T03:55:50Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-03-02T05:05:00Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-03-02T06:05:39Z"
+    }
+   ],
+   "minElevationDeg": -27.654238,
+   "maxElevationDeg": 13.204073
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "eveningDate": "2026-06-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-06-21+10%3A44%27&STOP_TIME=%272026-06-22+10%3A44%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [],
+   "minElevationDeg": 3.084288,
+   "maxElevationDeg": 43.78617
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "eveningDate": "2026-09-22",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-09-22+10%3A44%27&STOP_TIME=%272026-09-23+10%3A44%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-22T16:47:38Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-22T17:47:53Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-22T19:04:42Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-22T20:48:44Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-09-23T00:26:05Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-09-23T02:10:17Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-09-23T03:27:19Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2026-09-23T04:27:51Z"
+    }
+   ],
+   "minElevationDeg": -20.328428,
+   "maxElevationDeg": 20.553956
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "eveningDate": "2026-12-21",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272026-12-21+10%3A44%27&STOP_TIME=%272026-12-22+10%3A44%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-21T12:53:07Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-21T14:37:40Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-21T15:56:03Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2026-12-22T05:28:49Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2026-12-22T06:47:12Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2026-12-22T08:31:45Z"
+    }
+   ],
+   "minElevationDeg": -43.789127,
+   "maxElevationDeg": -3.08859
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "eveningDate": "2027-01-15",
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27&START_TIME=%272027-01-15+10%3A44%27&STOP_TIME=%272027-01-16+10%3A44%27&STEP_SIZE=%271m%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&TIME_DIGITS=%27MINUTES%27",
+   "events": [
+    {
+     "kind": "dusk",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-15T11:12:18Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-15T13:49:53Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-15T15:19:28Z"
+    },
+    {
+     "kind": "dusk",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-15T16:33:36Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -18.0,
+     "utc": "2027-01-16T05:12:35Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -12.0,
+     "utc": "2027-01-16T06:26:20Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -6.0,
+     "utc": "2027-01-16T07:54:59Z"
+    },
+    {
+     "kind": "dawn",
+     "thresholdDeg": -0.833,
+     "utc": "2027-01-16T10:16:44Z"
+    }
+   ],
+   "minElevationDeg": -41.379155,
+   "maxElevationDeg": -0.603641
+  }
+ ],
+ "spotElevations": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T12:00:00Z",
+   "elevationDeg": 30.959118
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T13:00:00Z",
+   "elevationDeg": 30.165534
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T14:00:00Z",
+   "elevationDeg": 26.704385
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T15:00:00Z",
+   "elevationDeg": 21.021693
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T16:00:00Z",
+   "elevationDeg": 13.69158
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T17:00:00Z",
+   "elevationDeg": 5.258017
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T18:00:00Z",
+   "elevationDeg": -3.815272
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T19:00:00Z",
+   "elevationDeg": -13.12345
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T20:00:00Z",
+   "elevationDeg": -22.267599
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T21:00:00Z",
+   "elevationDeg": -30.785147
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T22:00:00Z",
+   "elevationDeg": -38.07101
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-01T23:00:00Z",
+   "elevationDeg": -43.331945
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T00:00:00Z",
+   "elevationDeg": -45.710371
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T01:00:00Z",
+   "elevationDeg": -44.699484
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T02:00:00Z",
+   "elevationDeg": -40.523595
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T03:00:00Z",
+   "elevationDeg": -33.957325
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T04:00:00Z",
+   "elevationDeg": -25.850769
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T05:00:00Z",
+   "elevationDeg": -16.885358
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T06:00:00Z",
+   "elevationDeg": -7.571814
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T07:00:00Z",
+   "elevationDeg": 1.675347
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T08:00:00Z",
+   "elevationDeg": 10.462743
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T09:00:00Z",
+   "elevationDeg": 18.357089
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T10:00:00Z",
+   "elevationDeg": 24.846289
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T11:00:00Z",
+   "elevationDeg": 29.352045
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-03-02T12:00:00Z",
+   "elevationDeg": 31.342037
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T12:00:00Z",
+   "elevationDeg": 61.933475
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T13:00:00Z",
+   "elevationDeg": 59.81142
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T14:00:00Z",
+   "elevationDeg": 53.965596
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T15:00:00Z",
+   "elevationDeg": 45.977284
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T16:00:00Z",
+   "elevationDeg": 36.990392
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T17:00:00Z",
+   "elevationDeg": 27.678632
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T18:00:00Z",
+   "elevationDeg": 18.475669
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T19:00:00Z",
+   "elevationDeg": 9.724324
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T20:00:00Z",
+   "elevationDeg": 1.7542
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T21:00:00Z",
+   "elevationDeg": -5.081058
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T22:00:00Z",
+   "elevationDeg": -10.39912
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-21T23:00:00Z",
+   "elevationDeg": -13.824135
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T00:00:00Z",
+   "elevationDeg": -15.064112
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T01:00:00Z",
+   "elevationDeg": -14.001552
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T02:00:00Z",
+   "elevationDeg": -10.737563
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T03:00:00Z",
+   "elevationDeg": -5.553637
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T04:00:00Z",
+   "elevationDeg": 1.17765
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T05:00:00Z",
+   "elevationDeg": 9.072626
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T06:00:00Z",
+   "elevationDeg": 17.775121
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T07:00:00Z",
+   "elevationDeg": 26.954564
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T08:00:00Z",
+   "elevationDeg": 36.271249
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T09:00:00Z",
+   "elevationDeg": 45.302654
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T10:00:00Z",
+   "elevationDeg": 53.401247
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T11:00:00Z",
+   "elevationDeg": 59.466824
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-06-22T12:00:00Z",
+   "elevationDeg": 61.928295
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T12:00:00Z",
+   "elevationDeg": 38.673453
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T13:00:00Z",
+   "elevationDeg": 36.770604
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T14:00:00Z",
+   "elevationDeg": 32.119951
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T15:00:00Z",
+   "elevationDeg": 25.383285
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T16:00:00Z",
+   "elevationDeg": 17.250914
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T17:00:00Z",
+   "elevationDeg": 8.29922
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T18:00:00Z",
+   "elevationDeg": -1.008856
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T19:00:00Z",
+   "elevationDeg": -10.268724
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T20:00:00Z",
+   "elevationDeg": -19.068183
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T21:00:00Z",
+   "elevationDeg": -26.922608
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T22:00:00Z",
+   "elevationDeg": -33.227453
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-22T23:00:00Z",
+   "elevationDeg": -37.282994
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T00:00:00Z",
+   "elevationDeg": -38.478918
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T01:00:00Z",
+   "elevationDeg": -36.603882
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T02:00:00Z",
+   "elevationDeg": -31.984792
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T03:00:00Z",
+   "elevationDeg": -25.278949
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T04:00:00Z",
+   "elevationDeg": -17.174823
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T05:00:00Z",
+   "elevationDeg": -8.249168
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T06:00:00Z",
+   "elevationDeg": 1.033622
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T07:00:00Z",
+   "elevationDeg": 10.267055
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T08:00:00Z",
+   "elevationDeg": 19.036829
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T09:00:00Z",
+   "elevationDeg": 26.85633
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T10:00:00Z",
+   "elevationDeg": 33.120074
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T11:00:00Z",
+   "elevationDeg": 37.130245
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-09-23T12:00:00Z",
+   "elevationDeg": 38.282365
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T12:00:00Z",
+   "elevationDeg": 15.059961
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T13:00:00Z",
+   "elevationDeg": 13.850554
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T14:00:00Z",
+   "elevationDeg": 10.454013
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T15:00:00Z",
+   "elevationDeg": 5.160415
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T16:00:00Z",
+   "elevationDeg": -1.655107
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T17:00:00Z",
+   "elevationDeg": -9.610148
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T18:00:00Z",
+   "elevationDeg": -18.350785
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T19:00:00Z",
+   "elevationDeg": -27.547435
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T20:00:00Z",
+   "elevationDeg": -36.858103
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T21:00:00Z",
+   "elevationDeg": -45.851582
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T22:00:00Z",
+   "elevationDeg": -53.859749
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-21T23:00:00Z",
+   "elevationDeg": -59.747979
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T00:00:00Z",
+   "elevationDeg": -61.937408
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T01:00:00Z",
+   "elevationDeg": -59.559697
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T02:00:00Z",
+   "elevationDeg": -53.549291
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T03:00:00Z",
+   "elevationDeg": -45.479651
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T04:00:00Z",
+   "elevationDeg": -36.461213
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T05:00:00Z",
+   "elevationDeg": -27.147558
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T06:00:00Z",
+   "elevationDeg": -17.963681
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T07:00:00Z",
+   "elevationDeg": -9.24982
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T08:00:00Z",
+   "elevationDeg": -1.336076
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T09:00:00Z",
+   "elevationDeg": 5.422246
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T10:00:00Z",
+   "elevationDeg": 10.641993
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T11:00:00Z",
+   "elevationDeg": 13.949818
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2026-12-22T12:00:00Z",
+   "elevationDeg": 15.061414
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T12:00:00Z",
+   "elevationDeg": 17.354619
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T13:00:00Z",
+   "elevationDeg": 16.560353
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T14:00:00Z",
+   "elevationDeg": 13.482605
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T15:00:00Z",
+   "elevationDeg": 8.406578
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T16:00:00Z",
+   "elevationDeg": 1.724371
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T17:00:00Z",
+   "elevationDeg": -6.156935
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T18:00:00Z",
+   "elevationDeg": -14.860895
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T19:00:00Z",
+   "elevationDeg": -24.041694
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T20:00:00Z",
+   "elevationDeg": -33.349796
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T21:00:00Z",
+   "elevationDeg": -42.362002
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T22:00:00Z",
+   "elevationDeg": -50.455718
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-15T23:00:00Z",
+   "elevationDeg": -56.623289
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T00:00:00Z",
+   "elevationDeg": -59.458774
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T01:00:00Z",
+   "elevationDeg": -57.985576
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T02:00:00Z",
+   "elevationDeg": -52.742479
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T03:00:00Z",
+   "elevationDeg": -45.138798
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T04:00:00Z",
+   "elevationDeg": -36.336204
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T05:00:00Z",
+   "elevationDeg": -27.061574
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T06:00:00Z",
+   "elevationDeg": -17.78559
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T07:00:00Z",
+   "elevationDeg": -8.871643
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T08:00:00Z",
+   "elevationDeg": -0.661181
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T09:00:00Z",
+   "elevationDeg": 6.481121
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T10:00:00Z",
+   "elevationDeg": 12.154807
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T11:00:00Z",
+   "elevationDeg": 15.952708
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utc": "2027-01-16T12:00:00Z",
+   "elevationDeg": 17.539863
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T02:41:00Z",
+   "elevationDeg": 46.591016
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T03:41:00Z",
+   "elevationDeg": 45.304933
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T04:41:00Z",
+   "elevationDeg": 39.905642
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T05:41:00Z",
+   "elevationDeg": 31.546921
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T06:41:00Z",
+   "elevationDeg": 21.342939
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T07:41:00Z",
+   "elevationDeg": 10.058199
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T08:41:00Z",
+   "elevationDeg": -1.821843
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T09:41:00Z",
+   "elevationDeg": -13.962583
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T10:41:00Z",
+   "elevationDeg": -26.075109
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T11:41:00Z",
+   "elevationDeg": -37.810221
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T12:41:00Z",
+   "elevationDeg": -48.58574
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T13:41:00Z",
+   "elevationDeg": -57.23527
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T14:41:00Z",
+   "elevationDeg": -61.605591
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T15:41:00Z",
+   "elevationDeg": -59.731512
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T16:41:00Z",
+   "elevationDeg": -52.552499
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T17:41:00Z",
+   "elevationDeg": -42.465696
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T18:41:00Z",
+   "elevationDeg": -31.028652
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T19:41:00Z",
+   "elevationDeg": -19.010107
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T20:41:00Z",
+   "elevationDeg": -6.827078
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T21:41:00Z",
+   "elevationDeg": 5.222836
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T22:41:00Z",
+   "elevationDeg": 16.838511
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-01T23:41:00Z",
+   "elevationDeg": 27.615222
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-02T00:41:00Z",
+   "elevationDeg": 36.923944
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-02T01:41:00Z",
+   "elevationDeg": 43.788342
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-03-02T02:41:00Z",
+   "elevationDeg": 46.973972
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T02:41:00Z",
+   "elevationDeg": 77.748526
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T03:41:00Z",
+   "elevationDeg": 72.484024
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T04:41:00Z",
+   "elevationDeg": 61.74782
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T05:41:00Z",
+   "elevationDeg": 49.809452
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T06:41:00Z",
+   "elevationDeg": 37.639588
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T07:41:00Z",
+   "elevationDeg": 25.574326
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T08:41:00Z",
+   "elevationDeg": 13.831447
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T09:41:00Z",
+   "elevationDeg": 2.6348
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T10:41:00Z",
+   "elevationDeg": -7.727024
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T11:41:00Z",
+   "elevationDeg": -16.852717
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T12:41:00Z",
+   "elevationDeg": -24.193348
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T13:41:00Z",
+   "elevationDeg": -29.078003
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T14:41:00Z",
+   "elevationDeg": -30.881988
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T15:41:00Z",
+   "elevationDeg": -29.325751
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T16:41:00Z",
+   "elevationDeg": -24.652202
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T17:41:00Z",
+   "elevationDeg": -17.47113
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T18:41:00Z",
+   "elevationDeg": -8.458021
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T19:41:00Z",
+   "elevationDeg": 1.826922
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T20:41:00Z",
+   "elevationDeg": 12.972224
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T21:41:00Z",
+   "elevationDeg": 24.68247
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T22:41:00Z",
+   "elevationDeg": 36.730736
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-21T23:41:00Z",
+   "elevationDeg": 48.901555
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-22T00:41:00Z",
+   "elevationDeg": 60.876223
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-22T01:41:00Z",
+   "elevationDeg": 71.776972
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-06-22T02:41:00Z",
+   "elevationDeg": 77.744819
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T02:41:00Z",
+   "elevationDeg": 54.630712
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T03:41:00Z",
+   "elevationDeg": 51.390081
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T04:41:00Z",
+   "elevationDeg": 43.97414
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T05:41:00Z",
+   "elevationDeg": 34.064689
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T06:41:00Z",
+   "elevationDeg": 22.826234
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T07:41:00Z",
+   "elevationDeg": 10.923096
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T08:41:00Z",
+   "elevationDeg": -1.242869
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T09:41:00Z",
+   "elevationDeg": -13.368887
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T10:41:00Z",
+   "elevationDeg": -25.139386
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T11:41:00Z",
+   "elevationDeg": -36.107997
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T12:41:00Z",
+   "elevationDeg": -45.518693
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T13:41:00Z",
+   "elevationDeg": -52.080794
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T14:41:00Z",
+   "elevationDeg": -54.132837
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T15:41:00Z",
+   "elevationDeg": -50.943323
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T16:41:00Z",
+   "elevationDeg": -43.601114
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T17:41:00Z",
+   "elevationDeg": -33.755062
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T18:41:00Z",
+   "elevationDeg": -22.56298
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T19:41:00Z",
+   "elevationDeg": -10.692158
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T20:41:00Z",
+   "elevationDeg": 1.45172
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T21:41:00Z",
+   "elevationDeg": 13.562928
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T22:41:00Z",
+   "elevationDeg": 25.323577
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-22T23:41:00Z",
+   "elevationDeg": 36.284734
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-23T00:41:00Z",
+   "elevationDeg": 45.685811
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-23T01:41:00Z",
+   "elevationDeg": 52.227179
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-09-23T02:41:00Z",
+   "elevationDeg": 54.238366
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T02:41:00Z",
+   "elevationDeg": 30.881281
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T03:41:00Z",
+   "elevationDeg": 29.106044
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T04:41:00Z",
+   "elevationDeg": 24.246699
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T05:41:00Z",
+   "elevationDeg": 16.926072
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T06:41:00Z",
+   "elevationDeg": 7.815438
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T07:41:00Z",
+   "elevationDeg": -2.535095
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T08:41:00Z",
+   "elevationDeg": -13.723129
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T09:41:00Z",
+   "elevationDeg": -25.459354
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T10:41:00Z",
+   "elevationDeg": -37.51967
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T11:41:00Z",
+   "elevationDeg": -49.686797
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T12:41:00Z",
+   "elevationDeg": -61.627405
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T13:41:00Z",
+   "elevationDeg": -72.3853
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T14:41:00Z",
+   "elevationDeg": -77.75349
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T15:41:00Z",
+   "elevationDeg": -71.920347
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T16:41:00Z",
+   "elevationDeg": -61.053441
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T17:41:00Z",
+   "elevationDeg": -49.088774
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T18:41:00Z",
+   "elevationDeg": -36.921014
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T19:41:00Z",
+   "elevationDeg": -24.871957
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T20:41:00Z",
+   "elevationDeg": -13.157334
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T21:41:00Z",
+   "elevationDeg": -2.003262
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T22:41:00Z",
+   "elevationDeg": 8.296461
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-21T23:41:00Z",
+   "elevationDeg": 17.332745
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-22T00:41:00Z",
+   "elevationDeg": 24.548068
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-22T01:41:00Z",
+   "elevationDeg": 29.268148
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2026-12-22T02:41:00Z",
+   "elevationDeg": 30.879977
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T02:41:00Z",
+   "elevationDeg": 33.089942
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T03:41:00Z",
+   "elevationDeg": 31.903295
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T04:41:00Z",
+   "elevationDeg": 27.429863
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T05:41:00Z",
+   "elevationDeg": 20.310125
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T06:41:00Z",
+   "elevationDeg": 11.276321
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T07:41:00Z",
+   "elevationDeg": 0.934374
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T08:41:00Z",
+   "elevationDeg": -10.275849
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T09:41:00Z",
+   "elevationDeg": -22.041437
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T10:41:00Z",
+   "elevationDeg": -34.121189
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T11:41:00Z",
+   "elevationDeg": -46.281094
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T12:41:00Z",
+   "elevationDeg": -58.171609
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T13:41:00Z",
+   "elevationDeg": -68.902803
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T14:41:00Z",
+   "elevationDeg": -75.256013
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T15:41:00Z",
+   "elevationDeg": -71.732492
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T16:41:00Z",
+   "elevationDeg": -61.853311
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T17:41:00Z",
+   "elevationDeg": -50.183777
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T18:41:00Z",
+   "elevationDeg": -38.054585
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T19:41:00Z",
+   "elevationDeg": -25.912272
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T20:41:00Z",
+   "elevationDeg": -14.008308
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T21:41:00Z",
+   "elevationDeg": -2.572742
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T22:41:00Z",
+   "elevationDeg": 8.111725
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-15T23:41:00Z",
+   "elevationDeg": 17.652648
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-16T00:41:00Z",
+   "elevationDeg": 25.498917
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-16T01:41:00Z",
+   "elevationDeg": 30.942733
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utc": "2027-01-16T02:41:00Z",
+   "elevationDeg": 33.271398
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T10:44:00Z",
+   "elevationDeg": 12.822048
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T11:44:00Z",
+   "elevationDeg": 12.433644
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T12:44:00Z",
+   "elevationDeg": 10.701514
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T13:44:00Z",
+   "elevationDeg": 7.764983
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T14:44:00Z",
+   "elevationDeg": 3.843165
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T15:44:00Z",
+   "elevationDeg": -0.796605
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T16:44:00Z",
+   "elevationDeg": -5.862522
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T17:44:00Z",
+   "elevationDeg": -11.049609
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T18:44:00Z",
+   "elevationDeg": -16.041536
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T19:44:00Z",
+   "elevationDeg": -20.510417
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T20:44:00Z",
+   "elevationDeg": -24.124693
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T21:44:00Z",
+   "elevationDeg": -26.575504
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T22:44:00Z",
+   "elevationDeg": -27.625003
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-01T23:44:00Z",
+   "elevationDeg": -27.1622
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T00:44:00Z",
+   "elevationDeg": -25.234963
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T01:44:00Z",
+   "elevationDeg": -22.035539
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T02:44:00Z",
+   "elevationDeg": -17.850199
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T03:44:00Z",
+   "elevationDeg": -13.004969
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T04:44:00Z",
+   "elevationDeg": -7.830148
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T05:44:00Z",
+   "elevationDeg": -2.646201
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T06:44:00Z",
+   "elevationDeg": 2.23781
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T07:44:00Z",
+   "elevationDeg": 6.523934
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T08:44:00Z",
+   "elevationDeg": 9.931907
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T09:44:00Z",
+   "elevationDeg": 12.217848
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-03-02T10:44:00Z",
+   "elevationDeg": 13.204073
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T10:44:00Z",
+   "elevationDeg": 43.785241
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T11:44:00Z",
+   "elevationDeg": 42.984137
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T12:44:00Z",
+   "elevationDeg": 40.586039
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T13:44:00Z",
+   "elevationDeg": 36.90309
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T14:44:00Z",
+   "elevationDeg": 32.332615
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T15:44:00Z",
+   "elevationDeg": 27.269132
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T16:44:00Z",
+   "elevationDeg": 22.067473
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T17:44:00Z",
+   "elevationDeg": 17.039712
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T18:44:00Z",
+   "elevationDeg": 12.463111
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T19:44:00Z",
+   "elevationDeg": 8.585704
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T20:44:00Z",
+   "elevationDeg": 5.623958
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T21:44:00Z",
+   "elevationDeg": 3.751897
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T22:44:00Z",
+   "elevationDeg": 3.085042
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-21T23:44:00Z",
+   "elevationDeg": 3.665778
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T00:44:00Z",
+   "elevationDeg": 5.457142
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T01:44:00Z",
+   "elevationDeg": 8.348262
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T02:44:00Z",
+   "elevationDeg": 12.168617
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T03:44:00Z",
+   "elevationDeg": 16.704232
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T04:44:00Z",
+   "elevationDeg": 21.709069
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T05:44:00Z",
+   "elevationDeg": 26.907978
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T06:44:00Z",
+   "elevationDeg": 31.991564
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T07:44:00Z",
+   "elevationDeg": 36.608077
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T08:44:00Z",
+   "elevationDeg": 40.365091
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T09:44:00Z",
+   "elevationDeg": 42.863254
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-06-22T10:44:00Z",
+   "elevationDeg": 43.780876
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T10:44:00Z",
+   "elevationDeg": 20.553956
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T11:44:00Z",
+   "elevationDeg": 19.644742
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T12:44:00Z",
+   "elevationDeg": 17.372534
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T13:44:00Z",
+   "elevationDeg": 13.93517
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T14:44:00Z",
+   "elevationDeg": 9.603505
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T15:44:00Z",
+   "elevationDeg": 4.682043
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T16:44:00Z",
+   "elevationDeg": -0.515294
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T17:44:00Z",
+   "elevationDeg": -5.674058
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T18:44:00Z",
+   "elevationDeg": -10.479945
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T19:44:00Z",
+   "elevationDeg": -14.620616
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T20:44:00Z",
+   "elevationDeg": -17.797727
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T21:44:00Z",
+   "elevationDeg": -19.755048
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T22:44:00Z",
+   "elevationDeg": -20.319633
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-22T23:44:00Z",
+   "elevationDeg": -19.43982
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T00:44:00Z",
+   "elevationDeg": -17.198374
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T01:44:00Z",
+   "elevationDeg": -13.792124
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T02:44:00Z",
+   "elevationDeg": -9.491251
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T03:44:00Z",
+   "elevationDeg": -4.600145
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T04:44:00Z",
+   "elevationDeg": 0.566898
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T05:44:00Z",
+   "elevationDeg": 5.694757
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T06:44:00Z",
+   "elevationDeg": 10.468403
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T07:44:00Z",
+   "elevationDeg": 14.574989
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T08:44:00Z",
+   "elevationDeg": 17.716162
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T09:44:00Z",
+   "elevationDeg": 19.636365
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-09-23T10:44:00Z",
+   "elevationDeg": 20.163912
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T10:44:00Z",
+   "elevationDeg": -3.089764
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T11:44:00Z",
+   "elevationDeg": -3.750707
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T12:44:00Z",
+   "elevationDeg": -5.616766
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T13:44:00Z",
+   "elevationDeg": -8.572799
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T14:44:00Z",
+   "elevationDeg": -12.445122
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T15:44:00Z",
+   "elevationDeg": -17.01757
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T16:44:00Z",
+   "elevationDeg": -22.042402
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T17:44:00Z",
+   "elevationDeg": -27.242689
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T18:44:00Z",
+   "elevationDeg": -32.306778
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T19:44:00Z",
+   "elevationDeg": -36.880327
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T20:44:00Z",
+   "elevationDeg": -40.569258
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T21:44:00Z",
+   "elevationDeg": -42.976302
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T22:44:00Z",
+   "elevationDeg": -43.788592
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-21T23:44:00Z",
+   "elevationDeg": -42.88867
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T00:44:00Z",
+   "elevationDeg": -40.406275
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T01:44:00Z",
+   "elevationDeg": -36.661466
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T02:44:00Z",
+   "elevationDeg": -32.053054
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T03:44:00Z",
+   "elevationDeg": -26.973557
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T04:44:00Z",
+   "elevationDeg": -21.774998
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T05:44:00Z",
+   "elevationDeg": -16.767017
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T06:44:00Z",
+   "elevationDeg": -12.224947
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T07:44:00Z",
+   "elevationDeg": -8.395031
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T08:44:00Z",
+   "elevationDeg": -5.491568
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T09:44:00Z",
+   "elevationDeg": -3.685624
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2026-12-22T10:44:00Z",
+   "elevationDeg": -3.088868
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T10:44:00Z",
+   "elevationDeg": -0.78968
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T11:44:00Z",
+   "elevationDeg": -1.216007
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T12:44:00Z",
+   "elevationDeg": -2.878915
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T13:44:00Z",
+   "elevationDeg": -5.67074
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T14:44:00Z",
+   "elevationDeg": -9.419657
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T15:44:00Z",
+   "elevationDeg": -13.907774
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T16:44:00Z",
+   "elevationDeg": -18.884784
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T17:44:00Z",
+   "elevationDeg": -24.07308
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T18:44:00Z",
+   "elevationDeg": -29.164578
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T19:44:00Z",
+   "elevationDeg": -33.814299
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T20:44:00Z",
+   "elevationDeg": -37.642246
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T21:44:00Z",
+   "elevationDeg": -40.262854
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T22:44:00Z",
+   "elevationDeg": -41.358506
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-15T23:44:00Z",
+   "elevationDeg": -40.779733
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T00:44:00Z",
+   "elevationDeg": -38.605637
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T01:44:00Z",
+   "elevationDeg": -35.110683
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T02:44:00Z",
+   "elevationDeg": -30.66852
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T03:44:00Z",
+   "elevationDeg": -25.665593
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T04:44:00Z",
+   "elevationDeg": -20.458729
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T05:44:00Z",
+   "elevationDeg": -15.366911
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T06:44:00Z",
+   "elevationDeg": -10.676763
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T07:44:00Z",
+   "elevationDeg": -6.647617
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T08:44:00Z",
+   "elevationDeg": -3.509315
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T09:44:00Z",
+   "elevationDeg": -1.451008
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utc": "2027-01-16T10:44:00Z",
+   "elevationDeg": -0.603641
+  }
+ ]
+}

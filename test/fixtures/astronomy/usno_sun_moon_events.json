@@ -1,0 +1,597 @@
+{
+ "source": "USNO Astronomical Applications Department, rstt/oneday API v4 (https://aa.usno.navy.mil/data/api). Times are UTC (tz=0), rounded by USNO to the minute. Sun rise/set use the standard -0.833 deg convention; civil twilight is -6 deg.",
+ "retrieved": "2026-09-22T20:18Z",
+ "entries": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-03-01",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-01&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "06:12",
+    "Rise": "06:46",
+    "Upper Transit": "12:13",
+    "Set": "17:41",
+    "End Civil Twilight": "18:14"
+   },
+   "moon": {
+    "Set": "06:11",
+    "Rise": "15:15",
+    "Upper Transit": "23:02"
+   },
+   "fracillum": "95%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-03-02",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-02&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "06:10",
+    "Rise": "06:44",
+    "Upper Transit": "12:12",
+    "Set": "17:42",
+    "End Civil Twilight": "18:16"
+   },
+   "moon": {
+    "Set": "06:28",
+    "Rise": "16:40",
+    "Upper Transit": "23:50"
+   },
+   "fracillum": "99%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-06-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "02:55",
+    "Rise": "03:43",
+    "Upper Transit": "12:02",
+    "Set": "20:21",
+    "End Civil Twilight": "21:09"
+   },
+   "moon": {
+    "Rise": "11:40",
+    "Upper Transit": "17:51",
+    "Set": "23:46"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-06-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-22&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "02:56",
+    "Rise": "03:43",
+    "Upper Transit": "12:02",
+    "Set": "20:22",
+    "End Civil Twilight": "21:09"
+   },
+   "moon": {
+    "Rise": "12:56",
+    "Upper Transit": "18:33",
+    "Set": "23:57"
+   },
+   "fracillum": "56%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-09-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-22&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "05:13",
+    "Rise": "05:46",
+    "Upper Transit": "11:53",
+    "Set": "17:59",
+    "End Civil Twilight": "18:32"
+   },
+   "moon": {
+    "Set": "00:23",
+    "Rise": "16:35",
+    "Upper Transit": "21:02"
+   },
+   "fracillum": "82%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-09-23",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-23&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "05:15",
+    "Rise": "05:48",
+    "Upper Transit": "11:53",
+    "Set": "17:57",
+    "End Civil Twilight": "18:30"
+   },
+   "moon": {
+    "Set": "01:39",
+    "Rise": "16:51",
+    "Upper Transit": "21:47"
+   },
+   "fracillum": "89%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-12-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-21&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:23",
+    "Rise": "08:04",
+    "Upper Transit": "11:58",
+    "Set": "15:53",
+    "End Civil Twilight": "16:34"
+   },
+   "moon": {
+    "Set": "05:07",
+    "Rise": "13:09",
+    "Upper Transit": "21:43"
+   },
+   "fracillum": "90%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2026-12-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-22&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:24",
+    "Rise": "08:04",
+    "Upper Transit": "11:59",
+    "Set": "15:54",
+    "End Civil Twilight": "16:34"
+   },
+   "moon": {
+    "Set": "06:36",
+    "Rise": "13:49",
+    "Upper Transit": "22:48"
+   },
+   "fracillum": "96%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2027-01-15",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-15&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:21",
+    "Rise": "07:59",
+    "Upper Transit": "12:10",
+    "Set": "16:20",
+    "End Civil Twilight": "16:59"
+   },
+   "moon": {
+    "Rise": "10:27",
+    "Upper Transit": "17:42"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "utcDate": "2027-01-16",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-16&coords=51.5%2C-0.1&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:20",
+    "Rise": "07:59",
+    "Upper Transit": "12:10",
+    "Set": "16:22",
+    "End Civil Twilight": "17:00"
+   },
+   "moon": {
+    "Set": "01:16",
+    "Rise": "10:44",
+    "Upper Transit": "18:31"
+   },
+   "fracillum": "57%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-03-01",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-01&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:54",
+    "Set": "08:36",
+    "End Civil Twilight": "09:02",
+    "Begin Civil Twilight": "20:45",
+    "Rise": "21:11"
+   },
+   "moon": {
+    "Rise": "06:11",
+    "Upper Transit": "13:24",
+    "Set": "20:25"
+   },
+   "fracillum": "95%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-03-02",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-02&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:54",
+    "Set": "08:37",
+    "End Civil Twilight": "09:03",
+    "Begin Civil Twilight": "20:44",
+    "Rise": "21:09"
+   },
+   "moon": {
+    "Rise": "07:20",
+    "Upper Transit": "14:13",
+    "Set": "20:54"
+   },
+   "fracillum": "99%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-06-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:43",
+    "Set": "10:00",
+    "End Civil Twilight": "10:31",
+    "Begin Civil Twilight": "18:56",
+    "Rise": "19:26"
+   },
+   "moon": {
+    "Rise": "01:57",
+    "Upper Transit": "08:15",
+    "Set": "14:24"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-06-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-22&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:43",
+    "Set": "10:01",
+    "End Civil Twilight": "10:31",
+    "Begin Civil Twilight": "18:56",
+    "Rise": "19:26"
+   },
+   "moon": {
+    "Rise": "02:59",
+    "Upper Transit": "08:58",
+    "Set": "14:48"
+   },
+   "fracillum": "56%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-09-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-22&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:34",
+    "Set": "08:39",
+    "End Civil Twilight": "09:04",
+    "Begin Civil Twilight": "20:04",
+    "Rise": "20:30"
+   },
+   "moon": {
+    "Rise": "06:18",
+    "Upper Transit": "11:25",
+    "Set": "16:37"
+   },
+   "fracillum": "82%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-09-23",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-23&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:34",
+    "Set": "08:38",
+    "End Civil Twilight": "09:03",
+    "Begin Civil Twilight": "20:05",
+    "Rise": "20:31"
+   },
+   "moon": {
+    "Rise": "06:49",
+    "Upper Transit": "12:10",
+    "Set": "17:40"
+   },
+   "fracillum": "89%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-12-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-21&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:39",
+    "Set": "07:32",
+    "End Civil Twilight": "08:00",
+    "Begin Civil Twilight": "21:19",
+    "Rise": "21:48"
+   },
+   "moon": {
+    "Rise": "04:35",
+    "Upper Transit": "12:00",
+    "Set": "19:35"
+   },
+   "fracillum": "90%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2026-12-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-22&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:40",
+    "Set": "07:32",
+    "End Civil Twilight": "08:00",
+    "Begin Civil Twilight": "21:20",
+    "Rise": "21:48"
+   },
+   "moon": {
+    "Rise": "05:23",
+    "Upper Transit": "13:03",
+    "Set": "20:49"
+   },
+   "fracillum": "96%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2027-01-15",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-15&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:51",
+    "Set": "07:51",
+    "End Civil Twilight": "08:19",
+    "Begin Civil Twilight": "21:23",
+    "Rise": "21:50"
+   },
+   "moon": {
+    "Rise": "01:25",
+    "Upper Transit": "08:05",
+    "Set": "14:55"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "utcDate": "2027-01-16",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-16&coords=35.68%2C139.65&tz=0",
+   "sun": {
+    "Upper Transit": "02:51",
+    "Set": "07:52",
+    "End Civil Twilight": "08:19",
+    "Begin Civil Twilight": "21:22",
+    "Rise": "21:50"
+   },
+   "moon": {
+    "Rise": "01:54",
+    "Upper Transit": "08:53",
+    "Set": "16:02"
+   },
+   "fracillum": "57%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-03-01",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-01&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "05:09",
+    "Rise": "06:10",
+    "Upper Transit": "10:56",
+    "Set": "15:45",
+    "End Civil Twilight": "16:46"
+   },
+   "moon": {
+    "Set": "07:41",
+    "Rise": "11:17",
+    "Upper Transit": "21:43"
+   },
+   "fracillum": "95%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-03-02",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-02&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "05:05",
+    "Rise": "06:06",
+    "Upper Transit": "10:56",
+    "Set": "15:49",
+    "End Civil Twilight": "16:50"
+   },
+   "moon": {
+    "Set": "06:43",
+    "Rise": "13:59",
+    "Upper Transit": "22:31"
+   },
+   "fracillum": "99%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-06-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Object continuously above the Horizon": null,
+    "Object continuously above the Twilight Limit": null,
+    "Upper Transit": "10:46",
+    "Lower Transit": "22:46"
+   },
+   "moon": {
+    "Rise": "10:18",
+    "Upper Transit": "16:33",
+    "Set": "22:14"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-06-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-22&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Object continuously above the Horizon": null,
+    "Object continuously above the Twilight Limit": null,
+    "Upper Transit": "10:46",
+    "Lower Transit": "22:46"
+   },
+   "moon": {
+    "Rise": "12:13",
+    "Upper Transit": "17:15",
+    "Set": "21:49"
+   },
+   "fracillum": "56%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-09-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-22&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "03:23",
+    "Rise": "04:24",
+    "Upper Transit": "10:37",
+    "Set": "16:48",
+    "End Civil Twilight": "17:48"
+   },
+   "moon": {
+    "Rise": "18:00",
+    "Upper Transit": "19:43",
+    "Set": "21:45"
+   },
+   "fracillum": "82%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-09-23",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-23&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "03:27",
+    "Rise": "04:28",
+    "Upper Transit": "10:37",
+    "Set": "16:43",
+    "End Civil Twilight": "17:43"
+   },
+   "moon": {
+    "Rise": "17:09",
+    "Upper Transit": "20:28"
+   },
+   "fracillum": "89%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-12-21",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-21&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Object continuously below the Horizon": null,
+    "Begin Civil Twilight": "08:31",
+    "End Civil Twilight": "12:53"
+   },
+   "moon": {
+    "Object continuously above the Horizon": null,
+    "Lower Transit": "07:53",
+    "Upper Transit": "20:24"
+   },
+   "fracillum": "90%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2026-12-22",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-12-22&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Object continuously below the Horizon": null,
+    "Begin Civil Twilight": "08:32",
+    "End Civil Twilight": "12:54"
+   },
+   "moon": {
+    "Object continuously above the Horizon": null,
+    "Lower Transit": "08:55",
+    "Upper Transit": "21:28"
+   },
+   "fracillum": "96%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2027-01-15",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-15&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:58",
+    "Rise": "10:35",
+    "Upper Transit": "10:53",
+    "Set": "11:13",
+    "End Civil Twilight": "13:50"
+   },
+   "moon": {
+    "Rise": "07:58",
+    "Upper Transit": "16:23"
+   },
+   "fracillum": "46%"
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "utcDate": "2027-01-16",
+   "query": "https://aa.usno.navy.mil/api/rstt/oneday?date=2027-01-16&coords=69.65%2C18.96&tz=0",
+   "sun": {
+    "Begin Civil Twilight": "07:55",
+    "Rise": "10:16",
+    "Upper Transit": "10:54",
+    "Set": "11:32",
+    "End Civil Twilight": "13:53"
+   },
+   "moon": {
+    "Set": "01:52",
+    "Rise": "07:20",
+    "Upper Transit": "17:12"
+   },
+   "fracillum": "57%"
+  }
+ ]
+}
