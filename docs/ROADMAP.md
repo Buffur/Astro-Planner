@@ -239,8 +239,18 @@ rewritten to match the code.*
     still-referenced camera module or device. The v10 snapshot and migration
     tests extend the full ADR-008 matrix (M1-M9, M11; 166 tests green). TD-005
     resolved; TD-026 resolved in part. Group G3 is complete.
-  - **Next: TASK 4.1 — Capture-block editing defects.** Not started; it begins
-    only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 4.1** (`f5b29cc`) — `reorderCaptureBlocks`
+    no longer re-applies the `newIndex -= 1` adjustment `onReorderItem`
+    already makes (TD-010); the add dialog is shared with a new edit dialog,
+    reachable by tapping a block, calling the previously-unused
+    `updateCaptureBlock`; both run through `Form` validators (exposure > 0,
+    frame count ≥ 1) instead of silently defaulting to 60 s × 30 (TD-012, in
+    part — binning/gain exposure stays open); the list key is `ObjectKey(block)`
+    instead of a hashCode+index combination that changed on every reorder.
+    6 ViewModel tests cover every reorder direction; 4 widget tests cover
+    validation and the edit flow (179 tests green).
+  - **Next: TASK 4.2 — Save, selection and logbook consistency.** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

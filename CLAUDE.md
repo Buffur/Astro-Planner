@@ -68,13 +68,13 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-22, after TASK 3.3, commit `e580d03`)
+## Current Baseline and Known Traps (as of 2026-09-22, after TASK 4.1, commit `f5b29cc`)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 
 - **`dart run tool/check.dart`** — the quality gate: `dart format --set-exit-if-changed`, `flutter analyze --no-pub`, `flutter test --no-pub` (all scoped to `lib`/`test`), in one command. Runs all three regardless of an earlier failure, then prints a pass/fail summary and exits non-zero if any failed. Run this before calling a change complete (TASK 1.3, TD-046).
 - `flutter analyze --no-pub` — expected: no issues.
-- `flutter test --no-pub` — expected: **166 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved; 83 → 135 in TASK 2.2 → 147 in TASK 2.3 → 152 in TASK 2.4 → 160 in TASK 3.2 → 166 in TASK 3.3). A failing test is now a regression.
+- `flutter test --no-pub` — expected: **179 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved; 83 → 135 in TASK 2.2 → 147 in TASK 2.3 → 152 in TASK 2.4 → 160 in TASK 3.2 → 166 in TASK 3.3 → 179 in TASK 4.1). A failing test is now a regression.
 - `dart format lib test` — expected: no changes (the whole tree was formatted once, TASK 1.3). Formatting is not yet enforced in CI; `tool/check.dart` is the only current gate.
 - **After changing Drift tables (TASK 3.2 workflow, `build.yaml` configures it):** dump a new snapshot with `dart run drift_dev schema dump lib/data/database/app_database.dart drift_schemas/`, regenerate verification code with `dart run drift_dev schema generate drift_schemas/ lib/data/database/generated_migrations/ --no-data-classes --no-companions`, write the `onUpgrade` step, and add a migration test in `test/data/database/schema_migration_test.dart` (schema-equality + a data-preservation test). The floor is v8 (`kMinSupportedSchemaVersion`); `onUpgrade` throws `UnsupportedSchemaVersionException` for anything below it or newer than the app, before any statement runs. To change a foreign key's `ON DELETE` action or drop a column, use `Migrator.alterTable(TableMigration(table))` (SQLite can't alter either in place) — it rebuilds the table against the table's *current* Dart definition, so a brand-new column needs `newColumns: [...]` or the copy will try to select a column the old table doesn't have.
 - Android build/run was **not** verified.

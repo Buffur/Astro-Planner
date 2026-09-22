@@ -17,7 +17,9 @@
 > `_sessionDate`; this is ADR-007 §9's suggested **candidate** instant for
 > night-level scalars, used here as an interim, documented choice — **G6 has not
 > formally decided the canonical evaluation instant**, so this is not a closed
-> scientific decision. See SI-002's update below.
+> scientific decision. See SI-002's update below. **TASK 4.1 (2026-09-22, commit
+> `f5b29cc`):** the "Invalid capture-block input" SI-008 evidence row below is
+> resolved — no calculation changed.
 > **Nothing in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
@@ -390,7 +392,7 @@ integrity problem.
 | Bortle never set | Bortle 4 used silently (SI-007) |
 | GPS unavailable/denied on first launch | London coordinates used silently |
 | Equipment `pixelScale` null | Text `null arcsec/px` (`home_screen.dart:104`) |
-| Invalid capture-block input | Silently becomes 60 s × 30 frames (`capture_plan_widget.dart:93-94`) |
+| Invalid capture-block input | **RESOLVED 2026-09-22 (TASK 4.1, commit `f5b29cc`).** *(Was: silently became 60 s × 30 frames.)* Now rejected by `Form` validators (exposure > 0, frame count ≥ 1) instead of defaulted |
 | Fresh install | A default plan of 100×60 s lights, 20×60 s darks, 20×2 s flats is shown as the user's plan |
 
 **Correct Interpretation**

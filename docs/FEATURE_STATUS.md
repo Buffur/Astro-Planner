@@ -17,8 +17,11 @@
 > transactional migrations, schema snapshots and a migration test suite;
 > affected entry is F-02. **TASK 3.3 (2026-09-22, commit `e580d03`):** foreign
 > keys enforced, orphan cleanup, `equipment_profiles` dropped; affected
-> entries are F-02 and F-23. Statuses were assigned from the code and
-> from executed reproductions, not from earlier documentation.
+> entries are F-02 and F-23. **TASK 4.1 (2026-09-22, commit `f5b29cc`):**
+> capture-block reorder fixed, an edit dialog added, invalid input rejected
+> by validators, and stable list-item keys; affected entry is F-35. Statuses
+> were assigned from the code and from executed reproductions, not from
+> earlier documentation.
 
 ## Status legend
 
@@ -397,9 +400,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-35 — Capture plan editor (blocks)
 - **Status:** Partial
-- **Current implementation:** add (light/dark/flat/bias with a filter list), delete, reorder; default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences.
-- **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart:287-328`, `lib/domain/models/capture_block.dart`.
-- **Known issues:** dragging a block **down** under-moves by one (verified; `newIndex -= 1` applied to `onReorderItem`); invalid or empty input silently becomes 60 s × 30; negatives accepted; no edit UI (`updateCaptureBlock` unused); binning and gain/ISO not exposed; a default plan is shown as if it were the user's (TD-010, TD-012, SI-008).
+- **Current implementation:** add, edit, delete, reorder (light/dark/flat/bias with a filter list); default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences. **TASK 4.1:** the add dialog is shared with a new edit dialog (opened by tapping a block), reachable at `updateCaptureBlock` for the first time; both reject invalid input (exposure > 0, frame count ≥ 1) via `Form` validators instead of silently defaulting; list items key on `ObjectKey(block)` instead of a hashCode+index combination that changed on every reorder.
+- **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart` (`reorderCaptureBlocks`, `updateCaptureBlock`), `lib/domain/models/capture_block.dart`.
+- **Known issues:** binning and gain/ISO not exposed in the UI (fields exist on the model, default to 1/null); a default plan is shown as if it were the user's (SI-008). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope).
 - **Dependencies:** F-03.
 - **Roadmap relevance:** Phase 9 (central component).
 
