@@ -43,6 +43,7 @@
 > **TASK 6.1 (2026-09-22, documentation only, no code changed):** ADR-010 (ephemeris approach and moving objects) accepted in Part F; PD-07 and PD-16 resolved (E.1). Checked against `astronomical_engine.dart`, `visibility_calculator.dart` and `target_selection_screen.dart` at `a61459b`.
 > **TASK 6.2 (2026-09-22):** ADR-010 gained the owner's precession (formula change: J2000 → date, Meeus ch. 21) and refraction (airless + −0.833°) decisions and the Sun measurements.
 > **TASK 6.3 (2026-09-22):** ADR-010 status updated (Moon model implemented).
+> **TASK 6.4 (2026-09-22):** ADR-010 status updated (MoonConditions; mean-phase model deleted with a note; mean solar midnight adopted as the night-level evaluation instant).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1332,8 +1333,20 @@ Status: accepted (owner, 2026-09-22, TASK 6.1). Resolves PD-07 and PD-16. It als
 answers the Phase 0 pending decision "Which astronomical engine/library/reference
 to use for future ephemeris work" (Part A, unchanged). **Implemented:** TASK 6.3,
 the Moon model per §2 (every §4 tolerance met; CALC-28). **Not implemented yet:**
-TASK 6.4 (MoonConditions, retiring the mean-phase model), TASK 8.1 for the target
-types.
+TASK 8.1 for the target types. **TASK 6.4 (2026-09-22) implemented:**
+- `MoonConditions`, with a topocentric Moon–target separation in the equinox of
+  date, once the targets were precessed (TASK 6.2). Measured: within 0.05° of USNO
+  and Horizons for 45 geocentric and 135 topocentric star pairs.
+- **Deletion note (as §6 required):** the mean-synodic-month
+  `VisibilityCalculator.calculateLunarIllumination` (CALC-09, up to 4.7 pp off) was
+  deleted. Its four tests now assert the same new-moon and full-moon thresholds
+  against `MoonCalculator.illuminatedFraction`.
+- **Evaluation instant (ADR-007 §9 left this to G6):** night-level scalars, today
+  the illuminated fraction, are evaluated at **mean solar midnight
+  (`startUtc + 12 h`)**. Illumination changes by at most about 6 pp across a night.
+- **The sky warning's thresholds are unchanged** (illumination > 0.8 or Bortle ≥ 7,
+  SI-006). They now read the accurate illumination. Gating by Moon altitude or
+  separation is PD-17 / G10, not this task.
 
 **TASK 6.2 decisions (owner, 2026-09-22), recorded here as §2 required:**
 - **Precession — formula change** (rule 16, never silent).

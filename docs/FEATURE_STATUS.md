@@ -43,6 +43,7 @@
 > **TASK 5.6 (2026-09-22):** the capture planner UI shows every ADR-009 line (integration, acquisition, calibration in/outside the window, setup, window load vs available, session budget), the fit with its reason and end time, a one-tap "fill / trim to tonight's window" action, √N per (filter, exposure) group with help text, storage or "Unknown", and an assumptions panel; the block editor sets the calibration policy, binning and a typed gain. `capture_plan_widget.dart` was split into `widgets/capture_plan/`. Group G5 is complete. F-35 and F-37 → Implemented; F-39 Missing → Partial; F-36 and F-48 updated.
 > **TASK 6.2 (2026-09-22):** independent reference fixtures (USNO events and celestial-navigation altitudes, JPL Horizons Sun elevations, SIMBAD J2000 star positions; `test/fixtures/astronomy/`) and tolerance tests; target coordinates are now precessed J2000 → date (Meeus ch. 21, owner decision) in the one domain target-altitude function; altitudes stay airless with the −0.833° sunrise/sunset convention (owner decision); source/units/error doc comments on the astronomy functions. Affected entries: F-11, F-13, F-14, F-48.
 > **TASK 6.3 (2026-09-22):** a pure-domain Moon ephemeris (`MoonCalculator`, Meeus ch. 47 full tables in `moon_series.dart`, ADR-010) — position, topocentric altitude, illuminated fraction, phase longitude, rise/set on the night grid — verified against JPL Horizons and USNO well inside ADR-010 §4. **Not used by the app yet** (TASK 6.4 wires it and retires the mean-phase model). F-16 Missing → Partial; F-48 updated.
+> **TASK 6.4 (2026-09-22):** `MoonConditions` (Moon altitude, separation from the target, rise/set, illumination at mean solar midnight, closest approach while both are up) from `MoonCalculator`, shown on the sky card as annotations; the mean-phase `calculateLunarIllumination` was deleted. F-15 and F-16 → Implemented; F-48 updated.
 
 ## Status legend
 
@@ -82,8 +83,8 @@ feature exists although its roadmap phase has not been reached in
 | F-12 | Sun altitude and night timeline | Partial | 8 |
 | F-13 | Target visibility windows | Partial | 8 |
 | F-14 | Altitude chart | Implemented | 8 |
-| F-15 | Lunar illumination | Partial | 8 |
-| F-16 | Moon position, rise/set, Moon–target separation | Partial | 8 |
+| F-15 | Lunar illumination | Implemented | 8 |
+| F-16 | Moon position, rise/set, Moon–target separation | Implemented | 8 |
 | F-17 | Horizon / obstruction model | Missing | 8 |
 | F-18 | Sky-darkness warning | Prototype | 11 |
 | F-19 | Target selection, search, custom target CRUD | Implemented | 7 |
@@ -254,19 +255,19 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 8.
 
 ## F-15 — Lunar illumination
-- **Status:** Partial
-- **Current implementation:** mean-synodic-month model; shown as `Moon Illumination: NN.N%`, or `--` when there is no site; feeds the sky warning.
-- **Relevant files:** `visibility_calculator.dart:70-81`, `sky_darkness_widget.dart:15`, `planner_viewmodel.dart` (`lunarIllumination` getter).
-- **Known issues:** error up to 4.7 percentage points vs USNO 2025; displayed to 0.1 %; evaluated at one instant, not the imaging window (SI-002; TD-032). **TASK 2.4:** `lunarIllumination` is now `double?`, evaluated at `sessionNight.startUtc + 12h` (mean solar midnight — ADR-007 §9's candidate instant) and `null` without a site; the canonical evaluation instant for night-level scalars is not yet formally decided (G6) — see `docs/SCIENTIFIC_INTEGRITY.md`.
-- **Dependencies:** F-09 for the evaluation instant (resolved: now always the current `SessionNight`'s window, pending G6's final instant choice).
-- **Roadmap relevance:** Phase 8. Tests: 3 coarse tests (pure calculator) plus ViewModel null-without-site coverage.
+- **Status:** Implemented *(TASK 6.4)*
+- **Current implementation:** Meeus ch. 48 illuminated fraction from the ADR-010 Moon (`MoonCalculator`, 0.008 pp against JPL Horizons), evaluated at mean solar midnight of the night and shown as `Moon Illumination: NN%` (whole percent), or `--` without a site; feeds the sky warning.
+- **Relevant files:** `lib/domain/services/moon_calculator.dart`, `lib/domain/models/moon_conditions.dart`, `sky_darkness_widget.dart`, `planner_viewmodel.dart` (`moonConditions`, `lunarIllumination`).
+- **Known issues:** one value per night (it varies by up to about 6 pp across a night). The warning threshold (> 0.8) is still fixed (SI-006). *Resolved (TASK 6.4):* the mean-phase model, up to 4.7 pp off, is deleted.
+- **Dependencies:** F-16.
+- **Roadmap relevance:** Phase 8.
 
 ## F-16 — Moon position, rise/set, Moon–target separation
-- **Status:** Partial *(was Missing; TASK 6.3)*
-- **Current implementation:** the domain `MoonCalculator` (ADR-010) computes the Moon's apparent position, topocentric altitude, illuminated fraction and moonrise/moonset on the night grid, reference-tested against JPL Horizons and USNO. **Not shown anywhere yet** and no Moon–target separation (TASK 6.4).
-- **Relevant files:** `lib/domain/services/moon_calculator.dart`, `lib/domain/services/moon_series.dart`.
-- **Known issues:** required by the PRODUCT_SPEC MVP; the sky warning ignores whether the Moon is up (SI-002).
-- **Dependencies:** decision PD-07.
+- **Status:** Implemented *(TASK 6.3–6.4)*
+- **Current implementation:** `MoonConditions` for the night and the selected target: Moon altitude on the 5-minute grid, moonrise/moonset, the intervals when the Moon is up, and the closest Moon–target approach while both are above the horizon. The sky card shows "Moon up …" or "Moon up all night / below the horizon all night" and "Closest to the target while both are up: N° at HH:MM", or that they are never up together. These are annotations only, with no "impact %".
+- **Relevant files:** `lib/domain/services/moon_calculator.dart`, `lib/domain/models/moon_conditions.dart`, `sky_darkness_widget.dart`.
+- **Known issues:** the Moon does not yet gate or annotate imaging windows (PD-17 / G10). Times are labelled in the device zone until TASK 7.1.
+- **Dependencies:** ADR-010.
 - **Roadmap relevance:** Phase 8.
 
 ## F-17 — Horizon / obstruction model

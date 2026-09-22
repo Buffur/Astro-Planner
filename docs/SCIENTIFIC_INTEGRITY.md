@@ -38,6 +38,7 @@
 > **TASK 6.1 (2026-09-22, docs only):** ADR-010 decision notes on SI-002, SI-009 and SI-012. No calculation changed.
 > **TASK 6.2 (2026-09-22):** CALC-07/CALC-08 now reference-tested; new CALC-27 (precession) — a recorded formula change (ADR-010, TASK 6.2 decisions); SI-009 and SI-012 progress.
 > **TASK 6.3 (2026-09-22):** new CALC-28 (Moon, ADR-010) with reference results; SI-002 progress. No existing calculation changed.
+> **TASK 6.4 (2026-09-22):** CALC-09 deleted, new CALC-29 (MoonConditions and separation, reference-tested); SI-002 resolved for precision and geometry.
 
 ## Purpose and authority
 
@@ -64,7 +65,7 @@ Correct Interpretation → Required Future Action.**
 | ID | Topic | Status of the underlying feature | Work item |
 | --- | --- | --- | --- |
 | SI-001 | NPF exposure formula deviates from the published formula | Broken (not surfaced in UI) | TD-007 |
-| SI-002 | Moon: mean-phase precision limit, no Moon geometry | Partial | TD-032, TD-033 |
+| SI-002 | Moon: mean-phase precision limit, no Moon geometry | **Resolved 2026-09-22 (TASK 6.3–6.4)** for precision and geometry; the sky warning's use of it stays with SI-006 / G10 | TD-032 (resolved), TD-033 |
 | SI-003 | Relative stacking gain (√N) vs physical SNR | Partial (label fixed TASK 4.4; metric documentation still open) | TD-009 |
 | SI-004 | ISO / gain limitations | Prototype (descriptive text only) | TD-009 |
 | SI-005 | Aperture semantics and unit problem | Partial (seed value fixed TASK 4.4; field-naming/unit model still open) | TD-008 |
@@ -199,6 +200,8 @@ scan has not been done).
 **Decision 2026-09-22 (TASK 6.1):** ADR-010 decides the Moon model: in-house Meeus ch. 47 (full tables), ch. 48 illumination, ch. 40 parallax, with cited constants and a documented ΔT; the acceptance tolerances (illumination ≤ 1 pp, position ≤ 0.02°, rise/set on the grid [−2, +7] min) are in ADR-010 §4. The mean-phase model is retired in TASK 6.4. Not implemented.
 
 **Progress 2026-09-22 (TASK 6.3):** the ADR-010 Moon model exists in the domain (CALC-28) and meets every ADR-010 §4 tolerance with wide margins (illumination 0.008 pp vs the mean-phase model's 4.7 pp). The app still shows the mean-phase value until TASK 6.4 switches it and deletes the old model.
+
+**Resolved 2026-09-22 (TASK 6.4):** the app now shows the ADR-010 Moon (illumination 0.008 pp against Horizons; when the Moon is up; its closest approach to the target while both are up), and the mean-phase model is deleted. The illumination is still one value per night, at mean solar midnight (documented), and the sky warning still uses the fixed > 0.8 threshold (SI-006).
 
 **Status:** Partial. **Work items:** TD-032, TD-033.
 
@@ -710,7 +713,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-06 | `calculateLST` | GMST°, longitude° (east +) → degrees | GMST + λ | — | 1 | Good |
 | CALC-07 | `VisibilityCalculator.calculateLHA`, `calculateAltitude`, `calculateTargetAltitude` *(TASK 6.2)*, `calculateCulminationAltitude` *(TASK 6.2)* | LST°, RA°, Dec°, lat° → altitude°; targets: J2000 RA/Dec, UTC, lat°, lon° | `sin a = sin δ sin φ + cos δ cos φ cos H` (Meeus eq. 13.6); **targets precessed J2000 → date first (CALC-27)** | Geometric altitude, no refraction (TASK 6.2 policy) | **reference:** 67 USNO computed star altitudes, max error 0.017° (tolerance 0.05°); without precession 0.32° | Good |
 | CALC-08 | `calculateSunAltitude` | UTC, lat°, lon° → degrees | Low-precision solar coordinates (USNO "Approximate Solar Coordinates") | Airless; no nutation/aberration; UTC ≈ UT1 | **reference:** 375 JPL Horizons airless elevations, max error 0.0097° (tolerance 0.02°); timeline crossings within [−2, +7] min of Horizons and USNO (TASK 6.2) | Good |
-| CALC-09 | `calculateLunarIllumination` | UTC → 0–1 | Mean synodic month from an epoch | SI-002 (≤ 4.7 pp error on 2025 samples) | 3 coarse | Fair |
+| CALC-09 | ~~`calculateLunarIllumination`~~ **Deleted 2026-09-22 (TASK 6.4)** | UTC → 0–1 | Mean synodic month from an epoch | Up to 4.7 pp error (SI-002); replaced by CALC-28 (`MoonCalculator.illuminatedFraction`, 0.008 pp) | — | Deprecated (removed) |
 | CALC-10 | `calculateNightTimeline` | date (Y/M/D used as local solar date), lat, lon → `Map<String, DateTime?>` | Sun crossings −0.833/−6/−12/−18° on a 5-min scan | SI-009, SI-010; nulls at high latitude; first crossing only. *(TASK 2.3: now a thin wrapper over CALC-22, resolving the date through a `MeanSolarTimeContext`; numerically verified to agree exactly with the pre-2.3 scan for a normal night.)* | solstice comparison | Fair |
 | CALC-11 | `calculateVisibilityWindows` | date, lat, lon, target, minAltitude°, sunLimit° (−18) → list of UTC windows | Sun ≤ limit **and** target ≥ minAltitude, 5-min steps | Quantized; no Moon/weather/horizon; J2000 coordinates. *(TASK 2.3: now a thin wrapper over CALC-23; can report `clippedAtStart`/`clippedAtEnd` in polar night, verified.)* | 4 | Fair |
 | CALC-12 | `OpticalCalculator.calculatePixelScale` | pitch µm, EFL mm → arcsec/px | `206.265·p/f` | Returns 0.0 if EFL ≤ 0 | 1 | Good |
@@ -730,6 +733,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-26 *(ADR-009; implemented TASK 5.5)* | `FitAnalyzer.analyze` / `maxPlaceableFrames` / `noWindowReason` (`lib/domain/services/fit_analyzer.dart`) | the CALC-25 event sequence, `List<VisibilityWindow>`, margin m (default 15 %), transit instant → fits / tight / does not fit / no window / nothing to fit, reason, end instant, unused time, lost tails, unplaced frames per block, flip applied/dropped, similar-nights hint; inverse maximum | Atomic events placed in order; an event that doesn't fit moves to the next window and the tail is lost; the flip is placed at the first boundary at/after transit or dropped if the plan ends first; tight if placed time > (1 − m) × Σ windows; nights = ⌈window load ÷ placed⌉ | One target per night; the margin labels only; transit to 5-min resolution | ADR-009 E1–E7 (E1b per the TASK 5.5 erratum), margin, inverse, no-window reasons | Good |
 | CALC-27 *(TASK 6.2)* | `AstronomicalEngine.precessJ2000ToDate` | J2000 RA°, Dec°, JD → RA°, Dec° of date | Meeus ch. 21, eq. 21.2 (IAU 1976 ζ, z, θ) and 21.4 (rigorous) | Mean equinox of date; no nutation, aberration or proper motion (about 20–40″) | identity at J2000.0; precessed Dec within 0.03° of USNO Dec of date for all 67 observations | Good |
 | CALC-28 *(TASK 6.3)* | `MoonCalculator.position` / `topocentricAltitude` / `illuminatedFraction` / `phaseLongitudeDeg` / `riseSetForNight` (`lib/domain/services/moon_calculator.dart`, tables in `moon_series.dart`) | UTC (as UT1), lat°, lon°, `SessionNight` | Meeus ch. 47 full ELP-2000/82 tables (+ additive terms), ch. 22 nutation (4 terms) and obliquity, ch. 13 transforms, ch. 40 topocentric parallax, ch. 25 Sun (low accuracy), ch. 48 illumination, ch. 15 rise/set h₀ = 0.7275π − 0.5667°; ΔT = 69.2 s | Airless altitudes; rise/set on the 5-min grid; ΔT constant (±10 s ≈ 6″) | **reference (ADR-010 §4):** 32 Horizons instants over 2026–27: RA·cosδ 7.5″, Dec 2.3″, λ 7.4″, β 1.8″ (tolerance 72″); illumination 0.008 pp (≤ 1 pp); topocentric altitude 0.0016° at 3 sites incl. 69.65°N (≤ 0.05°); all 99 USNO phases ≤ 10 min; USNO moonrise/moonset on 15 site-nights matched one-to-one within [−2, +7] min | Good (**not yet used by the app**, TASK 6.4) |
+| CALC-29 *(TASK 6.4)* | `MoonCalculator.conditionsForNight`, `separationFromTarget`, `angularSeparationDeg`; `MoonConditions` | `SessionNight`, optional target (J2000) | On the night's 5-min grid: topocentric Moon altitude (CALC-28); target precessed to date (CALC-27) and its altitude (CALC-07); topocentric separation by the vector form of Meeus ch. 17; closest approach where both altitudes > 0°; illumination at mean solar midnight | Target nutation/aberration ignored (20–40″); 5-min grid; annotations only | **reference:** separation within 0.05° of USNO (45 geocentric Moon–star pairs) and Horizons + USNO (135 topocentric pairs at 3 sites) | Good |
 
 ---
 

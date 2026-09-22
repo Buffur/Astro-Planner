@@ -322,8 +322,11 @@ rewritten to match the code.*
   - Completed 2026-09-22: **TASK 6.3** — `MoonCalculator` (Meeus ch. 47 full tables,
     ADR-010), reference-tested against JPL Horizons and USNO; not yet used by the
     app. 309 tests green.
-  - **Next: TASK 6.4 — MoonConditions; retire the mean-phase model.** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 6.4** — `MoonConditions` (Moon up-times, closest
+    approach to the target, illumination at mean solar midnight) on the sky card;
+    separation reference-tested; mean-phase model deleted. 319 tests green.
+  - **Next: TASK 6.5 — Correct NPF (still hidden).** Not started; it begins only on
+    the owner's go-ahead.
 
 ### Phase → group map
 

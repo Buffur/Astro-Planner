@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **309 tests: 309 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.3) |
+| `flutter test --no-pub` | **319 tests: 319 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -320,3 +320,27 @@ Any test failure from here on is a regression, not a known pre-existing issue
     [−2.5, +7.5] min (USNO minute rounding included);
   - no-event nights are typed;
   - ΔT plausibility.
+
+**Added by TASK 6.4** (MoonConditions), 10 tests and 1 fixture:
+- **`test/fixtures/astronomy/moon_separation.json`:**
+  - USNO celnav GHA and declination of date for the Moon, 9 stars and Aries at 5
+    instants (responses from several sites merged, since the API omits objects
+    below the local horizon);
+  - JPL Horizons topocentric apparent Moon RA/Dec at 3 sites.
+- **`test/domain/services/moon_conditions_test.dart`** (9 tests):
+  - geocentric separation ≤ 0.05° against USNO (45 pairs);
+  - topocentric ≤ 0.05° against Horizons + USNO (135 pairs);
+  - separation identities;
+  - grid coverage and illumination at mean solar midnight;
+  - the closest approach counts only instants when both are up;
+  - a never-rising target → null, not 0;
+  - no target → no separation;
+  - up intervals follow rise/set;
+  - below-horizon samples.
+- **`test/presentation/widgets/sky_darkness_moon_test.dart`** (1): the sky card
+  shows the illumination (no "approx."), "Moon up …", the closest approach, and no
+  "impact".
+- **Updated:** the four illumination tests in `visibility_calculator_test.dart` and
+  `planner_session_date_test.dart` now call `MoonCalculator.illuminatedFraction`,
+  with the same instants and thresholds; the mean-phase function they tested was
+  deleted.
