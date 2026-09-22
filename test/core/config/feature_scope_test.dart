@@ -1,0 +1,29 @@
+// Locks in the PD-06 gate policy (roadmap TASK 4.3, TD-014;
+// docs/DECISIONS.md PD-06 E.1), so an accidental flip of one flag is a
+// failing test, not a silent policy violation.
+//
+//   Hidden: field-mode toggle (until TASK 12.4), light-pollution map card
+//   (until TASK 7.4), metadata import (until G17 / v1.1).
+//   Stays visible: the logbook (and text sharing, which has no gate of its
+//   own — it only appears inside the logbook screen this already gates).
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:astroplan/core/config/feature_scope.dart';
+
+void main() {
+  test('fieldMode is hidden (until TASK 12.4)', () {
+    expect(FeatureScope.fieldMode, isFalse);
+  });
+
+  test('lightPollutionContext is hidden (until TASK 7.4)', () {
+    expect(FeatureScope.lightPollutionContext, isFalse);
+  });
+
+  test('metadataImport is hidden (until G17 / v1.1)', () {
+    expect(FeatureScope.metadataImport, isFalse);
+  });
+
+  test('logbook stays visible (on the core path)', () {
+    expect(FeatureScope.logbook, isTrue);
+  });
+}

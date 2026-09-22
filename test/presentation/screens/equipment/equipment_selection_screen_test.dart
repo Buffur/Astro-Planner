@@ -180,4 +180,39 @@ void main() {
     // The list should now contain "Valid Rig"
     expect(find.text('Valid Rig'), findsOneWidget);
   });
+
+  testWidgets(
+    'the pixel-pitch label renders µm, not mojibake (TASK 4.3, TD-015)',
+    (WidgetTester tester) async {
+      final repo = MockEquipmentRepository();
+      await repo.insertEquipment(
+        const EquipmentProfile(
+          id: 1,
+          name: 'Test Rig',
+          sensorWidth: 23.5,
+          sensorHeight: 15.7,
+          pixelPitch: 3.76,
+          resolutionWidth: 6248,
+          resolutionHeight: 4176,
+          focalLength: 400.0,
+          aperture: 5.6,
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+      await tester.pumpAndSettle();
+
+      // Asserting the correct text is enough; tool/check_encoding.dart is
+      // what guards against the old mojibake creeping back into source, and
+      // a literal mojibake string in this file would itself trip that check.
+      expect(find.textContaining('µm'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.pumpAndSettle();
+
+      // The "Pixel Size" row's unit label, and the "Rotation (°)" field.
+      expect(find.text('µm'), findsOneWidget);
+      expect(find.text('Rotation (°)'), findsOneWidget);
+    },
+  );
 }

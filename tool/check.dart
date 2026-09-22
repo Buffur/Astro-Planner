@@ -1,14 +1,16 @@
-// AstroPlan quality gate: format, analyze, test — the same three steps a
+// AstroPlan quality gate: encoding, format, analyze, test — the same steps a
 // human is asked to run before calling a change complete, run by one
-// command so CI can enforce them too (roadmap TASK 1.3, TD-046).
+// command so CI can enforce them too (roadmap TASK 1.3, TD-046; encoding
+// added TASK 4.3, TD-015).
 //
 // Usage:
 //   dart run tool/check.dart
 //
-// Runs `dart format`, `flutter analyze` and `flutter test` (all --no-pub,
-// scoped to lib/ and test/) and reports a summary. All three run regardless
-// of earlier failures, so one pass shows every problem; the process exits
-// non-zero if any step failed.
+// Runs the encoding check (tool/check_encoding.dart), `dart format`,
+// `flutter analyze` and `flutter test` (all --no-pub, scoped to lib/ and
+// test/) and reports a summary. All steps run regardless of earlier
+// failures, so one pass shows every problem; the process exits non-zero if
+// any step failed.
 //
 // Out of scope (see docs/MASTER_ROADMAP.md TASK 1.3): stricter lints
 // (TD-038) and device tests.
@@ -17,6 +19,7 @@ import 'dart:io';
 
 Future<void> main() async {
   final steps = [
+    _Step('Encoding', 'dart', ['run', 'tool/check_encoding.dart']),
     _Step('Format', 'dart', [
       'format',
       '--output=none',

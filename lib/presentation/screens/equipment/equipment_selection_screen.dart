@@ -48,7 +48,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       parts.add(eq.cameraModel!);
     }
     parts.add('${eq.resolutionWidth}×${eq.resolutionHeight}px');
-    parts.add('${eq.pixelPitch}Вµm');
+    parts.add('${eq.pixelPitch}µm');
     return parts.join(' · ');
   }
 
@@ -124,7 +124,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // в”Ђв”Ђ Profile Identity в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+                        // ── Profile Identity ────────────────────────────
                         TextFormField(
                           controller: nameCtrl,
                           decoration: const InputDecoration(
@@ -159,7 +159,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        // в”Ђв”Ђ Sensor Section (Stellarium layout) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+                        // ── Sensor Section (Stellarium layout) ──────────
                         Text(
                           'Camera Sensor',
                           style: Theme.of(context).textTheme.labelMedium
@@ -208,10 +208,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // Pixel Size W × H Вµm
+                        // Pixel Size W × H µm
                         _StellariumRow(
                           label: 'Pixel Size',
-                          unit: 'Вµm',
+                          unit: 'µm',
                           fieldW: TextFormField(
                             controller: pixelCtrl,
                             keyboardType: const TextInputType.numberWithOptions(
@@ -417,7 +417,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                                       signed: true,
                                     ),
                                 decoration: const InputDecoration(
-                                  labelText: 'Rotation (В°)',
+                                  labelText: 'Rotation (°)',
                                   hintText: 'Optional',
                                 ),
                                 validator: (v) {

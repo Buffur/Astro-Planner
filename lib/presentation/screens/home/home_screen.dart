@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/feature_scope.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
 import '../../shared/night_time_formatter.dart';
@@ -36,25 +37,28 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'New Session',
             onPressed: () => context.read<PlannerViewModel>().newSession(),
           ),
-          IconButton(
-            icon: Icon(
-              context.watch<ThemeViewModel>().isFieldMode
-                  ? Icons.wb_sunny
-                  : Icons.nightlight_round,
+          if (FeatureScope.fieldMode)
+            IconButton(
+              icon: Icon(
+                context.watch<ThemeViewModel>().isFieldMode
+                    ? Icons.wb_sunny
+                    : Icons.nightlight_round,
+              ),
+              tooltip: 'Toggle Field Mode',
+              onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
             ),
-            tooltip: 'Toggle Field Mode',
-            onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.book),
-            tooltip: 'Logbook',
-            onPressed: () => context.push('/logbook'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Import Metadata',
-            onPressed: () => context.push('/metadata'),
-          ),
+          if (FeatureScope.logbook)
+            IconButton(
+              icon: const Icon(Icons.book),
+              tooltip: 'Logbook',
+              onPressed: () => context.push('/logbook'),
+            ),
+          if (FeatureScope.metadataImport)
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'Import Metadata',
+              onPressed: () => context.push('/metadata'),
+            ),
         ],
       ),
       body: viewModel.hasBootstrapError
@@ -213,42 +217,49 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              color: Theme.of(context).cardTheme.color,
-                              child: InkWell(
-                                onTap: () async {
-                                  final url = Uri.parse(
-                                    'https://www.lightpollutionmap.info/#zoom=4.00&lat=45.8720&lon=14.5470&state=eyJiYXNlbWFwIjoiTGF5ZXJCaW5nUm9hZCIsIm92ZXJsYXkiOiJzYl8yMDI1Iiwib3ZlcmxheWNvbG9yIjpmYWxzZSwib3ZlcmxheW9wYWNpdHkiOiI2MCIsImZlYXR1cmVzb3BhY2l0eSI6Ijg1In0=',
-                                  );
-                                  if (await canLaunchUrl(url)) {
-                                    await launchUrl(
-                                      url,
-                                      mode: LaunchMode.externalApplication,
+                            // TD-014: hidden until TASK 7.4 — the hard-coded
+                            // Slovenia coordinates below aren't the site's,
+                            // so it stays hidden rather than gaining a real
+                            // gate that just shows a wrong location (PD-06
+                            // E.1; fixing the coordinates is 7.4's job, not
+                            // this one).
+                            if (FeatureScope.lightPollutionContext)
+                              Card(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                color: Theme.of(context).cardTheme.color,
+                                child: InkWell(
+                                  onTap: () async {
+                                    final url = Uri.parse(
+                                      'https://www.lightpollutionmap.info/#zoom=4.00&lat=45.8720&lon=14.5470&state=eyJiYXNlbWFwIjoiTGF5ZXJCaW5nUm9hZCIsIm92ZXJsYXkiOiJzYl8yMDI1Iiwib3ZlcmxheWNvbG9yIjpmYWxzZSwib3ZlcmxheW9wYWNpdHkiOiI2MCIsImZlYXR1cmVzb3BhY2l0eSI6Ijg1In0=',
                                     );
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(6),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.map_outlined),
-                                      SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'Open Light Pollution Map',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(
+                                        url,
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.map_outlined),
+                                        SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            'Open Light Pollution Map',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Icon(Icons.open_in_browser),
-                                    ],
+                                        Icon(Icons.open_in_browser),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                             _SectionHeader('Capture Plan'),
                             const CapturePlanWidget(),
                             const SizedBox(height: 32),

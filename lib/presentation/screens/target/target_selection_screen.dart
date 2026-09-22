@@ -339,7 +339,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                   },
                   onDismissed: (direction) async {
                     await repo.deleteTarget(target.id);
-                    // Remove instantly from in-memory list вЂ” no flicker.
+                    // Remove instantly from in-memory list — no flicker.
                     setState(
                       () => _targets.removeWhere((t) => t.id == target.id),
                     );

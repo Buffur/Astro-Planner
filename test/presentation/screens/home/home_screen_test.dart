@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -425,5 +426,95 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Save Session'), findsNothing);
+  });
+
+  testWidgets('a gated feature has no entry point (TASK 4.3, TD-014, PD-06)', (
+    tester,
+  ) async {
+    final locId = await locationRepo.insertLocation(
+      const domain.LocationProfile(
+        id: 0,
+        name: 'Test Site',
+        latitude: 51.5,
+        longitude: -0.1,
+        elevation: 10,
+      ),
+    );
+    SharedPreferences.setMockInitialValues({'activeLocationId': locId});
+
+    final testTarget = domain.AstroTarget(
+      id: 1,
+      catalogId: 'M42',
+      commonName: 'Orion Nebula',
+      type: 'Nebula',
+      rightAscension: 83.85,
+      declination: -5.45,
+    );
+    await targetRepo.insertTarget(testTarget);
+    final testEquip = domain.EquipmentProfile(
+      id: 1,
+      name: 'ASI2600MC',
+      aperture: 4.0,
+      focalLength: 400.0,
+      sensorWidth: 23.5,
+      sensorHeight: 15.6,
+      resolutionWidth: 6000,
+      resolutionHeight: 4000,
+      pixelPitch: 3.76,
+      averageRawFileSizeMB: 50.0,
+    );
+    await equipmentRepo.insertEquipment(testEquip);
+
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    vm.setTarget(testTarget);
+    vm.setEquipment(testEquip);
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    // Hidden per PD-06 (FeatureScope: fieldMode, lightPollutionContext,
+    // metadataImport all false) — no icon, tooltip, card or route.
+    expect(find.byTooltip('Toggle Field Mode'), findsNothing);
+    expect(find.byTooltip('Import Metadata'), findsNothing);
+    expect(
+      AppRouter.router.configuration.routes.whereType<GoRoute>().map(
+        (r) => r.path,
+      ),
+      isNot(contains('/metadata')),
+    );
+
+    // Scroll through the whole body to check the light-pollution map card.
+    final listFinder = find.byType(Scrollable).first;
+    await tester.dragUntilVisible(
+      find.text('Capture Plan'),
+      listFinder,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Open Light Pollution Map'), findsNothing);
+
+    // Stays visible per PD-06 (on the core path).
+    expect(find.byTooltip('Logbook'), findsOneWidget);
+    expect(
+      AppRouter.router.configuration.routes.whereType<GoRoute>().map(
+        (r) => r.path,
+      ),
+      contains('/logbook'),
+    );
   });
 }
