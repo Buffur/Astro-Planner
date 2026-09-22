@@ -1,11 +1,14 @@
 # AstroPlan Technical Debt Register
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
-> `2357755`: `LocationService` seam, `PlannerViewModel.ready`, test harness).
-> **Resolved so far (2026-09-21):** TD-041 (TASK 0.2), TD-003 (TASK 1.1), and parts of
-> TD-002, TD-019, TD-037 (TASK 1.1) and TD-030, TD-031 (TASK 0.3). Every other item is
-> still Open. Items marked *(verified)* were reproduced
+> audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`:
+> `LocationService` seam, `PlannerViewModel.ready`, test harness), TASK 1.2 (commit
+> `2e17093`: deterministic bootstrap, Home empty/error states), and TASK 1.3 (commits
+> `94acd71` whole-tree format, `97924a0` quality-gate script and CI).
+> **Resolved so far (2026-09-21):** TD-041 (TASK 0.2), TD-003 (TASK 1.1), TD-046
+> (TASK 1.3), and largely TD-002 (TASK 1.2), and parts of TD-019, TD-037 (TASK 1.1)
+> and TD-030, TD-031 (TASK 0.3). Every other item is still Open. Items marked
+> *(verified)* were reproduced
 > by executing code; *(code reading)* means inferred from source and not executed.
 > Directions are **proposals** for the Master Development Roadmap, not approved
 > work; size tags are rough estimates: [S] hours, [M] days, [L] a week or more.
@@ -77,7 +80,7 @@
 | TD-037 | **Test determinism — PARTLY RESOLVED 2026-09-21 (TASK 1.1, `2357755`).** *Done:* the real-time `Future.delayed(300 ms)` waits are gone (`await vm.ready`), and location is injectable, so tests no longer need the `activeLocationId` workaround to dodge Geolocator. **Still open:** the static `AppRouter.router` singleton; an injectable clock (TASK 2.2); the Nominatim call and `LightPollutionRepository` are not injectable (they only avoid the real network because the test binding answers HTTP with 400) | Remaining: injectable clock; injectable router [S–M] | DEV-A1 |
 | TD-039 | **Logbook UX:** list unordered (oldest first); swipe-delete has no confirmation or undo (`logbook_screen.dart:54-66`) | Order, confirm/undo [S] | F-41 |
 | TD-043 | **Threshold constants and settings** (SI-006): named constants; a settings screen for minimum altitude, darkness limit, overhead, margins, dew | Settings design [M] | SI-006 |
-| TD-046 | **No CI configuration** exists in the repository | Add a minimal analyze + test workflow (TD-003 is resolved and the suite is green, so this is unblocked: TASK 1.3) [S] | F-49 |
+| TD-046 | **RESOLVED 2026-09-21 (TASK 1.3, commit `97924a0`).** *(Was: no CI configuration exists in the repository.)* `.github/workflows/ci.yml` runs `dart run tool/check.dart` (format check, analyze, test) on push to `main` and on pull requests. **Not yet exercised:** no Git remote is configured, so the workflow has not actually run. Also new: the whole tree was run through `dart format` once (commit `94acd71`); formatting itself is not yet enforced in CI, only the local `--set-exit-if-changed` check inside `tool/check.dart` | Done; see above | F-49 |
 
 ## Low
 

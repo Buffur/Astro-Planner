@@ -1,10 +1,11 @@
 # AstroPlan Feature Status
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`)
-> and TASK 1.2 (deterministic bootstrap, Home empty/error states); affected entries
-> are F-05, F-06, F-48 and F-49. Statuses were assigned from the code and from
-> executed reproductions, not from earlier documentation.
+> audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`),
+> TASK 1.2 (`2e17093`: deterministic bootstrap, Home empty/error states) and TASK 1.3
+> (`94acd71` whole-tree format, `97924a0` quality-gate script and CI); affected
+> entries are F-05, F-06, F-48 and F-49. Statuses were assigned from the code and
+> from executed reproductions, not from earlier documentation.
 
 ## Status legend
 
@@ -488,10 +489,10 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Roadmap relevance:** Phases 1, 16.
 
 ## F-49 — CI / build automation
-- **Status:** Missing
-- **Current implementation:** none: no CI configuration is tracked (previous docs referred to a "CI failure" that cannot exist).
-- **Relevant files:** —
-- **Known issues:** the suite is green (TASK 1.1, extended TASK 1.2) but nothing enforces it in CI (TD-046, roadmap TASK 1.3).
+- **Status:** Partial *(was Missing; TASK 1.3, commit `97924a0`)*
+- **Current implementation:** `tool/check.dart` (`dart run tool/check.dart`) runs `dart format --set-exit-if-changed`, `flutter analyze --no-pub` and `flutter test --no-pub` — all three regardless of an earlier failure, then a pass/fail summary, exiting non-zero on any failure. `.github/workflows/ci.yml` runs it on push to `main` and on pull requests.
+- **Relevant files:** `tool/check.dart`, `.github/workflows/ci.yml`.
+- **Known issues:** no Git remote is configured, so the workflow has never actually run (untested in the real GitHub Actions environment); stricter lints (TD-038) and device tests remain out of scope by design.
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 

@@ -187,11 +187,15 @@ rewritten to match the code.*
 - **Active task line** *(update this line at the end of every task)*:
   - Completed (all 2026-09-21): **TASK 0.1** (`34a7157`); **TASK 0.2** (`af076d9`);
     **TASK 0.3** (`ef20670`, `c8ad208`, `714426d`, plus the docs commit that records them).
-    Group G0 is complete. **TASK 1.1** (`2357755`); **TASK 1.2** (`2e17093`, plus the
-    docs commit that records it). G1 still needs 1.3.
-  - **Next: TASK 1.3 — Quality gate and CI.** Not started; it begins only on the
-    owner's go-ahead, and the CI workflow itself needs explicit owner approval per
-    the task's own scope note.
+    Group G0 is complete. **TASK 1.1** (`2357755`); **TASK 1.2** (`2e17093`); **TASK 1.3**
+    (`94acd71` whole-tree format, `97924a0` quality-gate script and CI — the CI workflow
+    was owner-approved before committing, plus the docs commit that records this task).
+    Group G1 is complete. **Milestone M0 is met on this branch**, except that CI has
+    never actually run: no Git remote is configured yet, so `.github/workflows/ci.yml`
+    is untested against real GitHub Actions.
+  - **Next: TASK 2.1 — ADR: SessionNight and time-zone strategy (PD-01, PD-02).** Not
+    started; it begins only on the owner's go-ahead, and it is itself an ADR task
+    that needs the owner's PD-01/PD-02 decisions, not just implementation.
 
 ### Phase → group map
 
