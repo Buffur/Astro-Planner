@@ -1,3 +1,4 @@
+import '../../core/time/clock.dart';
 import 'capture_block.dart';
 
 class SessionLog {
@@ -200,7 +201,12 @@ class SessionLog {
     );
   }
 
-  factory SessionLog.fromJson(Map<String, dynamic> json) {
+  /// [clock] supplies the fallback `sessionDate` when the manifest has no
+  /// `session_date_utc` (unchanged behavior: "now", as a local `DateTime`).
+  factory SessionLog.fromJson(
+    Map<String, dynamic> json, {
+    Clock clock = const SystemClock(),
+  }) {
     final location = json['location'] as Map<String, dynamic>? ?? {};
     final equipment = json['equipment_snapshot'] as Map<String, dynamic>? ?? {};
     final env = json['environment_snapshot'] as Map<String, dynamic>? ?? {};
@@ -213,7 +219,7 @@ class SessionLog {
       equipmentName: json['equipment_name'] as String? ?? 'Unknown Equipment',
       sessionDate: json['session_date_utc'] != null
           ? DateTime.parse(json['session_date_utc'] as String).toLocal()
-          : DateTime.now(),
+          : clock.nowUtc().toLocal(),
       locationName: location['name'] as String?,
       bortleScale: (location['bortle_scale'] as num?)?.toDouble(),
       focalLength: (equipment['focal_length_mm'] as num?)?.toDouble(),

@@ -1,3 +1,4 @@
+import 'package:astroplan/core/time/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/domain/models/session_log.dart';
 
@@ -119,4 +120,16 @@ void main() {
     expect(restored.actualLightFrames, original.actualLightFrames);
     expect(restored.environmentalNotes, original.environmentalNotes);
   });
+
+  test(
+    'fromJson without session_date_utc falls back to the injected clock',
+    () {
+      final instant = DateTime.utc(2026, 9, 22, 1, 30);
+      final restored = SessionLog.fromJson(
+        const {},
+        clock: FixedClock(instant),
+      );
+      expect(restored.sessionDate.toUtc(), instant);
+    },
+  );
 }
