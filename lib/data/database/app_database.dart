@@ -12,6 +12,48 @@ import 'tables/targets_table.dart';
 
 part 'app_database.g.dart';
 
+/// The oldest schema version this app upgrades in place (ADR-008 §2). Every
+/// committed build since `d0b737f` creates v8 or later; no older installs are
+/// supported. Below this floor, [AppDatabase] refuses to touch the file — see
+/// [resetUnsupportedDatabaseFile] for the (separately invoked) reset path.
+const int kMinSupportedSchemaVersion = 8;
+
+/// Thrown from [AppDatabase.migration]'s `onUpgrade` when the database file's
+/// stored schema version is outside the range this app can migrate (ADR-008
+/// §2, §3; TD-047). Thrown before any migration statement runs, so the file
+/// is left byte-for-byte unchanged.
+class UnsupportedSchemaVersionException implements Exception {
+  /// The schema version found in the database file.
+  final int foundVersion;
+
+  /// The oldest version this app can upgrade from ([kMinSupportedSchemaVersion]).
+  final int minSupportedVersion;
+
+  /// True when [foundVersion] is *newer* than the app's own schema version
+  /// (a downgrade: an older app build opened a newer database, TD-047).
+  /// False when [foundVersion] is older than [minSupportedVersion].
+  final bool isNewerThanApp;
+
+  const UnsupportedSchemaVersionException(
+    this.foundVersion, {
+    required this.minSupportedVersion,
+    required this.isNewerThanApp,
+  });
+
+  @override
+  String toString() {
+    if (isNewerThanApp) {
+      return 'UnsupportedSchemaVersionException: database is at schema '
+          '$foundVersion, newer than this app version supports. Refusing to '
+          'open it; the file was not modified.';
+    }
+    return 'UnsupportedSchemaVersionException: database is at schema '
+        '$foundVersion, older than the supported floor '
+        '($minSupportedVersion). Refusing to migrate it; the file was not '
+        'modified. See resetUnsupportedDatabaseFile().';
+  }
+}
+
 class CaptureBlocks extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionLogId => integer().references(SessionLogs, #id)();
@@ -76,62 +118,43 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await m.createTable(sessionLogs);
-        }
-        if (from < 3) {
-          await customStatement(
-            'ALTER TABLE equipment_profiles ADD COLUMN manufacturer TEXT;',
-          );
-          await customStatement(
-            'ALTER TABLE equipment_profiles ADD COLUMN camera_model TEXT;',
-          );
-          await customStatement(
-            'ALTER TABLE equipment_profiles ADD COLUMN rotation REAL;',
+        // ADR-008 §2: below the floor, refuse instead of running the old
+        // v1-v7 steps (removed below; they assumed *current* table
+        // definitions, not their own version's — the root cause of TD-004).
+        // Every committed build since d0b737f creates v8 or later.
+        if (from < kMinSupportedSchemaVersion) {
+          throw UnsupportedSchemaVersionException(
+            from,
+            minSupportedVersion: kMinSupportedSchemaVersion,
+            isNewerThanApp: false,
           );
         }
-        if (from < 4) {
-          await m.createTable(devices);
-          await m.createTable(cameraModules);
-          await m.createTable(opticalRigs);
-        }
-        if (from < 5) {
-          await customStatement(
-            '''INSERT INTO devices (id, name, manufacturer) SELECT id, name, manufacturer FROM equipment_profiles;''',
-          );
-          await customStatement(
-            '''INSERT INTO camera_modules (id, device_id, name, manufacturer, model, sensor_width_mm, sensor_height_mm, resolution_width_px, resolution_height_px, pixel_pitch_um) SELECT id, id, name || ' Camera', manufacturer, camera_model, sensor_width, sensor_height, resolution_width, resolution_height, pixel_pitch FROM equipment_profiles;''',
-          );
-          await customStatement(
-            '''INSERT INTO optical_rigs (id, name, camera_module_id, focal_length_mm, aperture, optical_multiplier, tracking_state, rotation_degrees) SELECT id, name, id, focal_length, aperture, optical_multiplier, 'unknown', rotation FROM equipment_profiles;''',
+        // ADR-008 §2/TD-047: Drift calls onUpgrade whenever the stored
+        // version differs from schemaVersion, including when it is *higher*
+        // (an older app build opening a newer database). Never touch it.
+        if (from > to) {
+          throw UnsupportedSchemaVersionException(
+            from,
+            minSupportedVersion: kMinSupportedSchemaVersion,
+            isNewerThanApp: true,
           );
         }
-        if (from < 6) {
-          await m.addColumn(locationProfiles, locationProfiles.bortleClass);
-        }
-        if (from < 7) {
-          await m.addColumn(sessionLogs, sessionLogs.locationName);
-          await m.addColumn(sessionLogs, sessionLogs.bortleScale);
-          await m.addColumn(sessionLogs, sessionLogs.plannedDarkFrames);
-          await m.addColumn(sessionLogs, sessionLogs.plannedFlatFrames);
-          await m.addColumn(sessionLogs, sessionLogs.plannedBiasFrames);
-          await m.addColumn(sessionLogs, sessionLogs.integrationTimeSeconds);
-          await m.addColumn(sessionLogs, sessionLogs.focalLength);
-          await m.addColumn(sessionLogs, sessionLogs.aperture);
-          await m.addColumn(sessionLogs, sessionLogs.temperature);
-          await m.addColumn(sessionLogs, sessionLogs.humidity);
-          await m.addColumn(sessionLogs, sessionLogs.cloudCover);
-        }
-        if (from < 8) {
-          await m.createTable(captureBlocks);
-        }
-        if (from < 9) {
-          await m.addColumn(
-            equipmentProfiles,
-            equipmentProfiles.averageRawFileSizeMB,
-          );
-          await m.addColumn(cameraModules, cameraModules.averageRawFileSizeMB);
-        }
+        // Only v8 -> v9 remains a supported path (floor is v8, current is
+        // v9). Wrapped in a transaction so a failure mid-step leaves the
+        // file completely unchanged, not partially migrated (verified by
+        // a test that injects a failure between the two addColumn calls).
+        await m.database.transaction(() async {
+          if (from < 9) {
+            await m.addColumn(
+              equipmentProfiles,
+              equipmentProfiles.averageRawFileSizeMB,
+            );
+            await m.addColumn(
+              cameraModules,
+              cameraModules.averageRawFileSizeMB,
+            );
+          }
+        });
       },
     );
   }
@@ -143,4 +166,22 @@ LazyDatabase _openConnection() {
     final file = File(p.join(dbFolder.path, 'astroplan.sqlite'));
     return NativeDatabase.createInBackground(file);
   });
+}
+
+/// The reset path for a below-floor database (ADR-008 §2): renames [file] to
+/// `<name>.v<foundVersion>.bak` (never deletes it) so a fresh database can be
+/// created at the original path.
+///
+/// This performs the file move only. Callers are responsible for asking the
+/// user to confirm first (ADR-008: "on the user's explicit confirmation ...
+/// without confirmation, nothing is touched") and for constructing a new
+/// [AppDatabase] afterwards, which creates a fresh v9 database on first use.
+/// **Not yet wired into app startup** — no caller exists yet; TD-047's
+/// tracking note covers this gap until a bootstrap task wires it in.
+Future<File> resetUnsupportedDatabaseFile(
+  File file, {
+  required int foundVersion,
+}) async {
+  final backupPath = '${file.path}.v$foundVersion.bak';
+  return file.rename(backupPath);
 }
