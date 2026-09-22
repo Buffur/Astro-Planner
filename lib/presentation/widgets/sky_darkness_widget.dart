@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../viewmodels/planner_viewmodel.dart';
+import '../shared/night_time_formatter.dart';
 import '../../../core/config/feature_scope.dart';
+import '../../../domain/models/night_timeline.dart';
 
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
@@ -13,7 +15,8 @@ class SkyDarknessWidget extends StatelessWidget {
     final timeline = viewModel.nightTimeline;
     final theme = Theme.of(context);
 
-    final lunarIllum = (viewModel.lunarIllumination * 100).toStringAsFixed(1);
+    final illum = viewModel.lunarIllumination;
+    final lunarIllum = illum == null ? '--' : (illum * 100).toStringAsFixed(1);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -167,17 +170,44 @@ class _BortleBadge extends StatelessWidget {
 }
 
 class _NightTimelineVisual extends StatelessWidget {
-  final Map<String, DateTime?> timeline;
+  final NightTimeline? timeline;
 
   const _NightTimelineVisual({required this.timeline});
 
   @override
   Widget build(BuildContext context) {
-    String format(DateTime? dt) {
-      if (dt == null) return '--:--';
-      final local = dt.toLocal();
-      return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+    final timeline = this.timeline;
+    if (timeline == null) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          'Set your site to see tonight\'s timeline.',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
     }
+    final windowStart = timeline.night.startUtc;
+
+    String dusk(SunThresholdResult r) => switch (r) {
+      SunCrossing(:final duskUtc?) => NightTimeFormatter.instant(
+        context,
+        duskUtc,
+        windowStartUtc: windowStart,
+      ),
+      SunCrossing() => 'Before start',
+      SunNeverBelow() => 'N/A',
+      SunAlwaysBelow() => 'All night',
+    };
+    String dawn(SunThresholdResult r) => switch (r) {
+      SunCrossing(:final dawnUtc?) => NightTimeFormatter.instant(
+        context,
+        dawnUtc,
+        windowStartUtc: windowStart,
+      ),
+      SunCrossing() => 'After end',
+      SunNeverBelow() => 'N/A',
+      SunAlwaysBelow() => 'All night',
+    };
 
     return Column(
       children: [
@@ -186,25 +216,25 @@ class _NightTimelineVisual extends StatelessWidget {
           children: [
             _TimelinePoint(
               label: 'Sunset',
-              time: format(timeline['sunset']),
+              time: dusk(timeline.sunriseSunset),
               icon: Icons.wb_sunny_outlined,
               color: Colors.orange,
             ),
             _TimelinePoint(
               label: 'Astro Dusk',
-              time: format(timeline['astroDusk']),
+              time: dusk(timeline.astronomicalTwilight),
               icon: Icons.nights_stay_outlined,
               color: Colors.indigo,
             ),
             _TimelinePoint(
               label: 'Astro Dawn',
-              time: format(timeline['astroDawn']),
+              time: dawn(timeline.astronomicalTwilight),
               icon: Icons.nights_stay,
               color: Colors.indigo,
             ),
             _TimelinePoint(
               label: 'Sunrise',
-              time: format(timeline['sunrise']),
+              time: dawn(timeline.sunriseSunset),
               icon: Icons.wb_sunny,
               color: Colors.orange,
             ),
@@ -231,7 +261,9 @@ class _NightTimelineVisual extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'True Night Window: ${format(timeline['astroDusk'])} - ${format(timeline['astroDawn'])}',
+          'True Night Window: ${dusk(timeline.astronomicalTwilight)} - '
+          '${dawn(timeline.astronomicalTwilight)} '
+          '(${NightTimeFormatter.deviceZoneCaption(windowStart)})',
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(fontWeight: FontWeight.bold),
         ),

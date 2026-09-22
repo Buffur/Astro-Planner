@@ -18,6 +18,7 @@ import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
+import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 
@@ -50,12 +51,24 @@ void main() {
   late domain.EquipmentProfile testEquip;
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
     logbookRepo = DriftLogbookRepository(database);
     locationRepo = DriftLocationRepository(database);
+
+    // A saved location, so isDefaultLocation is false and sessionNight
+    // resolves (TASK 2.4): Save Session needs a night to save.
+    final locId = await locationRepo.insertLocation(
+      const domain.LocationProfile(
+        id: 0,
+        name: 'Test Site',
+        latitude: 51.5072,
+        longitude: -0.1276,
+        elevation: 10,
+      ),
+    );
+    SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
     testTarget = domain.AstroTarget(
       id: 1,

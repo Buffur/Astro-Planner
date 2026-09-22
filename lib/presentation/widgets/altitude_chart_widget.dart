@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/altitude_curve.dart';
 import '../../domain/models/astro_target.dart';
-import '../../domain/models/calendar_date.dart';
 import '../../domain/models/session_night.dart';
-import '../../domain/models/site_time_context.dart';
-import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 
 /// Shows a target's altitude across one night.
@@ -14,17 +11,12 @@ import '../../domain/services/visibility_calculator.dart';
 /// domain (`VisibilityCalculator.calculateAltitudeCurve`), here in [build],
 /// not inside the painter, and the painter never imports astronomy code.
 ///
-/// [sessionDate]'s Y/M/D is resolved to a [SessionNight] through a
-/// [MeanSolarTimeContext] (ADR-007), the same path
-/// `PlannerViewModel.visibilityWindows`/`nightTimeline` use, so the chart and
-/// the rest of the screen now share one window — this widget's constructor
-/// is otherwise unchanged so callers (`home_screen.dart`) don't need to
-/// change before TASK 2.4 gives the ViewModel a SessionNight of its own.
+/// Takes the [SessionNight] directly (TASK 2.4) — the ViewModel now resolves
+/// one, so the chart no longer derives its own from raw coordinates and a
+/// `DateTime`; it shares the exact window the rest of the screen uses.
 class AltitudeChartWidget extends StatelessWidget {
   final AstroTarget target;
-  final double latitude;
-  final double longitude;
-  final DateTime sessionDate;
+  final SessionNight night;
 
   /// Minimum usable altitude in degrees. Drawn as a dashed red threshold line.
   final double minAltitude;
@@ -32,20 +24,12 @@ class AltitudeChartWidget extends StatelessWidget {
   const AltitudeChartWidget({
     super.key,
     required this.target,
-    required this.latitude,
-    required this.longitude,
-    required this.sessionDate,
+    required this.night,
     this.minAltitude = 20.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final night = SessionNightResolver.forEveningDate(
-      CalendarDate.fromDateTimeFields(sessionDate),
-      latitude: latitude,
-      longitude: longitude,
-      timeContext: MeanSolarTimeContext(longitude),
-    );
     final curve = VisibilityCalculator.calculateAltitudeCurve(
       night: night,
       target: target,

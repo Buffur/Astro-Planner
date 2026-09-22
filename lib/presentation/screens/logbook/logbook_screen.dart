@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/session_log.dart';
 import '../../../domain/repositories/logbook_repository.dart';
+import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
 class LogbookScreen extends StatefulWidget {
@@ -74,7 +76,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
                       }
                     },
                     title: Text(
-                      '${log.sessionDate.toLocal().toString().split(' ')[0]} - ${log.targetName}',
+                      // A legacy instant (ADR-007 §10): its device-local
+                      // calendar date is the evening it was shown as.
+                      '${NightTimeFormatter.eveningDate(CalendarDate.fromDateTimeFields(log.sessionDate.toLocal()))} - ${log.targetName}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

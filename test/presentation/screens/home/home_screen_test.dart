@@ -26,11 +26,14 @@ import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
+import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/presentation/shared/night_time_formatter.dart';
 
 import '../../../support/fake_location_service.dart';
 import '../../../support/flaky_target_repository.dart';
@@ -295,5 +298,132 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text("Couldn't load your data."), findsNothing);
+  });
+
+  testWidgets('a saved site shows the correct evening date, not the UTC one '
+      '(TASK 2.4, ADR-007 T1)', (tester) async {
+    // San Francisco at 18:30 PDT on 2026-09-21 = 2026-09-22 01:30 UTC.
+    // The old UTC-calendar-date rule would show the 22nd; the fix shows
+    // the 21st (see planner_session_date_test.dart for the ViewModel-level
+    // version of this same case).
+    final locId = await locationRepo.insertLocation(
+      const domain.LocationProfile(
+        id: 0,
+        name: 'Test Site',
+        latitude: 37.7749,
+        longitude: -122.4194,
+        elevation: 10,
+      ),
+    );
+    SharedPreferences.setMockInitialValues({'activeLocationId': locId});
+
+    // The Session Date section only renders once a target and equipment
+    // are both selected.
+    final testTarget = domain.AstroTarget(
+      id: 1,
+      catalogId: 'M42',
+      commonName: 'Orion Nebula',
+      type: 'Nebula',
+      rightAscension: 83.85,
+      declination: -5.45,
+    );
+    await targetRepo.insertTarget(testTarget);
+    final testEquip = domain.EquipmentProfile(
+      id: 1,
+      name: 'ASI2600MC',
+      aperture: 4.0,
+      focalLength: 400.0,
+      sensorWidth: 23.5,
+      sensorHeight: 15.6,
+      resolutionWidth: 6000,
+      resolutionHeight: 4000,
+      pixelPitch: 3.76,
+      averageRawFileSizeMB: 50.0,
+    );
+    await equipmentRepo.insertEquipment(testEquip);
+
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+        clock: FixedClock(DateTime.utc(2026, 9, 22, 1, 30)),
+      );
+      await vm.ready;
+    });
+
+    vm.setTarget(testTarget);
+    vm.setEquipment(testEquip);
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    final expectedDate = NightTimeFormatter.eveningDate(
+      CalendarDate(2026, 9, 21),
+    );
+    expect(find.textContaining('Night of $expectedDate'), findsOneWidget);
+    expect(find.textContaining('No site set'), findsNothing);
+  });
+
+  testWidgets('without a site, Home shows "No site set" and hides the altitude '
+      'chart and Save Session (ADR-007 §9, TASK 2.4)', (tester) async {
+    final testTarget = domain.AstroTarget(
+      id: 1,
+      catalogId: 'M42',
+      commonName: 'Orion Nebula',
+      type: 'Nebula',
+      rightAscension: 83.85,
+      declination: -5.45,
+    );
+    await targetRepo.insertTarget(testTarget);
+    final testEquip = domain.EquipmentProfile(
+      id: 1,
+      name: 'ASI2600MC',
+      aperture: 4.0,
+      focalLength: 400.0,
+      sensorWidth: 23.5,
+      sensorHeight: 15.6,
+      resolutionWidth: 6000,
+      resolutionHeight: 4000,
+      pixelPitch: 3.76,
+      averageRawFileSizeMB: 50.0,
+    );
+    await equipmentRepo.insertEquipment(testEquip);
+
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    vm.setTarget(testTarget);
+    vm.setEquipment(testEquip);
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('No site set'), findsOneWidget);
+    expect(
+      find.text("Set your site to see tonight's altitude chart."),
+      findsOneWidget,
+    );
+    expect(find.text('Save Session'), findsNothing);
   });
 }

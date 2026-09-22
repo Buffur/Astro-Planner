@@ -6,9 +6,14 @@ import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
+import '../../domain/models/calendar_date.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/capture_block.dart';
+import '../../domain/models/night_timeline.dart';
+import '../../domain/models/session_night.dart';
+import '../../domain/models/site_time_context.dart';
 import '../../domain/models/weather_conditions.dart';
 import '../../domain/models/location_profile.dart';
 import '../../domain/models/visibility_window.dart';
@@ -19,6 +24,7 @@ import '../../domain/repositories/location_repository.dart';
 import '../../data/repositories/light_pollution_repository.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../domain/services/location_service.dart';
+import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
@@ -32,6 +38,7 @@ class PlannerViewModel extends ChangeNotifier {
   final LocationRepository _locationRepository;
   final LightPollutionRepository _lightPollutionRepository;
   final LocationService _locationService;
+  final Clock _clock;
 
   /// Completes when the initial state (saved location, capture blocks, target,
   /// equipment, weather) has loaded. It does not wait for the silent
@@ -55,7 +62,9 @@ class PlannerViewModel extends ChangeNotifier {
   bool _weatherError = false;
   String? _locationName;
 
-  DateTime _sessionDate = DateTime.now().toUtc();
+  /// The evening date the user picked, or null to use the default (the
+  /// night containing "now"; ADR-007 §5). Cleared by [newSession].
+  CalendarDate? _pickedEveningDate;
   double _latitude = 51.5072;
   double _longitude = -0.1276;
 
@@ -83,7 +92,9 @@ class PlannerViewModel extends ChangeNotifier {
     this._locationRepository,
     this._lightPollutionRepository, {
     LocationService? locationService,
-  }) : _locationService = locationService ?? GeolocatorLocationService() {
+    Clock? clock,
+  }) : _locationService = locationService ?? GeolocatorLocationService(),
+       _clock = clock ?? const SystemClock() {
     ready = _init();
   }
 
@@ -221,10 +232,39 @@ class PlannerViewModel extends ChangeNotifier {
   bool get weatherError => _weatherError;
 
   String? get locationName => _locationName;
-  DateTime get sessionDate => _sessionDate;
 
-  void setSessionDate(DateTime date) {
-    _sessionDate = date;
+  /// The current [SessionNight], or null when there is no site to resolve
+  /// one for (ADR-007 §9: "when no site is set, there is no SessionNight").
+  /// Before TASK 7.1 this always resolves through a [MeanSolarTimeContext]
+  /// on [_longitude] — the device zone is never used in the computation.
+  SessionNight? get sessionNight {
+    if (_usingDefaultLocation) return null;
+    final timeContext = MeanSolarTimeContext(_longitude);
+    final pickedDate = _pickedEveningDate;
+    if (pickedDate != null) {
+      return SessionNightResolver.forEveningDate(
+        pickedDate,
+        latitude: _latitude,
+        longitude: _longitude,
+        timeContext: timeContext,
+      );
+    }
+    return SessionNightResolver.resolveDefault(
+      _clock.nowUtc(),
+      latitude: _latitude,
+      longitude: _longitude,
+      timeContext: timeContext,
+    );
+  }
+
+  /// The civil evening date of [sessionNight], or null when there is none.
+  CalendarDate? get eveningDate => sessionNight?.eveningDate;
+
+  /// Picks a specific evening date, overriding the default (the night
+  /// containing "now"). The date alone is stored — it takes effect once a
+  /// site is set, even if none is set yet (ADR-007 §2).
+  void setEveningDate(CalendarDate date) {
+    _pickedEveningDate = date;
     _refreshWeather(); // Date change might need new weather
     notifyListeners();
   }
@@ -462,7 +502,13 @@ class PlannerViewModel extends ChangeNotifier {
 
   Future<void> loadSession(SessionLog log) async {
     _activeSessionLog = log;
-    _sessionDate = log.sessionDate;
+    // log.sessionDate is a legacy instant (Drift hands it back as a
+    // device-local DateTime); its device-local calendar date is what the
+    // app showed for this session before, so that is what it maps to
+    // (ADR-007 §10 "legacy rows" proposal).
+    _pickedEveningDate = CalendarDate.fromDateTimeFields(
+      log.sessionDate.toLocal(),
+    );
 
     // Look up target
     final targets = await _targetRepository.searchTargets(log.targetName);
@@ -500,7 +546,9 @@ class PlannerViewModel extends ChangeNotifier {
 
   void newSession() {
     _activeSessionLog = null;
-    _sessionDate = DateTime.now().toUtc();
+    // Back to the default night (the one containing "now"), not a fixed
+    // wrong-zone date (TD-001: this used to re-set DateTime.now().toUtc()).
+    _pickedEveningDate = null;
     // we could also clear capture blocks or target if desired, but retaining them might be fine.
     // The requirement says "resets the planner state."
     notifyListeners();
@@ -508,31 +556,39 @@ class PlannerViewModel extends ChangeNotifier {
 
   // Calculations exposed to the UI
 
-  Map<String, DateTime?> get nightTimeline {
-    return VisibilityCalculator.calculateNightTimeline(
-      _sessionDate,
-      _latitude,
-      _longitude,
-    );
+  /// The Sun's dusk/dawn timeline for [sessionNight], or null when there is
+  /// no site (ADR-007 §8-§9).
+  NightTimeline? get nightTimeline {
+    final night = sessionNight;
+    if (night == null) return null;
+    return VisibilityCalculator.calculateNightTimelineForNight(night);
   }
 
   List<VisibilityWindow> get visibilityWindows {
-    if (_selectedTarget == null) return [];
-    return VisibilityCalculator.calculateVisibilityWindows(
-      date: _sessionDate,
-      latitude: _latitude,
-      longitude: _longitude,
+    final night = sessionNight;
+    if (night == null || _selectedTarget == null) return [];
+    return VisibilityCalculator.calculateVisibilityWindowsForNight(
+      night: night,
       target: _selectedTarget!,
       minAltitude: _minAltitude,
     );
   }
 
-  double get lunarIllumination {
-    return VisibilityCalculator.calculateLunarIllumination(_sessionDate);
+  /// Approximate lunar illumination for [sessionNight], evaluated at mean
+  /// solar midnight (`startUtc + 12h`) — ADR-007 §9's candidate instant for
+  /// night-level scalars; G6 has not formally decided this yet. Null when
+  /// there is no site.
+  double? get lunarIllumination {
+    final night = sessionNight;
+    if (night == null) return null;
+    return VisibilityCalculator.calculateLunarIllumination(
+      night.startUtc.add(const Duration(hours: 12)),
+    );
   }
 
   bool get skyDarknessWarning {
-    return lunarIllumination > 0.8 || _bortleClass >= 7;
+    final illum = lunarIllumination;
+    return (illum != null && illum > 0.8) || _bortleClass >= 7;
   }
 
   bool get dewWarning {
@@ -541,14 +597,17 @@ class PlannerViewModel extends ChangeNotifier {
         _dewPointThreshold;
   }
 
+  /// The target's altitude right now. Null without a target, an
+  /// unset RA/Dec, or a real site (showing this for the default London
+  /// coordinates would be a misleading default, SI-008).
   double? get currentAltitude {
-    if (_selectedTarget == null) return null;
+    if (_selectedTarget == null || _usingDefaultLocation) return null;
     if (_selectedTarget!.rightAscension == 0.0 &&
         _selectedTarget!.declination == 0.0) {
       return null;
     }
 
-    final jd = AstronomicalEngine.calculateJulianDate(DateTime.now().toUtc());
+    final jd = AstronomicalEngine.calculateJulianDate(_clock.nowUtc());
     final gmst = AstronomicalEngine.calculateGMST(jd);
     final lst = AstronomicalEngine.calculateLST(gmst, _longitude);
     final lha = VisibilityCalculator.calculateLHA(
@@ -562,8 +621,10 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
+  /// The target's culmination altitude (LHA = 0). Null without a target, an
+  /// unset RA/Dec, or a real site — see [currentAltitude].
   double? get maxAltitude {
-    if (_selectedTarget == null) return null;
+    if (_selectedTarget == null || _usingDefaultLocation) return null;
     if (_selectedTarget!.rightAscension == 0.0 &&
         _selectedTarget!.declination == 0.0) {
       return null;

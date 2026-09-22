@@ -1,4 +1,5 @@
-// Widget test for AltitudeChartWidget (roadmap TASK 2.3).
+// Widget test for AltitudeChartWidget (roadmap TASK 2.3, updated TASK 2.4
+// for the SessionNight-based constructor).
 //
 // The widget went from sampling astronomy inside its CustomPainter to
 // consuming a domain-computed AltitudeCurve (TD-023, DEV-A3). This test
@@ -8,6 +9,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
+import 'package:astroplan/domain/models/site_time_context.dart';
+import 'package:astroplan/domain/services/session_night_resolver.dart';
 import 'package:astroplan/presentation/widgets/altitude_chart_widget.dart';
 
 const _pleiades = AstroTarget(
@@ -23,17 +27,21 @@ Future<void> pumpChart(
   required AstroTarget target,
   required double latitude,
   required double longitude,
-  required DateTime sessionDate,
+  required CalendarDate eveningDate,
   double minAltitude = 20.0,
 }) {
+  final night = SessionNightResolver.forEveningDate(
+    eveningDate,
+    latitude: latitude,
+    longitude: longitude,
+    timeContext: MeanSolarTimeContext(longitude),
+  );
   return tester.pumpWidget(
     MaterialApp(
       home: Scaffold(
         body: AltitudeChartWidget(
           target: target,
-          latitude: latitude,
-          longitude: longitude,
-          sessionDate: sessionDate,
+          night: night,
           minAltitude: minAltitude,
         ),
       ),
@@ -48,7 +56,7 @@ void main() {
       target: _pleiades,
       latitude: 51.5072,
       longitude: -0.1276,
-      sessionDate: DateTime.utc(2025, 12, 21),
+      eveningDate: CalendarDate(2025, 12, 21),
     );
     await tester.pump();
 
@@ -70,7 +78,7 @@ void main() {
       ),
       latitude: 69.6492,
       longitude: 18.9553,
-      sessionDate: DateTime.utc(2026, 12, 20),
+      eveningDate: CalendarDate(2026, 12, 20),
     );
     await tester.pump();
 
@@ -88,7 +96,7 @@ void main() {
       target: _pleiades,
       latitude: 51.5072,
       longitude: -0.1276,
-      sessionDate: DateTime.utc(2020, 1, 1),
+      eveningDate: CalendarDate(2020, 1, 1),
     );
     await tester.pump();
 

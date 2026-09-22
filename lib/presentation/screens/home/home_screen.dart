@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../shared/night_time_formatter.dart';
+import '../../../domain/models/calendar_date.dart';
 import '../../../domain/repositories/logbook_repository.dart';
 import '../../../domain/models/session_log.dart';
 import '../../../domain/models/capture_block.dart';
@@ -88,20 +90,23 @@ class HomeScreen extends StatelessWidget {
                               },
                               onTap: () => context.push('/target'),
                             ),
-                            Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              clipBehavior: Clip.antiAlias,
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: AltitudeChartWidget(
-                                  target: target,
-                                  latitude: viewModel.latitude,
-                                  longitude: viewModel.longitude,
-                                  sessionDate: viewModel.sessionDate,
-                                  minAltitude: viewModel.minAltitude,
+                            if (viewModel.sessionNight != null)
+                              Card(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                clipBehavior: Clip.antiAlias,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: AltitudeChartWidget(
+                                    target: target,
+                                    night: viewModel.sessionNight!,
+                                    minAltitude: viewModel.minAltitude,
+                                  ),
                                 ),
+                              )
+                            else
+                              const _NoSiteCard(
+                                message: "Set your site to see tonight's altitude chart.",
                               ),
-                            ),
                             _SectionHeader('Equipment / How'),
                             PlannerSummaryCard(
                               title: 'Equipment: ${equipment.name}',
@@ -122,14 +127,23 @@ class HomeScreen extends StatelessWidget {
                                 leading: const Icon(Icons.calendar_month),
                                 title: const Text('Session Date'),
                                 subtitle: Text(
-                                  '${viewModel.sessionDate.year}-${viewModel.sessionDate.month.toString().padLeft(2, '0')}-${viewModel.sessionDate.day.toString().padLeft(2, '0')} (Night)',
+                                  viewModel.eveningDate != null
+                                      ? 'Night of ${NightTimeFormatter.eveningDate(viewModel.eveningDate!)}'
+                                      : 'No site set',
                                 ),
                                 trailing: const Icon(Icons.edit, size: 16),
                                 onTap: () async {
+                                  final evening = viewModel.eveningDate;
                                   final now = DateTime.now();
                                   final picked = await showDatePicker(
                                     context: context,
-                                    initialDate: viewModel.sessionDate,
+                                    initialDate: evening != null
+                                        ? DateTime(
+                                            evening.year,
+                                            evening.month,
+                                            evening.day,
+                                          )
+                                        : now,
                                     firstDate: DateTime(
                                       now.year - 1,
                                       now.month,
@@ -142,7 +156,9 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   );
                                   if (picked != null) {
-                                    viewModel.setSessionDate(picked);
+                                    viewModel.setEveningDate(
+                                      CalendarDate.fromDateTimeFields(picked),
+                                    );
                                   }
                                 },
                               ),
@@ -245,7 +261,8 @@ class HomeScreen extends StatelessWidget {
           target == null ||
               equipment == null ||
               viewModel.isLoading ||
-              viewModel.hasBootstrapError
+              viewModel.hasBootstrapError ||
+              viewModel.sessionNight == null
           ? null
           : BottomAppBar(
               child: SafeArea(
@@ -259,12 +276,23 @@ class HomeScreen extends StatelessWidget {
                       final int lightFrames = viewModel.captureBlocks
                           .where((b) => b.frameType == FrameType.light)
                           .fold(0, (sum, b) => sum + b.frameCount);
+                      // The button is only shown when sessionNight != null.
+                      final evening = viewModel.eveningDate!;
+                      // Legacy storage: SessionLog.sessionDate is still an
+                      // instant (G11 persists SessionNight properly). Local
+                      // midnight of the evening date round-trips correctly
+                      // through loadSession (ADR-007 §10 "legacy rows").
+                      final sessionDateInstant = DateTime(
+                        evening.year,
+                        evening.month,
+                        evening.day,
+                      );
 
                       final log =
                           viewModel.activeSessionLog?.copyWith(
                             targetName: target.commonName ?? target.catalogId,
                             equipmentName: equipment.name,
-                            sessionDate: viewModel.sessionDate,
+                            sessionDate: sessionDateInstant,
                             plannedLightFrames: lightFrames,
                             captureBlocks: viewModel.captureBlocks,
                           ) ??
@@ -272,7 +300,7 @@ class HomeScreen extends StatelessWidget {
                             id: 0,
                             targetName: target.commonName ?? target.catalogId,
                             equipmentName: equipment.name,
-                            sessionDate: viewModel.sessionDate,
+                            sessionDate: sessionDateInstant,
                             plannedLightFrames: lightFrames,
                             captureBlocks: viewModel.captureBlocks,
                           );
@@ -453,6 +481,33 @@ class _WeatherErrorCard extends StatelessWidget {
             const SizedBox(width: 12),
             const Expanded(child: Text("Couldn't load weather.")),
             TextButton(onPressed: onRetry, child: const Text('Retry')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown in place of a night-dependent section (the altitude chart) when
+/// there is no site — there is no SessionNight to compute it from
+/// (ADR-007 §9), so it must not silently use the default London
+/// coordinates (SI-008).
+class _NoSiteCard extends StatelessWidget {
+  final String message;
+
+  const _NoSiteCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.location_off_outlined, color: Colors.grey),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
           ],
         ),
       ),
