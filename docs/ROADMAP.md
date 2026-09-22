@@ -301,8 +301,11 @@ rewritten to match the code.*
     gain), schema v11 (`position`, `calibration_policy`, `gain_kind`/`gain_value`;
     `gain_iso` dropped, owner-approved), versioned plan JSON; migrations moved onto
     generated per-version step shapes. 249 tests green.
-  - **Next: TASK 5.4 — CaptureBudgetCalculator.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-22: **TASK 5.4** — `CaptureBudgetCalculator` (ADR-009 budget,
+    E1–E7 exact); no budget arithmetic left in the ViewModel; feasibility uses the
+    window load; dead `estimateTotalDuration` deleted. 268 tests green.
+  - **Next: TASK 5.5 — Fit analysis.** Not started; it begins only on the owner's
+    go-ahead.
 
 ### Phase → group map
 

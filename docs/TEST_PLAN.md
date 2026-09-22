@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **249 tests: 249 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.3) |
+| `flutter test --no-pub` | **268 tests: 268 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -243,3 +243,15 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - `test/data/repositories/shared_prefs_planning_repositories_test.dart`: the plan
   JSON is written as version 2; a pre-5.3 v1 list still loads, and an invalid block
   in it is skipped without losing the rest.
+
+**Changed by TASK 5.4** (capture budget), +20 −1 tests:
+- `test/domain/services/capture_budget_calculator_test.dart` (new, 20): ADR-009 §8
+  vectors E1, E1b, E2 (40/52/53 frames), E3, E4, E5, E6 (102/103/120/121), E7 to the
+  millisecond; flip not counted without a transit; edge cases (empty plan, no
+  dither after the last light, unknown storage is null and library excluded,
+  overheads from preferences); `transitFallsInWindows`.
+- Removed: `session_calculator_test.dart`'s `estimateTotalDuration` test, with the
+  dead function itself (ADR-009 §11; recorded in `DECISIONS.md`).
+- Updated with its reason: `planner_preferences_test.dart` "per-frame overhead
+  feeds the required time" now counts only in-window frames (the example plan's
+  darks and flats are outside the window under ADR-009 §3).

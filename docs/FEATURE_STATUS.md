@@ -38,6 +38,7 @@
 > earlier documentation.
 > **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. Affected entries: F-03, F-13, F-31, F-48.
 > **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`). Affected entries: F-35, F-39, F-48.
+> **TASK 5.4 (2026-09-22):** `CaptureBudgetCalculator` (CALC-25) implements the ADR-009 budget; the ViewModel only delegates; feasibility now uses the window load (calibration outside the window no longer counts against dark time); the dead `estimateTotalDuration` (CALC-19) was deleted. Affected entries: F-36, F-39, F-48.
 
 ## Status legend
 
@@ -426,9 +427,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-36 — Session duration and feasibility
 - **Status:** Partial
-- **Current implementation:** `estimatedRequiredTime` (all frames' exposure + 5 s per frame) compared with the summed visibility windows by `SessionCalculator.calculateFeasibility` → Feasible / Tight (> 85 %) / Infeasible.
+- **Current implementation:** **since TASK 5.4** `estimatedRequiredTime` is the ADR-009 window load from `CaptureBudgetCalculator` (lights and in-window calibration, per-frame and enabled optional overheads), compared with the summed visibility windows by `SessionCalculator.calculateFeasibility` → Feasible / Tight (configurable margin, TASK 5.2) / Infeasible. The Home line is relabelled "Time needed in window" (it was "Session Duration", which is no longer what it shows).
 - **Relevant files:** `planner_viewmodel.dart:478-491`, `lib/domain/services/session_calculator.dart:51-80`.
-- **Known issues:** conflates integration, acquisition, calibration and total budget; compares calibration-frame time with the night window; wrong night by default (F-09); no Moon/weather; the live math has **no tests** while the dead `estimateTotalDuration` does (DEV-A4; TD-022, TD-025).
+- **Known issues:** the fit is still a sum-of-windows comparison — frames can "straddle" a gap (atomic placement is TASK 5.5, ADR-009 E2c); only the window load is shown, not integration/acquisition/session budget lines (TASK 5.6); no Moon/weather. *Resolved (TASK 5.4):* conflation of integration, acquisition, calibration and total budget; calibration counted against the window regardless of policy; untested live math (DEV-A4, TD-022 largely).
 - **Dependencies:** F-13; decision PD-08.
 - **Roadmap relevance:** Phase 9.
 

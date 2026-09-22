@@ -32,6 +32,7 @@
 > Status vocabulary: **Intended / Planned**, **Actual / Implemented**, **Partial**,
 > **Broken**, **Missing**, **Deprecated**, **Unknown**.
 > **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences.
+> **TASK 5.4 (2026-09-22):** `CaptureBudgetCalculator` (CALC-25) implements the ADR-009 budget; the ViewModel only delegates; feasibility now uses the window load (calibration outside the window no longer counts against dark time); the dead `estimateTotalDuration` (CALC-19) was deleted. DEV-A4 resolved.
 
 ---
 
@@ -456,7 +457,14 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   pipeline directly in the ViewModel — not a widget, so outside this deviation's
   original scope, but still a second copy of the pipeline (TASK 2.4). TD-023.
 
-## DEV-A4 — Capture/session budget logic lives in the ViewModel, not the domain
+## DEV-A4 — Capture/session budget logic lives in the ViewModel, not the domain — **RESOLVED 2026-09-22 (TASK 5.4)**
+
+*Resolution:* the budget is computed by the pure domain `CaptureBudgetCalculator`
+(ADR-009, CALC-25; tested against ADR-009's vectors E1–E7). The ViewModel's
+`captureBudget` getter only supplies its inputs, and `estimatedRequiredTime`,
+`totalIntegrationTime`, `estimatedStorageMB` and `relativeStackingGain` read its
+result. The dead `estimateTotalDuration` was deleted. *(Original record below.)*
+
 - **Intended behavior:** "Business logic must be deterministic and testable";
   the capture planner is the central component.
 - **Actual behavior:** `estimatedRequiredTime` (all frame types plus a flat 5 s per

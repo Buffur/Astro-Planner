@@ -1072,9 +1072,12 @@ Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Implemented:**
 TASK 5.2, preferences (the margin, the per-frame overhead and the optional
 overheads are stored `PlanningPreferences`, with the ADR's defaults); TASK 5.3,
 block policy and order (`CalibrationPolicy` on `CaptureBlock`, default
-`outsideWindow`; existing calibration rows migrated to `outsideWindow` in v11).
+`outsideWindow`; existing calibration rows migrated to `outsideWindow` in v11);
+TASK 5.4, the budget calculator (`CaptureBudgetCalculator`, §2–§4 and §7,
+E1–E7 reproduced exactly). **Dead-code note (TASK 5.4, as §11 required):**
+`SessionCalculator.estimateTotalDuration` (the unsourced 15 % model, CALC-19)
+was deleted together with its test; nothing called it, and ADR-009 replaces it.
 **Not implemented yet:**
-- TASK 5.4: the budget calculator;
 - TASK 5.5: the fit;
 - TASK 5.6: the UI.
 
