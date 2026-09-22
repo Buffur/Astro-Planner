@@ -304,8 +304,11 @@ rewritten to match the code.*
   - Completed 2026-09-22: **TASK 5.4** — `CaptureBudgetCalculator` (ADR-009 budget,
     E1–E7 exact); no budget arithmetic left in the ViewModel; feasibility uses the
     window load; dead `estimateTotalDuration` deleted. 268 tests green.
-  - **Next: TASK 5.5 — Fit analysis.** Not started; it begins only on the owner's
-    go-ahead.
+  - Completed 2026-09-22: **TASK 5.5** — `FitAnalyzer` (atomic placement, reasons,
+    end time, inverse maximum, similar-nights hint); ADR-009 E1b fit vector corrected
+    by an erratum; the sum-of-windows `SessionCalculator` deleted. 282 tests green.
+  - **Next: TASK 5.6 — Capture planner UI.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

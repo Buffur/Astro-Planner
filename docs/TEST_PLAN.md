@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **268 tests: 268 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.4) |
+| `flutter test --no-pub` | **282 tests: 282 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -255,3 +255,14 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - Updated with its reason: `planner_preferences_test.dart` "per-frame overhead
   feeds the required time" now counts only in-window frames (the example plan's
   darks and flats are outside the window under ADR-009 §3).
+
+**Changed by TASK 5.5** (fit analysis), +21 −7 tests:
+- `test/domain/services/fit_analyzer_test.dart` (new, 21): ADR-009 §8 fit results —
+  E1; E1b per the erratum (flip dropped) and its mid-plan-transit variant (flip
+  applied, ends 00:23:40); E2a/b/c including E2c's "does not fit although the sums
+  would say tight", lost tails and the 2-nights hint; the E2 inverse (52); E3; E4; E5
+  no window; E6 at 102/103/120/121; E7 — all to the second; margin configuration;
+  nothing to fit; inverse edge cases; no-window reasons from a real London-June
+  timeline (−18° never reached; at −12° the target is the reason).
+- Removed with the deleted `SessionCalculator` (CALC-18): `session_calculator_test.dart`
+  (7 tests of the sum-of-windows rule, superseded by the fit tests above).

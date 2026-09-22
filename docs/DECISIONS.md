@@ -38,6 +38,7 @@
 > against `planner_viewmodel.dart`, `session_calculator.dart`, `capture_block.dart`
 > and `visibility_window.dart` at commit `f8e1a98`.
 > **TASK 5.3 (2026-09-22):** ADR-009 status updated. ADR-008 §3 conformance improved: migration steps now run through Drift's generated per-version `migrationSteps` (`schema_versions.dart`), so no step rebuilds against the live tables any more; the owner approved dropping `capture_blocks.gain_iso` in v11.
+> **TASK 5.5 (2026-09-22):** ADR-009 status updated; an erratum corrects the E1b fit vector to match §4/§6 (no semantic change).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1077,8 +1078,9 @@ TASK 5.4, the budget calculator (`CaptureBudgetCalculator`, §2–§4 and §7,
 E1–E7 reproduced exactly). **Dead-code note (TASK 5.4, as §11 required):**
 `SessionCalculator.estimateTotalDuration` (the unsourced 15 % model, CALC-19)
 was deleted together with its test; nothing called it, and ADR-009 replaces it.
+TASK 5.5, the fit (`FitAnalyzer`, §5–§6; the superseded sum-of-windows
+`SessionCalculator.calculateFeasibility`, CALC-18, was deleted with its tests).
 **Not implemented yet:**
-- TASK 5.5: the fit;
 - TASK 5.6: the UI.
 
 ### 1. Context (verified for this ADR at commit `f8e1a98`)
@@ -1251,6 +1253,16 @@ E6 results by frame count:
 | 103 | tight | 23:43:00 | — |
 | 120 | tight (fills the window exactly) | 00:00:00 | — |
 | 121 | doesn't fit, 1 frame unplaced | — | 0 |
+
+**Erratum (TASK 5.5, 2026-09-22):** the E1b fit row above contradicted this ADR's own
+normative rule (§4, §6: the flip is inserted at the first event boundary at or after
+the transit, and dropped when the placed plan ends before the transit). With the
+transit at 00:40 and the plan, without the flip, ending at 00:18:40, the flip is
+**dropped**: the correct fit result is **fits, end 00:18:40, flip dropped**. The
+TASK 5.1 scratch model had simply appended the flip at the end. The E1b *budget*
+(acquisition 12 220 s, counted conservatively) is unchanged and correct. A variant
+with the transit at 22:00 (mid-plan) applies the flip and ends at **00:23:40**. The
+semantics (§4, §6) are unchanged; only the vector is corrected. Both cases are tests.
 
 Tests in TASK 5.4 and TASK 5.5 must reproduce these to the millisecond. They must
 not derive expected values from the implementation (SCIENTIFIC_INTEGRITY Part C
