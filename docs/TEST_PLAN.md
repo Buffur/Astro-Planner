@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **229 tests: 229 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.2) |
+| `flutter test --no-pub` | **249 tests: 249 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -226,3 +226,20 @@ Any test failure from here on is a regression, not a known pre-existing issue
   switching dither on.
 - `test/domain/services/session_calculator_test.dart`: the configurable margin
   (default 15 %; 30 % turns a plan tight; 0 % boundary).
+
+**Added by TASK 5.3** (CaptureBlock model and schema), 20 tests:
+- `test/domain/models/capture_block_test.dart`: validation bounds (exposure, count,
+  binning, filter), `copyWith` validates, the calibration-policy invariant (none for
+  lights, default `outsideWindow`), `CaptureGain` ranges and `fromStored`,
+  case-insensitive frame-type parsing that never defaults to light, and the manifest
+  round trip plus legacy `gain_iso` reading.
+- `test/data/database/schema_migration_test.dart`: v8, v9 and v10 → v11 each match
+  the v11 snapshot exactly; v10 → v11 converts rows (frame type lower-cased, order
+  kept as `position = id`, calibration `outsideWindow`, `gain_iso` → kind unknown
+  with the numeric value only, `gain_iso` column gone).
+- `test/data/repositories/drift_logbook_repository_test.dart`: order, policy and
+  gain survive save and a reordering update; a row the domain rejects is skipped,
+  not read as a light.
+- `test/data/repositories/shared_prefs_planning_repositories_test.dart`: the plan
+  JSON is written as version 2; a pre-5.3 v1 list still loads, and an invalid block
+  in it is skipped without losing the rest.

@@ -41,6 +41,7 @@
 > Where the implementation deviates from the approved design it is marked
 > **IMPLEMENTATION DEVIATION** (intended behavior / actual behavior / consequence).
 > **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. B6 keys and one B3 row added; no schema change.
+> **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`).
 
 ---
 
@@ -181,7 +182,7 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | `AstroTarget` | id; catalogId; commonName?; rightAscension (deg, J2000); declination (deg); type (free text) | `astro_targets` | Units are documented nowhere in the class (SI-012) |
 | `EquipmentProfile` | id (**= `optical_rigs.id`**); name; manufacturer? (= device); cameraModel? (= camera module `model`); sensorWidth/sensorHeight (mm); pixelPitch (µm); resolutionWidth/Height (px); focalLength (mm); aperture (f-number); averageRawFileSizeMB?; rotation? (deg) | join of `optical_rigs` ⋈ `camera_modules` ⋈ `devices` | Flat **projection**; unit-less field names (SI-005). Does not expose `trackingState`, module name, device model/notes |
 | `EquipmentDevice`, `CameraModule`, `OpticalRig` | mirror the three normalized tables | `devices`, `camera_modules`, `optical_rigs` | **Dormant**: used only by `EquipmentCatalogRepository`, which is not registered in `main.dart` and not used by any ViewModel or screen |
-| `CaptureBlock` | id; sessionLogId; frameType (`light`/`dark`/`flat`/`bias`); filterName?; exposureTimeSeconds (s); frameCount; binning; gainIso? (free text) | `capture_blocks` (logs); JSON in shared preferences (active plan) | No validation; id is `0` in the active plan |
+| `CaptureBlock` | id; sessionLogId; frameType (`light`/`dark`/`flat`/`bias`); filterName? (trimmed, ≤ 32); exposureTimeSeconds (s, (0, 3600]); frameCount ([1, 100 000]); binning ([1, 4]); gain (`CaptureGain`: kind iso/gain/unknown + value, descriptive only); calibrationPolicy (`inWindow`/`outsideWindow`/`library`; null for lights, default `outsideWindow`) | `capture_blocks` (logs, ordered by `position`); versioned JSON in shared preferences (active plan) | **Validated in a factory since TASK 5.3** — an invalid block cannot be constructed; loaders skip (and log) stored rows the domain rejects; id is `0` in the active plan |
 | `SessionLog` | see `session_logs` + `captureBlocks` | `session_logs` + `capture_blocks` | Has `toShareableText()` (used by Logbook share) and `toJson()` / `fromJson()` "manifest v1" (used **only by tests**) |
 | `LocationProfile` | id; name; latitude (deg); longitude (deg, east positive); elevation (unit unspecified); bortleClass (int) | `location_profiles` | No time zone; Bortle cannot be "unknown" (SI-007) |
 | `WeatherConditions` | temperature (°C); cloudCover (%); humidity (%); dewPoint (°C); windSpeed (km/h, provider default); hourlyForecasts; lastUpdated (device clock) | shared preferences cache only | No provider/model, offset, validity window or staleness field |
@@ -242,7 +243,7 @@ allows reuse.
 | Key | Type | Written by | Meaning |
 | --- | --- | --- | --- |
 | `activeLocationId` | int | `SharedPrefsPlannerStateRepository` (from `setLocation`) | Pointer to the active `location_profiles` row |
-| `captureBlocks` | JSON string | `SharedPrefsPlannerStateRepository` (from `_saveBlocks`) | The active capture plan (hand-serialized; shape unchanged by TASK 5.2) |
+| `captureBlocks` | JSON string | `SharedPrefsPlannerStateRepository` (from `_saveBlocks`) | The active capture plan. **Versioned since TASK 5.3:** `{"version": 2, "blocks": [...]}` with `gainKind`/`gainValue`/`calibrationPolicy`; the pre-5.3 bare list (v1, free-text `gainIso`) is still read, its gain as kind unknown. Moves to the database in TASK 11.4 |
 | `targetId` | int | `SharedPrefsPlannerStateRepository` (from `setTarget`) | Selected target |
 | `equipmentId` | int | `SharedPrefsPlannerStateRepository` (from `setEquipment`) | Selected rig (`optical_rigs.id`) |
 | `minAltitude` | double | `SharedPrefsPlanningPreferencesRepository` | Minimum usable altitude (deg); Settings screen; clamped to [5, 60] on load (TASK 5.2) |
@@ -280,6 +281,7 @@ allows reuse.
 | 8 | `d0b737f` | + `capture_blocks` | `createTable` | Versions 4–8 all arrived in one commit. *Verified 2026-09-22 (TASK 3.1):* committed builds only ever created v1, v2, v3, v8 and v9; v4–v7 could exist only on a developer device from uncommitted builds |
 | 9 | `900b82a` | + `average_raw_file_size_mb` on `equipment_profiles` and `camera_modules`. `optical_multiplier` (rigs, flat table) and `bit_depth` (camera modules) were **removed from the Drift definitions with no migration** | `addColumn` × 2 | Upgraded databases keep the legacy columns; fresh installs do not — schema drift between installs |
 | 10 | `e580d03` | Orphan cleanup (`PRAGMA foreign_key_check`, delete + log); `camera_modules`/`optical_rigs`/`capture_blocks` rebuilt with real `ON DELETE` actions and without the legacy `bit_depth`/`optical_multiplier` columns; `equipment_profiles` dropped | `alterTable(TableMigration(...))` × 3, `deleteTable` | TASK 3.3, ADR-008 §4–§5. `beforeOpen` now sets `PRAGMA foreign_keys = ON` on every connection |
+| 11 | TASK 5.3 | `capture_blocks`: + `position` (int, order within the session), + `calibration_policy` (text, NULL for lights), + `gain_kind` (text, default `unknown`), + `gain_value` (real); `gain_iso` **dropped** after conversion (owner-approved, ADR-008 §3); `frame_type` lower-cased | `alterTable(TableMigration(...))` with `newColumns` and a `columnTransformer`: position = id (keeps insertion order); policy = NULL for lights else `outsideWindow` (ADR-009 §3); gain kind = `unknown` (never guessed); gain value = the old text when it is a plain non-negative number, else NULL | Migrations since TASK 5.3 run through Drift's generated `migrationSteps` (`lib/data/database/schema_versions.dart`, `drift_dev schema steps`); every step, including the v9 and v10 ones, is written against its **own** version's table shapes, not the live tables (ADR-008 §3) |
 
 **Empirically verified (2026-09-21, throwaway tests):**
 - A **v3 database → v9 fails**: `SqliteException(1): table optical_rigs has no

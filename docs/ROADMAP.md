@@ -297,8 +297,12 @@ rewritten to match the code.*
     (minimum altitude, darkness limit, margin, dew margin, per-frame and optional
     overheads); the ViewModel no longer imports SharedPreferences (owner approved
     moving the selection state too, `PlannerStateRepository`). 229 tests green.
-  - **Next: TASK 5.3 — CaptureBlock model and schema.** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 5.3** — validated `CaptureBlock` (policy, typed
+    gain), schema v11 (`position`, `calibration_policy`, `gain_kind`/`gain_value`;
+    `gain_iso` dropped, owner-approved), versioned plan JSON; migrations moved onto
+    generated per-version step shapes. 249 tests green.
+  - **Next: TASK 5.4 — CaptureBudgetCalculator.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

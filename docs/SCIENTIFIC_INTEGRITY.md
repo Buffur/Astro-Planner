@@ -31,6 +31,7 @@
 > **Nothing else in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 > **TASK 5.2 (2026-09-22):** SI-006 progress (thresholds are preferences); CALC-18 takes a configurable margin (default unchanged). No formula changed.
+> **TASK 5.3 (2026-09-22):** SI-004 progress (typed, descriptive-only gain). No calculation changed.
 
 ## Purpose and authority
 
@@ -266,6 +267,11 @@ sensor-specific way (dual-gain and ISO-invariant sensors behave differently).
    sensor-specific model and an ADR first.
 4. Consider a typed gain field with units (ISO vs camera gain units) instead of
    free text.
+
+**Progress 2026-09-22 (TASK 5.3):** action 4 done in the model — `CaptureGain`
+(kind iso / gain / unknown + value), documented as descriptive only and used by no
+calculation. Legacy free text was migrated as kind "unknown" (never guessed as ISO
+or gain). Not yet editable or shown in the UI (TASK 5.6).
 
 **Status:** Prototype. **Work item:** TD-009 (tracked together with SI-003).
 

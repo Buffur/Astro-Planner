@@ -22,6 +22,7 @@
 > **Prototype**, **Broken**, **Missing**, **Deprecated**, **Unknown**
 > (definitions: `FEATURE_STATUS.md`).
 > **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. Test baseline 229.
+> **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`). Test baseline 249; schema v11.
 
 ## 0. Start here (10-minute orientation)
 
@@ -286,7 +287,7 @@ added the location suite; TASK 1.2 added the bootstrap and Home suites; TASK 2.2
 added 52 session-night, calendar-date and clock tests; TASK 2.3 added 12 more —
 9 SessionNight-based calculator tests, 3 altitude-chart widget tests.)*
 
-- **Result:** 229 pass, 0 fail (`dart run tool/check.dart` after TASK 5.2; 147
+- **Result:** 249 pass, 0 fail (`dart run tool/check.dart` after TASK 5.3; 229 after TASK 5.2; 147
   after TASK 2.3; 135 after TASK 2.2; 83 after TASK 1.2). The
   audit's red `integration_flow_test.dart` (TD-003) was repaired, not weakened.
 - **Gaps:** no tests for the live budget math, Capture Plan, Sky, Altitude chart,

@@ -37,6 +37,7 @@
 > (capture-budget semantics) accepted in Part F; PD-08 resolved (E.1). Checked
 > against `planner_viewmodel.dart`, `session_calculator.dart`, `capture_block.dart`
 > and `visibility_window.dart` at commit `f8e1a98`.
+> **TASK 5.3 (2026-09-22):** ADR-009 status updated. ADR-008 §3 conformance improved: migration steps now run through Drift's generated per-version `migrationSteps` (`schema_versions.dart`), so no step rebuilds against the live tables any more; the owner approved dropping `capture_blocks.gain_iso` in v11.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1069,9 +1070,10 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
 
 Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Implemented:**
 TASK 5.2, preferences (the margin, the per-frame overhead and the optional
-overheads are stored `PlanningPreferences`, with the ADR's defaults). **Not
-implemented yet:**
-- TASK 5.3: block policy and order;
+overheads are stored `PlanningPreferences`, with the ADR's defaults); TASK 5.3,
+block policy and order (`CalibrationPolicy` on `CaptureBlock`, default
+`outsideWindow`; existing calibration rows migrated to `outsideWindow` in v11).
+**Not implemented yet:**
 - TASK 5.4: the budget calculator;
 - TASK 5.5: the fit;
 - TASK 5.6: the UI.

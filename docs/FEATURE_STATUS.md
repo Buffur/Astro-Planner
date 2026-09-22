@@ -37,6 +37,7 @@
 > were assigned from the code and from executed reproductions, not from
 > earlier documentation.
 > **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. Affected entries: F-03, F-13, F-31, F-48.
+> **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`). Affected entries: F-35, F-39, F-48.
 
 ## Status legend
 
@@ -418,7 +419,8 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Partial
 - **Current implementation:** add, edit, delete, reorder (light/dark/flat/bias with a filter list); default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences. **TASK 4.1:** the add dialog is shared with a new edit dialog (opened by tapping a block), reachable at `updateCaptureBlock` for the first time; both reject invalid input (exposure > 0, frame count ≥ 1) via `Form` validators instead of silently defaulting; list items key on `ObjectKey(block)` instead of a hashCode+index combination that changed on every reorder. **TASK 4.4:** the Sequence Plan header carries an "Example plan" badge while the seeded default is unmodified, clearing on the first add/edit/remove/reorder or on loading a saved session.
 - **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart` (`reorderCaptureBlocks`, `updateCaptureBlock`, `isExampleCapturePlan`), `lib/domain/models/capture_block.dart`.
-- **Known issues:** binning and gain/ISO not exposed in the UI (fields exist on the model, default to 1/null). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope). *Resolved (TASK 4.4):* the default plan used to be shown with no distinction from the user's own plan (SI-008; TD-013).
+- **TASK 5.3:** blocks are validated in the domain (exposure (0, 3600] s, count 1–100 000, binning 1–4); the dialog's validators match these bounds; order is persisted (`position`); each calibration block has a policy (default outside the window) and each block a typed gain.
+- **Known issues:** binning, gain and the calibration policy are not exposed in the UI yet (TASK 5.6). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope). *Resolved (TASK 4.4):* the default plan used to be shown with no distinction from the user's own plan (SI-008; TD-013).
 - **Dependencies:** F-03.
 - **Roadmap relevance:** Phase 9 (central component).
 
@@ -447,8 +449,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phases 8–10.
 
 ## F-39 — Calibration-frame planning
-- **Status:** Missing
-- **Current implementation:** dark/flat/bias blocks can be listed, but nothing schedules or relates them to the lights.
+- **Status:** Partial *(was Missing; TASK 5.3)*
+- **Current implementation:** each dark/flat/bias block now carries a calibration policy (`inWindow` / `outsideWindow` / `library`, default `outsideWindow`, ADR-009 §3), persisted in the database and the plan JSON. Nothing uses it yet: the live required time still counts every block against the window until TASK 5.4, and there is no UI to change it until TASK 5.6.
 - **Relevant files:** `capture_block.dart`, `capture_plan_widget.dart`.
 - **Known issues:** calibration time is counted against the night window (F-36).
 - **Dependencies:** decision PD-08.
