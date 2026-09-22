@@ -40,6 +40,7 @@
 > **TASK 5.3 (2026-09-22):** ADR-009 status updated. ADR-008 §3 conformance improved: migration steps now run through Drift's generated per-version `migrationSteps` (`schema_versions.dart`), so no step rebuilds against the live tables any more; the owner approved dropping `capture_blocks.gain_iso` in v11.
 > **TASK 5.5 (2026-09-22):** ADR-009 status updated; an erratum corrects the E1b fit vector to match §4/§6 (no semantic change).
 > **TASK 5.6 (2026-09-22):** ADR-009 marked fully implemented (G5 complete).
+> **TASK 6.1 (2026-09-22, documentation only, no code changed):** ADR-010 (ephemeris approach and moving objects) accepted in Part F; PD-07 and PD-16 resolved (E.1). Checked against `astronomical_engine.dart`, `visibility_calculator.dart` and `target_selection_screen.dart` at `a61459b`.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -303,7 +304,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-04 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | **Resolved — see E.1 and ADR-008 (Part F):** (b), with the floor at **v8**. (Original proposal: (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules).) | Any schema change |
 | PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
 | PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
-| PD-07 | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | Decide with the Moon-geometry requirement | Moon services, moving objects |
+| PD-07 **RESOLVED 2026-09-22** | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | **Resolved — see E.1 and ADR-010:** in-house Meeus ch. 47 with the full tables. (Original: decide with the Moon-geometry requirement.) | Moon services, moving objects |
 | PD-08 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | **Resolved — see E.1 and ADR-009 (Part F).** (Original: owner product decision; configurable overhead.) | Capture planner (central component) |
 | PD-09 **RESOLVED 2026-09-22** | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | **Resolved — see E.1 and ADR-008 §6:** per-row `source` + `confidence`, added by the owning tasks. (Original: decide with PD-04.) | SI-011, SI-007 fixes |
 | PD-10 | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
@@ -312,7 +313,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
 | PD-15 | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
-| PD-16 | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | Hide until PD-07 | Target UI |
+| PD-16 **RESOLVED 2026-09-22** | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | **Resolved — see E.1 and ADR-010 §3:** hidden for new targets in 1.0; existing ones labelled, never deleted. (Original: hide until PD-07.) | Target UI |
 | PD-17 *(placeholder, registered 2026-09-21)* | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | Decided in TASK 10.1. Roadmap's proposed starting point (not accepted): gates = Sun ≤ the darkness limit, target ≥ the minimum altitude, the horizon; annotations = Moon altitude, illumination and separation, cloud, dew; optional user-enabled Moon or cloud gates; explicitly no composite score | — | Opportunity calculator (10.2) |
 | PD-18 *(placeholder, registered 2026-09-21)* | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | Decided in TASK 11.1, before any migration | — | Session schema migration (11.2), information architecture (12.1) |
 | PD-19 *(placeholder, registered 2026-09-21)* | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | Decided in TASK 12.1. Roadmap's candidate (not accepted): bottom navigation Tonight · Sessions · Gear & Targets · Settings; execution as a full-screen route; PD-14 resolved as a fixed Tonight view, not a customizable dashboard | — | Navigation shell (12.2), execution and logbook screens |
@@ -455,6 +456,17 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - Existing calibration blocks change from "counted against the window" to
     `outsideWindow` (ADR-009 §3).
 - **Not implemented** (TASKs 5.2–5.6).
+
+### PD-07 and PD-16 — Ephemeris approach and moving objects (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 6.1). They chose
+  the recommended option for each of three questions:
+  - **Engine:** in-house Meeus ch. 47, over adopting a Dart package.
+  - **Series:** the full ch. 47 tables, over a short truncation.
+  - **Moving types:** hidden for new targets, existing ones labelled; over hiding
+    them entirely or keeping them with a warning.
+- **Decision:** see **ADR-010** (Part F).
+- **Not implemented** (TASKs 6.2–6.4 and 8.1).
 
 ---
 
@@ -1311,3 +1323,130 @@ rule 3).
 - **TASK 5.6:** the UI shows every line of §2 and the assumptions panel.
 - **Still open until those tasks land:** CALC-18, CALC-19, CALC-20, TD-022 and
   DEV-A4. This ADR changes no code.
+
+## ADR-010: Ephemeris approach and moving objects
+
+Status: accepted (owner, 2026-09-22, TASK 6.1). Resolves PD-07 and PD-16. It also
+answers the Phase 0 pending decision "Which astronomical engine/library/reference
+to use for future ephemeris work" (Part A, unchanged). **Not implemented yet:**
+TASKs 6.2–6.4 for the Moon, TASK 8.1 for the target types.
+
+### 1. Context (verified for this ADR at commit `a61459b`)
+
+- **Time functions.** `AstronomicalEngine` provides the Julian Date (from UTC), GMST
+  and LST. UTC is used as UT1 (|UT1 − UTC| < 0.9 s). Milliseconds are ignored. No
+  ΔT (TT − UT) is applied anywhere.
+- **Sun.** `VisibilityCalculator.calculateSunAltitude` uses a low-precision,
+  almanac-style solar formula: mean anomaly, a two-term equation of centre, and a
+  linearly varying obliquity. There is no nutation or aberration, and its accuracy
+  has not been measured (SI-009).
+- **Moon.** Only `calculateLunarIllumination`, a mean-synodic-month phase model with
+  up to **4.7 percentage points** of error (SI-002). There is **no** Moon position,
+  altitude, rise/set or Moon–target separation, although all of these are in the
+  PRODUCT_SPEC MVP.
+- **Targets.** Every target is a fixed RA/Dec (J2000, with no precession applied,
+  SI-012). `target_selection_screen.dart` nevertheless offers **Planet, Moon, Comet
+  and Asteroid** as target types. These bodies move, so a fixed position is wrong
+  for them by an amount that grows with time.
+- **Excluded by the rules.** An online ephemeris is ruled out: core calculations
+  must work offline (CLAUDE.md "Offline-First").
+
+### 2. Decision: an in-house Moon from Meeus (owner)
+
+- **Engine.** The Moon is computed in **pure Dart, offline and deterministically**,
+  following Jean Meeus, *Astronomical Algorithms*, 2nd ed. (Willmann-Bell, 1998).
+
+  | Chapter | Used for |
+  | --- | --- |
+  | 47 | Geocentric position (ELP-2000/82 main terms). **The full periodic-term tables** (owner): all the longitude/distance and latitude terms the chapter lists. The stated accuracy is about 10″ in longitude and 4″ in latitude |
+  | 48 | Illuminated fraction, from the Sun–Moon elongation |
+  | 40 | Topocentric correction (lunar parallax, up to about 1°) |
+  | 13 | Conversion to altitude/azimuth |
+  | 15 | Rise/set convention, with the Moon's h₀ = 0.7275 π − 0.5667°, π being the horizontal parallax |
+
+- **Sun inside the Moon model.** The Moon's illumination and elongation need the
+  Sun. TASK 6.3 uses a Sun position consistent with the Moon's frame, for example
+  Meeus ch. 25 (low accuracy, about 0.01°), and cites it. The existing Sun-altitude
+  function stays as it is until TASK 6.2 has measured it.
+- **Constants.** Every constant is transcribed with its chapter and table cited in a
+  doc comment. The tables live in one domain file; there are no Flutter imports.
+- **Time scale.** Meeus ch. 47 is in Terrestrial Time (TT). The Moon code applies a
+  **documented ΔT**, cited from a source, with its value and validity range
+  recorded. An error of ±10 s in ΔT moves the Moon by less than 6″, which is inside
+  the tolerances in §4. UTC is used as UT1.
+- **Frame.** Moon positions are geocentric apparent coordinates in the equinox **of
+  date**.
+  - **Consequence:** Moon–target separation (TASK 6.4) and any comparison with
+    J2000 target coordinates must first bring both into the same frame.
+  - Target precession to date is the precession decision assigned to **TASK 6.2**.
+  - Until that is decided, separation is not computed. Mixing frames would cost up
+    to about 0.36° in 2026 (≈ 26 years × 50″ per year).
+
+### 3. Decision: moving target types (owner)
+
+- **Hidden for new targets in 1.0.** The target editor no longer offers Planet, Moon,
+  Comet or Asteroid (implemented in TASK 8.1, where the roadmap already hides them).
+- **Existing targets of those types stay usable** and carry a visible warning:
+  "fixed coordinates — this object moves; positions are not tracked". They are
+  **never deleted or retyped silently**.
+- **No ephemerides for planets, comets or asteroids.** A Moon *target* type would
+  need the Moon model *plus* a targets-as-ephemerides design. Both are outside 1.0.
+- **Not affected:** the Moon as *night conditions* (TASKs 6.3 and 6.4).
+
+### 4. Planning-grade tolerances (the TASK 6.3 acceptance criteria)
+
+**References:**
+- **JPL Horizons** (ssd.jpl.nasa.gov/horizons) for positions and illumination.
+- **USNO Astronomical Applications Department** (aa.usno.navy.mil) for rise/set and
+  phase events.
+
+Each fixture records its query and retrieval date (TASK 6.2).
+
+| Quantity | Tolerance vs reference | Note |
+| --- | --- | --- |
+| Geocentric Moon RA and Dec (of date) | ≤ 0.02° (72″) | Meeus ch. 47 is at arcsecond level; the margin covers the ΔT and frame conventions |
+| Topocentric Moon altitude (airless) | ≤ 0.05° | Horizons topocentric, no refraction |
+| Illuminated fraction | ≤ 1 percentage point | Today's mean-phase model errs by up to 4.7 pp (SI-002) |
+| New, first-quarter, full and last-quarter instants (USNO) | ≤ 10 min | Derived from elongation |
+| Moonrise and moonset within a night | reported − USNO ∈ [−2 min, +7 min] | Events are reported on the 5-minute night grid (ADR-007 §9), at the first sample after the crossing, which adds (0, 5] min; ±2 min covers model and convention differences |
+| Moon–target separation (TASK 6.4) | ≤ 0.05° | Only once targets and the Moon share a frame (§2, TASK 6.2) |
+
+- **Test scope (roadmap TASK 6.3):**
+  - at least **20 reference instants**;
+  - spread over at least **2 years** and **3 latitudes**, including one at 60° or
+    above, where moonrise/moonset can be absent: a night with none reports that
+    explicitly, never as null;
+  - the USNO phase events of at least one full lunation.
+- **The Sun is measured the same way in TASK 6.2** (USNO twilight and rise/set on
+  the grid; tolerance [−2, +7] min).
+  - If the current formula misses that tolerance, a **new decision** is needed to
+    replace it with ch. 25.
+  - The formula must never be changed silently (rule 16).
+
+### 5. Alternatives considered
+
+| Alternative | Verdict | Reason |
+| --- | --- | --- |
+| Online ephemeris (JPL/USNO API) | Rejected | Offline-first; network-dependent core math |
+| Adopt a Dart package | Rejected for now (owner) | Needs a licence check against GPL-3.0 and an accuracy check before use; no candidate was evaluated. It can be revisited if the in-house model fails §4 |
+| Short truncation of ch. 47 (about 20 terms) | Rejected (owner) | Error of a few arcminutes that would itself need measuring; the full tables remove that question |
+| Keep the mean-phase model | Rejected | 4.7 pp error and no geometry (SI-002); retired in TASK 6.4 |
+| Keep the moving types selectable with a warning | Rejected (owner) | Invites plans that cannot be right |
+| Hide the moving types and hide existing targets of those types | Rejected (owner) | A user's saved target would vanish from the picker |
+
+### 6. Consequences
+
+- **TASK 6.2:**
+  - reference fixtures for Sun events and deep-sky alt/az;
+  - the **precession decision** (J2000 targets to date, or not), which §2's
+    separation depends on;
+  - the refraction decision;
+  - measurement of the existing Sun formula against §4.
+- **TASK 6.3:** the Moon ephemeris per §2, accepted against §4.
+- **TASK 6.4:** `MoonConditions` (altitude, illumination, rise/set within the night,
+  separation once frames match) as annotations only, with no "impact %". The
+  mean-phase model is deleted, with a DECISIONS note.
+- **TASK 8.1:** the moving types are hidden in the editor, and existing ones are
+  labelled (§3).
+- SI-002, SI-009, SI-012, TD-032 and TD-036 stay **open** until those tasks land.
+  This ADR changes no code.

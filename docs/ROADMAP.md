@@ -311,7 +311,11 @@ rewritten to match the code.*
     fit reason and end time, one-tap fill/trim, per-group √N with help, assumptions
     panel, policy/binning/gain in the editor; widget split). 291 tests green.
     **Group G5 is complete.**
-  - **Next: TASK 6.1 — ADR: ephemeris approach and moving objects (PD-07, PD-16).**
+  - Completed 2026-09-22: **TASK 6.1** — ADR-010 (ephemeris approach and moving
+    objects; `docs/DECISIONS.md` Part F), resolving PD-07 and PD-16. The owner chose:
+    in-house Meeus ch. 47 with the full tables; moving types hidden for new targets,
+    existing ones labelled. Documentation only.
+  - **Next: TASK 6.2 — Independent reference fixtures; document simplifications.**
     Not started; it begins only on the owner's go-ahead.
 
 ### Phase → group map

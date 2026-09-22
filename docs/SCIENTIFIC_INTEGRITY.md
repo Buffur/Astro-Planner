@@ -35,6 +35,7 @@
 > **TASK 5.4 (2026-09-22):** CALC-25 implemented and verified against ADR-009 E1–E7; CALC-19 deleted; CALC-20 budget part replaced; SI-013 progress. The budget semantics are ADR-009, not a silent formula change.
 > **TASK 5.5 (2026-09-22):** CALC-26 implemented; CALC-18 deleted. The E1b vector erratum is recorded in ADR-009 §8.
 > **TASK 5.6 (2026-09-22):** SI-003 and SI-004 progress (per-group √N with help text; descriptive-only gain in the editor). No calculation changed.
+> **TASK 6.1 (2026-09-22, docs only):** ADR-010 decision notes on SI-002, SI-009 and SI-012. No calculation changed.
 
 ## Purpose and authority
 
@@ -192,6 +193,8 @@ scan has not been done).
 4. Make the Moon warning threshold configurable and documented (see SI-006).
    The ephemeris choice is already an open decision in `docs/DECISIONS.md`
    (PD-07).
+
+**Decision 2026-09-22 (TASK 6.1):** ADR-010 decides the Moon model: in-house Meeus ch. 47 (full tables), ch. 48 illumination, ch. 40 parallax, with cited constants and a documented ΔT; the acceptance tolerances (illumination ≤ 1 pp, position ≤ 0.02°, rise/set on the grid [−2, +7] min) are in ADR-010 §4. The mean-phase model is retired in TASK 6.4. Not implemented.
 
 **Status:** Partial. **Work items:** TD-032, TD-033.
 
@@ -479,6 +482,8 @@ Part B); add tests against an independent reference ephemeris (USNO / JPL Horizo
 for Sun altitude, twilight times and target altitude; decide whether refraction
 should be included; correct the stale comment.
 
+**Decision 2026-09-22 (TASK 6.1):** ADR-010 §4 sets the measurement for the existing Sun formula (TASK 6.2, USNO events, [−2, +7] min on the 5-min grid); replacing it would need a new decision, never a silent change. Not implemented.
+
 **Status:** Implemented (undocumented). **Work item:** TD-036.
 
 ---
@@ -646,6 +651,8 @@ astronomical engine/library/reference to use for future ephemeris work").
 Block or hide moving-object types until the ephemeris decision (PD-07/PD-16); store
 epoch and source; add an hours/HMS input option or clear unit affordance; remove
 the `(0, 0)` sentinel; add angular size for FOV-fit.
+
+**Decision 2026-09-22 (TASK 6.1):** ADR-010 §3: the moving types (Planet, Moon, Comet, Asteroid) are hidden for new targets in 1.0 and existing ones are labelled "fixed coordinates — this object moves" (TASK 8.1). ADR-010 §2 also makes the J2000-vs-of-date frame explicit: separation waits for the TASK 6.2 precession decision. Not implemented.
 
 **Status:** Partial. **Work item:** TD-016.
 
