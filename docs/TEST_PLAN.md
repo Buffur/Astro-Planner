@@ -111,32 +111,56 @@ Note: until TD-003 is fixed, the "run `flutter analyze` and `flutter test` befor
 claiming completion" rule cannot be satisfied literally; report the failure as
 pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 
-### Current baseline (2026-09-21, after TASK 1.1, commit `2357755`)
+### Current baseline (2026-09-21, after TASK 1.2)
 
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **73 tests: 73 pass, 0 fail** (three consecutive full runs) |
+| `flutter test --no-pub` | **83 tests: 83 pass, 0 fail** (three consecutive full runs) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
-**Resolved by TASK 1.1:** the red `integration_flow_test.dart` (TD-003) — repaired,
-not weakened: the ViewModel is now built and awaited (`ready`) inside
-`tester.runAsync`, and its RA fixture (5.59, hours, in a degrees field) was fixed to
-83.85°. Device location goes through an injectable `LocationService`
+**Resolved by TASK 1.1 (commit `2357755`):** the red `integration_flow_test.dart`
+(TD-003) — repaired, not weakened: the ViewModel is now built and awaited (`ready`)
+inside `tester.runAsync`, and its RA fixture (5.59, hours, in a degrees field) was
+fixed to 83.85°. Device location goes through an injectable `LocationService`
 (`lib/domain/services/location_service.dart`), implemented by
 `GeolocatorLocationService` in production and `FakeLocationService`
 (`test/support/`) in tests. The two `Future.delayed(300 ms)` waits and the
 `activeLocationId` GPS-avoidance workaround are gone (`await vm.ready` instead);
 new suite `planner_location_test.dart` covers permission-denied and
-position-granted paths (2 tests; total test files 22, total tests 73).
+position-granted paths (2 tests).
+
+**Added by TASK 1.2** (deterministic bootstrap and Home empty/error states):
+- `planner_bootstrap_test.dart` (5 tests) — seeding completes before the ViewModel's
+  first read (mirrors `main.dart`'s fixed order); a repository failure during the
+  initial load sets `hasBootstrapError` instead of hanging; `retryBootstrap()`
+  recovers once the repository stops failing; `isDefaultLocation` before/after a
+  saved location loads. Uses a new `FlakyTargetRepository` test double
+  (`test/support/`) that wraps a real Drift-backed repository and can be told to
+  throw, so the failure and its recovery are both tested against a real store.
+- `home_screen_test.dart` (5 tests) — the empty state's "Choose a Target" /
+  "Choose Equipment" actions; the default-location banner shown/hidden; a weather
+  repository that throws shows a retry card without hanging the first screen, and
+  the retry button calls it again; a bootstrap failure shows the error view, and
+  retrying with a repository that has recovered clears it. These tests discovered
+  and work around two things, both pre-existing:
+  - `AppRouter.router`'s static-singleton state leaks navigation between tests in
+    the same file (TD-037) — worked around with `AppRouter.router.go('/')` in
+    `setUp()`, not fixed.
+  - a plain `ListView(children: [...])`'s off-screen children are not built until
+    scrolled into view (a Flutter sliver-list behavior, not a bug), so the weather
+    test uses the same taller test surface `integration_flow_test.dart` already
+    uses for the same reason.
+
+Total after TASK 1.2: 24 test files, 83 tests.
 
 **Still open** (`docs/TECH_DEBT.md` TD-025, TD-037): no tests for the live capture
-budget math, Home, Capture Plan, Sky, Weather, Altitude chart, Logbook, Location or
-Metadata screens; no migration tests; the NPF test is circular; `AppRouter.router` is
-a shared static; Nominatim and the light-pollution HTTP client are not injectable
-(tests only avoid the real network because the widget-test HTTP binding answers with
-400); no CI.
+budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata
+screens; no migration tests; the NPF test is circular; `AppRouter.router` is a
+shared static (worked around above, not fixed); Nominatim and the light-pollution
+HTTP client are not injectable (tests only avoid the real network because the
+widget-test HTTP binding answers with 400); no CI.
 
 Any test failure from here on is a regression, not a known pre-existing issue
 (`docs/DECISIONS.md` DEV-P8, resolved).

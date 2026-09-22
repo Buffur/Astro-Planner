@@ -2,8 +2,10 @@
 
 > **Read this first.** It is the entry point for any new agent or developer.
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited and documented 2026-09-21. Application code changed since only by TASK 1.1
-> (commit `2357755`: `LocationService` seam, `PlannerViewModel.ready`, test harness).
+> audited and documented 2026-09-21. Application code changed since by TASK 1.1
+> (commit `2357755`: `LocationService` seam, `PlannerViewModel.ready`, test harness)
+> and TASK 1.2 (deterministic bootstrap: seeding awaited before `runApp`, weather off
+> the startup path, `hasBootstrapError`/`retryBootstrap`, Home empty/error states).
 > Work now follows `docs/MASTER_ROADMAP.md`; the current position is the "active
 > task" line in `docs/ROADMAP.md`.
 >
@@ -20,7 +22,7 @@
 
 1. Read this file, then `ARCHITECTURE.md` (Parts B–C), `FEATURE_STATUS.md`
    (summary table) and `TECH_DEBT.md` (Critical and High).
-2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **73 pass,
+2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **83 pass,
    0 fail** (green since TASK 1.1; TD-003 resolved). Treat any failure as a
    regression.
 3. **Scope is `docs/MASTER_ROADMAP.md`** (approved 2026-09-21, OD-06): one roadmap
@@ -141,8 +143,10 @@ support. (22 features.)
 
 Known **defects inside Partial features:** capture-block reorder-down off by one;
 Save Session duplicates and stores no snapshot; storage shows `0.0 MB` when unknown;
-the integration test fails; a v3 → v9 migration throws; a first-launch seeding race
-and a Home dead-end (TD-002, TD-004, TD-010, TD-011, TD-013).
+a v3 → v9 migration throws (TD-004, TD-010, TD-011, TD-013). *(At the audit: also
+the integration test failing (TD-003, resolved TASK 1.1) and a first-launch seeding
+race with a Home dead-end (TD-002, largely resolved TASK 1.2 — see `TECH_DEBT.md`
+for what remains open).)*
 
 ## 9. Missing features
 
@@ -262,18 +266,22 @@ verification against real sample files, which the repository lacks (TD-018).
 
 ## 19. Tests
 
-73 tests in 22 files: domain services (astronomy, optics, session feasibility,
+83 tests in 24 files: domain services (astronomy, optics, session feasibility,
 visibility windows, metadata parsing, session log), Drift repositories and database,
 the Open-Meteo repository (mocked client), form-validation widget tests for the
-Equipment and Target screens, three ViewModel suites (session date, minimum altitude,
-location), an app-boot widget test and one end-to-end flow. *(At the audit, 71 tests
-in 21 files, 1,757 lines; TASK 1.1 added the location suite.)*
+Equipment and Target screens, four ViewModel suites (session date, minimum altitude,
+location, bootstrap), an app-boot widget test, one end-to-end flow, and a Home
+widget-test suite (empty state, default-location banner, weather failure, bootstrap
+failure). *(At the audit, 71 tests in 21 files, 1,757 lines; TASK 1.1 added the
+location suite; TASK 1.2 added the bootstrap and Home suites.)*
 
-- **Result:** 73 pass, 0 fail (three consecutive full runs after TASK 1.1). The
+- **Result:** 83 pass, 0 fail (three consecutive full runs after TASK 1.2). The
   audit's red `integration_flow_test.dart` (TD-003) was repaired, not weakened.
-- **Gaps:** no tests for the live budget math, Home, Capture Plan, Sky, Weather,
-  Altitude, Logbook, Location or Metadata screens; no migration tests; the NPF test
-  is circular; `AppRouter.router` is a shared static; no CI. See `TEST_PLAN.md`.
+- **Gaps:** no tests for the live budget math, Capture Plan, Sky, Altitude chart,
+  Logbook, Location or Metadata screens; no migration tests; the NPF test is
+  circular; `AppRouter.router` is a shared static (the new Home tests reset it in
+  `setUp()` to avoid cross-test leaks — a workaround, not a fix); no CI. See
+  `TEST_PLAN.md`.
 
 ## 20. Build
 
@@ -281,7 +289,7 @@ in 21 files, 1,757 lines; TASK 1.1 added the location suite.)*
 | --- | --- | --- |
 | Install dependencies | `flutter pub get` | Yes (implicitly) |
 | Analyze | `flutter analyze --no-pub` | **Yes** — clean |
-| Test | `flutter test --no-pub` | **Yes** — 73/73 (after TASK 1.1; was 70/71 at the audit) |
+| Test | `flutter test --no-pub` | **Yes** — 83/83 (after TASK 1.2; was 70/71 at the audit) |
 | Regenerate Drift code after changing tables | `dart run build_runner build --delete-conflicting-outputs` | **No** (standard `drift_dev` step; not run) |
 | Run on Android | `flutter run` | **No** — no device/emulator run in the audit |
 | Release build | `flutter build apk` | **No** — release signing currently uses the debug key |
@@ -314,10 +322,13 @@ requires a very recent Dart.
 
 ## 22. Technical debt
 
-46 tracked items in `TECH_DEBT.md` (6 Critical, 15 High, 17 Medium, 7 Low, 1
-recorded/resolved), plus a carry-forward map from the previous register. Critical: TD-001 UTC default night; TD-002
-non-deterministic startup and Home dead-end; TD-004 migrations; TD-006 dead
-light-pollution fetch; TD-007 NPF formula; TD-009 "Relative SNR" label.
+46 tracked items in `TECH_DEBT.md` (6 Critical, 15 High, 17 Medium, 7 Low, at the
+audit), plus a carry-forward map from the previous register. Critical: TD-001 UTC
+default night; TD-002 non-deterministic startup and Home dead-end (**largely
+resolved 2026-09-21, TASK 1.2** — see `TECH_DEBT.md` for what is still open);
+TD-004 migrations; TD-006 dead light-pollution fetch;
+TD-007 NPF formula; TD-009 "Relative SNR" label. Also resolved since the audit:
+TD-003 (TASK 1.1), TD-041 (TASK 0.2).
 
 ## 23. Scientific risks
 

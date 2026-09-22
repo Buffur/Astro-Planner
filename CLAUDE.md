@@ -68,12 +68,12 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-21, after TASK 1.1, commit `2357755`)
+## Current Baseline and Known Traps (as of 2026-09-21, after TASK 1.2, commit `2e17093`)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 
 - `flutter analyze --no-pub` — expected: no issues.
-- `flutter test --no-pub` — expected: **73 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved). A failing test is now a regression.
+- `flutter test --no-pub` — expected: **83 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved). A failing test is now a regression.
 - After changing Drift tables: `dart run build_runner build --delete-conflicting-outputs` (standard step; not exercised in the audit). Every schema change needs a migration **and** a migration test.
 - Android build/run was **not** verified.
 
@@ -93,7 +93,7 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 2. The default `sessionDate` is the **UTC** calendar date (wrong night for evenings west of UTC); the picker and loaded logs use **local** dates (`TD-001`).
 3. `aperture` means **f-number**; one seed stores a diameter (`SI-005`). Field names carry no units.
 4. Relative stacking gain is √N of light frames only; the UI label still says "Relative SNR" (`TD-009`). NPF exists but is wrong and not shown (`TD-007`).
-5. `PlannerViewModel` starts `_init()` from its constructor; await it with `vm.ready` (TASK 1.1). Seeding still races it (`TD-002`, TASK 1.2). It still calls HTTP (Nominatim) and SharedPreferences directly; GPS goes through the injected `LocationService`, so tests must pass a `FakeLocationService` (`test/support/`), or they will reach the real plugin.
+5. `PlannerViewModel` starts `_init()` from its constructor; await it with `vm.ready` (TASK 1.1). Seeding no longer races it — `main.dart` awaits both seeders before `runApp` (TASK 1.2). A bootstrap failure sets `hasBootstrapError` (retry via `retryBootstrap()`) instead of throwing unguarded; weather loads after the first frame, not as part of `ready`, and a failure sets `weatherError` rather than blocking or throwing (TASK 1.2). It still calls HTTP (Nominatim) and SharedPreferences directly; GPS goes through the injected `LocationService`, so tests must pass a `FakeLocationService` (`test/support/`), or they will reach the real plugin. The silent first-launch `unawaited(useCurrentLocation())` still has no try/catch around an unexpected platform exception.
 6. `LightPollutionRepository` can never succeed (malformed URL); Bortle defaults to 4; the Bortle badge is hidden by `FeatureScope.lightPollutionContext`.
 7. `FeatureScope.fieldMode` is defined but never read; the map handoff and field-mode toggle are ungated (`TD-014`).
 8. Unknown data must not be shown as zero or a default (`SI-008`).

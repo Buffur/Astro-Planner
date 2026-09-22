@@ -1,10 +1,12 @@
 # AstroPlan Architecture
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
-> `2357755`: `LocationService` seam, `PlannerViewModel.ready`); affected spots are
-> marked *(updated TASK 1.1)*. Line references into `planner_viewmodel.dart` were
-> taken at `900b82a` and are now off by up to ~15 lines.
+> audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`:
+> `LocationService` seam, `PlannerViewModel.ready`) and TASK 1.2 (commit `2e17093`:
+> deterministic bootstrap, `hasBootstrapError`/`retryBootstrap`, `isDefaultLocation`,
+> `weatherError`, Home empty/error states); affected spots are marked
+> *(updated TASK 1.1)*/*(updated TASK 1.2)*. Line references into
+> `planner_viewmodel.dart` were taken at `900b82a` and are now off by more.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -182,22 +184,24 @@ Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 
 | # | Responsibility | Where |
 | --- | --- | --- |
-| 1 | **Bootstrap / hydration** in `_init()`, started from the constructor, not awaitable: reads shared preferences, active location, capture plan, thresholds, selected target/equipment, then **awaits network weather** before clearing `isLoading`; fires reverse geocoding | `:61-128` |
+| 1 | **Bootstrap / hydration** in `_init()`/`_loadInitialState()`, started from the constructor, awaitable via `ready` *(updated TASK 1.1)*: reads shared preferences, active location, capture plan, thresholds, selected target/equipment; a failure sets `hasBootstrapError` (retry via `retryBootstrap()`) instead of throwing unguarded; weather is **not** awaited here any more — it loads after the first frame *(updated TASK 1.2)*; fires reverse geocoding | `:81-172` |
 | 2 | **Selection state** — target and equipment, mirrored to shared preferences | `:330-342` |
 | 3 | **Session date** and **session loading** (`setSessionDate`, `newSession`, `loadSession`, `_activeSessionLog`); target/equipment re-matched from a log by **name** | `:137-141,373-411` |
 | 4 | **Location** — coordinates; `setLocation` (persists, and overwrites the active saved profile); `useCurrentLocation` (through the injected `LocationService`; *updated TASK 1.1*); default London until a position is obtained | `:216-280` |
 | 5 | **Reverse geocoding** — raw `http.get` to Nominatim, errors swallowed (the doc comment still says "Open-Meteo") | `:163-187` |
 | 6 | **Light pollution / Bortle** — `_fetchBortle` (calls the concrete repository), `setBortleClass`, default 4 | `:189-214,344-364` |
-| 7 | **Weather** — fetch and refresh; state | `:123,219,282-285` |
+| 7 | **Weather** — fetch and refresh via a shared `_fetchWeather()`; loaded post-first-frame, not on the bootstrap path; `weatherError` set on failure *(updated TASK 1.2)* | `:279,324-335` |
 | 8 | **Capture plan** — add/update/remove/reorder blocks; hand-written JSON persistence; default 3-block plan | `:287-328` |
 | 9 | **Thresholds** — minimum altitude (clamped 5–60°), dew-point margin, both persisted | `:151-161,366-371` |
 | 10 | **Derived calculations exposed to the UI** (recomputed on every access, no caching): `nightTimeline`, `visibilityWindows`, `lunarIllumination`, `skyDarknessWarning`, `dewWarning`, `currentAltitude`, `maxAltitude`, `npfExposure` (unused), `totalIntegrationTime`, `estimatedRequiredTime`, `sessionFeasibility`, `estimatedStorageMB`, `relativeStackingGain`, `pixelScale` | `:413-512` |
 
-State fields: `_isLoading`, `_selectedTarget`, `_selectedEquipment`,
-`_currentWeather`, `_locationName`, `_sessionDate` (default `DateTime.now().toUtc()`,
-`:36`), `_latitude`/`_longitude` (default London), `_captureBlocks`, `_bortleClass`
-(default 4), `_dewPointThreshold` (default 2.0), `_activeSessionLog`, `_minAltitude`
-(default 20.0). The `captureBlocks` getter exposes the internal mutable list.
+State fields: `_isLoading`, `_bootstrapError`, `_usingDefaultLocation` *(both added
+TASK 1.2)*, `_selectedTarget`, `_selectedEquipment`, `_currentWeather`,
+`_weatherError` *(added TASK 1.2)*, `_locationName`, `_sessionDate` (default
+`DateTime.now().toUtc()`, `:36`), `_latitude`/`_longitude` (default London),
+`_captureBlocks`, `_bortleClass` (default 4), `_dewPointThreshold` (default 2.0),
+`_activeSessionLog`, `_minAltitude` (default 20.0). The `captureBlocks` getter
+exposes the internal mutable list.
 
 Direct imports that skip the intended layers: `package:http`,
 `package:shared_preferences`, the concrete
@@ -404,6 +408,17 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   dead-end message with no navigation.
 - **Consequence:** the first screen can be blocked by the network, or (racing) empty
   with no way forward. TD-002.
+- **Status: RESOLVED for the startup path 2026-09-21 (TASK 1.2).** `main.dart` awaits
+  seeding before `runApp`; `_init()`/`ready` no longer waits on weather, which loads
+  after the first frame (`SchedulerBinding.addPostFrameCallback`) and sets
+  `weatherError` on failure instead of throwing into the void; a bootstrap failure
+  sets `hasBootstrapError`, surfaced by Home with a retry view, instead of an
+  unguarded exception; the empty state has actions. **Not part of this fix:**
+  `setLocation()` — a user-initiated action, not the startup path — still awaits its
+  own weather fetch before returning; the silent first-launch
+  `unawaited(useCurrentLocation())` still has no try/catch around an unexpected
+  platform exception (only denial/disabled-service, which return `null`, are
+  handled). TD-002.
 
 ## DEV-A6 — Scientific calculation boundary is only partly documented and tested
 - **Intended behavior:** every calculation service documents input/output units,

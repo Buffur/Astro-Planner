@@ -1,9 +1,10 @@
 # AstroPlan Feature Status
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
-> `2357755`); affected entries are F-06, F-48 and F-49. Statuses were assigned from
-> the code and from executed reproductions, not from earlier documentation.
+> audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`)
+> and TASK 1.2 (deterministic bootstrap, Home empty/error states); affected entries
+> are F-05, F-06, F-48 and F-49. Statuses were assigned from the code and from
+> executed reproductions, not from earlier documentation.
 
 ## Status legend
 
@@ -33,7 +34,7 @@ feature exists although its roadmap phase has not been reached in
 | F-02 | Local persistence (Drift) and migrations | Partial | 4 |
 | F-03 | Preference persistence (plan, selections, thresholds) | Implemented | 2 |
 | F-04 | Feature gating (`FeatureScope`) | Partial | governance |
-| F-05 | Seed data and first-run bootstrap | Partial | 4, 7 |
+| F-05 | Seed data and first-run bootstrap | Partial *(bootstrap ordering fixed TASK 1.2)* | 4, 7 |
 | F-06 | Active location (GPS, map, reverse geocoding) | Partial | 8 |
 | F-07 | Saved locations management | Partial | 4 |
 | F-08 | Session date selection (picker) | Partial | 8 |
@@ -121,10 +122,10 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Roadmap relevance:** governance (ADR-006).
 
 ## F-05 — Seed data and first-run bootstrap
-- **Status:** Partial
-- **Current implementation:** `CatalogSeeder` (5 targets) and `EquipmentSeeder` (5 profiles) run unawaited after `runApp`; the ViewModel selects M42 and the first equipment on first read.
-- **Relevant files:** `lib/main.dart`, `lib/data/services/*.dart`, `planner_viewmodel.dart:61-128`.
-- **Known issues:** ViewModel can read the DB before seeding completes (reproduced: `target=null equipment=null`), producing a Home dead-end with no navigation; seeders re-seed if the user deletes everything; seed data errors (SI-005, SI-011); no `averageRawFileSizeMB` in any seed (TD-002, TD-008, TD-035).
+- **Status:** Partial *(bootstrap ordering fixed TASK 1.2)*
+- **Current implementation:** `main.dart` now awaits `CatalogSeeder` (5 targets) and `EquipmentSeeder` (5 profiles) before `runApp`, so the ViewModel's first read always sees seeded data (`2357755` established the seam; the ordering fix itself is a later TASK 1.2 commit — recorded here). Home's empty state (target/equipment still null, e.g. a seeding failure) now offers "Choose a Target" / "Choose Equipment" actions instead of a dead end.
+- **Relevant files:** `lib/main.dart`, `lib/data/services/*.dart`, `planner_viewmodel.dart:81-172`, `home_screen.dart` (`_EmptyStateView`).
+- **Known issues:** seeders re-seed if the user deletes everything; seed data errors (SI-005, SI-011); no `averageRawFileSizeMB` in any seed (TD-008, TD-035). *Resolved (TASK 1.2):* the DB-before-seeding race (TD-002) and the Home dead-end.
 - **Dependencies:** F-02, F-19, F-22.
 - **Roadmap relevance:** Phases 4, 7.
 
@@ -480,9 +481,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-48 — Automated tests
 - **Status:** Partial
-- **Current implementation:** 73 tests in 22 files; all pass (three consecutive full runs after TASK 1.1); `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`.
+- **Current implementation:** 83 tests in 24 files; all pass (three consecutive full runs after TASK 1.2); `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`. New (TASK 1.2): `planner_bootstrap_test.dart` (seeding-before-first-read, bootstrap-failure/retry, `isDefaultLocation`) and `home_screen_test.dart` (empty-state actions, default-location banner, weather-failure/retry, bootstrap-failure/retry), using a `FlakyTargetRepository` test double (`test/support/`).
 - **Relevant files:** `test/` (see `docs/TEST_PLAN.md`).
-- **Known issues:** no test for the live capture-budget math, Home, Capture Plan, Sky, Weather, Altitude, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests.
+- **Known issues:** no test for the live capture-budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static — `home_screen_test.dart` resets it in `setUp()` to avoid cross-test navigation leaks, a workaround, not a fix; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests.
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 
@@ -490,7 +491,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Status:** Missing
 - **Current implementation:** none: no CI configuration is tracked (previous docs referred to a "CI failure" that cannot exist).
 - **Relevant files:** —
-- **Known issues:** the suite is green (TASK 1.1) but nothing enforces it in CI (TD-046, roadmap TASK 1.3).
+- **Known issues:** the suite is green (TASK 1.1, extended TASK 1.2) but nothing enforces it in CI (TD-046, roadmap TASK 1.3).
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 
