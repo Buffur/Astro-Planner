@@ -4,24 +4,9 @@ import 'package:astroplan/domain/services/session_calculator.dart';
 
 void main() {
   group('SessionCalculator (Batch 3.4)', () {
-    test('estimates total duration correctly with overhead', () {
-      final duration = SessionCalculator.estimateTotalDuration(
-        lightFrames: 100, // 100 * 60 = 6000s
-        darkFrames: 20, // 20 * 60 = 1200s
-        flatFrames: 20, // 20 * 5 = 100s
-        biasFrames: 20, // 20 * 1 = 20s
-        exposureSeconds: 60,
-      );
-
-      // Lights: 6000
-      // Overhead 15% of 6000 = 900
-      // Darks: 1200
-      // Flats: 100
-      // Bias: 20
-      // Total = 6000 + 900 + 1200 + 100 + 20 = 8220 seconds
-
-      expect(duration.inSeconds, 8220);
-    });
+    // The `estimateTotalDuration` test was removed with the dead function
+    // itself (TASK 5.4, ADR-009; recorded in docs/DECISIONS.md). Its
+    // replacement is test/domain/services/capture_budget_calculator_test.dart.
 
     test('feasibility is infeasible if available time is 0', () {
       final result = SessionCalculator.calculateFeasibility(

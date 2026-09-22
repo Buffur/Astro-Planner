@@ -32,6 +32,7 @@ import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
+import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/services/session_calculator.dart';
 import '../../domain/models/session_log.dart';
 
@@ -659,26 +660,42 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  String get totalIntegrationTime {
-    final totalSeconds = _captureBlocks
-        .where((b) => b.frameType == FrameType.light)
-        .fold(0.0, (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount));
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-    return '${hours.toInt()}h ${minutes.toInt()}m';
+  /// The capture budget of the current plan (ADR-009, TASK 5.4). All
+  /// budget arithmetic lives in [CaptureBudgetCalculator]; this getter only
+  /// supplies its inputs.
+  CaptureBudget get captureBudget {
+    final overheads = CaptureOverheads.fromPreferences(_preferences);
+    var transits = false;
+    final night = sessionNight;
+    if (overheads.meridianFlipMs != null &&
+        night != null &&
+        _selectedTarget != null) {
+      transits = CaptureBudgetCalculator.transitFallsInWindows(
+        VisibilityCalculator.calculateAltitudeCurve(
+          night: night,
+          target: _selectedTarget!,
+        ),
+        visibilityWindows,
+      );
+    }
+    return CaptureBudgetCalculator.calculate(
+      blocks: _captureBlocks,
+      overheads: overheads,
+      targetTransitsInWindow: transits,
+      averageRawFileSizeMB: _selectedEquipment?.averageRawFileSizeMB,
+    );
   }
 
-  Duration get estimatedRequiredTime {
-    final totalExposure = _captureBlocks.fold(
-      0.0,
-      (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount),
-    );
-    // Per-frame overhead from the planning preferences (default 5 s, the
-    // value previously hard-coded here; TASK 5.2, ADR-009 §4).
-    final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
-    final overhead = totalFrames * _preferences.perFrameOverheadSeconds;
-    return Duration(seconds: (totalExposure + overhead).toInt());
+  /// Light-frame integration, formatted "Xh Ym".
+  String get totalIntegrationTime {
+    final minutes = captureBudget.integration.inMinutes;
+    return '${minutes ~/ 60}h ${minutes % 60}m';
   }
+
+  /// The time the plan needs inside the imaging windows: acquisition plus
+  /// in-window calibration (ADR-009 §2 "window load"). Calibration taken
+  /// outside the window or from a library is not included.
+  Duration get estimatedRequiredTime => captureBudget.windowLoad;
 
   SessionFeasibility get sessionFeasibility {
     return SessionCalculator.calculateFeasibility(
@@ -688,21 +705,14 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  double? get estimatedStorageMB {
-    if (_selectedEquipment == null) return null;
-    final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
-    return OpticalCalculator.estimateStorageRequirement(
-      averageRawFileSizeMB: _selectedEquipment!.averageRawFileSizeMB,
-      frameCount: totalFrames,
-    );
-  }
+  /// Estimated storage (MB) for every frame taken (library blocks excluded);
+  /// null when the rig's file size is unknown (SI-013).
+  double? get estimatedStorageMB => captureBudget.storageMB;
 
-  double get relativeStackingGain {
-    final lights = _captureBlocks
-        .where((b) => b.frameType == FrameType.light)
-        .fold(0, (sum, b) => sum + b.frameCount);
-    return OpticalCalculator.calculateRelativeStackingGain(lights);
-  }
+  double get relativeStackingGain =>
+      OpticalCalculator.calculateRelativeStackingGain(
+        captureBudget.lightFrameCount,
+      );
 
   double? get pixelScale {
     if (_selectedEquipment == null) return null;

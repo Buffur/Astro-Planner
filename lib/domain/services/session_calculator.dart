@@ -15,38 +15,9 @@ class SessionFeasibility {
 }
 
 class SessionCalculator {
-  /// Estimates the total physical time required to execute the capture sequence.
-  ///
-  /// Incorporates:
-  /// - Light exposures
-  /// - Dark exposures
-  /// - Flat exposures (estimated 5s each)
-  /// - Bias exposures (estimated 1s each)
-  /// - Baseline overhead (dithering, settling, download, autofocus - estimated 15% of lights duration)
-  static Duration estimateTotalDuration({
-    required int lightFrames,
-    required int darkFrames,
-    required int flatFrames,
-    required int biasFrames,
-    required int exposureSeconds,
-  }) {
-    final lightsDuration = lightFrames * exposureSeconds;
-    final darksDuration = darkFrames * exposureSeconds;
-    final flatsDuration = flatFrames * 5;
-    final biasDuration = biasFrames * 1;
-
-    // Overhead: typically dithering every N frames, autofocus every 1 hour, filter changes, etc.
-    // We apply a flat 15% overhead on light frames duration.
-    final overhead = (lightsDuration * 0.15).round();
-
-    final totalSeconds =
-        lightsDuration +
-        darksDuration +
-        flatsDuration +
-        biasDuration +
-        overhead;
-    return Duration(seconds: totalSeconds);
-  }
+  // `estimateTotalDuration` (the unsourced 15 % overhead model, CALC-19)
+  // was dead code and was deleted in TASK 5.4; the budget now comes from
+  // `CaptureBudgetCalculator` (ADR-009).
 
   /// Calculates the feasibility of a planned session given the available visibility windows.
   ///

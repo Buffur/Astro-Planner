@@ -10,6 +10,7 @@ import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
+import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/planning_preferences.dart';
 import 'package:astroplan/domain/models/weather_conditions.dart';
@@ -91,7 +92,17 @@ void main() {
   });
 
   test('per-frame overhead feeds the required time (default 5 s)', () async {
-    final frames = vm.captureBlocks.fold(0, (s, b) => s + b.frameCount);
+    // Since TASK 5.4 (ADR-009 §2) the required time is the window load:
+    // only lights and in-window calibration count. The example plan's darks
+    // and flats default to outside the window, so only its lights count.
+    final frames = vm.captureBlocks
+        .where(
+          (b) =>
+              b.frameType == FrameType.light ||
+              b.calibrationPolicy == CalibrationPolicy.inWindow,
+        )
+        .fold(0, (s, b) => s + b.frameCount);
+    expect(frames, 100);
     final at5 = vm.estimatedRequiredTime;
     await vm.setPlanningPreferences(
       vm.planningPreferences.copyWith(perFrameOverheadSeconds: 0),

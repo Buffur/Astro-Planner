@@ -359,7 +359,7 @@ class CapturePlanWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Session Duration',
+                  'Time needed in window',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
