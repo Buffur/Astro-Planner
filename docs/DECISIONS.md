@@ -33,6 +33,10 @@
 > SNR" is now met); ADR-005's conformance row updated to Complies. The NPF
 > formula/test deviation and undocumented-assumptions parts of DEV-P2 are
 > unchanged (SI-001, SI-003, SI-009) — out of this task's scope.
+> **Updated 2026-09-22 (TASK 5.1, documentation only, no code changed):** ADR-009
+> (capture-budget semantics) accepted in Part F; PD-08 resolved (E.1). Checked
+> against `planner_viewmodel.dart`, `session_calculator.dart`, `capture_block.dart`
+> and `visibility_window.dart` at commit `f8e1a98`.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -297,7 +301,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
 | PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
 | PD-07 | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | Decide with the Moon-geometry requirement | Moon services, moving objects |
-| PD-08 **[roadmap-blocking]** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | Owner product decision; configurable overhead | Capture planner (central component) |
+| PD-08 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | **Resolved — see E.1 and ADR-009 (Part F).** (Original: owner product decision; configurable overhead.) | Capture planner (central component) |
 | PD-09 **RESOLVED 2026-09-22** | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | **Resolved — see E.1 and ADR-008 §6:** per-row `source` + `confidence`, added by the owning tasks. (Original: decide with PD-04.) | SI-011, SI-007 fixes |
 | PD-10 | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
 | PD-11 | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
@@ -426,6 +430,28 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - Added by TASKs 7.1, 8.1 and 8.5, not in G3.
   - Legacy rows stay NULL, meaning unknown, never guessed.
 - **Not implemented.**
+
+### PD-08 — Capture-budget model (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 5.1). They chose
+  the recommended option for each of four questions:
+  - **Calibration:** the default policy for new calibration blocks is "outside the
+    window".
+  - **Overheads:** the optional overheads are off by default and labelled "not
+    included".
+  - **Per-frame overhead:** keep 5 s.
+  - **Session budget:** it includes outside-window calibration and setup, each on its
+    own line.
+- **Decision:** see **ADR-009** (Part F).
+  - Only lights and `inWindow` calibration are fitted.
+  - Frames and overhead events are atomic and never straddle a gap.
+  - The margin is configurable, with a default of 15 %.
+- **Refines the roadmap:**
+  - MASTER_ROADMAP TASK 5.1 defines the session budget as "acquisition + in-window
+    calibration + setup". Outside-window calibration is now included as its own line.
+  - Existing calibration blocks change from "counted against the window" to
+    `outsideWindow` (ADR-009 §3).
+- **Not implemented** (TASKs 5.2–5.6).
 
 ---
 
@@ -1038,3 +1064,229 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
 - **Later tasks** add provenance columns according to §6.
 - DEV-D1, DEV-D5, DEV-D6, TD-004, TD-005, TD-026 (partly) and TD-047 stay **open**
   until then. This ADR changes no code.
+
+## ADR-009: Capture-budget semantics
+
+Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Not implemented
+yet:**
+- TASK 5.2: preferences;
+- TASK 5.3: block policy and order;
+- TASK 5.4: the budget calculator;
+- TASK 5.5: the fit;
+- TASK 5.6: the UI.
+
+### 1. Context (verified for this ADR at commit `f8e1a98`)
+
+- **The live "required time"** is `PlannerViewModel.estimatedRequiredTime`
+  (`planner_viewmodel.dart:699`). It computes **Σ(exposure × count) over every
+  block type**, including darks, flats and bias, plus **5 s × every frame** (CALC-20,
+  TD-022, DEV-A4).
+- **The fit** is `SessionCalculator.calculateFeasibility` (CALC-18). It compares that
+  sum with the **sum** of the visibility windows:
+  - `infeasible` if it is greater than the windows;
+  - `tight` if it is greater than a **fixed** 85 % of them;
+  - otherwise `feasible`.
+
+  It ignores gaps between windows, so a frame is treated as if it could straddle one.
+- **`SessionCalculator.estimateTotalDuration`** (CALC-19, the 15 % model) is dead
+  code.
+- **The block model.** A `CaptureBlock` has `frameType` (light, dark, flat, bias),
+  `filterName`, `exposureTimeSeconds` (double), `frameCount`, `binning` and a
+  free-text `gainIso`. It has no policy and no position.
+- **The windows.** `visibilityWindows` is already a `List<VisibilityWindow>` of UTC
+  intervals for the `SessionNight`, darkness ∩ altitude (CALC-23, ADR-007 §9).
+
+### 2. Definitions
+
+All arithmetic is in **integer milliseconds**:
+
+- A frame lasts `round(exposure_s × 1000)` ms.
+- A block total is `count × per-frame ms`, so no rounding drift accumulates.
+
+| Quantity | Definition |
+| --- | --- |
+| **Integration** | Σ light exposure only: `Σ_light count × exposure`. The science quantity. |
+| **Acquisition** | Integration + per-frame overhead on every light frame + the in-window overhead events (§4) |
+| **In-window calibration** | Σ `count × (exposure + per-frame overhead)` over calibration blocks with policy `inWindow` |
+| **Window load** | Acquisition + in-window calibration. **The only quantity fitted into the windows** (§6) |
+| **Outside-window calibration** | Σ `count × (exposure + per-frame overhead)` over calibration blocks with policy `outsideWindow` (dusk or dawn flats, darks and bias after dawn). Reported, never fitted |
+| **Setup** | A single duration (§4). Reported as "start setup by *first window start − setup*". Never fitted |
+| **Session budget** | Window load + outside-window calibration + setup, **each shown on its own line** (owner decision). Refines the roadmap's wording "acquisition + in-window calibration + setup" |
+| **Library calibration** | Blocks with policy `library` consume no time. They are listed as "from library" |
+
+- **Lights are always in-window.** A light block has no policy.
+
+### 3. Calibration policy per block (TASK 5.3 adds the field)
+
+- **`inWindow`:** counts in the window load. Example: darks from an uncooled camera
+  or a smartphone at ambient temperature.
+- **`outsideWindow`:** counts in the session budget only. **This is the default for
+  every new dark, flat and bias block** (owner decision).
+- **`library`:** counts nowhere.
+- **Existing blocks** have no stored policy. They read as `outsideWindow` until TASK
+  5.3's migration writes one.
+
+  Today, every existing block counts against the window. This is an intentional,
+  recorded behaviour change: E7 goes from "infeasible" to "fits".
+
+### 4. Overheads (defaults are assumptions, configurable in TASK 5.2)
+
+| Overhead | Applies to | Default | Cost |
+| --- | --- | --- | --- |
+| Per-frame (download or interval gap) | Every acquired frame: lights and non-library calibration | **5 s** (the live value, kept so plans don't shift silently; owner decision) | Per frame |
+| Dither + settle | After every N-th **light** frame, only if another light frame follows | **Off** | D per event |
+| Refocus | At the first frame boundary where accumulated time *excluding refocus events* reaches k·T (k = 1, 2, …), only if another light frame follows | **Off** | R per event |
+| Filter change | Between consecutive light blocks whose `filterName` differs | **Off** | F per change |
+| Meridian flip | Once, if enabled and the target's upper transit falls inside an available window | **Off** | M, once |
+| Setup | Once, before the first window | **Off** | S |
+
+- **Why the optional overheads default to off** (owner decision): the app cannot know
+  whether a rig guides, has an autofocuser or uses an equatorial mount. Default
+  overheads would charge untracked and smartphone users for time they never spend.
+- **An overhead that is off is never a hidden zero.** The assumptions panel lists it
+  as **"not included"** (SI-008). Enabled values carry the label "assumption —
+  measure your rig".
+- **Meridian flip.**
+  - The budget (TASK 5.4) counts it conservatively whenever the transit lies inside
+    any window.
+  - The fit (TASK 5.5) inserts it at the first event boundary at or after the
+    transit.
+  - If the placed plan ends before the transit, the fit drops it and says so.
+- **One sequence.** Overhead events are part of **one ordered in-window event
+  sequence**: the frames in block order, with the events inserted as above. The
+  budget is the sum of that sequence, and the fit places the same sequence, so the
+  two cannot disagree.
+
+### 5. Available-time contract
+
+The fit consumes `List<VisibilityWindow>` for one `SessionNight`:
+
+- UTC instants;
+- sorted and non-overlapping;
+- each window inside `[startUtc, endUtc)`;
+- the list may be empty.
+
+Today the list is darkness ∩ altitude (CALC-23). **G10's Imaging Opportunity will
+produce the same type, with no API change.** The budget (TASK 5.4) does not read
+windows except for the meridian-flip condition.
+
+### 6. Fit semantics (TASK 5.5)
+
+- **Atomic events.** Every event (a frame plus its per-frame overhead, or an overhead
+  event) is atomic. Events are placed in sequence order into the windows.
+- **No straddling.** An event that does not fit in what remains of the current window
+  moves to the start of the next one. The leftover tail is **lost** and reported.
+  Nothing straddles a gap.
+- **Result:**
+  - **no window:** the list is empty. The reason comes from the night timeline, for
+    example "no astronomical darkness" (ADR-007 §8).
+  - **doesn't fit:** some events can't be placed. Reports the number of unplaced
+    frames per block and the lost tails.
+  - **tight:** everything is placed, but `window load > (1 − m) × Σ windows`.
+  - **fits:** otherwise.
+- **The margin `m`** defaults to **15 %**, the same as today's fixed 85 % threshold.
+  It is **configurable** in TASK 5.2. The margin only labels the result; it never
+  blocks placement.
+- **Every result reports:** the projected end instant, the unused time, the lost
+  tails, and a human-readable reason.
+- **Inverse question:** the maximum number of frames of a given light block that can
+  be **placed** (not "fit within the margin").
+- **A plan with no light frames** has nothing to fit. The result states this and is
+  not reported as "fits".
+
+### 7. Storage and relative stacking gain (TASKs 5.4 and 5.6; not new formulas)
+
+- **Storage:** per block, `count × averageRawFileSizeMB` over every acquired frame
+  (library blocks excluded).
+  - If the file size is unknown, storage is **unknown**, never 0 (SI-013, CALC-16).
+  - Binning is ignored and labelled as an estimate.
+- **Relative stacking gain:** `√N` is shown **per group of light frames with the same
+  exposure and filter**. It is never summed across groups, and never called SNR
+  (SI-003, CALC-15).
+
+### 8. Worked examples = test vectors (TASK 5.4 budget, TASK 5.5 fit)
+
+**How the vectors were produced:** computed 2026-09-22 with an independent scratch
+model of §2–§6, in integer milliseconds, outside the repository. Every parameter is
+stated in each row, so no example depends on a default except where noted.
+
+**Windows used below:**
+
+| Label | Window(s) |
+| --- | --- |
+| W1 | 21:00–03:00 |
+| W2 | 22:00–23:30 and 01:00–04:00 |
+| W3 | 22:10–02:40 |
+| W4 | 21:30–04:30 |
+| W5 | 22:00–00:00 |
+| W7 | 21:00–00:30 |
+
+- All times are UTC clock times on one night, and the margin is 15 %.
+- A tail value is the unused remainder of a window, in seconds.
+
+| # | Case | Plan and parameters | Windows | Integration | Acquisition | In-window cal | Window load | Outside cal | Setup | Session budget | Events | Fit result | End | Lost tails |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| E1 | Guided cooled rig | Ha 90 × 120 s; per-frame 2 s; dither every 3 lights, 20 s; refocus every 3600 s, 120 s | W1 (21 600 s) | 10 800 s | 11 920 s | 0 | 11 920 s | 0 | 0 | 11 920 s | 29 dithers, 3 refocus | **fits** (≤ 18 360 s) | 00:18:40 | — |
+| E1b | E1 + meridian flip | as E1, plus flip 300 s; transit 00:40 inside W1 | W1 | 10 800 s | 12 220 s | 0 | 12 220 s | 0 | 0 | 12 220 s | + 1 flip | **fits** | 00:23:40 | — |
+| E2a | Split window | 40 × 300 s; per-frame 5 s | W2 (5 400 + 10 800 = 16 200 s) | 12 000 s | 12 200 s | 0 | 12 200 s | 0 | 0 | 12 200 s | — | **fits** (≤ 13 770 s) | 02:56:55 | 215 |
+| E2b | Split window, inverse maximum | 52 × 300 s; per-frame 5 s | W2 | 15 600 s | 15 860 s | 0 | 15 860 s | 0 | 0 | 15 860 s | — | **tight**; 52 is the inverse answer (17 frames + 35 frames) | 03:57:55 | 215 |
+| E2c | Split window, one frame too many | 53 × 300 s; per-frame 5 s | W2 | 15 900 s | 16 165 s | 0 | 16 165 s | 0 | 0 | 16 165 s | — | **doesn't fit**: 1 light frame unplaced, although 16 165 s ≤ 16 200 s (the sum-of-windows rule would say "tight") | — | 215, 125 |
+| E3 | Untracked smartphone | 300 × 10 s lights; 30 × 10 s darks `inWindow`; per-frame 1 s; no other overheads | W3 (16 200 s) | 3 000 s | 3 300 s | 330 s | 3 630 s | 0 | 0 | 3 630 s | — | **fits** | 23:10:30 | — |
+| E4 | Calibration outside the window, library, setup | L 60 × 180 s, then R 20 × 180 s; filter change 30 s; flats 30 × 2 s `outsideWindow`; darks 20 × 180 s `library`; bias 50 × 0.001 s `outsideWindow`; per-frame 3 s; setup 2 700 s | W4 (25 200 s) | 14 400 s | 14 670 s | 0 | 14 670 s | 300.05 s (flats 150 + bias 150.05) | 2 700 s | 17 670.05 s | 1 filter change | **fits**; "start setup by 20:45" | 01:34:30 | — |
+| E5 | No window | 30 × 120 s; per-frame 2 s | none (e.g. no astronomical darkness) | 3 600 s | 3 660 s | 0 | 3 660 s | 0 | 0 | 3 660 s | — | **no window**, reason taken from the timeline | — | — |
+| E6 | Margin boundary | n × 60 s; per-frame 0 s | W5 (7 200 s; limit 6 120 s) | n × 60 | same | 0 | same | 0 | 0 | same | — | see below | see below | see below |
+| E7 | Old rule vs new rule | 24 × 300 s lights; 20 × 300 s darks at the **default** policy (`outsideWindow`); per-frame 5 s | W7 (12 600 s) | 7 200 s | 7 320 s | 0 | 7 320 s | 6 100 s | 0 | 13 420 s | — | **fits**; the current code rates it **infeasible** (13 420 s > 12 600 s) | 23:02:00 | — |
+
+E6 results by frame count:
+
+| Frames | Result | End | Lost tail |
+| --- | --- | --- | --- |
+| 102 | fits (exactly at the limit) | 23:42:00 | — |
+| 103 | tight | 23:43:00 | — |
+| 120 | tight (fills the window exactly) | 00:00:00 | — |
+| 121 | doesn't fit, 1 frame unplaced | — | 0 |
+
+Tests in TASK 5.4 and TASK 5.5 must reproduce these to the millisecond. They must
+not derive expected values from the implementation (SCIENTIFIC_INTEGRITY Part C
+rule 3).
+
+### 9. Alternatives considered
+
+| Alternative | Verdict | Reason |
+| --- | --- | --- |
+| Keep "Σ every block + 5 s per frame" against Σ windows (today) | Rejected | Calibration competes for dark time it doesn't need; no gap handling (E2c); integration and acquisition are conflated (TD-022) |
+| The 15 % model (`estimateTotalDuration`) | Rejected; deleted in TASK 5.4 | An unsourced flat percentage that doesn't scale with dither or refocus choices; dead code |
+| Fit on the sum of windows | Rejected | Frames are atomic and cannot straddle a gap (E2c) |
+| Typical guided-rig overheads on by default | Rejected (owner) | Overstates the load for untracked and smartphone users; the app can't know the rig |
+| Darks in-window by default | Rejected (owner) | Wrong for cooled cameras; still available per block |
+| Per-frame default of 2 s | Rejected (owner) | Would silently shorten existing plans |
+| Session budget excluding outside-window calibration (roadmap literal) | Refined (owner) | Dawn flats are real session time; shown as their own line |
+| Placement-dependent flip in the budget | Rejected | The budget must not depend on placement; conservative counting is used instead, and the fit refines it |
+
+### 10. Limitations and assumptions
+
+- **L1. Overhead defaults are assumptions.** Only the per-frame 5 s is on by default,
+  and it is pessimistic for smartphones, which are closer to 1 s.
+- **L2. One target per night.** Scheduling several targets is out of scope (TASK
+  5.5).
+- **L3. Refocus and dither are time- and count-based only.** Temperature-triggered
+  refocus and refocus on filter change are not modelled.
+- **L4. The meridian flip is a single fixed cost.** Nothing is modelled for
+  counterweight-up imaging or for mounts that never flip.
+- **L5. Outside-window calibration is not scheduled** into twilight. It is only
+  totalled.
+- **L6. Storage ignores binning and compression.**
+- **Assumption:** the per-frame overhead also applies to calibration frames.
+
+### 11. Consequences
+
+- **TASK 5.2:** preferences for the margin, the per-frame overhead and the optional
+  overheads (all off by default), each shown as a preference, not a law.
+- **TASK 5.3:** `calibrationPolicy` on `CaptureBlock` (default `outsideWindow`), with
+  its migration and snapshot, and a `position` column.
+- **TASK 5.4:** `CaptureBudgetCalculator` implementing §2–§4 and §7, plus E1–E7 as
+  tests. `estimateTotalDuration` is deleted, with a note here.
+- **TASK 5.5:** the fit analyzer implementing §5–§6, plus E1–E7 as tests.
+- **TASK 5.6:** the UI shows every line of §2 and the assumptions panel.
+- **Still open until those tasks land:** CALC-18, CALC-19, CALC-20, TD-022 and
+  DEV-A4. This ADR changes no code.

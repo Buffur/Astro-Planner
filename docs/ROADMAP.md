@@ -288,8 +288,13 @@ rewritten to match the code.*
     is replaced with an undocumented-threshold-honest comment (TD-042, in
     part). The string "SNR" no longer appears in `lib/`. 205 tests green.
     Group G4 is complete.
-  - **Next: TASK 5.1 — ADR: capture-budget semantics (PD-08).** Not started;
-    it begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 5.1** — ADR-009, capture-budget semantics
+    (`docs/DECISIONS.md` Part F), resolving PD-08. The owner chose: calibration
+    outside the window by default; optional overheads off and labelled; per-frame
+    overhead 5 s; the session budget includes outside-window calibration and setup.
+    Documentation only.
+  - **Next: TASK 5.2 — Planning preferences and a minimal Settings screen.** Not
+    started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 
