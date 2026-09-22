@@ -1067,9 +1067,10 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
 
 ## ADR-009: Capture-budget semantics
 
-Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Not implemented
-yet:**
-- TASK 5.2: preferences;
+Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Implemented:**
+TASK 5.2, preferences (the margin, the per-frame overhead and the optional
+overheads are stored `PlanningPreferences`, with the ADR's defaults). **Not
+implemented yet:**
 - TASK 5.3: block policy and order;
 - TASK 5.4: the budget calculator;
 - TASK 5.5: the fit;

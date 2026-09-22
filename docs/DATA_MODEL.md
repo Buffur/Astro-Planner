@@ -40,6 +40,7 @@
 > **Broken**, **Missing**, **Deprecated**, **Unknown**.
 > Where the implementation deviates from the approved design it is marked
 > **IMPLEMENTATION DEVIATION** (intended behavior / actual behavior / consequence).
+> **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. B6 keys and one B3 row added; no schema change.
 
 ---
 
@@ -185,6 +186,7 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | `LocationProfile` | id; name; latitude (deg); longitude (deg, east positive); elevation (unit unspecified); bortleClass (int) | `location_profiles` | No time zone; Bortle cannot be "unknown" (SI-007) |
 | `WeatherConditions` | temperature (°C); cloudCover (%); humidity (%); dewPoint (°C); windSpeed (km/h, provider default); hourlyForecasts; lastUpdated (device clock) | shared preferences cache only | No provider/model, offset, validity window or staleness field |
 | `HourlyForecast` | time; temperature; cloudCover; dewPoint; humidity; precipitationProbability (%); windSpeed; isDaytime | inside the weather cache | `time` is a **naive site-local string parsed as device-local** (SI-010) |
+| `PlanningPreferences` *(TASK 5.2)* | minAltitudeDeg; darknessLimit (enum, deg); feasibilityMarginPercent; dewMarginC; perFrameOverheadSeconds; optional overheads (nullable = off) | shared preferences (B6) | Clamped on construction; documented defaults are assumptions (`lib/domain/models/planning_preferences.dart`) |
 | `VisibilityWindow` | start, end (UTC); clippedAtStart, clippedAtEnd (bool) *(fields added TASK 2.3)* | not persisted | `duration` getter; value equality (now includes the clip flags). A window is clipped when it touches a `SessionNight` boundary in polar night (ADR-007 §9); always `false` for windows from the legacy DateTime-based API path, though that path can itself produce a clipped window (verified) since clipping depends only on the astronomy, not on which API computed it |
 | `NightTimeline` / `SunThresholdResult` *(TASK 2.3)* | night (`SessionNight`); four `SunThresholdResult` fields (sunriseSunset, civilTwilight, nauticalTwilight, astronomicalTwilight), each a `SunCrossing` (duskUtc?, dawnUtc?, belowAtStart, belowAtEnd), `SunNeverBelow` or `SunAlwaysBelow` | not persisted | Replaces the stringly-typed `Map<String, DateTime?>` (TD-024); "not reached" is never a bare null (SI-008). Built by `VisibilityCalculator.calculateNightTimelineForNight`; consumed by `sky_darkness_widget.dart` via sealed-class pattern matching *(wired TASK 2.4)* |
 | `AltitudeCurve` / `AltitudeSample` *(TASK 2.3)* | night (`SessionNight`); samples: List of {instantUtc, sunAltitudeDeg, targetAltitudeDeg}, 5-minute grid, 289 points inclusive of both ends | not persisted | Built by `VisibilityCalculator.calculateAltitudeCurve`; consumed by `AltitudeChartWidget`, the only current caller |
@@ -239,12 +241,16 @@ allows reuse.
 
 | Key | Type | Written by | Meaning |
 | --- | --- | --- | --- |
-| `activeLocationId` | int | `PlannerViewModel.setLocation` | Pointer to the active `location_profiles` row |
-| `captureBlocks` | JSON string | `PlannerViewModel._saveBlocks` | The active capture plan (hand-serialized) |
-| `targetId` | int | `setTarget` | Selected target |
-| `equipmentId` | int | `setEquipment` | Selected rig (`optical_rigs.id`) |
-| `minAltitude` | double | `setMinAltitude` | Minimum usable altitude (deg); no UI writes it; read without clamping |
-| `dewPointThreshold` | double | `setDewPointThreshold` | Dew margin (°C); no UI writes it |
+| `activeLocationId` | int | `SharedPrefsPlannerStateRepository` (from `setLocation`) | Pointer to the active `location_profiles` row |
+| `captureBlocks` | JSON string | `SharedPrefsPlannerStateRepository` (from `_saveBlocks`) | The active capture plan (hand-serialized; shape unchanged by TASK 5.2) |
+| `targetId` | int | `SharedPrefsPlannerStateRepository` (from `setTarget`) | Selected target |
+| `equipmentId` | int | `SharedPrefsPlannerStateRepository` (from `setEquipment`) | Selected rig (`optical_rigs.id`) |
+| `minAltitude` | double | `SharedPrefsPlanningPreferencesRepository` | Minimum usable altitude (deg); Settings screen; clamped to [5, 60] on load (TASK 5.2) |
+| `dewPointThreshold` | double | `SharedPrefsPlanningPreferencesRepository` | Dew margin (°C); Settings screen; clamped to [0, 10] |
+| `darknessLimitDeg` *(TASK 5.2)* | double | same | Sun limit for windows: −18, −15 or −12 (anything else reads as −18) |
+| `feasibilityMarginPercent` *(TASK 5.2)* | double | same | Tight-margin percent, default 15, range [0, 50] |
+| `perFrameOverheadSeconds` *(TASK 5.2)* | double | same | Per-frame overhead (s), default 5 |
+| `ditherEveryNFrames`, `ditherSettleSeconds`, `refocusEveryMinutes`, `refocusSeconds`, `filterChangeSeconds`, `meridianFlipSeconds`, `setupMinutes` *(TASK 5.2)* | int / double | same | Optional overheads (ADR-009 §4); an **absent key means off** ("not included"); stored, not yet consumed (TASK 5.4) |
 | `weather_cache_<lat.2dp>_<lon.2dp>` | JSON string | `OpenMeteoWeatherRepository` | Last successful weather response for ~1.1 km cell; served when the network fails, with no staleness limit |
 
 ## B7. Seed data

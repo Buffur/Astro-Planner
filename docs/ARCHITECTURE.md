@@ -31,6 +31,7 @@
 > Part C lists every **IMPLEMENTATION DEVIATION** between A and B.
 > Status vocabulary: **Intended / Planned**, **Actual / Implemented**, **Partial**,
 > **Broken**, **Missing**, **Deprecated**, **Unknown**.
+> **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences.
 
 ---
 
@@ -338,7 +339,12 @@ theme.
 ## B9. Persistence
 
 Drift (relational) + shared preferences (active plan, selections, thresholds,
-active-location pointer, weather cache). Details, keys and migration history:
+active-location pointer, weather cache). *(updated TASK 5.2)* Shared preferences
+are accessed only by data-layer repositories: `SharedPrefsPlanningPreferencesRepository`
+(thresholds and overheads, `PlanningPreferences`), `SharedPrefsPlannerStateRepository`
+(selections and the capture plan) and `OpenMeteoWeatherRepository` (cache).
+`PlannerViewModel` receives the first two as optional constructor arguments with
+production defaults (the same seam pattern as `LocationService` and `Clock`). Details, keys and migration history:
 `docs/DATA_MODEL.md` Part B.
 
 ## B10. External services and platform plugins

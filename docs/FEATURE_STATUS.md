@@ -36,6 +36,7 @@
 > affected entries are F-28, F-35, F-37. Statuses
 > were assigned from the code and from executed reproductions, not from
 > earlier documentation.
+> **TASK 5.2 (2026-09-22):** planning preferences (`PlanningPreferences` + repository) and a Settings screen; the planner selection state moved behind `PlannerStateRepository`; `PlannerViewModel` no longer imports SharedPreferences. Affected entries: F-03, F-13, F-31, F-48.
 
 ## Status legend
 
@@ -139,9 +140,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-03 — Preference persistence (active plan, selections, thresholds)
 - **Status:** Implemented
-- **Current implementation:** shared-preferences keys `captureBlocks`, `targetId`, `equipmentId`, `activeLocationId`, `minAltitude`, `dewPointThreshold` (see `docs/DATA_MODEL.md` B6).
-- **Relevant files:** `lib/presentation/viewmodels/planner_viewmodel.dart`.
-- **Known issues:** persistence code lives in the ViewModel (DEV-A1); `minAltitude` is read without clamping; capture plan is hand-serialized JSON. *Resolved (TASK 4.2):* the deleted selected target/equipment used to stay selected until restart — `refreshSelectedTarget`/`refreshSelectedEquipment` now clear it live, called from the target/equipment screens after an edit or delete (TD-028).
+- **Current implementation:** shared-preferences keys `captureBlocks`, `targetId`, `equipmentId`, `activeLocationId`, `minAltitude`, `dewPointThreshold`, plus (TASK 5.2) the new planning-preference keys (see `docs/DATA_MODEL.md` B6). **Since TASK 5.2** they are read and written only by two data-layer repositories, `SharedPrefsPlanningPreferencesRepository` and `SharedPrefsPlannerStateRepository`, behind domain interfaces; the keys and the plan JSON shape are unchanged, so existing installs keep their state.
+- **Relevant files:** `lib/data/repositories/shared_prefs_planning_preferences_repository.dart`, `lib/data/repositories/shared_prefs_planner_state_repository.dart`, `lib/domain/repositories/planning_preferences_repository.dart`, `lib/domain/repositories/planner_state_repository.dart`.
+- **Known issues:** capture plan is still hand-serialized JSON (moves to the database in TASK 11.4). *Resolved (TASK 5.2):* persistence code no longer lives in the ViewModel (DEV-A1 partly); `minAltitude` is clamped on load. *Resolved (TASK 4.2):* the deleted selected target/equipment used to stay selected until restart — `refreshSelectedTarget`/`refreshSelectedEquipment` now clear it live, called from the target/equipment screens after an edit or delete (TD-028).
 - **Dependencies:** shared_preferences.
 - **Roadmap relevance:** Phase 2/4.
 
@@ -230,9 +231,10 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-13 — Target visibility windows
 - **Status:** Partial
+- **TASK 5.2:** the minimum altitude and the Sun darkness limit (−18/−15/−12°) are user preferences, editable in Settings, and feed the windows.
 - **Current implementation:** windows where the Sun is below −18° (configurable) and the target is above a minimum altitude (default 20°); feeds feasibility. Handles multiple segments and high latitudes. **New (TASK 2.3):** a `SessionNight`-based `calculateVisibilityWindowsForNight`, sharing the 5-minute grid with the timeline and the altitude curve; a window touching the SessionNight boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9, verified for both the new API and the legacy wrapper). The old `calculateVisibilityWindows` is now a thin wrapper over it.
 - **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/visibility_window.dart`, `planner_viewmodel.dart:419-428`.
-- **Known issues:** no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; the minimum altitude and Sun limit have no UI control; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009). *Resolved (TASK 2.4):* wrong night by default (F-09) — `PlannerViewModel.visibilityWindows` now resolves a real `SessionNight` and returns `[]` without a site instead of silently using default London coordinates (SI-008).
+- **Known issues:** no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009). *Resolved (TASK 2.4):* wrong night by default (F-09) — `PlannerViewModel.visibilityWindows` now resolves a real `SessionNight` and returns `[]` without a site instead of silently using default London coordinates (SI-008).
 - **Dependencies:** F-11, F-12.
 - **Roadmap relevance:** Phase 8. Tests: 4 legacy window tests (UTC dates only) plus the TASK 2.3 SessionNight suite (polar cases, clip flags, exact agreement with the legacy wrapper).
 
@@ -382,7 +384,7 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Prototype
 - **Current implementation:** `dewWarning` getter (temperature − dew point ≤ threshold, default 2.0 °C) and a persisted threshold.
 - **Relevant files:** `planner_viewmodel.dart:366-371,438-441`.
-- **Known issues:** **never displayed**; no UI to change the threshold; uses current weather, not the forecast for the session (SI-006).
+- **Known issues:** **never displayed**; uses current weather. *Resolved (TASK 5.2):* the margin is editable in Settings, not the forecast for the session (SI-006).
 - **Dependencies:** F-29.
 - **Roadmap relevance:** Phase 10.
 

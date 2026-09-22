@@ -30,6 +30,7 @@
 > are marked for replacement. No calculation changed.
 > **Nothing else in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
+> **TASK 5.2 (2026-09-22):** SI-006 progress (thresholds are preferences); CALC-18 takes a configurable margin (default unchanged). No formula changed.
 
 ## Purpose and authority
 
@@ -351,7 +352,15 @@ appropriate, named, documented, and never phrased as physical laws.
 3. Remove or soften claims embedded in UI text and comments.
 4. Record each rationale/source in this register when it is chosen.
 
-**Status:** Partial. **Work items:** TD-033, TD-043.
+**Progress 2026-09-22 (TASK 5.2):** minimum altitude, the darkness Sun limit
+(−18/−15/−12°), the feasibility margin, the dew margin, the per-frame overhead and
+the optional overheads are named, documented, clamped preferences
+(`PlanningPreferences`) with a Settings screen whose text calls them preferences,
+not laws (actions 1–2 for these values). Defaults are unchanged (20°, −18°, 15 %,
+2 °C, 5 s), so no result shifted. Still hard-coded: the sky-warning thresholds
+(Moon > 0.8, Bortle ≥ 7).
+
+**Status:** Partial. **Work items:** TD-033 (open), TD-043 (resolved TASK 5.2).
 
 ---
 
@@ -680,7 +689,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-15 | `calculateRelativeStackingGain` | light frames N → factor | `√N` | SI-003 | 1 | Good (UI label corrected TASK 4.4) |
 | CALC-16 | `estimateStorageRequirement` | avg file MB?, frames → MB? | product, or null if avg file size unknown (TASK 4.4) | SI-008, SI-013 | 1 | Fair |
 | CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° → s | Deviates from published (SI-001) | Clamps abs(δ) to 89.9°; throws for f ≤ 0 or N ≤ 0; **not surfaced** | 1 (circular) | Fair |
-| CALC-18 | `SessionCalculator.calculateFeasibility` *(to be replaced per ADR-009: TASK 5.4/5.5)* | windows, required duration → state + totals | Sum of windows; infeasible if required > available; tight if > 85 % | Arbitrary margin (SI-006); no Moon/weather | 5 | Fair |
+| CALC-18 | `SessionCalculator.calculateFeasibility` *(to be replaced per ADR-009: TASK 5.4/5.5; since TASK 5.2 the margin is a parameter, `marginFraction`, default 0.15 = the old fixed 85 %, fed from the user preference)* | windows, required duration → state + totals | Sum of windows; infeasible if required > available; tight if > 85 % | Arbitrary margin (SI-006); no Moon/weather | 5 | Fair |
 | CALC-19 | `SessionCalculator.estimateTotalDuration` *(to be replaced per ADR-009: TASK 5.4/5.5)* | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | **Dead code** — nothing calls it | 1 | Good (but unused) |
 | CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good — consumed by `PlannerViewModel.sessionNight` (TASK 2.4) |
 | CALC-20 | `PlannerViewModel` derived getters *(to be replaced per ADR-009: TASK 5.4/5.5)* | plan + site → various | `estimatedRequiredTime` = Σ(exposure×count over **all** block types) + 5 s × frames; `totalIntegrationTime` = Σ lights only; `maxAltitude` = altitude at LHA = 0 | Not restricted to the night; conflates integration, acquisition and calibration (TD-022) | **none** | Poor |

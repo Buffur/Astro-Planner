@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **147 tests: 147 pass, 0 fail**, three consecutive full runs (`dart run tool/check.dart`) |
+| `flutter test --no-pub` | **229 tests: 229 pass, 0 fail** (`dart run tool/check.dart`, after TASK 5.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -209,3 +209,20 @@ widget-test HTTP binding answers with 400); no CI.
 
 Any test failure from here on is a regression, not a known pre-existing issue
 (`docs/DECISIONS.md` DEV-P8, resolved).
+
+**Added by TASK 5.2** (planning preferences), 24 tests:
+- `test/domain/models/planning_preferences_test.dart`: the documented defaults equal
+  the pre-5.2 values; clamping of every field, including non-finite input;
+  `DarknessLimit.fromDegrees`; toggling the optional overheads.
+- `test/data/repositories/shared_prefs_planning_repositories_test.dart`: round trips
+  for both repositories; the pre-5.2 keys are read, so saved values survive; an off
+  overhead removes its key; a corrupt saved plan throws.
+- `test/presentation/viewmodels/planner_preferences_test.dart`: the darkness limit and
+  the minimum altitude change the windows (London, M42, 2026-03-01, fixed clock); the
+  per-frame overhead feeds the required time; preferences survive a new ViewModel; a
+  source guard that no ViewModel imports SharedPreferences.
+- `test/presentation/screens/settings/settings_screen_test.dart`: defaults and
+  "Not included" rendering; a slider drag persists the value; choosing −12° and
+  switching dither on.
+- `test/domain/services/session_calculator_test.dart`: the configurable margin
+  (default 15 %; 30 % turns a plan tight; 0 % boundary).
