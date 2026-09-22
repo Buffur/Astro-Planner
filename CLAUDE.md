@@ -68,15 +68,15 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-22, after TASK 2.4, commit `1e58fcf`)
+## Current Baseline and Known Traps (as of 2026-09-22, after TASK 3.2, commit `3c25e8c`)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 
 - **`dart run tool/check.dart`** — the quality gate: `dart format --set-exit-if-changed`, `flutter analyze --no-pub`, `flutter test --no-pub` (all scoped to `lib`/`test`), in one command. Runs all three regardless of an earlier failure, then prints a pass/fail summary and exits non-zero if any failed. Run this before calling a change complete (TASK 1.3, TD-046).
 - `flutter analyze --no-pub` — expected: no issues.
-- `flutter test --no-pub` — expected: **152 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved; 83 → 135 in TASK 2.2 → 147 in TASK 2.3 → 152 in TASK 2.4). A failing test is now a regression.
+- `flutter test --no-pub` — expected: **160 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved; 83 → 135 in TASK 2.2 → 147 in TASK 2.3 → 152 in TASK 2.4 → 160 in TASK 3.2). A failing test is now a regression.
 - `dart format lib test` — expected: no changes (the whole tree was formatted once, TASK 1.3). Formatting is not yet enforced in CI; `tool/check.dart` is the only current gate.
-- After changing Drift tables: `dart run build_runner build --delete-conflicting-outputs` (standard step; not exercised in the audit). Every schema change needs a migration **and** a migration test.
+- **After changing Drift tables (TASK 3.2 workflow, `build.yaml` configures it):** dump a new snapshot with `dart run drift_dev schema dump lib/data/database/app_database.dart drift_schemas/`, regenerate verification code with `dart run drift_dev schema generate drift_schemas/ lib/data/database/generated_migrations/ --no-data-classes --no-companions`, write the `onUpgrade` step, and add a migration test in `test/data/database/schema_migration_test.dart` (schema-equality + a data-preservation test). The floor is v8 (`kMinSupportedSchemaVersion`); `onUpgrade` throws `UnsupportedSchemaVersionException` for anything below it or newer than the app, before any statement runs.
 - Android build/run was **not** verified.
 
 **Testing rule:** `.agents/rules/03-testing.md` can be satisfied literally again (`DEV-P8` resolved 2026-09-21). Investigate any failure as a regression; do not delete or weaken a test.
@@ -91,7 +91,7 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 
 **Traps that will bite (all verified):**
 
-1. `EquipmentProfile.id` is an **optical-rig id**; storage is normalized (Device → CameraModule → OpticalRig) but the domain/UI model is flat. The `equipment_profiles` table is orphaned.
+1. `EquipmentProfile.id` is an **optical-rig id**; storage is normalized (Device → CameraModule → OpticalRig) but the domain/UI model is flat. The `equipment_profiles` table is orphaned — dropping it is TASK 3.3, not done yet. Foreign keys are still **not enforced** (`PRAGMA foreign_keys = 0`, TD-005); that is also TASK 3.3. Migrations themselves are now guarded and snapshot-tested (TASK 3.2, ADR-008): the floor is v8, `onUpgrade` refuses anything below it or newer than the app before touching the file, and the one remaining step (v8→v9) runs inside a transaction. Upgraded (not fresh) databases still carry three leftover columns nothing reads (`equipment_profiles.optical_multiplier`, `optical_rigs.optical_multiplier`, `camera_modules.bit_depth`) until TASK 3.3's v10 cleanup.
 2. **RESOLVED (TASK 2.4).** `PlannerViewModel.sessionNight` now resolves a real `SessionNight` — `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)` by default, `.forEveningDate(...)` for a picked `CalendarDate` — instead of the old `_sessionDate = DateTime.now().toUtc()` (`TD-001`, resolved). `home_screen.dart`, `sky_darkness_widget.dart`, `altitude_chart_widget.dart` and `logbook_screen.dart` all consume it, through one `NightTimeFormatter` (`lib/presentation/shared/`) with no ad-hoc `.toLocal()` elsewhere. `sessionNight`/`eveningDate` are `null` without a site — Home shows a "No site set" state instead of the silent default-London astronomy (ADR-007 §9, SI-008). Still open: `PlannerViewModel.currentAltitude`/`maxAltitude` still run their own JD/GMST/LST/LHA pipeline against `_clock.nowUtc()` rather than the `AltitudeCurve` (`TD-023`); the site's own time zone is not available before TASK 7.1, so every displayed time is labelled as the **device** zone. Never derive a night from a `DateTime`'s Y/M/D, and never call `DateTime.now()` in `lib/domain` (a test enforces this) — use the injected `Clock` instead.
 3. `aperture` means **f-number**; one seed stores a diameter (`SI-005`). Field names carry no units.
 4. Relative stacking gain is √N of light frames only; the UI label still says "Relative SNR" (`TD-009`). NPF exists but is wrong and not shown (`TD-007`).

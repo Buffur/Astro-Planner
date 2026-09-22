@@ -13,7 +13,9 @@
 > `Clock`) instead of `DateTime.now().toUtc()`, and Home, the sky-darkness timeline,
 > the altitude chart and the logbook consume it through one shared
 > `NightTimeFormatter`; affected entries are F-08, F-09, F-12, F-13, F-14, F-15.
-> Statuses were assigned from the code and
+> **TASK 3.2 (2026-09-22, commit `3c25e8c`):** migration floor/downgrade guards,
+> transactional migrations, schema snapshots and a migration test suite;
+> affected entry is F-02. Statuses were assigned from the code and
 > from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -109,11 +111,11 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-02 — Local persistence (Drift) and migrations
 - **Status:** Partial
-- **Current implementation:** schema v9, 8 tables, repositories with in-memory-DB tests; raw-SQL incremental migrations.
-- **Relevant files:** `lib/data/database/*`, `lib/data/repositories/drift_*`.
-- **Known issues:** v3 → v9 upgrade throws; no migration tests or schema snapshots; foreign keys not enforced; orphaned `equipment_profiles`; upgraded databases keep legacy columns that fresh installs lack; a v8 → v9 upgrade works (DEV-D1, DEV-D6; TD-004, TD-005).
+- **Current implementation:** schema v9, 8 tables, repositories with in-memory-DB tests. **TASK 3.2:** the v1–v7 raw-SQL steps are gone; the only supported path (v8 → v9) is behind a floor guard and a downgrade guard, runs inside a transaction, and is checked against Drift schema snapshots (`drift_schemas/`) with a generated-verification migration test suite (`test/data/database/schema_migration_test.dart`).
+- **Relevant files:** `lib/data/database/*`, `lib/data/database/generated_migrations/*`, `drift_schemas/`, `build.yaml`, `lib/data/repositories/drift_*`.
+- **Known issues:** foreign keys not enforced; orphaned `equipment_profiles`; upgraded databases keep legacy columns (`optical_multiplier` ×2, `bit_depth`) that fresh installs lack (DEV-D1, DEV-D6; TD-005 — all TASK 3.3). The below-floor reset path exists (`resetUnsupportedDatabaseFile`) but nothing calls it — no bootstrap confirmation UI. *Resolved (TASK 3.2):* v3 → v9 throwing (TD-004); no migration tests or schema snapshots; the unguarded schema downgrade (TD-047, app-database half).
 - **Dependencies:** drift, sqlite3, `sqlite3_flutter_libs` (`0.6.0+eol`), path_provider.
-- **Roadmap relevance:** Phase 4; Phase 16 (migration testing). Decision PD-04.
+- **Roadmap relevance:** Phase 4; Phase 16 (migration testing). ~~Decision PD-04~~ (resolved, ADR-008).
 
 ## F-03 — Preference persistence (active plan, selections, thresholds)
 - **Status:** Implemented

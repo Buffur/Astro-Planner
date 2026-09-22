@@ -218,8 +218,17 @@ rewritten to match the code.*
     by the owner: floor v8 with backup/reset, v10 drops the orphan table and legacy
     columns, orphans are deleted before FKs go on, and provenance is per row.
     Documentation only.
-  - **Next: TASK 3.2 — Schema snapshots and migration tests.** Not started; it begins
-    only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 3.2** (`3c25e8c`) — the v1-v7 upgrade steps are
+    deleted; `onUpgrade` now supports only v8 -> v9, guarded by a floor check and a
+    downgrade check (TD-047) that both throw before any statement runs, and that one
+    step runs inside a transaction (verified atomic by an injected-failure test).
+    Drift schema snapshots (`drift_schemas/`) and generated verification code exist
+    for v8 and v9; an 8-test migration suite covers a fresh install, v8->v9 data
+    preservation, the floor/downgrade guards, the reset-file path, and the
+    transaction-atomicity check (160 tests green). TD-004 resolved. Foreign keys,
+    the orphan-table drop and the reset path's confirmation UI are TASK 3.3+.
+  - **Next: TASK 3.3 — Enforce foreign keys; retire the orphan table.** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

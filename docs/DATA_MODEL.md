@@ -14,6 +14,14 @@
 > app (`PlannerViewModel._pickedEveningDate`); still no schema change — a legacy
 > `SessionLog.sessionDate` instant maps to its device-local evening date at read
 > time (ADR-007 §10), it is not stored as a `CalendarDate` yet (G11, PD-18).
+> **TASK 3.2 (2026-09-22, commit `3c25e8c`):** implements ADR-008's migration
+> workflow — the v1–v7 upgrade steps are removed, replaced by a floor guard
+> (v8) and a downgrade guard; Drift schema snapshots (`drift_schemas/`) and
+> generated verification code (`lib/data/database/generated_migrations/`)
+> exist for v8 and v9; a migration test suite covers the matrix in B8a below.
+> `schemaVersion` stays at 9 — no table changed. TD-004 resolved; TD-047
+> resolved for the app-database guard (the bootstrap-level reset UI is a
+> separate, not-yet-scheduled follow-up).
 >
 > This document keeps **three things separate** on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -140,7 +148,7 @@ domain classes `as domain` (naming-collision hazard, TD-045).
 | `devices` (`Devices`) | id PK; name; manufacturer?; model?; notes? | **Actual**, used | One row is created per equipment profile; `name` = profile name |
 | `camera_modules` (`CameraModules`) | id PK; device_id FK→devices; name; manufacturer?; model?; sensor_width_mm; sensor_height_mm; resolution_width_px; resolution_height_px; pixel_pitch_um; average_raw_file_size_mb? | **Actual**, used | `name` is synthesized as `"<profile name> Camera"` |
 | `optical_rigs` (`OpticalRigs`) | id PK; name; camera_module_id FK→camera_modules; focal_length_mm; aperture (**f-number**, SI-005); tracking_state (text, default `'unknown'`); rotation_degrees? | **Actual**, used | `tracking_state` is stored but not exposed by the domain `EquipmentProfile` or any UI |
-| `equipment_profiles` (`EquipmentProfiles`) | id PK; name; manufacturer?; camera_model?; sensor_width; sensor_height; pixel_pitch; resolution_width; resolution_height; focal_length; aperture; average_raw_file_size_mb?; rotation? | **Deprecated / orphaned** | Not read or written by any application code. Still created by `createAll`, read by the v5 data-copy migration, and exercised by `app_database_test.dart` |
+| `equipment_profiles` (`EquipmentProfiles`) | id PK; name; manufacturer?; camera_model?; sensor_width; sensor_height; pixel_pitch; resolution_width; resolution_height; focal_length; aperture; average_raw_file_size_mb?; rotation? | **Deprecated / orphaned** | Not read or written by any application code. Still created by `createAll` and exercised by `app_database_test.dart`; the v5 data-copy migration that used to read it is gone (TASK 3.2, floor is now v8) |
 | `location_profiles` (`LocationProfiles`) | id PK; name; latitude; longitude; elevation; bortle_class (int, default 4) | **Actual**, used | Effectively one row (the "active" location) — see DEV-D4 |
 | `astro_targets` (`AstroTargets`) | id PK; catalog_id; common_name?; right_ascension (**degrees**, J2000); declination (**degrees**); type (free text) | **Actual**, used | No uniqueness constraint; no epoch/source/magnitude/size |
 | `session_logs` (`SessionLogs`) | id PK; target_name; equipment_name; session_date (stored as epoch seconds; returned as local `DateTime`); location_name?; bortle_scale (real?); planned_light_frames; planned_dark_frames?; planned_flat_frames?; planned_bias_frames?; integration_time_seconds?; focal_length?; aperture?; temperature?; humidity?; cloud_cover (int?); actual_light_frames?; rejected_frames?; environmental_notes?; processing_notes? | **Partial** | Snapshot columns exist but Save Session never fills them (DEV-D3) |
@@ -254,18 +262,67 @@ camera module and device **without checking whether other rigs reference them**
   by `from < 7`. These paths are reasoned from code, not executed.
 - There are **no migration tests** and no schema snapshots/dumps.
 
+**RESOLVED 2026-09-22 (TASK 3.2, commit `3c25e8c`; suite 160/160).** *(Was the
+above: v1–v7 steps written against current definitions, no snapshots, no
+tests.)* Implements ADR-008 §2–§3:
+
+- **The v1–v7 steps are deleted.** `onUpgrade` now has exactly one supported
+  path (`from < 9`, i.e. v8 → v9: `addColumn` × 2, unchanged from before),
+  guarded by two checks that run first and throw
+  `UnsupportedSchemaVersionException` **before any statement executes**:
+  - `from < kMinSupportedSchemaVersion` (8) — a below-floor database.
+  - `from > to` — a downgrade: an older app build opened a newer database
+    (TD-047; Drift calls `onUpgrade` whenever the stored version differs from
+    `schemaVersion`, in either direction).
+- **The v8 → v9 step runs inside `m.database.transaction(...)`.** Verified by a
+  test that injects a failure between the two `addColumn` calls: the file is
+  byte-identical afterwards, not left with only the first column added.
+- **`resetUnsupportedDatabaseFile(File, {foundVersion})`** renames a
+  below-floor file to `<name>.v<found>.bak` (never deletes it), so a fresh
+  database can be created at the original path. **Not yet called from
+  anywhere** — no bootstrap-level confirmation UI exists yet (ADR-008 says the
+  rename must only happen "on the user's explicit confirmation"); wiring it in
+  is a separate, not-yet-scheduled task.
+- **Schema snapshots and generated verification** (Drift's documented
+  tooling, `drift_dev schema dump` / `schema generate`, configured by the new
+  `build.yaml`):
+  - `drift_schemas/drift_schema_v8.json` — dumped from the `d0b737f` source
+    (the table definitions were swapped in, dumped, then reverted; verified
+    via `git diff` to leave no trace).
+  - `drift_schemas/drift_schema_v9.json` — dumped from the current source.
+  - `lib/data/database/generated_migrations/` (`schema.dart`,
+    `schema_v8.dart`, `schema_v9.dart`) — drift_dev-generated `GeneratedHelper`
+    and per-version `GeneratedDatabase` subclasses, used by
+    `SchemaVerifier` in tests. Regenerate both steps after any schema change.
+- **Test suite** (`test/data/database/schema_migration_test.dart`, 8 tests):
+  a fresh install matches its own declared schema (M1); v8 → v9 matches the v9
+  snapshot **except** the three documented legacy columns
+  (`equipment_profiles.optical_multiplier`, `optical_rigs.optical_multiplier`,
+  `camera_modules.bit_depth` — dropping them is TASK 3.3, not this task, so the
+  test asserts the mismatch is *exactly* these three, which would fail if a
+  fourth appeared); two data-preservation tests (device → module → rig chain,
+  location, target, a session with 2 capture blocks, and
+  `equipment_profiles` both non-empty and empty); the floor guard (M5); the
+  downgrade guard (M7); the reset path (M6); the transaction-atomicity check
+  (M11). M3/M4/M8–M10 (foreign keys, the orphan table, v10) are TASK 3.3.
+
 ## B9. IMPLEMENTATION DEVIATIONS (data model)
 
 ### DEV-D1 — Migrations are untested and one upgrade path fails
 - **Intended behavior:** "Add migrations for every schema-version bump. Add tests
   for migration behavior." (Migration Rules, Part A; ADR-003 "migrations … and
   testability".)
-- **Actual behavior:** No migration test exists. The v5 step still references a
-  column removed from the definitions in `900b82a`; v3 → v9 throws. FK enforcement
-  is off.
-- **Consequence:** Any database below v5 cannot be upgraded; the first real
-  release with an older beta install would crash on open. Fresh installs and v8
-  databases are unaffected. Work item: TD-004, TD-005.
+- **Actual behavior (historical):** No migration test existed. The v5 step
+  referenced a column removed from the definitions in `900b82a`; v3 → v9 threw.
+  FK enforcement is off (still true — that half is TD-005, TASK 3.3).
+- **RESOLVED 2026-09-22 (TASK 3.2; see B8 above).** The v1–v7 steps (including
+  the broken v5 one) are deleted rather than repaired — ADR-008 §2 decided the
+  upgrade floor is v8, and no installs below v8 need to be preserved (owner
+  confirmed). Schema snapshots and generated verification now exist for v8 and
+  v9, with a migration test suite (M1, M2, M5–M7, M11 of ADR-008 §7).
+- **Consequence (historical, now moot for the covered paths):** any database
+  below v5 could not be upgraded. Fresh installs and v8 databases were
+  unaffected. Work item: ~~TD-004~~ (resolved), TD-005 (FK half, TASK 3.3).
 
 ### DEV-D2 — Equipment is normalized in storage but flat in the domain
 - **Intended behavior:** Device, CameraModule and OpticalRig as first-class,
@@ -471,15 +528,25 @@ camera module and device **without checking whether other rigs reference them**
 4. **Stable identifiers, not display strings**, for cross-entity references
    (DEV-D3).
 5. **Migrations follow the Phase 0 rules** (Part A) and add tests; adopt Drift
-   schema snapshots before the next schema change (TD-004). *Decided 2026-09-22 by
-   ADR-008 (`docs/DECISIONS.md` Part F), not yet implemented:*
-   - **Floor.** The upgrade floor is v8. Older databases are refused, then backed up
-     and reset only on the user's confirmation. Newer databases are refused.
-   - **Snapshots.** Snapshots live in `drift_schemas/`, starting with v8 exported
-     from `d0b737f` and v9 from the current code.
+   schema snapshots before the next schema change (~~TD-004~~ resolved TASK 3.2).
+   *Decided 2026-09-22 by ADR-008 (`docs/DECISIONS.md` Part F); the floor and
+   snapshots are implemented (TASK 3.2, see B8 above); FKs and the orphan-table
+   drop are TASK 3.3:*
+   - **Floor.** The upgrade floor is v8 — **implemented** as a guard in
+     `onUpgrade`. Older databases are refused; `resetUnsupportedDatabaseFile`
+     backs up and resets a file, but nothing calls it yet — the user
+     confirmation UI is a separate, unscheduled follow-up. Newer databases are
+     refused.
+   - **Snapshots.** Snapshots live in `drift_schemas/` — **implemented**: v8
+     exported from `d0b737f`, v9 from the current code.
    - **Steps.** Each step is written against its own version's generated schema
-     class.
-   - **Tests.** Every bump has a data-preservation test and a schema-equality test.
+     class — **not yet needed**: only one step remains (v8 → v9, unchanged
+     code, still written directly against the live tables), since floor
+     enforcement removed every step it would otherwise apply to. Adopt this for
+     the *next* schema bump (5.3 or later).
+   - **Tests.** Every bump has a data-preservation test and a schema-equality
+     test — **implemented** for v8 → v9
+     (`test/data/database/schema_migration_test.dart`).
    - **Foreign keys.** They are on for every connection from v10.
    - **Workflow.** The full workflow is documented here by TASK 3.2.
 6. **Provenance for external and scientific data** (Part A; DEV-D5). *Decided

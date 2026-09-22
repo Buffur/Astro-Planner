@@ -14,7 +14,8 @@
 > consume `SessionNight` through one `NightTimeFormatter`; see B4, B5, B11
 > *(updated TASK 2.4)*. Line references into `planner_viewmodel.dart` were taken at
 > `900b82a` and are now off by more; several were replaced with getter names in
-> TASK 2.4's edits.
+> TASK 2.4's edits. TASK 3.2 (2026-09-22, commit `3c25e8c`) rewrote `onUpgrade`'s
+> migration steps and added schema snapshots; see B6.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -263,9 +264,13 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
 
 ## B6. Data layer (`lib/data/`)
 
-- **Drift `AppDatabase`** (schema 9; 8 tables) with hand-written, raw-SQL
-  `onUpgrade` steps; no `beforeOpen`; foreign keys not enforced. See
-  `docs/DATA_MODEL.md`.
+- **Drift `AppDatabase`** (schema 9; 8 tables); no `beforeOpen`; foreign keys not
+  enforced (TASK 3.3). **TASK 3.2:** `onUpgrade` now only supports v8 → v9
+  (the old v1–v7 raw-SQL steps are deleted), guarded by a floor check and a
+  downgrade check that both throw `UnsupportedSchemaVersionException` before
+  any statement runs, and the one remaining step runs inside a transaction.
+  Checked against Drift schema snapshots (`drift_schemas/`) via generated
+  verification code and a migration test suite. See `docs/DATA_MODEL.md` B8.
 - **Repositories:** `DriftTargetRepository`, `DriftEquipmentRepository` (reads and
   writes the normalized Device → CameraModule → OpticalRig chain and projects it to
   the flat `EquipmentProfile`), `DriftEquipmentCatalogRepository` (dormant),

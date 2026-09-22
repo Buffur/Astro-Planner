@@ -22,7 +22,8 @@
 > (persistence baseline, migration workflow, provenance) accepted in Part F; PD-04
 > and PD-09 resolved (E.1). Checked against `app_database.dart`, the table
 > definitions, the seeders, `drift_equipment_repository.dart`, the git history of
-> the schema, and the Drift 2.35.0 source, at commit `33a212b`.
+> the schema, and the Drift 2.35.0 source, at commit `33a212b`. **TASK 3.2
+> (2026-09-22, commit `3c25e8c`):** ADR-008 §2–§3 implemented; status block updated.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -388,7 +389,9 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - in v10: dropping `equipment_profiles`, dropping `optical_multiplier` and
     `bit_depth` through table rebuilds, and deleting orphan rows found by
     `foreign_key_check`.
-- **Not implemented** (TASKs 3.2 and 3.3).
+- **Implemented in part (TASK 3.2):** the floor guard and the file-rename half of
+  the reset (v1–v7 steps deleted). **Not implemented yet:** the v10 cleanup
+  (TASK 3.3) and the reset path's user-confirmation UI.
 
 ### PD-09 — Provenance storage (RESOLVED 2026-09-22)
 
@@ -780,8 +783,22 @@ the regression is covered.
 
 Status: accepted (owner, 2026-09-22, TASK 3.1). Resolves PD-04 and PD-09. It also
 answers the Phase 0 pending decision "How to store provenance for seeded target and
-equipment data" (Part A, unchanged). **Not implemented yet:** TASKs 3.2 and 3.3, then
-7.1, 8.1 and 8.5 for provenance columns.
+equipment data" (Part A, unchanged). **Implementation:** partial.
+- **Done (TASK 3.2, 2026-09-22, commit `3c25e8c`):** §2 (the v8 floor and the
+  downgrade guard, both implemented as `onUpgrade` checks that throw
+  `UnsupportedSchemaVersionException` before any statement runs; the v1–v7
+  steps are deleted) and §3 (schema snapshots in `drift_schemas/` for v8 and
+  v9, `build.yaml` configuring `drift_dev`, generated verification code, and
+  the migration test suite — M1, M2, M5–M7, M11 of §7). The v8→v9 step now
+  runs inside a transaction, verified atomic by an injected-failure test
+  (§3's "each upgrade runs as one unit", previously unverified).
+  `resetUnsupportedDatabaseFile` implements the reset half of §2 as a pure
+  file operation; **no caller exists yet** — the confirmation UI §2 requires
+  is not built.
+- **Not implemented yet:** §4–§5 (foreign keys, the v10 cleanup dropping
+  `equipment_profiles`/legacy columns — TASK 3.3, M3/M4/M8–M10), §6
+  (provenance columns — TASKs 7.1, 8.1, 8.5), and the bootstrap-level
+  confirmation UI for the reset path.
 
 ### 1. Context (verified for this ADR at commit `33a212b`)
 
