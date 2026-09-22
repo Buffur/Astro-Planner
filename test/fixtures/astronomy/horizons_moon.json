@@ -1,0 +1,1471 @@
+{
+ "source": "JPL Horizons API (https://ssd.jpl.nasa.gov/api/horizons.api), target 301 (Moon). Geocentric (500@399): quantity 2 apparent RA/Dec, 10 illuminated fraction (%), 20 range (km), 31 observer-centered IAU76/80 ecliptic-of-date longitude/latitude. Topocentric (geodetic site, 0 m): quantity 4 airless apparent azimuth/elevation. Step 559 h from 2026-01-03 03:17 UTC. Values copied unmodified. USNO phases: moon/phases/year API v4.",
+ "retrieved": "2026-09-22T20:30Z",
+ "geocentricQuery": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500%40399%27&START_TIME=%272026-01-03+03%3A17%27&STOP_TIME=%272027-12-30+00%3A00%27&STEP_SIZE=%27559h%27&QUANTITIES=%272%2C10%2C20%2C31%27&ANG_FORMAT=%27DEG%27&CSV_FORMAT=%27YES%27&RANGE_UNITS=%27KM%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&TIME_DIGITS=%27MINUTES%27",
+ "geocentricHeader": [
+  "Date__(UT)__HR:MN",
+  "",
+  "",
+  "R.A.__(a-app)",
+  "DEC___(a-app)",
+  "Illu%",
+  "delta",
+  "deldot",
+  "ObsEcLon",
+  "ObsEcLat",
+  ""
+ ],
+ "geocentric": [
+  {
+   "Date__(UT)__HR:MN": "2026-Jan-03 03:17",
+   "": "",
+   "R.A.__(a-app)": "99.943180479",
+   "DEC___(a-app)": "27.603968729",
+   "Illu%": "99.73245",
+   "delta": "3.6165252543E+05",
+   "deldot": "0.0243597",
+   "ObsEcLon": "98.8288488",
+   "ObsEcLat": "4.4700418"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Jan-26 10:17",
+   "": "",
+   "R.A.__(a-app)": "35.540621237",
+   "DEC___(a-app)": "18.913369099",
+   "Illu%": "52.72123",
+   "delta": "3.7129639602E+05",
+   "deldot": "-0.0305407",
+   "ObsEcLon": "39.4513432",
+   "ObsEcLat": "4.5119006"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Feb-18 17:17",
+   "": "",
+   "R.A.__(a-app)": "346.035597559",
+   "DEC___(a-app)": "-5.360117294",
+   "Illu%": "1.71869",
+   "delta": "3.8006544728E+05",
+   "deldot": "-0.0386717",
+   "ObsEcLon": "345.0717726",
+   "ObsEcLat": "0.5649732"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Mar-14 00:17",
+   "": "",
+   "R.A.__(a-app)": "294.761876965",
+   "DEC___(a-app)": "-25.378626036",
+   "Illu%": "26.01762",
+   "delta": "3.9693378873E+05",
+   "deldot": "-0.0468613",
+   "ObsEcLon": "292.2888961",
+   "ObsEcLat": "-3.8359338"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Apr-06 07:17",
+   "": "",
+   "R.A.__(a-app)": "240.787596755",
+   "DEC___(a-app)": "-25.973828834",
+   "Illu%": "83.80829",
+   "delta": "4.0433774625E+05",
+   "deldot": "0.0128709",
+   "ObsEcLon": "243.8623356",
+   "ObsEcLat": "-5.1473513"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Apr-29 14:17",
+   "": "",
+   "R.A.__(a-app)": "192.814341614",
+   "DEC___(a-app)": "-8.881039591",
+   "Illu%": "95.61527",
+   "delta": "3.9638796135E+05",
+   "deldot": "0.0354425",
+   "ObsEcLon": "195.2392787",
+   "ObsEcLat": "-3.1231664"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-May-22 21:17",
+   "": "",
+   "R.A.__(a-app)": "147.190163932",
+   "DEC___(a-app)": "14.159290974",
+   "Illu%": "43.85764",
+   "delta": "3.7784504243E+05",
+   "deldot": "0.0642833",
+   "ObsEcLon": "144.5910077",
+   "ObsEcLat": "0.8856544"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Jun-15 04:17",
+   "": "",
+   "R.A.__(a-app)": "84.276348107",
+   "DEC___(a-app)": "27.988309215",
+   "Illu%": "0.17068",
+   "delta": "3.5723906637E+05",
+   "deldot": "0.0047937",
+   "ObsEcLon": "84.9308883",
+   "ObsEcLat": "4.6510324"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Jul-08 11:17",
+   "": "",
+   "R.A.__(a-app)": "21.283918058",
+   "DEC___(a-app)": "13.436874151",
+   "Illu%": "42.87853",
+   "delta": "3.7516192044E+05",
+   "deldot": "-0.0596947",
+   "ObsEcLon": "24.6742283",
+   "ObsEcLat": "4.1732103"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Jul-31 18:17",
+   "": "",
+   "R.A.__(a-app)": "334.988070566",
+   "DEC___(a-app)": "-10.057876455",
+   "Illu%": "95.48414",
+   "delta": "3.9312090067E+05",
+   "deldot": "-0.0383848",
+   "ObsEcLon": "333.1644190",
+   "ObsEcLat": "0.3069188"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Aug-24 01:17",
+   "": "",
+   "R.A.__(a-app)": "285.700969402",
+   "DEC___(a-app)": "-26.466352158",
+   "Illu%": "84.17598",
+   "delta": "4.0304798097E+05",
+   "deldot": "-0.0211715",
+   "ObsEcLon": "284.0510483",
+   "ObsEcLat": "-3.7908656"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Sep-16 08:17",
+   "": "",
+   "R.A.__(a-app)": "232.054485409",
+   "DEC___(a-app)": "-24.259270273",
+   "Illu%": "26.91683",
+   "delta": "3.9942467849E+05",
+   "deldot": "0.0384134",
+   "ObsEcLon": "235.7400953",
+   "ObsEcLat": "-5.2207767"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Oct-09 15:17",
+   "": "",
+   "R.A.__(a-app)": "182.437242192",
+   "DEC___(a-app)": "-4.259530907",
+   "Illu%": "1.23953",
+   "delta": "3.8385910697E+05",
+   "deldot": "0.0411290",
+   "ObsEcLon": "183.9302483",
+   "ObsEcLat": "-2.9393043"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Nov-01 22:17",
+   "": "",
+   "R.A.__(a-app)": "133.338868926",
+   "DEC___(a-app)": "18.992479740",
+   "Illu%": "49.27740",
+   "delta": "3.7282532921E+05",
+   "deldot": "0.0382356",
+   "ObsEcLon": "130.4778241",
+   "ObsEcLat": "1.4354247"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Nov-25 05:17",
+   "": "",
+   "R.A.__(a-app)": "69.098337023",
+   "DEC___(a-app)": "26.884466655",
+   "Illu%": "99.29056",
+   "delta": "3.5972896499E+05",
+   "deldot": "-0.0137921",
+   "ObsEcLon": "71.3781804",
+   "ObsEcLat": "4.7878096"
+  },
+  {
+   "Date__(UT)__HR:MN": "2026-Dec-18 12:17",
+   "": "",
+   "R.A.__(a-app)": "9.303487870",
+   "DEC___(a-app)": "8.248608842",
+   "Illu%": "63.20424",
+   "delta": "3.8240482720E+05",
+   "deldot": "-0.0725442",
+   "ObsEcLon": "11.7902116",
+   "ObsEcLat": "3.8988098"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Jan-10 19:17",
+   "": "",
+   "R.A.__(a-app)": "324.647294341",
+   "DEC___(a-app)": "-13.921095692",
+   "Illu%": "7.65024",
+   "delta": "4.0279623207E+05",
+   "deldot": "-0.0260185",
+   "ObsEcLon": "322.3402054",
+   "ObsEcLat": "0.1516586"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Feb-03 02:17",
+   "": "",
+   "R.A.__(a-app)": "275.922268113",
+   "DEC___(a-app)": "-27.090590470",
+   "Illu%": "11.12810",
+   "delta": "4.0606718022E+05",
+   "deldot": "0.0049251",
+   "ObsEcLon": "275.2819786",
+   "ObsEcLat": "-3.7613897"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Feb-26 09:17",
+   "": "",
+   "R.A.__(a-app)": "222.576263677",
+   "DEC___(a-app)": "-21.847534689",
+   "Illu%": "67.86538",
+   "delta": "3.9123674616E+05",
+   "deldot": "0.0625763",
+   "ObsEcLon": "226.6559335",
+   "ObsEcLat": "-5.2587302"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Mar-21 16:17",
+   "": "",
+   "R.A.__(a-app)": "170.423577486",
+   "DEC___(a-app)": "1.250912762",
+   "Illu%": "99.17392",
+   "delta": "3.6999946575E+05",
+   "deldot": "0.0332538",
+   "ObsEcLon": "170.7086120",
+   "ObsEcLat": "-2.6437751"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Apr-13 23:17",
+   "": "",
+   "R.A.__(a-app)": "116.270481549",
+   "DEC___(a-app)": "23.365213048",
+   "Illu%": "50.28515",
+   "delta": "3.7004134762E+05",
+   "deldot": "-0.0003085",
+   "ObsEcLon": "113.9903957",
+   "ObsEcLat": "2.0887659"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-May-07 06:17",
+   "": "",
+   "R.A.__(a-app)": "53.604072975",
+   "DEC___(a-app)": "24.291233328",
+   "Illu%": "1.04534",
+   "delta": "3.7032283838E+05",
+   "deldot": "-0.0333222",
+   "ObsEcLon": "57.1240290",
+   "ObsEcLat": "4.9114794"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-May-30 13:17",
+   "": "",
+   "R.A.__(a-app)": "359.776194378",
+   "DEC___(a-app)": "3.995660977",
+   "Illu%": "31.04555",
+   "delta": "3.9081492049E+05",
+   "deldot": "-0.0612777",
+   "ObsEcLon": "1.3862460",
+   "ObsEcLat": "3.7545156"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Jun-22 20:17",
+   "": "",
+   "R.A.__(a-app)": "315.346241863",
+   "DEC___(a-app)": "-16.858507352",
+   "Illu%": "87.38760",
+   "delta": "4.0549149318E+05",
+   "deldot": "-0.0067490",
+   "ObsEcLon": "312.9058640",
+   "ObsEcLat": "0.0829680"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Jul-16 03:17",
+   "": "",
+   "R.A.__(a-app)": "265.301262588",
+   "DEC___(a-app)": "-27.138926355",
+   "Illu%": "94.24139",
+   "delta": "4.0251623227E+05",
+   "deldot": "0.0255270",
+   "ObsEcLon": "265.8104744",
+   "ObsEcLat": "-3.7699319"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Aug-08 10:17",
+   "": "",
+   "R.A.__(a-app)": "212.156152670",
+   "DEC___(a-app)": "-18.594243267",
+   "Illu%": "42.02505",
+   "delta": "3.8397234820E+05",
+   "deldot": "0.0686413",
+   "ObsEcLon": "216.3105129",
+   "ObsEcLat": "-5.2737464"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Aug-31 17:17",
+   "": "",
+   "R.A.__(a-app)": "158.645128557",
+   "DEC___(a-app)": "6.451553720",
+   "Illu%": "0.04229",
+   "delta": "3.6023009966E+05",
+   "deldot": "0.0222717",
+   "ObsEcLon": "157.8526203",
+   "ObsEcLat": "-2.3398988"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Sep-24 00:17",
+   "": "",
+   "R.A.__(a-app)": "99.195926068",
+   "DEC___(a-app)": "25.899652641",
+   "Illu%": "43.57587",
+   "delta": "3.7145308212E+05",
+   "deldot": "-0.0406533",
+   "ObsEcLon": "98.2748892",
+   "ObsEcLat": "2.7259840"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Oct-17 07:17",
+   "": "",
+   "R.A.__(a-app)": "40.606329321",
+   "DEC___(a-app)": "20.988928568",
+   "Illu%": "96.53825",
+   "delta": "3.8388438397E+05",
+   "deldot": "-0.0384150",
+   "ObsEcLon": "44.6412661",
+   "ObsEcLat": "4.9873532"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Nov-09 14:17",
+   "": "",
+   "R.A.__(a-app)": "351.786195318",
+   "DEC___(a-app)": "0.438046347",
+   "Illu%": "79.18862",
+   "delta": "3.9829392602E+05",
+   "deldot": "-0.0411150",
+   "ObsEcLon": "352.6287867",
+   "ObsEcLat": "3.6601067"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Dec-02 21:17",
+   "": "",
+   "R.A.__(a-app)": "306.704284645",
+   "DEC___(a-app)": "-19.088777432",
+   "Illu%": "20.65182",
+   "delta": "4.0340052557E+05",
+   "deldot": "0.0196674",
+   "ObsEcLon": "304.3898384",
+   "ObsEcLat": "0.0741789"
+  },
+  {
+   "Date__(UT)__HR:MN": "2027-Dec-26 04:17",
+   "": "",
+   "R.A.__(a-app)": "253.371541152",
+   "DEC___(a-app)": "-26.429189823",
+   "Illu%": "2.85096",
+   "delta": "3.9337472370E+05",
+   "deldot": "0.0369299",
+   "ObsEcLon": "255.1176742",
+   "ObsEcLat": "-3.8472346"
+  }
+ ],
+ "topocentric": [
+  {
+   "site": "London",
+   "lat": 51.5,
+   "lon": -0.1,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&START_TIME=%272026-01-03+03%3A17%27&STOP_TIME=%272027-12-30+00%3A00%27&STEP_SIZE=%27559h%27&QUANTITIES=%274%27&ANG_FORMAT=%27DEG%27&CSV_FORMAT=%27YES%27&RANGE_UNITS=%27KM%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&TIME_DIGITS=%27MINUTES%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-0.1%2C51.5%2C0%27",
+   "rows": [
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-03 03:17",
+     "": "",
+     "Azimuth_(a-app)": "258.762072180",
+     "Elevation_(a-app)": "43.897248965"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-26 10:17",
+     "": "",
+     "Azimuth_(a-app)": "58.502160765",
+     "Elevation_(a-app)": "-1.061176932"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Feb-18 17:17",
+     "": "",
+     "Azimuth_(a-app)": "244.086131820",
+     "Elevation_(a-app)": "11.757596835"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Mar-14 00:17",
+     "": "",
+     "Azimuth_(a-app)": "84.527499580",
+     "Elevation_(a-app)": "-38.156289551"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-06 07:17",
+     "": "",
+     "Azimuth_(a-app)": "233.503819096",
+     "Elevation_(a-app)": "-5.965297245"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-29 14:17",
+     "": "",
+     "Azimuth_(a-app)": "70.266363560",
+     "Elevation_(a-app)": "-26.834937464"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-May-22 21:17",
+     "": "",
+     "Azimuth_(a-app)": "248.050373626",
+     "Elevation_(a-app)": "33.187534685"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jun-15 04:17",
+     "": "",
+     "Azimuth_(a-app)": "52.652603023",
+     "Elevation_(a-app)": "5.914307211"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-08 11:17",
+     "": "",
+     "Azimuth_(a-app)": "266.251866095",
+     "Elevation_(a-app)": "19.310781059"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-31 18:17",
+     "": "",
+     "Azimuth_(a-app)": "79.300234552",
+     "Elevation_(a-app)": "-22.012042905"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Aug-24 01:17",
+     "": "",
+     "Azimuth_(a-app)": "235.333027070",
+     "Elevation_(a-app)": "-7.805008904"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Sep-16 08:17",
+     "": "",
+     "Azimuth_(a-app)": "88.739172007",
+     "Elevation_(a-app)": "-33.424568187"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Oct-09 15:17",
+     "": "",
+     "Azimuth_(a-app)": "247.386231419",
+     "Elevation_(a-app)": "10.868813723"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-01 22:17",
+     "": "",
+     "Azimuth_(a-app)": "56.641663341",
+     "Elevation_(a-app)": "-2.204289984"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-25 05:17",
+     "": "",
+     "Azimuth_(a-app)": "276.103083826",
+     "Elevation_(a-app)": "29.438167543"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Dec-18 12:17",
+     "": "",
+     "Azimuth_(a-app)": "78.606770052",
+     "Elevation_(a-app)": "0.552435458"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jan-10 19:17",
+     "": "",
+     "Azimuth_(a-app)": "249.408351922",
+     "Elevation_(a-app)": "-2.493558916"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-03 02:17",
+     "": "",
+     "Azimuth_(a-app)": "94.052931180",
+     "Elevation_(a-app)": "-33.051791005"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-26 09:17",
+     "": "",
+     "Azimuth_(a-app)": "243.108438545",
+     "Elevation_(a-app)": "-7.713318988"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Mar-21 16:17",
+     "": "",
+     "Azimuth_(a-app)": "75.519132586",
+     "Elevation_(a-app)": "-10.648022673"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Apr-13 23:17",
+     "": "",
+     "Azimuth_(a-app)": "273.780175301",
+     "Elevation_(a-app)": "26.520696721"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-07 06:17",
+     "": "",
+     "Azimuth_(a-app)": "70.985269951",
+     "Elevation_(a-app)": "15.108546804"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-30 13:17",
+     "": "",
+     "Azimuth_(a-app)": "270.308662827",
+     "Elevation_(a-app)": "3.934162931"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jun-22 20:17",
+     "": "",
+     "Azimuth_(a-app)": "92.748684313",
+     "Elevation_(a-app)": "-20.390024261"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jul-16 03:17",
+     "": "",
+     "Azimuth_(a-app)": "243.490573887",
+     "Elevation_(a-app)": "-14.644809366"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-08 10:17",
+     "": "",
+     "Azimuth_(a-app)": "93.268502418",
+     "Elevation_(a-app)": "-22.297267546"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-31 17:17",
+     "": "",
+     "Azimuth_(a-app)": "266.329754434",
+     "Elevation_(a-app)": "10.165108023"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Sep-24 00:17",
+     "": "",
+     "Azimuth_(a-app)": "71.439249794",
+     "Elevation_(a-app)": "17.613696229"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Oct-17 07:17",
+     "": "",
+     "Azimuth_(a-app)": "286.481910493",
+     "Elevation_(a-app)": "12.875562608"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Nov-09 14:17",
+     "": "",
+     "Azimuth_(a-app)": "90.426592144",
+     "Elevation_(a-app)": "-0.014320311"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-02 21:17",
+     "": "",
+     "Azimuth_(a-app)": "253.315850791",
+     "Elevation_(a-app)": "-12.059110587"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-26 04:17",
+     "": "",
+     "Azimuth_(a-app)": "103.771098106",
+     "Elevation_(a-app)": "-24.094743813"
+    }
+   ]
+  },
+  {
+   "site": "Tokyo",
+   "lat": 35.68,
+   "lon": 139.65,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&START_TIME=%272026-01-03+03%3A17%27&STOP_TIME=%272027-12-30+00%3A00%27&STEP_SIZE=%27559h%27&QUANTITIES=%274%27&ANG_FORMAT=%27DEG%27&CSV_FORMAT=%27YES%27&RANGE_UNITS=%27KM%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&TIME_DIGITS=%27MINUTES%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27139.65%2C35.68%2C0%27",
+   "rows": [
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-03 03:17",
+     "": "",
+     "Azimuth_(a-app)": "11.533838292",
+     "Elevation_(a-app)": "-26.657186765"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-26 10:17",
+     "": "",
+     "Azimuth_(a-app)": "238.091933688",
+     "Elevation_(a-app)": "62.494330838"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Feb-18 17:17",
+     "": "",
+     "Azimuth_(a-app)": "38.224016571",
+     "Elevation_(a-app)": "-54.332517066"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Mar-14 00:17",
+     "": "",
+     "Azimuth_(a-app)": "200.868068529",
+     "Elevation_(a-app)": "25.028227653"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-06 07:17",
+     "": "",
+     "Azimuth_(a-app)": "69.757678400",
+     "Elevation_(a-app)": "-68.618094792"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-29 14:17",
+     "": "",
+     "Azimuth_(a-app)": "205.191174477",
+     "Elevation_(a-app)": "41.409128528"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-May-22 21:17",
+     "": "",
+     "Azimuth_(a-app)": "15.278908933",
+     "Elevation_(a-app)": "-39.577825154"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jun-15 04:17",
+     "": "",
+     "Azimuth_(a-app)": "255.045843916",
+     "Elevation_(a-app)": "68.618812773"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-08 11:17",
+     "": "",
+     "Azimuth_(a-app)": "39.571236535",
+     "Elevation_(a-app)": "-32.095401879"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-31 18:17",
+     "": "",
+     "Azimuth_(a-app)": "215.787995202",
+     "Elevation_(a-app)": "36.292358779"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Aug-24 01:17",
+     "": "",
+     "Azimuth_(a-app)": "74.211750674",
+     "Elevation_(a-app)": "-66.710032917"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Sep-16 08:17",
+     "": "",
+     "Azimuth_(a-app)": "207.272369936",
+     "Elevation_(a-app)": "23.959030997"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Oct-09 15:17",
+     "": "",
+     "Azimuth_(a-app)": "41.700037779",
+     "Elevation_(a-app)": "-51.767961843"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-01 22:17",
+     "": "",
+     "Azimuth_(a-app)": "234.767651419",
+     "Elevation_(a-app)": "64.140311998"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-25 05:17",
+     "": "",
+     "Azimuth_(a-app)": "31.962891475",
+     "Elevation_(a-app)": "-20.647400089"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Dec-18 12:17",
+     "": "",
+     "Azimuth_(a-app)": "244.497387399",
+     "Elevation_(a-app)": "42.425515762"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jan-10 19:17",
+     "": "",
+     "Azimuth_(a-app)": "63.576517279",
+     "Elevation_(a-app)": "-52.856347756"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-03 02:17",
+     "": "",
+     "Azimuth_(a-app)": "209.383082547",
+     "Elevation_(a-app)": "19.894830146"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-26 09:17",
+     "": "",
+     "Azimuth_(a-app)": "72.632146031",
+     "Elevation_(a-app)": "-59.143884398"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Mar-21 16:17",
+     "": "",
+     "Azimuth_(a-app)": "228.503155621",
+     "Elevation_(a-app)": "43.564047504"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Apr-13 23:17",
+     "": "",
+     "Azimuth_(a-app)": "34.296867242",
+     "Elevation_(a-app)": "-23.416220157"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-07 06:17",
+     "": "",
+     "Azimuth_(a-app)": "266.407222273",
+     "Elevation_(a-app)": "48.985836087"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-30 13:17",
+     "": "",
+     "Azimuth_(a-app)": "58.099564537",
+     "Elevation_(a-app)": "-31.621764913"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jun-22 20:17",
+     "": "",
+     "Azimuth_(a-app)": "222.281349803",
+     "Elevation_(a-app)": "24.781169771"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jul-16 03:17",
+     "": "",
+     "Azimuth_(a-app)": "85.534325382",
+     "Elevation_(a-app)": "-57.700353662"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-08 10:17",
+     "": "",
+     "Azimuth_(a-app)": "220.423562736",
+     "Elevation_(a-app)": "23.774478708"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-31 17:17",
+     "": "",
+     "Azimuth_(a-app)": "49.956587776",
+     "Elevation_(a-app)": "-34.443718255"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Sep-24 00:17",
+     "": "",
+     "Azimuth_(a-app)": "269.930599823",
+     "Elevation_(a-app)": "47.939296689"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Oct-17 07:17",
+     "": "",
+     "Azimuth_(a-app)": "50.933976887",
+     "Elevation_(a-app)": "-14.702582469"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Nov-09 14:17",
+     "": "",
+     "Azimuth_(a-app)": "244.817393168",
+     "Elevation_(a-app)": "30.510448925"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-02 21:17",
+     "": "",
+     "Azimuth_(a-app)": "78.484569605",
+     "Elevation_(a-app)": "-48.825992374"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-26 04:17",
+     "": "",
+     "Azimuth_(a-app)": "220.889784224",
+     "Elevation_(a-app)": "13.870055465"
+    }
+   ]
+  },
+  {
+   "site": "Tromso",
+   "lat": 69.65,
+   "lon": 18.96,
+   "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&COMMAND=%27301%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40399%27&START_TIME=%272026-01-03+03%3A17%27&STOP_TIME=%272027-12-30+00%3A00%27&STEP_SIZE=%27559h%27&QUANTITIES=%274%27&ANG_FORMAT=%27DEG%27&CSV_FORMAT=%27YES%27&RANGE_UNITS=%27KM%27&APPARENT=%27AIRLESS%27&EXTRA_PREC=%27YES%27&TIME_DIGITS=%27MINUTES%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%2718.96%2C69.65%2C0%27",
+   "rows": [
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-03 03:17",
+     "": "",
+     "Azimuth_(a-app)": "262.600600439",
+     "Elevation_(a-app)": "31.456482444"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jan-26 10:17",
+     "": "",
+     "Azimuth_(a-app)": "77.126767891",
+     "Elevation_(a-app)": "14.480259788"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Feb-18 17:17",
+     "": "",
+     "Azimuth_(a-app)": "259.580624720",
+     "Elevation_(a-app)": "-2.824510462"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Mar-14 00:17",
+     "": "",
+     "Azimuth_(a-app)": "90.207070000",
+     "Elevation_(a-app)": "-27.935292558"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-06 07:17",
+     "": "",
+     "Azimuth_(a-app)": "253.171889843",
+     "Elevation_(a-app)": "-22.378276021"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Apr-29 14:17",
+     "": "",
+     "Azimuth_(a-app)": "81.772337101",
+     "Elevation_(a-app)": "-13.395870627"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-May-22 21:17",
+     "": "",
+     "Azimuth_(a-app)": "257.561219237",
+     "Elevation_(a-app)": "18.729723803"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jun-15 04:17",
+     "": "",
+     "Azimuth_(a-app)": "72.697130526",
+     "Elevation_(a-app)": "22.599424108"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-08 11:17",
+     "": "",
+     "Azimuth_(a-app)": "277.869528022",
+     "Elevation_(a-app)": "10.469618889"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Jul-31 18:17",
+     "": "",
+     "Azimuth_(a-app)": "91.290830169",
+     "Elevation_(a-app)": "-11.164552192"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Aug-24 01:17",
+     "": "",
+     "Azimuth_(a-app)": "255.519599227",
+     "Elevation_(a-app)": "-23.777428038"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Sep-16 08:17",
+     "": "",
+     "Azimuth_(a-app)": "95.648960924",
+     "Elevation_(a-app)": "-24.708753447"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Oct-09 15:17",
+     "": "",
+     "Azimuth_(a-app)": "262.928772309",
+     "Elevation_(a-app)": "-2.871940592"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-01 22:17",
+     "": "",
+     "Azimuth_(a-app)": "74.983962417",
+     "Elevation_(a-app)": "13.775745063"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Nov-25 05:17",
+     "": "",
+     "Azimuth_(a-app)": "282.976542601",
+     "Elevation_(a-app)": "23.034147776"
+    },
+    {
+     "Date__(UT)__HR:MN": "2026-Dec-18 12:17",
+     "": "",
+     "Azimuth_(a-app)": "97.489421515",
+     "Elevation_(a-app)": "10.623572623"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jan-10 19:17",
+     "": "",
+     "Azimuth_(a-app)": "268.480854478",
+     "Elevation_(a-app)": "-15.176740509"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-03 02:17",
+     "": "",
+     "Azimuth_(a-app)": "100.386754729",
+     "Elevation_(a-app)": "-25.968640182"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Feb-26 09:17",
+     "": "",
+     "Azimuth_(a-app)": "263.572038402",
+     "Elevation_(a-app)": "-21.849726721"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Mar-21 16:17",
+     "": "",
+     "Azimuth_(a-app)": "91.200101757",
+     "Elevation_(a-app)": "0.795305287"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Apr-13 23:17",
+     "": "",
+     "Azimuth_(a-app)": "282.069340781",
+     "Elevation_(a-app)": "19.581747109"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-07 06:17",
+     "": "",
+     "Azimuth_(a-app)": "94.573051479",
+     "Elevation_(a-app)": "26.829322235"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-May-30 13:17",
+     "": "",
+     "Azimuth_(a-app)": "286.641383713",
+     "Elevation_(a-app)": "-2.755430600"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jun-22 20:17",
+     "": "",
+     "Azimuth_(a-app)": "103.995596589",
+     "Elevation_(a-app)": "-13.690004331"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Jul-16 03:17",
+     "": "",
+     "Azimuth_(a-app)": "265.995026339",
+     "Elevation_(a-app)": "-28.412643817"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-08 10:17",
+     "": "",
+     "Azimuth_(a-app)": "103.808237407",
+     "Elevation_(a-app)": "-15.655993508"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Aug-31 17:17",
+     "": "",
+     "Azimuth_(a-app)": "280.878818531",
+     "Elevation_(a-app)": "1.851686627"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Sep-24 00:17",
+     "": "",
+     "Azimuth_(a-app)": "95.927407747",
+     "Elevation_(a-app)": "29.081961804"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Oct-17 07:17",
+     "": "",
+     "Azimuth_(a-app)": "298.662468580",
+     "Elevation_(a-app)": "11.075312504"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Nov-09 14:17",
+     "": "",
+     "Azimuth_(a-app)": "108.654664449",
+     "Elevation_(a-app)": "6.321187603"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-02 21:17",
+     "": "",
+     "Azimuth_(a-app)": "275.309630989",
+     "Elevation_(a-app)": "-23.196813857"
+    },
+    {
+     "Date__(UT)__HR:MN": "2027-Dec-26 04:17",
+     "": "",
+     "Azimuth_(a-app)": "112.640584081",
+     "Elevation_(a-app)": "-20.771233923"
+    }
+   ]
+  }
+ ],
+ "usnoPhases": [
+  {
+   "phase": "Full Moon",
+   "utc": "2026-01-03T10:03:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-01-10T15:48:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-01-18T19:52:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-01-26T04:47:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-02-01T22:09:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-02-09T12:43:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-02-17T12:01:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-02-24T12:27:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-03-03T11:38:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-03-11T09:38:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-03-19T01:23:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-03-25T19:18:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-04-02T02:12:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-04-10T04:51:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-04-17T11:52:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-04-24T02:32:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-05-01T17:23:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-05-09T21:10:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-05-16T20:01:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-05-23T11:11:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-05-31T08:45:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-06-08T10:00:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-06-15T02:54:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-06-21T21:55:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-06-29T23:56:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-07-07T19:29:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-07-14T09:43:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-07-21T11:05:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-07-29T14:36:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-08-06T02:21:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-08-12T17:37:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-08-20T02:46:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-08-28T04:18:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-09-04T07:51:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-09-11T03:27:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-09-18T20:44:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-09-26T16:49:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-10-03T13:25:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-10-10T15:50:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-10-18T16:12:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-10-26T04:12:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-11-01T20:28:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-11-09T07:02:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-11-17T11:48:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-11-24T14:53:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-12-01T06:08:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2026-12-09T00:52:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2026-12-17T05:42:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2026-12-24T01:28:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2026-12-30T18:59:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2026"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-01-07T20:24:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-01-15T20:34:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-01-22T12:17:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-01-29T10:55:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-02-06T15:56:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-02-14T07:58:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-02-20T23:23:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-02-28T05:16:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-03-08T09:29:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-03-15T16:25:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-03-22T10:44:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-03-30T00:54:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-04-06T23:51:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-04-13T22:56:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-04-20T22:27:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-04-28T20:18:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-05-06T10:58:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-05-13T04:44:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-05-20T10:59:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-05-28T13:58:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-06-04T19:40:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-06-11T10:56:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-06-19T00:44:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-06-27T04:54:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-07-04T03:02:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-07-10T18:39:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-07-18T15:45:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-07-26T16:55:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-08-02T10:05:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-08-09T04:54:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-08-17T07:29:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-08-25T02:27:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-08-31T17:41:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-09-07T18:31:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-09-15T23:03:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-09-23T10:20:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-09-30T02:36:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-10-07T11:47:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-10-15T13:47:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-10-22T17:29:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-10-29T13:36:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-11-06T08:00:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-11-14T03:26:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-11-21T00:48:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-11-28T03:24:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "First Quarter",
+   "utc": "2027-12-06T05:22:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Full Moon",
+   "utc": "2027-12-13T16:09:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "Last Quarter",
+   "utc": "2027-12-20T09:11:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  },
+  {
+   "phase": "New Moon",
+   "utc": "2027-12-27T20:12:00Z",
+   "query": "https://aa.usno.navy.mil/api/moon/phases/year?year=2027"
+  }
+ ]
+}
