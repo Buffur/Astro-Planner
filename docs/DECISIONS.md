@@ -1,11 +1,19 @@
 # AstroPlan Decisions
 
 > **Verification stamp:** conformance checked against code at commit `900b82a`
-> (2026-09-20), audited 2026-09-21. Application code changed since only by TASK 1.1
-> (commit `2357755`).
+> (2026-09-20), audited 2026-09-21. Application code has since been changed by
+> TASKs 1.1–1.3 (`2357755`, `2e17093`, `94acd71`, `97924a0`); Part B was not re-audited
+> as a whole after them.
 > **Updated 2026-09-21 (TASK 0.2):** PD-06 resolved (E.1), PD-17–PD-21 registered,
 > OD-06 recorded, DEV-P3 marked resolved. **TASK 0.3:** PD-13 resolved (E.1),
 > DEV-P7 marked resolved. No ADR in Part A was changed.
+> **Updated 2026-09-22 (TASK 2.1, documentation only, no code changed):** ADR-007
+> (SessionNight and time-zone strategy) accepted in the new Part F; PD-01 and PD-02
+> resolved (E.1). The time-handling code was re-read for this task
+> (`visibility_calculator.dart`, `planner_viewmodel.dart`, `altitude_chart_widget.dart`,
+> `sky_darkness_widget.dart`, `home_screen.dart`, `open_meteo_weather_repository.dart`,
+> `session_log.dart`) at commit `56344e2`. **TASK 2.2 (2026-09-22):** ADR-007 status
+> line updated (domain part implemented).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -15,6 +23,7 @@
 > - **Part C** — owner directives recorded from this reconciliation.
 > - **Part D** — behaviors *inferred* by the previous audit (not ADRs), corrected.
 > - **Part E** — open decisions register (**Proposed / Pending — not accepted**).
+> - **Part F** — ADRs accepted after the Phase 0 baseline (ADR-007 onwards).
 
 ---
 
@@ -251,8 +260,8 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 
 | ID | Decision needed | Evidence | Options | Recommendation (proposal) | Blocks |
 | --- | --- | --- | --- | --- | --- |
-| PD-01 **[roadmap-blocking]** | Session-night semantics and the default night rule | SI-010, TD-001 | (a) current night if the Sun is below −0.833°, otherwise the upcoming night; (b) always the next evening; (c) explicit date only with a "Tonight" button | (a): a site-local solar noon-to-noon window; the date picker means "the night beginning that evening". Proposed first implementation task once the roadmap is approved | Capture planner, Imaging Opportunity, weather alignment |
-| PD-02 **[roadmap-blocking]** | Site time-zone strategy | SI-010, TD-020 | (a) device zone (status quo); (b) provider offset stored per site (online); (c) bundled time-zone database + coordinate lookup (offline); (d) compute in solar/UTC time, display in a labelled zone | Compute in UTC/solar time (no zone needed); choose the display zone explicitly; evaluate (d) with (b) as offline-first, (c) if civil clock times are required. DST must be tested | Weather alignment, log display, remote-site planning |
+| PD-01 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Session-night semantics and the default night rule | SI-010, TD-001 | (a) current night if the Sun is below −0.833°, otherwise the upcoming night; (b) always the next evening; (c) explicit date only with a "Tonight" button | **Resolved — see E.1 and ADR-007 (Part F):** civil evening date at the site; mean-solar-noon window; default = the window containing *now* (the roadmap rule, not option (a)). (Original proposal: (a): a site-local solar noon-to-noon window; the date picker means "the night beginning that evening". Proposed first implementation task once the roadmap is approved.) | Capture planner, Imaging Opportunity, weather alignment |
+| PD-02 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Site time-zone strategy | SI-010, TD-020 | (a) device zone (status quo); (b) provider offset stored per site (online); (c) bundled time-zone database + coordinate lookup (offline); (d) compute in solar/UTC time, display in a labelled zone | **Resolved — see E.1 and ADR-007 (Part F):** (d) now — compute in UTC through a `SiteTimeContext` seam with a mean-solar fallback; the site's IANA zone and the `timezone` package arrive in TASK 7.1, where (b)/(c) are evaluated as the zone source. (Original proposal: compute in UTC/solar time (no zone needed); choose the display zone explicitly; evaluate (d) with (b) as offline-first, (c) if civil clock times are required. DST must be tested.) | Weather alignment, log display, remote-site planning |
 | PD-03 | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
 | PD-04 **[roadmap-blocking]** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules) | Any schema change |
 | PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
@@ -308,3 +317,392 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   amended (original text kept); DEV-P7 marked resolved.
 - **Not changed:** the audited-status table in `docs/ROADMAP.md` (a snapshot) and the
   audit documents, which still describe `GEMINI.md` as "git-ignored and absent".
+
+### PD-01 — Session-night semantics and the default night rule (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 2.1). They chose
+  the recommended option for each of two questions:
+  - **Identity:** "Civil date at site" over the roadmap's literal "mean-solar date".
+  - **Default:** "Window containing now" (the MASTER_ROADMAP TASK 2.1 rule) over
+    PD-01 option (a), the Sun-altitude rule.
+
+  The owner's task brief also required that the selected calendar date means "the
+  night starting on the evening of that date" and must not be replaced with
+  solar-noon semantics.
+- **Decision:** see **ADR-007** (Part F), §2–§5.
+- **What this refines in documented intent (recorded, not rewritten):**
+  - MASTER_ROADMAP TASK 2.1 says the window "needs no time zone". The window's
+    *instants* still need none, but choosing *which* solar noon a civil date refers to
+    needs a time context (ADR-007 §3). TASK 2.2's `forEveningDate(date, site)` and
+    `resolveDefault(now, site)` therefore take a `SiteTimeContext` as well.
+  - PD-01's original recommendation (a) is **not** adopted. Consequence, accepted by
+    the owner: between sunrise and the next mean solar noon the default is the night
+    that has just ended (ADR-007 §5, L4).
+- **Not implemented.** The code still uses the UTC calendar date (TD-001, SI-010 remain
+  open until TASKs 2.2–2.4).
+
+### PD-02 — Site time-zone strategy (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 2.1), choosing
+  "Defer to TASK 7.1" over "Add in 2.2" for the `timezone` package, together with the
+  identity decision above.
+- **Decision:** see **ADR-007** (Part F), §6–§7.
+  - Computation is in UTC through a `SiteTimeContext`. The device zone is never used
+    in computation.
+  - Display uses the site's IANA zone when it is known, otherwise the device zone,
+    always labelled.
+  - Until TASK 7.1 stores a zone per site, every site uses the mean-solar context
+    (known limitation L1).
+- **Deferred to TASK 7.1** (not decided here): the source of a site's IANA zone,
+  either the provider offset (option b) or a bundled database with a coordinate
+  lookup (option c), and the `timezone` dependency itself.
+- **Not implemented.**
+
+---
+
+# Part F — ADRs accepted after the Phase 0 baseline
+
+*Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*
+
+## ADR-007: SessionNight and time-zone strategy
+
+Status: accepted (owner, 2026-09-22, TASK 2.1). Resolves PD-01 and PD-02.
+**Implementation:** partial.
+- **Done (TASK 2.2, 2026-09-22):** §2–§6 and §11 in the pure domain
+  (`SessionNight`, `CalendarDate`, `SiteTimeContext` with its mean-solar and
+  fixed-offset contexts, `SessionNightResolver`, and a `Clock` in `lib/core/time/`),
+  with the §12 matrix as tests. The formula is exactly as written in §3, with no
+  deviation.
+- **Not done yet:** calculators (TASK 2.3), ViewModel and UI (TASK 2.4), the IANA
+  zone (TASK 7.1).
+
+### 1. Context
+
+The product answers "what can I photograph tonight?", but the code has no definition
+of "tonight". Four time bases are mixed (SI-010, TD-001, TD-020, TD-023; code re-read
+at `56344e2`):
+
+- **Default date.** `_sessionDate = DateTime.now().toUtc()`
+  (`planner_viewmodel.dart:58`, repeated in `newSession()` at `:503`). This is the
+  **UTC** calendar date.
+- **Timeline and windows.** `calculateNightTimeline` and `calculateVisibilityWindows`
+  (`visibility_calculator.dart`) read that `DateTime`'s Y/M/D as the **mean-solar**
+  date and scan 24 h from `12:00Z − longitude/15 h`.
+- **Date picker.** Supplies a **device-local midnight** `DateTime`
+  (`home_screen.dart:129`). Its Y/M/D gets the same mean-solar reading.
+- **Altitude chart.** Starts at **device-local** noon of the Y/M/D
+  (`altitude_chart_widget.dart:137`). Its "now" dot uses the device clock (`:295`).
+- **Night timeline display.** Printed in the **device** zone, with no label
+  (`sky_darkness_widget.dart:178`).
+- **Lunar illumination.** Evaluated at `_sessionDate` itself (`planner_viewmodel.dart:531`).
+  That is "now" on the default path but local midnight after a pick, so the night has
+  no defined evaluation instant.
+- **Weather.** Requested with `timezone=auto`. Its naive site-local strings are parsed
+  as device-local (`open_meteo_weather_repository.dart:66`), and the UTC offset is
+  discarded.
+- **Sessions.** Stored as an instant (`session_date` epoch), read back as local, and
+  printed with a local date (`session_log.dart:65,215`).
+
+Result, verified again for this ADR: at 18:30 PDT on 2026-09-21 in San Francisco,
+and at 21:00 EDT on 2026-10-31 in New York, the old rule selects **the next day's**
+night.
+
+### 2. SessionNight identity
+
+A SessionNight is identified by **(site, eveningDate)**.
+
+- **eveningDate `D`.** A **civil calendar date at the site**: year, month and day, with
+  no time of day and no zone. It is modelled as a date-only value, never as a
+  `DateTime` instant.
+- **Meaning shown to the user:** "the night that begins on the evening of D and
+  continues past midnight into D + 1".
+- **Site.** Latitude φ in degrees (north positive) and longitude λ in degrees (east
+  positive), with λ normalized to the interval (−180°, 180°]. The site also carries a
+  **time context** (§6).
+
+### 3. Window: start and end instants
+
+The window is the half-open UTC interval `[startUtc, endUtc)`.
+
+- **Mean solar offset.** `s(λ) = round(λ × 240 000)` milliseconds. Since 1° equals
+  4 min, this is integer arithmetic with an exact, deterministic result.
+- **Mean solar noon of solar date d.** `N(d) = d 12:00:00.000Z − s(λ)`.
+- **Civil noon of D.** `R = D 12:00` at the site, converted to UTC with the time
+  context's offset at that instant. Civil noon never falls inside a DST transition
+  under current tz rules, because transitions happen at night.
+- **startUtc.** The `N(d)` with d ∈ {D − 1, D, D + 1} that is **nearest to R**. On an
+  exact tie, the earlier one is taken; a tie requires the civil offset to differ from
+  mean solar time by exactly 12 h, and no current zone does.
+- **endUtc.** `startUtc + 24 h` exactly.
+
+Why boundaries sit at **mean solar noon**:
+
+- The Sun is near its daily maximum there. Every dusk that belongs to an evening, and
+  the dawn that follows it, therefore falls inside one window.
+- The window always contains the local evening.
+- The window depends only on λ, D and the time context, **not on any astronomy
+  model**. A later improvement to the Sun model can never move a stored night.
+
+Why the **civil** date selects the noon, instead of using the solar date directly: in
+date-line zones the solar date differs from the civil date by a day. At Kiritimati
+(UTC+14, λ −157.4°), the civil evening of Sep 22 is on solar date Sep 21. Selecting by
+civil noon keeps D equal to the user's calendar date everywhere (see T7 and T8).
+
+### 4. Inverse mapping and storage units
+
+- **labelOf(window).** The civil date of `startUtc` in the site's time context.
+- **Bijection.** `labelOf(forEveningDate(D)) = D` holds for every D. It was checked over
+  730 consecutive days in 13 contexts:
+  - Los Angeles, Kiritimati, Tokyo, Berlin, Apia, Urumqi;
+  - Asia/Shanghai at Kashgar's longitude, Adak, Tongatapu, Chatham;
+  - mean-solar contexts at λ = 180°, −179.99° and 0°.
+
+  The check found 0 violations (scratch script outside the repository, IANA tz data,
+  2026-09-22).
+- **Storage units.**
+  - Instants: UTC, millisecond precision.
+  - `eveningDate`: an ISO-8601 date string `YYYY-MM-DD`.
+
+### 5. Default-night resolution
+
+`resolveDefault(now, site)` returns **the window that contains `now`**
+(`startUtc ≤ now < endUtc`). Its label is `labelOf(window)`.
+
+- The window's instants depend only on `now` and λ. Only the label depends on the time
+  context.
+- `now` comes from an injectable `Clock` (TASK 2.2). `DateTime.now()` is not allowed in
+  `lib/domain`.
+- The default therefore switches exactly once per 24 h, at the site's mean solar noon:
+  - After midnight (for example 02:00), the default stays on the night in progress.
+  - From sunrise to solar noon it still shows the night that has just ended
+    (limitation L4, accepted by the owner).
+  - After solar noon, it shows tonight.
+- The user can always pick another date.
+
+### 6. Time context, storage and display zone
+
+- **`SiteTimeContext`** is a pure-Dart seam (TASK 2.2) with two members:
+  - `offsetAt(DateTime utc) → Duration`;
+  - a stable `id`.
+- **Implementations:**
+  - **Before TASK 7.1:** `MeanSolarTimeContext(λ)` (offset = `s(λ)`, id `solar`) and a
+    fixed-offset context. Tests also use a DST-transition fake from `test/support/`.
+  - **In 7.1:** an IANA-zone context, added together with the `timezone` package.
+- **Production before 7.1:** every site uses `MeanSolarTimeContext`. It agrees with the
+  civil rule wherever the civil offset is within 12 h of mean solar time, which covers
+  every zone except the date-line anomalies (L1).
+- **The device zone is never used in computation.** It is not a time context.
+- **Storage.** Every instant is stored in UTC.
+- **Display zone.**
+  - Use the site's IANA zone when it is known (7.1 onward). Otherwise use the device
+    zone.
+  - Every displayed time names its zone with an offset, for example
+    `19:08 PDT (UTC−7)`.
+  - When the display zone is the device zone rather than the site's zone, the UI says
+    so.
+  - Times after midnight carry a next-day marker. The header reads as a night (for
+    example "Night of Mon 21 Sep → Tue 22 Sep").
+  - Mean solar time is an identity fallback only and is never shown as a clock zone.
+- **One formatter** handles all of this (TASK 2.4), with no ad-hoc `toLocal()`.
+
+### 7. DST and the International Date Line
+
+- **DST.**
+  - A window is always exactly 24 h long. DST never changes its instants; it only
+    changes how they are displayed. For example, Berlin on 2026-10-24 shows
+    13:06 CEST → 12:06 CET.
+  - In the fall-back night, the repeated hour is disambiguated by the offset label.
+  - In the spring-forward night, the skipped hour simply does not appear.
+  - Choosing the noon uses the offset at civil noon, which is never ambiguous.
+- **Date line.**
+  - λ = 180° and λ = −180° are the same site, so they give identical windows.
+  - In a civil context, windows are continuous across the antimeridian: sites at
+    179.99° and −179.99° that share a zone start 4.8 s apart.
+  - In the mean-solar fallback, the *label* jumps by one day across the antimeridian.
+    That is inherent to solar time, and it is why civil identity was chosen.
+  - Zones whose civil offset differs from mean solar time by about 24 h are handled by
+    §3 once the zone is known (7.1). Examples: Kiribati (Line and Phoenix Islands),
+    Samoa, Tonga, Tokelau, Chatham.
+
+### 8. Polar conditions and absence of darkness
+
+- **The window is defined for every latitude and every date.** It is never null.
+  Polar states are properties of the **darkness content** of a window, not of its
+  existence.
+- **Per-threshold result (TASK 2.3).** For each Sun-altitude threshold h (−0.833°,
+  −6°, −12°, −18°, and the configurable darkness limit), the result is a typed value,
+  never a bare `null`. It is one of:
+  - **crossing:** a dusk instant and/or a dawn instant. An interval cut off at a window
+    edge is flagged `belowAtStart` or `belowAtEnd`.
+  - **neverBelow:** the Sun stays above h for the whole window. At h = −0.833° this is
+    midnight sun. At h = −18° it means **no astronomical darkness**, as in London in
+    June (T15).
+  - **alwaysBelow:** the Sun stays below h for the whole window. At h = −0.833° this is
+    polar night, and astronomical dusk and dawn can still exist (T14).
+- **No fake values.** "Not reached" is never shown as a time, as zero, or as a default
+  (SI-008).
+- **Visibility windows when the darkness limit is `neverBelow`:** the list is empty,
+  with the reason "no darkness at the chosen limit".
+
+### 9. Relationships
+
+- **Site.** A SessionNight exists only for a site.
+  - When the site changes, the same D is re-resolved at the new site. The date is the
+    user's intent; the instants are not.
+  - When no site is set, there is no SessionNight. TASK 2.4 shows a "no site set" state
+    instead of the silent London default.
+- **Target visibility and the timeline (TASK 2.3, G10).**
+  - The night timeline, visibility windows and altitude curve are all computed in the
+    domain over `[startUtc, endUtc)`.
+  - They share one sampling grid anchored at `startUtc`; the 5-minute step is kept
+    (TASK 2.3).
+  - A visibility window can touch a window boundary only when the Sun is below the
+    limit at mean solar noon, that is in polar night. Such a window is clipped and
+    flagged.
+  - Night-level scalars, such as Moon illumination, are evaluated at a defined instant
+    of the night. G6 chooses that instant; a candidate is mean solar midnight,
+    `startUtc + 12 h`.
+- **Weather (G9).**
+  - Weather samples are keyed by UTC instants. Provider-local times are converted with
+    the provider's offset, or UTC is requested.
+  - A night's weather is the set of samples with `startUtc ≤ t < endUtc`, usually
+    summarized over the darkness interval.
+  - A night beyond the provider's horizon has **no forecast** (unknown), never zero.
+  - Weather never defines or shifts the night.
+  - The zone the provider reports is one candidate source for the site zone in 7.1
+    (not decided here).
+- **Capture budget and imaging opportunity (G5, G10).** These consume the darkness
+  intervals of the SessionNight. Their rules are not decided here (PD-08, PD-17).
+
+### 10. What is persisted and what is calculated
+
+- **Persisted.** The schema itself is decided in G11 (PD-18).
+  - `eveningDate` as `YYYY-MM-DD` text: never an instant or epoch.
+  - The site: a reference plus a coordinate snapshot.
+  - The `id` of the time context used to resolve the night.
+  - Real event instants (created, started, ended, frame times), in UTC.
+- **Calculated, never the stored source of truth.** `startUtc`/`endUtc` (pure
+  arithmetic), the night timeline, darkness intervals, visibility windows and altitude
+  curves. Result snapshots for logs are PD-18.
+- **Legacy rows** (`session_date` as an instant). The mapping is decided in TASK 2.4 or
+  G11. Proposal: take the device-local calendar date of the stored instant, which is
+  what the old app displayed after a reload, and flag the row as legacy-mapped.
+
+### 11. Invariants (TASK 2.2 must enforce and test all of them)
+
+| # | Invariant |
+| --- | --- |
+| I1 | `endUtc − startUtc` = 86 400 000 ms exactly, on every date including DST transitions |
+| I2 | `startUtc + s(λ)` has time of day exactly 12:00:00.000: every start is a mean solar noon of the site |
+| I3 | Tiling: `forEveningDate(D + 1).startUtc == forEveningDate(D).endUtc`, with no gaps or overlaps |
+| I4 | Bijection: `labelOf(forEveningDate(D)) == D`, and `forEveningDate(labelOf(w)) == w` |
+| I5 | `resolveDefault(now)` contains `now`, with a half-open interval: `now == endUtc` belongs to the next night |
+| I6 | Monotonic: `now₁ ≤ now₂` implies `default(now₁).startUtc ≤ default(now₂).startUtc`; the label changes exactly once per 24 h, at mean solar noon |
+| I7 | 18:00 civil on D lies in the window of D whenever the context's offset is within 6 h of mean solar time, modulo 24 h (true for every current zone in the sweep) |
+| I8 | The output depends only on (`now` or D, φ, λ, context), never on the host or device zone; tests pass under several host `TZ` values |
+| I9 | A window exists for every φ ∈ [−90°, 90°] and every D; the resolver never returns null |
+| I10 | λ is normalized to (−180°, 180°]; λ = 180° and λ = −180° give identical results |
+| I11 | `startUtc` and `endUtc` are UTC (`isUtc`); `eveningDate` carries no time or zone |
+| I12 | The window does not depend on any Sun or Moon model |
+
+### 12. Test matrix (becomes the TASK 2.2 table)
+
+**Test conditions:**
+- **Expected values.** Window instants are exact arithmetic from §3. Offsets come from
+  IANA tz data (2026 rules: EU DST 29 Mar–25 Oct, US DST 8 Mar–1 Nov).
+- **Contexts in 2.2.** 2.2 has no `timezone` package, so it uses fixed-offset contexts
+  or a DST-transition fake with those instants.
+- **Darkness columns.** These are **indicative only**, for TASK 2.3. They come from an
+  independent NOAA-algorithm scratch computation at 1-minute steps, with geometric
+  altitude, and are expected to be within ±2 min. **2.3 must re-verify them against
+  USNO or NOAA** and must not take them from the code under test.
+- **"Old code" column.** The date the current implementation uses.
+
+| # | Case | Site (φ, λ) · context | Input | Expected D | startUtc → endUtc | Site-local display | Indicative sunset · astro dusk / dawn | Old code |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T1 | San Francisco evening | 37.7749, −122.4194 · LA (PDT) | now 2026-09-21 18:30 PDT | 2026-09-21 | 2026-09-21T20:09:40.656Z → 09-22T20:09:40.656Z | 13:09 PDT → 13:09 PDT | 19:08 · 20:36 / 05:30 PDT | 09-22 ✗ |
+| T2 | SF after midnight | same | now 2026-09-22 02:00 PDT | 2026-09-21 | = T1 | = T1 | = T1 | 09-22 ✗ |
+| T3 | SF morning (L4) | same | now 2026-09-22 09:00 PDT | 2026-09-21 | = T1 | = T1 | = T1 | 09-22 (differs by rule) |
+| T4 | SF after solar noon | same | now 2026-09-22 14:00 PDT | 2026-09-22 | 2026-09-22T20:09:40.656Z → 09-23T20:09:40.656Z | 13:09 PDT → 13:09 PDT | 19:06 · 20:34 / 05:30 PDT | 09-22 ✓ |
+| T5 | Tokyo after midnight | 35.6762, 139.6503 · +9 | now 2026-09-22 02:00 JST | 2026-09-21 | 2026-09-21T02:41:23.928Z → 09-22T02:41:23.928Z | 11:41 JST → 11:41 JST | 17:41 · 19:06 / 04:04 JST | 09-21 ✓ |
+| T6 | Tokyo morning | same | now 2026-09-22 10:00 JST | 2026-09-21 | = T5 | = T5 | = T5 | 09-22 (differs by rule) |
+| T7 | Kiritimati (UTC+14) | 1.8721, −157.4278 · fixed +14 | now 2026-09-22 20:00 +14 | 2026-09-22 | 2026-09-21T22:29:42.672Z → 09-22T22:29:42.672Z | 12:29 → 12:29 (+14) | 18:26 · 19:34 / 05:10 | 09-22 ✓; mean-solar fallback labels 09-21 (L1) |
+| T8 | Apia (UTC+13) | −13.8333, −171.7667 · fixed +13 | now 2026-09-22 21:00 +13 | 2026-09-22 | 2026-09-21T23:27:04.008Z → 09-22T23:27:04.008Z | 12:27 → 12:27 (+13) | 18:23 · 19:34 / 05:06 | fallback labels 09-21 (L1) |
+| T9 | EU DST fall-back night | 52.52, 13.405 · Berlin (fake) | D = 2026-10-24 (and now 21:00 CEST) | 2026-10-24 | 2026-10-24T11:06:22.800Z → 10-25T11:06:22.800Z | 13:06 CEST → 12:06 CET | 17:53 CEST · 19:47 CEST / 04:55 CET | 10-24 ✓ |
+| T10 | EU DST spring-forward night | same | D = 2026-03-28 | 2026-03-28 | 2026-03-28T11:06:22.800Z → 03-29T11:06:22.800Z | 12:06 CET → 13:06 CEST | 18:34 CET · 20:34 CET / 04:48 CEST | 03-28 ✓ |
+| T11 | US DST fall-back night | 40.7128, −74.0060 · New York (fake) | now 2026-10-31 21:00 EDT | 2026-10-31 | 2026-10-31T16:56:01.440Z → 11-01T16:56:01.440Z | 12:56 EDT → 11:56 EST | 17:54 EDT · 19:26 EDT / 04:54 EST | 11-01 ✗ |
+| T12 | US DST spring-forward night | same | now 2026-03-07 21:00 EST | 2026-03-07 | 2026-03-07T16:56:01.440Z → 03-08T16:56:01.440Z | 11:56 EST → 12:56 EDT | 17:55 EST · 19:26 EST / 05:49 EDT | 03-08 ✗ |
+| T13 | Tromsø, midnight sun | 69.6492, 18.9553 · Oslo (CEST) | D = 2026-06-20 | 2026-06-20 | 2026-06-20T10:44:10.728Z → 06-21T10:44:10.728Z | 12:44 → 12:44 CEST | sunset **neverBelow** · astro **neverBelow**; no visibility windows | n/a |
+| T14 | Tromsø, polar night | same · Oslo (CET) | D = 2026-12-20 | 2026-12-20 | 2026-12-20T10:44:10.728Z → 12-21T10:44:10.728Z | 11:44 → 11:44 CET | sunset **alwaysBelow** · astro dusk 16:56 / dawn 06:29 CET | n/a |
+| T15 | No astronomical darkness | 51.5074, −0.1278 · London (BST) | D = 2026-06-20 | 2026-06-20 | 2026-06-20T12:00:30.672Z → 06-21T12:00:30.672Z | 13:00 → 13:00 BST | 21:21 / sunrise 04:43 BST · astro **neverBelow** | n/a |
+| T16 | Antimeridian | λ = 180 and λ = −180 · mean-solar | D = 2026-09-22 | 2026-09-22 | both 2026-09-22T00:00:00.000Z → 09-23T00:00:00.000Z | — | — | — |
+| T17 | Host-zone independence | T1 inputs | run with host `TZ` = UTC, Asia/Tokyo, America/Los_Angeles | identical to T1 | identical | — | — | — |
+
+**Property tests (TASK 2.2):**
+- **P1.** I1–I4 and I7 for every D over 730 days, in these contexts:
+  - fixed +14, +13 and +9;
+  - the LA and Berlin DST fakes;
+  - mean-solar at λ ∈ {−180, −179.99, −122.42, 0, 13.4, 179.99, 180}.
+- **P2.** At the T1 site, step `now` by 5 min across 48 h. The default label changes
+  exactly twice, at the mean solar noons, and moves monotonically (I5, I6).
+- **P3.** λ = 179.99° and −179.99° with the same fixed +12 context give starts less
+  than 1 min apart.
+
+**Acceptance for TASK 2.2:** T1, T2, T11 and T12 fail on the old code. That confirms
+the regression is covered.
+
+### 13. Alternatives considered
+
+| Alternative | Verdict | Reason |
+| --- | --- | --- |
+| UTC calendar date (status quo) | Rejected | Off by 24 h west of UTC in the evening (verified: T1, T11, T12) |
+| Device-local date, with a device-local noon-to-noon window (the chart's current base) | Rejected | Wrong for remote sites; depends on the host; DST makes the window 23 or 25 h long |
+| Site civil noon-to-noon window (civil boundaries) | Rejected | Needs a zone even for the instants; DST gives 23 or 25 h windows; a boundary up to about 3 h from solar noon can split short polar-edge days |
+| Mean-solar date and window (roadmap literal, zone-free) | **Fallback only** | Exact outside date-line anomalies; labels the night one day off at Kiritimati, Samoa and Tonga; conflicts with "the user's calendar date" |
+| Apparent (true) solar noon or transit boundaries | Rejected | The identity would depend on the Sun model, and the window length would vary. The gain (up to about 16.5 min at the boundary) matters only on polar-edge days (L2) |
+| Sunset-to-sunrise window | Rejected | Undefined in polar day and night; depends on the model; excludes twilight |
+| PD-01 (a): Sun-altitude default | Rejected by the owner | Morning planning is better, but it depends on the model, and under midnight sun it always skips to the next window |
+| PD-01 (b): always the next evening | Rejected | At 02:00 it skips the night in progress |
+| PD-01 (c): explicit date only | Rejected | No default for "tonight" |
+| PD-02 (a): device zone in computation | Rejected | Non-deterministic; wrong for remote sites. Kept as the **display** fallback only |
+| `timezone` package in TASK 2.2 | Deferred to 7.1 (owner) | No coordinate-to-zone source exists before 7.1, so production would not change |
+
+### 14. Known limitations and assumptions
+
+- **L1 (until TASK 7.1).**
+  - Every site uses the mean-solar context. In zones whose civil offset differs from
+    mean solar time by 12 h or more (Kiribati Line and Phoenix Islands, Samoa, Tonga,
+    Tokelau, Chatham), the night is labelled one day off.
+  - The window instants are still correct.
+  - Displayed times stay honestly labelled.
+- **L2.** Boundaries sit at *mean*, not apparent, solar noon (up to about 16.5 min
+  apart). A crossing can land in the neighbouring window, flagged as clipped (§8), on
+  the few polar-edge days when the Sun's noon altitude is within a fraction of a degree
+  of a threshold.
+- **L3.** A historical zone discontinuity can leave a date with no civil noon; Samoa
+  skipped 2011-12-30. The resolver returns an explicit error for such a date. The date
+  picker's range (−1 to +5 years) makes this practically unreachable.
+- **L4.** The default switches at mean solar noon. Between sunrise and noon it shows
+  the night that has just ended (owner-accepted).
+- **Assumptions:**
+  - Civil noon is never inside a DST transition.
+  - Every current zone is within 6 h of mean solar time modulo 24 h (sweep above).
+  - Sun altitude thresholds stay the existing constants (−0.833°, −6°, −12°, −18°).
+    Making the darkness limit configurable is TASK 2.3 or TD-043, not this ADR.
+
+### 15. Consequences
+
+- **TASK 2.2** implements §2–§6 and §11–§12 in pure Dart:
+  - a `Clock`;
+  - a `SiteTimeContext` with its mean-solar and fixed-offset implementations;
+  - `SessionNight {eveningDate, startUtc, endUtc, latitude, longitude, timeContextId}`;
+  - `forEveningDate(D, site, ctx)`, `resolveDefault(now, site, ctx)` and `labelOf`.
+
+  The shape now includes the time context, which refines the roadmap's listed fields.
+- **TASK 2.3** implements §8 and §9 (typed timeline, shared sampling grid, domain
+  altitude curve).
+- **TASK 2.4** implements the display rules in §6 and the ViewModel adoption.
+- **TASK 7.1** adds the site IANA zone, its source, and the `timezone` dependency.
+- **G9** aligns weather per §9. **G11** persists per §10.
+- SI-010, TD-001, TD-020, TD-023 and TD-024 stay **open** until those tasks land. This
+  ADR changes no code.
