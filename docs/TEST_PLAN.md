@@ -111,12 +111,12 @@ Note: until TD-003 is fixed, the "run `flutter analyze` and `flutter test` befor
 claiming completion" rule cannot be satisfied literally; report the failure as
 pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 
-### Current baseline (2026-09-22, after TASK 2.2)
+### Current baseline (2026-09-22, after TASK 2.3, commit `de1792a`)
 
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **135 tests: 135 pass, 0 fail** (`dart run tool/check.dart`) |
+| `flutter test --no-pub` | **147 tests: 147 pass, 0 fail**, three consecutive full runs (`dart run tool/check.dart`) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -180,8 +180,28 @@ Total after TASK 1.2: 24 test files, 83 tests.
 
 Total after TASK 2.2: 27 test files, 135 tests.
 
+**Added by TASK 2.3** (calculators and the altitude chart consume SessionNight),
+12 tests:
+- **`test/domain/services/visibility_calculator_session_night_test.dart`** (9 tests):
+  the ADR-007 polar cases restated as typed-result assertions (T13 midnight sun,
+  T14 polar night with a separate astronomical-twilight crossing, T15 no
+  astronomical darkness); exact numeric agreement between the new
+  `calculateNightTimelineForNight`/`calculateVisibilityWindowsForNight` and the
+  legacy DateTime-based wrappers for a normal London winter night; a visibility
+  window spanning a polar night flagged `clippedAtStart`/`clippedAtEnd` through
+  both the new API and, separately, the legacy wrapper (the flag depends on the
+  astronomy, not on which API computed it — an assumption this second test proves
+  rather than just documents); the altitude curve's grid spacing/count and its
+  agreement with the timeline on the darkness-crossing instant.
+- **`test/presentation/widgets/altitude_chart_widget_test.dart`** (3 tests, the
+  chart's first widget test): renders for a normal night; renders for a
+  polar-night site without throwing; renders for a session date far from "now" so
+  the now-dot branch is exercised with nothing to draw.
+
+Total after TASK 2.3: 29 test files, 147 tests.
+
 **Still open** (`docs/TECH_DEBT.md` TD-025, TD-037): no tests for the live capture
-budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata
+budget math, Capture Plan, Sky, Logbook, Location or Metadata
 screens; no migration tests; the NPF test is circular; `AppRouter.router` is a
 shared static (worked around above, not fixed); Nominatim and the light-pollution
 HTTP client are not injectable (tests only avoid the real network because the

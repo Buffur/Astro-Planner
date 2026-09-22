@@ -6,7 +6,9 @@
 > deterministic bootstrap, `hasBootstrapError`/`retryBootstrap`, `isDefaultLocation`,
 > `weatherError`, Home empty/error states); affected spots are marked
 > *(updated TASK 1.1)*/*(updated TASK 1.2)*. TASK 2.2 (2026-09-22) added pure-domain
-> time types, not yet used by the app; see B5 *(updated TASK 2.2)*. Line references into
+> time types, not yet used by the app; see B5 *(updated TASK 2.2)*. TASK 2.3
+> (2026-09-22, commit `de1792a`) made the calculators and the altitude chart consume
+> `SessionNight`; see B1, B2, DEV-A3 *(updated TASK 2.3)*. Line references into
 > `planner_viewmodel.dart` were taken at `900b82a` and are now off by more.
 >
 > This document keeps three things separate on purpose:
@@ -135,6 +137,9 @@ approval.
         ├─► Equipment / Target screens ─► repository interfaces directly (no ViewModel)
         ├─► Logbook screen, Home "Save Session" ─► LogbookRepository directly
         ├─► Location picker ─► PlannerViewModel + Geolocator directly + OSM tiles
+        ├─► AltitudeChartWidget ─► VisibilityCalculator.calculateAltitudeCurve directly
+        │   (target/lat/lon/date passed in from Home; no PlannerViewModel reference,
+        │   no CustomPainter astronomy) *(updated TASK 2.3)*
         └─► Metadata screen ─► ImagePicker + MetadataExtractor (domain service) directly
 ```
 
@@ -294,7 +299,7 @@ after loading a session. Home's app-bar buttons push `/logbook` and `/metadata`
 | `LogbookScreen` | `LogbookRepository` (direct), VM `loadSession`, `share_plus` | Swipe-delete without confirmation |
 | `MetadataImportScreen` | `image_picker`, `MetadataExtractor` | Display-only |
 | `CapturePlanWidget` | VM | Add dialog; reorder; outputs |
-| `AltitudeChartWidget` | domain services **inside `CustomPainter.paint`** | Astronomy computed in the widget (DEV-A3) |
+| `AltitudeChartWidget` | `VisibilityCalculator.calculateAltitudeCurve`, called once from `build()` *(updated TASK 2.3)* | Render-only; `_AltitudeChartPainter` no longer computes astronomy (DEV-A3 resolved for the widget) |
 | `SkyDarknessWidget` | VM | Static gradient bar unrelated to data |
 | `WeatherForecastWidget` | weather model, VM | 48 h strip from local midnight |
 | `PlannerSummaryCard`, `InfoRow`, `SectionHeader` | — | Presentational |
@@ -326,9 +331,9 @@ active-location pointer, weather cache). Details, keys and migration history:
 | Component | Time base |
 | --- | --- |
 | `_sessionDate` default | **UTC** (`DateTime.now().toUtc()`); the date picker yields a **local-midnight** non-UTC `DateTime` |
-| `calculateNightTimeline` / `calculateVisibilityWindows` | Uses Y/M/D of the input as a *local solar date*; scans from 12:00 UTC minus longitude/15 h; returns UTC |
+| `calculateNightTimeline` / `calculateVisibilityWindows` | **Unchanged behavior, new implementation *(updated TASK 2.3)*:** still read Y/M/D of the input as the evening date, still return UTC — now via `SessionNightResolver.forEveningDate` with a `MeanSolarTimeContext`, instead of ad-hoc `12:00 UTC − longitude/15 h` math. A `SessionNight`-based sibling of each (`calculateNightTimelineForNight`, `calculateVisibilityWindowsForNight`) exists but nothing in the app calls it yet (TASK 2.4) |
 | `AstronomicalEngine.calculateJulianDate` | Requires UTC (throws otherwise) |
-| `AltitudeChartWidget` | Starts at **device-local** noon of the input's Y/M/D; converts each step to UTC for math; x-axis labels device-local |
+| `AltitudeChartWidget` | *(updated TASK 2.3)* Starts at the **same mean-solar-noon window** as the calculators above (no longer device-local noon); x-axis labels still device-local (`instantUtc.toLocal()`) |
 | `SkyDarknessWidget` | Prints `dt.toLocal()` (**device** time zone) |
 | Weather | `timezone=auto` → naive site-local strings parsed as **device-local**; offset discarded; `lastUpdated` uses the device clock |
 | Sessions | Stored as epoch seconds, read back as local `DateTime`; `toJson` writes UTC ISO-8601; `toShareableText` prints local date |
@@ -400,6 +405,15 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   24 h window (device-local noon) than the windows/timeline.
 - **Consequence:** untestable, inconsistent time windows, three places to fix any
   astronomy change. TD-023.
+- **Status: RESOLVED for the widget 2026-09-22 (TASK 2.3, commit `de1792a`).** The
+  chart no longer computes astronomy: `AltitudeChartWidget.build()` resolves one
+  `SessionNight` and calls the new `VisibilityCalculator.calculateAltitudeCurve`
+  once; `_AltitudeChartPainter` only maps the resulting samples to pixels and
+  imports no astronomy code. The chart and the calculators now share one window
+  (same `SessionNight`, same 5-minute grid) instead of diverging. **Still open:**
+  `PlannerViewModel.currentAltitude`/`maxAltitude` still run their own copy of the
+  pipeline directly in the ViewModel — not a widget, so outside this deviation's
+  original scope, but still a second copy of the pipeline (TASK 2.4). TD-023.
 
 ## DEV-A4 — Capture/session budget logic lives in the ViewModel, not the domain
 - **Intended behavior:** "Business logic must be deterministic and testable";

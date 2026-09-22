@@ -373,8 +373,14 @@ Status: accepted (owner, 2026-09-22, TASK 2.1). Resolves PD-01 and PD-02.
   fixed-offset contexts, `SessionNightResolver`, and a `Clock` in `lib/core/time/`),
   with the §12 matrix as tests. The formula is exactly as written in §3, with no
   deviation.
-- **Not done yet:** calculators (TASK 2.3), ViewModel and UI (TASK 2.4), the IANA
-  zone (TASK 7.1).
+- **Done (TASK 2.3, 2026-09-22, commit `de1792a`):** §8 (typed per-threshold
+  timeline, `NightTimeline`/`SunThresholdResult`) and §9 (shared 5-minute sampling
+  grid; `AltitudeCurve`; visibility-window boundary clipping in polar night,
+  `VisibilityWindow.clippedAtStart`/`clippedAtEnd`) in the pure domain, plus the
+  altitude chart made render-only. The old DateTime-based `calculateNightTimeline`/
+  `calculateVisibilityWindows` are now thin wrappers over the new API, so no caller
+  needed to change.
+- **Not done yet:** ViewModel and UI (TASK 2.4), the IANA zone (TASK 7.1).
 
 ### 1. Context
 

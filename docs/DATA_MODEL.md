@@ -3,7 +3,10 @@
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since by TASKs 1.1–1.3 (no entity
 > changes). **TASK 2.2 (2026-09-22):** three non-persisted domain types were added to
-> B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change.
+> B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change. **TASK 2.3
+> (2026-09-22, commit `de1792a`):** two more non-persisted types added
+> (`NightTimeline`/`SunThresholdResult`, `AltitudeCurve`/`AltitudeSample`);
+> `VisibilityWindow` gained two fields; no schema change.
 >
 > This document keeps **three things separate** on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -151,7 +154,9 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | `LocationProfile` | id; name; latitude (deg); longitude (deg, east positive); elevation (unit unspecified); bortleClass (int) | `location_profiles` | No time zone; Bortle cannot be "unknown" (SI-007) |
 | `WeatherConditions` | temperature (°C); cloudCover (%); humidity (%); dewPoint (°C); windSpeed (km/h, provider default); hourlyForecasts; lastUpdated (device clock) | shared preferences cache only | No provider/model, offset, validity window or staleness field |
 | `HourlyForecast` | time; temperature; cloudCover; dewPoint; humidity; precipitationProbability (%); windSpeed; isDaytime | inside the weather cache | `time` is a **naive site-local string parsed as device-local** (SI-010) |
-| `VisibilityWindow` | start, end (UTC) | not persisted | `duration` getter; value equality |
+| `VisibilityWindow` | start, end (UTC); clippedAtStart, clippedAtEnd (bool) *(fields added TASK 2.3)* | not persisted | `duration` getter; value equality (now includes the clip flags). A window is clipped when it touches a `SessionNight` boundary in polar night (ADR-007 §9); always `false` for windows from the legacy DateTime-based API path, though that path can itself produce a clipped window (verified) since clipping depends only on the astronomy, not on which API computed it |
+| `NightTimeline` / `SunThresholdResult` *(TASK 2.3)* | night (`SessionNight`); four `SunThresholdResult` fields (sunriseSunset, civilTwilight, nauticalTwilight, astronomicalTwilight), each a `SunCrossing` (duskUtc?, dawnUtc?, belowAtStart, belowAtEnd), `SunNeverBelow` or `SunAlwaysBelow` | not persisted | Replaces the stringly-typed `Map<String, DateTime?>` (TD-024); "not reached" is never a bare null (SI-008). Built by `VisibilityCalculator.calculateNightTimelineForNight`; **not used by the app yet** (TASK 2.4) |
+| `AltitudeCurve` / `AltitudeSample` *(TASK 2.3)* | night (`SessionNight`); samples: List of {instantUtc, sunAltitudeDeg, targetAltitudeDeg}, 5-minute grid, 289 points inclusive of both ends | not persisted | Built by `VisibilityCalculator.calculateAltitudeCurve`; consumed by `AltitudeChartWidget`, the only current caller |
 | `CalendarDate` *(TASK 2.2)* | year; month; day (no time, no zone) | not persisted yet | Validated; ISO `YYYY-MM-DD` round trip; the intended persisted form of a night's evening date (ADR-007 §10, G11) |
 | `SiteTimeContext` *(TASK 2.2)* | `id`; `offsetAt(utc)` | not persisted yet | `MeanSolarTimeContext` (id `solar`, offset `round(λ·240 000)` ms) and `FixedOffsetTimeContext` (id such as `UTC+14:00`); an IANA context arrives in TASK 7.1 |
 | `SessionNight` *(TASK 2.2)* | eveningDate (`CalendarDate`); startUtc; endUtc (= start + 24 h); latitude, longitude (deg, λ normalized to (−180, 180]); timeContextId | not persisted | Built by `SessionNightResolver` (ADR-007); **not used by the app yet** (TASK 2.4) |
@@ -434,7 +439,10 @@ camera module and device **without checking whether other rigs reference them**
 
 ## C11. Additional concepts identified by the audit (also **Missing**)
 - **SessionNight / time context** — the site-local noon-to-noon window and its
-  time zone (SI-010; PD-01, PD-02).
+  time zone (SI-010; PD-01, PD-02). *Progress:* decided by ADR-007 (TASK 2.1) and
+  implemented as a non-persisted domain type, used by the calculators and the
+  altitude chart (TASK 2.2, 2.3; see Part B). **Still Missing** from the app's own
+  state: the ViewModel and the schema (TASK 2.4, G11).
 - **MoonConditions** — illumination, altitude, rise/set and separation over the
   window (SI-002).
 - **Provenance record** — source, version, date, confidence (DEV-D5).

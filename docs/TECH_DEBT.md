@@ -6,10 +6,14 @@
 > `2e17093`: deterministic bootstrap, Home empty/error states), and TASK 1.3 (commits
 > `94acd71` whole-tree format, `97924a0` quality-gate script and CI). **TASK 2.2
 > (2026-09-22):** a pure-domain `SessionNight` resolver, `SiteTimeContext` and `Clock`
-> were added (progress on TD-001, TD-020 and TD-037; none resolved).
-> **Resolved so far (2026-09-21):** TD-041 (TASK 0.2), TD-003 (TASK 1.1), TD-046
-> (TASK 1.3), and largely TD-002 (TASK 1.2), and parts of TD-019, TD-037 (TASK 1.1)
-> and TD-030, TD-031 (TASK 0.3). Every other item is still Open. Items marked
+> were added (progress on TD-001, TD-020 and TD-037; none resolved). **TASK 2.3
+> (2026-09-22, commit `de1792a`):** the calculators and the altitude chart consume
+> `SessionNight`, resolving TD-023 and TD-024; the ViewModel and `sky_darkness_widget.dart`
+> still use the deprecated DateTime-based wrappers (TASK 2.4).
+> **Resolved so far (2026-09-21–22):** TD-041 (TASK 0.2), TD-003 (TASK 1.1), TD-046
+> (TASK 1.3), TD-023, TD-024 (TASK 2.3), and largely TD-002 (TASK 1.2), and parts of
+> TD-019, TD-037 (TASK 1.1) and TD-030, TD-031 (TASK 0.3). Every other item is still
+> Open. Items marked
 > *(verified)* were reproduced
 > by executing code; *(code reading)* means inferred from source and not executed.
 > Directions are **proposals** for the Master Development Roadmap, not approved
@@ -70,8 +74,8 @@
 | TD-016 | **Target model issues:** editing overwrites `catalogId` (`target_selection_screen.dart:175`); RA in degrees (`:130`); moving-object types offered (`:9-20`); no uniqueness/epoch/source/size/magnitude; `(0,0)` sentinel (`planner_viewmodel.dart:445,456`); `LIKE` wildcards not escaped | SI-012 actions; PD-07/PD-16 [M] | SI-012, F-19–F-21 |
 | TD-018 | **Metadata import limits:** whole-file `readAsBytes` and `String.fromCharCodes` (`metadata_extractor.dart:8,47`); FITS unreachable via `image_picker`; `/` inside FITS string values truncates them; nothing stored or linked; no real sample files | Verify against real files before expanding (ROADMAP Phase 12) [M] | F-45 |
 | TD-021 | **Screens bypass ViewModels** (DEV-A2) | Route through ViewModels when touched [M] | DEV-A2 |
-| TD-023 | **Astronomy pipeline triplicated; logic inside `CustomPainter`** (DEV-A3) | One domain altitude function; chart consumes domain outputs [M] | DEV-A3, F-14 |
-| TD-024 | **Stringly-typed night timeline** `Map<String, DateTime?>` (`visibility_calculator.dart:85`) | Typed value object [S–M] | F-12 |
+| TD-023 | **RESOLVED 2026-09-22 (TASK 2.3, commit `de1792a`).** *(Was: astronomy pipeline triplicated; logic inside `CustomPainter` (DEV-A3).)* The chart's `_AltitudeChartPainter` no longer imports `astronomical_engine.dart` or calls `VisibilityCalculator`'s raw math; `AltitudeChartWidget.build()` resolves one `SessionNight` and calls the new `VisibilityCalculator.calculateAltitudeCurve` once, and the painter only maps samples to pixels. The chart and the calculators now share one window (same `SessionNight`, same 5-minute grid) instead of the chart's own device-local-noon window. **Not fully consolidated:** `PlannerViewModel.currentAltitude`/`maxAltitude` still run their own copy of the pipeline — that is TASK 2.4 | Done; see above | DEV-A3, F-14 |
+| TD-024 | **RESOLVED 2026-09-22 (TASK 2.3, commit `de1792a`).** *(Was: stringly-typed night timeline `Map<String, DateTime?>` (`visibility_calculator.dart:85`).)* `NightTimeline` (`lib/domain/models/night_timeline.dart`) is a typed value object: each of the four thresholds is a `SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow`, never a bare null. `VisibilityCalculator.calculateNightTimelineForNight` returns it. **The old `Map<String, DateTime?>`-returning `calculateNightTimeline` still exists**, now as a thin wrapper, since `PlannerViewModel`/`sky_darkness_widget.dart` aren't migrated to the typed version yet (TASK 2.4) | Done; see above | F-12 |
 | TD-026 | **Equipment model dormant/orphaned:** `EquipmentCatalogRepository` unused; `trackingState` invisible; rig deletion deletes camera and device unconditionally (`drift_equipment_repository.dart:98-117`) | PD-03 [M] | DEV-D2, F-23 |
 | TD-027 | **Location handling:** `setLocation` overwrites the active saved profile (`planner_viewmodel.dart:216-255`); `_fetchBortle` reads `activeLocationId` while `setLocation` may still be inserting the row *(code reading)*; silent London default; no saved-location UI | Design saved locations with PD-02/PD-05 [M] | DEV-D4, F-06, F-07 |
 | TD-028 | **Stale selection** after deleting the selected target/rig (ViewModel not notified) *(code reading)* | Notify or clear selection [S] | DEV-A2 |

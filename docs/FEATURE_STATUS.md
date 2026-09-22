@@ -6,7 +6,9 @@
 > (`94acd71` whole-tree format, `97924a0` quality-gate script and CI); affected
 > entries are F-05, F-06, F-48 and F-49. **TASK 2.2 (2026-09-22):** new pure-domain
 > `SessionNight` resolver and `Clock`, not yet used by the app; affected entries are
-> F-09, F-10 and F-48. Statuses were assigned from the code and
+> F-09, F-10 and F-48. **TASK 2.3 (2026-09-22, commit `de1792a`):** the calculators
+> and the altitude chart consume `SessionNight`; affected entries are F-12, F-13,
+> F-14 and F-48. Statuses were assigned from the code and
 > from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -193,25 +195,25 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-12 — Sun altitude and night timeline
 - **Status:** Partial
-- **Current implementation:** low-precision Sun altitude; sunset, civil/nautical/astronomical dusk and dawn, sunrise on a 5-minute scan; UI shows sunset, astro dusk/dawn, sunrise and a "True Night Window".
-- **Relevant files:** `visibility_calculator.dart:33-133`, `lib/presentation/widgets/sky_darkness_widget.dart`.
-- **Known issues:** computed for the wrong night by default (F-09); 5-minute quantization and a stale "refine to 1-minute" comment (`:103`); returns `Map<String, DateTime?>`; times printed in the device zone; the gradient bar is decorative and unrelated to the data (TD-001, TD-024, TD-034, TD-036).
+- **Current implementation:** low-precision Sun altitude; sunset, civil/nautical/astronomical dusk and dawn, sunrise on a 5-minute scan. **New (TASK 2.3):** a `SessionNight`-based `calculateNightTimelineForNight` returns a typed `NightTimeline` (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow` per threshold, never a bare null); the old `Map<String, DateTime?>`-returning `calculateNightTimeline` is now a thin wrapper over it. UI (`sky_darkness_widget.dart`) still shows sunset, astro dusk/dawn, sunrise and a "True Night Window" from the old wrapper, unchanged.
+- **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/night_timeline.dart`, `lib/presentation/widgets/sky_darkness_widget.dart`.
+- **Known issues:** computed for the wrong night by default (F-09, still true: nothing in the app uses the typed API or a real `SessionNight` yet — TASK 2.4); 5-minute quantization (TD-036); times printed in the device zone; the gradient bar is decorative and unrelated to the data. *Resolved (TASK 2.3):* the stale "refine to 1-minute" comment is gone with the scan loop it was attached to (TD-024).
 - **Dependencies:** F-11, F-09.
 - **Roadmap relevance:** Phase 8.
 
 ## F-13 — Target visibility windows
 - **Status:** Partial
-- **Current implementation:** windows where the Sun is below −18° and the target is above a minimum altitude (default 20°); feeds feasibility. Handles multiple segments and high latitudes.
-- **Relevant files:** `visibility_calculator.dart:139-192`, `planner_viewmodel.dart:419-428`.
-- **Known issues:** wrong night by default (F-09); no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; the minimum altitude and Sun limit have no UI control; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009).
+- **Current implementation:** windows where the Sun is below −18° (configurable) and the target is above a minimum altitude (default 20°); feeds feasibility. Handles multiple segments and high latitudes. **New (TASK 2.3):** a `SessionNight`-based `calculateVisibilityWindowsForNight`, sharing the 5-minute grid with the timeline and the altitude curve; a window touching the SessionNight boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9, verified for both the new API and the legacy wrapper). The old `calculateVisibilityWindows` is now a thin wrapper over it.
+- **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/visibility_window.dart`, `planner_viewmodel.dart:419-428`.
+- **Known issues:** wrong night by default (F-09, still true: the ViewModel isn't migrated — TASK 2.4); no Moon, weather or horizon; 5-minute quantization; J2000 coordinates; the minimum altitude and Sun limit have no UI control; "culmination" is only max altitude at LHA = 0, not a culmination time and not restricted to the night (SI-006, SI-009).
 - **Dependencies:** F-11, F-12.
-- **Roadmap relevance:** Phase 8. Tests: 4 window tests (UTC dates only).
+- **Roadmap relevance:** Phase 8. Tests: 4 legacy window tests (UTC dates only) plus the TASK 2.3 SessionNight suite (polar cases, clip flags, exact agreement with the legacy wrapper).
 
 ## F-14 — Altitude chart
 - **Status:** Implemented
-- **Current implementation:** `CustomPaint` chart of target altitude over 24 h with day/twilight/night bands, a minimum-altitude line and a "now" marker.
-- **Relevant files:** `lib/presentation/widgets/altitude_chart_widget.dart`.
-- **Known issues:** astronomy computed inside `paint()` (DEV-A3); uses device-local noon, unlike the windows/timeline; shows the wrong night by default (F-09); no widget test (TD-023).
+- **Current implementation:** `CustomPaint` chart of target altitude over 24 h with day/twilight/night bands, a minimum-altitude line and a "now" marker. **TASK 2.3:** render-only — `build()` resolves a `SessionNight` and calls `VisibilityCalculator.calculateAltitudeCurve` once; the painter only maps the resulting samples (5-minute grid, 289 points, up from the old ad-hoc 96) to pixels, and no longer imports `astronomical_engine.dart` or calls raw astronomy. The chart now shares its window with the timeline/windows (same `SessionNight`), fixing the divergence DEV-A3 described. Constructor unchanged, so `home_screen.dart` needed no change.
+- **Relevant files:** `lib/presentation/widgets/altitude_chart_widget.dart`, `lib/domain/models/altitude_curve.dart`.
+- **Known issues:** shows the wrong night by default (F-09, still true: `sessionDate` is still the ViewModel's UTC-based date until TASK 2.4). *Resolved (TASK 2.3):* astronomy inside the painter and the device-local-noon divergence from the windows/timeline (DEV-A3, TD-023); a widget test now exists (3 tests: a normal night, a polar-night site, and a date with no "now" dot).
 - **Dependencies:** F-11, F-13.
 - **Roadmap relevance:** Phase 8.
 
@@ -493,9 +495,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-48 — Automated tests
 - **Status:** Partial
-- **Current implementation:** 135 tests in 27 files; all pass (`dart run tool/check.dart` after TASK 2.2; 83 in 24 files after TASK 1.2). New (TASK 2.2): `session_night_resolver_test.dart` (the ADR-007 matrix and invariants), `calendar_date_test.dart`, `clock_test.dart` (which includes a guard that `lib/domain` has no `DateTime.now()`), plus one `SessionLog.fromJson` clock-fallback test. Earlier: `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`. New (TASK 1.2): `planner_bootstrap_test.dart` (seeding-before-first-read, bootstrap-failure/retry, `isDefaultLocation`) and `home_screen_test.dart` (empty-state actions, default-location banner, weather-failure/retry, bootstrap-failure/retry), using a `FlakyTargetRepository` test double (`test/support/`).
+- **Current implementation:** 147 tests in 29 files; all pass, three consecutive full runs (`dart run tool/check.dart` after TASK 2.3; 135 in 27 files after TASK 2.2, 83 in 24 files after TASK 1.2). New (TASK 2.3): `visibility_calculator_session_night_test.dart` (9 tests: the ADR-007 polar cases, exact agreement between the new SessionNight-based API and the legacy wrappers, clip-flag behavior in both) and `altitude_chart_widget_test.dart` (3 tests, the chart's first widget test: a normal night, a polar-night site, a date far from "now"). New (TASK 2.2): `session_night_resolver_test.dart` (the ADR-007 matrix and invariants), `calendar_date_test.dart`, `clock_test.dart` (which includes a guard that `lib/domain` has no `DateTime.now()`), plus one `SessionLog.fromJson` clock-fallback test. Earlier: `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`. New (TASK 1.2): `planner_bootstrap_test.dart` (seeding-before-first-read, bootstrap-failure/retry, `isDefaultLocation`) and `home_screen_test.dart` (empty-state actions, default-location banner, weather-failure/retry, bootstrap-failure/retry), using a `FlakyTargetRepository` test double (`test/support/`).
 - **Relevant files:** `test/` (see `docs/TEST_PLAN.md`).
-- **Known issues:** no test for the live capture-budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static — `home_screen_test.dart` resets it in `setUp()` to avoid cross-test navigation leaks, a workaround, not a fix; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests.
+- **Known issues:** no test for the live capture-budget math, Capture Plan, Sky, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static — `home_screen_test.dart` resets it in `setUp()` to avoid cross-test navigation leaks, a workaround, not a fix; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests. *Resolved 2026-09-22 (TASK 2.3):* no widget test for the altitude chart.
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 

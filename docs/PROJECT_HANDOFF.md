@@ -7,8 +7,10 @@
 > and TASK 1.2 (deterministic bootstrap: seeding awaited before `runApp`, weather off
 > the startup path, `hasBootstrapError`/`retryBootstrap`, Home empty/error states).
 > TASK 1.3 added the quality gate and CI. TASK 2.1 accepted ADR-007 (SessionNight),
-> and TASK 2.2 (2026-09-22) implemented its pure-domain part, which is not yet used by
-> the app. Work now follows `docs/MASTER_ROADMAP.md`; the current position is the "active
+> TASK 2.2 (2026-09-22) implemented its pure-domain part, and TASK 2.3 (`de1792a`)
+> made the calculators and the altitude chart consume it, via deprecated wrappers so
+> no other caller needed to change — the ViewModel still isn't wired (TASK 2.4). Work
+> now follows `docs/MASTER_ROADMAP.md`; the current position is the "active
 > task" line in `docs/ROADMAP.md`.
 >
 > **The code is the source of truth for the ACTUAL state.** Design intent is kept
@@ -24,7 +26,7 @@
 
 1. Read this file, then `ARCHITECTURE.md` (Parts B–C), `FEATURE_STATUS.md`
    (summary table) and `TECH_DEBT.md` (Critical and High).
-2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **135 pass,
+2. Baseline to expect: `flutter analyze` → no issues; `flutter test` → **147 pass,
    0 fail** (green since TASK 1.1; TD-003 resolved). Treat any failure as a
    regression.
 3. **Scope is `docs/MASTER_ROADMAP.md`** (approved 2026-09-21, OD-06): one roadmap
@@ -268,18 +270,22 @@ verification against real sample files, which the repository lacks (TD-018).
 
 ## 19. Tests
 
-135 tests in 27 files: domain services (astronomy, optics, session feasibility,
-visibility windows, metadata parsing, session log, the session-night resolver and its
+147 tests in 29 files: domain services (astronomy, optics, session feasibility,
+visibility windows plus the new SessionNight-based timeline/windows/altitude-curve
+suite, metadata parsing, session log, the session-night resolver and its
 ADR-007 matrix, calendar date, clock), Drift repositories and database,
 the Open-Meteo repository (mocked client), form-validation widget tests for the
 Equipment and Target screens, four ViewModel suites (session date, minimum altitude,
-location, bootstrap), an app-boot widget test, one end-to-end flow, and a Home
+location, bootstrap), an app-boot widget test, one end-to-end flow, a Home
 widget-test suite (empty state, default-location banner, weather failure, bootstrap
-failure). *(At the audit, 71 tests in 21 files, 1,757 lines; TASK 1.1 added the
-location suite; TASK 1.2 added the bootstrap and Home suites; TASK 2.2 added 52
-session-night, calendar-date and clock tests.)*
+failure), and the altitude chart's first widget test (normal night, polar-night
+site, no-"now"-dot case). *(At the audit, 71 tests in 21 files, 1,757 lines; TASK 1.1
+added the location suite; TASK 1.2 added the bootstrap and Home suites; TASK 2.2
+added 52 session-night, calendar-date and clock tests; TASK 2.3 added 12 more —
+9 SessionNight-based calculator tests, 3 altitude-chart widget tests.)*
 
-- **Result:** 135 pass, 0 fail (`dart run tool/check.dart` after TASK 2.2; 83 after TASK 1.2). The
+- **Result:** 147 pass, 0 fail, three consecutive full runs (`dart run tool/check.dart`
+  after TASK 2.3; 135 after TASK 2.2; 83 after TASK 1.2). The
   audit's red `integration_flow_test.dart` (TD-003) was repaired, not weakened.
 - **Gaps:** no tests for the live budget math, Capture Plan, Sky, Altitude chart,
   Logbook, Location or Metadata screens; no migration tests; the NPF test is
@@ -293,7 +299,7 @@ session-night, calendar-date and clock tests.)*
 | --- | --- | --- |
 | Install dependencies | `flutter pub get` | Yes (implicitly) |
 | Analyze | `flutter analyze --no-pub` | **Yes** — clean |
-| Test | `flutter test --no-pub` | **Yes** — 135/135 (after TASK 2.2; 83 after TASK 1.2; was 70/71 at the audit) |
+| Test | `flutter test --no-pub` | **Yes** — 147/147 (after TASK 2.3; 135 after TASK 2.2; 83 after TASK 1.2; was 70/71 at the audit) |
 | Regenerate Drift code after changing tables | `dart run build_runner build --delete-conflicting-outputs` | **No** (standard `drift_dev` step; not run) |
 | Run on Android | `flutter run` | **No** — no device/emulator run in the audit |
 | Release build | `flutter build apk` | **No** — release signing currently uses the debug key |

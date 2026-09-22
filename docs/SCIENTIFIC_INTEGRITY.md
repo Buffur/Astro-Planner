@@ -6,7 +6,11 @@
 > below. TASKs 1.2–1.3 changed application code without touching any calculation
 > recorded here. **2026-09-22 (TASK 2.1):** SI-010 gained a decision note (ADR-007);
 > no calculation changed. **TASK 2.2:** new calculation CALC-21 (the session-night
-> window), which is not yet used by the app; SI-010 progress noted.
+> window), which is not yet used by the app; SI-010 progress noted. **TASK 2.3
+> (commit `de1792a`):** CALC-10/CALC-11 reimplemented as wrappers over new
+> calculations CALC-22/CALC-23/CALC-24 (SessionNight-based timeline, windows,
+> altitude curve); same formulas, not yet used by the app either; SI-010 progress
+> extended.
 > **Nothing in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
@@ -479,7 +483,7 @@ Interpretation" above without replacing it:
 - **Polar states:** these are typed results, never nulls.
 
 The assumptions, limitations (L1–L4), invariants (I1–I12) and the 17-case test matrix
-are in ADR-007 §11–§14. CALC-10 and CALC-11 are unchanged.
+are in ADR-007 §11–§14.
 
 **Progress 2026-09-22 (TASK 2.2):** the ADR-007 window and default rule are
 implemented in the pure domain as CALC-21 (`SessionNightResolver`) and tested against
@@ -488,6 +492,18 @@ sweeps in 13 contexts, and a 48-hour monotonicity walk. The expected instants we
 computed independently of the code. **The app does not use it yet**: the default path
 is still Broken until TASK 2.4, and the calculators take a `SessionNight` in TASK
 2.3.
+
+**Progress 2026-09-22 (TASK 2.3, commit `de1792a`):** CALC-10 and CALC-11 are no
+longer independent implementations — both are now thin wrappers over the new,
+`SessionNight`-based CALC-22/CALC-23 (plus CALC-24, the altitude curve), resolving
+the input date through a `MeanSolarTimeContext`. Verified to agree exactly with the
+pre-2.3 scan for a normal night, including that a window can be
+`clippedAtStart`/`clippedAtEnd` through either path in polar night. The altitude
+chart now consumes CALC-24 instead of computing astronomy itself (TD-023). **The
+default path is still Broken**: nothing in the app resolves a real `SessionNight`
+yet — `PlannerViewModel.sessionDate` is still the UTC calendar date, and both
+CALC-10/CALC-11's wrapper and the chart derive their window from that same wrong
+date. TASK 2.4 is what fixes the default itself.
 
 **Status:** Broken (default path). **Work items:** TD-001, TD-020.
 
@@ -613,8 +629,8 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-07 | `VisibilityCalculator.calculateLHA`, `calculateAltitude` | LST°, RA°, Dec°, lat° → altitude° | `sin a = sin δ sin φ + cos δ cos φ cos H` | Geometric altitude, no refraction | culmination case | Good |
 | CALC-08 | `calculateSunAltitude` | UTC, lat°, lon° → degrees | Low-precision solar coordinates (USNO "Approximate Solar Coordinates") | See SI-009; no direct reference-value test | indirect | Fair |
 | CALC-09 | `calculateLunarIllumination` | UTC → 0–1 | Mean synodic month from an epoch | SI-002 (≤ 4.7 pp error on 2025 samples) | 3 coarse | Fair |
-| CALC-10 | `calculateNightTimeline` | date (Y/M/D used as local solar date), lat, lon → `Map<String, DateTime?>` | Sun crossings −0.833/−6/−12/−18° on a 5-min scan | SI-009, SI-010; nulls at high latitude; first crossing only | solstice comparison | Fair |
-| CALC-11 | `calculateVisibilityWindows` | date, lat, lon, target, minAltitude°, sunLimit° (−18) → list of UTC windows | Sun ≤ limit **and** target ≥ minAltitude, 5-min steps | Quantized; no Moon/weather/horizon; J2000 coordinates | 4 | Fair |
+| CALC-10 | `calculateNightTimeline` | date (Y/M/D used as local solar date), lat, lon → `Map<String, DateTime?>` | Sun crossings −0.833/−6/−12/−18° on a 5-min scan | SI-009, SI-010; nulls at high latitude; first crossing only. *(TASK 2.3: now a thin wrapper over CALC-22, resolving the date through a `MeanSolarTimeContext`; numerically verified to agree exactly with the pre-2.3 scan for a normal night.)* | solstice comparison | Fair |
+| CALC-11 | `calculateVisibilityWindows` | date, lat, lon, target, minAltitude°, sunLimit° (−18) → list of UTC windows | Sun ≤ limit **and** target ≥ minAltitude, 5-min steps | Quantized; no Moon/weather/horizon; J2000 coordinates. *(TASK 2.3: now a thin wrapper over CALC-23; can report `clippedAtStart`/`clippedAtEnd` in polar night, verified.)* | 4 | Fair |
 | CALC-12 | `OpticalCalculator.calculatePixelScale` | pitch µm, EFL mm → arcsec/px | `206.265·p/f` | Returns 0.0 if EFL ≤ 0 | 1 | Good |
 | CALC-13 | `calculateFOV` | sensor dimension mm, EFL mm → degrees | `2·atan(d / 2f)` | Returns 0.0 if EFL ≤ 0; **not surfaced in UI** | 1 | Good |
 | CALC-14 | `calculateEffectiveFocalLength` | native FL mm → mm | Identity (no reducer/Barlow) | Optical multipliers removed in the latest commit | 1 | Fair |
@@ -625,6 +641,9 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-19 | `SessionCalculator.estimateTotalDuration` | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | **Dead code** — nothing calls it | 1 | Good (but unused) |
 | CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good (**not yet used by the app**) |
 | CALC-20 | `PlannerViewModel` derived getters | plan + site → various | `estimatedRequiredTime` = Σ(exposure×count over **all** block types) + 5 s × frames; `totalIntegrationTime` = Σ lights only; `maxAltitude` = altitude at LHA = 0 | Not restricted to the night; conflates integration, acquisition and calibration (TD-022) | **none** | Poor |
+| CALC-22 *(TASK 2.3)* | `VisibilityCalculator.calculateNightTimelineForNight` | `SessionNight` → `NightTimeline` | Same Sun-crossing scan as CALC-10, on `[night.startUtc, night.endUtc]` at the shared 5-min step; typed per threshold (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow`), never a bare null (SI-008) | Same as CALC-10 (SI-009); first crossing only per threshold | ADR-007 T13–T15 (polar cases), exact agreement with CALC-10 for a normal night | Good (**not yet used by the app** — TASK 2.4) |
+| CALC-23 *(TASK 2.3)* | `VisibilityCalculator.calculateVisibilityWindowsForNight` | `SessionNight`, target, minAltitude°, darknessLimitDeg° (−18) → list of `VisibilityWindow` | Same rule as CALC-11 (Sun ≤ limit and target ≥ minAltitude), sampled via CALC-24; a window touching the `SessionNight` boundary in polar night is flagged `clippedAtStart`/`clippedAtEnd` (ADR-007 §9) | Same as CALC-11 | polar clip case (Tromsø circumpolar target), exact agreement with CALC-11 for a normal night | Good (**not yet used by the app** — TASK 2.4) |
+| CALC-24 *(TASK 2.3)* | `VisibilityCalculator.calculateAltitudeCurve` | `SessionNight`, target → `AltitudeCurve` (289 samples) | Sun and target altitude (CALC-07, CALC-08) on the shared 5-min grid, `night.startUtc` to `night.endUtc` inclusive | Same simplifications as CALC-07/CALC-08 (no refraction, low-precision Sun) | grid spacing/count, agreement with CALC-22's crossing instant | Good — consumed by `AltitudeChartWidget`, the only current caller |
 
 ---
 

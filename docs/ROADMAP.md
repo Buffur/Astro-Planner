@@ -199,8 +199,14 @@ rewritten to match the code.*
   - Completed 2026-09-22: **TASK 2.2** — pure-domain `SessionNight`, `CalendarDate`,
     `SiteTimeContext`, `SessionNightResolver` and `Clock`, with the ADR-007 test matrix
     (135 tests green). Not yet used by the app.
-  - **Next: TASK 2.3 — Calculators consume SessionNight.** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 2.3** (`de1792a`) — the calculators
+    (`calculateNightTimelineForNight`, `calculateVisibilityWindowsForNight`,
+    `calculateAltitudeCurve`) and the altitude chart consume `SessionNight`, on a
+    shared 5-minute grid; the old DateTime-based calculators are now thin wrappers,
+    so `planner_viewmodel.dart` and `sky_darkness_widget.dart` need no change yet
+    (147 tests green). Not yet used by the ViewModel.
+  - **Next: TASK 2.4 — Planner and UI adopt SessionNight.** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 
