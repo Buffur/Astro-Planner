@@ -42,6 +42,7 @@
 > **TASK 5.5 (2026-09-22):** `FitAnalyzer` (CALC-26) places the ADR-009 event sequence atomically into the windows and reports fits / tight / does not fit / no window / nothing to fit with a reason, end time, lost tails, unplaced frames, the inverse maximum and a similar-nights hint; the sum-of-windows `SessionCalculator` (CALC-18) was deleted. Affected entries: F-36, F-48.
 > **TASK 5.6 (2026-09-22):** the capture planner UI shows every ADR-009 line (integration, acquisition, calibration in/outside the window, setup, window load vs available, session budget), the fit with its reason and end time, a one-tap "fill / trim to tonight's window" action, √N per (filter, exposure) group with help text, storage or "Unknown", and an assumptions panel; the block editor sets the calibration policy, binning and a typed gain. `capture_plan_widget.dart` was split into `widgets/capture_plan/`. Group G5 is complete. F-35 and F-37 → Implemented; F-39 Missing → Partial; F-36 and F-48 updated.
 > **TASK 6.2 (2026-09-22):** independent reference fixtures (USNO events and celestial-navigation altitudes, JPL Horizons Sun elevations, SIMBAD J2000 star positions; `test/fixtures/astronomy/`) and tolerance tests; target coordinates are now precessed J2000 → date (Meeus ch. 21, owner decision) in the one domain target-altitude function; altitudes stay airless with the −0.833° sunrise/sunset convention (owner decision); source/units/error doc comments on the astronomy functions. Affected entries: F-11, F-13, F-14, F-48.
+> **TASK 6.3 (2026-09-22):** a pure-domain Moon ephemeris (`MoonCalculator`, Meeus ch. 47 full tables in `moon_series.dart`, ADR-010) — position, topocentric altitude, illuminated fraction, phase longitude, rise/set on the night grid — verified against JPL Horizons and USNO well inside ADR-010 §4. **Not used by the app yet** (TASK 6.4 wires it and retires the mean-phase model). F-16 Missing → Partial; F-48 updated.
 
 ## Status legend
 
@@ -82,7 +83,7 @@ feature exists although its roadmap phase has not been reached in
 | F-13 | Target visibility windows | Partial | 8 |
 | F-14 | Altitude chart | Implemented | 8 |
 | F-15 | Lunar illumination | Partial | 8 |
-| F-16 | Moon position, rise/set, Moon–target separation | Missing | 8 |
+| F-16 | Moon position, rise/set, Moon–target separation | Partial | 8 |
 | F-17 | Horizon / obstruction model | Missing | 8 |
 | F-18 | Sky-darkness warning | Prototype | 11 |
 | F-19 | Target selection, search, custom target CRUD | Implemented | 7 |
@@ -261,9 +262,9 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 8. Tests: 3 coarse tests (pure calculator) plus ViewModel null-without-site coverage.
 
 ## F-16 — Moon position, rise/set, Moon–target separation
-- **Status:** Missing
-- **Current implementation:** none.
-- **Relevant files:** —
+- **Status:** Partial *(was Missing; TASK 6.3)*
+- **Current implementation:** the domain `MoonCalculator` (ADR-010) computes the Moon's apparent position, topocentric altitude, illuminated fraction and moonrise/moonset on the night grid, reference-tested against JPL Horizons and USNO. **Not shown anywhere yet** and no Moon–target separation (TASK 6.4).
+- **Relevant files:** `lib/domain/services/moon_calculator.dart`, `lib/domain/services/moon_series.dart`.
 - **Known issues:** required by the PRODUCT_SPEC MVP; the sky warning ignores whether the Moon is up (SI-002).
 - **Dependencies:** decision PD-07.
 - **Roadmap relevance:** Phase 8.

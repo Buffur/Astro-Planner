@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **299 tests: 299 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.2) |
+| `flutter test --no-pub` | **309 tests: 309 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -303,3 +303,20 @@ Any test failure from here on is a regression, not a known pre-existing issue
   - precessed Dec within 0.03° of USNO's Dec of date;
   - a regression guard that the unprecessed error exceeds 0.2°;
   - precession is the identity at J2000.0.
+
+**Added by TASK 6.3** (Moon ephemeris), 10 tests and 1 fixture:
+- **`test/fixtures/astronomy/horizons_moon.json`:**
+  - JPL Horizons Moon geocentric apparent RA/Dec, illuminated fraction, range and
+    ecliptic-of-date longitude/latitude at 32 instants (559 h apart, 2026–2027);
+  - topocentric airless elevation at London, Tokyo and Tromsø;
+  - the USNO phases for 2026–2027.
+
+  Source, queries and retrieval date are inside the file.
+- **`test/domain/services/moon_calculator_test.dart`** (ADR-010 §4 tolerances):
+  - RA/Dec and ecliptic coordinates ≤ 0.02°; distance ≤ 100 km; illumination ≤ 1 pp;
+  - topocentric altitude ≤ 0.05° at 3 sites including 69.65°N;
+  - all USNO phase instants ≤ 10 min (bisection on the Moon − Sun longitude);
+  - moonrise/moonset matched one-to-one with USNO on 15 site-nights within
+    [−2.5, +7.5] min (USNO minute rounding included);
+  - no-event nights are typed;
+  - ΔT plausibility.

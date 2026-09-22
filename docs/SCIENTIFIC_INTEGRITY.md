@@ -37,6 +37,7 @@
 > **TASK 5.6 (2026-09-22):** SI-003 and SI-004 progress (per-group √N with help text; descriptive-only gain in the editor). No calculation changed.
 > **TASK 6.1 (2026-09-22, docs only):** ADR-010 decision notes on SI-002, SI-009 and SI-012. No calculation changed.
 > **TASK 6.2 (2026-09-22):** CALC-07/CALC-08 now reference-tested; new CALC-27 (precession) — a recorded formula change (ADR-010, TASK 6.2 decisions); SI-009 and SI-012 progress.
+> **TASK 6.3 (2026-09-22):** new CALC-28 (Moon, ADR-010) with reference results; SI-002 progress. No existing calculation changed.
 
 ## Purpose and authority
 
@@ -196,6 +197,8 @@ scan has not been done).
    (PD-07).
 
 **Decision 2026-09-22 (TASK 6.1):** ADR-010 decides the Moon model: in-house Meeus ch. 47 (full tables), ch. 48 illumination, ch. 40 parallax, with cited constants and a documented ΔT; the acceptance tolerances (illumination ≤ 1 pp, position ≤ 0.02°, rise/set on the grid [−2, +7] min) are in ADR-010 §4. The mean-phase model is retired in TASK 6.4. Not implemented.
+
+**Progress 2026-09-22 (TASK 6.3):** the ADR-010 Moon model exists in the domain (CALC-28) and meets every ADR-010 §4 tolerance with wide margins (illumination 0.008 pp vs the mean-phase model's 4.7 pp). The app still shows the mean-phase value until TASK 6.4 switches it and deletes the old model.
 
 **Status:** Partial. **Work items:** TD-032, TD-033.
 
@@ -726,6 +729,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-25 *(ADR-009; implemented TASK 5.4)* | `CaptureBudgetCalculator.calculate` (`lib/domain/services/capture_budget_calculator.dart`) | blocks (type, filter, exposure s, count, calibration policy), overhead parameters (per-frame s; optional dither N and s, refocus T and s, filter change s, flip s, setup s), "transit in a window" flag → breakdown | Integration = Σ light exposure; acquisition = integration + per-frame × lights + in-window overhead events (one ordered sequence); window load = acquisition + in-window calibration; session budget = window load + outside-window calibration + setup; integer ms | Overhead defaults are assumptions (per-frame 5 s on; the rest off, shown as "not included"); ADR-009 L1–L6 | ADR-009 E1–E7 (independent scratch model) | Good — E1–E7 reproduced to the millisecond (`capture_budget_calculator_test.dart`) |
 | CALC-26 *(ADR-009; implemented TASK 5.5)* | `FitAnalyzer.analyze` / `maxPlaceableFrames` / `noWindowReason` (`lib/domain/services/fit_analyzer.dart`) | the CALC-25 event sequence, `List<VisibilityWindow>`, margin m (default 15 %), transit instant → fits / tight / does not fit / no window / nothing to fit, reason, end instant, unused time, lost tails, unplaced frames per block, flip applied/dropped, similar-nights hint; inverse maximum | Atomic events placed in order; an event that doesn't fit moves to the next window and the tail is lost; the flip is placed at the first boundary at/after transit or dropped if the plan ends first; tight if placed time > (1 − m) × Σ windows; nights = ⌈window load ÷ placed⌉ | One target per night; the margin labels only; transit to 5-min resolution | ADR-009 E1–E7 (E1b per the TASK 5.5 erratum), margin, inverse, no-window reasons | Good |
 | CALC-27 *(TASK 6.2)* | `AstronomicalEngine.precessJ2000ToDate` | J2000 RA°, Dec°, JD → RA°, Dec° of date | Meeus ch. 21, eq. 21.2 (IAU 1976 ζ, z, θ) and 21.4 (rigorous) | Mean equinox of date; no nutation, aberration or proper motion (about 20–40″) | identity at J2000.0; precessed Dec within 0.03° of USNO Dec of date for all 67 observations | Good |
+| CALC-28 *(TASK 6.3)* | `MoonCalculator.position` / `topocentricAltitude` / `illuminatedFraction` / `phaseLongitudeDeg` / `riseSetForNight` (`lib/domain/services/moon_calculator.dart`, tables in `moon_series.dart`) | UTC (as UT1), lat°, lon°, `SessionNight` | Meeus ch. 47 full ELP-2000/82 tables (+ additive terms), ch. 22 nutation (4 terms) and obliquity, ch. 13 transforms, ch. 40 topocentric parallax, ch. 25 Sun (low accuracy), ch. 48 illumination, ch. 15 rise/set h₀ = 0.7275π − 0.5667°; ΔT = 69.2 s | Airless altitudes; rise/set on the 5-min grid; ΔT constant (±10 s ≈ 6″) | **reference (ADR-010 §4):** 32 Horizons instants over 2026–27: RA·cosδ 7.5″, Dec 2.3″, λ 7.4″, β 1.8″ (tolerance 72″); illumination 0.008 pp (≤ 1 pp); topocentric altitude 0.0016° at 3 sites incl. 69.65°N (≤ 0.05°); all 99 USNO phases ≤ 10 min; USNO moonrise/moonset on 15 site-nights matched one-to-one within [−2, +7] min | Good (**not yet used by the app**, TASK 6.4) |
 
 ---
 

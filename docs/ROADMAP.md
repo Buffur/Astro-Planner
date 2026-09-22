@@ -319,8 +319,11 @@ rewritten to match the code.*
     and tolerance tests; J2000 → date precession (owner: now) and the airless +
     −0.833° refraction policy (owner); the Sun formula measured and kept. 299 tests
     green.
-  - **Next: TASK 6.3 — Moon ephemeris.** Not started; it begins only on the owner's
-    go-ahead.
+  - Completed 2026-09-22: **TASK 6.3** — `MoonCalculator` (Meeus ch. 47 full tables,
+    ADR-010), reference-tested against JPL Horizons and USNO; not yet used by the
+    app. 309 tests green.
+  - **Next: TASK 6.4 — MoonConditions; retire the mean-phase model.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

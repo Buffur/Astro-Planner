@@ -42,6 +42,7 @@
 > **TASK 5.6 (2026-09-22):** ADR-009 marked fully implemented (G5 complete).
 > **TASK 6.1 (2026-09-22, documentation only, no code changed):** ADR-010 (ephemeris approach and moving objects) accepted in Part F; PD-07 and PD-16 resolved (E.1). Checked against `astronomical_engine.dart`, `visibility_calculator.dart` and `target_selection_screen.dart` at `a61459b`.
 > **TASK 6.2 (2026-09-22):** ADR-010 gained the owner's precession (formula change: J2000 → date, Meeus ch. 21) and refraction (airless + −0.833°) decisions and the Sun measurements.
+> **TASK 6.3 (2026-09-22):** ADR-010 status updated (Moon model implemented).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1329,8 +1330,10 @@ rule 3).
 
 Status: accepted (owner, 2026-09-22, TASK 6.1). Resolves PD-07 and PD-16. It also
 answers the Phase 0 pending decision "Which astronomical engine/library/reference
-to use for future ephemeris work" (Part A, unchanged). **Not implemented yet:**
-TASKs 6.3–6.4 for the Moon, TASK 8.1 for the target types.
+to use for future ephemeris work" (Part A, unchanged). **Implemented:** TASK 6.3,
+the Moon model per §2 (every §4 tolerance met; CALC-28). **Not implemented yet:**
+TASK 6.4 (MoonConditions, retiring the mean-phase model), TASK 8.1 for the target
+types.
 
 **TASK 6.2 decisions (owner, 2026-09-22), recorded here as §2 required:**
 - **Precession — formula change** (rule 16, never silent).
