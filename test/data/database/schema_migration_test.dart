@@ -119,6 +119,79 @@ void main() {
     });
   });
 
+  group('TASK 5.3: v11 (capture-block order, policy, typed gain)', () {
+    for (final from in [8, 9, 10]) {
+      test('v$from -> v11 matches the v11 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 11);
+        await db.close();
+      });
+    }
+
+    test(
+      'v10 -> v11 converts rows: frame type lower-cased, order kept, '
+      'calibration outsideWindow, gain_iso -> unknown kind, never guessed',
+      () async {
+        final schema = await verifier.schemaAt(10);
+        final raw = schema.rawDatabase;
+        raw.execute(
+          "INSERT INTO session_logs (id, target_name, equipment_name, "
+          "session_date, planned_light_frames) VALUES "
+          "(1, 'M31', 'Rig', 1735689600, 10);",
+        );
+        final rows = [
+          "(1, 1, 'LIGHT', 'Ha', 300.0, 20, 1, '100')",
+          "(2, 1, 'dark', NULL, 300.0, 20, 1, 'Unity')",
+          "(3, 1, 'Flat', 'Ha', 2.0, 30, 1, NULL)",
+          "(4, 1, 'bias', NULL, 0.001, 50, 1, ' 12.5 ')",
+        ];
+        for (final r in rows) {
+          raw.execute(
+            'INSERT INTO capture_blocks (id, session_log_id, frame_type, '
+            'filter_name, exposure_time_seconds, frame_count, binning, '
+            'gain_iso) VALUES $r;',
+          );
+        }
+
+        final db = AppDatabase(schema.newConnection());
+        final blocks = await (db.select(
+          db.captureBlocks,
+        )..orderBy([(t) => OrderingTerm.asc(t.position)])).get();
+
+        expect(blocks.map((b) => b.id), [1, 2, 3, 4]); // order preserved
+        expect(blocks.map((b) => b.position), [1, 2, 3, 4]);
+        expect(blocks.map((b) => b.frameType), [
+          'light',
+          'dark',
+          'flat',
+          'bias',
+        ]);
+        expect(blocks.map((b) => b.calibrationPolicy), [
+          null,
+          'outsideWindow',
+          'outsideWindow',
+          'outsideWindow',
+        ]);
+        expect(blocks.every((b) => b.gainKind == 'unknown'), isTrue);
+        expect(blocks.map((b) => b.gainValue), [100.0, null, null, 12.5]);
+        expect(blocks[0].filterName, 'Ha');
+        expect(blocks[3].exposureTimeSeconds, 0.001);
+
+        final cols = await db
+            .customSelect(
+              "SELECT name FROM pragma_table_info('capture_blocks')",
+            )
+            .get();
+        expect(
+          cols.map((r) => r.read<String>('name')),
+          isNot(contains('gain_iso')),
+        );
+        await db.close();
+      },
+    );
+  });
+
   group('M2: v8 -> v10 data preservation', () {
     test(
       'device/module/rig chain, target, location, session + 2 blocks survive; '

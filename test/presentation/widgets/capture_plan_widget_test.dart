@@ -140,7 +140,7 @@ void main() {
     'tapping a block opens a pre-filled edit dialog that updates it',
     (tester) async {
       await vm.addCaptureBlock(
-        const CaptureBlock(
+        CaptureBlock(
           frameType: FrameType.light,
           filterName: 'L',
           exposureTimeSeconds: 60.0,

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 import '../../domain/repositories/logbook_repository.dart';
 import '../../domain/models/session_log.dart' as domain;
@@ -17,23 +18,18 @@ class DriftLogbookRepository implements LogbookRepository {
     final sessionRows = await (_db.select(
       _db.sessionLogs,
     )..orderBy([(t) => OrderingTerm.desc(t.id)])).get();
-    final blockRows = await _db.select(_db.captureBlocks).get();
+    // TASK 5.3: blocks come back in their saved order.
+    final blockRows =
+        await (_db.select(_db.captureBlocks)..orderBy([
+              (t) => OrderingTerm.asc(t.position),
+              (t) => OrderingTerm.asc(t.id),
+            ]))
+            .get();
 
     final blocksBySession = <int, List<domain.CaptureBlock>>{};
     for (final b in blockRows) {
-      final block = domain.CaptureBlock(
-        id: b.id,
-        sessionLogId: b.sessionLogId,
-        frameType: domain.FrameType.values.firstWhere(
-          (e) => e.name == b.frameType,
-          orElse: () => domain.FrameType.light,
-        ),
-        filterName: b.filterName,
-        exposureTimeSeconds: b.exposureTimeSeconds,
-        frameCount: b.frameCount,
-        binning: b.binning,
-        gainIso: b.gainIso,
-      );
+      final block = _toDomain(b);
+      if (block == null) continue;
       blocksBySession.putIfAbsent(b.sessionLogId, () => []).add(block);
     }
 
@@ -95,21 +91,7 @@ class DriftLogbookRepository implements LogbookRepository {
             ),
           );
 
-      for (final block in log.captureBlocks) {
-        await _db
-            .into(_db.captureBlocks)
-            .insert(
-              CaptureBlocksCompanion.insert(
-                sessionLogId: sessionId,
-                frameType: block.frameType.name,
-                filterName: Value(block.filterName),
-                exposureTimeSeconds: block.exposureTimeSeconds,
-                frameCount: block.frameCount,
-                binning: Value(block.binning),
-                gainIso: Value(block.gainIso),
-              ),
-            );
-      }
+      await _insertBlocks(sessionId, log.captureBlocks);
 
       return sessionId;
     });
@@ -150,21 +132,7 @@ class DriftLogbookRepository implements LogbookRepository {
         _db.captureBlocks,
       )..where((t) => t.sessionLogId.equals(log.id))).go();
 
-      for (final block in log.captureBlocks) {
-        await _db
-            .into(_db.captureBlocks)
-            .insert(
-              CaptureBlocksCompanion.insert(
-                sessionLogId: log.id,
-                frameType: block.frameType.name,
-                filterName: Value(block.filterName),
-                exposureTimeSeconds: block.exposureTimeSeconds,
-                frameCount: block.frameCount,
-                binning: Value(block.binning),
-                gainIso: Value(block.gainIso),
-              ),
-            );
-      }
+      await _insertBlocks(log.id, log.captureBlocks);
     });
   }
 
@@ -176,5 +144,61 @@ class DriftLogbookRepository implements LogbookRepository {
       )..where((t) => t.sessionLogId.equals(id))).go();
       await (_db.delete(_db.sessionLogs)..where((t) => t.id.equals(id))).go();
     });
+  }
+
+  /// Writes [blocks] for [sessionId] with their list order as `position`.
+  Future<void> _insertBlocks(
+    int sessionId,
+    List<domain.CaptureBlock> blocks,
+  ) async {
+    for (var i = 0; i < blocks.length; i++) {
+      final block = blocks[i];
+      await _db
+          .into(_db.captureBlocks)
+          .insert(
+            CaptureBlocksCompanion.insert(
+              sessionLogId: sessionId,
+              frameType: block.frameType.name,
+              filterName: Value(block.filterName),
+              exposureTimeSeconds: block.exposureTimeSeconds,
+              frameCount: block.frameCount,
+              binning: Value(block.binning),
+              position: Value(i),
+              calibrationPolicy: Value(block.calibrationPolicy?.name),
+              gainKind: Value(block.gain.kind.name),
+              gainValue: Value(block.gain.value),
+            ),
+          );
+    }
+  }
+
+  /// Maps a stored row to a domain block, or null (logged) when the row
+  /// holds values the domain rejects: an unknown frame type, or a value
+  /// outside the validated ranges (possible only in data written before
+  /// TASK 5.3's validation). Never silently read as a light frame.
+  static domain.CaptureBlock? _toDomain(CaptureBlock b) {
+    final type = domain.CaptureBlock.tryParseFrameType(b.frameType);
+    if (type == null) {
+      debugPrint('Skipping capture block ${b.id}: frame type ${b.frameType}');
+      return null;
+    }
+    try {
+      return domain.CaptureBlock(
+        id: b.id,
+        sessionLogId: b.sessionLogId,
+        frameType: type,
+        filterName: b.filterName,
+        exposureTimeSeconds: b.exposureTimeSeconds,
+        frameCount: b.frameCount,
+        binning: b.binning,
+        gain: domain.CaptureGain.fromStored(b.gainKind, b.gainValue),
+        calibrationPolicy: type == domain.FrameType.light
+            ? null
+            : domain.CalibrationPolicy.tryParse(b.calibrationPolicy),
+      );
+    } on ArgumentError catch (e) {
+      debugPrint('Skipping invalid capture block ${b.id}: $e');
+      return null;
+    }
   }
 }

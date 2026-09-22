@@ -164,18 +164,18 @@ class PlannerViewModel extends ChangeNotifier {
     if (_captureBlocks.isEmpty) {
       _isExampleCapturePlan = true;
       _captureBlocks = [
-        const CaptureBlock(
+        CaptureBlock(
           frameType: FrameType.light,
           filterName: 'L',
           exposureTimeSeconds: 60.0,
           frameCount: 100,
         ),
-        const CaptureBlock(
+        CaptureBlock(
           frameType: FrameType.dark,
           exposureTimeSeconds: 60.0,
           frameCount: 20,
         ),
-        const CaptureBlock(
+        CaptureBlock(
           frameType: FrameType.flat,
           exposureTimeSeconds: 2.0,
           frameCount: 20,

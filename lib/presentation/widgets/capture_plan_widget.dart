@@ -129,6 +129,10 @@ class CapturePlanWidget extends StatelessWidget {
                         if (exposure == null || exposure <= 0) {
                           return 'Enter a positive number of seconds';
                         }
+                        if (exposure > CaptureBlock.maxExposureSeconds) {
+                          return 'At most '
+                              '${CaptureBlock.maxExposureSeconds.round()} s';
+                        }
                         return null;
                       },
                     ),
@@ -143,6 +147,9 @@ class CapturePlanWidget extends StatelessWidget {
                         final count = int.tryParse((value ?? '').trim());
                         if (count == null || count < 1) {
                           return 'Enter a whole number of at least 1';
+                        }
+                        if (count > CaptureBlock.maxFrameCount) {
+                          return 'At most ${CaptureBlock.maxFrameCount}';
                         }
                         return null;
                       },
@@ -175,7 +182,11 @@ class CapturePlanWidget extends StatelessWidget {
                       exposureTimeSeconds: exposure,
                       frameCount: count,
                       binning: initial?.binning ?? 1,
-                      gainIso: initial?.gainIso,
+                      // Carried over unchanged; editable from TASK 5.6.
+                      gain: initial?.gain ?? CaptureGain.none,
+                      calibrationPolicy: selectedType == FrameType.light
+                          ? null
+                          : initial?.calibrationPolicy,
                     );
 
                     if (editIndex == null) {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/models/capture_block.dart';
@@ -7,8 +8,9 @@ import '../../domain/repositories/planner_state_repository.dart';
 
 /// [PlannerStateRepository] backed by SharedPreferences.
 ///
-/// Uses exactly the keys and the capture-plan JSON shape the ViewModel used
-/// before TASK 5.2, so existing installs keep their state.
+/// Uses exactly the keys the ViewModel used before TASK 5.2, so existing
+/// installs keep their state; the capture-plan JSON is versioned since
+/// TASK 5.3 and the pre-5.3 shape is still read.
 class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   static const _activeLocationId = 'activeLocationId';
   static const _targetId = 'targetId';
@@ -40,28 +42,74 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   Future<void> setSelectedEquipmentId(int id) async =>
       (await _prefs).setInt(_equipmentId, id);
 
+  /// Current plan JSON version (TASK 5.3): `{"version": 2, "blocks": [...]}`.
+  /// Version 1 (before 5.3) was a bare list with a free-text `gainIso`; it
+  /// is still read. The plan moves into the database in TASK 11.4.
+  static const planJsonVersion = 2;
+
   @override
   Future<List<CaptureBlock>?> loadCaptureBlocks() async {
     final json = (await _prefs).getString(_captureBlocks);
     if (json == null) return null;
-    final list = jsonDecode(json) as List;
-    return list
-        .map(
-          (b) => CaptureBlock(
-            id: b['id'] ?? 0,
-            frameType: FrameType.values.firstWhere(
-              (e) => e.name == b['frameType'],
-              orElse: () => FrameType.light,
-            ),
-            filterName: b['filterName'],
-            exposureTimeSeconds:
-                (b['exposureTimeSeconds'] as num?)?.toDouble() ?? 0.0,
-            frameCount: b['frameCount'] ?? 0,
-            binning: b['binning'] ?? 1,
-            gainIso: b['gainIso'],
-          ),
-        )
-        .toList();
+    final decoded = jsonDecode(json);
+    final List<dynamic> list;
+    final int version;
+    if (decoded is List) {
+      version = 1;
+      list = decoded;
+    } else if (decoded is Map && decoded['blocks'] is List) {
+      version = (decoded['version'] as num?)?.toInt() ?? planJsonVersion;
+      list = decoded['blocks'] as List;
+    } else {
+      throw const FormatException('Unrecognised capture-plan JSON');
+    }
+    final blocks = <CaptureBlock>[];
+    for (final b in list.whereType<Map>()) {
+      final block = _blockFromJson(b, version);
+      if (block != null) blocks.add(block);
+    }
+    return blocks;
+  }
+
+  /// One block, or null (logged) when it is invalid — an invalid saved block
+  /// must not discard the rest of the plan, nor exist in the domain.
+  static CaptureBlock? _blockFromJson(Map b, int version) {
+    final type = CaptureBlock.tryParseFrameType(b['frameType'] as String?);
+    if (type == null) {
+      debugPrint('Skipping saved block: frame type ${b['frameType']}');
+      return null;
+    }
+    try {
+      final CaptureGain gain;
+      if (version >= 2) {
+        gain = CaptureGain.fromStored(
+          b['gainKind'] as String?,
+          (b['gainValue'] as num?)?.toDouble(),
+        );
+      } else {
+        // v1 free text: the kind can't be told, so it is never guessed.
+        final legacy = double.tryParse('${b['gainIso'] ?? ''}'.trim());
+        gain = legacy != null && legacy.isFinite && legacy >= 0
+            ? CaptureGain.unknown(legacy)
+            : CaptureGain.none;
+      }
+      return CaptureBlock(
+        id: (b['id'] as num?)?.toInt() ?? 0,
+        frameType: type,
+        filterName: b['filterName'] as String?,
+        exposureTimeSeconds:
+            (b['exposureTimeSeconds'] as num?)?.toDouble() ?? 0.0,
+        frameCount: (b['frameCount'] as num?)?.toInt() ?? 0,
+        binning: (b['binning'] as num?)?.toInt() ?? 1,
+        gain: gain,
+        calibrationPolicy: type == FrameType.light
+            ? null
+            : CalibrationPolicy.tryParse(b['calibrationPolicy'] as String?),
+      );
+    } on ArgumentError catch (e) {
+      debugPrint('Skipping invalid saved block: $e');
+      return null;
+    }
   }
 
   @override
@@ -75,10 +123,15 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
             'exposureTimeSeconds': b.exposureTimeSeconds,
             'frameCount': b.frameCount,
             'binning': b.binning,
-            'gainIso': b.gainIso,
+            'gainKind': b.gain.kind.name,
+            'gainValue': b.gain.value,
+            'calibrationPolicy': b.calibrationPolicy?.name,
           },
         )
         .toList();
-    await (await _prefs).setString(_captureBlocks, jsonEncode(list));
+    await (await _prefs).setString(
+      _captureBlocks,
+      jsonEncode({'version': planJsonVersion, 'blocks': list}),
+    );
   }
 }

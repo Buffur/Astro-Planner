@@ -3617,15 +3617,51 @@ class $CaptureBlocksTable extends CaptureBlocks
     requiredDuringInsert: false,
     defaultValue: const Constant(1),
   );
-  static const VerificationMeta _gainIsoMeta = const VerificationMeta(
-    'gainIso',
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
   );
   @override
-  late final GeneratedColumn<String> gainIso = GeneratedColumn<String>(
-    'gain_iso',
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _calibrationPolicyMeta = const VerificationMeta(
+    'calibrationPolicy',
+  );
+  @override
+  late final GeneratedColumn<String> calibrationPolicy =
+      GeneratedColumn<String>(
+        'calibration_policy',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _gainKindMeta = const VerificationMeta(
+    'gainKind',
+  );
+  @override
+  late final GeneratedColumn<String> gainKind = GeneratedColumn<String>(
+    'gain_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('unknown'),
+  );
+  static const VerificationMeta _gainValueMeta = const VerificationMeta(
+    'gainValue',
+  );
+  @override
+  late final GeneratedColumn<double> gainValue = GeneratedColumn<double>(
+    'gain_value',
     aliasedName,
     true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
   @override
@@ -3637,7 +3673,10 @@ class $CaptureBlocksTable extends CaptureBlocks
     exposureTimeSeconds,
     frameCount,
     binning,
-    gainIso,
+    position,
+    calibrationPolicy,
+    gainKind,
+    gainValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3704,10 +3743,31 @@ class $CaptureBlocksTable extends CaptureBlocks
         binning.isAcceptableOrUnknown(data['binning']!, _binningMeta),
       );
     }
-    if (data.containsKey('gain_iso')) {
+    if (data.containsKey('position')) {
       context.handle(
-        _gainIsoMeta,
-        gainIso.isAcceptableOrUnknown(data['gain_iso']!, _gainIsoMeta),
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    if (data.containsKey('calibration_policy')) {
+      context.handle(
+        _calibrationPolicyMeta,
+        calibrationPolicy.isAcceptableOrUnknown(
+          data['calibration_policy']!,
+          _calibrationPolicyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('gain_kind')) {
+      context.handle(
+        _gainKindMeta,
+        gainKind.isAcceptableOrUnknown(data['gain_kind']!, _gainKindMeta),
+      );
+    }
+    if (data.containsKey('gain_value')) {
+      context.handle(
+        _gainValueMeta,
+        gainValue.isAcceptableOrUnknown(data['gain_value']!, _gainValueMeta),
       );
     }
     return context;
@@ -3747,9 +3807,21 @@ class $CaptureBlocksTable extends CaptureBlocks
         DriftSqlType.int,
         data['${effectivePrefix}binning'],
       )!,
-      gainIso: attachedDatabase.typeMapping.read(
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+      calibrationPolicy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}gain_iso'],
+        data['${effectivePrefix}calibration_policy'],
+      ),
+      gainKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gain_kind'],
+      )!,
+      gainValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gain_value'],
       ),
     );
   }
@@ -3768,7 +3840,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
   final double exposureTimeSeconds;
   final int frameCount;
   final int binning;
-  final String? gainIso;
+  final int position;
+  final String? calibrationPolicy;
+  final String gainKind;
+  final double? gainValue;
   const CaptureBlock({
     required this.id,
     required this.sessionLogId,
@@ -3777,7 +3852,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     required this.exposureTimeSeconds,
     required this.frameCount,
     required this.binning,
-    this.gainIso,
+    required this.position,
+    this.calibrationPolicy,
+    required this.gainKind,
+    this.gainValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3791,8 +3869,13 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     map['exposure_time_seconds'] = Variable<double>(exposureTimeSeconds);
     map['frame_count'] = Variable<int>(frameCount);
     map['binning'] = Variable<int>(binning);
-    if (!nullToAbsent || gainIso != null) {
-      map['gain_iso'] = Variable<String>(gainIso);
+    map['position'] = Variable<int>(position);
+    if (!nullToAbsent || calibrationPolicy != null) {
+      map['calibration_policy'] = Variable<String>(calibrationPolicy);
+    }
+    map['gain_kind'] = Variable<String>(gainKind);
+    if (!nullToAbsent || gainValue != null) {
+      map['gain_value'] = Variable<double>(gainValue);
     }
     return map;
   }
@@ -3808,9 +3891,14 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       exposureTimeSeconds: Value(exposureTimeSeconds),
       frameCount: Value(frameCount),
       binning: Value(binning),
-      gainIso: gainIso == null && nullToAbsent
+      position: Value(position),
+      calibrationPolicy: calibrationPolicy == null && nullToAbsent
           ? const Value.absent()
-          : Value(gainIso),
+          : Value(calibrationPolicy),
+      gainKind: Value(gainKind),
+      gainValue: gainValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gainValue),
     );
   }
 
@@ -3829,7 +3917,12 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       ),
       frameCount: serializer.fromJson<int>(json['frameCount']),
       binning: serializer.fromJson<int>(json['binning']),
-      gainIso: serializer.fromJson<String?>(json['gainIso']),
+      position: serializer.fromJson<int>(json['position']),
+      calibrationPolicy: serializer.fromJson<String?>(
+        json['calibrationPolicy'],
+      ),
+      gainKind: serializer.fromJson<String>(json['gainKind']),
+      gainValue: serializer.fromJson<double?>(json['gainValue']),
     );
   }
   @override
@@ -3843,7 +3936,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       'exposureTimeSeconds': serializer.toJson<double>(exposureTimeSeconds),
       'frameCount': serializer.toJson<int>(frameCount),
       'binning': serializer.toJson<int>(binning),
-      'gainIso': serializer.toJson<String?>(gainIso),
+      'position': serializer.toJson<int>(position),
+      'calibrationPolicy': serializer.toJson<String?>(calibrationPolicy),
+      'gainKind': serializer.toJson<String>(gainKind),
+      'gainValue': serializer.toJson<double?>(gainValue),
     };
   }
 
@@ -3855,7 +3951,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     double? exposureTimeSeconds,
     int? frameCount,
     int? binning,
-    Value<String?> gainIso = const Value.absent(),
+    int? position,
+    Value<String?> calibrationPolicy = const Value.absent(),
+    String? gainKind,
+    Value<double?> gainValue = const Value.absent(),
   }) => CaptureBlock(
     id: id ?? this.id,
     sessionLogId: sessionLogId ?? this.sessionLogId,
@@ -3864,7 +3963,12 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     exposureTimeSeconds: exposureTimeSeconds ?? this.exposureTimeSeconds,
     frameCount: frameCount ?? this.frameCount,
     binning: binning ?? this.binning,
-    gainIso: gainIso.present ? gainIso.value : this.gainIso,
+    position: position ?? this.position,
+    calibrationPolicy: calibrationPolicy.present
+        ? calibrationPolicy.value
+        : this.calibrationPolicy,
+    gainKind: gainKind ?? this.gainKind,
+    gainValue: gainValue.present ? gainValue.value : this.gainValue,
   );
   CaptureBlock copyWithCompanion(CaptureBlocksCompanion data) {
     return CaptureBlock(
@@ -3883,7 +3987,12 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           ? data.frameCount.value
           : this.frameCount,
       binning: data.binning.present ? data.binning.value : this.binning,
-      gainIso: data.gainIso.present ? data.gainIso.value : this.gainIso,
+      position: data.position.present ? data.position.value : this.position,
+      calibrationPolicy: data.calibrationPolicy.present
+          ? data.calibrationPolicy.value
+          : this.calibrationPolicy,
+      gainKind: data.gainKind.present ? data.gainKind.value : this.gainKind,
+      gainValue: data.gainValue.present ? data.gainValue.value : this.gainValue,
     );
   }
 
@@ -3897,7 +4006,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           ..write('exposureTimeSeconds: $exposureTimeSeconds, ')
           ..write('frameCount: $frameCount, ')
           ..write('binning: $binning, ')
-          ..write('gainIso: $gainIso')
+          ..write('position: $position, ')
+          ..write('calibrationPolicy: $calibrationPolicy, ')
+          ..write('gainKind: $gainKind, ')
+          ..write('gainValue: $gainValue')
           ..write(')'))
         .toString();
   }
@@ -3911,7 +4023,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     exposureTimeSeconds,
     frameCount,
     binning,
-    gainIso,
+    position,
+    calibrationPolicy,
+    gainKind,
+    gainValue,
   );
   @override
   bool operator ==(Object other) =>
@@ -3924,7 +4039,10 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           other.exposureTimeSeconds == this.exposureTimeSeconds &&
           other.frameCount == this.frameCount &&
           other.binning == this.binning &&
-          other.gainIso == this.gainIso);
+          other.position == this.position &&
+          other.calibrationPolicy == this.calibrationPolicy &&
+          other.gainKind == this.gainKind &&
+          other.gainValue == this.gainValue);
 }
 
 class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
@@ -3935,7 +4053,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
   final Value<double> exposureTimeSeconds;
   final Value<int> frameCount;
   final Value<int> binning;
-  final Value<String?> gainIso;
+  final Value<int> position;
+  final Value<String?> calibrationPolicy;
+  final Value<String> gainKind;
+  final Value<double?> gainValue;
   const CaptureBlocksCompanion({
     this.id = const Value.absent(),
     this.sessionLogId = const Value.absent(),
@@ -3944,7 +4065,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     this.exposureTimeSeconds = const Value.absent(),
     this.frameCount = const Value.absent(),
     this.binning = const Value.absent(),
-    this.gainIso = const Value.absent(),
+    this.position = const Value.absent(),
+    this.calibrationPolicy = const Value.absent(),
+    this.gainKind = const Value.absent(),
+    this.gainValue = const Value.absent(),
   });
   CaptureBlocksCompanion.insert({
     this.id = const Value.absent(),
@@ -3954,7 +4078,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     required double exposureTimeSeconds,
     required int frameCount,
     this.binning = const Value.absent(),
-    this.gainIso = const Value.absent(),
+    this.position = const Value.absent(),
+    this.calibrationPolicy = const Value.absent(),
+    this.gainKind = const Value.absent(),
+    this.gainValue = const Value.absent(),
   }) : sessionLogId = Value(sessionLogId),
        frameType = Value(frameType),
        exposureTimeSeconds = Value(exposureTimeSeconds),
@@ -3967,7 +4094,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     Expression<double>? exposureTimeSeconds,
     Expression<int>? frameCount,
     Expression<int>? binning,
-    Expression<String>? gainIso,
+    Expression<int>? position,
+    Expression<String>? calibrationPolicy,
+    Expression<String>? gainKind,
+    Expression<double>? gainValue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3978,7 +4108,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
         'exposure_time_seconds': exposureTimeSeconds,
       if (frameCount != null) 'frame_count': frameCount,
       if (binning != null) 'binning': binning,
-      if (gainIso != null) 'gain_iso': gainIso,
+      if (position != null) 'position': position,
+      if (calibrationPolicy != null) 'calibration_policy': calibrationPolicy,
+      if (gainKind != null) 'gain_kind': gainKind,
+      if (gainValue != null) 'gain_value': gainValue,
     });
   }
 
@@ -3990,7 +4123,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     Value<double>? exposureTimeSeconds,
     Value<int>? frameCount,
     Value<int>? binning,
-    Value<String?>? gainIso,
+    Value<int>? position,
+    Value<String?>? calibrationPolicy,
+    Value<String>? gainKind,
+    Value<double?>? gainValue,
   }) {
     return CaptureBlocksCompanion(
       id: id ?? this.id,
@@ -4000,7 +4136,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
       exposureTimeSeconds: exposureTimeSeconds ?? this.exposureTimeSeconds,
       frameCount: frameCount ?? this.frameCount,
       binning: binning ?? this.binning,
-      gainIso: gainIso ?? this.gainIso,
+      position: position ?? this.position,
+      calibrationPolicy: calibrationPolicy ?? this.calibrationPolicy,
+      gainKind: gainKind ?? this.gainKind,
+      gainValue: gainValue ?? this.gainValue,
     );
   }
 
@@ -4030,8 +4169,17 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     if (binning.present) {
       map['binning'] = Variable<int>(binning.value);
     }
-    if (gainIso.present) {
-      map['gain_iso'] = Variable<String>(gainIso.value);
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (calibrationPolicy.present) {
+      map['calibration_policy'] = Variable<String>(calibrationPolicy.value);
+    }
+    if (gainKind.present) {
+      map['gain_kind'] = Variable<String>(gainKind.value);
+    }
+    if (gainValue.present) {
+      map['gain_value'] = Variable<double>(gainValue.value);
     }
     return map;
   }
@@ -4046,7 +4194,10 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
           ..write('exposureTimeSeconds: $exposureTimeSeconds, ')
           ..write('frameCount: $frameCount, ')
           ..write('binning: $binning, ')
-          ..write('gainIso: $gainIso')
+          ..write('position: $position, ')
+          ..write('calibrationPolicy: $calibrationPolicy, ')
+          ..write('gainKind: $gainKind, ')
+          ..write('gainValue: $gainValue')
           ..write(')'))
         .toString();
   }
@@ -6355,7 +6506,10 @@ typedef $$CaptureBlocksTableCreateCompanionBuilder =
       required double exposureTimeSeconds,
       required int frameCount,
       Value<int> binning,
-      Value<String?> gainIso,
+      Value<int> position,
+      Value<String?> calibrationPolicy,
+      Value<String> gainKind,
+      Value<double?> gainValue,
     });
 typedef $$CaptureBlocksTableUpdateCompanionBuilder =
     CaptureBlocksCompanion Function({
@@ -6366,7 +6520,10 @@ typedef $$CaptureBlocksTableUpdateCompanionBuilder =
       Value<double> exposureTimeSeconds,
       Value<int> frameCount,
       Value<int> binning,
-      Value<String?> gainIso,
+      Value<int> position,
+      Value<String?> calibrationPolicy,
+      Value<String> gainKind,
+      Value<double?> gainValue,
     });
 
 final class $$CaptureBlocksTableReferences
@@ -6435,8 +6592,23 @@ class $$CaptureBlocksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get gainIso => $composableBuilder(
-    column: $table.gainIso,
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calibrationPolicy => $composableBuilder(
+    column: $table.calibrationPolicy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gainKind => $composableBuilder(
+    column: $table.gainKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gainValue => $composableBuilder(
+    column: $table.gainValue,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6503,8 +6675,23 @@ class $$CaptureBlocksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get gainIso => $composableBuilder(
-    column: $table.gainIso,
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calibrationPolicy => $composableBuilder(
+    column: $table.calibrationPolicy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gainKind => $composableBuilder(
+    column: $table.gainKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gainValue => $composableBuilder(
+    column: $table.gainValue,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6565,8 +6752,19 @@ class $$CaptureBlocksTableAnnotationComposer
   GeneratedColumn<int> get binning =>
       $composableBuilder(column: $table.binning, builder: (column) => column);
 
-  GeneratedColumn<String> get gainIso =>
-      $composableBuilder(column: $table.gainIso, builder: (column) => column);
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get calibrationPolicy => $composableBuilder(
+    column: $table.calibrationPolicy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get gainKind =>
+      $composableBuilder(column: $table.gainKind, builder: (column) => column);
+
+  GeneratedColumn<double> get gainValue =>
+      $composableBuilder(column: $table.gainValue, builder: (column) => column);
 
   $$SessionLogsTableAnnotationComposer get sessionLogId {
     final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
@@ -6627,7 +6825,10 @@ class $$CaptureBlocksTableTableManager
                 Value<double> exposureTimeSeconds = const Value.absent(),
                 Value<int> frameCount = const Value.absent(),
                 Value<int> binning = const Value.absent(),
-                Value<String?> gainIso = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<String?> calibrationPolicy = const Value.absent(),
+                Value<String> gainKind = const Value.absent(),
+                Value<double?> gainValue = const Value.absent(),
               }) => CaptureBlocksCompanion(
                 id: id,
                 sessionLogId: sessionLogId,
@@ -6636,7 +6837,10 @@ class $$CaptureBlocksTableTableManager
                 exposureTimeSeconds: exposureTimeSeconds,
                 frameCount: frameCount,
                 binning: binning,
-                gainIso: gainIso,
+                position: position,
+                calibrationPolicy: calibrationPolicy,
+                gainKind: gainKind,
+                gainValue: gainValue,
               ),
           createCompanionCallback:
               ({
@@ -6647,7 +6851,10 @@ class $$CaptureBlocksTableTableManager
                 required double exposureTimeSeconds,
                 required int frameCount,
                 Value<int> binning = const Value.absent(),
-                Value<String?> gainIso = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<String?> calibrationPolicy = const Value.absent(),
+                Value<String> gainKind = const Value.absent(),
+                Value<double?> gainValue = const Value.absent(),
               }) => CaptureBlocksCompanion.insert(
                 id: id,
                 sessionLogId: sessionLogId,
@@ -6656,7 +6863,10 @@ class $$CaptureBlocksTableTableManager
                 exposureTimeSeconds: exposureTimeSeconds,
                 frameCount: frameCount,
                 binning: binning,
-                gainIso: gainIso,
+                position: position,
+                calibrationPolicy: calibrationPolicy,
+                gainKind: gainKind,
+                gainValue: gainValue,
               ),
           withReferenceMapper: (p0) => p0
               .map(

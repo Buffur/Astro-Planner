@@ -133,7 +133,11 @@ class SessionLog {
                 'exposure_seconds': b.exposureTimeSeconds,
                 'frame_count': b.frameCount,
                 'binning': b.binning,
-                'gain_iso': b.gainIso,
+                // TASK 5.3: typed, descriptive-only gain and the
+                // calibration policy (replaced the free-text gain_iso).
+                'gain_kind': b.gain.kind.name,
+                'gain_value': b.gain.value,
+                'calibration_policy': b.calibrationPolicy?.name,
               },
             )
             .toList(),
@@ -227,22 +231,10 @@ class SessionLog {
       temperature: (env['temperature_c'] as num?)?.toDouble(),
       humidity: (env['humidity_percent'] as num?)?.toDouble(),
       cloudCover: env['cloud_cover_percent'] as int?,
-      captureBlocks: (plan['blocks'] as List<dynamic>? ?? []).map((b) {
-        final bMap = b as Map<String, dynamic>;
-        return CaptureBlock(
-          id: bMap['id'] as int? ?? 0,
-          frameType: FrameType.values.firstWhere(
-            (e) => e.name == bMap['frame_type'],
-            orElse: () => FrameType.light,
-          ),
-          filterName: bMap['filter_name'] as String?,
-          exposureTimeSeconds:
-              (bMap['exposure_seconds'] as num?)?.toDouble() ?? 0.0,
-          frameCount: bMap['frame_count'] as int? ?? 0,
-          binning: bMap['binning'] as int? ?? 1,
-          gainIso: bMap['gain_iso'] as String?,
-        );
-      }).toList(),
+      captureBlocks: (plan['blocks'] as List<dynamic>? ?? [])
+          .map((b) => _blockFromManifest(b as Map<String, dynamic>))
+          .whereType<CaptureBlock>()
+          .toList(),
       plannedLightFrames: plan['light_frames'] as int? ?? 0,
       plannedDarkFrames: plan['dark_frames'] as int?,
       plannedFlatFrames: plan['flat_frames'] as int?,
@@ -254,5 +246,41 @@ class SessionLog {
       environmentalNotes: results['environmental_notes'] as String?,
       processingNotes: results['processing_notes'] as String?,
     );
+  }
+
+  /// One manifest block, or null when it is invalid (TASK 5.3: an invalid
+  /// block cannot exist in the domain). Reads the pre-5.3 free-text
+  /// `gain_iso` as an unknown-kind value, never guessing ISO vs gain.
+  static CaptureBlock? _blockFromManifest(Map<String, dynamic> b) {
+    final type = CaptureBlock.tryParseFrameType(b['frame_type'] as String?);
+    if (type == null) return null;
+    try {
+      final CaptureGain gain;
+      if (b.containsKey('gain_kind')) {
+        gain = CaptureGain.fromStored(
+          b['gain_kind'] as String?,
+          (b['gain_value'] as num?)?.toDouble(),
+        );
+      } else {
+        final legacy = double.tryParse('${b['gain_iso'] ?? ''}'.trim());
+        gain = legacy != null && legacy.isFinite && legacy >= 0
+            ? CaptureGain.unknown(legacy)
+            : CaptureGain.none;
+      }
+      return CaptureBlock(
+        id: b['id'] as int? ?? 0,
+        frameType: type,
+        filterName: b['filter_name'] as String?,
+        exposureTimeSeconds: (b['exposure_seconds'] as num?)?.toDouble() ?? 0,
+        frameCount: b['frame_count'] as int? ?? 0,
+        binning: b['binning'] as int? ?? 1,
+        gain: gain,
+        calibrationPolicy: type == FrameType.light
+            ? null
+            : CalibrationPolicy.tryParse(b['calibration_policy'] as String?),
+      );
+    } on ArgumentError {
+      return null;
+    }
   }
 }

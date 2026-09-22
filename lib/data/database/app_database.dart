@@ -9,6 +9,8 @@ import 'tables/equipment_foundation_tables.dart';
 import 'tables/locations_table.dart';
 import 'tables/targets_table.dart';
 
+import 'schema_versions.dart';
+
 part 'app_database.g.dart';
 
 /// The oldest schema version this app upgrades in place (ADR-008 §2). Every
@@ -58,12 +60,21 @@ class CaptureBlocks extends Table {
   // ADR-008 §4: a session's blocks are removed with it.
   IntColumn get sessionLogId =>
       integer().references(SessionLogs, #id, onDelete: KeyAction.cascade)();
-  TextColumn get frameType => text()(); // LIGHT, DARK, FLAT, BIAS
+  // FrameType.name, lower case: light, dark, flat, bias (normalized by v11).
+  TextColumn get frameType => text()();
   TextColumn get filterName => text().nullable()();
   RealColumn get exposureTimeSeconds => real()();
   IntColumn get frameCount => integer()();
   IntColumn get binning => integer().withDefault(const Constant(1))();
-  TextColumn get gainIso => text().nullable()();
+  // TASK 5.3 (v11): order within the session, ascending. Existing rows
+  // received their id, which preserves insertion order.
+  IntColumn get position => integer().withDefault(const Constant(0))();
+  // CalibrationPolicy.name; NULL for lights (ADR-009 §3).
+  TextColumn get calibrationPolicy => text().nullable()();
+  // GainKind.name + value, descriptive only (SI-004). Replaced the free-text
+  // gain_iso column in v11.
+  TextColumn get gainKind => text().withDefault(const Constant('unknown'))();
+  RealColumn get gainValue => real().nullable()();
 }
 
 class SessionLogs extends Table {
@@ -109,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -139,64 +150,103 @@ class AppDatabase extends _$AppDatabase {
             isNewerThanApp: true,
           );
         }
-        // With the guards above, from is always 8 here today (the only
-        // version between the floor and the current one), but the two
-        // steps below stay staged by version — exactly like the pre-v10
-        // chain — rather than merged into one, so a future app build that
-        // genuinely stops at v9 (this repository has never shipped, but
-        // nothing here should assume that) still upgrades correctly.
-        // Wrapped in one transaction so a failure mid-step leaves the file
-        // completely unchanged (ADR-008 §3 "each upgrade runs as one
-        // unit"; verified by a test that injects a failure partway
-        // through).
+        // Each step is written against its OWN version's generated table
+        // shapes (`schema_versions.dart`, `drift_dev schema steps`), never
+        // the live Dart tables — ADR-008 §3. The live tables change with
+        // every schema bump (TASK 5.3 changed capture_blocks for v11), and a
+        // step that rebuilt against them would silently produce the newest
+        // shape mid-chain: the root cause of TD-004 / DEV-D1.
+        // The whole chain runs inside one transaction, so a failure
+        // mid-step leaves the file completely unchanged (ADR-008 §3;
+        // verified by a test that injects a failure partway through).
         await m.database.transaction(() async {
-          if (from < 9) {
-            await m.addColumn(
-              cameraModules,
-              cameraModules.averageRawFileSizeMB,
-            );
-            // No matching equipmentProfiles.averageRawFileSizeMB step: that
-            // table is dropped by the v10 step immediately below, in the
-            // same transaction, so adding a column to it first would be
-            // pure waste — and it can no longer be referenced by a typed
-            // accessor now that EquipmentProfiles isn't a declared table.
-          }
-          if (from < 10) {
-            // ADR-008 §4: clean up any pre-existing orphans (TD-005
-            // verified one could exist) while foreign keys are still off —
-            // beforeOpen below only turns them on once this whole
-            // migration succeeds.
-            await _deleteOrphanForeignKeyRows(m.database);
+          await m.runMigrationSteps(
+            from: from,
+            to: to,
+            steps: migrationSteps(
+              from8To9: (m, schema) async {
+                await m.addColumn(
+                  schema.cameraModules,
+                  schema.cameraModules.averageRawFileSizeMB,
+                );
+                // No equipment_profiles step: that table is dropped by the
+                // v10 step, in the same transaction.
+              },
+              from9To10: (m, schema) async {
+                // ADR-008 §4: clean up pre-existing orphans while foreign
+                // keys are still off (beforeOpen turns them on afterwards).
+                await _deleteOrphanForeignKeyRows(m.database);
 
-            // SQLite can't ALTER a column's type or a foreign key's ON
-            // DELETE action in place, so these three are rebuilt against
-            // the *current* Dart definitions (ADR-008 §4-§5): that adds
-            // the real ON DELETE actions declared on the tables now, and —
-            // for cameraModules and opticalRigs — drops the bit_depth /
-            // optical_multiplier columns the old addColumn-only upgrades
-            // left behind. By this point cameraModules already has
-            // averageRawFileSizeMB (added above, or present on any
-            // install that was already at v9), so no newColumns entry is
-            // needed here.
-            await m.alterTable(TableMigration(cameraModules));
-            await m.alterTable(TableMigration(opticalRigs));
-            await m.alterTable(TableMigration(captureBlocks));
+                // SQLite can't alter a foreign key's ON DELETE action or
+                // drop a column in place: rebuild against the v10 shapes.
+                // This also drops the legacy bit_depth/optical_multiplier
+                // columns that addColumn-only upgrades left behind.
+                await m.alterTable(TableMigration(schema.cameraModules));
+                await m.alterTable(TableMigration(schema.opticalRigs));
+                await m.alterTable(TableMigration(schema.captureBlocks));
 
-            // ADR-008 §5: the orphaned flat table is retired.
-            await m.deleteTable('equipment_profiles');
+                // ADR-008 §5: the orphaned flat table is retired.
+                await m.deleteTable('equipment_profiles');
 
-            // Confirm the cleanup above actually worked before beforeOpen
-            // turns enforcement on.
-            final remaining = await m.database
-                .customSelect('PRAGMA foreign_key_check;')
-                .get();
-            if (remaining.isNotEmpty) {
-              throw StateError(
-                'ADR-008 v10 migration: foreign_key_check still found '
-                '${remaining.length} violation(s) after cleanup: $remaining',
-              );
-            }
-          }
+                final remaining = await m.database
+                    .customSelect('PRAGMA foreign_key_check;')
+                    .get();
+                if (remaining.isNotEmpty) {
+                  throw StateError(
+                    'ADR-008 v10 migration: foreign_key_check still found '
+                    '${remaining.length} violation(s) after cleanup: '
+                    '$remaining',
+                  );
+                }
+              },
+              from10To11: (m, schema) async {
+                // TASK 5.3 (ADR-009 §3, SI-004): capture blocks gain an
+                // order, a calibration policy and a typed gain; the
+                // free-text gain_iso column is converted, then dropped
+                // (owner-approved, ADR-008 §3).
+                final blocks = schema.captureBlocks;
+                await m.alterTable(
+                  TableMigration(
+                    blocks,
+                    newColumns: [
+                      blocks.position,
+                      blocks.calibrationPolicy,
+                      blocks.gainKind,
+                      blocks.gainValue,
+                    ],
+                    columnTransformer: {
+                      // Older rows and fixtures used upper case.
+                      blocks.frameType: const CustomExpression<String>(
+                        'lower(trim(frame_type))',
+                      ),
+                      // Existing order = insertion order.
+                      blocks.position: const CustomExpression<int>('id'),
+                      // ADR-009 §3: calibration defaults to outside the
+                      // window; lights have no policy.
+                      blocks.calibrationPolicy: const CustomExpression<String>(
+                        "CASE WHEN lower(trim(frame_type)) = 'light' "
+                        "THEN NULL ELSE 'outsideWindow' END",
+                      ),
+                      // The old text can't tell ISO from gain: never
+                      // guessed, recorded as unknown.
+                      blocks.gainKind: const CustomExpression<String>(
+                        "'unknown'",
+                      ),
+                      // A plain non-negative number is kept as the value;
+                      // anything else (blank, text, mixed) becomes NULL.
+                      blocks.gainValue: const CustomExpression<double>(
+                        "CASE WHEN gain_iso IS NOT NULL "
+                        "AND trim(gain_iso) <> '' "
+                        "AND trim(gain_iso) NOT GLOB '*[^0-9.]*' "
+                        "AND trim(gain_iso) GLOB '*[0-9]*' "
+                        "THEN CAST(trim(gain_iso) AS REAL) ELSE NULL END",
+                      ),
+                    },
+                  ),
+                );
+              },
+            ),
+          );
         });
       },
       // ADR-008 §4: every connection enforces foreign keys, not just
