@@ -1,21 +1,29 @@
-// Schema snapshot and migration tests (roadmap TASK 3.2, ADR-008).
+// Schema snapshot and migration tests (roadmap TASK 3.2, TASK 3.3, ADR-008).
 //
 // ADR-008 (docs/DECISIONS.md Part F) decided the upgrade floor (v8), the
 // migration workflow (Drift schema snapshots + generated verification), and
-// that the old v1-v7 upgrade steps be removed: they were written against
-// *current* table definitions rather than their own version's, which is the
-// root cause of TD-004 (v3 -> v9 threw `no column named optical_multiplier`).
+// removed the v1-v7 upgrade steps (TASK 3.2). TASK 3.3 adds §4-§5: v10
+// enforces foreign keys (one-time orphan cleanup, then real ON DELETE
+// actions via a rebuild) and drops the orphaned `equipment_profiles` table.
 //
-// This file is the TASK-3.2 slice of the ADR-008 section 7 test matrix:
-//   M1  fresh install matches the v9 snapshot
-//   M2  v8 -> v9 data-preservation (device/module/rig chain, target,
+// This file is the ADR-008 section 7 test matrix in full:
+//   M1  fresh install matches its own declared schema
+//   M2  v8 -> v10 data preservation (device/module/rig chain, target,
 //       location, session + 2 blocks, equipment_profiles empty and non-empty)
+//   M3  v9 -> v10 matches the v10 snapshot exactly
+//   M4  v8 -> v10, step by step (in one onUpgrade call, staged by version),
+//       matches the v10 snapshot exactly
 //   M5  below floor (v3) is refused; file byte-identical afterwards
 //   M6  the reset path renames the old file and lets a fresh db be created
 //   M7  downgrade (newer-than-app) is refused; file/user_version unchanged
-//   M11 a failure mid-step (v8->v9 has two statements) leaves the file
-//       unchanged, because the migration runs inside one transaction
-// M3/M4/M8-M10 (foreign keys, the orphan table, v10) are TASK 3.3.
+//   M8  orphans before v10 are deleted and counted; legitimate rows survive
+//   M9  foreign keys are on after open: an orphan insert throws; deleting a
+//       session cascades to its blocks; deleting a referenced device is
+//       refused
+//   M11 a failure mid-step leaves the file unchanged, because the migration
+//       runs inside one transaction
+// M10 (the existing repository/database suite, green with FKs on) is the
+// rest of `flutter test`, not a dedicated test here.
 
 import 'dart:io';
 
@@ -46,7 +54,7 @@ class _StampedAtVersion extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => const [];
 }
 
-/// [AppDatabase] with a deliberately broken v8->v9 step: the first statement
+/// [AppDatabase] with a deliberately broken upgrade step: one real statement
 /// runs, then it throws. Used by the M11 atomicity test.
 class _FailingUpgradeDatabase extends AppDatabase {
   _FailingUpgradeDatabase(super.e);
@@ -57,10 +65,7 @@ class _FailingUpgradeDatabase extends AppDatabase {
       onCreate: (m) => m.createAll(),
       onUpgrade: (m, from, to) async {
         await m.database.transaction(() async {
-          await m.addColumn(
-            equipmentProfiles,
-            equipmentProfiles.averageRawFileSizeMB,
-          );
+          await m.addColumn(cameraModules, cameraModules.averageRawFileSizeMB);
           throw StateError('injected mid-step failure (M11)');
         });
       },
@@ -95,44 +100,29 @@ void main() {
     );
   });
 
-  group('schema-verification: v8 -> v9', () {
+  group('schema-verification (M3, M4)', () {
     test(
-      'matches the v9 snapshot exactly apart from the three documented '
-      'legacy columns (ADR-008 §1, §3: dropping them is TASK 3.3, not 3.2)',
+      'M4: v8 -> v10, step by step, matches the v10 snapshot exactly',
       () async {
         final connection = await verifier.startAt(8);
         final db = AppDatabase(connection);
-
-        // addColumn only adds; it never drops optical_multiplier or
-        // bit_depth, so a v8->v9 upgrade keeps them even though the v9 Dart
-        // model and a fresh install don't have them. This is the exact,
-        // named gap ADR-008 recorded — asserting on it here means an
-        // *unexpected* fourth column would still fail this test.
-        await expectLater(
-          () => verifier.migrateAndValidate(db, 9),
-          throwsA(
-            isA<SchemaMismatch>().having(
-              (e) => e.explanation,
-              'explanation',
-              allOf(
-                contains('equipment_profiles'),
-                contains('camera_modules'),
-                contains('optical_rigs'),
-                contains('optical_multiplier'),
-                contains('bit_depth'),
-                isNot(contains('average_raw_file_size_m_b')),
-              ),
-            ),
-          ),
-        );
+        await verifier.migrateAndValidate(db, 10);
         await db.close();
       },
     );
+
+    test('M3: v9 -> v10 matches the v10 snapshot exactly', () async {
+      final connection = await verifier.startAt(9);
+      final db = AppDatabase(connection);
+      await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
   });
 
-  group('M2: v8 -> v9 data preservation', () {
+  group('M2: v8 -> v10 data preservation', () {
     test(
-      'device/module/rig chain, target, location, session + 2 blocks survive',
+      'device/module/rig chain, target, location, session + 2 blocks survive; '
+      'equipment_profiles (non-empty) is gone',
       () async {
         final schema = await verifier.schemaAt(8);
         final raw = schema.rawDatabase;
@@ -184,8 +174,8 @@ void main() {
           "filter_name, exposure_time_seconds, frame_count, binning, "
           "gain_iso) VALUES (2, 1, 'DARK', NULL, 300.0, 20, 1, '100');",
         );
-        // equipment_profiles: one legacy row, to check the M2 "non-empty"
-        // case; the "empty" case is covered by the next test.
+        // equipment_profiles: one legacy row, to check that dropping a
+        // *non-empty* orphan table (ADR-008 §5) still migrates cleanly.
         raw.execute(
           "INSERT INTO equipment_profiles (id, name, manufacturer, "
           "camera_model, sensor_width, sensor_height, pixel_pitch, "
@@ -196,9 +186,8 @@ void main() {
         );
 
         final db = AppDatabase(schema.newConnection());
-        // Runs the real onUpgrade (v8 -> v9) via Drift's normal lazy-open
-        // path; the strict schema-equality check is the test above, which
-        // documents the known legacy-column gap instead of failing on it.
+        // Runs the real onUpgrade (v8 -> v10, staged) via Drift's normal
+        // lazy-open path; the schema-equality checks are M3/M4 above.
         await db.customSelect('SELECT 1').get();
 
         final devices = await db.select(db.devices).get();
@@ -207,8 +196,9 @@ void main() {
 
         final modules = await db.select(db.cameraModules).get();
         expect(modules, hasLength(1));
-        // bit_depth was dropped from the Dart model; the new column is NULL
-        // for a row that predates it (never guessed, SI-008).
+        // bit_depth was dropped from the Dart model long before v10; the
+        // averageRawFileSizeMB column is NULL for a row that predates it
+        // (never guessed, SI-008).
         expect(modules.single.averageRawFileSizeMB, isNull);
 
         final rigs = await db.select(db.opticalRigs).get();
@@ -230,25 +220,102 @@ void main() {
         final blocks = await db.select(db.captureBlocks).get();
         expect(blocks, hasLength(2));
 
-        final equipmentProfiles = await db.select(db.equipmentProfiles).get();
-        expect(equipmentProfiles, hasLength(1));
-        expect(equipmentProfiles.single.name, 'Legacy Profile');
-        expect(equipmentProfiles.single.averageRawFileSizeMB, isNull);
+        // ADR-008 §5: equipment_profiles no longer exists at all.
+        final tables = await db
+            .customSelect(
+              "SELECT name FROM sqlite_master WHERE type = 'table' AND "
+              "name = 'equipment_profiles';",
+            )
+            .get();
+        expect(tables, isEmpty);
 
         await db.close();
       },
     );
 
-    test('an empty equipment_profiles table also upgrades cleanly', () async {
+    test('an empty equipment_profiles table also migrates cleanly (dropped, no error)', () async {
       final schema = await verifier.schemaAt(8);
       final db = AppDatabase(schema.newConnection());
       await db.customSelect('SELECT 1').get();
 
-      final equipmentProfiles = await db.select(db.equipmentProfiles).get();
-      expect(equipmentProfiles, isEmpty);
+      final tables = await db
+          .customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND "
+            "name = 'equipment_profiles';",
+          )
+          .get();
+      expect(tables, isEmpty);
 
       await db.close();
     });
+  });
+
+  group('M8: orphan cleanup before v10', () {
+    test(
+      'an orphan capture_block and an orphan optical_rig are deleted and '
+      'counted; legitimate rows survive; foreign_key_check is empty after',
+      () async {
+        final schema = await verifier.schemaAt(8);
+        final raw = schema.rawDatabase;
+
+        // A legitimate chain, to prove cleanup is selective.
+        raw.execute(
+          "INSERT INTO devices (id, name) VALUES (1, 'Good Device');",
+        );
+        raw.execute(
+          "INSERT INTO camera_modules (id, device_id, name, "
+          "sensor_width_mm, sensor_height_mm, resolution_width_px, "
+          "resolution_height_px, pixel_pitch_um) VALUES "
+          "(1, 1, 'Good Camera', 23.5, 15.7, 6248, 4176, 3.76);",
+        );
+        raw.execute(
+          "INSERT INTO optical_rigs (id, name, camera_module_id, "
+          "focal_length_mm, aperture, optical_multiplier, tracking_state) "
+          "VALUES (1, 'Good Rig', 1, 600.0, 6.0, 1.0, 'unknown');",
+        );
+        raw.execute(
+          "INSERT INTO session_logs (id, target_name, equipment_name, "
+          "session_date, planned_light_frames) VALUES "
+          "(1, 'M31', 'Good Rig', 1735689600, 10);",
+        );
+        raw.execute(
+          "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+          "exposure_time_seconds, frame_count) VALUES "
+          "(1, 1, 'LIGHT', 300.0, 10);",
+        );
+
+        // An orphan optical_rig pointing at a camera module that doesn't
+        // exist (id 999).
+        raw.execute(
+          "INSERT INTO optical_rigs (id, name, camera_module_id, "
+          "focal_length_mm, aperture, optical_multiplier, tracking_state) "
+          "VALUES (2, 'Orphan Rig', 999, 400.0, 5.0, 1.0, 'unknown');",
+        );
+        // An orphan capture_block pointing at a session that doesn't exist
+        // (id 999) — the exact case TD-005 verified could be inserted.
+        raw.execute(
+          "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+          "exposure_time_seconds, frame_count) VALUES "
+          "(2, 999, 'DARK', 300.0, 5);",
+        );
+
+        final db = AppDatabase(schema.newConnection());
+        await db.customSelect('SELECT 1').get();
+
+        final rigs = await db.select(db.opticalRigs).get();
+        expect(rigs.map((r) => r.id), [1]);
+
+        final blocks = await db.select(db.captureBlocks).get();
+        expect(blocks.map((b) => b.id), [1]);
+
+        final violations = await db
+            .customSelect('PRAGMA foreign_key_check;')
+            .get();
+        expect(violations, isEmpty);
+
+        await db.close();
+      },
+    );
   });
 
   group('Floor and downgrade guards (ADR-008 §2, TD-047)', () {
@@ -291,9 +358,9 @@ void main() {
     );
 
     test(
-      'M7: a newer-than-app database (v15) is refused; file unchanged',
+      'M7: a newer-than-app database (v99) is refused; file unchanged',
       () async {
-        await _stampFile(dbFile, 15);
+        await _stampFile(dbFile, 99);
         final before = await _readBytes(dbFile);
 
         final db = AppDatabase(NativeDatabase(dbFile));
@@ -301,7 +368,7 @@ void main() {
           () => db.customSelect('SELECT 1').get(),
           throwsA(
             isA<UnsupportedSchemaVersionException>()
-                .having((e) => e.foundVersion, 'foundVersion', 15)
+                .having((e) => e.foundVersion, 'foundVersion', 99)
                 .having((e) => e.isNewerThanApp, 'isNewerThanApp', isTrue),
           ),
         );
@@ -345,8 +412,8 @@ void main() {
       await fresh.close();
     });
 
-    test('M11: a failure mid-step in the v8 -> v9 migration leaves the file '
-        'unchanged (the migration runs as one transaction)', () async {
+    test('M11: a failure mid-step in an upgrade leaves the file unchanged (the '
+        'migration runs as one transaction)', () async {
       // A real, physical v8 database (DatabaseAtV8's default onCreate
       // creates the full v8 schema and stamps user_version = 8).
       final v8db = DatabaseAtV8(NativeDatabase(dbFile));
@@ -373,5 +440,98 @@ void main() {
             'together, not just the user_version bump',
       );
     });
+  });
+
+  group('M9: foreign keys are on after open (ADR-008 §4)', () {
+    late AppDatabase db;
+
+    setUp(() {
+      db = AppDatabase(NativeDatabase.memory());
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    test('PRAGMA foreign_keys is on', () async {
+      final row = await db.customSelect('PRAGMA foreign_keys;').getSingle();
+      expect(row.read<int>('foreign_keys'), 1);
+    });
+
+    test('inserting an orphan capture_block throws', () async {
+      await expectLater(
+        () => db
+            .into(db.captureBlocks)
+            .insert(
+              CaptureBlocksCompanion.insert(
+                sessionLogId: 999, // no such session_logs row
+                frameType: 'LIGHT',
+                exposureTimeSeconds: 60.0,
+                frameCount: 10,
+              ),
+            ),
+        throwsA(anything),
+      );
+    });
+
+    test('deleting a session cascades to its capture blocks', () async {
+      final sessionId = await db
+          .into(db.sessionLogs)
+          .insert(
+            SessionLogsCompanion.insert(
+              targetName: 'M31',
+              equipmentName: 'Test Rig',
+              sessionDate: DateTime.utc(2026, 1, 1),
+              plannedLightFrames: 10,
+            ),
+          );
+      await db
+          .into(db.captureBlocks)
+          .insert(
+            CaptureBlocksCompanion.insert(
+              sessionLogId: sessionId,
+              frameType: 'LIGHT',
+              exposureTimeSeconds: 60.0,
+              frameCount: 10,
+            ),
+          );
+
+      await (db.delete(
+        db.sessionLogs,
+      )..where((t) => t.id.equals(sessionId))).go();
+
+      final remainingBlocks = await (db.select(
+        db.captureBlocks,
+      )..where((t) => t.sessionLogId.equals(sessionId))).get();
+      expect(remainingBlocks, isEmpty);
+    });
+
+    test(
+      'deleting a device that a camera module still references is refused',
+      () async {
+        final deviceId = await db
+            .into(db.devices)
+            .insert(DevicesCompanion.insert(name: 'Shared Device'));
+        await db
+            .into(db.cameraModules)
+            .insert(
+              CameraModulesCompanion.insert(
+                deviceId: deviceId,
+                name: 'Shared Camera',
+                sensorWidthMm: 23.5,
+                sensorHeightMm: 15.7,
+                resolutionWidthPx: 6248,
+                resolutionHeightPx: 4176,
+                pixelPitchUm: 3.76,
+              ),
+            );
+
+        await expectLater(
+          () =>
+              (db.delete(db.devices)..where((t) => t.id.equals(deviceId))).go(),
+          throwsA(anything),
+        );
+      },
+    );
   });
 }

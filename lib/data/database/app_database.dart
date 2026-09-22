@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 import 'tables/equipment_foundation_tables.dart';
-import 'tables/equipment_table.dart';
 import 'tables/locations_table.dart';
 import 'tables/targets_table.dart';
 
@@ -56,7 +55,9 @@ class UnsupportedSchemaVersionException implements Exception {
 
 class CaptureBlocks extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get sessionLogId => integer().references(SessionLogs, #id)();
+  // ADR-008 §4: a session's blocks are removed with it.
+  IntColumn get sessionLogId =>
+      integer().references(SessionLogs, #id, onDelete: KeyAction.cascade)();
   TextColumn get frameType => text()(); // LIGHT, DARK, FLAT, BIAS
   TextColumn get filterName => text().nullable()();
   RealColumn get exposureTimeSeconds => real()();
@@ -95,7 +96,6 @@ class SessionLogs extends Table {
 
 @DriftDatabase(
   tables: [
-    EquipmentProfiles,
     Devices,
     CameraModules,
     OpticalRigs,
@@ -109,7 +109,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -139,23 +139,95 @@ class AppDatabase extends _$AppDatabase {
             isNewerThanApp: true,
           );
         }
-        // Only v8 -> v9 remains a supported path (floor is v8, current is
-        // v9). Wrapped in a transaction so a failure mid-step leaves the
-        // file completely unchanged, not partially migrated (verified by
-        // a test that injects a failure between the two addColumn calls).
+        // With the guards above, from is always 8 here today (the only
+        // version between the floor and the current one), but the two
+        // steps below stay staged by version — exactly like the pre-v10
+        // chain — rather than merged into one, so a future app build that
+        // genuinely stops at v9 (this repository has never shipped, but
+        // nothing here should assume that) still upgrades correctly.
+        // Wrapped in one transaction so a failure mid-step leaves the file
+        // completely unchanged (ADR-008 §3 "each upgrade runs as one
+        // unit"; verified by a test that injects a failure partway
+        // through).
         await m.database.transaction(() async {
           if (from < 9) {
-            await m.addColumn(
-              equipmentProfiles,
-              equipmentProfiles.averageRawFileSizeMB,
-            );
             await m.addColumn(
               cameraModules,
               cameraModules.averageRawFileSizeMB,
             );
+            // No matching equipmentProfiles.averageRawFileSizeMB step: that
+            // table is dropped by the v10 step immediately below, in the
+            // same transaction, so adding a column to it first would be
+            // pure waste — and it can no longer be referenced by a typed
+            // accessor now that EquipmentProfiles isn't a declared table.
+          }
+          if (from < 10) {
+            // ADR-008 §4: clean up any pre-existing orphans (TD-005
+            // verified one could exist) while foreign keys are still off —
+            // beforeOpen below only turns them on once this whole
+            // migration succeeds.
+            await _deleteOrphanForeignKeyRows(m.database);
+
+            // SQLite can't ALTER a column's type or a foreign key's ON
+            // DELETE action in place, so these three are rebuilt against
+            // the *current* Dart definitions (ADR-008 §4-§5): that adds
+            // the real ON DELETE actions declared on the tables now, and —
+            // for cameraModules and opticalRigs — drops the bit_depth /
+            // optical_multiplier columns the old addColumn-only upgrades
+            // left behind. By this point cameraModules already has
+            // averageRawFileSizeMB (added above, or present on any
+            // install that was already at v9), so no newColumns entry is
+            // needed here.
+            await m.alterTable(TableMigration(cameraModules));
+            await m.alterTable(TableMigration(opticalRigs));
+            await m.alterTable(TableMigration(captureBlocks));
+
+            // ADR-008 §5: the orphaned flat table is retired.
+            await m.deleteTable('equipment_profiles');
+
+            // Confirm the cleanup above actually worked before beforeOpen
+            // turns enforcement on.
+            final remaining = await m.database
+                .customSelect('PRAGMA foreign_key_check;')
+                .get();
+            if (remaining.isNotEmpty) {
+              throw StateError(
+                'ADR-008 v10 migration: foreign_key_check still found '
+                '${remaining.length} violation(s) after cleanup: $remaining',
+              );
+            }
           }
         });
       },
+      // ADR-008 §4: every connection enforces foreign keys, not just
+      // upgraded ones. Runs after onCreate/onUpgrade, so it never sees the
+      // v10 migration's own transient state.
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON;');
+      },
+    );
+  }
+}
+
+/// ADR-008 §4: reads `PRAGMA foreign_key_check` and deletes every row it
+/// flags — one batch `DELETE ... WHERE rowid IN (...)` per table — logging
+/// the count removed. Must run before foreign keys are turned on.
+Future<void> _deleteOrphanForeignKeyRows(GeneratedDatabase db) async {
+  final violations = await db.customSelect('PRAGMA foreign_key_check;').get();
+  final rowIdsByTable = <String, Set<int>>{};
+  for (final row in violations) {
+    final table = row.read<String>('table');
+    final rowId = row.read<int>('rowid');
+    rowIdsByTable.putIfAbsent(table, () => {}).add(rowId);
+  }
+  for (final entry in rowIdsByTable.entries) {
+    await db.customStatement(
+      'DELETE FROM ${entry.key} WHERE rowid IN (${entry.value.join(',')});',
+    );
+    // ignore: avoid_print
+    print(
+      'ADR-008 v10 migration: deleted ${entry.value.length} orphan row(s) '
+      'from ${entry.key} (dangling foreign key).',
     );
   }
 }

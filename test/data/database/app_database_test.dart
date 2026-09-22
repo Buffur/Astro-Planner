@@ -14,30 +14,63 @@ void main() {
     await database.close();
   });
 
-  test('can create and retrieve equipment profile', () async {
-    final id = await database
-        .into(database.equipmentProfiles)
-        .insert(
-          EquipmentProfilesCompanion.insert(
-            name: 'ZWO ASI2600MC Pro',
-            sensorWidth: 23.5,
-            sensorHeight: 15.7,
-            pixelPitch: 3.76,
-            resolutionWidth: 6248,
-            resolutionHeight: 4176,
-            focalLength: 0.0,
-            aperture: 0.0,
-          ),
-        );
+  // Replaces the old 'can create and retrieve equipment profile' test, which
+  // inserted into equipment_profiles directly: that table is dropped in v10
+  // (ADR-008 §5, TASK 3.3) — not read or written by any application code,
+  // and now not part of the schema at all. Equipment is the normalized
+  // Device -> CameraModule -> OpticalRig chain, so this test covers that
+  // instead (the reason is recorded here, per ADR-008 §5's requirement).
+  test(
+    'can create and retrieve a device/camera-module/optical-rig chain',
+    () async {
+      final deviceId = await database
+          .into(database.devices)
+          .insert(
+            DevicesCompanion.insert(
+              name: 'ZWO ASI2600MC Pro',
+              manufacturer: const Value('ZWO'),
+            ),
+          );
 
-    final profile = await (database.select(
-      database.equipmentProfiles,
-    )..where((t) => t.id.equals(id))).getSingle();
+      final cameraModuleId = await database
+          .into(database.cameraModules)
+          .insert(
+            CameraModulesCompanion.insert(
+              deviceId: deviceId,
+              name: 'ZWO ASI2600MC Pro Camera',
+              sensorWidthMm: 23.5,
+              sensorHeightMm: 15.7,
+              resolutionWidthPx: 6248,
+              resolutionHeightPx: 4176,
+              pixelPitchUm: 3.76,
+            ),
+          );
 
-    expect(profile.name, 'ZWO ASI2600MC Pro');
-    expect(profile.sensorWidth, 23.5);
-    expect(profile.resolutionWidth, 6248);
-  });
+      final rigId = await database
+          .into(database.opticalRigs)
+          .insert(
+            OpticalRigsCompanion.insert(
+              name: 'Backyard Rig',
+              cameraModuleId: cameraModuleId,
+              focalLengthMm: 600.0,
+              aperture: 6.0,
+            ),
+          );
+
+      final rig = await (database.select(
+        database.opticalRigs,
+      )..where((t) => t.id.equals(rigId))).getSingle();
+      final cameraModule = await (database.select(
+        database.cameraModules,
+      )..where((t) => t.id.equals(cameraModuleId))).getSingle();
+
+      expect(rig.name, 'Backyard Rig');
+      expect(rig.cameraModuleId, cameraModuleId);
+      expect(cameraModule.deviceId, deviceId);
+      expect(cameraModule.sensorWidthMm, 23.5);
+      expect(cameraModule.resolutionWidthPx, 6248);
+    },
+  );
 
   test('can insert and retrieve expanded SessionLog', () async {
     final date = DateTime.now();

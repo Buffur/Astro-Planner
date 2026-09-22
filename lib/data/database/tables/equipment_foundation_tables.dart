@@ -10,7 +10,11 @@ class Devices extends Table {
 
 class CameraModules extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get deviceId => integer().references(Devices, #id)();
+  // ADR-008 §4: a device with camera modules still pointing to it cannot be
+  // deleted (guarded in DriftEquipmentRepository before v10; enforced by
+  // SQLite itself from v10 onward, once foreign keys are on).
+  IntColumn get deviceId =>
+      integer().references(Devices, #id, onDelete: KeyAction.restrict)();
   TextColumn get name => text()();
   TextColumn get manufacturer => text().nullable()();
   TextColumn get model => text().nullable()();
@@ -25,7 +29,10 @@ class CameraModules extends Table {
 class OpticalRigs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
-  IntColumn get cameraModuleId => integer().references(CameraModules, #id)();
+  // ADR-008 §4: a camera module with rigs still pointing to it cannot be
+  // deleted — same RESTRICT reasoning as CameraModules.deviceId above.
+  IntColumn get cameraModuleId =>
+      integer().references(CameraModules, #id, onDelete: KeyAction.restrict)();
   RealColumn get focalLengthMm => real()();
   RealColumn get aperture => real()();
   TextColumn get trackingState =>

@@ -124,12 +124,36 @@ class DriftEquipmentRepository implements EquipmentRepository {
       await (_db.delete(_db.opticalRigs)..where((t) => t.id.equals(id))).go();
 
       if (cam != null) {
-        await (_db.delete(
-          _db.cameraModules,
-        )..where((t) => t.id.equals(cam.id))).go();
-        await (_db.delete(
-          _db.devices,
-        )..where((t) => t.id.equals(cam.deviceId))).go();
+        // ADR-008 §4: camera_modules.device_id and optical_rigs.camera_module_id
+        // are ON DELETE RESTRICT from v10 — deleting a shared row would throw.
+        // Every profile is currently created as its own 1:1:1 chain, so these
+        // counts are 0 in practice today, but guard anyway for when equipment
+        // composition (PD-03) lets rigs and modules be reused.
+        final otherRigsOnModule =
+            await (_db.selectOnly(_db.opticalRigs)
+                  ..addColumns([_db.opticalRigs.id.count()])
+                  ..where(_db.opticalRigs.cameraModuleId.equals(cam.id)))
+                .map((row) => row.read(_db.opticalRigs.id.count()) ?? 0)
+                .getSingle();
+
+        if (otherRigsOnModule == 0) {
+          await (_db.delete(
+            _db.cameraModules,
+          )..where((t) => t.id.equals(cam.id))).go();
+
+          final otherModulesOnDevice =
+              await (_db.selectOnly(_db.cameraModules)
+                    ..addColumns([_db.cameraModules.id.count()])
+                    ..where(_db.cameraModules.deviceId.equals(cam.deviceId)))
+                  .map((row) => row.read(_db.cameraModules.id.count()) ?? 0)
+                  .getSingle();
+
+          if (otherModulesOnDevice == 0) {
+            await (_db.delete(
+              _db.devices,
+            )..where((t) => t.id.equals(cam.deviceId))).go();
+          }
+        }
       }
     });
   }
