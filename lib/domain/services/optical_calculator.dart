@@ -5,9 +5,7 @@ class OpticalCalculator {
   /// Calculates the effective focal length of the optical system.
   /// Inputs: native focal length (mm).
   /// Output: Effective focal length (mm).
-  static double calculateEffectiveFocalLength({
-    required double focalLength,
-  }) {
+  static double calculateEffectiveFocalLength({required double focalLength}) {
     return focalLength;
   }
 
@@ -32,7 +30,8 @@ class OpticalCalculator {
     required double effectiveFocalLength,
   }) {
     if (effectiveFocalLength <= 0) return 0.0;
-    final radians = 2.0 * math.atan(sensorDimension / (2.0 * effectiveFocalLength));
+    final radians =
+        2.0 * math.atan(sensorDimension / (2.0 * effectiveFocalLength));
     return radians * (180.0 / math.pi);
   }
 
@@ -58,7 +57,7 @@ class OpticalCalculator {
 
   /// Calculates the NPF rule exposure limit for untracked astrophotography.
   /// This calculates the maximum recommended exposure time to limit visible star trailing.
-  /// 
+  ///
   /// Formula: t = (16.856 * N + 13.713 * p + 90) / (f * cos(declination))
   /// N = aperture (f-number)
   /// p = pixel pitch (microns)
@@ -71,19 +70,24 @@ class OpticalCalculator {
     required double effectiveFocalLength,
     required double declinationDegrees,
   }) {
-    if (effectiveFocalLength <= 0) throw ArgumentError('Effective focal length must be positive.');
+    if (effectiveFocalLength <= 0) {
+      throw ArgumentError('Effective focal length must be positive.');
+    }
     if (apertureFNumber <= 0) throw ArgumentError('Aperture must be positive.');
-    
+
     // declination in radians
     final declinationRadians = declinationDegrees * (math.pi / 180.0);
-    
+
     // Limit declination to avoid division by zero near poles
-    final clampedDec = math.min(declinationRadians.abs(), 89.9 * (math.pi / 180.0));
+    final clampedDec = math.min(
+      declinationRadians.abs(),
+      89.9 * (math.pi / 180.0),
+    );
 
     final n = apertureFNumber;
     final p = pixelPitch;
     final f = effectiveFocalLength;
-    
+
     return (16.856 * n + 13.713 * p + 90.0) / (f * math.cos(clampedDec));
   }
 }

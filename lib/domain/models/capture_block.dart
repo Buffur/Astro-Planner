@@ -1,9 +1,4 @@
-enum FrameType {
-  light,
-  dark,
-  flat,
-  bias
-}
+enum FrameType { light, dark, flat, bias }
 
 class CaptureBlock {
   final int id;

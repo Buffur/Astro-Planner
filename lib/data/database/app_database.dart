@@ -28,23 +28,23 @@ class SessionLogs extends Table {
   TextColumn get targetName => text()();
   TextColumn get equipmentName => text()();
   DateTimeColumn get sessionDate => dateTime()();
-  
+
   TextColumn get locationName => text().nullable()();
   RealColumn get bortleScale => real().nullable()();
-  
+
   IntColumn get plannedLightFrames => integer()();
   IntColumn get plannedDarkFrames => integer().nullable()();
   IntColumn get plannedFlatFrames => integer().nullable()();
   IntColumn get plannedBiasFrames => integer().nullable()();
   RealColumn get integrationTimeSeconds => real().nullable()();
-  
+
   RealColumn get focalLength => real().nullable()();
   RealColumn get aperture => real().nullable()();
-  
+
   RealColumn get temperature => real().nullable()();
   RealColumn get humidity => real().nullable()();
   IntColumn get cloudCover => integer().nullable()();
-  
+
   IntColumn get actualLightFrames => integer().nullable()();
   IntColumn get rejectedFrames => integer().nullable()();
   TextColumn get environmentalNotes => text().nullable()();
@@ -80,9 +80,15 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(sessionLogs);
         }
         if (from < 3) {
-          await customStatement('ALTER TABLE equipment_profiles ADD COLUMN manufacturer TEXT;');
-          await customStatement('ALTER TABLE equipment_profiles ADD COLUMN camera_model TEXT;');
-          await customStatement('ALTER TABLE equipment_profiles ADD COLUMN rotation REAL;');
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN manufacturer TEXT;',
+          );
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN camera_model TEXT;',
+          );
+          await customStatement(
+            'ALTER TABLE equipment_profiles ADD COLUMN rotation REAL;',
+          );
         }
         if (from < 4) {
           await m.createTable(devices);
@@ -90,9 +96,15 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(opticalRigs);
         }
         if (from < 5) {
-          await customStatement('''INSERT INTO devices (id, name, manufacturer) SELECT id, name, manufacturer FROM equipment_profiles;''');
-          await customStatement('''INSERT INTO camera_modules (id, device_id, name, manufacturer, model, sensor_width_mm, sensor_height_mm, resolution_width_px, resolution_height_px, pixel_pitch_um) SELECT id, id, name || ' Camera', manufacturer, camera_model, sensor_width, sensor_height, resolution_width, resolution_height, pixel_pitch FROM equipment_profiles;''');
-          await customStatement('''INSERT INTO optical_rigs (id, name, camera_module_id, focal_length_mm, aperture, optical_multiplier, tracking_state, rotation_degrees) SELECT id, name, id, focal_length, aperture, optical_multiplier, 'unknown', rotation FROM equipment_profiles;''');
+          await customStatement(
+            '''INSERT INTO devices (id, name, manufacturer) SELECT id, name, manufacturer FROM equipment_profiles;''',
+          );
+          await customStatement(
+            '''INSERT INTO camera_modules (id, device_id, name, manufacturer, model, sensor_width_mm, sensor_height_mm, resolution_width_px, resolution_height_px, pixel_pitch_um) SELECT id, id, name || ' Camera', manufacturer, camera_model, sensor_width, sensor_height, resolution_width, resolution_height, pixel_pitch FROM equipment_profiles;''',
+          );
+          await customStatement(
+            '''INSERT INTO optical_rigs (id, name, camera_module_id, focal_length_mm, aperture, optical_multiplier, tracking_state, rotation_degrees) SELECT id, name, id, focal_length, aperture, optical_multiplier, 'unknown', rotation FROM equipment_profiles;''',
+          );
         }
         if (from < 6) {
           await m.addColumn(locationProfiles, locationProfiles.bortleClass);
@@ -114,7 +126,10 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(captureBlocks);
         }
         if (from < 9) {
-          await m.addColumn(equipmentProfiles, equipmentProfiles.averageRawFileSizeMB);
+          await m.addColumn(
+            equipmentProfiles,
+            equipmentProfiles.averageRawFileSizeMB,
+          );
           await m.addColumn(cameraModules, cameraModules.averageRawFileSizeMB);
         }
       },

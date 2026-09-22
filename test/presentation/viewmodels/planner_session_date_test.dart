@@ -21,12 +21,16 @@ import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
 import '../../support/fake_location_service.dart';
 
 class _MockWeather implements WeatherRepository {
   @override
-  Future<WeatherConditions?> getCurrentWeather(double lat, double lon,
-      {bool forceRefresh = false}) async => null;
+  Future<WeatherConditions?> getCurrentWeather(
+    double lat,
+    double lon, {
+    bool forceRefresh = false,
+  }) async => null;
 }
 
 void main() {
@@ -43,8 +47,11 @@ void main() {
 
       final locId = await locationRepo.insertLocation(
         const domain.LocationProfile(
-          id: 0, name: 'Test Site',
-          latitude: 51.5, longitude: -0.1, elevation: 10,
+          id: 0,
+          name: 'Test Site',
+          latitude: 51.5,
+          longitude: -0.1,
+          elevation: 10,
         ),
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': locId});
@@ -111,10 +118,14 @@ void main() {
 
     test('nightTimeline differs between summer and winter solstice', () {
       final summerTimeline = VisibilityCalculator.calculateNightTimeline(
-        DateTime.utc(2025, 6, 21), lat, lon,
+        DateTime.utc(2025, 6, 21),
+        lat,
+        lon,
       );
       final winterTimeline = VisibilityCalculator.calculateNightTimeline(
-        DateTime.utc(2025, 12, 21), lat, lon,
+        DateTime.utc(2025, 12, 21),
+        lat,
+        lon,
       );
 
       // Both maps must be returned (non-empty) without throwing
@@ -126,8 +137,16 @@ void main() {
       final summerSunset = summerTimeline['sunset'];
       final winterSunset = winterTimeline['sunset'];
 
-      expect(summerSunset, isNotNull, reason: 'Sunset must exist on summer solstice');
-      expect(winterSunset, isNotNull, reason: 'Sunset must exist on winter solstice');
+      expect(
+        summerSunset,
+        isNotNull,
+        reason: 'Sunset must exist on summer solstice',
+      );
+      expect(
+        winterSunset,
+        isNotNull,
+        reason: 'Sunset must exist on winter solstice',
+      );
       // Summer sunset is later in the day than winter sunset
       expect(
         summerSunset!.hour > winterSunset!.hour ||
@@ -142,16 +161,22 @@ void main() {
       final illum = VisibilityCalculator.calculateLunarIllumination(
         DateTime.utc(2025, 1, 29),
       );
-      expect(illum, lessThan(0.15),
-          reason: 'Near new moon illumination should be < 15%');
+      expect(
+        illum,
+        lessThan(0.15),
+        reason: 'Near new moon illumination should be < 15%',
+      );
     });
 
     test('lunarIllumination is high near full moon (2025-02-12)', () {
       final illum = VisibilityCalculator.calculateLunarIllumination(
         DateTime.utc(2025, 2, 12),
       );
-      expect(illum, greaterThan(0.85),
-          reason: 'Near full moon illumination should be > 85%');
+      expect(
+        illum,
+        greaterThan(0.85),
+        reason: 'Near full moon illumination should be > 85%',
+      );
     });
 
     test('future date (1 year ahead) does not throw', () {
@@ -163,7 +188,9 @@ void main() {
     });
 
     test('past date (30 days ago) does not throw', () {
-      final pastDate = DateTime.now().toUtc().subtract(const Duration(days: 30));
+      final pastDate = DateTime.now().toUtc().subtract(
+        const Duration(days: 30),
+      );
       expect(
         () => VisibilityCalculator.calculateNightTimeline(pastDate, lat, lon),
         returnsNormally,

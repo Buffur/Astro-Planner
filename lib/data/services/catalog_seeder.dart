@@ -51,7 +51,12 @@ class CatalogSeeder {
         catalogId: 'M8',
         commonName: 'Lagoon Nebula',
         rightAscension: AstroMath.raToDecimalDegrees(18, 3, 37),
-        declination: AstroMath.decToDecimalDegrees(24, 23, 12, isNegative: true),
+        declination: AstroMath.decToDecimalDegrees(
+          24,
+          23,
+          12,
+          isNegative: true,
+        ),
         type: 'Nebula',
       ),
     ];

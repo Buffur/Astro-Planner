@@ -25,11 +25,16 @@ class AstronomicalEngine {
     final a = year ~/ 100;
     final b = 2 - a + (a ~/ 4);
 
-    final jdMidnight = (365.25 * (year + 4716)).floor() +
+    final jdMidnight =
+        (365.25 * (year + 4716)).floor() +
         (30.6001 * (month + 1)).floor() +
-        day + b - 1524.5;
+        day +
+        b -
+        1524.5;
 
-    final dayFraction = (utcTime.hour + (utcTime.minute / 60.0) + (utcTime.second / 3600.0)) / 24.0;
+    final dayFraction =
+        (utcTime.hour + (utcTime.minute / 60.0) + (utcTime.second / 3600.0)) /
+        24.0;
 
     return jdMidnight + dayFraction;
   }

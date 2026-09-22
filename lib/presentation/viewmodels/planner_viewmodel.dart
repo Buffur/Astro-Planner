@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/capture_block.dart';
@@ -22,6 +24,7 @@ import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/session_calculator.dart';
 import '../../domain/models/session_log.dart';
+
 class PlannerViewModel extends ChangeNotifier {
   final TargetRepository _targetRepository;
   final EquipmentRepository _equipmentRepository;
@@ -73,8 +76,14 @@ class PlannerViewModel extends ChangeNotifier {
   /// Valid range: 5° – 60°. User-configurable.
   double _minAltitude = 20.0;
 
-  PlannerViewModel(this._targetRepository, this._equipmentRepository, this._weatherRepository, this._locationRepository, this._lightPollutionRepository, {LocationService? locationService})
-      : _locationService = locationService ?? GeolocatorLocationService() {
+  PlannerViewModel(
+    this._targetRepository,
+    this._equipmentRepository,
+    this._weatherRepository,
+    this._locationRepository,
+    this._lightPollutionRepository, {
+    LocationService? locationService,
+  }) : _locationService = locationService ?? GeolocatorLocationService() {
     ready = _init();
   }
 
@@ -127,30 +136,51 @@ class PlannerViewModel extends ChangeNotifier {
     if (blocksJson != null) {
       try {
         final list = jsonDecode(blocksJson) as List;
-        _captureBlocks = list.map((b) => CaptureBlock(
-          id: b['id'] ?? 0,
-          frameType: FrameType.values.firstWhere((e) => e.name == b['frameType'], orElse: () => FrameType.light),
-          filterName: b['filterName'],
-          exposureTimeSeconds: (b['exposureTimeSeconds'] as num?)?.toDouble() ?? 0.0,
-          frameCount: b['frameCount'] ?? 0,
-          binning: b['binning'] ?? 1,
-          gainIso: b['gainIso'],
-        )).toList();
+        _captureBlocks = list
+            .map(
+              (b) => CaptureBlock(
+                id: b['id'] ?? 0,
+                frameType: FrameType.values.firstWhere(
+                  (e) => e.name == b['frameType'],
+                  orElse: () => FrameType.light,
+                ),
+                filterName: b['filterName'],
+                exposureTimeSeconds:
+                    (b['exposureTimeSeconds'] as num?)?.toDouble() ?? 0.0,
+                frameCount: b['frameCount'] ?? 0,
+                binning: b['binning'] ?? 1,
+                gainIso: b['gainIso'],
+              ),
+            )
+            .toList();
       } catch (e) {
         _captureBlocks = [];
       }
     }
     if (_captureBlocks.isEmpty) {
       _captureBlocks = [
-        const CaptureBlock(frameType: FrameType.light, filterName: 'L', exposureTimeSeconds: 60.0, frameCount: 100),
-        const CaptureBlock(frameType: FrameType.dark, exposureTimeSeconds: 60.0, frameCount: 20),
-        const CaptureBlock(frameType: FrameType.flat, exposureTimeSeconds: 2.0, frameCount: 20),
+        const CaptureBlock(
+          frameType: FrameType.light,
+          filterName: 'L',
+          exposureTimeSeconds: 60.0,
+          frameCount: 100,
+        ),
+        const CaptureBlock(
+          frameType: FrameType.dark,
+          exposureTimeSeconds: 60.0,
+          frameCount: 20,
+        ),
+        const CaptureBlock(
+          frameType: FrameType.flat,
+          exposureTimeSeconds: 2.0,
+          frameCount: 20,
+        ),
       ];
     }
-    
+
     _dewPointThreshold = prefs.getDouble('dewPointThreshold') ?? 2.0;
     _minAltitude = prefs.getDouble('minAltitude') ?? 20.0;
-    
+
     final targetId = prefs.getInt('targetId');
     if (targetId != null) {
       _selectedTarget = await _targetRepository.getTargetById(targetId);
@@ -159,7 +189,7 @@ class PlannerViewModel extends ChangeNotifier {
       final targets = await _targetRepository.searchTargets('M42');
       if (targets.isNotEmpty) _selectedTarget = targets.first;
     }
-    
+
     final eqId = prefs.getInt('equipmentId');
     if (eqId != null) {
       _selectedEquipment = await _equipmentRepository.getEquipmentById(eqId);
@@ -168,7 +198,7 @@ class PlannerViewModel extends ChangeNotifier {
       final equipment = await _equipmentRepository.getAllEquipment();
       if (equipment.isNotEmpty) _selectedEquipment = equipment.first;
     }
-    
+
     unawaited(_reverseGeocode(_latitude, _longitude));
   }
 
@@ -226,13 +256,15 @@ class PlannerViewModel extends ChangeNotifier {
       final uri = Uri.parse(
         'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json&accept-language=en',
       );
-      final response = await http.get(uri, headers: {'User-Agent': 'AstroPlan/1.0'})
+      final response = await http
+          .get(uri, headers: {'User-Agent': 'AstroPlan/1.0'})
           .timeout(const Duration(seconds: 6));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final address = data['address'] as Map<String, dynamic>?;
         if (address != null) {
-          _locationName = address['city'] as String? ??
+          _locationName =
+              address['city'] as String? ??
               address['town'] as String? ??
               address['village'] as String? ??
               address['county'] as String? ??
@@ -250,7 +282,7 @@ class PlannerViewModel extends ChangeNotifier {
     if (bortle != null) {
       _bortleClass = bortle;
       notifyListeners();
-      
+
       // Update saved location profile if active
       final prefs = await SharedPreferences.getInstance();
       final activeId = prefs.getInt('activeLocationId');
@@ -265,7 +297,7 @@ class PlannerViewModel extends ChangeNotifier {
               longitude: existing.longitude,
               elevation: existing.elevation,
               bortleClass: bortle,
-            )
+            ),
           );
         }
       }
@@ -279,7 +311,7 @@ class PlannerViewModel extends ChangeNotifier {
     await _fetchWeather();
     unawaited(_reverseGeocode(lat, lon));
     unawaited(_fetchBortle(lat, lon));
-    
+
     final prefs = await SharedPreferences.getInstance();
     final activeId = prefs.getInt('activeLocationId');
     if (activeId != null) {
@@ -294,12 +326,12 @@ class PlannerViewModel extends ChangeNotifier {
             longitude: lon,
             elevation: existing.elevation,
             bortleClass: _bortleClass,
-          )
+          ),
         );
         return;
       }
     }
-    
+
     // Insert new custom location
     final loc = LocationProfile(
       id: 0,
@@ -325,7 +357,11 @@ class PlannerViewModel extends ChangeNotifier {
 
   Future<void> _fetchWeather({bool forceRefresh = false}) async {
     try {
-      _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude, forceRefresh: forceRefresh);
+      _currentWeather = await _weatherRepository.getCurrentWeather(
+        _latitude,
+        _longitude,
+        forceRefresh: forceRefresh,
+      );
       _weatherError = false;
     } catch (e) {
       _weatherError = true;
@@ -338,7 +374,7 @@ class PlannerViewModel extends ChangeNotifier {
     _captureBlocks.add(block);
     await _saveBlocks();
   }
-  
+
   Future<void> updateCaptureBlock(int index, CaptureBlock block) async {
     if (index >= 0 && index < _captureBlocks.length) {
       _captureBlocks[index] = block;
@@ -365,18 +401,22 @@ class PlannerViewModel extends ChangeNotifier {
   Future<void> _saveBlocks() async {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    final list = _captureBlocks.map((b) => {
-      'id': b.id,
-      'frameType': b.frameType.name,
-      'filterName': b.filterName,
-      'exposureTimeSeconds': b.exposureTimeSeconds,
-      'frameCount': b.frameCount,
-      'binning': b.binning,
-      'gainIso': b.gainIso,
-    }).toList();
+    final list = _captureBlocks
+        .map(
+          (b) => {
+            'id': b.id,
+            'frameType': b.frameType.name,
+            'filterName': b.filterName,
+            'exposureTimeSeconds': b.exposureTimeSeconds,
+            'frameCount': b.frameCount,
+            'binning': b.binning,
+            'gainIso': b.gainIso,
+          },
+        )
+        .toList();
     await prefs.setString('captureBlocks', jsonEncode(list));
   }
-  
+
   Future<void> setEquipment(EquipmentProfile profile) async {
     _selectedEquipment = profile;
     notifyListeners();
@@ -407,7 +447,7 @@ class PlannerViewModel extends ChangeNotifier {
             longitude: existing.longitude,
             elevation: existing.elevation,
             bortleClass: bortle,
-          )
+          ),
         );
       }
     }
@@ -423,22 +463,28 @@ class PlannerViewModel extends ChangeNotifier {
   Future<void> loadSession(SessionLog log) async {
     _activeSessionLog = log;
     _sessionDate = log.sessionDate;
-    
+
     // Look up target
     final targets = await _targetRepository.searchTargets(log.targetName);
     if (targets.isNotEmpty) {
       try {
-        _selectedTarget = targets.firstWhere((t) => (t.commonName ?? t.catalogId).toLowerCase() == log.targetName.toLowerCase());
+        _selectedTarget = targets.firstWhere(
+          (t) =>
+              (t.commonName ?? t.catalogId).toLowerCase() ==
+              log.targetName.toLowerCase(),
+        );
       } catch (e) {
         _selectedTarget = targets.first;
       }
     }
-    
+
     // Look up equipment
     final equipments = await _equipmentRepository.getAllEquipment();
     if (equipments.isNotEmpty) {
       try {
-        _selectedEquipment = equipments.firstWhere((e) => e.name.toLowerCase() == log.equipmentName.toLowerCase());
+        _selectedEquipment = equipments.firstWhere(
+          (e) => e.name.toLowerCase() == log.equipmentName.toLowerCase(),
+        );
       } catch (e) {
         // Keep current or clear
       }
@@ -448,7 +494,7 @@ class PlannerViewModel extends ChangeNotifier {
       _captureBlocks = List.from(log.captureBlocks);
       await _saveBlocks();
     }
-    
+
     notifyListeners();
   }
 
@@ -456,14 +502,18 @@ class PlannerViewModel extends ChangeNotifier {
     _activeSessionLog = null;
     _sessionDate = DateTime.now().toUtc();
     // we could also clear capture blocks or target if desired, but retaining them might be fine.
-    // The requirement says "resets the planner state." 
+    // The requirement says "resets the planner state."
     notifyListeners();
   }
 
   // Calculations exposed to the UI
 
   Map<String, DateTime?> get nightTimeline {
-    return VisibilityCalculator.calculateNightTimeline(_sessionDate, _latitude, _longitude);
+    return VisibilityCalculator.calculateNightTimeline(
+      _sessionDate,
+      _latitude,
+      _longitude,
+    );
   }
 
   List<VisibilityWindow> get visibilityWindows {
@@ -487,25 +537,43 @@ class PlannerViewModel extends ChangeNotifier {
 
   bool get dewWarning {
     if (_currentWeather == null) return false;
-    return (_currentWeather!.temperature - _currentWeather!.dewPoint) <= _dewPointThreshold;
+    return (_currentWeather!.temperature - _currentWeather!.dewPoint) <=
+        _dewPointThreshold;
   }
 
   double? get currentAltitude {
     if (_selectedTarget == null) return null;
-    if (_selectedTarget!.rightAscension == 0.0 && _selectedTarget!.declination == 0.0) return null;
-    
+    if (_selectedTarget!.rightAscension == 0.0 &&
+        _selectedTarget!.declination == 0.0) {
+      return null;
+    }
+
     final jd = AstronomicalEngine.calculateJulianDate(DateTime.now().toUtc());
     final gmst = AstronomicalEngine.calculateGMST(jd);
     final lst = AstronomicalEngine.calculateLST(gmst, _longitude);
-    final lha = VisibilityCalculator.calculateLHA(lst, _selectedTarget!.rightAscension);
-    return VisibilityCalculator.calculateAltitude(lha: lha, declination: _selectedTarget!.declination, latitude: _latitude);
+    final lha = VisibilityCalculator.calculateLHA(
+      lst,
+      _selectedTarget!.rightAscension,
+    );
+    return VisibilityCalculator.calculateAltitude(
+      lha: lha,
+      declination: _selectedTarget!.declination,
+      latitude: _latitude,
+    );
   }
 
   double? get maxAltitude {
     if (_selectedTarget == null) return null;
-    if (_selectedTarget!.rightAscension == 0.0 && _selectedTarget!.declination == 0.0) return null;
-    
-    return VisibilityCalculator.calculateAltitude(lha: 0.0, declination: _selectedTarget!.declination, latitude: _latitude);
+    if (_selectedTarget!.rightAscension == 0.0 &&
+        _selectedTarget!.declination == 0.0) {
+      return null;
+    }
+
+    return VisibilityCalculator.calculateAltitude(
+      lha: 0.0,
+      declination: _selectedTarget!.declination,
+      latitude: _latitude,
+    );
   }
 
   double? get npfExposure {
@@ -519,14 +587,19 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   String get totalIntegrationTime {
-    final totalSeconds = _captureBlocks.where((b) => b.frameType == FrameType.light).fold(0.0, (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount));
+    final totalSeconds = _captureBlocks
+        .where((b) => b.frameType == FrameType.light)
+        .fold(0.0, (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount));
     final hours = totalSeconds ~/ 3600;
     final minutes = (totalSeconds % 3600) ~/ 60;
     return '${hours.toInt()}h ${minutes.toInt()}m';
   }
 
   Duration get estimatedRequiredTime {
-    final totalExposure = _captureBlocks.fold(0.0, (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount));
+    final totalExposure = _captureBlocks.fold(
+      0.0,
+      (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount),
+    );
     // add overhead per frame (e.g. 5 seconds download time)
     final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
     final overhead = totalFrames * 5.0;
@@ -550,7 +623,10 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   double get relativeStackingGain {
-    final lights = _captureBlocks.where((b) => b.frameType == FrameType.light).fold(0, (sum, b) => sum + b.frameCount); return OpticalCalculator.calculateRelativeStackingGain(lights);
+    final lights = _captureBlocks
+        .where((b) => b.frameType == FrameType.light)
+        .fold(0, (sum, b) => sum + b.frameCount);
+    return OpticalCalculator.calculateRelativeStackingGain(lights);
   }
 
   double? get pixelScale {
@@ -558,6 +634,9 @@ class PlannerViewModel extends ChangeNotifier {
     final efl = OpticalCalculator.calculateEffectiveFocalLength(
       focalLength: _selectedEquipment!.focalLength,
     );
-    return OpticalCalculator.calculatePixelScale(pixelPitch: _selectedEquipment!.pixelPitch, effectiveFocalLength: efl);
+    return OpticalCalculator.calculatePixelScale(
+      pixelPitch: _selectedEquipment!.pixelPitch,
+      effectiveFocalLength: efl,
+    );
   }
 }

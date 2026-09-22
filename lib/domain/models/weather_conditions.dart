@@ -26,7 +26,8 @@ class HourlyForecast {
       cloudCover: (json['cloudCover'] as num).toDouble(),
       dewPoint: (json['dewPoint'] as num).toDouble(),
       humidity: (json['humidity'] as num).toDouble(),
-      precipitationProbability: (json['precipitationProbability'] as num?)?.toDouble() ?? 0.0,
+      precipitationProbability:
+          (json['precipitationProbability'] as num?)?.toDouble() ?? 0.0,
       windSpeed: (json['windSpeed'] as num?)?.toDouble() ?? 0.0,
       isDaytime: json['isDaytime'] as bool? ?? false,
     );
@@ -70,7 +71,8 @@ class WeatherConditions {
       humidity: (json['humidity'] as num).toDouble(),
       dewPoint: (json['dewPoint'] as num).toDouble(),
       windSpeed: (json['windSpeed'] as num?)?.toDouble() ?? 0.0,
-      hourlyForecasts: (json['hourlyForecasts'] as List<dynamic>?)
+      hourlyForecasts:
+          (json['hourlyForecasts'] as List<dynamic>?)
               ?.map((e) => HourlyForecast.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],

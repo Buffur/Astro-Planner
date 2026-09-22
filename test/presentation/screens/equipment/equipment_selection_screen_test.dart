@@ -53,9 +53,7 @@ void main() {
         Provider<EquipmentRepository>.value(value: repo),
         ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
       ],
-      child: const MaterialApp(
-        home: EquipmentSelectionScreen(),
-      ),
+      child: const MaterialApp(home: EquipmentSelectionScreen()),
     );
   }
 
@@ -89,7 +87,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Enter valid name
-    await tester.enterText(find.widgetWithText(TextFormField, 'Profile Name'), 'Test Profile');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Profile Name'),
+      'Test Profile',
+    );
 
     // Enter non-numeric in Resolution Width (hint: '6248')
     await tester.enterText(find.widgetWithText(TextFormField, '6248'), 'abc');
@@ -111,7 +112,10 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Profile Name'), 'Test Profile');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Profile Name'),
+      'Test Profile',
+    );
     await tester.enterText(find.widgetWithText(TextFormField, '6248'), '0');
 
     await tester.tap(find.text('Save'));
@@ -131,8 +135,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // We must enter all required fields because they now validate
-    await tester.enterText(find.widgetWithText(TextFormField, 'Profile Name'), 'Valid Rig');
-    
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Profile Name'),
+      'Valid Rig',
+    );
+
     // Find inputs by hint text to target specific Stellarium rows
     final resW = find.widgetWithText(TextFormField, '6248');
     final resH = find.widgetWithText(TextFormField, '4176');
@@ -140,8 +147,14 @@ void main() {
     final pixelH = find.widgetWithText(TextFormField, '3.76').last;
     final sensorW = find.widgetWithText(TextFormField, '23.50');
     final sensorH = find.widgetWithText(TextFormField, '15.70');
-    final focal = find.widgetWithText(TextFormField, 'Effective Focal Length (mm)');
-    final aperture = find.widgetWithText(TextFormField, 'Effective Aperture (f/)');
+    final focal = find.widgetWithText(
+      TextFormField,
+      'Effective Focal Length (mm)',
+    );
+    final aperture = find.widgetWithText(
+      TextFormField,
+      'Effective Aperture (f/)',
+    );
 
     await tester.enterText(resW, '6000');
     await tester.enterText(resH, '4000');
@@ -160,7 +173,7 @@ void main() {
     expect(find.text('Invalid'), findsNothing);
     expect(find.text('> 0'), findsNothing);
     expect(find.text('Must be > 0'), findsNothing);
-    
+
     // The list should now contain "Valid Rig"
     expect(find.text('Valid Rig'), findsOneWidget);
   });

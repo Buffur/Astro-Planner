@@ -2,15 +2,13 @@ class VisibilityWindow {
   final DateTime start;
   final DateTime end;
 
-  const VisibilityWindow({
-    required this.start,
-    required this.end,
-  });
+  const VisibilityWindow({required this.start, required this.end});
 
   Duration get duration => end.difference(start);
 
   @override
-  String toString() => 'VisibilityWindow(start: ${start.toIso8601String()}, end: ${end.toIso8601String()})';
+  String toString() =>
+      'VisibilityWindow(start: ${start.toIso8601String()}, end: ${end.toIso8601String()})';
 
   @override
   bool operator ==(Object other) =>

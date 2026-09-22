@@ -20,12 +20,16 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
 import '../../support/fake_location_service.dart';
 
 class _MockWeather implements WeatherRepository {
   @override
-  Future<WeatherConditions?> getCurrentWeather(double lat, double lon,
-      {bool forceRefresh = false}) async => null;
+  Future<WeatherConditions?> getCurrentWeather(
+    double lat,
+    double lon, {
+    bool forceRefresh = false,
+  }) async => null;
 }
 
 void main() {
@@ -41,7 +45,11 @@ void main() {
 
     final locId = await locationRepo.insertLocation(
       const domain.LocationProfile(
-        id: 0, name: 'Test', latitude: 51.5, longitude: -0.1, elevation: 10,
+        id: 0,
+        name: 'Test',
+        latitude: 51.5,
+        longitude: -0.1,
+        elevation: 10,
       ),
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});

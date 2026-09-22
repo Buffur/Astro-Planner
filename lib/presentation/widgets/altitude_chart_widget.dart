@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+
 import '../../domain/models/astro_target.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
-
 
 class AltitudeChartWidget extends StatelessWidget {
   final AstroTarget target;
   final double latitude;
   final double longitude;
   final DateTime sessionDate;
+
   /// Minimum usable altitude in degrees. Drawn as a dashed red threshold line.
   final double minAltitude;
 
@@ -32,7 +33,8 @@ class AltitudeChartWidget extends StatelessWidget {
           children: [
             Text(
               'Visibility & Altitude',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -79,7 +81,10 @@ class AltitudeChartWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 4),
-        Text('Min ${minAltitude.toStringAsFixed(0)}°', style: const TextStyle(fontSize: 10)),
+        Text(
+          'Min ${minAltitude.toStringAsFixed(0)}°',
+          style: const TextStyle(fontSize: 10),
+        ),
       ],
     );
   }
@@ -94,7 +99,9 @@ class AltitudeChartWidget extends StatelessWidget {
             width: 10,
             height: 10,
             decoration: BoxDecoration(
-              color: isDark && color == Colors.black87 ? Colors.grey.shade900 : color,
+              color: isDark && color == Colors.black87
+                  ? Colors.grey.shade900
+                  : color,
               border: Border.all(color: Colors.grey.shade400, width: 0.5),
             ),
           ),
@@ -138,9 +145,13 @@ class _AltitudeChartPainter extends CustomPainter {
     for (int i = 0; i <= numSteps; i++) {
       final time = start.add(stepDuration * i);
       final utcTime = time.toUtc();
-      
+
       // Calculate Sun Altitude
-      final sunAlt = VisibilityCalculator.calculateSunAltitude(utcTime, latitude, longitude);
+      final sunAlt = VisibilityCalculator.calculateSunAltitude(
+        utcTime,
+        latitude,
+        longitude,
+      );
       sunAltitudes.add(sunAlt);
 
       // Calculate Target Altitude
@@ -163,13 +174,15 @@ class _AltitudeChartPainter extends CustomPainter {
 
     // 1. Draw Background Zones based on Sun Altitude
     final paintZone = Paint()..style = PaintingStyle.fill;
-    
+
     for (int i = 0; i < numSteps; i++) {
       final sunAlt = sunAltitudes[i];
       Color zoneColor;
-      
+
       if (sunAlt > 0) {
-        zoneColor = isDark ? Colors.blueGrey.shade800 : Colors.lightBlue.shade100; // Day
+        zoneColor = isDark
+            ? Colors.blueGrey.shade800
+            : Colors.lightBlue.shade100; // Day
       } else if (sunAlt > -18) {
         // Twilight transition
         zoneColor = isDark ? Colors.indigo.shade900 : Colors.indigo.shade300;
@@ -187,17 +200,21 @@ class _AltitudeChartPainter extends CustomPainter {
     final paintGrid = Paint()
       ..color = isDark ? Colors.white30 : Colors.white60
       ..strokeWidth = 1.0;
-    
+
     final paintText = TextPainter(textDirection: TextDirection.ltr);
 
     void drawLine(double alt, String label, {bool dashed = false}) {
       final y = size.height - ((alt + 10) / 100) * size.height;
       if (y >= 0 && y <= size.height) {
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintGrid);
-        
+
         paintText.text = TextSpan(
           text: label,
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: isDark ? Colors.white70 : Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
         );
         paintText.layout();
         paintText.paint(canvas, Offset(4, y - 14));
@@ -234,7 +251,11 @@ class _AltitudeChartPainter extends CustomPainter {
       final paintThresholdText = TextPainter(textDirection: TextDirection.ltr);
       paintThresholdText.text = TextSpan(
         text: thresholdLabel,
-        style: const TextStyle(color: Colors.redAccent, fontSize: 9, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.redAccent,
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+        ),
       );
       paintThresholdText.layout();
       // Position label at right side to avoid overlap with left labels
@@ -258,43 +279,53 @@ class _AltitudeChartPainter extends CustomPainter {
         // Smooth curve
         final p0 = targetPoints[i - 1];
         final p1 = targetPoints[i];
-        path.quadraticBezierTo(p0.dx, p0.dy, (p0.dx + p1.dx) / 2, (p0.dy + p1.dy) / 2);
+        path.quadraticBezierTo(
+          p0.dx,
+          p0.dy,
+          (p0.dx + p1.dx) / 2,
+          (p0.dy + p1.dy) / 2,
+        );
       }
       path.lineTo(targetPoints.last.dx, targetPoints.last.dy);
     }
-    
+
     canvas.drawPath(path, paintLine);
-    
+
     // Draw dot for current time if it's within the window
     final now = DateTime.now();
-    if (now.isAfter(start) && now.isBefore(start.add(const Duration(hours: 24)))) {
+    if (now.isAfter(start) &&
+        now.isBefore(start.add(const Duration(hours: 24)))) {
       final diffMin = now.difference(start).inMinutes;
       final percent = diffMin / (24 * 60);
       final x = percent * size.width;
-      
+
       // Interpolate Y
       final index = (percent * numSteps).floor().clamp(0, numSteps - 1);
       final y = targetPoints[index].dy;
-      
+
       canvas.drawCircle(Offset(x, y), 5, Paint()..color = Colors.redAccent);
       canvas.drawCircle(Offset(x, y), 2, Paint()..color = Colors.white);
     }
-    
+
     // X-Axis Time Labels
-    for (int i = 0; i <= numSteps; i += 16) { // Every 4 hours (16 * 15m)
+    for (int i = 0; i <= numSteps; i += 16) {
+      // Every 4 hours (16 * 15m)
       final x = (i / numSteps) * size.width;
       final time = start.add(stepDuration * i);
       final label = "${time.hour.toString().padLeft(2, '0')}:00";
       paintText.text = TextSpan(
         text: label,
-        style: TextStyle(color: isDark ? Colors.white70 : Colors.white, fontSize: 10),
+        style: TextStyle(
+          color: isDark ? Colors.white70 : Colors.white,
+          fontSize: 10,
+        ),
       );
       paintText.layout();
       // Adjust edge labels to not clip
       double dx = x - paintText.width / 2;
       if (dx < 0) dx = 0;
       if (dx + paintText.width > size.width) dx = size.width - paintText.width;
-      
+
       paintText.paint(canvas, Offset(dx, size.height - 14));
     }
   }

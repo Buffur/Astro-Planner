@@ -85,12 +85,12 @@ void main() {
     );
 
     final json = original.toJson();
-    
+
     // Verify specific manifest structure
     expect(json['manifest_version'], 1);
     expect(json['app_name'], 'AstroPlan');
     expect(json['target_name'], 'Rosette Nebula');
-    
+
     // Nested checks
     expect(json['location']['name'], 'Dark Site');
     expect(json['equipment_snapshot']['focal_length_mm'], 200.0);
@@ -104,7 +104,10 @@ void main() {
     expect(restored.id, original.id);
     expect(restored.targetName, original.targetName);
     expect(restored.equipmentName, original.equipmentName);
-    expect(restored.sessionDate.toUtc().toIso8601String(), original.sessionDate.toUtc().toIso8601String());
+    expect(
+      restored.sessionDate.toUtc().toIso8601String(),
+      original.sessionDate.toUtc().toIso8601String(),
+    );
     expect(restored.locationName, original.locationName);
     expect(restored.bortleScale, original.bortleScale);
     expect(restored.plannedLightFrames, original.plannedLightFrames);

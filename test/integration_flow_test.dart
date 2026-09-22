@@ -20,11 +20,16 @@ import 'package:astroplan/domain/models/astro_target.dart' as domain;
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+
 import 'support/fake_location_service.dart';
 
 class MockWeatherRepository implements WeatherRepository {
   @override
-  Future<WeatherConditions?> getCurrentWeather(double latitude, double longitude, {bool forceRefresh = false}) async {
+  Future<WeatherConditions?> getCurrentWeather(
+    double latitude,
+    double longitude, {
+    bool forceRefresh = false,
+  }) async {
     return const WeatherConditions(
       temperature: 15.0,
       cloudCover: 10.0,
@@ -51,18 +56,28 @@ void main() {
     equipmentRepo = DriftEquipmentRepository(database);
     logbookRepo = DriftLogbookRepository(database);
     locationRepo = DriftLocationRepository(database);
-    
+
     testTarget = domain.AstroTarget(
-      id: 1, catalogId: 'M42', commonName: 'Orion Nebula', type: 'Nebula',
+      id: 1,
+      catalogId: 'M42',
+      commonName: 'Orion Nebula',
+      type: 'Nebula',
       rightAscension: 83.85, // degrees (5.59 h x 15)
-      declination: -5.45
+      declination: -5.45,
     );
     await targetRepo.insertTarget(testTarget);
-    
+
     testEquip = domain.EquipmentProfile(
-      id: 1, name: 'ASI2600MC', aperture: 4.0, focalLength: 400.0,
-      sensorWidth: 23.5, sensorHeight: 15.6, resolutionWidth: 6000, resolutionHeight: 4000,
-      pixelPitch: 3.76, averageRawFileSizeMB: 50.0
+      id: 1,
+      name: 'ASI2600MC',
+      aperture: 4.0,
+      focalLength: 400.0,
+      sensorWidth: 23.5,
+      sensorHeight: 15.6,
+      resolutionWidth: 6000,
+      resolutionHeight: 4000,
+      pixelPitch: 3.76,
+      averageRawFileSizeMB: 50.0,
     );
     await equipmentRepo.insertEquipment(testEquip);
   });
@@ -71,7 +86,9 @@ void main() {
     await database.close();
   });
 
-  testWidgets('E2E Flow: Planner -> Save -> Logbook', (WidgetTester tester) async {
+  testWidgets('E2E Flow: Planner -> Save -> Logbook', (
+    WidgetTester tester,
+  ) async {
     // Use a taller surface so the Save Session button is within hittable bounds
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -81,7 +98,11 @@ void main() {
     // needs the real event loop, which the fake-async test zone never runs.
     await tester.runAsync(() async {
       plannerViewModel = PlannerViewModel(
-        targetRepo, equipmentRepo, MockWeatherRepository(), locationRepo, LightPollutionRepository(),
+        targetRepo,
+        equipmentRepo,
+        MockWeatherRepository(),
+        locationRepo,
+        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await plannerViewModel.ready;
@@ -101,13 +122,13 @@ void main() {
         child: const AstroPlanApp(),
       ),
     );
-    
+
     plannerViewModel.setTarget(testTarget);
     plannerViewModel.setEquipment(testEquip);
     await tester.pumpAndSettle();
 
     expect(find.text('Session Planner'), findsOneWidget);
-    
+
     // Scroll down to reveal the Save Session button
     final listFinder = find.byType(Scrollable).first;
     final saveButtonFinder = find.text('Save Session');
@@ -117,10 +138,10 @@ void main() {
       const Offset(0, -100),
     );
     await tester.pumpAndSettle();
-    
+
     await tester.tap(saveButtonFinder);
     await tester.pump(const Duration(seconds: 1)); // allow SnackBar to render
-    
+
     expect(find.text('Session saved to Logbook!'), findsOneWidget);
 
     // Scroll back to top to reveal AppBar icons

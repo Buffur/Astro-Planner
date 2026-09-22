@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/models/astro_target.dart' as domain;
 import '../database/app_database.dart';
@@ -27,29 +28,35 @@ class DriftTargetRepository implements TargetRepository {
 
   @override
   Future<domain.AstroTarget?> getTargetById(int id) async {
-    final dbTarget = await (_db.select(_db.astroTargets)..where((t) => t.id.equals(id))).getSingleOrNull();
+    final dbTarget = await (_db.select(
+      _db.astroTargets,
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
     return dbTarget != null ? _mapToDomain(dbTarget) : null;
   }
 
   @override
   Future<int> insertTarget(domain.AstroTarget target) async {
-    return _db.into(_db.astroTargets).insert(
-      AstroTargetsCompanion.insert(
-        catalogId: target.catalogId,
-        commonName: Value(target.commonName),
-        rightAscension: target.rightAscension,
-        declination: target.declination,
-        type: target.type,
-      ),
-    );
+    return _db
+        .into(_db.astroTargets)
+        .insert(
+          AstroTargetsCompanion.insert(
+            catalogId: target.catalogId,
+            commonName: Value(target.commonName),
+            rightAscension: target.rightAscension,
+            declination: target.declination,
+            type: target.type,
+          ),
+        );
   }
 
   @override
   Future<List<domain.AstroTarget>> searchTargets(String query) async {
     final likeQuery = '%$query%';
-    final dbTargets = await (_db.select(_db.astroTargets)
-          ..where((t) => t.catalogId.like(likeQuery) | t.commonName.like(likeQuery)))
-        .get();
+    final dbTargets =
+        await (_db.select(_db.astroTargets)..where(
+              (t) => t.catalogId.like(likeQuery) | t.commonName.like(likeQuery),
+            ))
+            .get();
     return dbTargets.map(_mapToDomain).toList();
   }
 
@@ -60,7 +67,9 @@ class DriftTargetRepository implements TargetRepository {
 
   @override
   Future<void> updateTarget(domain.AstroTarget target) async {
-    await (_db.update(_db.astroTargets)..where((t) => t.id.equals(target.id))).write(
+    await (_db.update(
+      _db.astroTargets,
+    )..where((t) => t.id.equals(target.id))).write(
       AstroTargetsCompanion(
         catalogId: Value(target.catalogId),
         commonName: Value(target.commonName),

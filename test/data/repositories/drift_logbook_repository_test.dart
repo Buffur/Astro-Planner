@@ -27,7 +27,7 @@ void main() {
     );
 
     await repository.addLog(log);
-    
+
     final logs = await repository.getAllLogs();
     expect(logs.length, 1);
     expect(logs.first.targetName, 'M42');

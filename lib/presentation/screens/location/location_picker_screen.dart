@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../viewmodels/planner_viewmodel.dart';
 
 class LocationPickerScreen extends StatefulWidget {
@@ -47,16 +48,15 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
 
       final position = await Geolocator.getCurrentPosition();
       final newLoc = LatLng(position.latitude, position.longitude);
-      
+
       setState(() {
         _selectedLocation = newLoc;
       });
       _mapController.move(newLoc, 10.0);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
@@ -66,7 +66,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   void _saveLocation() {
     if (_selectedLocation != null) {
       final viewModel = context.read<PlannerViewModel>();
-      viewModel.setLocation(_selectedLocation!.latitude, _selectedLocation!.longitude);
+      viewModel.setLocation(
+        _selectedLocation!.latitude,
+        _selectedLocation!.longitude,
+      );
       context.pop();
     }
   }

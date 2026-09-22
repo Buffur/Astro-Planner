@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'core/theme/app_theme.dart';
 import 'presentation/navigation/app_router.dart';
 import 'presentation/viewmodels/planner_viewmodel.dart';
@@ -55,7 +56,16 @@ void main() async {
         Provider<LogbookRepository>.value(value: logbookRepo),
         Provider<LocationRepository>.value(value: locationRepo),
         Provider<LightPollutionRepository>.value(value: lightPollutionRepo),
-        ChangeNotifierProvider(create: (_) => PlannerViewModel(targetRepo, equipmentRepo, weatherRepo, locationRepo, lightPollutionRepo, locationService: locationService)),
+        ChangeNotifierProvider(
+          create: (_) => PlannerViewModel(
+            targetRepo,
+            equipmentRepo,
+            weatherRepo,
+            locationRepo,
+            lightPollutionRepo,
+            locationService: locationService,
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
@@ -69,7 +79,7 @@ class AstroPlanApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeVM = context.watch<ThemeViewModel>();
-    
+
     return MaterialApp.router(
       title: 'AstroPlan',
       theme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.light,

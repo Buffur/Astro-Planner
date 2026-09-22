@@ -56,13 +56,13 @@ void main() {
         Provider<TargetRepository>.value(value: repo),
         ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
       ],
-      child: const MaterialApp(
-        home: TargetSelectionScreen(),
-      ),
+      child: const MaterialApp(home: TargetSelectionScreen()),
     );
   }
 
-  testWidgets('empty required target fields are rejected', (WidgetTester tester) async {
+  testWidgets('empty required target fields are rejected', (
+    WidgetTester tester,
+  ) async {
     final repo = MockTargetRepository();
     final planner = MockPlannerViewModel();
 
@@ -81,7 +81,9 @@ void main() {
     expect(find.text('Required'), findsNWidgets(3));
   });
 
-  testWidgets('non-numeric input is rejected for RA and Dec', (WidgetTester tester) async {
+  testWidgets('non-numeric input is rejected for RA and Dec', (
+    WidgetTester tester,
+  ) async {
     final repo = MockTargetRepository();
     final planner = MockPlannerViewModel();
 
@@ -91,9 +93,18 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Target Name *'), 'Test Target');
-    await tester.enterText(find.widgetWithText(TextFormField, '0.0 to 360.0'), 'abc'); // RA
-    await tester.enterText(find.widgetWithText(TextFormField, '-90.0 to +90.0'), 'xyz'); // Dec
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Target Name *'),
+      'Test Target',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '0.0 to 360.0'),
+      'abc',
+    ); // RA
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
+      'xyz',
+    ); // Dec
 
     await tester.tap(find.text('Save'));
     await tester.pump();
@@ -112,16 +123,28 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Target Name *'), 'Test Target');
-    await tester.enterText(find.widgetWithText(TextFormField, '0.0 to 360.0'), '-10.0'); // RA
-    await tester.enterText(find.widgetWithText(TextFormField, '-90.0 to +90.0'), '45.0'); // Dec
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Target Name *'),
+      'Test Target',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '0.0 to 360.0'),
+      '-10.0',
+    ); // RA
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
+      '45.0',
+    ); // Dec
 
     await tester.tap(find.text('Save'));
     await tester.pump();
 
     expect(find.text('Must be 0.0 to 360.0'), findsOneWidget);
 
-    await tester.enterText(find.widgetWithText(TextFormField, '0.0 to 360.0'), '360.1'); // RA
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '0.0 to 360.0'),
+      '360.1',
+    ); // RA
     await tester.tap(find.text('Save'));
     await tester.pump();
 
@@ -138,16 +161,28 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Target Name *'), 'Test Target');
-    await tester.enterText(find.widgetWithText(TextFormField, '0.0 to 360.0'), '180.0'); // RA
-    await tester.enterText(find.widgetWithText(TextFormField, '-90.0 to +90.0'), '-91.0'); // Dec
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Target Name *'),
+      'Test Target',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '0.0 to 360.0'),
+      '180.0',
+    ); // RA
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
+      '-91.0',
+    ); // Dec
 
     await tester.tap(find.text('Save'));
     await tester.pump();
 
     expect(find.text('Must be -90.0 to +90.0'), findsOneWidget);
-    
-    await tester.enterText(find.widgetWithText(TextFormField, '-90.0 to +90.0'), '90.1'); // Dec
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
+      '90.1',
+    ); // Dec
     await tester.tap(find.text('Save'));
     await tester.pump();
 
@@ -164,9 +199,18 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextFormField, 'Target Name *'), 'Andromeda');
-    await tester.enterText(find.widgetWithText(TextFormField, '0.0 to 360.0'), '10.6847'); // RA
-    await tester.enterText(find.widgetWithText(TextFormField, '-90.0 to +90.0'), '41.2687'); // Dec
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Target Name *'),
+      'Andromeda',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '0.0 to 360.0'),
+      '10.6847',
+    ); // RA
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
+      '41.2687',
+    ); // Dec
 
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
@@ -176,7 +220,7 @@ void main() {
     expect(find.text('Must be a number'), findsNothing);
     expect(find.text('Must be 0.0 to 360.0'), findsNothing);
     expect(find.text('Must be -90.0 to +90.0'), findsNothing);
-    
+
     // The list should now contain "Andromeda"
     expect(find.text('Andromeda'), findsOneWidget);
   });

@@ -2,14 +2,14 @@ import 'capture_block.dart';
 
 class SessionLog {
   final int id;
-  
+
   // Basic Info
   final String targetName;
   final String equipmentName;
   final DateTime sessionDate;
   final String? locationName;
   final double? bortleScale;
-  
+
   // Capture Plan
   final List<CaptureBlock> captureBlocks;
   final int plannedLightFrames;
@@ -17,16 +17,16 @@ class SessionLog {
   final int? plannedFlatFrames;
   final int? plannedBiasFrames;
   final double? integrationTimeSeconds;
-  
+
   // Equipment Snapshot
   final double? focalLength;
   final double? aperture;
-  
+
   // Environmental / Weather Snapshot
   final double? temperature;
   final double? humidity;
   final int? cloudCover;
-  
+
   // Actual Results
   final int? actualLightFrames;
   final int? rejectedFrames;
@@ -64,21 +64,25 @@ class SessionLog {
     buffer.writeln('Target: $targetName');
     buffer.writeln('Date: ${sessionDate.toLocal().toString().split(' ')[0]}');
     if (locationName != null) buffer.writeln('Location: $locationName');
-    
+
     buffer.writeln('\n--- Equipment ---');
     buffer.writeln('Rig: $equipmentName');
     if (focalLength != null) buffer.writeln('Focal Length: ${focalLength}mm');
     if (aperture != null) buffer.writeln('Aperture: f/$aperture');
-    
+
     buffer.writeln('\n--- Capture Plan ---');
     buffer.writeln('Lights: $plannedLightFrames');
     if (plannedDarkFrames != null) buffer.writeln('Darks: $plannedDarkFrames');
     if (plannedFlatFrames != null) buffer.writeln('Flats: $plannedFlatFrames');
-    if (plannedBiasFrames != null) buffer.writeln('Bias/Dark-Flats: $plannedBiasFrames');
-    if (integrationTimeSeconds != null) {
-      buffer.writeln('Planned Integration: ${(integrationTimeSeconds! / 3600).toStringAsFixed(2)} hrs');
+    if (plannedBiasFrames != null) {
+      buffer.writeln('Bias/Dark-Flats: $plannedBiasFrames');
     }
-    
+    if (integrationTimeSeconds != null) {
+      buffer.writeln(
+        'Planned Integration: ${(integrationTimeSeconds! / 3600).toStringAsFixed(2)} hrs',
+      );
+    }
+
     buffer.writeln('\n--- Environment ---');
     if (temperature != null) buffer.writeln('Temperature: $temperature°C');
     if (humidity != null) buffer.writeln('Humidity: $humidity%');
@@ -87,9 +91,11 @@ class SessionLog {
     if (environmentalNotes != null && environmentalNotes!.isNotEmpty) {
       buffer.writeln('Conditions Notes: $environmentalNotes');
     }
-    
+
     buffer.writeln('\n--- Results & Notes ---');
-    if (actualLightFrames != null) buffer.writeln('Actual Lights: $actualLightFrames');
+    if (actualLightFrames != null) {
+      buffer.writeln('Actual Lights: $actualLightFrames');
+    }
     if (rejectedFrames != null) buffer.writeln('Rejected: $rejectedFrames');
     if (processingNotes != null && processingNotes!.isNotEmpty) {
       buffer.writeln('Processing: $processingNotes');
@@ -106,10 +112,7 @@ class SessionLog {
       'target_name': targetName,
       'equipment_name': equipmentName,
       'session_date_utc': sessionDate.toUtc().toIso8601String(),
-      'location': {
-        'name': locationName,
-        'bortle_scale': bortleScale,
-      },
+      'location': {'name': locationName, 'bortle_scale': bortleScale},
       'equipment_snapshot': {
         'focal_length_mm': focalLength,
         'aperture_f': aperture,
@@ -120,15 +123,19 @@ class SessionLog {
         'cloud_cover_percent': cloudCover,
       },
       'capture_plan': {
-        'blocks': captureBlocks.map((b) => {
-          'id': b.id,
-          'frame_type': b.frameType.name,
-          'filter_name': b.filterName,
-          'exposure_seconds': b.exposureTimeSeconds,
-          'frame_count': b.frameCount,
-          'binning': b.binning,
-          'gain_iso': b.gainIso,
-        }).toList(),
+        'blocks': captureBlocks
+            .map(
+              (b) => {
+                'id': b.id,
+                'frame_type': b.frameType.name,
+                'filter_name': b.filterName,
+                'exposure_seconds': b.exposureTimeSeconds,
+                'frame_count': b.frameCount,
+                'binning': b.binning,
+                'gain_iso': b.gainIso,
+              },
+            )
+            .toList(),
         'light_frames': plannedLightFrames,
         'dark_frames': plannedDarkFrames,
         'flat_frames': plannedFlatFrames,
@@ -179,7 +186,8 @@ class SessionLog {
       plannedDarkFrames: plannedDarkFrames ?? this.plannedDarkFrames,
       plannedFlatFrames: plannedFlatFrames ?? this.plannedFlatFrames,
       plannedBiasFrames: plannedBiasFrames ?? this.plannedBiasFrames,
-      integrationTimeSeconds: integrationTimeSeconds ?? this.integrationTimeSeconds,
+      integrationTimeSeconds:
+          integrationTimeSeconds ?? this.integrationTimeSeconds,
       focalLength: focalLength ?? this.focalLength,
       aperture: aperture ?? this.aperture,
       temperature: temperature ?? this.temperature,
@@ -203,7 +211,7 @@ class SessionLog {
       id: json['session_id'] as int? ?? 0,
       targetName: json['target_name'] as String? ?? 'Unknown Target',
       equipmentName: json['equipment_name'] as String? ?? 'Unknown Equipment',
-      sessionDate: json['session_date_utc'] != null 
+      sessionDate: json['session_date_utc'] != null
           ? DateTime.parse(json['session_date_utc'] as String).toLocal()
           : DateTime.now(),
       locationName: location['name'] as String?,
@@ -217,9 +225,13 @@ class SessionLog {
         final bMap = b as Map<String, dynamic>;
         return CaptureBlock(
           id: bMap['id'] as int? ?? 0,
-          frameType: FrameType.values.firstWhere((e) => e.name == bMap['frame_type'], orElse: () => FrameType.light),
+          frameType: FrameType.values.firstWhere(
+            (e) => e.name == bMap['frame_type'],
+            orElse: () => FrameType.light,
+          ),
           filterName: bMap['filter_name'] as String?,
-          exposureTimeSeconds: (bMap['exposure_seconds'] as num?)?.toDouble() ?? 0.0,
+          exposureTimeSeconds:
+              (bMap['exposure_seconds'] as num?)?.toDouble() ?? 0.0,
           frameCount: bMap['frame_count'] as int? ?? 0,
           binning: bMap['binning'] as int? ?? 1,
           gainIso: bMap['gain_iso'] as String?,
@@ -229,7 +241,8 @@ class SessionLog {
       plannedDarkFrames: plan['dark_frames'] as int?,
       plannedFlatFrames: plan['flat_frames'] as int?,
       plannedBiasFrames: plan['bias_frames'] as int?,
-      integrationTimeSeconds: (plan['integration_time_seconds'] as num?)?.toDouble(),
+      integrationTimeSeconds: (plan['integration_time_seconds'] as num?)
+          ?.toDouble(),
       actualLightFrames: results['light_frames'] as int?,
       rejectedFrames: results['rejected_frames'] as int?,
       environmentalNotes: results['environmental_notes'] as String?,

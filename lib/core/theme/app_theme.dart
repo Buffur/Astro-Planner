@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
 class AppTheme {
@@ -111,9 +112,7 @@ class AppTheme {
       ),
       margin: EdgeInsets.zero,
     ),
-    iconTheme: const IconThemeData(
-      color: AppColors.fieldTextPrimary,
-    ),
+    iconTheme: const IconThemeData(color: AppColors.fieldTextPrimary),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         foregroundColor: AppColors.fieldBackground,
@@ -135,4 +134,3 @@ class AppTheme {
     ),
   );
 }
-

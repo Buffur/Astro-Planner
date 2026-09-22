@@ -8,7 +8,7 @@ void main() {
   test('saves and loads averageRawFileSizeMB', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final repo = DriftEquipmentRepository(db);
-    
+
     final profile = domain.EquipmentProfile(
       id: 0,
       name: 'Test Rig',
@@ -24,9 +24,9 @@ void main() {
 
     final id = await repo.insertEquipment(profile);
     final loaded = await repo.getEquipmentById(id);
-    
+
     expect(loaded?.averageRawFileSizeMB, 42.5);
-    
+
     await db.close();
   });
 }

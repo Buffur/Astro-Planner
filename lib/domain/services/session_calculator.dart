@@ -1,10 +1,6 @@
 import '../models/visibility_window.dart';
 
-enum FeasibilityState {
-  feasible,
-  tight,
-  infeasible,
-}
+enum FeasibilityState { feasible, tight, infeasible }
 
 class SessionFeasibility {
   final Duration totalAvailableTime;
@@ -20,7 +16,7 @@ class SessionFeasibility {
 
 class SessionCalculator {
   /// Estimates the total physical time required to execute the capture sequence.
-  /// 
+  ///
   /// Incorporates:
   /// - Light exposures
   /// - Dark exposures
@@ -38,12 +34,17 @@ class SessionCalculator {
     final darksDuration = darkFrames * exposureSeconds;
     final flatsDuration = flatFrames * 5;
     final biasDuration = biasFrames * 1;
-    
+
     // Overhead: typically dithering every N frames, autofocus every 1 hour, filter changes, etc.
     // We apply a flat 15% overhead on light frames duration.
     final overhead = (lightsDuration * 0.15).round();
 
-    final totalSeconds = lightsDuration + darksDuration + flatsDuration + biasDuration + overhead;
+    final totalSeconds =
+        lightsDuration +
+        darksDuration +
+        flatsDuration +
+        biasDuration +
+        overhead;
     return Duration(seconds: totalSeconds);
   }
 
@@ -56,11 +57,11 @@ class SessionCalculator {
     for (final window in availableWindows) {
       totalAvailableSeconds += window.duration.inSeconds;
     }
-    
+
     final available = Duration(seconds: totalAvailableSeconds);
-    
+
     FeasibilityState state;
-    
+
     if (available.inSeconds == 0) {
       state = FeasibilityState.infeasible;
     } else if (estimatedRequiredTime.inSeconds > available.inSeconds) {
@@ -71,7 +72,7 @@ class SessionCalculator {
     } else {
       state = FeasibilityState.feasible;
     }
-    
+
     return SessionFeasibility(
       totalAvailableTime: available,
       estimatedRequiredTime: estimatedRequiredTime,

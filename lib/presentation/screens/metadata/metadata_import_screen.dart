@@ -1,6 +1,8 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+
 import '../../../domain/models/image_metadata.dart';
 import '../../../domain/services/metadata_extractor.dart';
 import '../../widgets/planner_summary_card.dart';
@@ -39,9 +41,7 @@ class _MetadataImportScreenState extends State<MetadataImportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Metadata Import'),
-      ),
+      appBar: AppBar(title: const Text('Metadata Import')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -75,9 +75,15 @@ class _MetadataImportScreenState extends State<MetadataImportScreen> {
                     PlannerSummaryCard(
                       title: 'Shooting Parameters',
                       data: {
-                        'Exposure Time': _metadata!.exposureTime != null ? '${_metadata!.exposureTime} s' : 'Unknown',
-                        'Focal Length': _metadata!.focalLength != null ? '${_metadata!.focalLength} mm' : 'Unknown',
-                        'Aperture': _metadata!.aperture != null ? 'f/${_metadata!.aperture}' : 'Unknown',
+                        'Exposure Time': _metadata!.exposureTime != null
+                            ? '${_metadata!.exposureTime} s'
+                            : 'Unknown',
+                        'Focal Length': _metadata!.focalLength != null
+                            ? '${_metadata!.focalLength} mm'
+                            : 'Unknown',
+                        'Aperture': _metadata!.aperture != null
+                            ? 'f/${_metadata!.aperture}'
+                            : 'Unknown',
                         'ISO': _metadata!.iso ?? 'Unknown',
                       },
                     ),
@@ -85,12 +91,26 @@ class _MetadataImportScreenState extends State<MetadataImportScreen> {
                       Card(
                         margin: const EdgeInsets.only(bottom: 16),
                         child: ExpansionTile(
-                          title: const Text('Raw EXIF Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: const Text(
+                            'Raw EXIF Data',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           children: _metadata!.rawTags.entries
-                              .map((e) => ListTile(
-                                    title: Text(e.key, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                    subtitle: Text(e.value, style: const TextStyle(fontSize: 12)),
-                                  ))
+                              .map(
+                                (e) => ListTile(
+                                  title: Text(
+                                    e.key,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    e.value,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              )
                               .toList(),
                         ),
                       ),

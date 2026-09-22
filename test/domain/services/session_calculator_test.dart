@@ -7,9 +7,9 @@ void main() {
     test('estimates total duration correctly with overhead', () {
       final duration = SessionCalculator.estimateTotalDuration(
         lightFrames: 100, // 100 * 60 = 6000s
-        darkFrames: 20,   // 20 * 60 = 1200s
-        flatFrames: 20,   // 20 * 5 = 100s
-        biasFrames: 20,   // 20 * 1 = 20s
+        darkFrames: 20, // 20 * 60 = 1200s
+        flatFrames: 20, // 20 * 5 = 100s
+        biasFrames: 20, // 20 * 1 = 20s
         exposureSeconds: 60,
       );
 
@@ -19,7 +19,7 @@ void main() {
       // Flats: 100
       // Bias: 20
       // Total = 6000 + 900 + 1200 + 100 + 20 = 8220 seconds
-      
+
       expect(duration.inSeconds, 8220);
     });
 
@@ -28,7 +28,7 @@ void main() {
         availableWindows: [],
         estimatedRequiredTime: const Duration(hours: 2),
       );
-      
+
       expect(result.state, FeasibilityState.infeasible);
       expect(result.totalAvailableTime.inSeconds, 0);
     });
@@ -43,7 +43,7 @@ void main() {
         availableWindows: [w1],
         estimatedRequiredTime: const Duration(hours: 3),
       );
-      
+
       expect(result.state, FeasibilityState.infeasible);
       expect(result.totalAvailableTime.inHours, 2);
     });
@@ -59,7 +59,7 @@ void main() {
         availableWindows: [w1],
         estimatedRequiredTime: const Duration(minutes: 108),
       );
-      
+
       expect(result.state, FeasibilityState.tight);
     });
 
@@ -74,10 +74,10 @@ void main() {
         availableWindows: [w1],
         estimatedRequiredTime: const Duration(hours: 1),
       );
-      
+
       expect(result.state, FeasibilityState.feasible);
     });
-    
+
     test('handles multiple windows', () {
       final w1 = VisibilityWindow(
         start: DateTime(2025, 1, 1, 20, 0),
@@ -92,7 +92,7 @@ void main() {
         availableWindows: [w1, w2],
         estimatedRequiredTime: const Duration(hours: 4),
       );
-      
+
       expect(result.totalAvailableTime.inHours, 5);
       expect(result.state, FeasibilityState.feasible);
     });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/models/session_log.dart';
 import '../../../domain/repositories/logbook_repository.dart';
 import '../../viewmodels/planner_viewmodel.dart';
@@ -32,9 +33,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Logbook'),
-      ),
+      appBar: AppBar(title: const Text('Logbook')),
       body: FutureBuilder<List<SessionLog>>(
         future: _logsFuture,
         builder: (context, snapshot) {
@@ -76,7 +75,10 @@ class _LogbookScreenState extends State<LogbookScreen> {
                     },
                     title: Text(
                       '${log.sessionDate.toLocal().toString().split(' ')[0]} - ${log.targetName}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,8 +88,12 @@ class _LogbookScreenState extends State<LogbookScreen> {
                         Text('Planned Frames: ${log.plannedLightFrames}'),
                         if (log.actualLightFrames != null)
                           Text('Actual Frames: ${log.actualLightFrames}'),
-                        if (log.rejectedFrames != null && log.rejectedFrames! > 0)
-                          Text('Rejected Frames: ${log.rejectedFrames}', style: const TextStyle(color: Colors.red)),
+                        if (log.rejectedFrames != null &&
+                            log.rejectedFrames! > 0)
+                          Text(
+                            'Rejected Frames: ${log.rejectedFrames}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
                       ],
                     ),
                     trailing: Row(
@@ -96,7 +102,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
                         IconButton(
                           icon: const Icon(Icons.share),
                           onPressed: () {
-                            SharePlus.instance.share(ShareParams(text: log.toShareableText()));
+                            SharePlus.instance.share(
+                              ShareParams(text: log.toShareableText()),
+                            );
                           },
                         ),
                       ],

@@ -1,7 +1,9 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/repositories/equipment_repository.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../viewmodels/planner_viewmodel.dart';
@@ -55,32 +57,42 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     final formKey = GlobalKey<FormState>();
 
     // Controllers — pre-filled when editing.
-    final nameCtrl =
-        TextEditingController(text: existing?.name ?? '');
-    final manufacturerCtrl =
-        TextEditingController(text: existing?.manufacturer ?? '');
-    final cameraModelCtrl =
-        TextEditingController(text: existing?.cameraModel ?? '');
+    final nameCtrl = TextEditingController(text: existing?.name ?? '');
+    final manufacturerCtrl = TextEditingController(
+      text: existing?.manufacturer ?? '',
+    );
+    final cameraModelCtrl = TextEditingController(
+      text: existing?.cameraModel ?? '',
+    );
     final resWCtrl = TextEditingController(
-        text: existing != null ? existing.resolutionWidth.toString() : '');
+      text: existing != null ? existing.resolutionWidth.toString() : '',
+    );
     final resHCtrl = TextEditingController(
-        text: existing != null ? existing.resolutionHeight.toString() : '');
+      text: existing != null ? existing.resolutionHeight.toString() : '',
+    );
     final pixelCtrl = TextEditingController(
-        text: existing != null ? existing.pixelPitch.toString() : '');
+      text: existing != null ? existing.pixelPitch.toString() : '',
+    );
     final sensorWCtrl = TextEditingController(
-        text: existing != null ? existing.sensorWidth.toStringAsFixed(2) : '');
+      text: existing != null ? existing.sensorWidth.toStringAsFixed(2) : '',
+    );
     final sensorHCtrl = TextEditingController(
-        text: existing != null ? existing.sensorHeight.toStringAsFixed(2) : '');
+      text: existing != null ? existing.sensorHeight.toStringAsFixed(2) : '',
+    );
     final focalCtrl = TextEditingController(
-        text: existing != null ? existing.focalLength.toString() : '');
+      text: existing != null ? existing.focalLength.toString() : '',
+    );
     final apertureCtrl = TextEditingController(
-        text: existing != null ? existing.aperture.toString() : '');
+      text: existing != null ? existing.aperture.toString() : '',
+    );
     final averageRawFileSizeMBCtrl = TextEditingController(
-        text: existing?.averageRawFileSizeMB != null ? existing!.averageRawFileSizeMB!.toString() : '');
+      text: existing?.averageRawFileSizeMB != null
+          ? existing!.averageRawFileSizeMB!.toString()
+          : '',
+    );
     final rotationCtrl = TextEditingController(
-        text: existing?.rotation != null
-            ? existing!.rotation!.toString()
-            : '');
+      text: existing?.rotation != null ? existing!.rotation!.toString() : '',
+    );
 
     /// Auto-compute sensor size from resolution × pixel pitch.
     void autoSensorSize() {
@@ -98,337 +110,381 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     await showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(builder: (context, setDialogState) {
-          return AlertDialog(
-          title: Text(isEdit ? 'Edit Equipment' : 'Add Equipment Profile'),
-          // Constrain width on larger screens.
-          content: SizedBox(
-            width: min(MediaQuery.of(context).size.width * 0.9, 480),
-            child: SingleChildScrollView(
-              child: Form(
-                key: formKey,
-                child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // в”Ђв”Ђ Profile Identity в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-                  TextFormField(
-                    controller: nameCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Profile Name',
-                      hintText: 'e.g. ZWO ASI2600MC + 400mm Refractor',
-                    ),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: manufacturerCtrl,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(isEdit ? 'Edit Equipment' : 'Add Equipment Profile'),
+              // Constrain width on larger screens.
+              content: SizedBox(
+                width: min(MediaQuery.of(context).size.width * 0.9, 480),
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // в”Ђв”Ђ Profile Identity в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+                        TextFormField(
+                          controller: nameCtrl,
                           decoration: const InputDecoration(
-                            labelText: 'Manufacturer',
-                            hintText: 'e.g. ZWO',
+                            labelText: 'Profile Name',
+                            hintText: 'e.g. ZWO ASI2600MC + 400mm Refractor',
+                          ),
+                          validator: (v) =>
+                              v == null || v.trim().isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: manufacturerCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Manufacturer',
+                                  hintText: 'e.g. ZWO',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: cameraModelCtrl,
+                                decoration: const InputDecoration(
+                                  labelText: 'Model',
+                                  hintText: 'e.g. ASI2600MC',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // в”Ђв”Ђ Sensor Section (Stellarium layout) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+                        Text(
+                          'Camera Sensor',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Resolution W × H px
+                        _StellariumRow(
+                          label: 'Resolution',
+                          unit: 'px',
+                          fieldW: TextFormField(
+                            controller: resWCtrl,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            onChanged: (_) => autoSensorSize(),
+                            decoration: const InputDecoration(hintText: '6248'),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = int.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
+                          ),
+                          fieldH: TextFormField(
+                            controller: resHCtrl,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            onChanged: (_) => autoSensorSize(),
+                            decoration: const InputDecoration(hintText: '4176'),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = int.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: cameraModelCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Model',
-                            hintText: 'e.g. ASI2600MC',
+                        const SizedBox(height: 8),
+                        // Pixel Size W × H Вµm
+                        _StellariumRow(
+                          label: 'Pixel Size',
+                          unit: 'Вµm',
+                          fieldW: TextFormField(
+                            controller: pixelCtrl,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            onChanged: (_) => autoSensorSize(),
+                            decoration: const InputDecoration(hintText: '3.76'),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = double.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
+                          ),
+                          // Pixel size is square — show same value label for H
+                          fieldH: TextFormField(
+                            controller: pixelCtrl,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            onChanged: (_) => autoSensorSize(),
+                            decoration: const InputDecoration(hintText: '3.76'),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = double.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // в”Ђв”Ђ Sensor Section (Stellarium layout) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
-                  Text('Camera Sensor',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          )),
-                  const SizedBox(height: 8),
-                  // Resolution W × H px
-                  _StellariumRow(
-                    label: 'Resolution',
-                    unit: 'px',
-                    fieldW: TextFormField(
-                      controller: resWCtrl,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      onChanged: (_) => autoSensorSize(),
-                      decoration: const InputDecoration(hintText: '6248'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = int.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                    fieldH: TextFormField(
-                      controller: resHCtrl,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      onChanged: (_) => autoSensorSize(),
-                      decoration: const InputDecoration(hintText: '4176'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = int.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Pixel Size W × H Вµm
-                  _StellariumRow(
-                    label: 'Pixel Size',
-                    unit: 'Вµm',
-                    fieldW: TextFormField(
-                      controller: pixelCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      textAlign: TextAlign.center,
-                      onChanged: (_) => autoSensorSize(),
-                      decoration: const InputDecoration(hintText: '3.76'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                    // Pixel size is square — show same value label for H
-                    fieldH: TextFormField(
-                      controller: pixelCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      textAlign: TextAlign.center,
-                      onChanged: (_) => autoSensorSize(),
-                      decoration: const InputDecoration(hintText: '3.76'),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Square pixels assumed (W = H)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withAlpha(128),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Square pixels assumed (W = H)',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withAlpha(128),
+                              ),
                         ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Sensor Size W × H mm — auto-calculated
-                  _StellariumRow(
-                    label: 'Sensor Size',
-                    unit: 'mm',
-                    fieldW: TextFormField(
-                      controller: sensorWCtrl,
-                      readOnly: true,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).disabledColor),
-                      decoration: const InputDecoration(
-                        hintText: '23.50',
-                        filled: true,
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                    fieldH: TextFormField(
-                      controller: sensorHCtrl,
-                      readOnly: true,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).disabledColor),
-                      decoration: const InputDecoration(
-                        hintText: '15.70',
-                        filled: true,
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Invalid';
-                        if (n <= 0) return '> 0';
-                        return null;
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Auto-calculated from Resolution × Pixel Size',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withAlpha(128),
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Bit Depth removed
-                  const SizedBox(height: 20),
-                  Text('Optics',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          )),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: focalCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: const InputDecoration(
-                              labelText: 'Effective Focal Length (mm)'),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Required';
-                            final n = double.tryParse(v);
-                            if (n == null) return 'Invalid';
-                            if (n <= 0) return 'Must be > 0';
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: apertureCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration:
-                              const InputDecoration(labelText: 'Effective Aperture (f/)'),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Required';
-                            final n = double.tryParse(v);
-                            if (n == null) return 'Invalid';
-                            if (n <= 0) return 'Must be > 0';
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: averageRawFileSizeMBCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: const InputDecoration(
-                            labelText: 'Average RAW File Size (MB)',
-                            hintText: 'e.g. 50.0',
+                        const SizedBox(height: 8),
+                        // Sensor Size W × H mm — auto-calculated
+                        _StellariumRow(
+                          label: 'Sensor Size',
+                          unit: 'mm',
+                          fieldW: TextFormField(
+                            controller: sensorWCtrl,
+                            readOnly: true,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Theme.of(context).disabledColor,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: '23.50',
+                              filled: true,
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = double.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
                           ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return null;
-                            if (double.tryParse(v) == null) return 'Invalid';
-                            return null;
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: rotationCtrl,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true, signed: true),
-                          decoration: const InputDecoration(
-                            labelText: 'Rotation (В°)',
-                            hintText: 'Optional',
+                          fieldH: TextFormField(
+                            controller: sensorHCtrl,
+                            readOnly: true,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Theme.of(context).disabledColor,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: '15.70',
+                              filled: true,
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              final n = double.tryParse(v);
+                              if (n == null) return 'Invalid';
+                              if (n <= 0) return '> 0';
+                              return null;
+                            },
                           ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return null;
-                            if (double.tryParse(v) == null) return 'Invalid';
-                            return null;
-                          },
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          'Auto-calculated from Resolution × Pixel Size',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface
+                                    .withAlpha(128),
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Bit Depth removed
+                        const SizedBox(height: 20),
+                        Text(
+                          'Optics',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: focalCtrl,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Effective Focal Length (mm)',
+                                ),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final n = double.tryParse(v);
+                                  if (n == null) return 'Invalid';
+                                  if (n <= 0) return 'Must be > 0';
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: apertureCtrl,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Effective Aperture (f/)',
+                                ),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return 'Required';
+                                  }
+                                  final n = double.tryParse(v);
+                                  if (n == null) return 'Invalid';
+                                  if (n <= 0) return 'Must be > 0';
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: averageRawFileSizeMBCtrl,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Average RAW File Size (MB)',
+                                  hintText: 'e.g. 50.0',
+                                ),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return null;
+                                  }
+                                  if (double.tryParse(v) == null) {
+                                    return 'Invalid';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: rotationCtrl,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                      signed: true,
+                                    ),
+                                decoration: const InputDecoration(
+                                  labelText: 'Rotation (В°)',
+                                  hintText: 'Optional',
+                                ),
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return null;
+                                  }
+                                  if (double.tryParse(v) == null) {
+                                    return 'Invalid';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (!formKey.currentState!.validate()) return;
-                final name = nameCtrl.text.trim();
-                if (name.isEmpty) return;
-                final repo = context.read<EquipmentRepository>();
-                final profile = EquipmentProfile(
-                  id: existing?.id ?? 0,
-                  name: name,
-                  manufacturer: manufacturerCtrl.text.trim().isEmpty
-                      ? null
-                      : manufacturerCtrl.text.trim(),
-                  cameraModel: cameraModelCtrl.text.trim().isEmpty
-                      ? null
-                      : cameraModelCtrl.text.trim(),
-                  resolutionWidth:
-                      int.tryParse(resWCtrl.text) ?? 0,
-                  resolutionHeight:
-                      int.tryParse(resHCtrl.text) ?? 0,
-                  pixelPitch:
-                      double.tryParse(pixelCtrl.text) ?? 0.0,
-                  sensorWidth:
-                      double.tryParse(sensorWCtrl.text) ?? 0.0,
-                  sensorHeight:
-                      double.tryParse(sensorHCtrl.text) ?? 0.0,
-                  focalLength:
-                      double.tryParse(focalCtrl.text) ?? 0.0,
-                  aperture:
-                      double.tryParse(apertureCtrl.text) ?? 0.0,
-                  averageRawFileSizeMB:
-                      double.tryParse(averageRawFileSizeMBCtrl.text),
-                  rotation: rotationCtrl.text.trim().isEmpty
-                      ? null
-                      : double.tryParse(rotationCtrl.text),
-                );
-                if (isEdit) {
-                  await repo.updateEquipment(profile);
-                } else {
-                  await repo.insertEquipment(profile);
-                }
-                if (context.mounted) Navigator.of(context).pop();
-              },
-              child: Text(isEdit ? 'Save Changes' : 'Save'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
+                    final name = nameCtrl.text.trim();
+                    if (name.isEmpty) return;
+                    final repo = context.read<EquipmentRepository>();
+                    final profile = EquipmentProfile(
+                      id: existing?.id ?? 0,
+                      name: name,
+                      manufacturer: manufacturerCtrl.text.trim().isEmpty
+                          ? null
+                          : manufacturerCtrl.text.trim(),
+                      cameraModel: cameraModelCtrl.text.trim().isEmpty
+                          ? null
+                          : cameraModelCtrl.text.trim(),
+                      resolutionWidth: int.tryParse(resWCtrl.text) ?? 0,
+                      resolutionHeight: int.tryParse(resHCtrl.text) ?? 0,
+                      pixelPitch: double.tryParse(pixelCtrl.text) ?? 0.0,
+                      sensorWidth: double.tryParse(sensorWCtrl.text) ?? 0.0,
+                      sensorHeight: double.tryParse(sensorHCtrl.text) ?? 0.0,
+                      focalLength: double.tryParse(focalCtrl.text) ?? 0.0,
+                      aperture: double.tryParse(apertureCtrl.text) ?? 0.0,
+                      averageRawFileSizeMB: double.tryParse(
+                        averageRawFileSizeMBCtrl.text,
+                      ),
+                      rotation: rotationCtrl.text.trim().isEmpty
+                          ? null
+                          : double.tryParse(rotationCtrl.text),
+                    );
+                    if (isEdit) {
+                      await repo.updateEquipment(profile);
+                    } else {
+                      await repo.insertEquipment(profile);
+                    }
+                    if (context.mounted) Navigator.of(context).pop();
+                  },
+                  child: Text(isEdit ? 'Save Changes' : 'Save'),
+                ),
+              ],
+            );
+          },
         );
-        });
       },
     );
     // Always refresh list after dialog closes.
@@ -445,95 +501,94 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
           : _equipment.isEmpty
-              ? const Center(child: Text('No equipment profiles found.'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _equipment.length,
-                  itemBuilder: (context, index) {
-                    final eq = _equipment[index];
-                    final isSelected =
-                        eq.id == planner.selectedEquipment?.id;
+          ? const Center(child: Text('No equipment profiles found.'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _equipment.length,
+              itemBuilder: (context, index) {
+                final eq = _equipment[index];
+                final isSelected = eq.id == planner.selectedEquipment?.id;
 
-                    final card = Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.transparent,
-                          width: 2,
+                final card = Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      eq.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(_subtitle(eq)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          tooltip: 'Edit',
+                          onPressed: () => _showEquipmentDialog(existing: eq),
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        title: Text(eq.name,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold)),
-                        subtitle: Text(_subtitle(eq)),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined,
-                                  size: 20),
-                              tooltip: 'Edit',
-                              onPressed: () =>
-                                  _showEquipmentDialog(existing: eq),
-                            ),
-                            if (isSelected)
-                              const Icon(Icons.check_circle,
-                                  color: Colors.blue),
-                          ],
-                        ),
-                        onTap: () {
-                          planner.setEquipment(eq);
-                          context.pop();
-                        },
-                      ),
-                    );
+                        if (isSelected)
+                          const Icon(Icons.check_circle, color: Colors.blue),
+                      ],
+                    ),
+                    onTap: () {
+                      planner.setEquipment(eq);
+                      context.pop();
+                    },
+                  ),
+                );
 
-                    return Dismissible(
-                      key: ValueKey('eq_${eq.id}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(12),
+                return Dismissible(
+                  key: ValueKey('eq_${eq.id}'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 16),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Equipment?'),
+                        content: Text(
+                          'Are you sure you want to delete "${eq.name}"?',
                         ),
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 16),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        return await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Delete Equipment?'),
-                            content: Text(
-                                'Are you sure you want to delete "${eq.name}"?'),
-                            actions: [
-                              TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, false),
-                                  child: const Text('Cancel')),
-                              TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context, true),
-                                  child: const Text('Delete')),
-                            ],
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
                           ),
-                        );
-                      },
-                      onDismissed: (direction) async {
-                        await repo.deleteEquipment(eq.id);
-                        setState(() =>
-                            _equipment.removeWhere((e) => e.id == eq.id));
-                      },
-                      child: card,
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
                     );
                   },
-                ),
+                  onDismissed: (direction) async {
+                    await repo.deleteEquipment(eq.id);
+                    setState(
+                      () => _equipment.removeWhere((e) => e.id == eq.id),
+                    );
+                  },
+                  child: card,
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showEquipmentDialog(),
         child: const Icon(Icons.add),
@@ -565,15 +620,13 @@ class _StellariumRow extends StatelessWidget {
           width: 90,
           child: Padding(
             padding: const EdgeInsets.only(top: 14),
-            child: Text(label,
-                style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ),
         Expanded(child: fieldW),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Text('×',
-              style: Theme.of(context).textTheme.titleMedium),
+          child: Text('×', style: Theme.of(context).textTheme.titleMedium),
         ),
         Expanded(child: fieldH),
         const SizedBox(width: 6),
@@ -581,8 +634,7 @@ class _StellariumRow extends StatelessWidget {
           width: 30,
           child: Padding(
             padding: const EdgeInsets.only(top: 14),
-            child: Text(unit,
-                style: Theme.of(context).textTheme.bodySmall),
+            child: Text(unit, style: Theme.of(context).textTheme.bodySmall),
           ),
         ),
       ],

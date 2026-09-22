@@ -27,7 +27,12 @@ class AstroMath {
   /// Purpose: Internal coordinate representation.
   /// Inputs: degrees (-90 to 90), minutes (0-60), seconds (0-60), isNegative (bool)
   /// Formula: (abs(d) + m/60 + s/3600) * sign
-  static double decToDecimalDegrees(int degrees, int minutes, double seconds, {bool isNegative = false}) {
+  static double decToDecimalDegrees(
+    int degrees,
+    int minutes,
+    double seconds, {
+    bool isNegative = false,
+  }) {
     final absDegrees = degrees.abs();
     final decimal = absDegrees + (minutes / 60.0) + (seconds / 3600.0);
     return isNegative || degrees < 0 ? -decimal : decimal;

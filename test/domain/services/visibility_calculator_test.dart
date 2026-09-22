@@ -21,9 +21,18 @@ void main() {
     });
 
     test('calculates lunar illumination correctly at full moon (~14.76 days later)', () {
-      final fullMoon = DateTime.utc(2000, 1, 6, 18, 14).add(const Duration(days: 14, hours: 18, minutes: 22));
+      final fullMoon = DateTime.utc(
+        2000,
+        1,
+        6,
+        18,
+        14,
+      ).add(const Duration(days: 14, hours: 18, minutes: 22));
       final illum = VisibilityCalculator.calculateLunarIllumination(fullMoon);
-      expect(illum, closeTo(1.0, 0.05)); // allowing some margin for average synodic month approximation
+      expect(
+        illum,
+        closeTo(1.0, 0.05),
+      ); // allowing some margin for average synodic month approximation
     });
   });
 }

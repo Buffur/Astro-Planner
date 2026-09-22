@@ -18,17 +18,19 @@ void main() {
   });
 
   test('can insert and retrieve equipment profiles', () async {
-    await repository.insertEquipment(const domain.EquipmentProfile(
-      id: 0,
-      name: 'Pixel 8 Pro (Main)',
-      sensorWidth: 9.6,
-      sensorHeight: 7.2,
-      pixelPitch: 1.2,
-      resolutionWidth: 8160,
-      resolutionHeight: 6144,
-      focalLength: 6.9,
-      aperture: 1.68,
-    ));
+    await repository.insertEquipment(
+      const domain.EquipmentProfile(
+        id: 0,
+        name: 'Pixel 8 Pro (Main)',
+        sensorWidth: 9.6,
+        sensorHeight: 7.2,
+        pixelPitch: 1.2,
+        resolutionWidth: 8160,
+        resolutionHeight: 6144,
+        focalLength: 6.9,
+        aperture: 1.68,
+      ),
+    );
 
     final all = await repository.getAllEquipment();
     expect(all.length, 1);

@@ -18,23 +18,27 @@ void main() {
   });
 
   test('can insert and search targets', () async {
-    await repository.insertTarget(const domain.AstroTarget(
-      id: 0,
-      catalogId: 'M31',
-      commonName: 'Andromeda',
-      rightAscension: 10.0,
-      declination: 41.0,
-      type: 'Galaxy',
-    ));
+    await repository.insertTarget(
+      const domain.AstroTarget(
+        id: 0,
+        catalogId: 'M31',
+        commonName: 'Andromeda',
+        rightAscension: 10.0,
+        declination: 41.0,
+        type: 'Galaxy',
+      ),
+    );
 
-    await repository.insertTarget(const domain.AstroTarget(
-      id: 0,
-      catalogId: 'M42',
-      commonName: 'Orion Nebula',
-      rightAscension: 83.0,
-      declination: -5.0,
-      type: 'Nebula',
-    ));
+    await repository.insertTarget(
+      const domain.AstroTarget(
+        id: 0,
+        catalogId: 'M42',
+        commonName: 'Orion Nebula',
+        rightAscension: 83.0,
+        declination: -5.0,
+        type: 'Nebula',
+      ),
+    );
 
     final all = await repository.getAllTargets();
     expect(all.length, 2);

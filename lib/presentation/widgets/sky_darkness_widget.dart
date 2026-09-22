@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../viewmodels/planner_viewmodel.dart';
 import '../../../core/config/feature_scope.dart';
 
@@ -11,9 +12,9 @@ class SkyDarknessWidget extends StatelessWidget {
     final viewModel = context.watch<PlannerViewModel>();
     final timeline = viewModel.nightTimeline;
     final theme = Theme.of(context);
-    
+
     final lunarIllum = (viewModel.lunarIllumination * 100).toStringAsFixed(1);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias,
@@ -27,7 +28,9 @@ class SkyDarknessWidget extends StatelessWidget {
               children: [
                 Text(
                   'Sky Darkness & Timeline',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (FeatureScope.lightPollutionContext)
                   _BortleBadge(
@@ -41,18 +44,25 @@ class SkyDarknessWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Moon Status
             Row(
               children: [
-                const Icon(Icons.nightlight_round, size: 20, color: Colors.blueGrey),
+                const Icon(
+                  Icons.nightlight_round,
+                  size: 20,
+                  color: Colors.blueGrey,
+                ),
                 const SizedBox(width: 8),
-                Text('Moon Illumination: $lunarIllum%', style: const TextStyle(fontWeight: FontWeight.w500)),
+                Text(
+                  'Moon Illumination: $lunarIllum%',
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Night Timeline
             _NightTimelineVisual(timeline: timeline),
           ],
@@ -73,16 +83,38 @@ class _BortleBadge extends StatelessWidget {
     Color badgeColor;
     Color textColor = Colors.white;
     switch (bortleClass) {
-      case 1: badgeColor = Colors.black; break;
-      case 2: badgeColor = Colors.blueGrey.shade900; break;
-      case 3: badgeColor = Colors.blue.shade900; break;
-      case 4: badgeColor = Colors.green.shade700; break;
-      case 5: badgeColor = Colors.yellow.shade700; textColor = Colors.black; break;
-      case 6: badgeColor = Colors.orange; break;
-      case 7: badgeColor = Colors.deepOrange; break;
-      case 8: badgeColor = Colors.red; break;
-      case 9: badgeColor = Colors.white; textColor = Colors.red; break;
-      default: badgeColor = Colors.grey; break;
+      case 1:
+        badgeColor = Colors.black;
+        break;
+      case 2:
+        badgeColor = Colors.blueGrey.shade900;
+        break;
+      case 3:
+        badgeColor = Colors.blue.shade900;
+        break;
+      case 4:
+        badgeColor = Colors.green.shade700;
+        break;
+      case 5:
+        badgeColor = Colors.yellow.shade700;
+        textColor = Colors.black;
+        break;
+      case 6:
+        badgeColor = Colors.orange;
+        break;
+      case 7:
+        badgeColor = Colors.deepOrange;
+        break;
+      case 8:
+        badgeColor = Colors.red;
+        break;
+      case 9:
+        badgeColor = Colors.white;
+        textColor = Colors.red;
+        break;
+      default:
+        badgeColor = Colors.grey;
+        break;
     }
 
     return Container(
@@ -102,7 +134,12 @@ class _BortleBadge extends StatelessWidget {
             9,
             (index) => DropdownMenuItem(
               value: index + 1,
-              child: Text('Bortle ${index + 1}', style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
+              child: Text(
+                'Bortle ${index + 1}',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
             ),
           ),
           onChanged: onChanged,
@@ -113,7 +150,11 @@ class _BortleBadge extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 8.0, right: 4.0),
                   child: Text(
                     'Bortle ${index + 1}',
-                    style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13),
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
               );
@@ -143,10 +184,30 @@ class _NightTimelineVisual extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _TimelinePoint(label: 'Sunset', time: format(timeline['sunset']), icon: Icons.wb_sunny_outlined, color: Colors.orange),
-            _TimelinePoint(label: 'Astro Dusk', time: format(timeline['astroDusk']), icon: Icons.nights_stay_outlined, color: Colors.indigo),
-            _TimelinePoint(label: 'Astro Dawn', time: format(timeline['astroDawn']), icon: Icons.nights_stay, color: Colors.indigo),
-            _TimelinePoint(label: 'Sunrise', time: format(timeline['sunrise']), icon: Icons.wb_sunny, color: Colors.orange),
+            _TimelinePoint(
+              label: 'Sunset',
+              time: format(timeline['sunset']),
+              icon: Icons.wb_sunny_outlined,
+              color: Colors.orange,
+            ),
+            _TimelinePoint(
+              label: 'Astro Dusk',
+              time: format(timeline['astroDusk']),
+              icon: Icons.nights_stay_outlined,
+              color: Colors.indigo,
+            ),
+            _TimelinePoint(
+              label: 'Astro Dawn',
+              time: format(timeline['astroDawn']),
+              icon: Icons.nights_stay,
+              color: Colors.indigo,
+            ),
+            _TimelinePoint(
+              label: 'Sunrise',
+              time: format(timeline['sunrise']),
+              icon: Icons.wb_sunny,
+              color: Colors.orange,
+            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -171,7 +232,8 @@ class _NightTimelineVisual extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'True Night Window: ${format(timeline['astroDusk'])} - ${format(timeline['astroDawn'])}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -184,7 +246,12 @@ class _TimelinePoint extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _TimelinePoint({required this.label, required this.time, required this.icon, required this.color});
+  const _TimelinePoint({
+    required this.label,
+    required this.time,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -192,11 +259,15 @@ class _TimelinePoint extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(height: 4),
-        Text(time, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        Text(label, style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10)),
+        Text(
+          time,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
+        ),
       ],
     );
   }
 }
-
-

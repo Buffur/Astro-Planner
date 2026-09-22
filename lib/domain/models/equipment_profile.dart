@@ -11,13 +11,13 @@ class EquipmentProfile {
   // but are currently stored independently.
   final double sensorWidth;
   final double sensorHeight;
-  
+
   // Pixel size in microns (um)
   final double pixelPitch;
   // Resolution in pixels
   final int resolutionWidth;
   final int resolutionHeight;
-  
+
   // Optics
   final double focalLength;
   final double aperture;

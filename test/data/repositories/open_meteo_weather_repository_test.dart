@@ -25,7 +25,7 @@ void main() {
       expect(weather!.temperature, 15.0);
       expect(weather.hourlyForecasts.length, 1);
       expect(weather.hourlyForecasts.first.temperature, 14.0);
-      
+
       // Verify caching occurred
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('weather_cache_51.50_-0.10'), isNotNull);
@@ -33,7 +33,10 @@ void main() {
 
     test('falls back to cache when network fails', () async {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('weather_cache_51.50_-0.10', '{"temperature": 10.0, "cloudCover": 50.0, "humidity": 80.0, "dewPoint": 5.0, "hourlyForecasts": [], "lastUpdated": "2023-01-01T00:00:00.000Z"}');
+      await prefs.setString(
+        'weather_cache_51.50_-0.10',
+        '{"temperature": 10.0, "cloudCover": 50.0, "humidity": 80.0, "dewPoint": 5.0, "hourlyForecasts": [], "lastUpdated": "2023-01-01T00:00:00.000Z"}',
+      );
 
       final mockClient = MockClient((request) async {
         throw Exception('Offline');

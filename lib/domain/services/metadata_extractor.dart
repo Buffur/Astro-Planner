@@ -1,5 +1,7 @@
 import 'dart:io';
+
 import 'package:exif/exif.dart';
+
 import '../models/image_metadata.dart';
 
 class MetadataExtractor {
@@ -21,13 +23,25 @@ class MetadataExtractor {
       }
 
       return ImageMetadata(
-        cameraMake: tags['Image Make']?.printable ?? tags['Image Make']?.toString(),
-        cameraModel: tags['Image Model']?.printable ?? tags['Image Model']?.toString(),
-        focalLength: parseRational(tags['EXIF FocalLength']?.printable ?? tags['EXIF FocalLength']?.toString())?.toString(),
-        aperture: tags['EXIF FNumber']?.printable ?? tags['EXIF FNumber']?.toString(),
-        exposureTime: tags['EXIF ExposureTime']?.printable ?? tags['EXIF ExposureTime']?.toString(),
-        iso: tags['EXIF ISOSpeedRatings']?.printable ?? tags['EXIF ISOSpeedRatings']?.toString(),
-        dateTimeOriginal: tags['EXIF DateTimeOriginal']?.printable ?? tags['EXIF DateTimeOriginal']?.toString(),
+        cameraMake:
+            tags['Image Make']?.printable ?? tags['Image Make']?.toString(),
+        cameraModel:
+            tags['Image Model']?.printable ?? tags['Image Model']?.toString(),
+        focalLength: parseRational(
+          tags['EXIF FocalLength']?.printable ??
+              tags['EXIF FocalLength']?.toString(),
+        )?.toString(),
+        aperture:
+            tags['EXIF FNumber']?.printable ?? tags['EXIF FNumber']?.toString(),
+        exposureTime:
+            tags['EXIF ExposureTime']?.printable ??
+            tags['EXIF ExposureTime']?.toString(),
+        iso:
+            tags['EXIF ISOSpeedRatings']?.printable ??
+            tags['EXIF ISOSpeedRatings']?.toString(),
+        dateTimeOriginal:
+            tags['EXIF DateTimeOriginal']?.printable ??
+            tags['EXIF DateTimeOriginal']?.toString(),
         rawTags: tags.map((k, v) => MapEntry(k, v.printable)),
       );
     } catch (e) {
@@ -85,7 +99,7 @@ class MetadataExtractor {
 
   static double? parseRational(String? value) {
     if (value == null || value.trim().isEmpty) return null;
-    
+
     double? parsedValue;
     if (value.contains('/')) {
       final parts = value.split('/');

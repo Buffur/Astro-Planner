@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/repositories/target_repository.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../viewmodels/planner_viewmodel.dart';
@@ -100,63 +101,78 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                 child: Form(
                   key: formKey,
                   child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: nameCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Target Name *',
-                        hintText: 'e.g. Andromeda Galaxy',
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        controller: nameCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Target Name *',
+                          hintText: 'e.g. Andromeda Galaxy',
+                        ),
+                        validator: (v) =>
+                            v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: selectedType,
-                      decoration: const InputDecoration(labelText: 'Object Type'),
-                      items: _kObjectTypes
-                          .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setDialogState(() => selectedType = val);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: raCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true, signed: false),
-                      decoration: const InputDecoration(
-                        labelText: 'Right Ascension (Degrees) *',
-                        hintText: '0.0 to 360.0',
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        initialValue: selectedType,
+                        decoration: const InputDecoration(
+                          labelText: 'Object Type',
+                        ),
+                        items: _kObjectTypes
+                            .map(
+                              (t) => DropdownMenuItem(value: t, child: Text(t)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setDialogState(() => selectedType = val);
+                          }
+                        },
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Must be a number';
-                        if (n < 0.0 || n >= 360.0) return 'Must be 0.0 to 360.0';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: decCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true, signed: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Declination (Degrees) *',
-                        hintText: '-90.0 to +90.0',
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: raCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: false,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Right Ascension (Degrees) *',
+                          hintText: '0.0 to 360.0',
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Required';
+                          final n = double.tryParse(v);
+                          if (n == null) return 'Must be a number';
+                          if (n < 0.0 || n >= 360.0) {
+                            return 'Must be 0.0 to 360.0';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        final n = double.tryParse(v);
-                        if (n == null) return 'Must be a number';
-                        if (n < -90.0 || n > 90.0) return 'Must be -90.0 to +90.0';
-                        return null;
-                      },
-                    ),
-                  ],
-                ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: decCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                          signed: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Declination (Degrees) *',
+                          hintText: '-90.0 to +90.0',
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Required';
+                          final n = double.tryParse(v);
+                          if (n == null) return 'Must be a number';
+                          if (n < -90.0 || n > 90.0) {
+                            return 'Must be -90.0 to +90.0';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -215,8 +231,9 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                 hintText: 'Search target (e.g., Andromeda)',
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -230,103 +247,101 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
           : _targets.isEmpty
-              ? Center(
-                  child: Text(_searchQuery.isEmpty
-                      ? 'No targets found.'
-                      : 'No results for "$_searchQuery".'),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _targets.length,
-                  itemBuilder: (context, index) {
-                    final target = _targets[index];
-                    final isSelected = target.id == planner.selectedTarget?.id;
+          ? Center(
+              child: Text(
+                _searchQuery.isEmpty
+                    ? 'No targets found.'
+                    : 'No results for "$_searchQuery".',
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _targets.length,
+              itemBuilder: (context, index) {
+                final target = _targets[index];
+                final isSelected = target.id == planner.selectedTarget?.id;
 
-                    final card = Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.transparent,
-                          width: 2,
+                final card = Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      _targetLabel(target),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(target.type),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          tooltip: 'Edit',
+                          onPressed: () => _showTargetDialog(existing: target),
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          _targetLabel(target),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(target.type),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon:
-                                  const Icon(Icons.edit_outlined, size: 20),
-                              tooltip: 'Edit',
-                              onPressed: () =>
-                                  _showTargetDialog(existing: target),
-                            ),
-                            if (isSelected)
-                              const Icon(Icons.check_circle,
-                                  color: Colors.blue),
-                          ],
-                        ),
-                        onTap: () {
-                          planner.setTarget(target);
-                          context.pop();
-                        },
-                      ),
-                    );
+                        if (isSelected)
+                          const Icon(Icons.check_circle, color: Colors.blue),
+                      ],
+                    ),
+                    onTap: () {
+                      planner.setTarget(target);
+                      context.pop();
+                    },
+                  ),
+                );
 
-                    return Dismissible(
-                      key: ValueKey('target_${target.id}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(12),
+                return Dismissible(
+                  key: ValueKey('target_${target.id}'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade400,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 16),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Target?'),
+                        content: Text(
+                          'Are you sure you want to delete ${target.commonName ?? target.catalogId}?',
                         ),
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 16),
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        return await showDialog<bool>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Delete Target?'),
-                            content: Text(
-                              'Are you sure you want to delete ${target.commonName ?? target.catalogId}?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(context, false),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.pop(context, true),
-                                child: const Text('Delete'),
-                              ),
-                            ],
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Cancel'),
                           ),
-                        );
-                      },
-                      onDismissed: (direction) async {
-                        await repo.deleteTarget(target.id);
-                        // Remove instantly from in-memory list вЂ” no flicker.
-                        setState(() =>
-                            _targets.removeWhere((t) => t.id == target.id));
-                      },
-                      child: card,
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Delete'),
+                          ),
+                        ],
+                      ),
                     );
                   },
-                ),
+                  onDismissed: (direction) async {
+                    await repo.deleteTarget(target.id);
+                    // Remove instantly from in-memory list вЂ” no flicker.
+                    setState(
+                      () => _targets.removeWhere((t) => t.id == target.id),
+                    );
+                  },
+                  child: card,
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showTargetDialog(),
         child: const Icon(Icons.add),
