@@ -1,9 +1,15 @@
 import 'dart:math' as math;
 
 import '../../core/utils/astro_math.dart';
+import '../models/altitude_curve.dart';
 import '../models/astro_target.dart';
+import '../models/calendar_date.dart';
+import '../models/night_timeline.dart';
+import '../models/session_night.dart';
+import '../models/site_time_context.dart';
 import '../models/visibility_window.dart';
 import 'astronomical_engine.dart';
+import 'session_night_resolver.dart';
 
 /// Service for calculating target visibility, altitudes, and basic solar/lunar ephemerides.
 class VisibilityCalculator {
@@ -91,85 +97,160 @@ class VisibilityCalculator {
   }
 
   /// Calculates the times for sunset, twilights, and sunrise.
-  /// Returns a map of important astronomical times for the given local noon (or 12:00 UTC).
+  ///
+  /// **Deprecated (TASK 2.3):** a wrapper over [calculateNightTimelineForNight],
+  /// kept for callers not yet migrated to [SessionNight] (TASK 2.4). [date]'s
+  /// Y/M/D is read as the evening date and resolved through a
+  /// [MeanSolarTimeContext], matching the old behavior exactly (within
+  /// millisecond rounding). A threshold with no crossing is reported as
+  /// `null` here, even though [calculateNightTimelineForNight] never returns
+  /// a bare null — this wrapper exists only to keep the old return shape.
   static Map<String, DateTime?> calculateNightTimeline(
     DateTime date,
     double latitude,
     double longitude,
   ) {
-    // We want to find events for the "night" following the given date.
-    // Start scanning from approximate local noon to local noon tomorrow.
-    final offsetHours = longitude / 15.0;
-    final offsetDuration = Duration(minutes: (offsetHours * 60).round());
-    DateTime start = DateTime.utc(
-      date.year,
-      date.month,
-      date.day,
-      12,
-      0,
-    ).subtract(offsetDuration);
+    final night = SessionNightResolver.forEveningDate(
+      CalendarDate.fromDateTimeFields(date),
+      latitude: latitude,
+      longitude: longitude,
+      timeContext: MeanSolarTimeContext(longitude),
+    );
+    final timeline = calculateNightTimelineForNight(night);
 
-    DateTime? sunset;
-    DateTime? civilDusk;
-    DateTime? nauticalDusk;
-    DateTime? astroDusk;
-    DateTime? astroDawn;
-    DateTime? nauticalDawn;
-    DateTime? civilDawn;
-    DateTime? sunrise;
-
-    double prevAlt = calculateSunAltitude(start, latitude, longitude);
-
-    // Scan in 5-minute increments for speed, then refine to 1-minute
-    for (int minutes = 5; minutes <= 24 * 60; minutes += 5) {
-      DateTime current = start.add(Duration(minutes: minutes));
-      double alt = calculateSunAltitude(current, latitude, longitude);
-
-      // Check crossings (going down)
-      if (prevAlt >= -0.833 && alt < -0.833 && sunset == null) sunset = current;
-      if (prevAlt >= -6.0 && alt < -6.0 && civilDusk == null) {
-        civilDusk = current;
-      }
-      if (prevAlt >= -12.0 && alt < -12.0 && nauticalDusk == null) {
-        nauticalDusk = current;
-      }
-      if (prevAlt >= -18.0 && alt < -18.0 && astroDusk == null) {
-        astroDusk = current;
-      }
-
-      // Check crossings (going up)
-      if (prevAlt < -18.0 && alt >= -18.0 && astroDawn == null) {
-        astroDawn = current;
-      }
-      if (prevAlt < -12.0 && alt >= -12.0 && nauticalDawn == null) {
-        nauticalDawn = current;
-      }
-      if (prevAlt < -6.0 && alt >= -6.0 && civilDawn == null) {
-        civilDawn = current;
-      }
-      if (prevAlt < -0.833 && alt >= -0.833 && sunrise == null) {
-        sunrise = current;
-      }
-
-      prevAlt = alt;
-    }
+    DateTime? dusk(SunThresholdResult r) => r is SunCrossing ? r.duskUtc : null;
+    DateTime? dawn(SunThresholdResult r) => r is SunCrossing ? r.dawnUtc : null;
 
     return {
-      'sunset': sunset,
-      'civilDusk': civilDusk,
-      'nauticalDusk': nauticalDusk,
-      'astroDusk': astroDusk,
-      'astroDawn': astroDawn,
-      'nauticalDawn': nauticalDawn,
-      'civilDawn': civilDawn,
-      'sunrise': sunrise,
+      'sunset': dusk(timeline.sunriseSunset),
+      'civilDusk': dusk(timeline.civilTwilight),
+      'nauticalDusk': dusk(timeline.nauticalTwilight),
+      'astroDusk': dusk(timeline.astronomicalTwilight),
+      'astroDawn': dawn(timeline.astronomicalTwilight),
+      'nauticalDawn': dawn(timeline.nauticalTwilight),
+      'civilDawn': dawn(timeline.civilTwilight),
+      'sunrise': dawn(timeline.sunriseSunset),
     };
+  }
+
+  /// The step of the shared sampling grid used by [calculateNightTimelineForNight],
+  /// [calculateVisibilityWindowsForNight] and [calculateAltitudeCurve]
+  /// (ADR-007 §9). Kept at 5 minutes, the step the pre-SessionNight code
+  /// already used for windows and the timeline.
+  static const Duration sampleStep = Duration(minutes: 5);
+
+  /// The Sun's dusk/dawn timeline for [night], at the four standard
+  /// altitude thresholds (ADR-007 §8). Pure; samples [sampleStep] apart,
+  /// anchored at `night.startUtc`, inclusive of `night.endUtc` (ADR-007 §9).
+  static NightTimeline calculateNightTimelineForNight(SessionNight night) {
+    const thresholds = [-0.833, -6.0, -12.0, -18.0];
+
+    final altitudes = <double>[];
+    final instants = <DateTime>[];
+    for (
+      var elapsed = Duration.zero;
+      elapsed <= SessionNight.length;
+      elapsed += sampleStep
+    ) {
+      final instant = night.startUtc.add(elapsed);
+      instants.add(instant);
+      altitudes.add(
+        calculateSunAltitude(instant, night.latitude, night.longitude),
+      );
+    }
+
+    SunThresholdResult resultFor(double threshold) {
+      DateTime? dusk;
+      DateTime? dawn;
+      for (var i = 1; i < altitudes.length; i++) {
+        final prevAlt = altitudes[i - 1];
+        final alt = altitudes[i];
+        if (prevAlt >= threshold && alt < threshold) {
+          dusk ??= instants[i];
+        }
+        if (prevAlt < threshold && alt >= threshold) {
+          dawn ??= instants[i];
+        }
+      }
+
+      if (dusk == null && dawn == null) {
+        return altitudes.first < threshold
+            ? SunAlwaysBelow(threshold)
+            : SunNeverBelow(threshold);
+      }
+      return SunCrossing(
+        threshold,
+        duskUtc: dusk,
+        dawnUtc: dawn,
+        belowAtStart: altitudes.first < threshold,
+        belowAtEnd: altitudes.last < threshold,
+      );
+    }
+
+    final byThreshold = {for (final h in thresholds) h: resultFor(h)};
+    return NightTimeline(
+      night: night,
+      sunriseSunset: byThreshold[-0.833]!,
+      civilTwilight: byThreshold[-6.0]!,
+      nauticalTwilight: byThreshold[-12.0]!,
+      astronomicalTwilight: byThreshold[-18.0]!,
+    );
+  }
+
+  /// [target]'s and the Sun's altitude across [night], on the shared
+  /// [sampleStep] grid (ADR-007 §9). Presentation code (the altitude chart)
+  /// consumes this instead of sampling astronomy itself (TD-023, DEV-A3).
+  static AltitudeCurve calculateAltitudeCurve({
+    required SessionNight night,
+    required AstroTarget target,
+  }) {
+    final samples = <AltitudeSample>[];
+    for (
+      var elapsed = Duration.zero;
+      elapsed <= SessionNight.length;
+      elapsed += sampleStep
+    ) {
+      final instant = night.startUtc.add(elapsed);
+      final sunAlt = calculateSunAltitude(
+        instant,
+        night.latitude,
+        night.longitude,
+      );
+
+      final jd = AstronomicalEngine.calculateJulianDate(instant);
+      final gmst = AstronomicalEngine.calculateGMST(jd);
+      final lst = AstronomicalEngine.calculateLST(gmst, night.longitude);
+      final lha = calculateLHA(lst, target.rightAscension);
+      final targetAlt = calculateAltitude(
+        lha: lha,
+        declination: target.declination,
+        latitude: night.latitude,
+      );
+
+      samples.add(
+        AltitudeSample(
+          instantUtc: instant,
+          sunAltitudeDeg: sunAlt,
+          targetAltitudeDeg: targetAlt,
+        ),
+      );
+    }
+    return AltitudeCurve(night: night, samples: samples);
   }
 
   /// Calculates all usable visibility windows for a target during the night.
   /// A usable window requires:
   /// - The Sun is below the specified twilight threshold (default: -18.0 for Astronomical Twilight).
   /// - The Target is above the [minAltitude].
+  ///
+  /// **Deprecated (TASK 2.3):** a wrapper over [calculateVisibilityWindowsForNight],
+  /// kept for callers not yet migrated to [SessionNight] (TASK 2.4). [date]'s
+  /// Y/M/D is read as the evening date and resolved through a
+  /// [MeanSolarTimeContext], matching the old behavior exactly (within
+  /// millisecond rounding). A window can still be
+  /// [VisibilityWindow.clippedAtStart]/`clippedAtEnd` through this wrapper —
+  /// the flags depend only on the Sun's altitude at the site's mean solar
+  /// noon (polar night), not on which time context picked that noon.
   static List<VisibilityWindow> calculateVisibilityWindows({
     required DateTime date,
     required double latitude,
@@ -178,57 +259,72 @@ class VisibilityCalculator {
     required double minAltitude,
     double sunAltitudeThreshold = -18.0,
   }) {
-    // Scan from approximate local noon today to local noon tomorrow
-    final offsetHours = longitude / 15.0;
-    final offsetDuration = Duration(minutes: (offsetHours * 60).round());
-    final start = DateTime.utc(
-      date.year,
-      date.month,
-      date.day,
-      12,
-      0,
-    ).subtract(offsetDuration);
+    final night = SessionNightResolver.forEveningDate(
+      CalendarDate.fromDateTimeFields(date),
+      latitude: latitude,
+      longitude: longitude,
+      timeContext: MeanSolarTimeContext(longitude),
+    );
+    return calculateVisibilityWindowsForNight(
+      night: night,
+      target: target,
+      minAltitude: minAltitude,
+      darknessLimitDeg: sunAltitudeThreshold,
+    );
+  }
+
+  /// [SessionNight]-based visibility windows (ADR-007 §9): the intervals
+  /// where the Sun is at or below [darknessLimitDeg] (the product's
+  /// configurable "dark enough to image" limit; default -18°, astronomical
+  /// twilight) **and** [target] is at or above [minAltitude]. Samples
+  /// [sampleStep] apart on the same grid as [calculateNightTimelineForNight]
+  /// and [calculateAltitudeCurve].
+  ///
+  /// A window flagged [VisibilityWindow.clippedAtStart] or
+  /// `clippedAtEnd` was already usable at that boundary — only possible when
+  /// the Sun is below [darknessLimitDeg] at the site's mean solar noon, i.e.
+  /// polar night (ADR-007 §9).
+  static List<VisibilityWindow> calculateVisibilityWindowsForNight({
+    required SessionNight night,
+    required AstroTarget target,
+    required double minAltitude,
+    double darknessLimitDeg = -18.0,
+  }) {
+    final curve = calculateAltitudeCurve(night: night, target: target);
     final windows = <VisibilityWindow>[];
 
-    DateTime? currentWindowStart;
+    DateTime? currentStart;
+    var startClipped = false;
 
-    // Scan in 5-minute increments
-    const stepMinutes = 5;
-    for (int minutes = 0; minutes <= 24 * 60; minutes += stepMinutes) {
-      final current = start.add(Duration(minutes: minutes));
+    for (var i = 0; i < curve.samples.length; i++) {
+      final sample = curve.samples[i];
+      final isUsable =
+          sample.sunAltitudeDeg <= darknessLimitDeg &&
+          sample.targetAltitudeDeg >= minAltitude;
 
-      final sunAlt = calculateSunAltitude(current, latitude, longitude);
-      final isDark = sunAlt <= sunAltitudeThreshold;
-
-      bool isTargetHighEnough = false;
-      if (isDark) {
-        final jd = AstronomicalEngine.calculateJulianDate(current);
-        final gmst = AstronomicalEngine.calculateGMST(jd);
-        final lst = AstronomicalEngine.calculateLST(gmst, longitude);
-        final lha = calculateLHA(lst, target.rightAscension);
-        final targetAlt = calculateAltitude(
-          lha: lha,
-          declination: target.declination,
-          latitude: latitude,
+      if (isUsable && currentStart == null) {
+        currentStart = sample.instantUtc;
+        startClipped = i == 0;
+      } else if (!isUsable && currentStart != null) {
+        windows.add(
+          VisibilityWindow(
+            start: currentStart,
+            end: sample.instantUtc,
+            clippedAtStart: startClipped,
+          ),
         );
-        isTargetHighEnough = targetAlt >= minAltitude;
-      }
-
-      final isUsable = isDark && isTargetHighEnough;
-
-      if (isUsable && currentWindowStart == null) {
-        currentWindowStart = current;
-      } else if (!isUsable && currentWindowStart != null) {
-        windows.add(VisibilityWindow(start: currentWindowStart, end: current));
-        currentWindowStart = null;
+        currentStart = null;
+        startClipped = false;
       }
     }
 
-    if (currentWindowStart != null) {
+    if (currentStart != null) {
       windows.add(
         VisibilityWindow(
-          start: currentWindowStart,
-          end: start.add(const Duration(hours: 24)),
+          start: currentStart,
+          end: night.endUtc,
+          clippedAtStart: startClipped,
+          clippedAtEnd: true,
         ),
       );
     }

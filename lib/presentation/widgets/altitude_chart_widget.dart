@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/models/altitude_curve.dart';
 import '../../domain/models/astro_target.dart';
+import '../../domain/models/calendar_date.dart';
+import '../../domain/models/session_night.dart';
+import '../../domain/models/site_time_context.dart';
+import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
-import '../../domain/services/astronomical_engine.dart';
 
+/// Shows a target's altitude across one night.
+///
+/// Render-only (TD-023, DEV-A3, TASK 2.3): astronomy is sampled once in the
+/// domain (`VisibilityCalculator.calculateAltitudeCurve`), here in [build],
+/// not inside the painter, and the painter never imports astronomy code.
+///
+/// [sessionDate]'s Y/M/D is resolved to a [SessionNight] through a
+/// [MeanSolarTimeContext] (ADR-007), the same path
+/// `PlannerViewModel.visibilityWindows`/`nightTimeline` use, so the chart and
+/// the rest of the screen now share one window — this widget's constructor
+/// is otherwise unchanged so callers (`home_screen.dart`) don't need to
+/// change before TASK 2.4 gives the ViewModel a SessionNight of its own.
 class AltitudeChartWidget extends StatelessWidget {
   final AstroTarget target;
   final double latitude;
@@ -24,6 +40,17 @@ class AltitudeChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final night = SessionNightResolver.forEveningDate(
+      CalendarDate.fromDateTimeFields(sessionDate),
+      latitude: latitude,
+      longitude: longitude,
+      timeContext: MeanSolarTimeContext(longitude),
+    );
+    final curve = VisibilityCalculator.calculateAltitudeCurve(
+      night: night,
+      target: target,
+    );
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
@@ -43,9 +70,7 @@ class AltitudeChartWidget extends StatelessWidget {
               child: CustomPaint(
                 painter: _AltitudeChartPainter(
                   target: target,
-                  latitude: latitude,
-                  longitude: longitude,
-                  date: sessionDate,
+                  curve: curve,
                   theme: Theme.of(context),
                   minAltitude: minAltitude,
                 ),
@@ -115,17 +140,13 @@ class AltitudeChartWidget extends StatelessWidget {
 
 class _AltitudeChartPainter extends CustomPainter {
   final AstroTarget target;
-  final double latitude;
-  final double longitude;
-  final DateTime date;
+  final AltitudeCurve curve;
   final ThemeData theme;
   final double minAltitude;
 
   _AltitudeChartPainter({
     required this.target,
-    required this.latitude,
-    required this.longitude,
-    required this.date,
+    required this.curve,
     required this.theme,
     required this.minAltitude,
   });
@@ -133,50 +154,27 @@ class _AltitudeChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final isDark = theme.brightness == Brightness.dark;
+    final samples = curve.samples;
+    final numSteps = samples.length - 1;
+    if (numSteps <= 0) return;
 
-    // Chart spans from 12:00 PM local today to 12:00 PM local tomorrow (24 hours)
-    final start = DateTime(date.year, date.month, date.day, 12, 0);
-    const int numSteps = 96; // 15-minute intervals
-    final stepDuration = const Duration(hours: 24) ~/ numSteps;
-
-    final List<Offset> targetPoints = [];
-    final List<double> sunAltitudes = [];
-
-    for (int i = 0; i <= numSteps; i++) {
-      final time = start.add(stepDuration * i);
-      final utcTime = time.toUtc();
-
-      // Calculate Sun Altitude
-      final sunAlt = VisibilityCalculator.calculateSunAltitude(
-        utcTime,
-        latitude,
-        longitude,
-      );
-      sunAltitudes.add(sunAlt);
-
-      // Calculate Target Altitude
-      final jd = AstronomicalEngine.calculateJulianDate(utcTime);
-      final gmst = AstronomicalEngine.calculateGMST(jd);
-      final lst = AstronomicalEngine.calculateLST(gmst, longitude);
-      final lha = VisibilityCalculator.calculateLHA(lst, target.rightAscension);
-      final alt = VisibilityCalculator.calculateAltitude(
-        lha: lha,
-        declination: target.declination,
-        latitude: latitude,
-      );
-
-      final x = (i / numSteps) * size.width;
+    double yOf(double altitudeDeg) {
       // Map Y from 90 to 0 (top to bottom). Altitude can be negative.
-      // Let's clip visual plot from -10 to 90 degrees to show setting.
-      final y = size.height - ((alt + 10) / 100) * size.height;
-      targetPoints.add(Offset(x, y.clamp(0.0, size.height)));
+      // Clip the visual plot from -10 to 90 degrees to show setting.
+      final y = size.height - ((altitudeDeg + 10) / 100) * size.height;
+      return y.clamp(0.0, size.height);
     }
+
+    final targetPoints = <Offset>[
+      for (var i = 0; i <= numSteps; i++)
+        Offset((i / numSteps) * size.width, yOf(samples[i].targetAltitudeDeg)),
+    ];
 
     // 1. Draw Background Zones based on Sun Altitude
     final paintZone = Paint()..style = PaintingStyle.fill;
 
     for (int i = 0; i < numSteps; i++) {
-      final sunAlt = sunAltitudes[i];
+      final sunAlt = samples[i].sunAltitudeDeg;
       Color zoneColor;
 
       if (sunAlt > 0) {
@@ -204,7 +202,7 @@ class _AltitudeChartPainter extends CustomPainter {
     final paintText = TextPainter(textDirection: TextDirection.ltr);
 
     void drawLine(double alt, String label, {bool dashed = false}) {
-      final y = size.height - ((alt + 10) / 100) * size.height;
+      final y = yOf(alt);
       if (y >= 0 && y <= size.height) {
         canvas.drawLine(Offset(0, y), Offset(size.width, y), paintGrid);
 
@@ -226,7 +224,7 @@ class _AltitudeChartPainter extends CustomPainter {
     drawLine(60, '60°');
 
     // 2b. Draw Minimum Altitude Threshold Line (dashed red)
-    final thresholdY = size.height - ((minAltitude + 10) / 100) * size.height;
+    final thresholdY = yOf(minAltitude);
     if (thresholdY >= 0 && thresholdY <= size.height) {
       final paintThreshold = Paint()
         ..color = Colors.redAccent
@@ -292,27 +290,28 @@ class _AltitudeChartPainter extends CustomPainter {
     canvas.drawPath(path, paintLine);
 
     // Draw dot for current time if it's within the window
-    final now = DateTime.now();
-    if (now.isAfter(start) &&
-        now.isBefore(start.add(const Duration(hours: 24)))) {
-      final diffMin = now.difference(start).inMinutes;
-      final percent = diffMin / (24 * 60);
+    final nowUtc = DateTime.now().toUtc();
+    if (curve.night.contains(nowUtc)) {
+      final percent =
+          nowUtc.difference(curve.night.startUtc).inMilliseconds /
+          SessionNight.length.inMilliseconds;
       final x = percent * size.width;
 
       // Interpolate Y
-      final index = (percent * numSteps).floor().clamp(0, numSteps - 1);
+      final index = (percent * numSteps).floor().clamp(0, numSteps);
       final y = targetPoints[index].dy;
 
       canvas.drawCircle(Offset(x, y), 5, Paint()..color = Colors.redAccent);
       canvas.drawCircle(Offset(x, y), 2, Paint()..color = Colors.white);
     }
 
-    // X-Axis Time Labels
-    for (int i = 0; i <= numSteps; i += 16) {
-      // Every 4 hours (16 * 15m)
+    // X-Axis Time Labels. Local-hour labels only, as before this task; a
+    // zone-labelled formatter is TASK 2.4 (ADR-007 §6).
+    final labelStep = (numSteps / 6).round().clamp(1, numSteps); // ~4-hourly
+    for (int i = 0; i <= numSteps; i += labelStep) {
       final x = (i / numSteps) * size.width;
-      final time = start.add(stepDuration * i);
-      final label = "${time.hour.toString().padLeft(2, '0')}:00";
+      final localTime = samples[i].instantUtc.toLocal();
+      final label = "${localTime.hour.toString().padLeft(2, '0')}:00";
       paintText.text = TextSpan(
         text: label,
         style: TextStyle(
@@ -333,9 +332,7 @@ class _AltitudeChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(_AltitudeChartPainter oldDelegate) {
     return oldDelegate.target != target ||
-        oldDelegate.latitude != latitude ||
-        oldDelegate.longitude != longitude ||
-        oldDelegate.date != date ||
+        oldDelegate.curve.night != curve.night ||
         oldDelegate.theme.brightness != theme.brightness ||
         oldDelegate.minAltitude != minAltitude;
   }
