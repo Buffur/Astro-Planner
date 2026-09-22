@@ -45,6 +45,7 @@
 > **TASK 6.3 (2026-09-22):** a pure-domain Moon ephemeris (`MoonCalculator`, Meeus ch. 47 full tables in `moon_series.dart`, ADR-010) — position, topocentric altitude, illuminated fraction, phase longitude, rise/set on the night grid — verified against JPL Horizons and USNO well inside ADR-010 §4. **Not used by the app yet** (TASK 6.4 wires it and retires the mean-phase model). F-16 Missing → Partial; F-48 updated.
 > **TASK 6.4 (2026-09-22):** `MoonConditions` (Moon altitude, separation from the target, rise/set, illumination at mean solar midnight, closest approach while both are up) from `MoonCalculator`, shown on the sky card as annotations; the mean-phase `calculateLunarIllumination` was deleted. F-15 and F-16 → Implemented; F-48 updated.
 > **TASK 6.5 (2026-09-22):** the NPF rule now follows F. Michaud's primary source (derivation on sahavre.fr), with an explicit k (default 1, range 1–3); the circular test is replaced by independent worked examples. Still hidden (PD-11). Group G6 is complete. F-26 Broken → Partial (correct but hidden); F-48 updated.
+> **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display. Affected entries: F-06, F-07, F-10, F-33, F-48.
 
 ## Status legend
 
@@ -174,6 +175,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-06 — Active location (GPS, map picker, reverse geocoding)
 - **Status:** Partial
+- **TASK 7.1:** a GPS fix or map pick is now a **transient** position, remembered across restarts (preferences) and never written into a saved site; it deselects the active site. The first-launch GPS lookup no longer creates a "Custom Location" row.
 - **Current implementation:** `useCurrentLocation` (through the injected `LocationService`, implemented by `GeolocatorLocationService`; *updated TASK 1.1*), a `flutter_map` picker with a marker and "Current Location" button, Nominatim reverse geocoding for a place name; defaults to London until a location is set.
 - **Relevant files:** `planner_viewmodel.dart:163-280`, `lib/presentation/screens/location/location_picker_screen.dart`.
 - **Known issues:** unhandled platform-location exceptions on the startup path (`unawaited`, no `try/catch`); silent London default; geocoding failures swallowed; Geolocator flow duplicated in the picker; `setLocation` overwrites the active saved profile; OSM tiles shown without attribution and with a mismatched user-agent; not run on a device in this audit (TD-002, TD-027, TD-031).
@@ -182,6 +184,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-07 — Saved locations management
 - **Status:** Partial
+- **TASK 7.1:** sites carry nullable Bortle with source and date, SQM, an IANA zone and notes (schema v12); nothing writes into a site except an explicit user edit (the Bortle edit writes source `user` and the date). Still no UI to list, create or switch sites (TASK 7.3).
 - **Current implementation:** `LocationProfile` table, `LocationRepository` (CRUD, tested), one "active" row referenced from preferences.
 - **Relevant files:** `lib/data/repositories/drift_location_repository.dart`, `lib/domain/repositories/location_repository.dart`.
 - **Known issues:** no UI to list, name, switch or delete locations; only one row ever exists; elevation unit unspecified and unused; `_fetchBortle` reads the active id concurrently with `setLocation` inserting the row (race, from code reading, not reproduced) (DEV-D4; TD-027).
@@ -207,6 +210,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-10 — Site time-zone handling
 - **Status:** Partial *(was Missing; TASK 2.2, 2026-09-22)*
+- **TASK 7.1:** an active site with an IANA zone uses it for the night identity (`IanaTimeContext`; ADR-007 L1 fixed) and for display — `NightTimeFormatter.zoneCaption` labels "site zone Europe/London, BST, UTC+01:00"; the altitude chart's axis also goes through the formatter now. Without a zone (or for a transient position) the mean-solar identity and labelled device zone remain. No UI to set a zone yet (TASK 7.3).
 - **Current implementation:** the domain has a `SiteTimeContext` seam
   (`lib/domain/models/site_time_context.dart`), with a mean-solar fallback and a
   fixed-offset implementation (ADR-007 §6), used by `SessionNightResolver`. **TASK

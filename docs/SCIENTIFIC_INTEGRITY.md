@@ -40,6 +40,7 @@
 > **TASK 6.3 (2026-09-22):** new CALC-28 (Moon, ADR-010) with reference results; SI-002 progress. No existing calculation changed.
 > **TASK 6.4 (2026-09-22):** CALC-09 deleted, new CALC-29 (MoonConditions and separation, reference-tested); SI-002 resolved for precision and geometry.
 > **TASK 6.5 (2026-09-22):** CALC-17 corrected to the primary source (recorded formula change); SI-001 resolved for the formula (still hidden).
+> **TASK 7.1 (2026-09-23):** SI-007 and SI-010 progress (unknown Bortle; IANA site zone). No calculation formula changed.
 
 ## Purpose and authority
 
@@ -423,6 +424,8 @@ state and must not be silently replaced by a typical value.
 3. Decide the data source (offline dataset vs manual Bortle/SQM entry; PD-05).
 4. Remove or replace the scraper; until then keep the `FeatureScope` gate.
 
+**Progress 2026-09-23 (TASK 7.1):** Bortle is nullable end to end (schema v12, domain, ViewModel, the hidden badge offers "unknown"); the default 4 was cleared from stored rows with a note (owner decision); an unknown Bortle no longer counts toward the sky warning. The scraper itself remains until TASK 7.4.
+
 **Status:** Broken (fetch); Partial (manual entry, hidden). **Work item:** TD-006.
 
 ---
@@ -584,6 +587,8 @@ all consume the same `SessionNight`/`NightTimeFormatter` (§6's "one formatter")
 so the chart, timeline, header and logbook can no longer diverge from each other.
 Still device-zone display only (no site IANA zone; TASK 7.1) — that part of
 SI-010 stays open under TD-020.
+
+**Progress 2026-09-23 (TASK 7.1):** the active site's IANA zone now drives the night identity (`IanaTimeContext`) and the display, fixing ADR-007 L1 for sites that have a zone; the IANA offsets agree hourly with the IANA-derived test fakes over 2026–2027.
 
 **Status:** Resolved (default path; TASK 2.4). **Open remainder:** site
 time-zone display (TD-020, TASK 7.1). **Work items:** ~~TD-001~~ (resolved),

@@ -45,6 +45,7 @@
 > **TASK 6.3 (2026-09-22):** ADR-010 status updated (Moon model implemented).
 > **TASK 6.4 (2026-09-22):** ADR-010 status updated (MoonConditions; mean-phase model deleted with a note; mean solar midnight adopted as the night-level evaluation instant).
 > **TASK 6.5 (2026-09-22):** SI-001 NPF formula-change record added (E.1).
+> **TASK 7.1 (2026-09-23):** ADR-007 status updated (IANA zone per site; L1 fixed for sites with a zone; zone source = the TASK 7.3 picker). Owner decisions this task: legacy Bortle 4 → NULL with a note (others kept as `legacy`); add the `timezone` package now; map/GPS positions are transient and remembered.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -537,8 +538,17 @@ Status: accepted (owner, 2026-09-22, TASK 2.1). Resolves PD-01 and PD-02.
   choice (`startUtc + 12h`) — **G6 has not formally decided it**, so this is
   recorded as provisional in `docs/SCIENTIFIC_INTEGRITY.md`, not as a closed
   decision.
-- **Not done yet:** the IANA zone and per-site display zone (TASK 7.1); weather
-  alignment (G9); persisting `SessionNight` itself instead of mapping legacy
+- **Done (TASK 7.1, 2026-09-23):**
+  - `IanaTimeContext` (`timezone` 0.11.1, BSD licence, 10-year data set);
+  - a nullable IANA zone per site (schema v12);
+  - `NightTimeFormatter` prefers the site's zone (`zoneCaption`, e.g. "site zone
+    Europe/London, BST, UTC+01:00") and falls back to the labelled device zone.
+
+  **L1 is fixed for sites that have a zone.** Sites without one, and transient
+  positions, keep the mean-solar identity. The zone's *source* (PD-02, deferred to
+  7.1) is the TASK 7.3 editor's zone picker, defaulting to the device zone. It is
+  never inferred from the device in computation.
+- **Not done yet:** weather alignment (G9); persisting `SessionNight` itself instead of mapping legacy
   instant rows (G11, PD-18) — `home_screen.dart`'s Save Session still stores
   local midnight of the picked evening date, per §10's "legacy rows" proposal;
   `PlannerViewModel.currentAltitude`/`maxAltitude` still run their own

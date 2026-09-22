@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **327 tests: 327 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.5) |
+| `flutter test --no-pub` | **347 tests: 347 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.1) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -360,3 +360,28 @@ Any test failure from here on is a regression, not a known pre-existing issue
   - k is linear and limited to 1–3;
   - |δ| is symmetric and capped near the pole;
   - invalid optics are rejected.
+
+**Added by TASK 7.1** (site model and schema v12), 20 tests:
+- **Schema (`schema_migration_test.dart`):** v8–v11 → v12 match the snapshot; v11 →
+  v12 turns the default Bortle 4 into NULL with a note and keeps another value as
+  `legacy`, leaving coordinates untouched.
+- **Repository (`drift_location_repository_test.dart`):** the new fields round
+  trip; unknown stays null; `LocationProfile` rejects out-of-range values.
+- **Zone model (`iana_time_context_test.dart`):**
+  - unknown ids give null;
+  - the LA PDT→PST transition;
+  - hourly agreement with the IANA-derived DST fakes (Berlin, LA, NY, London) over
+    2026–2027;
+  - Kiritimati now gets the civil evening date (ADR-007 L1 fixed).
+- **Formatter (`night_time_formatter_zone_test.dart`):** wall-clock conversion
+  through a zone (DST-aware); captions "site zone …" and the device fallback; the
+  "+1" marker in the site zone.
+- **ViewModel (`planner_site_test.dart`), the acceptance tests:**
+  - a spy repository proves that a map pick, GPS on first launch and the online
+    Bortle result write nothing into a site;
+  - an explicit Bortle edit is the one write, with source `user` and the date;
+  - the site's zone drives `displayZoneId` and the night;
+  - with Bortle unknown, only the Moon can trigger the sky warning.
+- **Updated, with its reason:** `planner_location_test.dart`'s GPS test used to
+  assert that the fix overwrote the saved site (the defect TD-027). It now asserts
+  the transient, remembered position and an untouched site.
