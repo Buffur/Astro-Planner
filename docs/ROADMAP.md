@@ -272,8 +272,24 @@ rewritten to match the code.*
     the pattern `app_router.dart`/`sky_darkness_widget.dart` already used
     (TD-014, DEV-P1). 201 tests green, including a policy-lock test and a
     "gated feature has no entry point" test.
-  - **Next: TASK 4.4 — Honest numbers and labels.** Not started; it begins
-    only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 4.4** (`514dcc5`) — renamed "Stacking Gain
+    (Relative SNR)" to "Relative stacking gain (√N vs one frame)" (TD-009,
+    DEV-P2, SI-003); `OpticalCalculator.estimateStorageRequirement` returns
+    null instead of a fabricated `0.0` when the average RAW file size is
+    unknown, and the capture-plan widget and Home render "Unknown" instead of
+    `0.0 MB`/`null arcsec/px` (TD-013, SI-008); Moon illumination is shown as
+    a rounded, explicitly approximate percentage; the RA/Dec `(0, 0)` "unset"
+    sentinel is removed from `currentAltitude`/`maxAltitude` and the target
+    edit dialog's prefill logic (TD-013, SI-008); the seeded default capture
+    plan carries an "Example plan" badge until the user changes it (TD-013,
+    SI-008); the sky warning describes reduced contrast instead of asserting
+    an outcome; the seeded telescope stub's aperture is corrected from f/72
+    to f/5.6 = 400mm/72mm (TD-008, SI-005); the unsourced "≥1 mag" rationale
+    is replaced with an undocumented-threshold-honest comment (TD-042, in
+    part). The string "SNR" no longer appears in `lib/`. 205 tests green.
+    Group G4 is complete.
+  - **Next: TASK 5.1 — ADR: capture-budget semantics (PD-08).** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

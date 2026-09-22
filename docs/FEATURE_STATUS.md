@@ -28,7 +28,12 @@
 > mojibake fixed and an encoding check added to the quality gate;
 > `FeatureScope.metadataImport` now matches PD-06, and every entry point
 > (Home's field-mode toggle, Import Metadata button, light-pollution map
-> card) reads it; affected entries are F-04, F-22, F-34, F-46. Statuses
+> card) reads it; affected entries are F-04, F-22, F-34, F-46. **TASK 4.4
+> (2026-09-22, commit `514dcc5`):** stacking-gain label corrected, storage
+> and pixel-scale unknowns render as "Unknown" instead of `0.0`/`null`, the
+> RA/Dec `(0, 0)` sentinel removed, the default plan labeled "Example plan",
+> the sky warning reworded, and the seeded telescope aperture corrected;
+> affected entries are F-28, F-35, F-37. Statuses
 > were assigned from the code and from executed reproductions, not from
 > earlier documentation.
 
@@ -349,9 +354,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-28 — Storage estimate
 - **Status:** Partial
-- **Current implementation:** `averageRawFileSizeMB × total frames (all types)`, shown as `Estimated Storage`.
+- **Current implementation:** `averageRawFileSizeMB × total frames (all types)`, shown as `Estimated Storage`. **TASK 4.4:** `estimateStorageRequirement` returns `null` (not `0.0`) when the average size is unknown, and the widget shows "Unknown".
 - **Relevant files:** `optical_calculator.dart:52-57`, `planner_viewmodel.dart:493-500`, `capture_plan_widget.dart:223-225`.
-- **Known issues:** shows **`0.0 MB`** when the size is unknown (all seeds); no theoretical payload figure; bit depth no longer stored (SI-008, SI-013; TD-013).
+- **Known issues:** no theoretical payload figure; bit depth no longer stored (SI-013). *Resolved (TASK 4.4):* used to show a fabricated **`0.0 MB`** when the size was unknown (all seeds) (SI-008; TD-013).
 - **Dependencies:** F-22.
 - **Roadmap relevance:** Phase 9.
 
@@ -409,9 +414,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-35 — Capture plan editor (blocks)
 - **Status:** Partial
-- **Current implementation:** add, edit, delete, reorder (light/dark/flat/bias with a filter list); default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences. **TASK 4.1:** the add dialog is shared with a new edit dialog (opened by tapping a block), reachable at `updateCaptureBlock` for the first time; both reject invalid input (exposure > 0, frame count ≥ 1) via `Form` validators instead of silently defaulting; list items key on `ObjectKey(block)` instead of a hashCode+index combination that changed on every reorder.
-- **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart` (`reorderCaptureBlocks`, `updateCaptureBlock`), `lib/domain/models/capture_block.dart`.
-- **Known issues:** binning and gain/ISO not exposed in the UI (fields exist on the model, default to 1/null); a default plan is shown as if it were the user's (SI-008). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope).
+- **Current implementation:** add, edit, delete, reorder (light/dark/flat/bias with a filter list); default plan 100×60 s lights, 20×60 s darks, 20×2 s flats; persisted in preferences. **TASK 4.1:** the add dialog is shared with a new edit dialog (opened by tapping a block), reachable at `updateCaptureBlock` for the first time; both reject invalid input (exposure > 0, frame count ≥ 1) via `Form` validators instead of silently defaulting; list items key on `ObjectKey(block)` instead of a hashCode+index combination that changed on every reorder. **TASK 4.4:** the Sequence Plan header carries an "Example plan" badge while the seeded default is unmodified, clearing on the first add/edit/remove/reorder or on loading a saved session.
+- **Relevant files:** `lib/presentation/widgets/capture_plan_widget.dart`, `planner_viewmodel.dart` (`reorderCaptureBlocks`, `updateCaptureBlock`, `isExampleCapturePlan`), `lib/domain/models/capture_block.dart`.
+- **Known issues:** binning and gain/ISO not exposed in the UI (fields exist on the model, default to 1/null). *Resolved (TASK 4.1):* dragging a block **down** used to under-move by one (`newIndex -= 1` applied on top of `onReorderItem`'s own adjustment, TD-010); invalid or empty input used to silently become 60 s × 30 with negatives accepted, and there was no edit UI (TD-012, partially — binning/gain exposure was out of this task's scope). *Resolved (TASK 4.4):* the default plan used to be shown with no distinction from the user's own plan (SI-008; TD-013).
 - **Dependencies:** F-03.
 - **Roadmap relevance:** Phase 9 (central component).
 
@@ -425,9 +430,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-37 — Integration time and relative stacking gain
 - **Status:** Partial
-- **Current implementation:** integration time = Σ light exposure × count; relative gain = √(light frames), shown as `10.0x`.
+- **Current implementation:** integration time = Σ light exposure × count; relative gain = √(light frames), shown as `10.0x` labeled "Relative stacking gain (√N vs one frame)" (TASK 4.4).
 - **Relevant files:** `planner_viewmodel.dart:471-476,502-504`, `optical_calculator.dart:44-47`, `capture_plan_widget.dart:206-218`.
-- **Known issues:** UI label says "Relative SNR" (ADR-005 deviation); gain ignores sub-exposure length (100×60 s ≠ 20×300 s in the display though both are 6000 s) (SI-003; TD-009).
+- **Known issues:** gain ignores sub-exposure length (100×60 s ≠ 20×300 s in the display though both are 6000 s) (SI-003). *Resolved (TASK 4.4):* the UI label used to say "Relative SNR" (ADR-005 deviation; TD-009).
 - **Dependencies:** F-35.
 - **Roadmap relevance:** Phase 9.
 

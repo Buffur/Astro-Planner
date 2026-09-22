@@ -19,8 +19,13 @@
 > formally decided the canonical evaluation instant**, so this is not a closed
 > scientific decision. See SI-002's update below. **TASK 4.1 (2026-09-22, commit
 > `f5b29cc`):** the "Invalid capture-block input" SI-008 evidence row below is
-> resolved — no calculation changed.
-> **Nothing in this document has been fixed.** It records issues and the
+> resolved — no calculation changed. **TASK 4.4 (2026-09-22, commit
+> `514dcc5`):** SI-003's label, SI-005's seed value, and several SI-008 UI
+> presentation cases (storage, pixel scale, example plan, RA/Dec sentinel) are
+> resolved; SI-006's sky-warning wording is resolved (its thresholds are not).
+> No calculation formula changed — only labels, seed data and a null-vs-zero
+> return-value fix in `estimateStorageRequirement`.
+> **Nothing else in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
 ## Purpose and authority
@@ -49,12 +54,12 @@ Correct Interpretation → Required Future Action.**
 | --- | --- | --- | --- |
 | SI-001 | NPF exposure formula deviates from the published formula | Broken (not surfaced in UI) | TD-007 |
 | SI-002 | Moon: mean-phase precision limit, no Moon geometry | Partial | TD-032, TD-033 |
-| SI-003 | Relative stacking gain (√N) vs physical SNR | Partial (label deviates) | TD-009 |
+| SI-003 | Relative stacking gain (√N) vs physical SNR | Partial (label fixed TASK 4.4; metric documentation still open) | TD-009 |
 | SI-004 | ISO / gain limitations | Prototype (descriptive text only) | TD-009 |
-| SI-005 | Aperture semantics and unit problem | Broken (seed data), Partial (model) | TD-008 |
-| SI-006 | Hard-coded astronomy and planning thresholds | Partial | TD-033, TD-043 |
+| SI-005 | Aperture semantics and unit problem | Partial (seed value fixed TASK 4.4; field-naming/unit model still open) | TD-008 |
+| SI-006 | Hard-coded astronomy and planning thresholds | Partial (warning wording fixed TASK 4.4; thresholds still hard-coded) | TD-033, TD-043 |
 | SI-007 | Bortle default vs unknown | Broken (fetch), Partial (manual, hidden) | TD-006 |
-| SI-008 | Unknown treated as zero / default presented as fact | Partial | TD-013 |
+| SI-008 | Unknown treated as zero / default presented as fact | Partial (storage/pixel-scale/example-plan/RA-Dec cases fixed TASK 4.4; Bortle/GPS defaults still open) | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
 | SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
 | SI-011 | Seed equipment data provenance and internal consistency | Unknown / Partial | TD-008 |
@@ -194,13 +199,13 @@ frame count, so it cannot compare plans with different sub-exposure lengths.
 - `OpticalCalculator.calculateRelativeStackingGain(N) = √N`, computed from the
   **light-frame count only** (`optical_calculator.dart:44-47`;
   `planner_viewmodel.dart:502-504`).
-- The UI label is `Stacking Gain (Relative SNR)`, value shown as e.g. `10.0x`
-  (`lib/presentation/widgets/capture_plan_widget.dart:215`).
-- The doc comment correctly says "relative gain, not absolute SNR", but the label
-  contains the word SNR. This conflicts with CLAUDE.md rule 18, ADR-005 and
-  `PRODUCT_SPEC.md` ("must be labeled as relative stacking gain, not absolute
-  SNR"). The label was deliberately restored in commit `1baa514`
-  ("restore SNR").
+- **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`), label only.** *(Was: the
+  UI label was `Stacking Gain (Relative SNR)`, value shown as e.g. `10.0x`
+  (`lib/presentation/widgets/capture_plan_widget.dart:215`); it conflicted with
+  CLAUDE.md rule 18, ADR-005 and `PRODUCT_SPEC.md`, having been deliberately
+  restored in commit `1baa514` ("restore SNR").)* The label is now "Relative
+  stacking gain (√N vs one frame)"; the string "SNR" no longer appears in
+  `lib/`.
 - Example of the limitation: 100 × 60 s and 20 × 300 s are both 6000 s of
   integration, yet the app shows gain 10.0 and 4.5 respectively.
 - No sky background, read noise, dark current, signal rate, or rejection model
@@ -214,14 +219,17 @@ sub-exposure lengths requires a noise model (signal rate, sky rate, read noise,
 dark current) that the app does not have and has no data to build.
 
 **Required Future Action**
-1. Rename the UI label to "Relative stacking gain (√N vs one frame)".
-2. Document the assumptions in the doc comment and in a UI help text.
+1. ~~Rename the UI label to "Relative stacking gain (√N vs one frame)".~~ Done
+   (TASK 4.4).
+2. Document the assumptions in the doc comment and in a UI help text (still
+   open — the doc comment is brief; no UI help text exists).
 3. Make total integration time the primary comparison figure; do not compare gain
    across different sub-exposure lengths.
 4. Do not introduce a physical SNR model without an approved ADR and per-camera
    gain/read-noise data.
 
-**Status:** Partial (metric acceptable, label deviates). **Work item:** TD-009.
+**Status:** Partial (metric acceptable; label now correct as of TASK 4.4, assumption
+documentation still open). **Work item:** TD-009 (resolved for the label).
 
 ---
 
@@ -271,11 +279,13 @@ but seed data stores a diameter in one record, and field names carry no units.
   (`equipment_selection_screen.dart:325`), Home shows `f/<value>`
   (`home_screen.dart:105`), NPF takes `apertureFNumber`, and the shareable log
   text prints `f/$aperture` (`session_log.dart:71`).
-- The seeded record "ZWO ASI2600MC + 400mm (Telescope Stub)" stores
+- **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`), seed only.** *(Was: the
+  seeded record "ZWO ASI2600MC + 400mm (Telescope Stub)" stored
   `aperture: 72.0` (`lib/data/services/equipment_seeder.dart:82`), which is a
   72 mm *diameter* (400/72 ≈ f/5.6), displayed as `f/72.0`. With N = 72 the NPF
-  function returns 3.39 s, versus ≈ 0.46 s from the published formula with
-  N ≈ 5.56.
+  function returned 3.39 s, versus ≈ 0.46 s from the published formula with
+  N ≈ 5.56.)* The seed now stores `aperture: 400.0 / 72.0` (f/5.56, displayed
+  as f/5.6).
 - Field names are unit-less in the domain model (`focalLength`, `aperture`,
   `pixelPitch`, `sensorWidth`); only the foundation tables use unit suffixes
   (`focalLengthMm`, `pixelPitchUm`), and `aperture` has none there either.
@@ -290,12 +300,12 @@ quantity with an explicit unit.
 1. Define canonical fields (for example `focalRatio` dimensionless and, optionally,
    `apertureDiameterMm`, with one derived from the other via focal length).
 2. Rename fields with explicit units; add plausible-range validation.
-3. Correct the seed record.
+3. ~~Correct the seed record.~~ Done (TASK 4.4).
 4. Decide a migration policy for user-entered rows — they cannot be auto-classified
    without guessing, and silent guessing is prohibited (owner decision PD-10).
 5. Add tests.
 
-**Status:** Broken (seed), Partial (model). **Work item:** TD-008.
+**Status:** Partial (model unchanged; the one broken seed value is fixed). **Work item:** TD-008 (seed value resolved; field-naming/unit work still open).
 
 ---
 
@@ -311,10 +321,10 @@ document constants).
 
 | Threshold | Value | Location | User-configurable? | Interpretation |
 | --- | --- | --- | --- | --- |
-| Minimum usable target altitude | default 20°, clamp [5°, 60°] | `planner_viewmodel.dart:55,156-161` | In ViewModel and persisted (`minAltitude`), **no UI control calls it** | Planning preference (airmass, obstructions, site). The doc comment claims "≥ 1 mag attenuation" below 20°; this is unsourced and site/band dependent |
+| Minimum usable target altitude | default 20°, clamp [5°, 60°] | `planner_viewmodel.dart:55,156-161` | In ViewModel and persisted (`minAltitude`), **no UI control calls it** | Planning preference (airmass, obstructions, site). **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`):** the doc comment no longer claims a specific "≥ 1 mag attenuation" figure (unsourced, site/band dependent); it now states the qualitative rationale only |
 | "Astronomical darkness" Sun limit | −18° | `visibility_calculator.dart:145` (default parameter) | No | Conventional twilight definition; whether −12° suffices is a user/filter choice (a unit test exercises −12° but no UI exists) |
 | Sunset / civil / nautical / astronomical Sun altitudes | −0.833°, −6°, −12°, −18° | `visibility_calculator.dart:109-118` | No | Conventional definitions; acceptable as definitions, but undocumented in code |
-| Sky warning | Moon illumination > 0.8 **or** Bortle ≥ 7 | `planner_viewmodel.dart:435` | No | Heuristic; ignores Moon altitude, target, filters; the warning text claims targets "will wash out" |
+| Sky warning | Moon illumination > 0.8 **or** Bortle ≥ 7 | `planner_viewmodel.dart:435` | No | Heuristic; ignores Moon altitude, target, filters. **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`), wording only:** the warning text no longer asserts an outcome ("will wash out"); it now describes reduced contrast. The thresholds themselves are still hard-coded (unchanged) |
 | Feasibility "tight" margin | required > 85 % of available | `session_calculator.dart:68` | No | Arbitrary safety margin |
 | Per-frame overhead | 5.0 s flat (live path) | `planner_viewmodel.dart:482` | No | Unsourced; real overhead includes download, dither/settle, autofocus, filter change, meridian flip |
 | Dead overhead model | 15 % of light time; flats 5 s; bias 1 s | `session_calculator.dart:30-48` | No | Unused by the app (see TD-022) |
@@ -388,12 +398,13 @@ integrity problem.
 **Current Behavior**
 | Situation | What the user sees |
 | --- | --- |
-| `averageRawFileSizeMB` is null (all 5 seeded profiles) | `Estimated Storage 0.0 MB` — `estimateStorageRequirement` does `(x ?? 0.0) * n` and the ViewModel returns a non-null number, so the `N/A` branch is unreachable (verified in a widget run) |
+| `averageRawFileSizeMB` is null (all 5 seeded profiles) | **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`).** *(Was: `Estimated Storage 0.0 MB` — `estimateStorageRequirement` did `(x ?? 0.0) * n`, so the `N/A` branch was unreachable.)* `estimateStorageRequirement` now returns `null` when the average size is unknown, and the capture-plan widget renders "Unknown" |
 | Bortle never set | Bortle 4 used silently (SI-007) |
 | GPS unavailable/denied on first launch | London coordinates used silently |
-| Equipment `pixelScale` null | Text `null arcsec/px` (`home_screen.dart:104`) |
+| Equipment `pixelScale` null | **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`).** *(Was: text `null arcsec/px`, `home_screen.dart:104`.)* Home now renders "Unknown" |
 | Invalid capture-block input | **RESOLVED 2026-09-22 (TASK 4.1, commit `f5b29cc`).** *(Was: silently became 60 s × 30 frames.)* Now rejected by `Form` validators (exposure > 0, frame count ≥ 1) instead of defaulted |
-| Fresh install | A default plan of 100×60 s lights, 20×60 s darks, 20×2 s flats is shown as the user's plan |
+| Fresh install | **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`).** *(Was: a default plan of 100×60 s lights, 20×60 s darks, 20×2 s flats shown with no distinction from a user's own plan.)* The Sequence Plan header now carries an "Example plan" badge until the user adds, edits, removes or reorders a block, or loads a saved session |
+| Target with RA/Dec at exactly (0, 0) | **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`).** *(Was: `PlannerViewModel.currentAltitude`/`maxAltitude` treated `(0, 0)` as an "unset" sentinel and returned null even for a target genuinely at that coordinate; the target edit dialog used the same check to decide whether to pre-fill RA/Dec.)* RA/Dec are required fields with no real "unset" state, so the sentinel was removed from both call sites |
 
 **Correct Interpretation**
 Missing data is *unknown*; defaults are *assumptions*. Neither may masquerade as a
@@ -404,7 +415,7 @@ Adopt and enforce the rule "no domain default may masquerade as a measurement":
 nullable values with explicit UI states, and labelled assumptions. Record it as a
 decision in `docs/DECISIONS.md` when approved.
 
-**Status:** Partial. **Work item:** TD-013 (and SI-007).
+**Status:** Partial (Bortle default and GPS-default-location cases remain open — G6/PD-05 territory, out of TASK 4.4's scope). **Work item:** TD-013 (resolved; and SI-007).
 
 ---
 
@@ -663,8 +674,8 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-12 | `OpticalCalculator.calculatePixelScale` | pitch µm, EFL mm → arcsec/px | `206.265·p/f` | Returns 0.0 if EFL ≤ 0 | 1 | Good |
 | CALC-13 | `calculateFOV` | sensor dimension mm, EFL mm → degrees | `2·atan(d / 2f)` | Returns 0.0 if EFL ≤ 0; **not surfaced in UI** | 1 | Good |
 | CALC-14 | `calculateEffectiveFocalLength` | native FL mm → mm | Identity (no reducer/Barlow) | Optical multipliers removed in the latest commit | 1 | Fair |
-| CALC-15 | `calculateRelativeStackingGain` | light frames N → factor | `√N` | SI-003 | 1 | Good (UI label deviates) |
-| CALC-16 | `estimateStorageRequirement` | avg file MB?, frames → MB | product | SI-008, SI-013 | 1 | Fair |
+| CALC-15 | `calculateRelativeStackingGain` | light frames N → factor | `√N` | SI-003 | 1 | Good (UI label corrected TASK 4.4) |
+| CALC-16 | `estimateStorageRequirement` | avg file MB?, frames → MB? | product, or null if avg file size unknown (TASK 4.4) | SI-008, SI-013 | 1 | Fair |
 | CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° → s | Deviates from published (SI-001) | Clamps abs(δ) to 89.9°; throws for f ≤ 0 or N ≤ 0; **not surfaced** | 1 (circular) | Fair |
 | CALC-18 | `SessionCalculator.calculateFeasibility` | windows, required duration → state + totals | Sum of windows; infeasible if required > available; tight if > 85 % | Arbitrary margin (SI-006); no Moon/weather | 5 | Fair |
 | CALC-19 | `SessionCalculator.estimateTotalDuration` | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | **Dead code** — nothing calls it | 1 | Good (but unused) |

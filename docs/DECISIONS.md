@@ -28,7 +28,11 @@
 > (foreign keys, orphan cleanup, equipment_profiles dropped); PD-04's E.1 entry
 > and the ADR-008 status block updated. **TASK 4.3 (2026-09-22, commit `576c069`):**
 > PD-06's enforcement is implemented; DEV-P1 resolved; ADR-006's conformance
-> row updated to Complies.
+> row updated to Complies. **TASK 4.4 (2026-09-22, commit `514dcc5`):** DEV-P2
+> resolved for the label half (ADR-005's "must not be labeled as absolute
+> SNR" is now met); ADR-005's conformance row updated to Complies. The NPF
+> formula/test deviation and undocumented-assumptions parts of DEV-P2 are
+> unchanged (SI-001, SI-003, SI-009) — out of this task's scope.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -122,7 +126,7 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
 | ADR-002 | Provider and explicit ViewModels | **Partial** | Provider + `ChangeNotifier` only, no other framework. But only two ViewModels exist, one of which (`PlannerViewModel`) owns everything, and several screens bypass ViewModels — DEV-P5 → DEV-A1, DEV-A2 |
 | ADR-003 | SQLite via Drift ("typed queries, migrations, relationships, and testability") | **Partial** | Drift is used correctly for typed queries. Migrations are untested and one path fails; relationships are declared but not enforced — DEV-P4 → DEV-D1, DEV-D6 |
 | ADR-004 | Out of planetarium scope | **Complies** | No planetarium, AR, embedded Stellarium, camera preview or camera control exists |
-| ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Deviation** | DEV-P2 |
+| ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Complies** *(label, TASK 4.4)* | DEV-P2 (partially resolved) |
 | ADR-006 | Hide implemented future-phase features behind `FeatureScope` until approved | **Complies** *(TASK 4.3)* | DEV-P1 (resolved) |
 
 ## DEV-P1 — ADR-006 gating is only partly implemented
@@ -155,16 +159,19 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
   user-visible with no record of approval (open decision PD-06, resolved E.1).
   TD-014.
 
-## DEV-P2 — ADR-005 is not met
+## DEV-P2 — ADR-005 is not met (label half resolved TASK 4.4)
 - **Intended behavior:** calculations document units, assumptions, valid ranges,
   references and tests; "Relative stacking gain must not be labeled as absolute SNR."
-- **Actual behavior:** the UI label is `Stacking Gain (Relative SNR)`
-  (`capture_plan_widget.dart:215`, restored on purpose in commit `1baa514`); the NPF
-  formula deviates from the published one and its test is circular; assumptions and
-  references are mostly undocumented.
-- **Consequence:** an accepted ADR is violated in user-facing text and in the
-  calculation register. Details: `docs/SCIENTIFIC_INTEGRITY.md` SI-001, SI-003,
-  SI-009. TD-007, TD-009, TD-036.
+- **Actual behavior (historical):** the UI label was `Stacking Gain (Relative SNR)`
+  (`capture_plan_widget.dart:215`, restored on purpose in commit `1baa514`).
+- **RESOLVED 2026-09-22 (TASK 4.4, commit `514dcc5`), label only:** the label now
+  reads "Relative stacking gain (√N vs one frame)"; the string "SNR" no longer
+  appears anywhere in `lib/`. `optical_calculator.dart`'s doc comment already
+  correctly described the metric as relative gain.
+- **Still open (unchanged by TASK 4.4):** the NPF formula deviates from the
+  published one and its test is circular; assumptions and references are mostly
+  undocumented. Details: `docs/SCIENTIFIC_INTEGRITY.md` SI-001, SI-003, SI-009.
+  TD-007, TD-036.
 
 ## DEV-P3 — No active roadmap phase is declared
 - **Intended behavior:** "The active phase is the only approved scope unless the
@@ -262,8 +269,8 @@ verified status:
 | --- | --- |
 | Complement, not replace Stellarium (product) | **Consistent with ADR-004** |
 | "The `SessionCalculator` strictly compares available darkness against capture block times plus a 15 % overhead" | **Incorrect.** The 15 % model is in `estimateTotalDuration`, which nothing calls. The live path is `PlannerViewModel.estimatedRequiredTime` (all frame types plus a flat 5 s per frame) compared with the visibility windows by `SessionCalculator.calculateFeasibility` |
-| Storage uses empirical average RAW size | **True as implemented**, but PRODUCT_SPEC also requires distinguishing theoretical payload; seeds carry no size so the UI shows `0.0 MB` (SI-008, SI-013) |
-| Relative gain presented as a statistical metric "explicitly avoiding … absolute SNR" | **Partly.** The metric and doc comment are correct; the UI label says "Relative SNR" (DEV-P2) |
+| Storage uses empirical average RAW size | **True as implemented**, but PRODUCT_SPEC also requires distinguishing theoretical payload; seeds still carry no size, but as of TASK 4.4 the UI shows "Unknown" rather than a fabricated `0.0 MB` (SI-008, SI-013) |
+| Relative gain presented as a statistical metric "explicitly avoiding … absolute SNR" | **True as of TASK 4.4.** The metric, doc comment and UI label are now all consistent (DEV-P2 label half resolved) |
 | Flutter / Provider + ChangeNotifier / Drift | **Consistent with ADR-001/002/003** |
 | Open-Meteo weather (no key) | **Implementation choice, consistent with ROADMAP Phase 10 ("initially using Open-Meteo")**; not an ADR |
 | Nominatim reverse geocoding | **Implementation choice**; lives in the ViewModel (DEV-A1) |
