@@ -193,9 +193,14 @@ rewritten to match the code.*
     Group G1 is complete. **Milestone M0 is met on this branch**, except that CI has
     never actually run: no Git remote is configured yet, so `.github/workflows/ci.yml`
     is untested against real GitHub Actions.
-  - **Next: TASK 2.1 — ADR: SessionNight and time-zone strategy (PD-01, PD-02).** Not
-    started; it begins only on the owner's go-ahead, and it is itself an ADR task
-    that needs the owner's PD-01/PD-02 decisions, not just implementation.
+  - Completed 2026-09-22: **TASK 2.1** — ADR-007, SessionNight and time-zone strategy
+    (`docs/DECISIONS.md` Part F). PD-01 and PD-02 were resolved by the owner.
+    Documentation only.
+  - Completed 2026-09-22: **TASK 2.2** — pure-domain `SessionNight`, `CalendarDate`,
+    `SiteTimeContext`, `SessionNightResolver` and `Clock`, with the ADR-007 test matrix
+    (135 tests green). Not yet used by the app.
+  - **Next: TASK 2.3 — Calculators consume SessionNight.** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 

@@ -5,7 +5,8 @@
 > `LocationService` seam, `PlannerViewModel.ready`) and TASK 1.2 (commit `2e17093`:
 > deterministic bootstrap, `hasBootstrapError`/`retryBootstrap`, `isDefaultLocation`,
 > `weatherError`, Home empty/error states); affected spots are marked
-> *(updated TASK 1.1)*/*(updated TASK 1.2)*. Line references into
+> *(updated TASK 1.1)*/*(updated TASK 1.2)*. TASK 2.2 (2026-09-22) added pure-domain
+> time types, not yet used by the app; see B5 *(updated TASK 2.2)*. Line references into
 > `planner_viewmodel.dart` were taken at `900b82a` and are now off by more.
 >
 > This document keeps three things separate on purpose:
@@ -235,7 +236,18 @@ implemented by `GeolocatorLocationService` (`lib/data/services/`) and replaced b
 **Not abstracted (no interface exists):** light pollution (concrete class in the
 data layer), reverse geocoding (inline HTTP in the ViewModel), device location in
 `LocationPickerScreen` (still calls Geolocator inline), key-value preferences
-(inline), current time (`DateTime.now()` inline).
+(inline), current time in the ViewModel and widgets (`DateTime.now()` inline).
+
+**Added, not yet wired (TASK 2.2, 2026-09-22; ADR-007)** *(updated TASK 2.2)*:
+- **Current time:** a `Clock` seam (`lib/core/time/clock.dart`: `SystemClock`,
+  `FixedClock`). Its only production use so far is `SessionLog.fromJson`'s fallback;
+  `lib/domain` no longer calls `DateTime.now()`.
+- **Session night:** `SessionNight` and `CalendarDate`
+  (`lib/domain/models/`), the `SiteTimeContext` seam with `MeanSolarTimeContext` and
+  `FixedOffsetTimeContext` (`lib/domain/models/site_time_context.dart`), and the
+  static, pure `SessionNightResolver` (`lib/domain/services/`).
+- **Not wired yet:** no ViewModel, widget or calculator uses these yet (TASKs
+  2.3–2.4), so the time-base table below still describes the running app.
 
 ## B6. Data layer (`lib/data/`)
 

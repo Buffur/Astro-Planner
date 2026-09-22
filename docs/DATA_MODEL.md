@@ -1,7 +1,9 @@
 # AstroPlan Data Model
 
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
-> audited 2026-09-21. Application code unchanged since.
+> audited 2026-09-21. Application code changed since by TASKs 1.1–1.3 (no entity
+> changes). **TASK 2.2 (2026-09-22):** three non-persisted domain types were added to
+> B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change.
 >
 > This document keeps **three things separate** on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -150,6 +152,9 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | `WeatherConditions` | temperature (°C); cloudCover (%); humidity (%); dewPoint (°C); windSpeed (km/h, provider default); hourlyForecasts; lastUpdated (device clock) | shared preferences cache only | No provider/model, offset, validity window or staleness field |
 | `HourlyForecast` | time; temperature; cloudCover; dewPoint; humidity; precipitationProbability (%); windSpeed; isDaytime | inside the weather cache | `time` is a **naive site-local string parsed as device-local** (SI-010) |
 | `VisibilityWindow` | start, end (UTC) | not persisted | `duration` getter; value equality |
+| `CalendarDate` *(TASK 2.2)* | year; month; day (no time, no zone) | not persisted yet | Validated; ISO `YYYY-MM-DD` round trip; the intended persisted form of a night's evening date (ADR-007 §10, G11) |
+| `SiteTimeContext` *(TASK 2.2)* | `id`; `offsetAt(utc)` | not persisted yet | `MeanSolarTimeContext` (id `solar`, offset `round(λ·240 000)` ms) and `FixedOffsetTimeContext` (id such as `UTC+14:00`); an IANA context arrives in TASK 7.1 |
+| `SessionNight` *(TASK 2.2)* | eveningDate (`CalendarDate`); startUtc; endUtc (= start + 24 h); latitude, longitude (deg, λ normalized to (−180, 180]); timeContextId | not persisted | Built by `SessionNightResolver` (ADR-007); **not used by the app yet** (TASK 2.4) |
 | `SessionFeasibility`, `FeasibilityState` | totals + `feasible`/`tight`/`infeasible` | not persisted | Defined in `session_calculator.dart` |
 | `ImageMetadata` | all strings: make, model, focalLength, aperture, exposureTime, iso, dateTimeOriginal, rawTags | not persisted | Display-only |
 
@@ -163,7 +168,8 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 | Pixel pitch | µm |
 | Aperture field | **f-number** (dimensionless) — one seed violates this (SI-005) |
 | Exposure | seconds |
-| Timestamps in domain math | UTC (`AstronomicalEngine` throws if not UTC) |
+| Timestamps in domain math | UTC (`AstronomicalEngine` throws if not UTC; `SessionNightResolver` and `FixedClock` reject non-UTC inputs) |
+| Session-night evening date *(TASK 2.2, not wired)* | Civil calendar date at the site (`CalendarDate`), never an instant (ADR-007) |
 | Timestamps in DB | epoch seconds (Drift default), read back as local `DateTime` |
 | Weather | Open-Meteo defaults: °C, %, km/h; hourly times are site-local naive strings |
 | Elevation | Unit unspecified (assumed metres); not used in any calculation |

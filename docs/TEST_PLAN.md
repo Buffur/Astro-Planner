@@ -111,12 +111,12 @@ Note: until TD-003 is fixed, the "run `flutter analyze` and `flutter test` befor
 claiming completion" rule cannot be satisfied literally; report the failure as
 pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 
-### Current baseline (2026-09-21, after TASK 1.2)
+### Current baseline (2026-09-22, after TASK 2.2)
 
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **83 tests: 83 pass, 0 fail** (three consecutive full runs) |
+| `flutter test --no-pub` | **135 tests: 135 pass, 0 fail** (`dart run tool/check.dart`) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -154,6 +154,31 @@ position-granted paths (2 tests).
     uses for the same reason.
 
 Total after TASK 1.2: 24 test files, 83 tests.
+
+**Added by TASK 2.2** (SessionNight domain, ADR-007), 52 tests:
+- **`test/domain/services/session_night_resolver_test.dart`** holds the ADR-007 §12
+  matrix:
+  - default night from "now" (T1–T9, T11, T12);
+  - chosen evening dates, including the DST nights with site-local display
+    (T9–T16);
+  - the L1 fallback;
+  - P1, the §11 invariants over 730 dates in 13 contexts;
+  - P2, a 48-hour monotonicity walk;
+  - P3, antimeridian continuity;
+  - input validation.
+
+  Each "now" case also records whether it discriminates against the old UTC-date
+  rule: T1, T2, T3, T6, T11 and T12 do. DST is tested without the `timezone` package
+  through `test/support/dst_time_context.dart`, whose 2026–2027 transition instants
+  come from the IANA database. All inputs are UTC, so no test depends on the host
+  zone (T17 is enforced structurally: non-UTC inputs are rejected).
+- **`test/domain/models/calendar_date_test.dart`:** `CalendarDate` and the
+  time-context ids.
+- **`test/core/time/clock_test.dart`:** `FixedClock` and `SystemClock`, plus a
+  source guard that `lib/domain` has no `DateTime.now()`.
+- **`session_log_test.dart`:** a `fromJson` clock-fallback test.
+
+Total after TASK 2.2: 27 test files, 135 tests.
 
 **Still open** (`docs/TECH_DEBT.md` TD-025, TD-037): no tests for the live capture
 budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata

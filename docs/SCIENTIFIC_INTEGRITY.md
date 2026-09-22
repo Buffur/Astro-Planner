@@ -3,7 +3,10 @@
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
 > `2357755`); the only spot it touches here is the integration-test RA fixture
-> below.
+> below. TASKs 1.2–1.3 changed application code without touching any calculation
+> recorded here. **2026-09-22 (TASK 2.1):** SI-010 gained a decision note (ADR-007);
+> no calculation changed. **TASK 2.2:** new calculation CALC-21 (the session-night
+> window), which is not yet used by the app; SI-010 progress noted.
 > **Nothing in this document has been fixed.** It records issues and the
 > required future action for each. See `docs/TECH_DEBT.md` for the work items.
 
@@ -462,7 +465,29 @@ consumers must share one time base, and display in a stated time zone.
 **Required Future Action**
 Owner decisions PD-01 (default-night rule) and PD-02 (site time-zone strategy),
 then a pure-domain session-night definition with regression tests (Americas
-evening, after-midnight, date line, DST, high latitude). **Not started.**
+evening, after-midnight, date line, DST, high latitude).
+
+**Update 2026-09-22 (TASK 2.1, decision only — no code changed):** PD-01 and PD-02
+are resolved by **ADR-007** (`docs/DECISIONS.md` Part F). This refines the "Correct
+Interpretation" above without replacing it:
+- **Identity:** a night is identified by the site plus its **civil** evening date D.
+- **Window:** the window is `[startUtc, startUtc + 24 h)`, where `startUtc` is the
+  site's mean solar noon (`12:00Z − round(λ·240 000) ms`) nearest to civil noon of D.
+- **Default:** the default is the window that contains *now*.
+- **Time context:** computation is in UTC through a time context. The context is mean
+  solar until TASK 7.1 adds the site's IANA zone. The device zone is never used.
+- **Polar states:** these are typed results, never nulls.
+
+The assumptions, limitations (L1–L4), invariants (I1–I12) and the 17-case test matrix
+are in ADR-007 §11–§14. CALC-10 and CALC-11 are unchanged.
+
+**Progress 2026-09-22 (TASK 2.2):** the ADR-007 window and default rule are
+implemented in the pure domain as CALC-21 (`SessionNightResolver`) and tested against
+the ADR matrix: 11 default-night cases and 9 chosen-date cases, 730-day invariant
+sweeps in 13 contexts, and a 48-hour monotonicity walk. The expected instants were
+computed independently of the code. **The app does not use it yet**: the default path
+is still Broken until TASK 2.4, and the calculators take a `SessionNight` in TASK
+2.3.
 
 **Status:** Broken (default path). **Work items:** TD-001, TD-020.
 
@@ -598,6 +623,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° → s | Deviates from published (SI-001) | Clamps abs(δ) to 89.9°; throws for f ≤ 0 or N ≤ 0; **not surfaced** | 1 (circular) | Fair |
 | CALC-18 | `SessionCalculator.calculateFeasibility` | windows, required duration → state + totals | Sum of windows; infeasible if required > available; tight if > 85 % | Arbitrary margin (SI-006); no Moon/weather | 5 | Fair |
 | CALC-19 | `SessionCalculator.estimateTotalDuration` | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | **Dead code** — nothing calls it | 1 | Good (but unused) |
+| CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good (**not yet used by the app**) |
 | CALC-20 | `PlannerViewModel` derived getters | plan + site → various | `estimatedRequiredTime` = Σ(exposure×count over **all** block types) + 5 s × frames; `totalIntegrationTime` = Σ lights only; `maxAltitude` = altitude at LHA = 0 | Not restricted to the night; conflates integration, acquisition and calibration (TD-022) | **none** | Poor |
 
 ---

@@ -4,7 +4,9 @@
 > audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`),
 > TASK 1.2 (`2e17093`: deterministic bootstrap, Home empty/error states) and TASK 1.3
 > (`94acd71` whole-tree format, `97924a0` quality-gate script and CI); affected
-> entries are F-05, F-06, F-48 and F-49. Statuses were assigned from the code and
+> entries are F-05, F-06, F-48 and F-49. **TASK 2.2 (2026-09-22):** new pure-domain
+> `SessionNight` resolver and `Clock`, not yet used by the app; affected entries are
+> F-09, F-10 and F-48. Statuses were assigned from the code and
 > from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -40,7 +42,7 @@ feature exists although its roadmap phase has not been reached in
 | F-07 | Saved locations management | Partial | 4 |
 | F-08 | Session date selection (picker) | Partial | 8 |
 | F-09 | Default "tonight" resolution | **Broken** | 8 |
-| F-10 | Site time-zone handling | Missing | 8 |
+| F-10 | Site time-zone handling | Partial | 8 |
 | F-11 | Astronomy core (JD, GMST, LST, altitude) | Implemented | 5 |
 | F-12 | Sun altitude and night timeline | Partial | 8 |
 | F-13 | Target visibility windows | Partial | 8 |
@@ -161,12 +163,21 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 - **Current implementation:** the ViewModel's default `_sessionDate` is `DateTime.now().toUtc()`.
 - **Relevant files:** `planner_viewmodel.dart:36`, `visibility_calculator.dart:85-90,139-151`.
 - **Known issues:** uses the **UTC calendar date**. Verified: at 18:30 PDT the app shows the next night's sunset 24.0 h late and the header reads tomorrow's date; the timeline, windows, chart and feasibility are all for the wrong night. Correct in Europe. Not covered by any test (SI-010; TD-001).
-- **Dependencies:** decisions PD-01, PD-02.
+- **Progress (TASK 2.2, 2026-09-22):** PD-01 and PD-02 are decided (ADR-007). A
+  correct, tested pure-domain resolver exists (`SessionNightResolver.resolveDefault`
+  in `lib/domain/services/session_night_resolver.dart`; the ADR-007 matrix passes,
+  including San Francisco at 18:30 PDT). **Nothing in the app uses it yet**, so the
+  status stays Broken until TASK 2.4 (the ViewModel) and TASK 2.3 (the calculators).
+- **Dependencies:** ~~decisions PD-01, PD-02~~ (resolved); TASKs 2.3 and 2.4.
 - **Roadmap relevance:** Phase 8; blocks Phases 9–10.
 
 ## F-10 — Site time-zone handling
-- **Status:** Missing
-- **Current implementation:** none. Times are shown in the **device** zone; weather timestamps are naive; the provider's `utc_offset_seconds` is discarded.
+- **Status:** Partial *(was Missing; TASK 2.2, 2026-09-22)*
+- **Current implementation:** the domain now has a `SiteTimeContext` seam
+  (`lib/domain/models/site_time_context.dart`), with a mean-solar fallback and a
+  fixed-offset implementation (ADR-007 §6). It is used only by `SessionNightResolver`
+  and its tests. There is still no per-site zone (TASK 7.1) and no zone-labelled
+  display (TASK 2.4). In the running app, as before: times are shown in the **device** zone; weather timestamps are naive; the provider's `utc_offset_seconds` is discarded.
 - **Relevant files:** — (see `sky_darkness_widget.dart:137`, `open_meteo_weather_repository.dart:47`).
 - **Known issues:** remote-site planning shows wrong clock times; weather and timeline can disagree by the zone difference (SI-010; TD-020).
 - **Dependencies:** decision PD-02.
@@ -482,7 +493,7 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-48 — Automated tests
 - **Status:** Partial
-- **Current implementation:** 83 tests in 24 files; all pass (three consecutive full runs after TASK 1.2); `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`. New (TASK 1.2): `planner_bootstrap_test.dart` (seeding-before-first-read, bootstrap-failure/retry, `isDefaultLocation`) and `home_screen_test.dart` (empty-state actions, default-location banner, weather-failure/retry, bootstrap-failure/retry), using a `FlakyTargetRepository` test double (`test/support/`).
+- **Current implementation:** 135 tests in 27 files; all pass (`dart run tool/check.dart` after TASK 2.2; 83 in 24 files after TASK 1.2). New (TASK 2.2): `session_night_resolver_test.dart` (the ADR-007 matrix and invariants), `calendar_date_test.dart`, `clock_test.dart` (which includes a guard that `lib/domain` has no `DateTime.now()`), plus one `SessionLog.fromJson` clock-fallback test. Earlier: `flutter analyze` clean. Location is injected (`FakeLocationService` in `test/support/`) and the ViewModel is awaited with `vm.ready`. New (TASK 1.2): `planner_bootstrap_test.dart` (seeding-before-first-read, bootstrap-failure/retry, `isDefaultLocation`) and `home_screen_test.dart` (empty-state actions, default-location banner, weather-failure/retry, bootstrap-failure/retry), using a `FlakyTargetRepository` test double (`test/support/`).
 - **Relevant files:** `test/` (see `docs/TEST_PLAN.md`).
 - **Known issues:** no test for the live capture-budget math, Capture Plan, Sky, Altitude chart, Logbook, Location or Metadata screens; no migration tests; some tests mirror the implementation (NPF); `AppRouter.router` is a shared static — `home_screen_test.dart` resets it in `setUp()` to avoid cross-test navigation leaks, a workaround, not a fix; Nominatim and light-pollution HTTP are not injectable (TD-025, TD-037). *Resolved 2026-09-21 (TASK 1.1, `2357755`):* the red `integration_flow_test.dart` (TD-003), the 300 ms sleeps, and GPS access in tests.
 - **Dependencies:** —
