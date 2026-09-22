@@ -429,10 +429,11 @@ class PlannerViewModel extends ChangeNotifier {
     }
   }
 
+  /// Expects `newIndex` already adjusted for the removal at `oldIndex`, per
+  /// the `onReorderItem` contract `capture_plan_widget.dart` uses — do not
+  /// re-adjust it here (TD-010: the old `newIndex -= 1` doubled up with that
+  /// adjustment and dropped blocks dragged downward one slot short).
   Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) async {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
     final item = _captureBlocks.removeAt(oldIndex);
     _captureBlocks.insert(newIndex, item);
     await _saveBlocks();

@@ -36,11 +36,25 @@ class CapturePlanWidget extends StatelessWidget {
     }
   }
 
-  void _showAddBlockDialog(BuildContext context, PlannerViewModel viewModel) {
-    FrameType selectedType = FrameType.light;
-    String filter = 'L';
-    final exposureController = TextEditingController();
-    final countController = TextEditingController();
+  /// Shared by the add and edit flows (TASK 4.1). When [editIndex] is given,
+  /// the dialog is pre-filled from [initial] and calls `updateCaptureBlock`
+  /// instead of `addCaptureBlock` — the only reachable caller of that method
+  /// before this task (TD-012: "no edit UI (`updateCaptureBlock` unused)").
+  void _showBlockDialog(
+    BuildContext context,
+    PlannerViewModel viewModel, {
+    int? editIndex,
+    CaptureBlock? initial,
+  }) {
+    FrameType selectedType = initial?.frameType ?? FrameType.light;
+    String filter = initial?.filterName ?? 'L';
+    final exposureController = TextEditingController(
+      text: initial != null ? _trimZeros(initial.exposureTimeSeconds) : '',
+    );
+    final countController = TextEditingController(
+      text: initial != null ? initial.frameCount.toString() : '',
+    );
+    final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
@@ -48,68 +62,93 @@ class CapturePlanWidget extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Add Capture Block'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  DropdownButtonFormField<FrameType>(
-                    initialValue: selectedType,
-                    decoration: const InputDecoration(labelText: 'Frame Type'),
-                    items: FrameType.values
-                        .map(
-                          (t) => DropdownMenuItem(
-                            value: t,
-                            child: Text(t.name.toUpperCase()),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) {
-                      if (v != null) setState(() => selectedType = v);
-                    },
-                  ),
-                  if (selectedType == FrameType.light ||
-                      selectedType == FrameType.flat)
-                    DropdownButtonFormField<String>(
-                      initialValue: filter,
-                      decoration: const InputDecoration(labelText: 'Filter'),
-                      items:
-                          [
-                                'L',
-                                'R',
-                                'G',
-                                'B',
-                                'Ha',
-                                'OIII',
-                                'SII',
-                                'OSC',
-                                'None',
-                              ]
-                              .map(
-                                (f) =>
-                                    DropdownMenuItem(value: f, child: Text(f)),
-                              )
-                              .toList(),
+              title: Text(
+                editIndex == null ? 'Add Capture Block' : 'Edit Capture Block',
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<FrameType>(
+                      initialValue: selectedType,
+                      decoration: const InputDecoration(
+                        labelText: 'Frame Type',
+                      ),
+                      items: FrameType.values
+                          .map(
+                            (t) => DropdownMenuItem(
+                              value: t,
+                              child: Text(t.name.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (v) {
-                        if (v != null) setState(() => filter = v);
+                        if (v != null) setState(() => selectedType = v);
                       },
                     ),
-                  TextFormField(
-                    controller: exposureController,
-                    decoration: const InputDecoration(
-                      labelText: 'Exposure (seconds)',
-                      hintText: 'e.g. 60',
+                    if (selectedType == FrameType.light ||
+                        selectedType == FrameType.flat)
+                      DropdownButtonFormField<String>(
+                        initialValue: filter,
+                        decoration: const InputDecoration(labelText: 'Filter'),
+                        items:
+                            [
+                                  'L',
+                                  'R',
+                                  'G',
+                                  'B',
+                                  'Ha',
+                                  'OIII',
+                                  'SII',
+                                  'OSC',
+                                  'None',
+                                ]
+                                .map(
+                                  (f) => DropdownMenuItem(
+                                    value: f,
+                                    child: Text(f),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (v) {
+                          if (v != null) setState(() => filter = v);
+                        },
+                      ),
+                    TextFormField(
+                      controller: exposureController,
+                      decoration: const InputDecoration(
+                        labelText: 'Exposure (seconds)',
+                        hintText: 'e.g. 60',
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) {
+                        final exposure = double.tryParse((value ?? '').trim());
+                        if (exposure == null || exposure <= 0) {
+                          return 'Enter a positive number of seconds';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  TextFormField(
-                    controller: countController,
-                    decoration: const InputDecoration(
-                      labelText: 'Frame Count',
-                      hintText: 'e.g. 30',
+                    TextFormField(
+                      controller: countController,
+                      decoration: const InputDecoration(
+                        labelText: 'Frame Count',
+                        hintText: 'e.g. 30',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        final count = int.tryParse((value ?? '').trim());
+                        if (count == null || count < 1) {
+                          return 'Enter a whole number of at least 1';
+                        }
+                        return null;
+                      },
                     ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ],
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -118,26 +157,35 @@ class CapturePlanWidget extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final exposure =
-                        double.tryParse(exposureController.text.trim()) ?? 60.0;
-                    final count =
-                        int.tryParse(countController.text.trim()) ?? 30;
+                    if (!(formKey.currentState?.validate() ?? false)) return;
 
-                    viewModel.addCaptureBlock(
-                      CaptureBlock(
-                        frameType: selectedType,
-                        filterName:
-                            (selectedType == FrameType.light ||
-                                selectedType == FrameType.flat)
-                            ? filter
-                            : null,
-                        exposureTimeSeconds: exposure,
-                        frameCount: count,
-                      ),
+                    final exposure = double.parse(
+                      exposureController.text.trim(),
                     );
+                    final count = int.parse(countController.text.trim());
+                    final block = CaptureBlock(
+                      id: initial?.id ?? 0,
+                      sessionLogId: initial?.sessionLogId ?? 0,
+                      frameType: selectedType,
+                      filterName:
+                          (selectedType == FrameType.light ||
+                              selectedType == FrameType.flat)
+                          ? filter
+                          : null,
+                      exposureTimeSeconds: exposure,
+                      frameCount: count,
+                      binning: initial?.binning ?? 1,
+                      gainIso: initial?.gainIso,
+                    );
+
+                    if (editIndex == null) {
+                      viewModel.addCaptureBlock(block);
+                    } else {
+                      viewModel.updateCaptureBlock(editIndex, block);
+                    }
                     Navigator.pop(ctx);
                   },
-                  child: const Text('Add'),
+                  child: Text(editIndex == null ? 'Add' : 'Save'),
                 ),
               ],
             );
@@ -145,6 +193,14 @@ class CapturePlanWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Whole numbers print without a trailing ".0" (e.g. an exposure of 60.0
+  /// pre-fills the edit dialog as "60", not "60.0").
+  String _trimZeros(double value) {
+    return value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toString();
   }
 
   @override
@@ -182,7 +238,7 @@ class CapturePlanWidget extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.add_circle),
                   color: Colors.indigo,
-                  onPressed: () => _showAddBlockDialog(context, viewModel),
+                  onPressed: () => _showBlockDialog(context, viewModel),
                 ),
               ],
             ),
@@ -207,8 +263,20 @@ class CapturePlanWidget extends StatelessWidget {
                       : '';
 
                   return ListTile(
-                    key: ValueKey(block.hashCode.toString() + index.toString()),
+                    // TD-010/TD-012: was ValueKey(hashCode + index), which
+                    // changes on every reorder (defeating the point of a
+                    // ReorderableListView key) and can collide since
+                    // CaptureBlock doesn't override hashCode. ObjectKey
+                    // tracks this specific block instance regardless of its
+                    // position, and stays stable across a drag.
+                    key: ObjectKey(block),
                     contentPadding: EdgeInsets.zero,
+                    onTap: () => _showBlockDialog(
+                      context,
+                      viewModel,
+                      editIndex: index,
+                      initial: block,
+                    ),
                     title: Text(
                       '${block.frameType.name.toUpperCase()} $filterStr',
                     ),
