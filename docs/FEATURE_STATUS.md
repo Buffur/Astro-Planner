@@ -44,6 +44,7 @@
 > **TASK 6.2 (2026-09-22):** independent reference fixtures (USNO events and celestial-navigation altitudes, JPL Horizons Sun elevations, SIMBAD J2000 star positions; `test/fixtures/astronomy/`) and tolerance tests; target coordinates are now precessed J2000 → date (Meeus ch. 21, owner decision) in the one domain target-altitude function; altitudes stay airless with the −0.833° sunrise/sunset convention (owner decision); source/units/error doc comments on the astronomy functions. Affected entries: F-11, F-13, F-14, F-48.
 > **TASK 6.3 (2026-09-22):** a pure-domain Moon ephemeris (`MoonCalculator`, Meeus ch. 47 full tables in `moon_series.dart`, ADR-010) — position, topocentric altitude, illuminated fraction, phase longitude, rise/set on the night grid — verified against JPL Horizons and USNO well inside ADR-010 §4. **Not used by the app yet** (TASK 6.4 wires it and retires the mean-phase model). F-16 Missing → Partial; F-48 updated.
 > **TASK 6.4 (2026-09-22):** `MoonConditions` (Moon altitude, separation from the target, rise/set, illumination at mean solar midnight, closest approach while both are up) from `MoonCalculator`, shown on the sky card as annotations; the mean-phase `calculateLunarIllumination` was deleted. F-15 and F-16 → Implemented; F-48 updated.
+> **TASK 6.5 (2026-09-22):** the NPF rule now follows F. Michaud's primary source (derivation on sahavre.fr), with an explicit k (default 1, range 1–3); the circular test is replaced by independent worked examples. Still hidden (PD-11). Group G6 is complete. F-26 Broken → Partial (correct but hidden); F-48 updated.
 
 ## Status legend
 
@@ -94,7 +95,7 @@ feature exists although its roadmap phase has not been reached in
 | F-23 | Equipment composition (Device / Camera / Rig) | Partial | 4 |
 | F-24 | Pixel scale | Implemented | 6 |
 | F-25 | Field of view (FOV) | Partial | 6 |
-| F-26 | NPF exposure recommendation | **Broken** | 6 |
+| F-26 | NPF exposure recommendation | Partial | 6 |
 | F-27 | Optical multipliers (reducer / Barlow) | Prototype | 6 |
 | F-28 | Storage estimate | Partial | 9 |
 | F-29 | Weather fetch and offline cache | Partial | 10 |
@@ -347,12 +348,12 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 6.
 
 ## F-26 — NPF exposure recommendation
-- **Status:** Broken
-- **Current implementation:** `calculateNPFExposure` and a ViewModel getter `npfExposure`; **no UI consumer**.
-- **Relevant files:** `optical_calculator.dart:59-88`, `planner_viewmodel.dart:461-469`.
-- **Known issues:** formula uses a constant `90.0` instead of `0.1·F` (2.9× too long for phones, 0.72× for 2000 mm); circular unit test; no K factor; not labelled as a recommendation; throws on invalid input (SI-001; TD-007).
-- **Dependencies:** decisions PD-10, PD-11.
-- **Roadmap relevance:** Phase 6 ("later NPF recommendations").
+- **Status:** Partial *(was Broken; TASK 6.5)*
+- **Current implementation:** `calculateNPFExposure` follows Michaud's complete NPF rule from the primary source, with an explicit k (default 1, range 1–3) and |δ| as the field's minimum declination (0 if unknown). A ViewModel getter `npfExposure` exists; **no UI consumer** (PD-11: hidden).
+- **Relevant files:** `lib/domain/services/optical_calculator.dart`, `planner_viewmodel.dart` (`npfExposure`).
+- **Known issues:** not shown (by decision, PD-11). The getter passes the target's centre declination rather than the field minimum, to be revisited when it is surfaced. *Resolved (TASK 6.5):* the `+ 90` constant (2.9× too long for phones), the circular test and the missing k (SI-001, TD-007).
+- **Dependencies:** PD-11 to surface it.
+- **Roadmap relevance:** Phase 6.
 
 ## F-27 — Optical multipliers (reducer / Barlow)
 - **Status:** Prototype

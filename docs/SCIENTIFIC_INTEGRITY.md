@@ -39,6 +39,7 @@
 > **TASK 6.2 (2026-09-22):** CALC-07/CALC-08 now reference-tested; new CALC-27 (precession) — a recorded formula change (ADR-010, TASK 6.2 decisions); SI-009 and SI-012 progress.
 > **TASK 6.3 (2026-09-22):** new CALC-28 (Moon, ADR-010) with reference results; SI-002 progress. No existing calculation changed.
 > **TASK 6.4 (2026-09-22):** CALC-09 deleted, new CALC-29 (MoonConditions and separation, reference-tested); SI-002 resolved for precision and geometry.
+> **TASK 6.5 (2026-09-22):** CALC-17 corrected to the primary source (recorded formula change); SI-001 resolved for the formula (still hidden).
 
 ## Purpose and authority
 
@@ -64,7 +65,7 @@ Correct Interpretation → Required Future Action.**
 
 | ID | Topic | Status of the underlying feature | Work item |
 | --- | --- | --- | --- |
-| SI-001 | NPF exposure formula deviates from the published formula | Broken (not surfaced in UI) | TD-007 |
+| SI-001 | NPF exposure formula deviates from the published formula | **Resolved 2026-09-22 (TASK 6.5)** for the formula; still not surfaced (PD-11) | TD-007 (resolved) |
 | SI-002 | Moon: mean-phase precision limit, no Moon geometry | **Resolved 2026-09-22 (TASK 6.3–6.4)** for precision and geometry; the sky warning's use of it stays with SI-006 / G10 | TD-032 (resolved), TD-033 |
 | SI-003 | Relative stacking gain (√N) vs physical SNR | Partial (label fixed TASK 4.4; metric documentation still open) | TD-009 |
 | SI-004 | ISO / gain limitations | Prototype (descriptive text only) | TD-009 |
@@ -140,6 +141,8 @@ recommendation and not an absolute exposure limit.
 
 **Sources:** complete formula — https://mypetstars.com/glossary/npf-formula ;
 simplified formula — https://www.npfcalculator.com/ .
+**Resolved 2026-09-22 (TASK 6.5):** actions 1–4 are done. (1) The primary source was read on sahavre.fr (the older URL is dead), and its derivation gives the unrounded constants 16.8567, 0.099724 and 13.713. (2) The formula is corrected, with the citation in the doc comment and a formula-change record in `docs/DECISIONS.md` E.1. (3) The circular test is replaced by five independent worked examples; the source has no numeric examples in its text. (4) k is explicit (default 1, range 1–3). Action 5 stands: NPF stays hidden until PD-11 decides how to surface it as a recommendation for untracked exposures.
+
 **Status:** Broken (unsurfaced). **Work item:** TD-007.
 
 ---
@@ -721,7 +724,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-14 | `calculateEffectiveFocalLength` | native FL mm → mm | Identity (no reducer/Barlow) | Optical multipliers removed in the latest commit | 1 | Fair |
 | CALC-15 | `calculateRelativeStackingGain` | light frames N → factor | `√N` | SI-003 | 1 | Good (UI label corrected TASK 4.4) |
 | CALC-16 | `estimateStorageRequirement` | avg file MB?, frames → MB? | product, or null if avg file size unknown (TASK 4.4) | SI-008, SI-013 | 1 | Fair |
-| CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° → s | Deviates from published (SI-001) | Clamps abs(δ) to 89.9°; throws for f ≤ 0 or N ≤ 0; **not surfaced** | 1 (circular) | Fair |
+| CALC-17 | `calculateNPFExposure` | N, p µm, f mm, δ° (field minimum \|δ\|, 0 if unknown), k (1–3, default 1) → s | **Since TASK 6.5:** Michaud's complete NPF rule, `k(16.8567N + 0.099724f + 13.713p)/(f cos\|δ\|)`, constants computed from his derivation (sahavre.fr) | Assumes 3″ seeing, 550 nm, Bayer sensor, a moderately aberrated lens; \|δ\| capped at 89.9°; **not surfaced** (PD-11) | 5 independent worked examples incl. a phone lens (≤ 1e-5 s; within 0.2 % of the published rounding) | Good (hidden) |
 | CALC-18 | ~~`SessionCalculator.calculateFeasibility`~~ **Deleted 2026-09-22 (TASK 5.5)** | windows, required duration → state + totals | Sum of windows vs required time with a margin | Could not see gaps between windows (ADR-009 E2c); replaced by CALC-26; its tests removed with it | — | Deprecated (removed) |
 | CALC-19 | ~~`SessionCalculator.estimateTotalDuration`~~ **Deleted 2026-09-22 (TASK 5.4)** | frame counts, exposure s → Duration | 15 % overhead on lights; flats 5 s; bias 1 s | Was dead code; replaced by CALC-25 (ADR-009); its test was removed with it | — | Deprecated (removed) |
 | CALC-21 *(TASK 2.2)* | `SessionNightResolver.forEveningDate` / `resolveDefault` | civil `CalendarDate` or UTC instant, lat°, lon° (east +), `SiteTimeContext` → `SessionNight` | start = mean solar noon `D 12:00Z − round(λ·240 000) ms` nearest civil noon of D; end = start + 24 h; default = window containing now (ADR-007) | Mean, not apparent, noon (ADR-007 L2); mean-solar context until TASK 7.1 (L1); no Sun model involved | ADR-007 matrix (T1–T16), P1–P3, input validation | Good — consumed by `PlannerViewModel.sessionNight` (TASK 2.4) |

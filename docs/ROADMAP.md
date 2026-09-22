@@ -325,8 +325,11 @@ rewritten to match the code.*
   - Completed 2026-09-22: **TASK 6.4** — `MoonConditions` (Moon up-times, closest
     approach to the target, illumination at mean solar midnight) on the sky card;
     separation reference-tested; mean-phase model deleted. 319 tests green.
-  - **Next: TASK 6.5 — Correct NPF (still hidden).** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 6.5** — NPF corrected to Michaud's primary source
+    (explicit k; independent worked examples; DECISIONS formula-change record); still
+    hidden (PD-11). 327 tests green. **Group G6 is complete.**
+  - **Next: TASK 7.1 — Site model and schema.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

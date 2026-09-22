@@ -44,6 +44,7 @@
 > **TASK 6.2 (2026-09-22):** ADR-010 gained the owner's precession (formula change: J2000 → date, Meeus ch. 21) and refraction (airless + −0.833°) decisions and the Sun measurements.
 > **TASK 6.3 (2026-09-22):** ADR-010 status updated (Moon model implemented).
 > **TASK 6.4 (2026-09-22):** ADR-010 status updated (MoonConditions; mean-phase model deleted with a note; mean solar midnight adopted as the night-level evaluation instant).
+> **TASK 6.5 (2026-09-22):** SI-001 NPF formula-change record added (E.1).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -470,6 +471,35 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
     them entirely or keeping them with a warning.
 - **Decision:** see **ADR-010** (Part F).
 - **Not implemented** (TASKs 6.2–6.4 and 8.1).
+
+### SI-001 — NPF formula correction (formula change record, TASK 6.5, 2026-09-22)
+
+- **Why this is recorded:** a formula change is never silent (rule 16;
+  SCIENTIFIC_INTEGRITY Part C rule 2). The roadmap (TASK 6.5) required this entry.
+- **Primary source, read 2026-09-22:** F. Michaud, "La Règle NPF" and "Les
+  coulisses de la règle NPF", Société Astronomique du Havre
+  (https://sahavre.fr/wp/regle-npf-rule/,
+  https://sahavre.fr/wp/les-coulisses-de-la-regle-npf/). The older URL cited in
+  SI-001 now returns "page unavailable".
+- **Before:** `t = (16.856 N + 13.713 p + 90) / (f cos δ)`. The constant `90`
+  replaced the focal-length term, giving 2.9× too long for phone lenses and 0.72×
+  at 2000 mm. There was no k.
+- **After:** `t = k · (16.8567 N + 0.099724 f + 13.713 p) / (f cos |δ|)`.
+  - Each constant is computed in code from the source's own derivation: Airy
+    4.47 · 550 nm, 3″ seeing, 2-pixel Bayer spread, 13713 ≈ 86164 s / 2π.
+  - The published rounded form k(16.9 N + 0.10 f + 13.7 p)/(f cos δ) differs by
+    under 0.2 %.
+  - k defaults to 1 (round stars); values outside Michaud's 1–3 are rejected.
+  - δ is, per the source, the **minimum** |declination| of the field, 0 when
+    unknown. It is capped at 89.9°, as before.
+- **Deviation from the roadmap wording:** the roadmap asked for "at least 3
+  published examples". The primary source has no numeric worked examples in its
+  text (its tables are images). The tests therefore use five examples computed
+  independently from the source formula in a scratch script, cross-checked against
+  the published rounded form. One is a phone lens.
+- **Unchanged:** PD-11. NPF stays **hidden**, with no UI consumer. The ViewModel
+  getter passes the target's centre declination, not the field's minimum. That must
+  be revisited when PD-11 decides how NPF is surfaced.
 
 ---
 

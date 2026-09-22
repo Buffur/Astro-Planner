@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **319 tests: 319 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.4) |
+| `flutter test --no-pub` | **327 tests: 327 pass, 0 fail** (`dart run tool/check.dart`, after TASK 6.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -344,3 +344,19 @@ Any test failure from here on is a regression, not a known pre-existing issue
   `planner_session_date_test.dart` now call `MoonCalculator.illuminatedFraction`,
   with the same instants and thresholds; the mean-phase function they tested was
   deleted.
+
+**Changed by TASK 6.5** (NPF), +9 −1 tests, in `optical_calculator_test.dart`:
+- **Removed:** the circular NPF test, whose expected value was derived from the
+  implementation's own wrong `+ 90` constant (SI-001, TD-007).
+- **Added: five worked examples,** computed independently from Michaud's derivation
+  in a scratch script and each checked to within 0.2 % of his published rounded
+  formula:
+  - a phone lens (iPhone 15 Pro Max main);
+  - APS-C 24 mm;
+  - 400 mm at δ 0° and 60°;
+  - full frame 50 mm at δ 45° with k = 2.
+- **Also added:**
+  - the coefficients against the derivation;
+  - k is linear and limited to 1–3;
+  - |δ| is symmetric and capped near the pole;
+  - invalid optics are rejected.
