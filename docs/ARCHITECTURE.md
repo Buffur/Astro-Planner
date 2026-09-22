@@ -307,19 +307,19 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
 | `/target` | `TargetSelectionScreen` | — |
 | `/equipment` | `EquipmentSelectionScreen` | — |
 | `/location` | `LocationPickerScreen` | — |
-| `/metadata` | `MetadataImportScreen` | `FeatureScope.metadataImport` (currently `true`) |
+| `/metadata` | `MetadataImportScreen` | `FeatureScope.metadataImport` (currently `false`, TASK 4.3) |
 | `/logbook` | `LogbookScreen` | `FeatureScope.logbook` (currently `true`) |
 
 Navigation uses `context.push` / `context.pop`; the Logbook uses `context.go('/')`
-after loading a session. Home's app-bar buttons push `/logbook` and `/metadata`
-**unconditionally**, so turning a gate off would navigate to a missing route
-(DEV-P1).
+after loading a session. **TASK 4.3:** Home's app-bar buttons now read
+`FeatureScope` too (they used to push `/logbook` and `/metadata` unconditionally,
+DEV-P1 — resolved).
 
 ## B8. Presentation inventory and where logic lives
 
 | Screen / widget | Reads | Notes |
 | --- | --- | --- |
-| `HomeScreen` | `PlannerViewModel`, `ThemeViewModel`; `LogbookRepository` for Save | Empty state has **no navigation** to Target/Equipment; ungated field-mode toggle and light-pollution map link (hard-coded coordinates) |
+| `HomeScreen` | `PlannerViewModel`, `ThemeViewModel`, `FeatureScope`; `LogbookRepository` for Save | Empty state has **no navigation** to Target/Equipment. **TASK 4.3:** field-mode toggle and light-pollution map card are now gated (`FeatureScope`, DEV-P1 resolved); the map link's coordinates are still hard-coded Slovenia (F-34, TASK 7.4's job) |
 | `TargetSelectionScreen` | `TargetRepository` (direct), VM for selection | Add/edit dialog with validation; no ViewModel for CRUD |
 | `EquipmentSelectionScreen` | `EquipmentRepository` (direct), VM for selection | 260-line dialog with validation; contains mojibake strings |
 | `LocationPickerScreen` | VM + Geolocator + `flutter_map` | Duplicates the ViewModel's Geolocator flow |

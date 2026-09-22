@@ -24,8 +24,13 @@
 > id so a second Save updates instead of duplicating; target/equipment
 > selections refresh after an edit or delete; the logbook orders
 > newest-first and confirms before deleting; affected entries are F-03,
-> F-19, F-22, F-40, F-41. Statuses were assigned from the code and
-> from executed reproductions, not from earlier documentation.
+> F-19, F-22, F-40, F-41. **TASK 4.3 (2026-09-22, commit `576c069`):**
+> mojibake fixed and an encoding check added to the quality gate;
+> `FeatureScope.metadataImport` now matches PD-06, and every entry point
+> (Home's field-mode toggle, Import Metadata button, light-pollution map
+> card) reads it; affected entries are F-04, F-22, F-34, F-46. Statuses
+> were assigned from the code and from executed reproductions, not from
+> earlier documentation.
 
 ## Status legend
 
@@ -54,7 +59,7 @@ feature exists although its roadmap phase has not been reached in
 | F-01 | App shell, DI, routing, theming | Implemented | 2, 3 |
 | F-02 | Local persistence (Drift) and migrations | Partial | 4 |
 | F-03 | Preference persistence (plan, selections, thresholds) | Implemented | 2 |
-| F-04 | Feature gating (`FeatureScope`) | Partial | governance |
+| F-04 | Feature gating (`FeatureScope`) | Implemented *(TASK 4.3)* | governance |
 | F-05 | Seed data and first-run bootstrap | Partial *(bootstrap ordering fixed TASK 1.2)* | 4, 7 |
 | F-06 | Active location (GPS, map, reverse geocoding) | Partial | 8 |
 | F-07 | Saved locations management | Partial | 4 |
@@ -102,7 +107,7 @@ feature exists although its roadmap phase has not been reached in
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
 
-Counts (50 features): Implemented 7 · Partial 22 · Prototype 8 · Broken 4 ·
+Counts (50 features): Implemented 8 · Partial 21 · Prototype 8 · Broken 4 ·
 Missing 9 · Deprecated 0 · Unknown 0. (The orphaned `equipment_profiles` table
 recorded under F-23 was dropped entirely in TASK 3.3, not merely deprecated —
 see DATA_MODEL.md B2/B8.)
@@ -136,11 +141,11 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 2/4.
 
 ## F-04 — Feature gating (`FeatureScope`)
-- **Status:** Partial
-- **Current implementation:** four flags; two are honoured (`lightPollutionContext` for the Bortle badge, `metadataImport` / `logbook` for route creation).
+- **Status:** Implemented *(TASK 4.3)*
+- **Current implementation:** four flags, all read from the one source and matching PD-06 E.1 exactly: `fieldMode`/`lightPollutionContext`/`metadataImport` are `false` (hidden), `logbook` is `true` (stays visible). Every entry point reads it — the field-mode toggle and Import Metadata buttons and the light-pollution map card in `home_screen.dart` (previously ungated), the Bortle badge in `sky_darkness_widget.dart`, and route registration in `app_router.dart`.
 - **Relevant files:** `lib/core/config/feature_scope.dart`, `app_router.dart`, `sky_darkness_widget.dart`, `home_screen.dart`.
-- **Known issues:** `fieldMode` never read; map handoff ungated; Home buttons push gated routes unconditionally; `metadataImport` and `logbook` are `true` with no recorded approval (DEV-P1; TD-014).
-- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); the gate is enforced by roadmap TASK 4.3.
+- **Known issues:** none open. *Resolved (TASK 4.3):* `fieldMode` was never read; the map handoff was ungated; Home's buttons pushed gated routes unconditionally; `metadataImport` was `true` with no recorded approval (DEV-P1; TD-014).
+- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); enforced by roadmap TASK 4.3, with a test that a gated feature has no entry point (`feature_scope_test.dart`, `app_router_test.dart`, `home_screen_test.dart`).
 - **Roadmap relevance:** governance (ADR-006).
 
 ## F-05 — Seed data and first-run bootstrap
@@ -298,9 +303,9 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Implemented
 - **Current implementation:** list, add, edit, delete (with confirmation), selection; form validates required numeric fields; sensor size is auto-derived from resolution × pixel pitch.
 - **Relevant files:** `lib/presentation/screens/equipment/equipment_selection_screen.dart`, `lib/data/repositories/drift_equipment_repository.dart`.
-- **Known issues:** mojibake in strings (`Вµm`, `В°`, box-drawing comments) (TD-015); RAW size accepts negatives; seeded data errors (SI-005, SI-011); repository called directly (DEV-A2). *Resolved (TASK 4.2):* deleting or editing the selected rig used to leave a stale selection — the screen now calls `PlannerViewModel.refreshSelectedEquipment()` after its dialog closes and after a swipe-delete (TD-028).
+- **Known issues:** RAW size accepts negatives; seeded data errors (SI-005, SI-011); repository called directly (DEV-A2). *Resolved (TASK 4.2):* deleting or editing the selected rig used to leave a stale selection — the screen now calls `PlannerViewModel.refreshSelectedEquipment()` after its dialog closes and after a swipe-delete (TD-028). *Resolved (TASK 4.3):* mojibake in strings (`Вµm`, `В°`, box-drawing comments), now correct (`µm`, `°`) and checked by `tool/check_encoding.dart` (TD-015).
 - **Dependencies:** F-02, F-23.
-- **Roadmap relevance:** Phase 6. Tests: 4 form-validation widget tests, 2 repository tests.
+- **Roadmap relevance:** Phase 6. Tests: 4 form-validation widget tests, 1 encoding test, 2 repository tests.
 
 ## F-23 — Equipment composition (Device / Camera module / Optical rig)
 - **Status:** Partial
@@ -394,9 +399,9 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-34 — External light-pollution map handoff
 - **Status:** Broken
-- **Current implementation:** a Home card that opens lightpollutionmap.info in the browser.
-- **Relevant files:** `home_screen.dart:167-195`.
-- **Known issues:** the URL hard-codes lat 45.872, lon 14.547 (Slovenia), not the user's site; ungated (DEV-P1; TD-014).
+- **Current implementation:** a Home card that opens lightpollutionmap.info in the browser. **TASK 4.3:** the card is now gated behind `FeatureScope.lightPollutionContext` (hidden until TASK 7.4) rather than shown unconditionally — its hard-coded coordinates make a real gate pointless before 7.4 fixes them.
+- **Relevant files:** `home_screen.dart`, `lib/core/config/feature_scope.dart`.
+- **Known issues:** the URL hard-codes lat 45.872, lon 14.547 (Slovenia), not the user's site (DEV-P1; still open, TASK 7.4's job). *Resolved (TASK 4.3):* the card was ungated (TD-014).
 - **Dependencies:** url_launcher.
 - **Roadmap relevance:** Phase 11 (ahead of phase).
 
@@ -493,11 +498,11 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode
-- **Status:** Prototype
-- **Current implementation:** an app-bar toggle switches to `AppTheme.fieldTheme` (in-memory).
-- **Relevant files:** `theme_viewmodel.dart`, `main.dart:72-73`, `home_screen.dart:34-38`.
-- **Known issues:** ungated despite ADR-006; not persisted; no checklist or other field utilities (DEV-P1).
-- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); the gate is enforced by roadmap TASK 4.3.
+- **Status:** Prototype, now hidden *(TASK 4.3)*
+- **Current implementation:** an app-bar toggle switches to `AppTheme.fieldTheme` (in-memory). **TASK 4.3:** the toggle button is gated behind `FeatureScope.fieldMode` (hidden until TASK 12.4), so it has no entry point at all — the underlying `ThemeViewModel`/`AppTheme` code is unchanged and unreachable rather than removed.
+- **Relevant files:** `theme_viewmodel.dart`, `main.dart`, `home_screen.dart`, `lib/core/config/feature_scope.dart`.
+- **Known issues:** not persisted; no checklist or other field utilities (DEV-P1). *Resolved (TASK 4.3):* ungated despite ADR-006 (TD-014).
+- **Dependencies:** decision PD-06 (resolved 2026-09-21: `DECISIONS.md` E.1); enforced by roadmap TASK 4.3.
 - **Roadmap relevance:** Phase 15 (ahead of phase).
 
 ## F-47 — Custom dashboard

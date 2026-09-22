@@ -26,7 +26,9 @@
 > (2026-09-22, commit `3c25e8c`):** ADR-008 §2–§3 implemented; status block updated.
 > **TASK 3.3 (2026-09-22, commit `e580d03`):** ADR-008 sections 4-5 implemented
 > (foreign keys, orphan cleanup, equipment_profiles dropped); PD-04's E.1 entry
-> and the ADR-008 status block updated.
+> and the ADR-008 status block updated. **TASK 4.3 (2026-09-22, commit `576c069`):**
+> PD-06's enforcement is implemented; DEV-P1 resolved; ADR-006's conformance
+> row updated to Complies.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -121,29 +123,37 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
 | ADR-003 | SQLite via Drift ("typed queries, migrations, relationships, and testability") | **Partial** | Drift is used correctly for typed queries. Migrations are untested and one path fails; relationships are declared but not enforced — DEV-P4 → DEV-D1, DEV-D6 |
 | ADR-004 | Out of planetarium scope | **Complies** | No planetarium, AR, embedded Stellarium, camera preview or camera control exists |
 | ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Deviation** | DEV-P2 |
-| ADR-006 | Hide implemented future-phase features behind `FeatureScope` until approved | **Deviation** | DEV-P1 |
+| ADR-006 | Hide implemented future-phase features behind `FeatureScope` until approved | **Complies** *(TASK 4.3)* | DEV-P1 (resolved) |
 
 ## DEV-P1 — ADR-006 gating is only partly implemented
 - **Intended behavior:** later-phase features already in the code are hidden behind
   `FeatureScope` gates — field mode; light-pollution context and external map
   handoff; metadata import; logbook UI and save action — until their phases are
   explicitly approved.
-- **Actual behavior** (`lib/core/config/feature_scope.dart`,
+- **Actual behavior (historical)** (`lib/core/config/feature_scope.dart`,
   `lib/presentation/navigation/app_router.dart`, `home_screen.dart`,
   `sky_darkness_widget.dart`):
-  - `fieldMode = false` is **defined but never read**; the field-mode toggle is live
-    in Home's app bar (`home_screen.dart:37`).
-  - `lightPollutionContext = false` gates only the Bortle badge
-    (`sky_darkness_widget.dart:32`). The **external map handoff card is ungated** and
-    opens a URL with hard-coded Slovenia coordinates (`home_screen.dart:172`);
+  - `fieldMode = false` was **defined but never read**; the field-mode toggle was live
+    in Home's app bar.
+  - `lightPollutionContext = false` gated only the Bortle badge. The **external map
+    handoff card was ungated** and opened a URL with hard-coded Slovenia coordinates;
     `_fetchBortle` still runs on every location change.
-  - `metadataImport = true` and `logbook = true`: the routes are enabled with no
+  - `metadataImport = true` and `logbook = true`: the routes were enabled with no
     recorded approval (ADR-006 lists both as initially disabled).
-  - Home's app-bar buttons push `/logbook` and `/metadata` unconditionally, so
-    switching either gate off would navigate to a route that does not exist.
-- **Consequence:** the scope discipline the ADR was written to provide is not
-  enforced. Features from Phases 11–15 are user-visible, and there is no record of
-  whether they are approved (open decision PD-06). TD-014.
+  - Home's app-bar buttons pushed `/logbook` and `/metadata` unconditionally, so
+    switching either gate off would have navigated to a route that did not exist.
+- **RESOLVED 2026-09-22 (TASK 4.3, commit `576c069`; suite 201/201).**
+  `FeatureScope.metadataImport` now reads `false`, matching ADR-006/PD-06
+  (`fieldMode`/`lightPollutionContext` were already correctly `false`). Every entry
+  point reads `FeatureScope` directly: Home's field-mode toggle, Import Metadata
+  button and light-pollution map card are each wrapped in `if (FeatureScope.*)`,
+  the same pattern `app_router.dart`'s route registration and
+  `sky_darkness_widget.dart`'s Bortle badge already used. Verified by tests that a
+  gated feature has no icon, tooltip, card or route.
+- **Consequence (historical, now resolved).** The scope discipline the ADR was
+  written to provide was not enforced; features from Phases 11–15 were
+  user-visible with no record of approval (open decision PD-06, resolved E.1).
+  TD-014.
 
 ## DEV-P2 — ADR-005 is not met
 - **Intended behavior:** calculations document units, assumptions, valid ranges,
@@ -309,13 +319,14 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - **Stay visible** (they are on the core path): the **logbook** and **text sharing**.
   - **Hidden** until their group: **metadata import** until G17 (v1.1); the
     **light-pollution map card** until TASK 7.4; the **field-mode toggle** until TASK 12.4.
-- **Enforcement:** by TASK 4.3 — every entry point (buttons, cards, routes) gated
-  from one source (`FeatureScope`), with a test that a gated feature has no entry
-  point. **This decision is recorded only; no code was changed by TASK 0.2.**
-- **Consequence for the actual state:** the code still disagrees with the policy
-  (`metadataImport = true`; field-mode toggle and map card ungated; Home pushes
-  gated routes unconditionally). That remains DEV-P1 / TD-014, **open** until 4.3.
-  DEV-P3 and TD-041 (no declared scope) are resolved by this decision.
+- **Enforcement — DONE 2026-09-22 (TASK 4.3, commit `576c069`):** every entry point
+  (buttons, cards, routes) gated from one source (`FeatureScope`), with tests that
+  a gated feature has no entry point. **This decision was recorded only when
+  written; no code was changed by TASK 0.2 — TASK 4.3 implemented it.**
+- **Consequence for the actual state (historical, resolved TASK 4.3):** the code
+  used to disagree with the policy (`metadataImport = true`; field-mode toggle and
+  map card ungated; Home pushed gated routes unconditionally). DEV-P1 / TD-014 are
+  now resolved. DEV-P3 and TD-041 (no declared scope) are resolved by this decision.
 - **Not decided here:** whether the manual Bortle badge and any other gated element
   change visibility — not addressed by the roadmap text; revisit in TASK 7.4.
 

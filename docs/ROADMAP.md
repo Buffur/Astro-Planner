@@ -260,8 +260,20 @@ rewritten to match the code.*
     (verified directly). `getAllLogs` now orders newest-saved first, and the
     logbook's swipe-delete confirms first, matching the equipment/target
     screens (TD-039). 193 tests green.
-  - **Next: TASK 4.3 — Encoding fixes and gate enforcement.** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 4.3** (`576c069`) — fixed seven mojibake spots
+    in `equipment_selection_screen.dart`/`target_selection_screen.dart`
+    (`µm`, `°`, box-drawing, an em dash) and added `tool/check_encoding.dart`
+    to the quality gate (every `lib`/`test` file must be valid UTF-8 and
+    contain no Cyrillic character — a reliable signal for this corruption
+    pattern in an English-only codebase), verified by injecting and removing
+    a probe file (TD-015). `FeatureScope.metadataImport` now reads `false`,
+    matching PD-06; Home's field-mode toggle, Import Metadata button and
+    light-pollution map card are each gated behind `FeatureScope`, matching
+    the pattern `app_router.dart`/`sky_darkness_widget.dart` already used
+    (TD-014, DEV-P1). 201 tests green, including a policy-lock test and a
+    "gated feature has no entry point" test.
+  - **Next: TASK 4.4 — Honest numbers and labels.** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 
