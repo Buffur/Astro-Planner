@@ -61,6 +61,27 @@ class _LogbookScreenState extends State<LogbookScreen> {
                   padding: const EdgeInsets.only(right: 20),
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
+                confirmDismiss: (direction) async {
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Session?'),
+                      content: Text(
+                        'Are you sure you want to delete "${log.targetName}"?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 onDismissed: (_) async {
                   await context.read<LogbookRepository>().deleteLog(log.id);
                   _refreshLogs();

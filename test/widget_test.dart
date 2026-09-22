@@ -43,7 +43,7 @@ class MockLogbookRepository implements LogbookRepository {
   @override
   Future<List<domain.SessionLog>> getAllLogs() async => [];
   @override
-  Future<void> addLog(domain.SessionLog log) async {}
+  Future<int> addLog(domain.SessionLog log) async => 1;
   @override
   Future<void> updateLog(domain.SessionLog log) async {}
   @override

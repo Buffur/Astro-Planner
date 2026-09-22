@@ -12,7 +12,11 @@ class DriftLogbookRepository implements LogbookRepository {
 
   @override
   Future<List<domain.SessionLog>> getAllLogs() async {
-    final sessionRows = await _db.select(_db.sessionLogs).get();
+    // Newest-saved first (TASK 4.2, TD-039); id correlates with insertion
+    // order since it's an autoincrement primary key.
+    final sessionRows = await (_db.select(
+      _db.sessionLogs,
+    )..orderBy([(t) => OrderingTerm.desc(t.id)])).get();
     final blockRows = await _db.select(_db.captureBlocks).get();
 
     final blocksBySession = <int, List<domain.CaptureBlock>>{};
@@ -63,8 +67,8 @@ class DriftLogbookRepository implements LogbookRepository {
   }
 
   @override
-  Future<void> addLog(domain.SessionLog log) async {
-    await _db.transaction(() async {
+  Future<int> addLog(domain.SessionLog log) async {
+    return await _db.transaction(() async {
       final sessionId = await _db
           .into(_db.sessionLogs)
           .insert(
@@ -106,6 +110,8 @@ class DriftLogbookRepository implements LogbookRepository {
               ),
             );
       }
+
+      return sessionId;
     });
   }
 

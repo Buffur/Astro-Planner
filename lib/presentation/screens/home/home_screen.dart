@@ -305,10 +305,16 @@ class HomeScreen extends StatelessWidget {
                             captureBlocks: viewModel.captureBlocks,
                           );
 
+                      // TD-011: track the saved row's id so a second tap
+                      // updates it instead of inserting a duplicate.
                       if (viewModel.activeSessionId != null) {
                         await context.read<LogbookRepository>().updateLog(log);
+                        viewModel.markSessionSaved(log);
                       } else {
-                        await context.read<LogbookRepository>().addLog(log);
+                        final newId = await context
+                            .read<LogbookRepository>()
+                            .addLog(log);
+                        viewModel.markSessionSaved(log.copyWith(id: newId));
                       }
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(

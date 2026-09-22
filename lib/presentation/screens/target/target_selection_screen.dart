@@ -211,6 +211,12 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
     );
     // Refresh list after dialog closes, regardless of whether user saved.
     _loadTargets();
+    // TD-028: pick up an edit to the currently selected target instead of
+    // leaving the planner showing stale field values. A no-op unless the
+    // edited target is the selected one.
+    if (mounted) {
+      await context.read<PlannerViewModel>().refreshSelectedTarget();
+    }
   }
 
   @override
@@ -337,6 +343,9 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     setState(
                       () => _targets.removeWhere((t) => t.id == target.id),
                     );
+                    // TD-028: clear the planner's selection if this was it,
+                    // instead of leaving a reference to a deleted target.
+                    await planner.refreshSelectedTarget();
                   },
                   child: card,
                 );

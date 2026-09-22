@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:astroplan/main.dart';
+import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
@@ -51,6 +52,10 @@ void main() {
   late domain.EquipmentProfile testEquip;
 
   setUp(() async {
+    // AppRouter.router is a shared static singleton (TD-037): reset it so a
+    // navigation in one test doesn't leak into the next (now that this file
+    // has more than one test).
+    AppRouter.router.go('/');
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
@@ -168,4 +173,61 @@ void main() {
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
   });
+
+  testWidgets(
+    'TASK 4.2, TD-011: tapping Save Session twice produces one row, not two',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.runAsync(() async {
+        plannerViewModel = PlannerViewModel(
+          targetRepo,
+          equipmentRepo,
+          MockWeatherRepository(),
+          locationRepo,
+          LightPollutionRepository(),
+          locationService: FakeLocationService(),
+        );
+        await plannerViewModel.ready;
+      });
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            Provider<AppDatabase>.value(value: database),
+            Provider<TargetRepository>.value(value: targetRepo),
+            Provider<EquipmentRepository>.value(value: equipmentRepo),
+            Provider<LogbookRepository>.value(value: logbookRepo),
+            Provider<LocationRepository>.value(value: locationRepo),
+            ChangeNotifierProvider.value(value: plannerViewModel),
+            ChangeNotifierProvider(create: (_) => ThemeViewModel()),
+          ],
+          child: const AstroPlanApp(),
+        ),
+      );
+
+      plannerViewModel.setTarget(testTarget);
+      plannerViewModel.setEquipment(testEquip);
+      await tester.pumpAndSettle();
+
+      final listFinder = find.byType(Scrollable).first;
+      final saveButtonFinder = find.text('Save Session');
+      await tester.dragUntilVisible(
+        saveButtonFinder,
+        listFinder,
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(saveButtonFinder);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(saveButtonFinder);
+      await tester.pump(const Duration(seconds: 1));
+
+      final logs = await logbookRepo.getAllLogs();
+      expect(logs, hasLength(1));
+    },
+  );
 }

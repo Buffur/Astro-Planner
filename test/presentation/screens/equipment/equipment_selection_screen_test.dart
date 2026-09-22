@@ -43,6 +43,9 @@ class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
   }
 
   @override
+  Future<void> refreshSelectedEquipment() async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 

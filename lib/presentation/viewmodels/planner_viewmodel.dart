@@ -555,6 +555,36 @@ class PlannerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Records [log] as the active session after a successful save (TASK 4.2,
+  /// TD-011), without `loadSession`'s heavier re-derivation of target/
+  /// equipment/date from the log. A second Save while [log]'s id is set
+  /// routes to `updateLog` instead of inserting a duplicate row.
+  void markSessionSaved(SessionLog log) {
+    _activeSessionLog = log;
+    notifyListeners();
+  }
+
+  /// Re-reads the selected target from the repository by id (TASK 4.2,
+  /// TD-028): clears the selection if it was deleted, or picks up an edit,
+  /// instead of leaving stale state. Call after any target edit or delete.
+  Future<void> refreshSelectedTarget() async {
+    final current = _selectedTarget;
+    if (current == null) return;
+    _selectedTarget = await _targetRepository.getTargetById(current.id);
+    notifyListeners();
+  }
+
+  /// Re-reads the selected equipment from the repository by id (TASK 4.2,
+  /// TD-028) — see [refreshSelectedTarget].
+  Future<void> refreshSelectedEquipment() async {
+    final current = _selectedEquipment;
+    if (current == null) return;
+    _selectedEquipment = await _equipmentRepository.getEquipmentById(
+      current.id,
+    );
+    notifyListeners();
+  }
+
   // Calculations exposed to the UI
 
   /// The Sun's dusk/dawn timeline for [sessionNight], or null when there is

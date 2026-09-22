@@ -489,6 +489,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     );
     // Always refresh list after dialog closes.
     _loadEquipment();
+    // TD-028: pick up an edit to the currently selected equipment instead of
+    // leaving the planner showing stale field values. A no-op unless the
+    // edited profile is the selected one.
+    if (mounted) {
+      await context.read<PlannerViewModel>().refreshSelectedEquipment();
+    }
   }
 
   @override
@@ -584,6 +590,9 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     setState(
                       () => _equipment.removeWhere((e) => e.id == eq.id),
                     );
+                    // TD-028: clear the planner's selection if this was it,
+                    // instead of leaving a reference to a deleted profile.
+                    await planner.refreshSelectedEquipment();
                   },
                   child: card,
                 );
