@@ -227,8 +227,20 @@ rewritten to match the code.*
     preservation, the floor/downgrade guards, the reset-file path, and the
     transaction-atomicity check (160 tests green). TD-004 resolved. Foreign keys,
     the orphan-table drop and the reset path's confirmation UI are TASK 3.3+.
-  - **Next: TASK 3.3 — Enforce foreign keys; retire the orphan table.** Not started;
-    it begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 3.3** (`e580d03`) — the v9->v10 step (staged
+    after the v8->v9 step, in the same transaction) runs a one-time
+    `PRAGMA foreign_key_check` orphan cleanup, rebuilds
+    `camera_modules`/`optical_rigs`/`capture_blocks` via `Migrator.alterTable`
+    to add real `ON DELETE RESTRICT`/`RESTRICT`/`CASCADE` actions and drop the
+    legacy `bit_depth`/`optical_multiplier` columns, and drops the orphaned
+    `equipment_profiles` table entirely. `beforeOpen` now sets
+    `PRAGMA foreign_keys = ON` on every connection.
+    `DriftEquipmentRepository.deleteEquipment` guards against deleting a
+    still-referenced camera module or device. The v10 snapshot and migration
+    tests extend the full ADR-008 matrix (M1-M9, M11; 166 tests green). TD-005
+    resolved; TD-026 resolved in part. Group G3 is complete.
+  - **Next: TASK 4.1 — Capture-block editing defects.** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 

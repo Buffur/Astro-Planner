@@ -24,6 +24,9 @@
 > definitions, the seeders, `drift_equipment_repository.dart`, the git history of
 > the schema, and the Drift 2.35.0 source, at commit `33a212b`. **TASK 3.2
 > (2026-09-22, commit `3c25e8c`):** ADR-008 §2–§3 implemented; status block updated.
+> **TASK 3.3 (2026-09-22, commit `e580d03`):** ADR-008 sections 4-5 implemented
+> (foreign keys, orphan cleanup, equipment_profiles dropped); PD-04's E.1 entry
+> and the ADR-008 status block updated.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -389,9 +392,11 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - in v10: dropping `equipment_profiles`, dropping `optical_multiplier` and
     `bit_depth` through table rebuilds, and deleting orphan rows found by
     `foreign_key_check`.
-- **Implemented in part (TASK 3.2):** the floor guard and the file-rename half of
-  the reset (v1–v7 steps deleted). **Not implemented yet:** the v10 cleanup
-  (TASK 3.3) and the reset path's user-confirmation UI.
+- **Implemented (TASK 3.2, TASK 3.3):** the floor guard, the file-rename half of
+  the reset, the v1–v7 step deletion, and the v10 cleanup (dropping
+  `equipment_profiles`, dropping `optical_multiplier`/`bit_depth` through
+  table rebuilds, deleting orphan rows found by `foreign_key_check`).
+  **Not implemented yet:** the reset path's user-confirmation UI.
 
 ### PD-09 — Provenance storage (RESOLVED 2026-09-22)
 
@@ -795,10 +800,24 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
   `resetUnsupportedDatabaseFile` implements the reset half of §2 as a pure
   file operation; **no caller exists yet** — the confirmation UI §2 requires
   is not built.
-- **Not implemented yet:** §4–§5 (foreign keys, the v10 cleanup dropping
-  `equipment_profiles`/legacy columns — TASK 3.3, M3/M4/M8–M10), §6
-  (provenance columns — TASKs 7.1, 8.1, 8.5), and the bootstrap-level
-  confirmation UI for the reset path.
+- **Done (TASK 3.3, 2026-09-22, commit `e580d03`):** §4 (a one-time
+  `PRAGMA foreign_key_check` orphan cleanup — deleting and logging the count
+  per table — followed by `Migrator.alterTable` rebuilds of
+  `camera_modules`/`optical_rigs`/`capture_blocks` to add the real
+  `RESTRICT`/`RESTRICT`/`CASCADE` `ON DELETE` actions §4 specifies, and a
+  re-check before continuing; `beforeOpen` sets `PRAGMA foreign_keys = ON` on
+  every connection; `DriftEquipmentRepository.deleteEquipment` now guards
+  against deleting a still-referenced camera module or device) and §5
+  (`equipment_profiles` is dropped, and the two legacy columns —
+  `optical_multiplier` on `camera_modules`/`optical_rigs`,
+  `bit_depth` on `camera_modules` — are gone from the rebuilt tables;
+  `app_database_test.dart`'s equipment_profiles test is replaced, per §5's
+  own instruction, and the reason is recorded there). The migration test
+  suite now covers the full §7 matrix except the bootstrap-UI pieces of M6
+  (M1–M4, M5–M9, M11).
+- **Not implemented yet:** §6 (provenance columns — TASKs 7.1, 8.1, 8.5) and
+  the bootstrap-level confirmation UI for the reset path (§2) and for a
+  refused downgrade (TD-047's remaining half).
 
 ### 1. Context (verified for this ADR at commit `33a212b`)
 

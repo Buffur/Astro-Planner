@@ -15,7 +15,9 @@
 > `NightTimeFormatter`; affected entries are F-08, F-09, F-12, F-13, F-14, F-15.
 > **TASK 3.2 (2026-09-22, commit `3c25e8c`):** migration floor/downgrade guards,
 > transactional migrations, schema snapshots and a migration test suite;
-> affected entry is F-02. Statuses were assigned from the code and
+> affected entry is F-02. **TASK 3.3 (2026-09-22, commit `e580d03`):** foreign
+> keys enforced, orphan cleanup, `equipment_profiles` dropped; affected
+> entries are F-02 and F-23. Statuses were assigned from the code and
 > from executed reproductions, not from earlier documentation.
 
 ## Status legend
@@ -94,8 +96,9 @@ feature exists although its roadmap phase has not been reached in
 | F-50 | Platform support | Partial | 1, 16 |
 
 Counts (50 features): Implemented 7 · Partial 22 · Prototype 8 · Broken 4 ·
-Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphaned
-`equipment_profiles` table, is recorded under F-23.)
+Missing 9 · Deprecated 0 · Unknown 0. (The orphaned `equipment_profiles` table
+recorded under F-23 was dropped entirely in TASK 3.3, not merely deprecated —
+see DATA_MODEL.md B2/B8.)
 
 ---
 
@@ -111,9 +114,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-02 — Local persistence (Drift) and migrations
 - **Status:** Partial
-- **Current implementation:** schema v9, 8 tables, repositories with in-memory-DB tests. **TASK 3.2:** the v1–v7 raw-SQL steps are gone; the only supported path (v8 → v9) is behind a floor guard and a downgrade guard, runs inside a transaction, and is checked against Drift schema snapshots (`drift_schemas/`) with a generated-verification migration test suite (`test/data/database/schema_migration_test.dart`).
+- **Current implementation:** schema v10, 7 tables, repositories with in-memory-DB tests. **TASK 3.2:** the v1–v7 raw-SQL steps are gone; every upgrade is behind a floor guard and a downgrade guard, runs inside a transaction, and is checked against Drift schema snapshots (`drift_schemas/`) with a generated-verification migration test suite (`test/data/database/schema_migration_test.dart`). **TASK 3.3:** foreign keys are enforced on every connection; the v9 → v10 step cleans up pre-existing orphans, rebuilds `camera_modules`/`optical_rigs`/`capture_blocks` with real `ON DELETE` actions, and drops `equipment_profiles`.
 - **Relevant files:** `lib/data/database/*`, `lib/data/database/generated_migrations/*`, `drift_schemas/`, `build.yaml`, `lib/data/repositories/drift_*`.
-- **Known issues:** foreign keys not enforced; orphaned `equipment_profiles`; upgraded databases keep legacy columns (`optical_multiplier` ×2, `bit_depth`) that fresh installs lack (DEV-D1, DEV-D6; TD-005 — all TASK 3.3). The below-floor reset path exists (`resetUnsupportedDatabaseFile`) but nothing calls it — no bootstrap confirmation UI. *Resolved (TASK 3.2):* v3 → v9 throwing (TD-004); no migration tests or schema snapshots; the unguarded schema downgrade (TD-047, app-database half).
+- **Known issues:** the below-floor reset path exists (`resetUnsupportedDatabaseFile`) but nothing calls it — no bootstrap confirmation UI; a real downgrade just throws with no UI handling it either (TD-047's remaining half). *Resolved (TASK 3.2):* v3 → v9 throwing (TD-004); no migration tests or schema snapshots; the unguarded schema downgrade (TD-047, app-database half). *Resolved (TASK 3.3):* foreign keys not enforced (TD-005); orphaned `equipment_profiles`; upgraded databases keeping legacy columns (`optical_multiplier` ×2, `bit_depth`) that fresh installs lacked — the v10 migration rebuilds the affected tables and drops the orphan (DEV-D1, DEV-D6).
 - **Dependencies:** drift, sqlite3, `sqlite3_flutter_libs` (`0.6.0+eol`), path_provider.
 - **Roadmap relevance:** Phase 4; Phase 16 (migration testing). ~~Decision PD-04~~ (resolved, ADR-008).
 
@@ -294,9 +297,9 @@ Missing 9 · Deprecated 0 · Unknown 0. (One Deprecated *component*, the orphane
 
 ## F-23 — Equipment composition (Device / Camera module / Optical rig)
 - **Status:** Partial
-- **Current implementation:** storage is normalized (Device → CameraModule → OpticalRig) and used, always 1:1:1; the UI/domain use a flat `EquipmentProfile` (id = rig id). `EquipmentCatalogRepository` exists and is tested but is registered nowhere. The flat `equipment_profiles` table is **Deprecated** (orphaned).
+- **Current implementation:** storage is normalized (Device → CameraModule → OpticalRig) and used, always 1:1:1; the UI/domain use a flat `EquipmentProfile` (id = rig id). `EquipmentCatalogRepository` exists and is tested but is registered nowhere. **TASK 3.3:** the flat `equipment_profiles` table is gone (dropped in the v10 migration, ADR-008 §5), not just deprecated; `camera_modules.device_id`/`optical_rigs.camera_module_id` are `ON DELETE RESTRICT`.
 - **Relevant files:** `lib/data/database/tables/equipment_foundation_tables.dart`, `drift_equipment_repository.dart`, `drift_equipment_catalog_repository.dart`, `lib/domain/models/{equipment_profile,equipment_device,camera_module,optical_rig}.dart`.
-- **Known issues:** no camera reuse; `trackingState` stored but invisible; deleting a rig deletes its camera and device unconditionally (DEV-D2; TD-026).
+- **Known issues:** no camera reuse; `trackingState` stored but invisible (DEV-D2; TD-026 — both still open). *Resolved (TASK 3.3):* deleting a rig used to delete its camera module and device unconditionally; `deleteEquipment` now checks for other references first, matching the new `RESTRICT` constraint.
 - **Dependencies:** decision PD-03.
 - **Roadmap relevance:** Phase 4 (foundation), 6.
 

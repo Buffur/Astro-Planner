@@ -21,7 +21,14 @@
 > exist for v8 and v9; a migration test suite covers the matrix in B8a below.
 > `schemaVersion` stays at 9 — no table changed. TD-004 resolved; TD-047
 > resolved for the app-database guard (the bootstrap-level reset UI is a
-> separate, not-yet-scheduled follow-up).
+> separate, not-yet-scheduled follow-up). **TASK 3.3 (2026-09-22, commit
+> `e580d03`):** `schemaVersion` is now **10**. `equipment_profiles` is
+> dropped (Dart class and table); `camera_modules`/`optical_rigs`/
+> `capture_blocks` are rebuilt with real `ON DELETE` actions and, for the
+> first two, without the legacy `bit_depth`/`optical_multiplier` columns;
+> foreign keys are enforced on every connection. TD-005 resolved; TD-026
+> resolved in part (the unconditional-delete half). B2, B8 and DEV-D6
+> updated below.
 >
 > This document keeps **three things separate** on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -95,10 +102,12 @@ and logbook schema are formally approved.
 Current issue: active planner location is persisted through shared preferences
 rather than the `LocationProfiles` table.
 
-> **Status of those three Phase 0 issues on 2026-09-21:**
-> 1. Flat equipment table — **Partial**: normalized tables now exist and are used
->    (see DEV-D2), but the domain/UI model is still flat and the flat table is
->    orphaned.
+> **Status of those three Phase 0 issues on 2026-09-21 (1 updated 2026-09-22,
+> TASK 3.3):**
+> 1. Flat equipment table — **Partial**: normalized tables now exist and are
+>    used (see DEV-D2), but the domain/UI model is still flat. The flat
+>    `equipment_profiles` table itself is no longer orphaned in the schema —
+>    it is dropped entirely (TASK 3.3, ADR-008 §5).
 > 2. Display strings instead of relationships — **Still open** (DEV-D3).
 > 3. Active location in shared preferences — **Partially resolved**: coordinates
 >    live in `location_profiles`; the *pointer* to the active row and several
@@ -130,29 +139,36 @@ External or scientific data should preserve source information where practical:
 
 | Store | Technology / location | Contents | Notes |
 | --- | --- | --- | --- |
-| Relational DB | SQLite via Drift; file `astroplan.sqlite` in the app documents directory, opened with `NativeDatabase.createInBackground` (`lib/data/database/app_database.dart`); **schema version 9** | Equipment (3 normalized tables + 1 orphan), locations, targets, session logs, capture blocks | Foreign keys are declared but **not enforced** (`PRAGMA foreign_keys = 0`, no `beforeOpen`) |
+| Relational DB | SQLite via Drift; file `astroplan.sqlite` in the app documents directory, opened with `NativeDatabase.createInBackground` (`lib/data/database/app_database.dart`); **schema version 10** | Equipment (3 normalized tables), locations, targets, session logs, capture blocks | **TASK 3.3:** foreign keys are now enforced (`beforeOpen` sets `PRAGMA foreign_keys = ON` on every connection); `camera_modules.device_id`/`optical_rigs.camera_module_id` are `ON DELETE RESTRICT`, `capture_blocks.session_log_id` is `ON DELETE CASCADE` |
 | Key-value | `shared_preferences` | Active plan, selections, thresholds, active-location pointer, weather cache | See B6. Accessed directly from `PlannerViewModel` and `OpenMeteoWeatherRepository` |
 | In-memory | `PlannerViewModel` fields | Selected target/equipment, session date, lat/lon, Bortle, weather, capture blocks, active log | Lost on restart except what is mirrored to shared preferences |
 | Files | — | None (no export files; picked images are read, never stored) | — |
 
-## B2. Drift schema v9 (tables)
+## B2. Drift schema v10 (tables)
 
-Generated code `lib/data/database/app_database.g.dart` was regenerated in the
-latest schema-changing commit (`900b82a`); it was not re-generated during this
-audit. Drift row classes share names with domain models (`SessionLog`,
-`AstroTarget`, `LocationProfile`, `EquipmentProfile`), so repositories import the
-domain classes `as domain` (naming-collision hazard, TD-045).
+Generated code `lib/data/database/app_database.g.dart` was regenerated for the
+v10 migration (TASK 3.3, commit `e580d03`). Drift row classes share names
+with domain models (`SessionLog`, `AstroTarget`, `LocationProfile`), so
+repositories import the domain classes `as domain` (naming-collision hazard,
+TD-045).
 
 | Table (Dart class) | Columns (type; `?` = nullable) | Status | Notes |
 | --- | --- | --- | --- |
 | `devices` (`Devices`) | id PK; name; manufacturer?; model?; notes? | **Actual**, used | One row is created per equipment profile; `name` = profile name |
-| `camera_modules` (`CameraModules`) | id PK; device_id FK→devices; name; manufacturer?; model?; sensor_width_mm; sensor_height_mm; resolution_width_px; resolution_height_px; pixel_pitch_um; average_raw_file_size_mb? | **Actual**, used | `name` is synthesized as `"<profile name> Camera"` |
-| `optical_rigs` (`OpticalRigs`) | id PK; name; camera_module_id FK→camera_modules; focal_length_mm; aperture (**f-number**, SI-005); tracking_state (text, default `'unknown'`); rotation_degrees? | **Actual**, used | `tracking_state` is stored but not exposed by the domain `EquipmentProfile` or any UI |
-| `equipment_profiles` (`EquipmentProfiles`) | id PK; name; manufacturer?; camera_model?; sensor_width; sensor_height; pixel_pitch; resolution_width; resolution_height; focal_length; aperture; average_raw_file_size_mb?; rotation? | **Deprecated / orphaned** | Not read or written by any application code. Still created by `createAll` and exercised by `app_database_test.dart`; the v5 data-copy migration that used to read it is gone (TASK 3.2, floor is now v8) |
+| `camera_modules` (`CameraModules`) | id PK; device_id FK→devices **ON DELETE RESTRICT**; name; manufacturer?; model?; sensor_width_mm; sensor_height_mm; resolution_width_px; resolution_height_px; pixel_pitch_um; average_raw_file_size_mb? | **Actual**, used | `name` is synthesized as `"<profile name> Camera"`. **TASK 3.3:** the legacy `bit_depth` column (present only on upgraded installs) is gone — the v10 migration rebuilds the table |
+| `optical_rigs` (`OpticalRigs`) | id PK; name; camera_module_id FK→camera_modules **ON DELETE RESTRICT**; focal_length_mm; aperture (**f-number**, SI-005); tracking_state (text, default `'unknown'`); rotation_degrees? | **Actual**, used | `tracking_state` is stored but not exposed by the domain `EquipmentProfile` or any UI. **TASK 3.3:** the legacy `optical_multiplier` column is gone |
 | `location_profiles` (`LocationProfiles`) | id PK; name; latitude; longitude; elevation; bortle_class (int, default 4) | **Actual**, used | Effectively one row (the "active" location) — see DEV-D4 |
 | `astro_targets` (`AstroTargets`) | id PK; catalog_id; common_name?; right_ascension (**degrees**, J2000); declination (**degrees**); type (free text) | **Actual**, used | No uniqueness constraint; no epoch/source/magnitude/size |
 | `session_logs` (`SessionLogs`) | id PK; target_name; equipment_name; session_date (stored as epoch seconds; returned as local `DateTime`); location_name?; bortle_scale (real?); planned_light_frames; planned_dark_frames?; planned_flat_frames?; planned_bias_frames?; integration_time_seconds?; focal_length?; aperture?; temperature?; humidity?; cloud_cover (int?); actual_light_frames?; rejected_frames?; environmental_notes?; processing_notes? | **Partial** | Snapshot columns exist but Save Session never fills them (DEV-D3) |
-| `capture_blocks` (`CaptureBlocks`) | id PK; session_log_id FK→session_logs; frame_type; filter_name?; exposure_time_seconds; frame_count; binning (default 1); gain_iso (text?) | **Actual**, used | No explicit sequence-position column (order relies on insertion order / id). A code comment says `LIGHT, DARK...` but the stored value is the lowercase enum name (`light`, `dark`, `flat`, `bias`) |
+| `capture_blocks` (`CaptureBlocks`) | id PK; session_log_id FK→session_logs **ON DELETE CASCADE**; frame_type; filter_name?; exposure_time_seconds; frame_count; binning (default 1); gain_iso (text?) | **Actual**, used | No explicit sequence-position column (order relies on insertion order / id). A code comment says `LIGHT, DARK...` but the stored value is the lowercase enum name (`light`, `dark`, `flat`, `bias`) |
+
+**REMOVED 2026-09-22 (TASK 3.3, ADR-008 §5):** `equipment_profiles`
+(`EquipmentProfiles`) — the flat, orphaned table (id PK; name;
+manufacturer?; camera_model?; sensor_width; sensor_height; pixel_pitch;
+resolution_width; resolution_height; focal_length; aperture;
+average_raw_file_size_mb?; rotation?). It was not read or written by any
+application code; the v10 migration drops it (and the Dart class, and
+`app_database_test.dart`'s test against it — see DEV-D2).
 
 Other schema facts: no indexes beyond primary keys; no unique constraints;
 `DateTime` columns use Drift's default (epoch seconds).
@@ -198,18 +214,26 @@ Other schema facts: no indexes beyond primary keys; no unique constraints;
 
 ```text
 devices ──1:1── camera_modules ──1:1── optical_rigs        (by construction in DriftEquipmentRepository;
-                                                            the schema itself allows 1:N)
+                                                            the schema itself allows 1:N; ON DELETE RESTRICT
+                                                            from v10, TASK 3.3)
 EquipmentProfile.id  ==  optical_rigs.id
-session_logs ──1:N── capture_blocks                        (FK declared, NOT enforced; deleted manually in the repository)
+session_logs ──1:N── capture_blocks                        (ON DELETE CASCADE and enforced from v10, TASK 3.3;
+                                                            also still deleted manually in the repository)
 session_logs.target_name    ~ astro_targets  (catalog_id / common_name)   soft link by display string
 session_logs.equipment_name ~ optical_rigs.name                            soft link by display string
 session_logs.location_name  — never populated by Save Session
 location_profiles: the "active" row is referenced from SharedPreferences (activeLocationId)
 ```
 
-Deleting a rig via `DriftEquipmentRepository.deleteEquipment` also deletes its
-camera module and device **without checking whether other rigs reference them**
-(safe only because the app always creates 1:1:1 chains).
+**RESOLVED 2026-09-22 (TASK 3.3, commit `e580d03`).** *(Was: deleting a rig via
+`DriftEquipmentRepository.deleteEquipment` also deleted its camera module and
+device without checking whether other rigs reference them.)* `deleteEquipment`
+now checks for other rigs on the camera module and other camera modules on the
+device before deleting either, matching the `ON DELETE RESTRICT` the v10
+migration added (a delete of a still-referenced row would otherwise throw). In
+practice the counts are always 0 today, since the app only ever creates 1:1:1
+chains, but the guard is in place for when equipment composition (PD-03)
+allows reuse.
 
 ## B6. SharedPreferences contents
 
@@ -236,7 +260,7 @@ camera module and device **without checking whether other rigs reference them**
 - Seeding is started unawaited in `main()` (race with the ViewModel's first read,
   TD-002).
 
-## B8. Schema and migration history (v1 → v9)
+## B8. Schema and migration history (v1 → v10)
 
 | Version | Commit | What changed | Migration step | Notes |
 | --- | --- | --- | --- | --- |
@@ -249,6 +273,7 @@ camera module and device **without checking whether other rigs reference them**
 | 7 | `d0b737f` | `session_logs` expanded (location, bortle, planned darks/flats/bias, integration, focal, aperture, weather snapshot) | `addColumn` × 11 | |
 | 8 | `d0b737f` | + `capture_blocks` | `createTable` | Versions 4–8 all arrived in one commit. *Verified 2026-09-22 (TASK 3.1):* committed builds only ever created v1, v2, v3, v8 and v9; v4–v7 could exist only on a developer device from uncommitted builds |
 | 9 | `900b82a` | + `average_raw_file_size_mb` on `equipment_profiles` and `camera_modules`. `optical_multiplier` (rigs, flat table) and `bit_depth` (camera modules) were **removed from the Drift definitions with no migration** | `addColumn` × 2 | Upgraded databases keep the legacy columns; fresh installs do not — schema drift between installs |
+| 10 | `e580d03` | Orphan cleanup (`PRAGMA foreign_key_check`, delete + log); `camera_modules`/`optical_rigs`/`capture_blocks` rebuilt with real `ON DELETE` actions and without the legacy `bit_depth`/`optical_multiplier` columns; `equipment_profiles` dropped | `alterTable(TableMigration(...))` × 3, `deleteTable` | TASK 3.3, ADR-008 §4–§5. `beforeOpen` now sets `PRAGMA foreign_keys = ON` on every connection |
 
 **Empirically verified (2026-09-21, throwaway tests):**
 - A **v3 database → v9 fails**: `SqliteException(1): table optical_rigs has no
@@ -294,17 +319,27 @@ tests.)* Implements ADR-008 §2–§3:
     `schema_v8.dart`, `schema_v9.dart`) — drift_dev-generated `GeneratedHelper`
     and per-version `GeneratedDatabase` subclasses, used by
     `SchemaVerifier` in tests. Regenerate both steps after any schema change.
-- **Test suite** (`test/data/database/schema_migration_test.dart`, 8 tests):
-  a fresh install matches its own declared schema (M1); v8 → v9 matches the v9
-  snapshot **except** the three documented legacy columns
-  (`equipment_profiles.optical_multiplier`, `optical_rigs.optical_multiplier`,
-  `camera_modules.bit_depth` — dropping them is TASK 3.3, not this task, so the
-  test asserts the mismatch is *exactly* these three, which would fail if a
-  fourth appeared); two data-preservation tests (device → module → rig chain,
-  location, target, a session with 2 capture blocks, and
-  `equipment_profiles` both non-empty and empty); the floor guard (M5); the
-  downgrade guard (M7); the reset path (M6); the transaction-atomicity check
-  (M11). M3/M4/M8–M10 (foreign keys, the orphan table, v10) are TASK 3.3.
+- **Test suite** (`test/data/database/schema_migration_test.dart`, 8 tests at
+  the time): a fresh install matches its own declared schema (M1); v8 → v9
+  matched the v9 snapshot **except** the three documented legacy columns; two
+  data-preservation tests; the floor guard (M5); the downgrade guard (M7); the
+  reset path (M6); the transaction-atomicity check (M11). M3/M4/M8–M10
+  (foreign keys, the orphan table, v10) were TASK 3.3.
+
+**Superseded 2026-09-22 (TASK 3.3, commit `e580d03`; suite 166/166).**
+`onUpgrade` now has two staged steps under the same guards and the same outer
+transaction, not one: `from < 9` (unchanged: `cameraModules` gains
+`averageRawFileSizeMB`; the matching `equipmentProfiles` addColumn is gone —
+that table is dropped by the very next step, so adding a column to it first
+would be pure waste, and it can no longer be referenced now that
+`EquipmentProfiles` isn't a declared table) and `from < 10` (ADR-008 §4–§5, see
+the v10 row above). Kept staged, not merged, so a hypothetical device already
+at v9 — none has ever existed for this pre-release app — would still upgrade
+correctly. The "except the three documented legacy columns" schema mismatch
+above is gone: a v8 → v10 (or v9 → v10) migration now matches the v10 snapshot
+**exactly**, asserted by tests M3 and M4. The test suite grew to 14 tests in
+this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
+`flutter test`, not a dedicated test).
 
 ## B9. IMPLEMENTATION DEVIATIONS (data model)
 
@@ -314,15 +349,17 @@ tests.)* Implements ADR-008 §2–§3:
   testability".)
 - **Actual behavior (historical):** No migration test existed. The v5 step
   referenced a column removed from the definitions in `900b82a`; v3 → v9 threw.
-  FK enforcement is off (still true — that half is TD-005, TASK 3.3).
+  FK enforcement was off.
 - **RESOLVED 2026-09-22 (TASK 3.2; see B8 above).** The v1–v7 steps (including
   the broken v5 one) are deleted rather than repaired — ADR-008 §2 decided the
   upgrade floor is v8, and no installs below v8 need to be preserved (owner
   confirmed). Schema snapshots and generated verification now exist for v8 and
   v9, with a migration test suite (M1, M2, M5–M7, M11 of ADR-008 §7).
-- **Consequence (historical, now moot for the covered paths):** any database
-  below v5 could not be upgraded. Fresh installs and v8 databases were
-  unaffected. Work item: ~~TD-004~~ (resolved), TD-005 (FK half, TASK 3.3).
+- **RESOLVED 2026-09-22 (TASK 3.3; see B8 above).** FK enforcement is on for
+  every connection; see DEV-D6 below.
+- **Consequence (historical, now moot).** Any database below v5 could not be
+  upgraded. Fresh installs and v8 databases were unaffected. Work item:
+  ~~TD-004~~ (resolved), ~~TD-005~~ (resolved).
 
 ### DEV-D2 — Equipment is normalized in storage but flat in the domain
 - **Intended behavior:** Device, CameraModule and OpticalRig as first-class,
@@ -331,11 +368,15 @@ tests.)* Implements ADR-008 §2–§3:
 - **Actual behavior:** The three tables exist and are used, but always as a 1:1:1
   chain created by one insert. The UI and domain only see the flat
   `EquipmentProfile` (id = rig id). `EquipmentCatalogRepository` (implemented,
-  tested) is unregistered. The flat `equipment_profiles` table is orphaned.
-  `trackingState` is stored and invisible.
+  tested) is unregistered. `trackingState` is stored and invisible.
+- **RESOLVED 2026-09-22 in part (TASK 3.3, commit `e580d03`).** The orphaned
+  `equipment_profiles` table is dropped (ADR-008 §5; B2 above), and
+  `DriftEquipmentRepository.deleteEquipment` now checks for other references
+  before deleting a shared camera module or device, matching the `ON DELETE
+  RESTRICT` the v10 migration added.
 - **Consequence:** Users cannot reuse one camera across rigs; the composability
-  goal is unmet; dead code and an orphan table create confusion (the previous docs
-  described the flat table as the live one). Direction is open (PD-03).
+  goal is unmet; `EquipmentCatalogRepository` stays dead code. Direction is open
+  (PD-03).
 
 ### DEV-D3 — Session logs use display strings and record no snapshot
 - **Intended behavior:** Stable relationships (Phase 0 "current issue" #2) and
@@ -372,11 +413,20 @@ tests.)* Implements ADR-008 §2–§3:
 ### DEV-D6 — Foreign keys and integrity are declared, not enforced
 - **Intended behavior:** Relationships expressed through `references()` in the
   schema (ADR-003: "relationships").
-- **Actual behavior:** `PRAGMA foreign_keys = 0`; an orphan `capture_blocks` row
-  with a non-existent `session_log_id` was inserted successfully (verified).
-  Deletes cascade only through hand-written repository code.
-- **Consequence:** Orphans are possible via any code path that bypasses the
-  repositories or future refactors. TD-005.
+- **Actual behavior (historical):** `PRAGMA foreign_keys = 0`; an orphan
+  `capture_blocks` row with a non-existent `session_log_id` was inserted
+  successfully (verified). Deletes cascaded only through hand-written
+  repository code.
+- **RESOLVED 2026-09-22 (TASK 3.3, commit `e580d03`; suite 166/166).**
+  `beforeOpen` sets `PRAGMA foreign_keys = ON` for every connection. The v10
+  migration ran a one-time `PRAGMA foreign_key_check` first and deleted every
+  flagged row (logging the count per table) before rebuilding
+  `camera_modules`/`optical_rigs`/`capture_blocks` with real `ON DELETE`
+  actions (`RESTRICT`/`RESTRICT`/`CASCADE`). Verified: an orphan insert now
+  throws, a session delete cascades to its blocks, and deleting a device or
+  camera module still referenced elsewhere is refused.
+- **Consequence (historical, now moot).** Orphans were possible via any code
+  path that bypassed the repositories. TD-005.
 
 ---
 
@@ -529,26 +579,33 @@ tests.)* Implements ADR-008 §2–§3:
    (DEV-D3).
 5. **Migrations follow the Phase 0 rules** (Part A) and add tests; adopt Drift
    schema snapshots before the next schema change (~~TD-004~~ resolved TASK 3.2).
-   *Decided 2026-09-22 by ADR-008 (`docs/DECISIONS.md` Part F); the floor and
-   snapshots are implemented (TASK 3.2, see B8 above); FKs and the orphan-table
-   drop are TASK 3.3:*
+   *Decided 2026-09-22 by ADR-008 (`docs/DECISIONS.md` Part F); the floor,
+   snapshots, foreign keys and the orphan-table drop are all implemented
+   (TASK 3.2, TASK 3.3, see B8 above):*
    - **Floor.** The upgrade floor is v8 — **implemented** as a guard in
      `onUpgrade`. Older databases are refused; `resetUnsupportedDatabaseFile`
      backs up and resets a file, but nothing calls it yet — the user
      confirmation UI is a separate, unscheduled follow-up. Newer databases are
      refused.
    - **Snapshots.** Snapshots live in `drift_schemas/` — **implemented**: v8
-     exported from `d0b737f`, v9 from the current code.
+     exported from `d0b737f`, v9 and v10 from the current code at each task.
    - **Steps.** Each step is written against its own version's generated schema
-     class — **not yet needed**: only one step remains (v8 → v9, unchanged
-     code, still written directly against the live tables), since floor
-     enforcement removed every step it would otherwise apply to. Adopt this for
-     the *next* schema bump (5.3 or later).
+     class — **not yet needed**: the two steps that exist (v8 → v9, v9 → v10)
+     are still written directly against the live tables, since floor
+     enforcement removed every step they would otherwise conflict with. Adopt
+     the generated-schema-class approach for the *next* schema bump (5.3 or
+     later).
    - **Tests.** Every bump has a data-preservation test and a schema-equality
-     test — **implemented** for v8 → v9
+     test — **implemented** for v8 → v9 → v10
      (`test/data/database/schema_migration_test.dart`).
-   - **Foreign keys.** They are on for every connection from v10.
-   - **Workflow.** The full workflow is documented here by TASK 3.2.
+   - **Foreign keys.** They are on for every connection from v10 —
+     **implemented** (TASK 3.3): `beforeOpen` sets `PRAGMA foreign_keys = ON`;
+     a one-time orphan cleanup runs first, then `camera_modules`/
+     `optical_rigs`/`capture_blocks` are rebuilt with real `ON DELETE` actions.
+   - **Orphan table.** `equipment_profiles` is dropped — **implemented**
+     (TASK 3.3).
+   - **Workflow.** The full workflow is documented here by TASK 3.2, extended
+     by TASK 3.3.
 6. **Provenance for external and scientific data** (Part A; DEV-D5). *Decided
    2026-09-22 by ADR-008 §6:*
    - **Columns.** Per-row nullable `source` (a namespaced id) and `confidence`

@@ -15,7 +15,9 @@
 > *(updated TASK 2.4)*. Line references into `planner_viewmodel.dart` were taken at
 > `900b82a` and are now off by more; several were replaced with getter names in
 > TASK 2.4's edits. TASK 3.2 (2026-09-22, commit `3c25e8c`) rewrote `onUpgrade`'s
-> migration steps and added schema snapshots; see B6.
+> migration steps and added schema snapshots; see B6. TASK 3.3 (2026-09-22,
+> commit `e580d03`) enabled foreign keys, added the v10 orphan cleanup and table
+> rebuilds, and dropped `equipment_profiles`; see B6.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -264,18 +266,29 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
 
 ## B6. Data layer (`lib/data/`)
 
-- **Drift `AppDatabase`** (schema 9; 8 tables); no `beforeOpen`; foreign keys not
-  enforced (TASK 3.3). **TASK 3.2:** `onUpgrade` now only supports v8 → v9
-  (the old v1–v7 raw-SQL steps are deleted), guarded by a floor check and a
-  downgrade check that both throw `UnsupportedSchemaVersionException` before
-  any statement runs, and the one remaining step runs inside a transaction.
-  Checked against Drift schema snapshots (`drift_schemas/`) via generated
-  verification code and a migration test suite. See `docs/DATA_MODEL.md` B8.
+- **Drift `AppDatabase`** (schema 10; 7 tables). **TASK 3.2:** `onUpgrade`
+  guards every upgrade with a floor check and a downgrade check that both
+  throw `UnsupportedSchemaVersionException` before any statement runs, and
+  the old v1–v7 raw-SQL steps are deleted. **TASK 3.3:** foreign keys are
+  now enforced — `beforeOpen` sets `PRAGMA foreign_keys = ON` on every
+  connection; the v9 → v10 step runs a one-time `PRAGMA foreign_key_check`
+  orphan cleanup (deleting and logging flagged rows), then rebuilds
+  `camera_modules`/`optical_rigs`/`capture_blocks` via `Migrator.alterTable`
+  to add real `ON DELETE RESTRICT`/`RESTRICT`/`CASCADE` actions (SQLite can't
+  alter a foreign key's action in place) and to drop the legacy
+  `bit_depth`/`optical_multiplier` columns an addColumn-only upgrade left
+  behind; the orphaned `equipment_profiles` table is dropped entirely, not
+  just deprecated. Every step runs inside one transaction. Checked against
+  Drift schema snapshots (`drift_schemas/`) via generated verification code
+  and a migration test suite. See `docs/DATA_MODEL.md` B8.
 - **Repositories:** `DriftTargetRepository`, `DriftEquipmentRepository` (reads and
   writes the normalized Device → CameraModule → OpticalRig chain and projects it to
-  the flat `EquipmentProfile`), `DriftEquipmentCatalogRepository` (dormant),
+  the flat `EquipmentProfile`; **TASK 3.3:** `deleteEquipment` now checks for other
+  references before deleting a shared camera module or device, since a `RESTRICT`
+  violation would otherwise throw), `DriftEquipmentCatalogRepository` (dormant),
   `DriftLocationRepository`, `DriftLogbookRepository` (session rows plus a separate
-  `capture_blocks` table, joined in memory; manual cascade on delete),
+  `capture_blocks` table, joined in memory; manual cascade on delete, now backed by
+  a real `ON DELETE CASCADE` too),
   `OpenMeteoWeatherRepository` (HTTP + shared-preferences cache; `http.Client`
   injectable), `LightPollutionRepository` (concrete; static `http.get`; not
   injectable; **cannot succeed**, SI-007).
