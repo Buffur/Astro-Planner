@@ -150,7 +150,8 @@ Save Session duplicates and stores no snapshot; storage shows `0.0 MB` when unkn
 a v3 → v9 migration throws (TD-004, TD-010, TD-011, TD-013). *(At the audit: also
 the integration test failing (TD-003, resolved TASK 1.1) and a first-launch seeding
 race with a Home dead-end (TD-002, largely resolved TASK 1.2 — see `TECH_DEBT.md`
-for what remains open).)*
+for what remains open).)* *(Since resolved: TD-004 TASK 3.2; TD-010 and the
+duplicate-save half of TD-011 TASK 4.1/4.2 — see `TECH_DEBT.md`.)*
 
 ## 9. Missing features
 

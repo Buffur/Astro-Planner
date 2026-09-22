@@ -17,7 +17,9 @@
 > TASK 2.4's edits. TASK 3.2 (2026-09-22, commit `3c25e8c`) rewrote `onUpgrade`'s
 > migration steps and added schema snapshots; see B6. TASK 3.3 (2026-09-22,
 > commit `e580d03`) enabled foreign keys, added the v10 orphan cleanup and table
-> rebuilds, and dropped `equipment_profiles`; see B6.
+> rebuilds, and dropped `equipment_profiles`; see B6. TASK 4.2 (2026-09-22, commit
+> `7641d49`) added `PlannerViewModel.markSessionSaved`/`refreshSelectedTarget`/
+> `refreshSelectedEquipment`; see DEV-A2.
 >
 > This document keeps three things separate on purpose:
 > - **Part A — Design intent** (approved Phase 0 baseline, preserved verbatim).
@@ -420,9 +422,12 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
 - **Actual behavior:** the Equipment, Target and Logbook screens and Home's Save
   button call repositories directly; the Metadata screen calls a domain service and
   `ImagePicker` directly; the Location picker duplicates the Geolocator flow.
-- **Consequence:** state ownership is inconsistent (deleting the selected target or
-  rig leaves a stale selection in the ViewModel, TD-028); cross-cutting concerns such
-  as error states have no home. TD-021.
+- **Consequence:** state ownership is inconsistent; cross-cutting concerns such
+  as error states have no home. TD-021. *Resolved for one symptom (TASK 4.2):*
+  deleting or editing the selected target/rig used to leave a stale selection in
+  the ViewModel (TD-028) — the screens now call `PlannerViewModel.refreshSelectedTarget`/
+  `refreshSelectedEquipment` afterward, a targeted fix on top of the deviation
+  rather than a fix to the deviation itself.
 
 ## DEV-A3 — Astronomy is computed inside a widget, and the pipeline is triplicated
 - **Intended behavior:** "Do not place non-trivial astronomy or capture calculations
@@ -519,7 +524,7 @@ listed with its work item.
 | P4 | **Capture-budget domain service** (pure Dart) separating integration, acquisition, calibration and total session budget, with configurable overhead | Central product component; testable | TD-022 (PD-08) |
 | P5 | **Typed value objects** for the night timeline and windows; one shared altitude function used by ViewModel, windows and chart | Remove triplication and stringly-typed maps | TD-023, TD-024 |
 | P6 | **Decompose `PlannerViewModel` only along the seams P2–P4 create** (for example site/weather, plan, selection); incremental and test-first; no big-bang rewrite | Reduce blast radius | TD-019 |
-| P7 | **Route screens through ViewModels** when they are next modified | Consistent state ownership | TD-021, TD-028 |
+| P7 | **Route screens through ViewModels** when they are next modified | Consistent state ownership | TD-021 |
 | P8 | **Persistence governance**: Drift schema snapshots + migration tests, FK enforcement, retire or use the orphan table, decide the equipment model | Safe schema evolution | TD-004, TD-005, TD-026 (PD-03, PD-04) |
 | P9 | **Represent unknown explicitly** (nullable values, UI states) across the domain | Scientific integrity | SI-008, TD-013 |
 | P10 | **Test architecture**: injectable clock, no real-time sleeps, widget tests for the main screens, independent reference values for calculations | Reliability | TD-025, TD-037 |

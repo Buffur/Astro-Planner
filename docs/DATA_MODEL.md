@@ -386,9 +386,12 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
   Session fills only names, date, planned light frames and blocks. Location,
   Bortle, weather, focal length, aperture, integration time and planned
   darks/flats/bias stay null (verified in a widget run). The log has no
-  coordinates or time zone. Saving twice inserts two rows.
+  coordinates or time zone. **Resolved 2026-09-22 (TASK 4.2):** saving twice
+  used to insert two rows — `addLog` now returns the new id and
+  `PlannerViewModel.markSessionSaved` tracks it, so a second Save updates the
+  same row (TD-011, duplicate-save half only).
 - **Consequence:** A logged session cannot be re-analysed or reproduced; renaming
-  equipment breaks `loadSession` matching; duplicates accumulate. TD-011.
+  equipment breaks `loadSession` matching. TD-011 (snapshot half, still open).
 
 ### DEV-D4 — Active planner state is split across three stores
 - **Intended behavior:** Active location persisted in `LocationProfiles`, not

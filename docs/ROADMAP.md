@@ -249,8 +249,19 @@ rewritten to match the code.*
     instead of a hashCode+index combination that changed on every reorder.
     6 ViewModel tests cover every reorder direction; 4 widget tests cover
     validation and the edit flow (179 tests green).
-  - **Next: TASK 4.2 — Save, selection and logbook consistency.** Not started;
-    it begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 4.2** (`7641d49`) — `LogbookRepository.addLog`
+    returns the new row's id; `PlannerViewModel.markSessionSaved` records it
+    (on both the insert and update paths) so a second Save tap updates the
+    same row instead of duplicating (TD-011, duplicate-save half). New
+    `refreshSelectedTarget`/`refreshSelectedEquipment` re-read the selection
+    by id, wired into the target/equipment screens after an edit or delete
+    (TD-028) — the "also after a restart" case needed no new code, since
+    bootstrap already falls back when a saved selection id doesn't resolve
+    (verified directly). `getAllLogs` now orders newest-saved first, and the
+    logbook's swipe-delete confirms first, matching the equipment/target
+    screens (TD-039). 193 tests green.
+  - **Next: TASK 4.3 — Encoding fixes and gate enforcement.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

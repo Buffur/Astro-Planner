@@ -19,9 +19,13 @@
 > keys enforced, orphan cleanup, `equipment_profiles` dropped; affected
 > entries are F-02 and F-23. **TASK 4.1 (2026-09-22, commit `f5b29cc`):**
 > capture-block reorder fixed, an edit dialog added, invalid input rejected
-> by validators, and stable list-item keys; affected entry is F-35. Statuses
-> were assigned from the code and from executed reproductions, not from
-> earlier documentation.
+> by validators, and stable list-item keys; affected entry is F-35.
+> **TASK 4.2 (2026-09-22, commit `7641d49`):** `addLog` returns the new row's
+> id so a second Save updates instead of duplicating; target/equipment
+> selections refresh after an edit or delete; the logbook orders
+> newest-first and confirms before deleting; affected entries are F-03,
+> F-19, F-22, F-40, F-41. Statuses were assigned from the code and
+> from executed reproductions, not from earlier documentation.
 
 ## Status legend
 
@@ -127,7 +131,7 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Implemented
 - **Current implementation:** shared-preferences keys `captureBlocks`, `targetId`, `equipmentId`, `activeLocationId`, `minAltitude`, `dewPointThreshold` (see `docs/DATA_MODEL.md` B6).
 - **Relevant files:** `lib/presentation/viewmodels/planner_viewmodel.dart`.
-- **Known issues:** persistence code lives in the ViewModel (DEV-A1); `minAltitude` is read without clamping; capture plan is hand-serialized JSON; the deleted selected target/equipment stays selected until restart (TD-028).
+- **Known issues:** persistence code lives in the ViewModel (DEV-A1); `minAltitude` is read without clamping; capture plan is hand-serialized JSON. *Resolved (TASK 4.2):* the deleted selected target/equipment used to stay selected until restart — `refreshSelectedTarget`/`refreshSelectedEquipment` now clear it live, called from the target/equipment screens after an edit or delete (TD-028).
 - **Dependencies:** shared_preferences.
 - **Roadmap relevance:** Phase 2/4.
 
@@ -268,7 +272,7 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Implemented
 - **Current implementation:** searchable list (`LIKE`), add/edit/delete with validation (RA 0–360°, Dec ±90°), selection stored in preferences.
 - **Relevant files:** `lib/presentation/screens/target/target_selection_screen.dart`, `lib/data/repositories/drift_target_repository.dart`.
-- **Known issues:** editing overwrites `catalogId` with the name; RA entered in degrees; no uniqueness; stale selection after deleting the selected target; calls the repository directly (DEV-A2); `LIKE` wildcards not escaped (TD-016, TD-021, TD-028).
+- **Known issues:** editing overwrites `catalogId` with the name; RA entered in degrees; no uniqueness; calls the repository directly (DEV-A2); `LIKE` wildcards not escaped (TD-016, TD-021). *Resolved (TASK 4.2):* stale selection after deleting or editing the selected target — the screen now calls `PlannerViewModel.refreshSelectedTarget()` after its dialog closes and after a swipe-delete (TD-028).
 - **Dependencies:** F-02.
 - **Roadmap relevance:** Phase 7. Tests: 5 form-validation widget tests, 1 repository test.
 
@@ -294,7 +298,7 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Implemented
 - **Current implementation:** list, add, edit, delete (with confirmation), selection; form validates required numeric fields; sensor size is auto-derived from resolution × pixel pitch.
 - **Relevant files:** `lib/presentation/screens/equipment/equipment_selection_screen.dart`, `lib/data/repositories/drift_equipment_repository.dart`.
-- **Known issues:** mojibake in strings (`Вµm`, `В°`, box-drawing comments) (TD-015); RAW size accepts negatives; deleting the selected rig leaves a stale selection; seeded data errors (SI-005, SI-011); repository called directly (DEV-A2).
+- **Known issues:** mojibake in strings (`Вµm`, `В°`, box-drawing comments) (TD-015); RAW size accepts negatives; seeded data errors (SI-005, SI-011); repository called directly (DEV-A2). *Resolved (TASK 4.2):* deleting or editing the selected rig used to leave a stale selection — the screen now calls `PlannerViewModel.refreshSelectedEquipment()` after its dialog closes and after a swipe-delete (TD-028).
 - **Dependencies:** F-02, F-23.
 - **Roadmap relevance:** Phase 6. Tests: 4 form-validation widget tests, 2 repository tests.
 
@@ -442,17 +446,17 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-40 — Save session (planned)
 - **Status:** Partial
-- **Current implementation:** a "Save Session" button writes target name, equipment name, date, planned light frames and blocks; updates instead if a session was loaded.
-- **Relevant files:** `home_screen.dart:201-247`, `lib/data/repositories/drift_logbook_repository.dart`.
-- **Known issues:** tapping twice inserts **two rows** (verified; the ViewModel never learns the new id); location, Bortle, weather, focal length, aperture, integration time and planned calibration counts stay null (verified); the widget calls the repository directly (DEV-A2, DEV-D3; TD-011).
+- **Current implementation:** a "Save Session" button writes target name, equipment name, date, planned light frames and blocks; updates instead if a session was loaded or already saved this session (**TASK 4.2:** `addLog` now returns the new id and `PlannerViewModel.markSessionSaved` records it, so a second tap updates instead of duplicating).
+- **Relevant files:** `home_screen.dart`, `lib/data/repositories/drift_logbook_repository.dart`, `lib/presentation/viewmodels/planner_viewmodel.dart` (`markSessionSaved`).
+- **Known issues:** location, Bortle, weather, focal length, aperture, integration time and planned calibration counts stay null (verified); the widget calls the repository directly (DEV-A2, DEV-D3). *Resolved (TASK 4.2):* tapping twice used to insert two rows (TD-011).
 - **Dependencies:** F-35, F-41.
 - **Roadmap relevance:** Phase 13 (ahead of phase).
 
 ## F-41 — Logbook list / reload / delete / share
 - **Status:** Partial
-- **Current implementation:** list of sessions; tap reloads a session into the planner; swipe deletes; share sends `toShareableText()`.
+- **Current implementation:** list of sessions, newest-saved first (**TASK 4.2**); tap reloads a session into the planner; swipe deletes with a confirmation dialog (**TASK 4.2**, matching the equipment/target screens' pattern); share sends `toShareableText()`.
 - **Relevant files:** `lib/presentation/screens/logbook/logbook_screen.dart`, `session_log.dart`.
-- **Known issues:** unordered (oldest first); swipe-delete has no confirmation or undo; reload re-matches target/equipment **by name**; the loaded date becomes a local `DateTime`; no widget test (TD-011, TD-039).
+- **Known issues:** no undo after delete; reload re-matches target/equipment **by name**; the loaded date becomes a local `DateTime`. *Resolved (TASK 4.2):* unordered (oldest first); swipe-delete had no confirmation; no widget test (TD-039).
 - **Dependencies:** F-40; gate `FeatureScope.logbook`.
 - **Roadmap relevance:** Phase 13 (ahead of phase).
 
