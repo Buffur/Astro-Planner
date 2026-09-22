@@ -7,6 +7,7 @@ import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/location/location_picker_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
+import '../screens/settings/settings_screen.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -24,6 +25,10 @@ class AppRouter {
       GoRoute(
         path: '/location',
         builder: (context, state) => const LocationPickerScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       if (FeatureScope.metadataImport)
         GoRoute(

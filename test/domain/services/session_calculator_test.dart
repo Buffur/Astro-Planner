@@ -97,4 +97,37 @@ void main() {
       expect(result.state, FeasibilityState.feasible);
     });
   });
+
+  group('configurable margin (TASK 5.2)', () {
+    final twoHours = [
+      VisibilityWindow(
+        start: DateTime.utc(2026, 1, 1, 22),
+        end: DateTime.utc(2026, 1, 2, 0),
+      ),
+    ];
+    FeasibilityState stateFor(int minutes, double margin) =>
+        SessionCalculator.calculateFeasibility(
+          availableWindows: twoHours,
+          estimatedRequiredTime: Duration(minutes: minutes),
+          marginFraction: margin,
+        ).state;
+
+    test('default is 15 % (the old fixed 85 % threshold)', () {
+      expect(
+        SessionCalculator.calculateFeasibility(
+          availableWindows: twoHours,
+          estimatedRequiredTime: const Duration(minutes: 103),
+        ).state,
+        FeasibilityState.tight,
+      );
+      expect(stateFor(102, 0.15), FeasibilityState.feasible);
+    });
+
+    test('a larger margin turns the same plan tight; zero margin never', () {
+      expect(stateFor(90, 0.15), FeasibilityState.feasible);
+      expect(stateFor(90, 0.30), FeasibilityState.tight);
+      expect(stateFor(120, 0.0), FeasibilityState.feasible);
+      expect(stateFor(121, 0.0), FeasibilityState.infeasible);
+    });
+  });
 }

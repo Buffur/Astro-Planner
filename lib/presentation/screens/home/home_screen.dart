@@ -47,6 +47,11 @@ class HomeScreen extends StatelessWidget {
               tooltip: 'Toggle Field Mode',
               onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
             ),
+          IconButton(
+            icon: const Icon(Icons.tune),
+            tooltip: 'Planning Settings',
+            onPressed: () => context.push('/settings'),
+          ),
           if (FeatureScope.logbook)
             IconButton(
               icon: const Icon(Icons.book),

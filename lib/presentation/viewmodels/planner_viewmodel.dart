@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
@@ -16,11 +15,16 @@ import '../../domain/models/session_night.dart';
 import '../../domain/models/site_time_context.dart';
 import '../../domain/models/weather_conditions.dart';
 import '../../domain/models/location_profile.dart';
+import '../../domain/models/planning_preferences.dart';
 import '../../domain/models/visibility_window.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/weather_repository.dart';
 import '../../domain/repositories/location_repository.dart';
+import '../../domain/repositories/planner_state_repository.dart';
+import '../../domain/repositories/planning_preferences_repository.dart';
+import '../../data/repositories/shared_prefs_planner_state_repository.dart';
+import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
 import '../../data/repositories/light_pollution_repository.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../domain/services/location_service.dart';
@@ -39,6 +43,8 @@ class PlannerViewModel extends ChangeNotifier {
   final LightPollutionRepository _lightPollutionRepository;
   final LocationService _locationService;
   final Clock _clock;
+  final PlanningPreferencesRepository _preferencesRepository;
+  final PlannerStateRepository _stateRepository;
 
   /// Completes when the initial state (saved location, capture blocks, target,
   /// equipment, weather) has loaded. It does not wait for the silent
@@ -75,21 +81,14 @@ class PlannerViewModel extends ChangeNotifier {
   /// default plan must not look like the user's own plan).
   bool _isExampleCapturePlan = true;
   int _bortleClass = 4;
-  double _dewPointThreshold = 2.0;
 
   SessionLog? _activeSessionLog;
   int? get activeSessionId => _activeSessionLog?.id;
   SessionLog? get activeSessionLog => _activeSessionLog;
 
-  /// Minimum usable altitude in degrees.
-  ///
-  /// Default: 20°
-  /// Rationale: below 20° atmospheric extinction and seeing both worsen
-  /// enough to noticeably hurt astrophotography quality. 20° is a commonly
-  /// used minimum for imaging; the exact attenuation at that altitude
-  /// depends on local conditions and is not a fixed, sourced figure.
-  /// Valid range: 5° – 60°. User-configurable.
-  double _minAltitude = 20.0;
+  /// Planning thresholds and overhead defaults (TASK 5.2). Defaults,
+  /// rationale and valid ranges are documented on [PlanningPreferences].
+  PlanningPreferences _preferences = PlanningPreferences();
 
   PlannerViewModel(
     this._targetRepository,
@@ -99,8 +98,14 @@ class PlannerViewModel extends ChangeNotifier {
     this._lightPollutionRepository, {
     LocationService? locationService,
     Clock? clock,
+    PlanningPreferencesRepository? preferencesRepository,
+    PlannerStateRepository? stateRepository,
   }) : _locationService = locationService ?? GeolocatorLocationService(),
-       _clock = clock ?? const SystemClock() {
+       _clock = clock ?? const SystemClock(),
+       _preferencesRepository =
+           preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
+       _stateRepository =
+           stateRepository ?? SharedPrefsPlannerStateRepository() {
     ready = _init();
   }
 
@@ -133,9 +138,7 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   Future<void> _loadInitialState() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final activeLocationId = prefs.getInt('activeLocationId');
+    final activeLocationId = await _stateRepository.getActiveLocationId();
     if (activeLocationId != null) {
       final loc = await _locationRepository.getLocationById(activeLocationId);
       if (loc != null) {
@@ -149,31 +152,14 @@ class PlannerViewModel extends ChangeNotifier {
       unawaited(useCurrentLocation());
     }
 
-    final blocksJson = prefs.getString('captureBlocks');
-    if (blocksJson != null) {
-      try {
-        final list = jsonDecode(blocksJson) as List;
-        _captureBlocks = list
-            .map(
-              (b) => CaptureBlock(
-                id: b['id'] ?? 0,
-                frameType: FrameType.values.firstWhere(
-                  (e) => e.name == b['frameType'],
-                  orElse: () => FrameType.light,
-                ),
-                filterName: b['filterName'],
-                exposureTimeSeconds:
-                    (b['exposureTimeSeconds'] as num?)?.toDouble() ?? 0.0,
-                frameCount: b['frameCount'] ?? 0,
-                binning: b['binning'] ?? 1,
-                gainIso: b['gainIso'],
-              ),
-            )
-            .toList();
+    try {
+      final saved = await _stateRepository.loadCaptureBlocks();
+      if (saved != null) {
+        _captureBlocks = saved;
         _isExampleCapturePlan = _captureBlocks.isEmpty;
-      } catch (e) {
-        _captureBlocks = [];
       }
+    } catch (e) {
+      _captureBlocks = [];
     }
     if (_captureBlocks.isEmpty) {
       _isExampleCapturePlan = true;
@@ -197,10 +183,9 @@ class PlannerViewModel extends ChangeNotifier {
       ];
     }
 
-    _dewPointThreshold = prefs.getDouble('dewPointThreshold') ?? 2.0;
-    _minAltitude = prefs.getDouble('minAltitude') ?? 20.0;
+    _preferences = await _preferencesRepository.load();
 
-    final targetId = prefs.getInt('targetId');
+    final targetId = await _stateRepository.getSelectedTargetId();
     if (targetId != null) {
       _selectedTarget = await _targetRepository.getTargetById(targetId);
     }
@@ -209,7 +194,7 @@ class PlannerViewModel extends ChangeNotifier {
       if (targets.isNotEmpty) _selectedTarget = targets.first;
     }
 
-    final eqId = prefs.getInt('equipmentId');
+    final eqId = await _stateRepository.getSelectedEquipmentId();
     if (eqId != null) {
       _selectedEquipment = await _equipmentRepository.getEquipmentById(eqId);
     }
@@ -287,18 +272,26 @@ class PlannerViewModel extends ChangeNotifier {
   /// plan the user has built — the UI must label it accordingly.
   bool get isExampleCapturePlan => _isExampleCapturePlan;
   int get bortleClass => _bortleClass;
-  double get dewPointThreshold => _dewPointThreshold;
+  double get dewPointThreshold => _preferences.dewMarginC;
+
+  /// The user's planning thresholds and overhead defaults (TASK 5.2).
+  PlanningPreferences get planningPreferences => _preferences;
+
+  /// Replaces the planning preferences, persists them, and refreshes every
+  /// value derived from them (windows, feasibility, dew warning).
+  Future<void> setPlanningPreferences(PlanningPreferences preferences) async {
+    _preferences = preferences;
+    notifyListeners();
+    await _preferencesRepository.save(_preferences);
+  }
 
   /// Minimum usable altitude. Clamped to [5°, 60°].
-  double get minAltitude => _minAltitude;
+  double get minAltitude => _preferences.minAltitudeDeg;
 
   /// Sets the minimum usable altitude and persists it.
   /// [value] is clamped to the valid range [5°, 60°].
   Future<void> setMinAltitude(double value) async {
-    _minAltitude = value.clamp(5.0, 60.0);
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('minAltitude', _minAltitude);
+    await setPlanningPreferences(_preferences.copyWith(minAltitudeDeg: value));
   }
 
   /// Resolves lat/lon to a human-readable city/town name via Open-Meteo geocoding.
@@ -336,8 +329,7 @@ class PlannerViewModel extends ChangeNotifier {
       notifyListeners();
 
       // Update saved location profile if active
-      final prefs = await SharedPreferences.getInstance();
-      final activeId = prefs.getInt('activeLocationId');
+      final activeId = await _stateRepository.getActiveLocationId();
       if (activeId != null) {
         final existing = await _locationRepository.getLocationById(activeId);
         if (existing != null) {
@@ -364,8 +356,7 @@ class PlannerViewModel extends ChangeNotifier {
     unawaited(_reverseGeocode(lat, lon));
     unawaited(_fetchBortle(lat, lon));
 
-    final prefs = await SharedPreferences.getInstance();
-    final activeId = prefs.getInt('activeLocationId');
+    final activeId = await _stateRepository.getActiveLocationId();
     if (activeId != null) {
       final existing = await _locationRepository.getLocationById(activeId);
       if (existing != null) {
@@ -394,7 +385,7 @@ class PlannerViewModel extends ChangeNotifier {
       bortleClass: _bortleClass,
     );
     final newId = await _locationRepository.insertLocation(loc);
-    await prefs.setInt('activeLocationId', newId);
+    await _stateRepository.setActiveLocationId(newId);
   }
 
   Future<void> useCurrentLocation() async {
@@ -457,42 +448,25 @@ class PlannerViewModel extends ChangeNotifier {
 
   Future<void> _saveBlocks() async {
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    final list = _captureBlocks
-        .map(
-          (b) => {
-            'id': b.id,
-            'frameType': b.frameType.name,
-            'filterName': b.filterName,
-            'exposureTimeSeconds': b.exposureTimeSeconds,
-            'frameCount': b.frameCount,
-            'binning': b.binning,
-            'gainIso': b.gainIso,
-          },
-        )
-        .toList();
-    await prefs.setString('captureBlocks', jsonEncode(list));
+    await _stateRepository.saveCaptureBlocks(_captureBlocks);
   }
 
   Future<void> setEquipment(EquipmentProfile profile) async {
     _selectedEquipment = profile;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('equipmentId', profile.id);
+    await _stateRepository.setSelectedEquipmentId(profile.id);
   }
 
   Future<void> setTarget(AstroTarget target) async {
     _selectedTarget = target;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('targetId', target.id);
+    await _stateRepository.setSelectedTargetId(target.id);
   }
 
   Future<void> setBortleClass(int bortle) async {
     _bortleClass = bortle;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    final activeId = prefs.getInt('activeLocationId');
+    final activeId = await _stateRepository.getActiveLocationId();
     if (activeId != null) {
       final existing = await _locationRepository.getLocationById(activeId);
       if (existing != null) {
@@ -511,10 +485,7 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   Future<void> setDewPointThreshold(double threshold) async {
-    _dewPointThreshold = threshold;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('dewPointThreshold', _dewPointThreshold);
+    await setPlanningPreferences(_preferences.copyWith(dewMarginC: threshold));
   }
 
   Future<void> loadSession(SessionLog log) async {
@@ -618,7 +589,8 @@ class PlannerViewModel extends ChangeNotifier {
     return VisibilityCalculator.calculateVisibilityWindowsForNight(
       night: night,
       target: _selectedTarget!,
-      minAltitude: _minAltitude,
+      minAltitude: _preferences.minAltitudeDeg,
+      darknessLimitDeg: _preferences.darknessLimit.degrees,
     );
   }
 
@@ -642,7 +614,7 @@ class PlannerViewModel extends ChangeNotifier {
   bool get dewWarning {
     if (_currentWeather == null) return false;
     return (_currentWeather!.temperature - _currentWeather!.dewPoint) <=
-        _dewPointThreshold;
+        _preferences.dewMarginC;
   }
 
   /// The target's altitude right now. Null without a target or a real site
@@ -701,9 +673,10 @@ class PlannerViewModel extends ChangeNotifier {
       0.0,
       (sum, b) => sum + (b.exposureTimeSeconds * b.frameCount),
     );
-    // add overhead per frame (e.g. 5 seconds download time)
+    // Per-frame overhead from the planning preferences (default 5 s, the
+    // value previously hard-coded here; TASK 5.2, ADR-009 §4).
     final totalFrames = _captureBlocks.fold(0, (sum, b) => sum + b.frameCount);
-    final overhead = totalFrames * 5.0;
+    final overhead = totalFrames * _preferences.perFrameOverheadSeconds;
     return Duration(seconds: (totalExposure + overhead).toInt());
   }
 
@@ -711,6 +684,7 @@ class PlannerViewModel extends ChangeNotifier {
     return SessionCalculator.calculateFeasibility(
       availableWindows: visibilityWindows,
       estimatedRequiredTime: estimatedRequiredTime,
+      marginFraction: _preferences.feasibilityMarginFraction,
     );
   }
 
