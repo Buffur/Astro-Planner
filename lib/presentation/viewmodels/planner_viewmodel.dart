@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/models/astro_target.dart';
@@ -35,15 +36,26 @@ class PlannerViewModel extends ChangeNotifier {
   late final Future<void> ready;
 
   bool _isLoading = true;
+
+  /// Set when the initial load (location, capture blocks, target, equipment)
+  /// fails. Weather is not part of this — see [weatherError].
+  Object? _bootstrapError;
+
+  /// True until a location is resolved, either from a saved profile or from
+  /// the device. While true, [latitude]/[longitude] are the hard-coded
+  /// default (London), used silently.
+  bool _usingDefaultLocation = true;
+
   AstroTarget? _selectedTarget;
   EquipmentProfile? _selectedEquipment;
   WeatherConditions? _currentWeather;
+  bool _weatherError = false;
   String? _locationName;
-  
+
   DateTime _sessionDate = DateTime.now().toUtc();
   double _latitude = 51.5072;
   double _longitude = -0.1276;
-  
+
   List<CaptureBlock> _captureBlocks = [];
   int _bortleClass = 4;
   double _dewPointThreshold = 2.0;
@@ -67,8 +79,36 @@ class PlannerViewModel extends ChangeNotifier {
   }
 
   Future<void> _init() async {
+    try {
+      await _loadInitialState();
+      _bootstrapError = null;
+    } catch (e) {
+      _bootstrapError = e;
+      debugPrint('PlannerViewModel bootstrap error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+
+    if (_bootstrapError == null) {
+      // Weather is network-bound and must never hold up the first screen:
+      // it loads after the first frame is drawn, not as part of `ready`.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        unawaited(_fetchWeather());
+      });
+    }
+  }
+
+  /// Retries the initial load after a bootstrap failure ([hasBootstrapError]).
+  Future<void> retryBootstrap() async {
+    _isLoading = true;
+    notifyListeners();
+    await _init();
+  }
+
+  Future<void> _loadInitialState() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     final activeLocationId = prefs.getInt('activeLocationId');
     if (activeLocationId != null) {
       final loc = await _locationRepository.getLocationById(activeLocationId);
@@ -76,12 +116,13 @@ class PlannerViewModel extends ChangeNotifier {
         _latitude = loc.latitude;
         _longitude = loc.longitude;
         _bortleClass = loc.bortleClass;
+        _usingDefaultLocation = false;
       }
     } else {
       // First launch — try getting current location silently
       unawaited(useCurrentLocation());
     }
-    
+
     final blocksJson = prefs.getString('captureBlocks');
     if (blocksJson != null) {
       try {
@@ -128,17 +169,27 @@ class PlannerViewModel extends ChangeNotifier {
       if (equipment.isNotEmpty) _selectedEquipment = equipment.first;
     }
     
-    _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
     unawaited(_reverseGeocode(_latitude, _longitude));
-    
-    _isLoading = false;
-    notifyListeners();
   }
 
   bool get isLoading => _isLoading;
+
+  /// True when the initial load (location, capture blocks, target,
+  /// equipment) failed. Retry with [retryBootstrap].
+  bool get hasBootstrapError => _bootstrapError != null;
+
+  /// True until a location is resolved; [latitude]/[longitude] are the
+  /// hard-coded default and were not chosen by the user.
+  bool get isDefaultLocation => _usingDefaultLocation;
+
   AstroTarget? get selectedTarget => _selectedTarget;
   EquipmentProfile? get selectedEquipment => _selectedEquipment;
   WeatherConditions? get currentWeather => _currentWeather;
+
+  /// True when the most recent weather fetch threw. Distinct from
+  /// [currentWeather] being null, which can also mean "not loaded yet".
+  bool get weatherError => _weatherError;
+
   String? get locationName => _locationName;
   DateTime get sessionDate => _sessionDate;
 
@@ -224,8 +275,8 @@ class PlannerViewModel extends ChangeNotifier {
   Future<void> setLocation(double lat, double lon) async {
     _latitude = lat;
     _longitude = lon;
-    _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude);
-    notifyListeners();
+    _usingDefaultLocation = false;
+    await _fetchWeather();
     unawaited(_reverseGeocode(lat, lon));
     unawaited(_fetchBortle(lat, lon));
     
@@ -270,8 +321,16 @@ class PlannerViewModel extends ChangeNotifier {
     await setLocation(position.latitude, position.longitude);
   }
 
-  Future<void> refreshWeather() async {
-    _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude, forceRefresh: true);
+  Future<void> refreshWeather() => _fetchWeather(forceRefresh: true);
+
+  Future<void> _fetchWeather({bool forceRefresh = false}) async {
+    try {
+      _currentWeather = await _weatherRepository.getCurrentWeather(_latitude, _longitude, forceRefresh: forceRefresh);
+      _weatherError = false;
+    } catch (e) {
+      _weatherError = true;
+      debugPrint('Weather fetch error: $e');
+    }
     notifyListeners();
   }
 

@@ -1,0 +1,299 @@
+// Widget tests for Home's bootstrap-related states (roadmap TASK 1.2).
+//
+// Covers:
+//   - the empty state offers actions to choose a target and equipment
+//   - the default-location banner shows until a location is resolved
+//   - a weather-repository failure renders an error/retry card instead of
+//     hanging or crashing (the first screen never blocks on the network)
+//   - a bootstrap-repository failure renders an error/retry view
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+import 'package:astroplan/main.dart';
+import 'package:astroplan/presentation/navigation/app_router.dart';
+import 'package:astroplan/data/database/app_database.dart';
+import 'package:astroplan/data/repositories/drift_target_repository.dart';
+import 'package:astroplan/domain/repositories/target_repository.dart';
+import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/domain/repositories/equipment_repository.dart';
+import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
+import 'package:astroplan/domain/repositories/logbook_repository.dart';
+import 'package:astroplan/data/repositories/drift_location_repository.dart';
+import 'package:astroplan/domain/repositories/location_repository.dart';
+import 'package:astroplan/data/repositories/light_pollution_repository.dart';
+import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
+import 'package:drift/native.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:astroplan/domain/models/astro_target.dart' as domain;
+import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
+import 'package:astroplan/domain/models/location_profile.dart' as domain;
+import 'package:astroplan/domain/models/weather_conditions.dart';
+import 'package:astroplan/domain/repositories/weather_repository.dart';
+
+import '../../../support/fake_location_service.dart';
+import '../../../support/flaky_target_repository.dart';
+
+class _MockWeather implements WeatherRepository {
+  @override
+  Future<WeatherConditions?> getCurrentWeather(
+    double lat,
+    double lon, {
+    bool forceRefresh = false,
+  }) async {
+    return const WeatherConditions(
+      temperature: 15.0,
+      cloudCover: 10.0,
+      humidity: 50.0,
+      dewPoint: 5.0,
+    );
+  }
+}
+
+class _ThrowingWeather implements WeatherRepository {
+  int calls = 0;
+
+  @override
+  Future<WeatherConditions?> getCurrentWeather(
+    double lat,
+    double lon, {
+    bool forceRefresh = false,
+  }) async {
+    calls++;
+    throw Exception('network down');
+  }
+}
+
+void main() {
+  late AppDatabase database;
+  late DriftTargetRepository targetRepo;
+  late DriftEquipmentRepository equipmentRepo;
+  late DriftLogbookRepository logbookRepo;
+  late DriftLocationRepository locationRepo;
+
+  setUp(() {
+    // AppRouter.router is a shared static singleton (TD-037): reset it so a
+    // navigation in one test doesn't leak into the next.
+    AppRouter.router.go('/');
+    SharedPreferences.setMockInitialValues({});
+    database = AppDatabase(NativeDatabase.memory());
+    targetRepo = DriftTargetRepository(database);
+    equipmentRepo = DriftEquipmentRepository(database);
+    logbookRepo = DriftLogbookRepository(database);
+    locationRepo = DriftLocationRepository(database);
+  });
+
+  tearDown(() async {
+    await database.close();
+  });
+
+  Widget wrap(PlannerViewModel vm) {
+    return MultiProvider(
+      providers: [
+        Provider<AppDatabase>.value(value: database),
+        Provider<TargetRepository>.value(value: targetRepo),
+        Provider<EquipmentRepository>.value(value: equipmentRepo),
+        Provider<LogbookRepository>.value(value: logbookRepo),
+        Provider<LocationRepository>.value(value: locationRepo),
+        ChangeNotifierProvider.value(value: vm),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
+      ],
+      child: const AstroPlanApp(),
+    );
+  }
+
+  testWidgets('empty state offers actions to choose a target and equipment', (
+    tester,
+  ) async {
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a Target'), findsOneWidget);
+    expect(find.text('Choose Equipment'), findsOneWidget);
+
+    await tester.tap(find.text('Choose a Target'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select Target'), findsOneWidget);
+  });
+
+  testWidgets('a default location shows a banner that offers to set the site', (
+    tester,
+  ) async {
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('default location'), findsOneWidget);
+    expect(find.text('Set site'), findsOneWidget);
+  });
+
+  testWidgets('a saved location hides the default-location banner', (
+    tester,
+  ) async {
+    final locId = await locationRepo.insertLocation(
+      const domain.LocationProfile(
+        id: 0,
+        name: 'Test Site',
+        latitude: 51.5,
+        longitude: -0.1,
+        elevation: 10,
+      ),
+    );
+    SharedPreferences.setMockInitialValues({'activeLocationId': locId});
+
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        targetRepo,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Session Planner'), findsOneWidget);
+    expect(find.textContaining('default location'), findsNothing);
+  });
+
+  testWidgets(
+    'a weather-repository failure shows a retry card instead of hanging',
+    (tester) async {
+      final testTarget = domain.AstroTarget(
+        id: 1,
+        catalogId: 'M42',
+        commonName: 'Orion Nebula',
+        type: 'Nebula',
+        rightAscension: 83.85,
+        declination: -5.45,
+      );
+      await targetRepo.insertTarget(testTarget);
+      final testEquip = domain.EquipmentProfile(
+        id: 1,
+        name: 'ASI2600MC',
+        aperture: 4.0,
+        focalLength: 400.0,
+        sensorWidth: 23.5,
+        sensorHeight: 15.6,
+        resolutionWidth: 6000,
+        resolutionHeight: 4000,
+        pixelPitch: 3.76,
+        averageRawFileSizeMB: 50.0,
+      );
+      await equipmentRepo.insertEquipment(testEquip);
+
+      // A taller surface so the weather section (below the target card and
+      // altitude chart) is scrolled into view and actually built.
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      final throwingWeather = _ThrowingWeather();
+      late PlannerViewModel vm;
+      await tester.runAsync(() async {
+        vm = PlannerViewModel(
+          targetRepo,
+          equipmentRepo,
+          throwingWeather,
+          locationRepo,
+          LightPollutionRepository(),
+          locationService: FakeLocationService(),
+        );
+        await vm.ready;
+      });
+
+      // The first screen renders without waiting on weather at all.
+      expect(vm.hasBootstrapError, isFalse);
+
+      await tester.pumpWidget(wrap(vm));
+      await tester.pump();
+      expect(find.text('Session Planner'), findsOneWidget);
+
+      // Weather loads after the first frame and fails.
+      await tester.pumpAndSettle();
+      expect(throwingWeather.calls, greaterThan(0));
+      expect(find.text("Couldn't load weather."), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.text("Couldn't load weather."), findsOneWidget);
+      expect(throwingWeather.calls, greaterThan(1));
+    },
+  );
+
+  testWidgets('a bootstrap-repository failure shows an error view with retry', (
+    tester,
+  ) async {
+    final flakyTargets = FlakyTargetRepository(targetRepo);
+    await targetRepo.insertTarget(
+      domain.AstroTarget(
+        id: 1,
+        catalogId: 'M42',
+        commonName: 'Orion Nebula',
+        type: 'Nebula',
+        rightAscension: 83.85,
+        declination: -5.45,
+      ),
+    );
+
+    late PlannerViewModel vm;
+    await tester.runAsync(() async {
+      vm = PlannerViewModel(
+        flakyTargets,
+        equipmentRepo,
+        _MockWeather(),
+        locationRepo,
+        LightPollutionRepository(),
+        locationService: FakeLocationService(),
+      );
+      await vm.ready;
+    });
+
+    await tester.pumpWidget(wrap(vm));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Couldn't load your data."), findsOneWidget);
+    expect(
+      find.text('Select a Target and Equipment profile to begin planning.'),
+      findsNothing,
+    );
+
+    flakyTargets.shouldThrow = false;
+    await tester.runAsync(() => vm.retryBootstrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text("Couldn't load your data."), findsNothing);
+  });
+}

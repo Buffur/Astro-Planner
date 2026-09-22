@@ -34,6 +34,17 @@ void main() async {
   final targetSeeder = CatalogSeeder(targetRepo);
   final equipmentSeeder = EquipmentSeeder(equipmentRepo);
 
+  // Seeding must finish before the ViewModel's first read, or a fresh
+  // install sees an empty catalog until the app restarts (TD-002). Seeding
+  // is idempotent (seedIfNeeded checks for existing rows first), so a
+  // failure here is safe to retry on the next launch.
+  try {
+    await targetSeeder.seedIfNeeded();
+    await equipmentSeeder.seedIfNeeded();
+  } catch (e) {
+    debugPrint('Seeding error: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
@@ -50,16 +61,6 @@ void main() async {
       child: const AstroPlanApp(),
     ),
   );
-
-  // Run seeding asynchronously after app boot to prevent black screens on hot restart
-  Future.microtask(() async {
-    try {
-      await targetSeeder.seedIfNeeded();
-      await equipmentSeeder.seedIfNeeded();
-    } catch (e) {
-      debugPrint('Seeding error: $e');
-    }
-  });
 }
 
 class AstroPlanApp extends StatelessWidget {

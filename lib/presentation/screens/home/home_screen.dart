@@ -7,6 +7,8 @@ import '../../widgets/planner_summary_card.dart';
 import '../../../domain/repositories/logbook_repository.dart';
 import '../../../domain/models/session_log.dart';
 import '../../../domain/models/capture_block.dart';
+import '../../../domain/models/astro_target.dart';
+import '../../../domain/models/equipment_profile.dart';
 import '../../viewmodels/theme_viewmodel.dart';
 import '../../widgets/capture_plan_widget.dart';
 import '../../widgets/altitude_chart_widget.dart';
@@ -48,27 +50,19 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: viewModel.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : target == null || equipment == null
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.auto_awesome, size: 48, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text(
-                          'Select a Target and Equipment profile to begin planning.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : ListView(
+      body: viewModel.hasBootstrapError
+          ? _BootstrapErrorView(
+              onRetry: () => context.read<PlannerViewModel>().retryBootstrap(),
+            )
+          : viewModel.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: [
+                    if (viewModel.isDefaultLocation) const _DefaultLocationBanner(),
+                    Expanded(
+                      child: target == null || equipment == null
+                          ? _EmptyStateView(target: target, equipment: equipment)
+                          : ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
                     _SectionHeader('Target / What'),
@@ -134,6 +128,10 @@ class HomeScreen extends StatelessWidget {
                         weather: viewModel.currentWeather!,
                         onTap: () => context.push('/location'),
                       )
+                    else if (viewModel.weatherError)
+                      _WeatherErrorCard(
+                        onRetry: () => context.read<PlannerViewModel>().refreshWeather(),
+                      )
                     else
                       PlannerSummaryCard(
                         title: 'Location: ${viewModel.locationName ?? "Custom"}',
@@ -198,7 +196,10 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 32),
                   ],
                 ),
-      bottomNavigationBar: target == null || equipment == null || viewModel.isLoading
+                    ),
+                  ],
+                ),
+      bottomNavigationBar: target == null || equipment == null || viewModel.isLoading || viewModel.hasBootstrapError
           ? null
           : BottomAppBar(
               child: SafeArea(
@@ -262,6 +263,138 @@ class _SectionHeader extends StatelessWidget {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown instead of the whole screen when the initial load
+/// (`PlannerViewModel.hasBootstrapError`) failed.
+class _BootstrapErrorView extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _BootstrapErrorView({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+            const SizedBox(height: 16),
+            const Text(
+              "Couldn't load your data.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when target and/or equipment have not been selected yet, with an
+/// action for each missing piece.
+class _EmptyStateView extends StatelessWidget {
+  final AstroTarget? target;
+  final EquipmentProfile? equipment;
+
+  const _EmptyStateView({required this.target, required this.equipment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.auto_awesome, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Select a Target and Equipment profile to begin planning.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                if (target == null)
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/target'),
+                    icon: const Icon(Icons.explore_outlined),
+                    label: const Text('Choose a Target'),
+                  ),
+                if (equipment == null)
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/equipment'),
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Choose Equipment'),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown above the content while the ViewModel has not resolved an explicit
+/// location (saved profile or device position) and is using the hard-coded
+/// default.
+class _DefaultLocationBanner extends StatelessWidget {
+  const _DefaultLocationBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialBanner(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: const Icon(Icons.location_off_outlined),
+      content: const Text('Using a default location — set your site for accurate results.'),
+      actions: [
+        TextButton(
+          onPressed: () => context.push('/location'),
+          child: const Text('Set site'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Shown in place of the weather card when the most recent fetch failed.
+class _WeatherErrorCard extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _WeatherErrorCard({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            const Icon(Icons.cloud_off, color: Colors.grey),
+            const SizedBox(width: 12),
+            const Expanded(child: Text("Couldn't load weather.")),
+            TextButton(onPressed: onRetry, child: const Text('Retry')),
+          ],
         ),
       ),
     );
