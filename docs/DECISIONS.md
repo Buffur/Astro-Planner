@@ -18,6 +18,11 @@
 > chart made render-only). **TASK 2.4 (2026-09-22, `1e58fcf`):** ADR-007 §5/§6
 > implemented (`PlannerViewModel.sessionNight`, `NightTimeFormatter`); PD-01/PD-02
 > now fully realized in the running app, not just the domain layer.
+> **Updated 2026-09-22 (TASK 3.1, documentation only, no code changed):** ADR-008
+> (persistence baseline, migration workflow, provenance) accepted in Part F; PD-04
+> and PD-09 resolved (E.1). Checked against `app_database.dart`, the table
+> definitions, the seeders, `drift_equipment_repository.dart`, the git history of
+> the schema, and the Drift 2.35.0 source, at commit `33a212b`.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -267,12 +272,12 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-01 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Session-night semantics and the default night rule | SI-010, TD-001 | (a) current night if the Sun is below −0.833°, otherwise the upcoming night; (b) always the next evening; (c) explicit date only with a "Tonight" button | **Resolved — see E.1 and ADR-007 (Part F):** civil evening date at the site; mean-solar-noon window; default = the window containing *now* (the roadmap rule, not option (a)). (Original proposal: (a): a site-local solar noon-to-noon window; the date picker means "the night beginning that evening". Proposed first implementation task once the roadmap is approved.) | Capture planner, Imaging Opportunity, weather alignment |
 | PD-02 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Site time-zone strategy | SI-010, TD-020 | (a) device zone (status quo); (b) provider offset stored per site (online); (c) bundled time-zone database + coordinate lookup (offline); (d) compute in solar/UTC time, display in a labelled zone | **Resolved — see E.1 and ADR-007 (Part F):** (d) now — compute in UTC through a `SiteTimeContext` seam with a mean-solar fallback; the site's IANA zone and the `timezone` package arrive in TASK 7.1, where (b)/(c) are evaluated as the zone source. (Original proposal: compute in UTC/solar time (no zone needed); choose the display zone explicitly; evaluate (d) with (b) as offline-first, (c) if civil clock times are required. DST must be tested.) | Weather alignment, log display, remote-site planning |
 | PD-03 | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
-| PD-04 **[roadmap-blocking]** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules) | Any schema change |
+| PD-04 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | **Resolved — see E.1 and ADR-008 (Part F):** (b), with the floor at **v8**. (Original proposal: (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules).) | Any schema change |
 | PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
 | PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
 | PD-07 | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | Decide with the Moon-geometry requirement | Moon services, moving objects |
 | PD-08 **[roadmap-blocking]** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | Owner product decision; configurable overhead | Capture planner (central component) |
-| PD-09 | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | Decide with PD-04 | SI-011, SI-007 fixes |
+| PD-09 **RESOLVED 2026-09-22** | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | **Resolved — see E.1 and ADR-008 §6:** per-row `source` + `confidence`, added by the owning tasks. (Original: decide with PD-04.) | SI-011, SI-007 fixes |
 | PD-10 | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
 | PD-11 | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
@@ -360,6 +365,40 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Deferred to TASK 7.1** (not decided here): the source of a site's IANA zone,
   either the provider offset (option b) or a bundled database with a coordinate
   lookup (option c), and the `timezone` dependency itself.
+- **Not implemented.**
+
+### PD-04 — Persistence baseline and migration strategy (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 3.1). They chose
+  the recommended option for three questions:
+  - **Floor:** v8, with backup and reset for older databases, over repairing every
+    path.
+  - **v10 cleanup:** drop the orphan table and the legacy columns, over dropping the
+    table only.
+  - **Orphans:** delete them and log the counts, over aborting and leaving foreign
+    keys off.
+
+  The owner also confirmed that **no installs below v8 need to be preserved**.
+- **Decision:** see **ADR-008** §2–§5 (Part F).
+- **Refines the original option (b):** the floor is v8, not v9, because v8 → v9 is
+  proven to work.
+- **Destructive steps approved by this decision**, and only these:
+  - renaming (not deleting) a below-floor database after user confirmation;
+  - deleting the v1–v7 upgrade steps from the code;
+  - in v10: dropping `equipment_profiles`, dropping `optical_multiplier` and
+    `bit_depth` through table rebuilds, and deleting orphan rows found by
+    `foreign_key_check`.
+- **Not implemented** (TASKs 3.2 and 3.3).
+
+### PD-09 — Provenance storage (RESOLVED 2026-09-22)
+
+- **Decided by:** the project owner, in chat, on 2026-09-22 (TASK 3.1), choosing
+  "Per-row source + confidence" over "Separate data_sources table".
+- **Decision:** see **ADR-008** §6.
+  - Nullable `source` and `confidence` columns, with per-field pairs where the
+    origins differ.
+  - Added by TASKs 7.1, 8.1 and 8.5, not in G3.
+  - Legacy rows stay NULL, meaning unknown, never guessed.
 - **Not implemented.**
 
 ---
@@ -736,3 +775,212 @@ the regression is covered.
 - **G9** aligns weather per §9. **G11** persists per §10.
 - SI-010, TD-001, TD-020, TD-023 and TD-024 stay **open** until those tasks land. This
   ADR changes no code.
+
+## ADR-008: Persistence baseline, migration workflow and provenance
+
+Status: accepted (owner, 2026-09-22, TASK 3.1). Resolves PD-04 and PD-09. It also
+answers the Phase 0 pending decision "How to store provenance for seeded target and
+equipment data" (Part A, unchanged). **Not implemented yet:** TASKs 3.2 and 3.3, then
+7.1, 8.1 and 8.5 for provenance columns.
+
+### 1. Context (verified for this ADR at commit `33a212b`)
+
+- **Schema versions created by committed builds** (`git log` on
+  `app_database.dart`):
+
+  | Version | Commit |
+  | --- | --- |
+  | v1 | `bb327e2` |
+  | v2 | `8070dd5` |
+  | v3 | `5bc8ba6` |
+  | v8 | `d0b737f` |
+  | v9 | `900b82a` |
+
+  **v4–v7 were never committed.** They arrived together in `d0b737f`, and could only
+  exist on a developer device from uncommitted builds. Every committed build from
+  `d0b737f` onwards creates v8 or later. `main` was pushed to `origin`
+  (GitHub) at `a1bcbd9`, which contains all of these commits.
+- **The upgrade chain** (`app_database.dart`, `onUpgrade`) is a sequence of
+  `if (from < n)` steps. They are written against the **current** table
+  definitions, not the definitions of their own version (the root cause of DEV-D1):
+  - Every path from v1, v2 or v3 is **certain to fail**. `createTable(opticalRigs)`
+    uses today's definition, which has no `optical_multiplier`, and then the v5
+    `INSERT … SELECT` names that column. v3 → v9 was reproduced on 2026-09-21. v1
+    and v2 go through the same step.
+  - v8 → v9 works (reproduced 2026-09-21). It leaves **legacy columns** that fresh
+    v9 installs lack: `optical_multiplier` (NOT NULL DEFAULT 1.0) on `optical_rigs`
+    and `equipment_profiles`, and `bit_depth` (nullable) on `camera_modules`.
+- **Downgrades are unguarded** (new finding, recorded as TD-047).
+  - Drift calls `onUpgrade` whenever the stored version differs from
+    `schemaVersion`, including when it is *higher*
+    (`drift-2.35.0/lib/src/runtime/api/db_base.dart:131`,
+    `hadUpgrade => versionBefore != versionNow`).
+  - With the current `if (from < n)` chain, an older build would run no step and
+    then open a newer database as if it matched.
+- **Foreign keys are not enforced.**
+  - No `beforeOpen` sets `PRAGMA foreign_keys`. An orphan `capture_blocks` insert
+    succeeded (verified 2026-09-21).
+  - Declared references: `capture_blocks.session_log_id → session_logs`,
+    `camera_modules.device_id → devices`, and
+    `optical_rigs.camera_module_id → camera_modules`. None has an `ON DELETE` clause.
+  - Deletes are hand-written in the repositories. `deleteEquipment` deletes a rig's
+    camera module and device without checking for other references.
+- **Orphan table.** `equipment_profiles` is not read or written by any application
+  code since v4. Only the v5 copy step, the v9 `addColumn` and `app_database_test`
+  touch it.
+- **No provenance is stored** (DEV-D5).
+  - The seeders insert only into an empty table and do not mark their rows.
+  - A seeded row therefore cannot be told apart from a user-entered or user-edited
+    one after the fact.
+
+### 2. Decision: upgrade floor v8
+
+- **Supported:** databases at **v8 and v9** upgrade in place. Every later version
+  must upgrade from v8.
+- **Below v8** (`from < 8`): the database is **not migrated**.
+  - The app shows a clear message: the database comes from a pre-release build and
+    cannot be upgraded.
+  - **On the user's explicit confirmation**, it renames the file to
+    `astroplan.sqlite.v<from>.bak` (never deletes it) and creates a fresh database.
+  - Without confirmation, nothing is touched.
+- **Newer than the app** (`from > schemaVersion`): refused, with the same kind of
+  message, and the file is left untouched (TD-047). Newer databases are never reset.
+- **The legacy v1–v7 steps are removed** from `onUpgrade`.
+- **Owner confirmation (2026-09-22):** no installs below v8 need to be preserved.
+- **Refines PD-04 option (b):** that option said "declare v9 the floor (no installs
+  below v8 exist)". The floor is **v8**, so both v8 and v9 databases are supported.
+
+### 3. Decision: migration workflow (from TASK 3.2 onwards)
+
+- **Tooling.** Use Drift's schema tooling (`drift_dev` 2.35, already a dev
+  dependency).
+  - A `build.yaml` database entry.
+  - Versioned JSON snapshots in `drift_schemas/`: **v8 exported from `d0b737f`**,
+    and **v9 from the current code**.
+  - Generated `stepByStep` versioned schema classes, and generated
+    schema-verification tests.
+- **Every schema bump**, as one change:
+  - a new snapshot;
+  - a `from → to` step written **against the generated schema class of its own
+    version**, never against the live table definitions (that is what broke
+    DEV-D1);
+  - a migration test with sample rows that checks the data survives;
+  - a verification test that the upgraded schema equals the fresh schema.
+- **Each upgrade runs as one unit.** If it fails, the file is left unchanged. 3.2
+  must verify this, because Drift's transaction behaviour for `onUpgrade` is not
+  assumed here.
+- **Destructive steps** (drop table, drop column, table rebuild, row deletion) need
+  explicit owner approval every time. Part A Migration Rules stay in force. This ADR
+  approves exactly the destructive steps in §2, §4 and §5.
+- **Documentation.** The workflow itself is documented in `DATA_MODEL.md` by TASK
+  3.2.
+
+### 4. Decision: foreign keys (TASK 3.3)
+
+- **One-time cleanup in the v10 upgrade step,** with foreign keys **off**:
+  1. Run `PRAGMA foreign_key_check`.
+  2. **Delete orphan rows**, whose referenced parent does not exist. Log the count
+     removed per table (owner decision).
+  3. Re-run the check. The step fails if anything remains.
+- **Every connection:** `beforeOpen` sets `PRAGMA foreign_keys = ON`.
+- **Delete behaviour.** SQLite cannot alter a constraint, so these tables are rebuilt
+  in v10:
+
+  | Reference | On delete |
+  | --- | --- |
+  | `capture_blocks → session_logs` | `CASCADE` |
+  | `camera_modules → devices` | `RESTRICT` |
+  | `optical_rigs → camera_modules` | `RESTRICT` |
+
+- **Guarded deletes.** Repository deletes of shared equipment rows are guarded: a
+  camera module or device is deleted only when no other row references it.
+- **Tests** run with foreign keys on, the same as production.
+
+### 5. Decision: v10 cleanup scope (TASK 3.3)
+
+- **Drop `equipment_profiles`.**
+- **Rebuild `optical_rigs` and `camera_modules`** without the legacy columns
+  `optical_multiplier` and `bit_depth`. Every install then has one schema, and
+  snapshot validation is exact.
+  - **Accepted data loss (owner):** a non-default multiplier on a developer
+    database. The code has ignored the column since `900b82a` (CALC-14 is the
+    identity).
+- **One step.** The §4 rebuilds and this cleanup are the same v10 step, with one new
+  snapshot.
+- **Test code.** `app_database_test.dart`'s `equipment_profiles` test is replaced,
+  because the table no longer exists. The reason is recorded; this is not a
+  weakened test.
+
+### 6. Decision: provenance (per row, PD-09)
+
+- **Columns on tables that hold external or scientific data:**
+  - `source`: nullable TEXT, a stable namespaced id. Examples: `user`,
+    `seed:equipment@1`, `seed:catalog@1`, `catalog:openngc@<version>`,
+    `provider:open-meteo/<model>`, `device:gps`, `geocoder:nominatim`, `exif`,
+    `fits`.
+  - `confidence`: nullable TEXT, one of:
+    - `verified`: checked against a cited primary source;
+    - `reported`: taken from a source that was not independently checked
+      (manufacturer summary, provider, user entry);
+    - `estimated`: derived or approximated, such as an empirical RAW size.
+- **Per-field pairs.** A row whose fields have different origins gets per-field
+  pairs, for example a site's `bortle_source` and `bortle_date` next to user-entered
+  coordinates (TASK 7.1).
+- **NULL means unknown.** Legacy rows keep NULL, displayed as "unknown". They are
+  **never back-filled by guessing**: seeded rows cannot be identified reliably, and
+  users may have edited them (PD-10 applies the same rule).
+- **Never the reverse.** A default is never recorded as a measurement, and a NULL
+  is never shown as a value (SI-008).
+- **No `data_sources` table now.** Citation, licence and attribution text live with
+  the asset and the About screen (TASK 8.2). A later `data_sources` table can be
+  keyed by the same `source` ids without changing what existing rows mean.
+- **Timing.** The columns are **not added in G3**. Each arrives in the additive
+  migration of the task that owns its table:
+  - 7.1: sites (Bortle/SQM source and date);
+  - 8.1: targets (`source`);
+  - 8.5: equipment specs (`source`, `confidence`).
+
+  Weather and session snapshots follow the same convention when they are persisted
+  (G9, G11).
+
+### 7. Test matrix (for TASKs 3.2 and 3.3)
+
+| # | Case | Task | Expected |
+| --- | --- | --- | --- |
+| M1 | Fresh install | 3.2 | Schema equals the v9 snapshot (3.3: v10) |
+| M2 | v8 (`d0b737f` snapshot) with sample rows → v9. Rows: device → module → rig chain, target, location, session with 2 blocks; `equipment_profiles` both empty and non-empty | 3.2 | All rows intact; new columns NULL; schema equals v9 apart from the documented legacy columns (until v10) |
+| M3 | v9 → v10 | 3.3 | Orphan table and legacy columns gone; rows intact; `capture_blocks` cascades; schema equals the v10 snapshot exactly |
+| M4 | v8 → v10, step by step | 3.3 | Same as M3 |
+| M5 | Below floor: v1, v2 and v3 databases | 3.2 | Specific "unsupported version" error; no step runs; file byte-identical afterwards |
+| M6 | Reset path after M5, confirmed | 3.2 | Old file renamed to `astroplan.sqlite.v<from>.bak` with content intact; fresh database at the current version |
+| M7 | Downgrade: database stamped at schemaVersion + 1 | 3.2 | Refused; file and `user_version` unchanged (TD-047) |
+| M8 | Orphans before v10: orphan block, rig with a missing module | 3.3 | Orphans deleted and counts logged; legitimate rows intact; `foreign_key_check` empty |
+| M9 | FKs on after open | 3.3 | `PRAGMA foreign_keys` = 1; an orphan insert throws; deleting a session removes its blocks; deleting a device referenced by a module is refused |
+| M10 | Existing repository and database tests | 3.3 | Green with FKs on |
+| M11 | Failed upgrade (injected failure mid-step) | 3.2 | File unchanged (§3, one unit) |
+
+### 8. Alternatives considered
+
+| Alternative | Verdict | Reason |
+| --- | --- | --- |
+| Repair every path from v1 | Rejected (owner) | The v4–v7 schemas were never committed and can only be guessed; each path needs a historical schema and a test; no install needs it |
+| Recreate the database on any failure (PD-04 c) | Rejected | Silent data loss on v8/v9 installs |
+| Floor v9 (PD-04 b, literal) | Refined to v8 | v8 → v9 is proven to work; a floor of v9 would needlessly reset v8 installs |
+| Keep legacy columns and whitelist them | Rejected (owner) | Two schemas forever; the validation cannot be exact |
+| Leave FKs off when orphans exist | Rejected (owner) | Integrity would not be guaranteed on that install |
+| `data_sources` table | Deferred | Joins and FKs for about 5 sources; can be added later, keyed by the same ids |
+
+### 9. Consequences
+
+- **TASK 3.2:**
+  - the snapshots (v8 from `d0b737f`, v9);
+  - generated verification;
+  - floor and downgrade handling, plus the reset path and its UI message;
+  - removal of the v1–v7 steps;
+  - M1, M2, M5–M7 and M11;
+  - the workflow in `DATA_MODEL.md`.
+- **TASK 3.3:** the v10 step (§4, §5), `beforeOpen` with foreign keys on, guarded
+  deletes, and M3, M4 and M8–M10.
+- **Later tasks** add provenance columns according to §6.
+- DEV-D1, DEV-D5, DEV-D6, TD-004, TD-005, TD-026 (partly) and TD-047 stay **open**
+  until then. This ADR changes no code.

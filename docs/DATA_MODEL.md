@@ -3,7 +3,10 @@
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since by TASKs 1.1–1.3 (no entity
 > changes). **TASK 2.2 (2026-09-22):** three non-persisted domain types were added to
-> B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change. **TASK 2.3
+> B3 (`CalendarDate`, `SiteTimeContext`, `SessionNight`); no schema change. **TASK 3.1
+> (2026-09-22, docs only):** ADR-008 decided the persistence baseline and the
+> provenance convention; Part D rules 5 and 6 now point to it. B8 gained a note
+> (v4–v7 never committed). No schema change. **TASK 2.3
 > (2026-09-22, commit `de1792a`):** two more non-persisted types added
 > (`NightTimeline`/`SunThresholdResult`, `AltitudeCurve`/`AltitudeSample`);
 > `VisibilityWindow` gained two fields; no schema change. **TASK 2.4 (2026-09-22,
@@ -236,7 +239,7 @@ camera module and device **without checking whether other rigs reference them**
 | 5 | `d0b737f` | copy flat rows into the three tables | 3 × `INSERT … SELECT` | **References `optical_multiplier`** — see DEV-D1 |
 | 6 | `d0b737f` | `location_profiles.bortle_class` | `addColumn` | |
 | 7 | `d0b737f` | `session_logs` expanded (location, bortle, planned darks/flats/bias, integration, focal, aperture, weather snapshot) | `addColumn` × 11 | |
-| 8 | `d0b737f` | + `capture_blocks` | `createTable` | Versions 4–8 all arrived in one commit |
+| 8 | `d0b737f` | + `capture_blocks` | `createTable` | Versions 4–8 all arrived in one commit. *Verified 2026-09-22 (TASK 3.1):* committed builds only ever created v1, v2, v3, v8 and v9; v4–v7 could exist only on a developer device from uncommitted builds |
 | 9 | `900b82a` | + `average_raw_file_size_mb` on `equipment_profiles` and `camera_modules`. `optical_multiplier` (rigs, flat table) and `bit_depth` (camera modules) were **removed from the Drift definitions with no migration** | `addColumn` × 2 | Upgraded databases keep the legacy columns; fresh installs do not — schema drift between installs |
 
 **Empirically verified (2026-09-21, throwaway tests):**
@@ -468,6 +471,22 @@ camera module and device **without checking whether other rigs reference them**
 4. **Stable identifiers, not display strings**, for cross-entity references
    (DEV-D3).
 5. **Migrations follow the Phase 0 rules** (Part A) and add tests; adopt Drift
-   schema snapshots before the next schema change (TD-004).
-6. **Provenance for external and scientific data** (Part A; DEV-D5).
+   schema snapshots before the next schema change (TD-004). *Decided 2026-09-22 by
+   ADR-008 (`docs/DECISIONS.md` Part F), not yet implemented:*
+   - **Floor.** The upgrade floor is v8. Older databases are refused, then backed up
+     and reset only on the user's confirmation. Newer databases are refused.
+   - **Snapshots.** Snapshots live in `drift_schemas/`, starting with v8 exported
+     from `d0b737f` and v9 from the current code.
+   - **Steps.** Each step is written against its own version's generated schema
+     class.
+   - **Tests.** Every bump has a data-preservation test and a schema-equality test.
+   - **Foreign keys.** They are on for every connection from v10.
+   - **Workflow.** The full workflow is documented here by TASK 3.2.
+6. **Provenance for external and scientific data** (Part A; DEV-D5). *Decided
+   2026-09-22 by ADR-008 §6:*
+   - **Columns.** Per-row nullable `source` (a namespaced id) and `confidence`
+     (`verified` / `reported` / `estimated`), with per-field pairs where the origins
+     differ.
+   - **Timing.** Added by TASKs 7.1, 8.1 and 8.5.
+   - **Legacy rows.** They stay NULL, meaning unknown, never guessed.
 7. **Do not create the Part C concepts in code** without an approved design.

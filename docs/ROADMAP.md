@@ -213,8 +213,13 @@ rewritten to match the code.*
     "No site set" state replaces the silent default-London astronomy (ADR-007 §9);
     the old defect-asserting test is replaced, with the reason recorded (152 tests
     green). Group G2 is complete.
-  - **Next: TASK 3.1 — ADR: persistence baseline and provenance (PD-04, PD-09).**
-    Not started; it begins only on the owner's go-ahead.
+  - Completed 2026-09-22: **TASK 3.1** — ADR-008 (persistence baseline, migration
+    workflow, provenance; `docs/DECISIONS.md` Part F). PD-04 and PD-09 were resolved
+    by the owner: floor v8 with backup/reset, v10 drops the orphan table and legacy
+    columns, orphans are deleted before FKs go on, and provenance is per row.
+    Documentation only.
+  - **Next: TASK 3.2 — Schema snapshots and migration tests.** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 
