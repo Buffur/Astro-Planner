@@ -325,21 +325,27 @@ class CaptureBudgetCalculator {
     );
   }
 
-  /// Whether the target's upper transit (its highest sample on the night's
-  /// 5-minute grid, when that is not at either end of the night) falls
-  /// inside one of [windows]. Resolution: 5 minutes (the curve's grid).
-  static bool transitFallsInWindows(
-    AltitudeCurve curve,
-    List<VisibilityWindow> windows,
-  ) {
+  /// The target's upper transit: its highest sample on the night's
+  /// 5-minute grid, or null when that maximum is at either end of the night
+  /// (the target culminates outside it). Resolution: 5 minutes.
+  static DateTime? transitInstant(AltitudeCurve curve) {
     final s = curve.samples;
-    if (s.length < 3 || windows.isEmpty) return false;
+    if (s.length < 3) return null;
     var best = 0;
     for (var i = 1; i < s.length; i++) {
       if (s[i].targetAltitudeDeg > s[best].targetAltitudeDeg) best = i;
     }
-    if (best == 0 || best == s.length - 1) return false;
-    final t = s[best].instantUtc;
+    if (best == 0 || best == s.length - 1) return null;
+    return s[best].instantUtc;
+  }
+
+  /// Whether [transitInstant] falls inside one of [windows].
+  static bool transitFallsInWindows(
+    AltitudeCurve curve,
+    List<VisibilityWindow> windows,
+  ) {
+    final t = transitInstant(curve);
+    if (t == null) return false;
     return windows.any((w) => !t.isBefore(w.start) && t.isBefore(w.end));
   }
 }

@@ -33,7 +33,7 @@ import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/astronomical_engine.dart';
 import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
-import '../../domain/services/session_calculator.dart';
+import '../../domain/services/fit_analyzer.dart';
 import '../../domain/models/session_log.dart';
 
 class PlannerViewModel extends ChangeNotifier {
@@ -665,24 +665,29 @@ class PlannerViewModel extends ChangeNotifier {
   /// supplies its inputs.
   CaptureBudget get captureBudget {
     final overheads = CaptureOverheads.fromPreferences(_preferences);
-    var transits = false;
-    final night = sessionNight;
-    if (overheads.meridianFlipMs != null &&
-        night != null &&
-        _selectedTarget != null) {
-      transits = CaptureBudgetCalculator.transitFallsInWindows(
-        VisibilityCalculator.calculateAltitudeCurve(
-          night: night,
-          target: _selectedTarget!,
-        ),
-        visibilityWindows,
-      );
-    }
+    final transit = overheads.meridianFlipMs == null ? null : _transitUtc;
     return CaptureBudgetCalculator.calculate(
       blocks: _captureBlocks,
       overheads: overheads,
-      targetTransitsInWindow: transits,
+      targetTransitsInWindow:
+          transit != null &&
+          visibilityWindows.any(
+            (w) => !transit.isBefore(w.start) && transit.isBefore(w.end),
+          ),
       averageRawFileSizeMB: _selectedEquipment?.averageRawFileSizeMB,
+    );
+  }
+
+  /// The target's upper transit tonight, or null without a night/target or
+  /// when it culminates outside the night (5-minute resolution).
+  DateTime? get _transitUtc {
+    final night = sessionNight;
+    if (night == null || _selectedTarget == null) return null;
+    return CaptureBudgetCalculator.transitInstant(
+      VisibilityCalculator.calculateAltitudeCurve(
+        night: night,
+        target: _selectedTarget!,
+      ),
     );
   }
 
@@ -697,11 +702,32 @@ class PlannerViewModel extends ChangeNotifier {
   /// outside the window or from a library is not included.
   Duration get estimatedRequiredTime => captureBudget.windowLoad;
 
-  SessionFeasibility get sessionFeasibility {
-    return SessionCalculator.calculateFeasibility(
-      availableWindows: visibilityWindows,
-      estimatedRequiredTime: estimatedRequiredTime,
+  /// Whether and how the plan fits tonight's windows (ADR-009 §6, TASK
+  /// 5.5): the budget's event sequence placed atomically into the windows.
+  FitResult get fitAnalysis {
+    final budget = captureBudget;
+    final night = sessionNight;
+    final String noWindowReason;
+    if (night == null) {
+      // Home already shows its own "No site set" state; don't repeat it.
+      noWindowReason = "Choose a location to see tonight's windows.";
+    } else if (_selectedTarget == null) {
+      noWindowReason = "Choose a target to see tonight's windows.";
+    } else {
+      noWindowReason = FitAnalyzer.noWindowReason(
+        timeline: nightTimeline!,
+        darknessLimitDeg: _preferences.darknessLimit.degrees,
+        minAltitudeDeg: _preferences.minAltitudeDeg,
+      );
+    }
+    return FitAnalyzer.analyze(
+      budget: budget,
+      windows: visibilityWindows,
       marginFraction: _preferences.feasibilityMarginFraction,
+      transitUtc: budget.countOf(BudgetEventKind.meridianFlip) > 0
+          ? _transitUtc
+          : null,
+      noWindowReason: noWindowReason,
     );
   }
 

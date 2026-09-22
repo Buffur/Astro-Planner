@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../viewmodels/planner_viewmodel.dart';
 import '../../domain/models/capture_block.dart';
-import '../../domain/services/session_calculator.dart';
+import '../../domain/services/fit_analyzer.dart';
 
 class CapturePlanWidget extends StatelessWidget {
   const CapturePlanWidget({super.key});
@@ -14,25 +14,32 @@ class CapturePlanWidget extends StatelessWidget {
     return '${hours}h ${minutes}m';
   }
 
-  String _formatFeasibility(FeasibilityState state) {
+  String _formatFit(FitState state) {
     switch (state) {
-      case FeasibilityState.feasible:
-        return 'Feasible';
-      case FeasibilityState.tight:
+      case FitState.fits:
+        return 'Fits';
+      case FitState.tight:
         return 'Tight';
-      case FeasibilityState.infeasible:
-        return 'Infeasible';
+      case FitState.doesNotFit:
+        return "Doesn't fit";
+      case FitState.noWindow:
+        return 'No window';
+      case FitState.nothingToFit:
+        return 'Nothing to fit';
     }
   }
 
-  Color _feasibilityColor(FeasibilityState state) {
+  Color _fitColor(FitState state) {
     switch (state) {
-      case FeasibilityState.feasible:
+      case FitState.fits:
         return Colors.green;
-      case FeasibilityState.tight:
+      case FitState.tight:
         return Colors.orange;
-      case FeasibilityState.infeasible:
+      case FitState.doesNotFit:
+      case FitState.noWindow:
         return Colors.red;
+      case FitState.nothingToFit:
+        return Colors.grey;
     }
   }
 
@@ -218,7 +225,7 @@ class CapturePlanWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<PlannerViewModel>();
     final blocks = viewModel.captureBlocks;
-    final feasibility = viewModel.sessionFeasibility;
+    final fit = viewModel.fitAnalysis;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -376,17 +383,26 @@ class CapturePlanWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Feasibility',
+                  'Fit tonight',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  _formatFeasibility(feasibility.state),
+                  _formatFit(fit.state),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: _feasibilityColor(feasibility.state),
+                    color: _fitColor(fit.state),
                   ),
                 ),
               ],
+            ),
+            // ADR-009 §6: every fit result carries a reason.
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                fit.reason,
+                key: const Key('capturePlan.fitReason'),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
             const SizedBox(height: 4),
             Row(
