@@ -16,7 +16,7 @@ class SkyDarknessWidget extends StatelessWidget {
     final theme = Theme.of(context);
 
     final illum = viewModel.lunarIllumination;
-    final lunarIllum = illum == null ? '--' : (illum * 100).toStringAsFixed(1);
+    final lunarIllum = illum == null ? '--' : '~${(illum * 100).round()}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -58,7 +58,9 @@ class SkyDarknessWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Moon Illumination: $lunarIllum%',
+                  illum == null
+                      ? 'Moon Illumination: $lunarIllum'
+                      : 'Moon Illumination: $lunarIllum% (approx.)',
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
               ],

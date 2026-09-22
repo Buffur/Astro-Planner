@@ -47,12 +47,14 @@ class OpticalCalculator {
 
   /// Estimates the storage requirement for a given number of frames.
   /// Inputs: averageRawFileSizeMB, frameCount.
-  /// Output: Estimated size in Megabytes (MB).
-  static double estimateStorageRequirement({
+  /// Output: Estimated size in Megabytes (MB), or null when the equipment's
+  /// average RAW file size is unknown — never fabricated as 0.0 (SI-008).
+  static double? estimateStorageRequirement({
     required double? averageRawFileSizeMB,
     required int frameCount,
   }) {
-    return (averageRawFileSizeMB ?? 0.0) * frameCount;
+    if (averageRawFileSizeMB == null) return null;
+    return averageRawFileSizeMB * frameCount;
   }
 
   /// Calculates the NPF rule exposure limit for untracked astrophotography.

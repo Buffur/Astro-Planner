@@ -115,8 +115,9 @@ class HomeScreen extends StatelessWidget {
                             PlannerSummaryCard(
                               title: 'Equipment: ${equipment.name}',
                               data: {
-                                'Pixel Scale':
-                                    '${viewModel.pixelScale?.toStringAsFixed(2)} arcsec/px',
+                                'Pixel Scale': viewModel.pixelScale != null
+                                    ? '${viewModel.pixelScale!.toStringAsFixed(2)} arcsec/px'
+                                    : 'Unknown',
                                 'Aperture':
                                     'f/${equipment.aperture.toStringAsFixed(1)}',
                                 'Sensor':
@@ -206,7 +207,7 @@ class HomeScreen extends StatelessWidget {
                                       SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Sky Warning: High light pollution or bright Moon will wash out faint targets!',
+                                          'Sky Warning: High light pollution or a bright Moon reduces contrast on faint targets.',
                                           style: TextStyle(
                                             color: Colors.deepOrange,
                                             fontWeight: FontWeight.bold,

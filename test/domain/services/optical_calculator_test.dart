@@ -45,6 +45,17 @@ void main() {
       expect(sizeMB, closeTo(500.0, 0.01));
     });
 
+    test(
+      'returns null (not a fabricated 0.0) when the RAW file size is unknown',
+      () {
+        final sizeMB = OpticalCalculator.estimateStorageRequirement(
+          averageRawFileSizeMB: null,
+          frameCount: 10,
+        );
+        expect(sizeMB, isNull);
+      },
+    );
+
     test('calculates NPF exposure accurately', () {
       // f/4, 3.76um pixels, 400mm focal length, dec 0
       // (16.856*4 + 13.713*3.76 + 90) / (400 * cos(0))

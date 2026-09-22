@@ -69,6 +69,11 @@ class PlannerViewModel extends ChangeNotifier {
   double _longitude = -0.1276;
 
   List<CaptureBlock> _captureBlocks = [];
+
+  /// True while [_captureBlocks] is still the seeded example plan — cleared
+  /// as soon as the user saves any capture-block change (TASK 4.4: the
+  /// default plan must not look like the user's own plan).
+  bool _isExampleCapturePlan = true;
   int _bortleClass = 4;
   double _dewPointThreshold = 2.0;
 
@@ -79,9 +84,10 @@ class PlannerViewModel extends ChangeNotifier {
   /// Minimum usable altitude in degrees.
   ///
   /// Default: 20°
-  /// Rationale: Below 20° atmospheric extinction becomes significant (≥1 mag
-  /// attenuation), seeing degrades, and astrophotography quality drops
-  /// noticeably. 20° is the widely adopted minimum for productive imaging.
+  /// Rationale: below 20° atmospheric extinction and seeing both worsen
+  /// enough to noticeably hurt astrophotography quality. 20° is a commonly
+  /// used minimum for imaging; the exact attenuation at that altitude
+  /// depends on local conditions and is not a fixed, sourced figure.
   /// Valid range: 5° – 60°. User-configurable.
   double _minAltitude = 20.0;
 
@@ -164,11 +170,13 @@ class PlannerViewModel extends ChangeNotifier {
               ),
             )
             .toList();
+        _isExampleCapturePlan = _captureBlocks.isEmpty;
       } catch (e) {
         _captureBlocks = [];
       }
     }
     if (_captureBlocks.isEmpty) {
+      _isExampleCapturePlan = true;
       _captureBlocks = [
         const CaptureBlock(
           frameType: FrameType.light,
@@ -274,6 +282,10 @@ class PlannerViewModel extends ChangeNotifier {
   double get latitude => _latitude;
   double get longitude => _longitude;
   List<CaptureBlock> get captureBlocks => _captureBlocks;
+
+  /// True while the current capture plan is still the seeded example, not a
+  /// plan the user has built — the UI must label it accordingly.
+  bool get isExampleCapturePlan => _isExampleCapturePlan;
   int get bortleClass => _bortleClass;
   double get dewPointThreshold => _dewPointThreshold;
 
@@ -412,12 +424,14 @@ class PlannerViewModel extends ChangeNotifier {
 
   Future<void> addCaptureBlock(CaptureBlock block) async {
     _captureBlocks.add(block);
+    _isExampleCapturePlan = false;
     await _saveBlocks();
   }
 
   Future<void> updateCaptureBlock(int index, CaptureBlock block) async {
     if (index >= 0 && index < _captureBlocks.length) {
       _captureBlocks[index] = block;
+      _isExampleCapturePlan = false;
       await _saveBlocks();
     }
   }
@@ -425,6 +439,7 @@ class PlannerViewModel extends ChangeNotifier {
   Future<void> removeCaptureBlock(int index) async {
     if (index >= 0 && index < _captureBlocks.length) {
       _captureBlocks.removeAt(index);
+      _isExampleCapturePlan = false;
       await _saveBlocks();
     }
   }
@@ -436,6 +451,7 @@ class PlannerViewModel extends ChangeNotifier {
   Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) async {
     final item = _captureBlocks.removeAt(oldIndex);
     _captureBlocks.insert(newIndex, item);
+    _isExampleCapturePlan = false;
     await _saveBlocks();
   }
 
@@ -539,6 +555,7 @@ class PlannerViewModel extends ChangeNotifier {
 
     if (log.captureBlocks.isNotEmpty) {
       _captureBlocks = List.from(log.captureBlocks);
+      _isExampleCapturePlan = false;
       await _saveBlocks();
     }
 
@@ -628,15 +645,11 @@ class PlannerViewModel extends ChangeNotifier {
         _dewPointThreshold;
   }
 
-  /// The target's altitude right now. Null without a target, an
-  /// unset RA/Dec, or a real site (showing this for the default London
-  /// coordinates would be a misleading default, SI-008).
+  /// The target's altitude right now. Null without a target or a real site
+  /// (showing this for the default London coordinates would be a misleading
+  /// default, SI-008).
   double? get currentAltitude {
     if (_selectedTarget == null || _usingDefaultLocation) return null;
-    if (_selectedTarget!.rightAscension == 0.0 &&
-        _selectedTarget!.declination == 0.0) {
-      return null;
-    }
 
     final jd = AstronomicalEngine.calculateJulianDate(_clock.nowUtc());
     final gmst = AstronomicalEngine.calculateGMST(jd);
@@ -652,14 +665,10 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  /// The target's culmination altitude (LHA = 0). Null without a target, an
-  /// unset RA/Dec, or a real site — see [currentAltitude].
+  /// The target's culmination altitude (LHA = 0). Null without a target or a
+  /// real site — see [currentAltitude].
   double? get maxAltitude {
     if (_selectedTarget == null || _usingDefaultLocation) return null;
-    if (_selectedTarget!.rightAscension == 0.0 &&
-        _selectedTarget!.declination == 0.0) {
-      return null;
-    }
 
     return VisibilityCalculator.calculateAltitude(
       lha: 0.0,

@@ -79,7 +79,10 @@ class EquipmentSeeder {
         resolutionWidth: 6248,
         resolutionHeight: 4176,
         focalLength: 400.0,
-        aperture: 72.0,
+        // f/5.6 (400mm focal length / 72mm aperture diameter). `aperture`
+        // stores the f-number, not the diameter (SI-005) — the previous
+        // seed put the 72mm diameter here, which read as f/72.
+        aperture: 400.0 / 72.0,
       ),
     ];
 

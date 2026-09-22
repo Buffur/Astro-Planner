@@ -231,9 +231,38 @@ class CapturePlanWidget extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Sequence Plan',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Row(
+                  children: [
+                    const Text(
+                      'Sequence Plan',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    if (viewModel.isExampleCapturePlan) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.indigo.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.indigo.shade100),
+                        ),
+                        child: Text(
+                          'Example plan',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.indigo.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 IconButton(
                   icon: const Icon(Icons.add_circle),
@@ -370,7 +399,7 @@ class CapturePlanWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Stacking Gain (Relative SNR)',
+                  'Relative stacking gain (√N vs one frame)',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -393,7 +422,7 @@ class CapturePlanWidget extends StatelessWidget {
                 Text(
                   viewModel.estimatedStorageMB != null
                       ? '${viewModel.estimatedStorageMB!.toStringAsFixed(1)} MB'
-                      : 'N/A',
+                      : 'Unknown',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.orange,

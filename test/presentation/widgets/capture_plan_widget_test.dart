@@ -170,4 +170,26 @@ void main() {
       expect(vm.captureBlocks.single.exposureTimeSeconds, 60.0);
     },
   );
+
+  testWidgets('stacking gain is labeled as relative, not SNR', (tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Relative stacking gain (√N vs one frame)'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('SNR'), findsNothing);
+  });
+
+  testWidgets('unknown storage renders as Unknown, not a fabricated 0.0 MB', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(vm.estimatedStorageMB, isNull);
+    expect(find.text('Unknown'), findsOneWidget);
+    expect(find.textContaining('0.0 MB'), findsNothing);
+  });
 }

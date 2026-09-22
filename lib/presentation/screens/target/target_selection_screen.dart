@@ -77,14 +77,10 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
       text: existing?.commonName ?? existing?.catalogId ?? '',
     );
     final raCtrl = TextEditingController(
-      text: (existing != null && existing.rightAscension != 0.0)
-          ? existing.rightAscension.toString()
-          : '',
+      text: existing != null ? existing.rightAscension.toString() : '',
     );
     final decCtrl = TextEditingController(
-      text: (existing != null && existing.declination != 0.0)
-          ? existing.declination.toString()
-          : '',
+      text: existing != null ? existing.declination.toString() : '',
     );
     String selectedType = existing?.type ?? _kObjectTypes.first;
     final isEdit = existing != null;
