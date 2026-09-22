@@ -75,7 +75,7 @@ void main() {
     await equipmentRepo.insertEquipment(_equipment);
 
     final locId = await locationRepo.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'Test',
         latitude: 51.5,

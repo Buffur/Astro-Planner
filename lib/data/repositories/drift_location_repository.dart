@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/models/calendar_date.dart';
 import '../../domain/models/location_profile.dart' as domain;
 import '../../domain/repositories/location_repository.dart';
 import '../database/app_database.dart';
@@ -17,22 +18,38 @@ class DriftLocationRepository implements LocationRepository {
       longitude: row.longitude,
       elevation: row.elevation,
       bortleClass: row.bortleClass,
+      bortleSource: row.bortleSource,
+      bortleDate: _date(row.bortleDate),
+      sqm: row.sqm,
+      sqmSource: row.sqmSource,
+      sqmDate: _date(row.sqmDate),
+      timeZoneId: row.timeZone,
+      notes: row.notes,
     );
   }
 
+  static CalendarDate? _date(String? iso) =>
+      iso == null ? null : CalendarDate.parse(iso);
+
+  static LocationProfilesCompanion _companion(domain.LocationProfile l) =>
+      LocationProfilesCompanion(
+        name: Value(l.name),
+        latitude: Value(l.latitude),
+        longitude: Value(l.longitude),
+        elevation: Value(l.elevation),
+        bortleClass: Value(l.bortleClass),
+        bortleSource: Value(l.bortleSource),
+        bortleDate: Value(l.bortleDate?.toIso8601String()),
+        sqm: Value(l.sqm),
+        sqmSource: Value(l.sqmSource),
+        sqmDate: Value(l.sqmDate?.toIso8601String()),
+        timeZone: Value(l.timeZoneId),
+        notes: Value(l.notes),
+      );
+
   @override
   Future<int> insertLocation(domain.LocationProfile location) {
-    return _db
-        .into(_db.locationProfiles)
-        .insert(
-          LocationProfilesCompanion.insert(
-            name: location.name,
-            latitude: location.latitude,
-            longitude: location.longitude,
-            elevation: location.elevation,
-            bortleClass: Value(location.bortleClass),
-          ),
-        );
+    return _db.into(_db.locationProfiles).insert(_companion(location));
   }
 
   @override
@@ -53,15 +70,7 @@ class DriftLocationRepository implements LocationRepository {
   Future<void> updateLocation(domain.LocationProfile location) {
     return (_db.update(
       _db.locationProfiles,
-    )..where((t) => t.id.equals(location.id))).write(
-      LocationProfilesCompanion(
-        name: Value(location.name),
-        latitude: Value(location.latitude),
-        longitude: Value(location.longitude),
-        elevation: Value(location.elevation),
-        bortleClass: Value(location.bortleClass),
-      ),
-    );
+    )..where((t) => t.id.equals(location.id))).write(_companion(location));
   }
 
   @override

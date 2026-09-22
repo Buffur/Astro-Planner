@@ -14,6 +14,7 @@ import '../../domain/models/night_timeline.dart';
 import '../../domain/models/session_night.dart';
 import '../../domain/models/site_time_context.dart';
 import '../../domain/models/weather_conditions.dart';
+import '../../domain/models/iana_time_context.dart';
 import '../../domain/models/location_profile.dart';
 import '../../domain/models/planning_preferences.dart';
 import '../../domain/models/visibility_window.dart';
@@ -82,7 +83,13 @@ class PlannerViewModel extends ChangeNotifier {
   /// as soon as the user saves any capture-block change (TASK 4.4: the
   /// default plan must not look like the user's own plan).
   bool _isExampleCapturePlan = true;
-  int _bortleClass = 4;
+
+  /// Bortle class of the active site, or null when unknown (SI-007).
+  int? _bortleClass;
+
+  /// The active saved site, or null when the position is transient (a map
+  /// pick or GPS fix, TASK 7.1) or when there is no position yet.
+  LocationProfile? _activeSite;
 
   SessionLog? _activeSessionLog;
   int? get activeSessionId => _activeSessionLog?.id;
@@ -144,14 +151,22 @@ class PlannerViewModel extends ChangeNotifier {
     if (activeLocationId != null) {
       final loc = await _locationRepository.getLocationById(activeLocationId);
       if (loc != null) {
+        _activeSite = loc;
         _latitude = loc.latitude;
         _longitude = loc.longitude;
         _bortleClass = loc.bortleClass;
         _usingDefaultLocation = false;
       }
     } else {
-      // First launch — try getting current location silently
-      unawaited(useCurrentLocation());
+      final transient = await _stateRepository.getTransientPosition();
+      if (transient != null) {
+        _latitude = transient.latitude;
+        _longitude = transient.longitude;
+        _usingDefaultLocation = false;
+      } else {
+        // First launch — try getting current location silently
+        unawaited(useCurrentLocation());
+      }
     }
 
     try {
@@ -234,7 +249,7 @@ class PlannerViewModel extends ChangeNotifier {
   /// on [_longitude] — the device zone is never used in the computation.
   SessionNight? get sessionNight {
     if (_usingDefaultLocation) return null;
-    final timeContext = MeanSolarTimeContext(_longitude);
+    final timeContext = _timeContext;
     final pickedDate = _pickedEveningDate;
     if (pickedDate != null) {
       return SessionNightResolver.forEveningDate(
@@ -273,7 +288,26 @@ class PlannerViewModel extends ChangeNotifier {
   /// True while the current capture plan is still the seeded example, not a
   /// plan the user has built — the UI must label it accordingly.
   bool get isExampleCapturePlan => _isExampleCapturePlan;
-  int get bortleClass => _bortleClass;
+
+  /// Bortle class of the active site, or null when unknown.
+  int? get bortleClass => _bortleClass;
+
+  /// The active saved site; null when the position is transient.
+  LocationProfile? get activeSite => _activeSite;
+
+  /// The site's time context: its IANA zone when known (TASK 7.1),
+  /// otherwise mean solar time (ADR-007 §6, L1). Never the device zone.
+  SiteTimeContext get _timeContext =>
+      IanaTimeContext.tryCreate(_activeSite?.timeZoneId) ??
+      MeanSolarTimeContext(_longitude);
+
+  /// The IANA zone times should be shown in, or null to use the device zone
+  /// (always labelled; ADR-007 §6).
+  String? get displayZoneId {
+    final ctx = _timeContext;
+    return ctx is IanaTimeContext ? ctx.id : null;
+  }
+
   double get dewPointThreshold => _preferences.dewMarginC;
 
   /// The user's planning thresholds and overhead defaults (TASK 5.2).
@@ -324,70 +358,31 @@ class PlannerViewModel extends ChangeNotifier {
     }
   }
 
+  /// The (currently never-succeeding, TD-006) online Bortle lookup. Its
+  /// result is held in memory only: no code path writes into a saved site
+  /// without an explicit user action (TASK 7.1 acceptance).
   Future<void> _fetchBortle(double lat, double lon) async {
     final bortle = await _lightPollutionRepository.fetchBortleClass(lat, lon);
     if (bortle != null) {
       _bortleClass = bortle;
       notifyListeners();
-
-      // Update saved location profile if active
-      final activeId = await _stateRepository.getActiveLocationId();
-      if (activeId != null) {
-        final existing = await _locationRepository.getLocationById(activeId);
-        if (existing != null) {
-          await _locationRepository.updateLocation(
-            LocationProfile(
-              id: activeId,
-              name: existing.name,
-              latitude: existing.latitude,
-              longitude: existing.longitude,
-              elevation: existing.elevation,
-              bortleClass: bortle,
-            ),
-          );
-        }
-      }
     }
   }
 
+  /// Sets a **transient** position (a map pick or GPS fix, TASK 7.1): it is
+  /// remembered across restarts but never written into a saved site, and it
+  /// deselects the active site (whose zone and Bortle no longer apply).
   Future<void> setLocation(double lat, double lon) async {
     _latitude = lat;
     _longitude = lon;
     _usingDefaultLocation = false;
+    _activeSite = null;
+    _bortleClass = null;
+    await _stateRepository.clearActiveLocationId();
+    await _stateRepository.setTransientPosition(lat, lon);
     await _fetchWeather();
     unawaited(_reverseGeocode(lat, lon));
     unawaited(_fetchBortle(lat, lon));
-
-    final activeId = await _stateRepository.getActiveLocationId();
-    if (activeId != null) {
-      final existing = await _locationRepository.getLocationById(activeId);
-      if (existing != null) {
-        // Update existing saved location
-        await _locationRepository.updateLocation(
-          LocationProfile(
-            id: activeId,
-            name: existing.name,
-            latitude: lat,
-            longitude: lon,
-            elevation: existing.elevation,
-            bortleClass: _bortleClass,
-          ),
-        );
-        return;
-      }
-    }
-
-    // Insert new custom location
-    final loc = LocationProfile(
-      id: 0,
-      name: 'Custom Location',
-      latitude: lat,
-      longitude: lon,
-      elevation: 0,
-      bortleClass: _bortleClass,
-    );
-    final newId = await _locationRepository.insertLocation(loc);
-    await _stateRepository.setActiveLocationId(newId);
   }
 
   Future<void> useCurrentLocation() async {
@@ -465,24 +460,20 @@ class PlannerViewModel extends ChangeNotifier {
     await _stateRepository.setSelectedTargetId(target.id);
   }
 
-  Future<void> setBortleClass(int bortle) async {
+  /// An explicit user edit of the Bortle class (null = unknown). For an
+  /// active saved site it is stored with source `user` and today's date;
+  /// for a transient position it is held in memory only.
+  Future<void> setBortleClass(int? bortle) async {
     _bortleClass = bortle;
     notifyListeners();
-    final activeId = await _stateRepository.getActiveLocationId();
-    if (activeId != null) {
-      final existing = await _locationRepository.getLocationById(activeId);
-      if (existing != null) {
-        await _locationRepository.updateLocation(
-          LocationProfile(
-            id: activeId,
-            name: existing.name,
-            latitude: existing.latitude,
-            longitude: existing.longitude,
-            elevation: existing.elevation,
-            bortleClass: bortle,
-          ),
-        );
-      }
+    final site = _activeSite;
+    if (site != null) {
+      final updated = site.withUserBortle(
+        bortle,
+        CalendarDate.fromDateTimeFields(_clock.nowUtc()),
+      );
+      _activeSite = updated;
+      await _locationRepository.updateLocation(updated);
     }
   }
 
@@ -621,7 +612,8 @@ class PlannerViewModel extends ChangeNotifier {
 
   bool get skyDarknessWarning {
     final illum = lunarIllumination;
-    return (illum != null && illum > 0.8) || _bortleClass >= 7;
+    final bortle = _bortleClass;
+    return (illum != null && illum > 0.8) || (bortle != null && bortle >= 7);
   }
 
   bool get dewWarning {

@@ -65,7 +65,7 @@ void main() {
     // A saved location, so isDefaultLocation is false and sessionNight
     // resolves (TASK 2.4): Save Session needs a night to save.
     final locId = await locationRepo.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'Test Site',
         latitude: 51.5072,

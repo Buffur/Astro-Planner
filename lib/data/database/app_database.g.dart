@@ -1584,10 +1584,82 @@ class $LocationProfilesTable extends LocationProfiles
   late final GeneratedColumn<int> bortleClass = GeneratedColumn<int>(
     'bortle_class',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(4),
+  );
+  static const VerificationMeta _bortleSourceMeta = const VerificationMeta(
+    'bortleSource',
+  );
+  @override
+  late final GeneratedColumn<String> bortleSource = GeneratedColumn<String>(
+    'bortle_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bortleDateMeta = const VerificationMeta(
+    'bortleDate',
+  );
+  @override
+  late final GeneratedColumn<String> bortleDate = GeneratedColumn<String>(
+    'bortle_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sqmMeta = const VerificationMeta('sqm');
+  @override
+  late final GeneratedColumn<double> sqm = GeneratedColumn<double>(
+    'sqm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sqmSourceMeta = const VerificationMeta(
+    'sqmSource',
+  );
+  @override
+  late final GeneratedColumn<String> sqmSource = GeneratedColumn<String>(
+    'sqm_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sqmDateMeta = const VerificationMeta(
+    'sqmDate',
+  );
+  @override
+  late final GeneratedColumn<String> sqmDate = GeneratedColumn<String>(
+    'sqm_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _timeZoneMeta = const VerificationMeta(
+    'timeZone',
+  );
+  @override
+  late final GeneratedColumn<String> timeZone = GeneratedColumn<String>(
+    'time_zone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -1597,6 +1669,13 @@ class $LocationProfilesTable extends LocationProfiles
     longitude,
     elevation,
     bortleClass,
+    bortleSource,
+    bortleDate,
+    sqm,
+    sqmSource,
+    sqmDate,
+    timeZone,
+    notes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1654,6 +1733,51 @@ class $LocationProfilesTable extends LocationProfiles
         ),
       );
     }
+    if (data.containsKey('bortle_source')) {
+      context.handle(
+        _bortleSourceMeta,
+        bortleSource.isAcceptableOrUnknown(
+          data['bortle_source']!,
+          _bortleSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('bortle_date')) {
+      context.handle(
+        _bortleDateMeta,
+        bortleDate.isAcceptableOrUnknown(data['bortle_date']!, _bortleDateMeta),
+      );
+    }
+    if (data.containsKey('sqm')) {
+      context.handle(
+        _sqmMeta,
+        sqm.isAcceptableOrUnknown(data['sqm']!, _sqmMeta),
+      );
+    }
+    if (data.containsKey('sqm_source')) {
+      context.handle(
+        _sqmSourceMeta,
+        sqmSource.isAcceptableOrUnknown(data['sqm_source']!, _sqmSourceMeta),
+      );
+    }
+    if (data.containsKey('sqm_date')) {
+      context.handle(
+        _sqmDateMeta,
+        sqmDate.isAcceptableOrUnknown(data['sqm_date']!, _sqmDateMeta),
+      );
+    }
+    if (data.containsKey('time_zone')) {
+      context.handle(
+        _timeZoneMeta,
+        timeZone.isAcceptableOrUnknown(data['time_zone']!, _timeZoneMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     return context;
   }
 
@@ -1686,7 +1810,35 @@ class $LocationProfilesTable extends LocationProfiles
       bortleClass: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}bortle_class'],
-      )!,
+      ),
+      bortleSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bortle_source'],
+      ),
+      bortleDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bortle_date'],
+      ),
+      sqm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sqm'],
+      ),
+      sqmSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sqm_source'],
+      ),
+      sqmDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sqm_date'],
+      ),
+      timeZone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}time_zone'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
     );
   }
 
@@ -1699,17 +1851,50 @@ class $LocationProfilesTable extends LocationProfiles
 class LocationProfile extends DataClass implements Insertable<LocationProfile> {
   final int id;
   final String name;
+
+  /// Degrees, north positive.
   final double latitude;
+
+  /// Degrees, east positive.
   final double longitude;
+
+  /// Metres above mean sea level. Rows created before v12 by the old
+  /// "current location" path hold 0, which may mean "not measured".
   final double elevation;
-  final int bortleClass;
+
+  /// Bortle class 1–9, or NULL when unknown (SI-007). Nullable since v12:
+  /// the old default 4 was cleared by the v11→v12 migration (owner).
+  final int? bortleClass;
+
+  /// Provenance of [bortleClass] (ADR-008 §6): `user`, `legacy`, …
+  final String? bortleSource;
+
+  /// When [bortleClass] was determined, ISO `YYYY-MM-DD`.
+  final String? bortleDate;
+
+  /// Sky quality, mag/arcsec² (SQM), or NULL when unknown.
+  final double? sqm;
+  final String? sqmSource;
+  final String? sqmDate;
+
+  /// IANA time zone id (e.g. `Europe/London`), or NULL when unknown — the
+  /// night then falls back to mean solar time (ADR-007 §6, L1).
+  final String? timeZone;
+  final String? notes;
   const LocationProfile({
     required this.id,
     required this.name,
     required this.latitude,
     required this.longitude,
     required this.elevation,
-    required this.bortleClass,
+    this.bortleClass,
+    this.bortleSource,
+    this.bortleDate,
+    this.sqm,
+    this.sqmSource,
+    this.sqmDate,
+    this.timeZone,
+    this.notes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1719,7 +1904,30 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     map['latitude'] = Variable<double>(latitude);
     map['longitude'] = Variable<double>(longitude);
     map['elevation'] = Variable<double>(elevation);
-    map['bortle_class'] = Variable<int>(bortleClass);
+    if (!nullToAbsent || bortleClass != null) {
+      map['bortle_class'] = Variable<int>(bortleClass);
+    }
+    if (!nullToAbsent || bortleSource != null) {
+      map['bortle_source'] = Variable<String>(bortleSource);
+    }
+    if (!nullToAbsent || bortleDate != null) {
+      map['bortle_date'] = Variable<String>(bortleDate);
+    }
+    if (!nullToAbsent || sqm != null) {
+      map['sqm'] = Variable<double>(sqm);
+    }
+    if (!nullToAbsent || sqmSource != null) {
+      map['sqm_source'] = Variable<String>(sqmSource);
+    }
+    if (!nullToAbsent || sqmDate != null) {
+      map['sqm_date'] = Variable<String>(sqmDate);
+    }
+    if (!nullToAbsent || timeZone != null) {
+      map['time_zone'] = Variable<String>(timeZone);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     return map;
   }
 
@@ -1730,7 +1938,28 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       latitude: Value(latitude),
       longitude: Value(longitude),
       elevation: Value(elevation),
-      bortleClass: Value(bortleClass),
+      bortleClass: bortleClass == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bortleClass),
+      bortleSource: bortleSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bortleSource),
+      bortleDate: bortleDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bortleDate),
+      sqm: sqm == null && nullToAbsent ? const Value.absent() : Value(sqm),
+      sqmSource: sqmSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sqmSource),
+      sqmDate: sqmDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sqmDate),
+      timeZone: timeZone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timeZone),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
     );
   }
 
@@ -1745,7 +1974,14 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
       elevation: serializer.fromJson<double>(json['elevation']),
-      bortleClass: serializer.fromJson<int>(json['bortleClass']),
+      bortleClass: serializer.fromJson<int?>(json['bortleClass']),
+      bortleSource: serializer.fromJson<String?>(json['bortleSource']),
+      bortleDate: serializer.fromJson<String?>(json['bortleDate']),
+      sqm: serializer.fromJson<double?>(json['sqm']),
+      sqmSource: serializer.fromJson<String?>(json['sqmSource']),
+      sqmDate: serializer.fromJson<String?>(json['sqmDate']),
+      timeZone: serializer.fromJson<String?>(json['timeZone']),
+      notes: serializer.fromJson<String?>(json['notes']),
     );
   }
   @override
@@ -1757,7 +1993,14 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
       'elevation': serializer.toJson<double>(elevation),
-      'bortleClass': serializer.toJson<int>(bortleClass),
+      'bortleClass': serializer.toJson<int?>(bortleClass),
+      'bortleSource': serializer.toJson<String?>(bortleSource),
+      'bortleDate': serializer.toJson<String?>(bortleDate),
+      'sqm': serializer.toJson<double?>(sqm),
+      'sqmSource': serializer.toJson<String?>(sqmSource),
+      'sqmDate': serializer.toJson<String?>(sqmDate),
+      'timeZone': serializer.toJson<String?>(timeZone),
+      'notes': serializer.toJson<String?>(notes),
     };
   }
 
@@ -1767,14 +2010,28 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     double? latitude,
     double? longitude,
     double? elevation,
-    int? bortleClass,
+    Value<int?> bortleClass = const Value.absent(),
+    Value<String?> bortleSource = const Value.absent(),
+    Value<String?> bortleDate = const Value.absent(),
+    Value<double?> sqm = const Value.absent(),
+    Value<String?> sqmSource = const Value.absent(),
+    Value<String?> sqmDate = const Value.absent(),
+    Value<String?> timeZone = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
   }) => LocationProfile(
     id: id ?? this.id,
     name: name ?? this.name,
     latitude: latitude ?? this.latitude,
     longitude: longitude ?? this.longitude,
     elevation: elevation ?? this.elevation,
-    bortleClass: bortleClass ?? this.bortleClass,
+    bortleClass: bortleClass.present ? bortleClass.value : this.bortleClass,
+    bortleSource: bortleSource.present ? bortleSource.value : this.bortleSource,
+    bortleDate: bortleDate.present ? bortleDate.value : this.bortleDate,
+    sqm: sqm.present ? sqm.value : this.sqm,
+    sqmSource: sqmSource.present ? sqmSource.value : this.sqmSource,
+    sqmDate: sqmDate.present ? sqmDate.value : this.sqmDate,
+    timeZone: timeZone.present ? timeZone.value : this.timeZone,
+    notes: notes.present ? notes.value : this.notes,
   );
   LocationProfile copyWithCompanion(LocationProfilesCompanion data) {
     return LocationProfile(
@@ -1786,6 +2043,17 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       bortleClass: data.bortleClass.present
           ? data.bortleClass.value
           : this.bortleClass,
+      bortleSource: data.bortleSource.present
+          ? data.bortleSource.value
+          : this.bortleSource,
+      bortleDate: data.bortleDate.present
+          ? data.bortleDate.value
+          : this.bortleDate,
+      sqm: data.sqm.present ? data.sqm.value : this.sqm,
+      sqmSource: data.sqmSource.present ? data.sqmSource.value : this.sqmSource,
+      sqmDate: data.sqmDate.present ? data.sqmDate.value : this.sqmDate,
+      timeZone: data.timeZone.present ? data.timeZone.value : this.timeZone,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -1797,14 +2065,34 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('elevation: $elevation, ')
-          ..write('bortleClass: $bortleClass')
+          ..write('bortleClass: $bortleClass, ')
+          ..write('bortleSource: $bortleSource, ')
+          ..write('bortleDate: $bortleDate, ')
+          ..write('sqm: $sqm, ')
+          ..write('sqmSource: $sqmSource, ')
+          ..write('sqmDate: $sqmDate, ')
+          ..write('timeZone: $timeZone, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, latitude, longitude, elevation, bortleClass);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    latitude,
+    longitude,
+    elevation,
+    bortleClass,
+    bortleSource,
+    bortleDate,
+    sqm,
+    sqmSource,
+    sqmDate,
+    timeZone,
+    notes,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1814,7 +2102,14 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.elevation == this.elevation &&
-          other.bortleClass == this.bortleClass);
+          other.bortleClass == this.bortleClass &&
+          other.bortleSource == this.bortleSource &&
+          other.bortleDate == this.bortleDate &&
+          other.sqm == this.sqm &&
+          other.sqmSource == this.sqmSource &&
+          other.sqmDate == this.sqmDate &&
+          other.timeZone == this.timeZone &&
+          other.notes == this.notes);
 }
 
 class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
@@ -1823,7 +2118,14 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
   final Value<double> latitude;
   final Value<double> longitude;
   final Value<double> elevation;
-  final Value<int> bortleClass;
+  final Value<int?> bortleClass;
+  final Value<String?> bortleSource;
+  final Value<String?> bortleDate;
+  final Value<double?> sqm;
+  final Value<String?> sqmSource;
+  final Value<String?> sqmDate;
+  final Value<String?> timeZone;
+  final Value<String?> notes;
   const LocationProfilesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1831,6 +2133,13 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     this.longitude = const Value.absent(),
     this.elevation = const Value.absent(),
     this.bortleClass = const Value.absent(),
+    this.bortleSource = const Value.absent(),
+    this.bortleDate = const Value.absent(),
+    this.sqm = const Value.absent(),
+    this.sqmSource = const Value.absent(),
+    this.sqmDate = const Value.absent(),
+    this.timeZone = const Value.absent(),
+    this.notes = const Value.absent(),
   });
   LocationProfilesCompanion.insert({
     this.id = const Value.absent(),
@@ -1839,6 +2148,13 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     required double longitude,
     required double elevation,
     this.bortleClass = const Value.absent(),
+    this.bortleSource = const Value.absent(),
+    this.bortleDate = const Value.absent(),
+    this.sqm = const Value.absent(),
+    this.sqmSource = const Value.absent(),
+    this.sqmDate = const Value.absent(),
+    this.timeZone = const Value.absent(),
+    this.notes = const Value.absent(),
   }) : name = Value(name),
        latitude = Value(latitude),
        longitude = Value(longitude),
@@ -1850,6 +2166,13 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     Expression<double>? longitude,
     Expression<double>? elevation,
     Expression<int>? bortleClass,
+    Expression<String>? bortleSource,
+    Expression<String>? bortleDate,
+    Expression<double>? sqm,
+    Expression<String>? sqmSource,
+    Expression<String>? sqmDate,
+    Expression<String>? timeZone,
+    Expression<String>? notes,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1858,6 +2181,13 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
       if (longitude != null) 'longitude': longitude,
       if (elevation != null) 'elevation': elevation,
       if (bortleClass != null) 'bortle_class': bortleClass,
+      if (bortleSource != null) 'bortle_source': bortleSource,
+      if (bortleDate != null) 'bortle_date': bortleDate,
+      if (sqm != null) 'sqm': sqm,
+      if (sqmSource != null) 'sqm_source': sqmSource,
+      if (sqmDate != null) 'sqm_date': sqmDate,
+      if (timeZone != null) 'time_zone': timeZone,
+      if (notes != null) 'notes': notes,
     });
   }
 
@@ -1867,7 +2197,14 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     Value<double>? latitude,
     Value<double>? longitude,
     Value<double>? elevation,
-    Value<int>? bortleClass,
+    Value<int?>? bortleClass,
+    Value<String?>? bortleSource,
+    Value<String?>? bortleDate,
+    Value<double?>? sqm,
+    Value<String?>? sqmSource,
+    Value<String?>? sqmDate,
+    Value<String?>? timeZone,
+    Value<String?>? notes,
   }) {
     return LocationProfilesCompanion(
       id: id ?? this.id,
@@ -1876,6 +2213,13 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
       longitude: longitude ?? this.longitude,
       elevation: elevation ?? this.elevation,
       bortleClass: bortleClass ?? this.bortleClass,
+      bortleSource: bortleSource ?? this.bortleSource,
+      bortleDate: bortleDate ?? this.bortleDate,
+      sqm: sqm ?? this.sqm,
+      sqmSource: sqmSource ?? this.sqmSource,
+      sqmDate: sqmDate ?? this.sqmDate,
+      timeZone: timeZone ?? this.timeZone,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -1900,6 +2244,27 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     if (bortleClass.present) {
       map['bortle_class'] = Variable<int>(bortleClass.value);
     }
+    if (bortleSource.present) {
+      map['bortle_source'] = Variable<String>(bortleSource.value);
+    }
+    if (bortleDate.present) {
+      map['bortle_date'] = Variable<String>(bortleDate.value);
+    }
+    if (sqm.present) {
+      map['sqm'] = Variable<double>(sqm.value);
+    }
+    if (sqmSource.present) {
+      map['sqm_source'] = Variable<String>(sqmSource.value);
+    }
+    if (sqmDate.present) {
+      map['sqm_date'] = Variable<String>(sqmDate.value);
+    }
+    if (timeZone.present) {
+      map['time_zone'] = Variable<String>(timeZone.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     return map;
   }
 
@@ -1911,7 +2276,14 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('elevation: $elevation, ')
-          ..write('bortleClass: $bortleClass')
+          ..write('bortleClass: $bortleClass, ')
+          ..write('bortleSource: $bortleSource, ')
+          ..write('bortleDate: $bortleDate, ')
+          ..write('sqm: $sqm, ')
+          ..write('sqmSource: $sqmSource, ')
+          ..write('sqmDate: $sqmDate, ')
+          ..write('timeZone: $timeZone, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
@@ -5428,7 +5800,14 @@ typedef $$LocationProfilesTableCreateCompanionBuilder =
       required double latitude,
       required double longitude,
       required double elevation,
-      Value<int> bortleClass,
+      Value<int?> bortleClass,
+      Value<String?> bortleSource,
+      Value<String?> bortleDate,
+      Value<double?> sqm,
+      Value<String?> sqmSource,
+      Value<String?> sqmDate,
+      Value<String?> timeZone,
+      Value<String?> notes,
     });
 typedef $$LocationProfilesTableUpdateCompanionBuilder =
     LocationProfilesCompanion Function({
@@ -5437,7 +5816,14 @@ typedef $$LocationProfilesTableUpdateCompanionBuilder =
       Value<double> latitude,
       Value<double> longitude,
       Value<double> elevation,
-      Value<int> bortleClass,
+      Value<int?> bortleClass,
+      Value<String?> bortleSource,
+      Value<String?> bortleDate,
+      Value<double?> sqm,
+      Value<String?> sqmSource,
+      Value<String?> sqmDate,
+      Value<String?> timeZone,
+      Value<String?> notes,
     });
 
 class $$LocationProfilesTableFilterComposer
@@ -5476,6 +5862,41 @@ class $$LocationProfilesTableFilterComposer
 
   ColumnFilters<int> get bortleClass => $composableBuilder(
     column: $table.bortleClass,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bortleSource => $composableBuilder(
+    column: $table.bortleSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bortleDate => $composableBuilder(
+    column: $table.bortleDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sqm => $composableBuilder(
+    column: $table.sqm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sqmSource => $composableBuilder(
+    column: $table.sqmSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sqmDate => $composableBuilder(
+    column: $table.sqmDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get timeZone => $composableBuilder(
+    column: $table.timeZone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5518,6 +5939,41 @@ class $$LocationProfilesTableOrderingComposer
     column: $table.bortleClass,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get bortleSource => $composableBuilder(
+    column: $table.bortleSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bortleDate => $composableBuilder(
+    column: $table.bortleDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sqm => $composableBuilder(
+    column: $table.sqm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sqmSource => $composableBuilder(
+    column: $table.sqmSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sqmDate => $composableBuilder(
+    column: $table.sqmDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeZone => $composableBuilder(
+    column: $table.timeZone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocationProfilesTableAnnotationComposer
@@ -5548,6 +6004,31 @@ class $$LocationProfilesTableAnnotationComposer
     column: $table.bortleClass,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get bortleSource => $composableBuilder(
+    column: $table.bortleSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get bortleDate => $composableBuilder(
+    column: $table.bortleDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get sqm =>
+      $composableBuilder(column: $table.sqm, builder: (column) => column);
+
+  GeneratedColumn<String> get sqmSource =>
+      $composableBuilder(column: $table.sqmSource, builder: (column) => column);
+
+  GeneratedColumn<String> get sqmDate =>
+      $composableBuilder(column: $table.sqmDate, builder: (column) => column);
+
+  GeneratedColumn<String> get timeZone =>
+      $composableBuilder(column: $table.timeZone, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 }
 
 class $$LocationProfilesTableTableManager
@@ -5592,7 +6073,14 @@ class $$LocationProfilesTableTableManager
                 Value<double> latitude = const Value.absent(),
                 Value<double> longitude = const Value.absent(),
                 Value<double> elevation = const Value.absent(),
-                Value<int> bortleClass = const Value.absent(),
+                Value<int?> bortleClass = const Value.absent(),
+                Value<String?> bortleSource = const Value.absent(),
+                Value<String?> bortleDate = const Value.absent(),
+                Value<double?> sqm = const Value.absent(),
+                Value<String?> sqmSource = const Value.absent(),
+                Value<String?> sqmDate = const Value.absent(),
+                Value<String?> timeZone = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
               }) => LocationProfilesCompanion(
                 id: id,
                 name: name,
@@ -5600,6 +6088,13 @@ class $$LocationProfilesTableTableManager
                 longitude: longitude,
                 elevation: elevation,
                 bortleClass: bortleClass,
+                bortleSource: bortleSource,
+                bortleDate: bortleDate,
+                sqm: sqm,
+                sqmSource: sqmSource,
+                sqmDate: sqmDate,
+                timeZone: timeZone,
+                notes: notes,
               ),
           createCompanionCallback:
               ({
@@ -5608,7 +6103,14 @@ class $$LocationProfilesTableTableManager
                 required double latitude,
                 required double longitude,
                 required double elevation,
-                Value<int> bortleClass = const Value.absent(),
+                Value<int?> bortleClass = const Value.absent(),
+                Value<String?> bortleSource = const Value.absent(),
+                Value<String?> bortleDate = const Value.absent(),
+                Value<double?> sqm = const Value.absent(),
+                Value<String?> sqmSource = const Value.absent(),
+                Value<String?> sqmDate = const Value.absent(),
+                Value<String?> timeZone = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
               }) => LocationProfilesCompanion.insert(
                 id: id,
                 name: name,
@@ -5616,6 +6118,13 @@ class $$LocationProfilesTableTableManager
                 longitude: longitude,
                 elevation: elevation,
                 bortleClass: bortleClass,
+                bortleSource: bortleSource,
+                bortleDate: bortleDate,
+                sqm: sqm,
+                sqmSource: sqmSource,
+                sqmDate: sqmDate,
+                timeZone: timeZone,
+                notes: notes,
               ),
           withReferenceMapper: (p0) => p0
               .map(

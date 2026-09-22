@@ -148,7 +148,7 @@ void main() {
     test('false once a saved location loads', () async {
       final locationRepo = DriftLocationRepository(database);
       final locId = await locationRepo.insertLocation(
-        const domain.LocationProfile(
+        domain.LocationProfile(
           id: 0,
           name: 'Test Site',
           latitude: 51.5,

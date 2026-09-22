@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../shared/night_time_formatter.dart';
+
 import '../../domain/models/altitude_curve.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/session_night.dart';
@@ -21,11 +23,16 @@ class AltitudeChartWidget extends StatelessWidget {
   /// Minimum usable altitude in degrees. Drawn as a dashed red threshold line.
   final double minAltitude;
 
+  /// The site's IANA zone for the time axis, or null for the device zone
+  /// (TASK 7.1).
+  final String? zoneId;
+
   const AltitudeChartWidget({
     super.key,
     required this.target,
     required this.night,
     this.minAltitude = 20.0,
+    this.zoneId,
   });
 
   @override
@@ -57,6 +64,7 @@ class AltitudeChartWidget extends StatelessWidget {
                   curve: curve,
                   theme: Theme.of(context),
                   minAltitude: minAltitude,
+                  zoneId: zoneId,
                 ),
               ),
             ),
@@ -127,12 +135,14 @@ class _AltitudeChartPainter extends CustomPainter {
   final AltitudeCurve curve;
   final ThemeData theme;
   final double minAltitude;
+  final String? zoneId;
 
   _AltitudeChartPainter({
     required this.target,
     required this.curve,
     required this.theme,
     required this.minAltitude,
+    required this.zoneId,
   });
 
   @override
@@ -289,12 +299,15 @@ class _AltitudeChartPainter extends CustomPainter {
       canvas.drawCircle(Offset(x, y), 2, Paint()..color = Colors.white);
     }
 
-    // X-Axis Time Labels. Local-hour labels only, as before this task; a
-    // zone-labelled formatter is TASK 2.4 (ADR-007 §6).
+    // X-Axis Time Labels: hours in the site's zone when known, else the
+    // device's (TASK 7.1), via the one formatter.
     final labelStep = (numSteps / 6).round().clamp(1, numSteps); // ~4-hourly
     for (int i = 0; i <= numSteps; i += labelStep) {
       final x = (i / numSteps) * size.width;
-      final localTime = samples[i].instantUtc.toLocal();
+      final localTime = NightTimeFormatter.wallClock(
+        samples[i].instantUtc,
+        zoneId: zoneId,
+      );
       final label = "${localTime.hour.toString().padLeft(2, '0')}:00";
       paintText.text = TextSpan(
         text: label,

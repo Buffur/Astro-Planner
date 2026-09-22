@@ -30,12 +30,14 @@ class CaptureBudgetSummary extends StatelessWidget {
     final windows = viewModel.visibilityWindows;
     final setupStart = budget.setupStartUtc(windows);
 
+    final zoneId = viewModel.displayZoneId;
     String clock(DateTime utc) => night == null
-        ? NightTimeFormatter.clockTime(context, utc)
+        ? NightTimeFormatter.clockTime(context, utc, zoneId: zoneId)
         : NightTimeFormatter.instant(
             context,
             utc,
             windowStartUtc: night.startUtc,
+            zoneId: zoneId,
           );
 
     return Column(
@@ -117,7 +119,7 @@ class CaptureBudgetSummary extends StatelessWidget {
             (fit.state == FitState.fits || fit.state == FitState.tight))
           Text(
             'Capture ends at ${clock(fit.endUtc!)} '
-            '(${NightTimeFormatter.deviceZoneCaption(fit.endUtc!)}).',
+            '(${NightTimeFormatter.zoneCaption(fit.endUtc!, zoneId: zoneId)}).',
             key: const Key('capturePlan.fitEnd'),
             style: theme.textTheme.bodySmall,
           ),

@@ -162,7 +162,7 @@ void main() {
     tester,
   ) async {
     final locId = await locationRepo.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'Test Site',
         latitude: 51.5,
@@ -308,7 +308,7 @@ void main() {
     // the 21st (see planner_session_date_test.dart for the ViewModel-level
     // version of this same case).
     final locId = await locationRepo.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'Test Site',
         latitude: 37.7749,
@@ -432,7 +432,7 @@ void main() {
     tester,
   ) async {
     final locId = await locationRepo.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'Test Site',
         latitude: 51.5,

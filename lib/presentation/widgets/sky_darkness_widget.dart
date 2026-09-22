@@ -39,11 +39,7 @@ class SkyDarknessWidget extends StatelessWidget {
                 if (FeatureScope.lightPollutionContext)
                   _BortleBadge(
                     bortleClass: viewModel.bortleClass,
-                    onChanged: (val) {
-                      if (val != null) {
-                        viewModel.setBortleClass(val);
-                      }
-                    },
+                    onChanged: viewModel.setBortleClass,
                   ),
               ],
             ),
@@ -66,12 +62,18 @@ class SkyDarknessWidget extends StatelessWidget {
                 ),
               ],
             ),
-            _MoonDetails(conditions: viewModel.moonConditions),
+            _MoonDetails(
+              conditions: viewModel.moonConditions,
+              zoneId: viewModel.displayZoneId,
+            ),
 
             const SizedBox(height: 16),
 
             // Night Timeline
-            _NightTimelineVisual(timeline: timeline),
+            _NightTimelineVisual(
+              timeline: timeline,
+              zoneId: viewModel.displayZoneId,
+            ),
           ],
         ),
       ),
@@ -80,7 +82,8 @@ class SkyDarknessWidget extends StatelessWidget {
 }
 
 class _BortleBadge extends StatelessWidget {
-  final int bortleClass;
+  /// Null when unknown (SI-007, TASK 7.1).
+  final int? bortleClass;
   final ValueChanged<int?> onChanged;
 
   const _BortleBadge({required this.bortleClass, required this.onChanged});
@@ -133,30 +136,42 @@ class _BortleBadge extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade400, width: 0.5),
       ),
       child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
+        child: DropdownButton<int?>(
           value: bortleClass,
           dropdownColor: Theme.of(context).cardColor,
           icon: Icon(Icons.arrow_drop_down, color: textColor),
-          items: List.generate(
-            9,
-            (index) => DropdownMenuItem(
-              value: index + 1,
+          items: [
+            DropdownMenuItem<int?>(
+              value: null,
               child: Text(
-                'Bortle ${index + 1}',
+                'Bortle unknown',
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
-          ),
+            ...List.generate(
+              9,
+              (index) => DropdownMenuItem<int?>(
+                value: index + 1,
+                child: Text(
+                  'Bortle ${index + 1}',
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+              ),
+            ),
+          ],
           onChanged: onChanged,
           selectedItemBuilder: (BuildContext context) {
-            return List.generate(9, (index) {
+            return List.generate(10, (i) {
+              final index = i - 1; // item 0 is "unknown"
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0, right: 4.0),
                   child: Text(
-                    'Bortle ${index + 1}',
+                    i == 0 ? 'Bortle ?' : 'Bortle ${index + 1}',
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.bold,
@@ -176,7 +191,10 @@ class _BortleBadge extends StatelessWidget {
 class _NightTimelineVisual extends StatelessWidget {
   final NightTimeline? timeline;
 
-  const _NightTimelineVisual({required this.timeline});
+  /// The site's IANA zone, or null for the device zone (TASK 7.1).
+  final String? zoneId;
+
+  const _NightTimelineVisual({required this.timeline, required this.zoneId});
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +215,7 @@ class _NightTimelineVisual extends StatelessWidget {
         context,
         duskUtc,
         windowStartUtc: windowStart,
+        zoneId: zoneId,
       ),
       SunCrossing() => 'Before start',
       SunNeverBelow() => 'N/A',
@@ -207,6 +226,7 @@ class _NightTimelineVisual extends StatelessWidget {
         context,
         dawnUtc,
         windowStartUtc: windowStart,
+        zoneId: zoneId,
       ),
       SunCrossing() => 'After end',
       SunNeverBelow() => 'N/A',
@@ -267,7 +287,7 @@ class _NightTimelineVisual extends StatelessWidget {
         Text(
           'True Night Window: ${dusk(timeline.astronomicalTwilight)} - '
           '${dawn(timeline.astronomicalTwilight)} '
-          '(${NightTimeFormatter.deviceZoneCaption(windowStart)})',
+          '(${NightTimeFormatter.zoneCaption(windowStart, zoneId: zoneId)})',
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
@@ -311,9 +331,12 @@ class _TimelinePoint extends StatelessWidget {
 /// When the Moon is up tonight and how close it comes to the target —
 /// annotations only, never an "impact %" (ADR-010, TASK 6.4).
 class _MoonDetails extends StatelessWidget {
-  const _MoonDetails({required this.conditions});
+  const _MoonDetails({required this.conditions, required this.zoneId});
 
   final MoonConditions? conditions;
+
+  /// The site's IANA zone, or null for the device zone (TASK 7.1).
+  final String? zoneId;
 
   @override
   Widget build(BuildContext context) {
@@ -324,6 +347,7 @@ class _MoonDetails extends StatelessWidget {
       context,
       utc,
       windowStartUtc: c.night.startUtc,
+      zoneId: zoneId,
     );
 
     final String upText;
@@ -355,7 +379,7 @@ class _MoonDetails extends StatelessWidget {
           if (sepText != null)
             Text(sepText, key: const Key('sky.moonSeparation'), style: style),
           Text(
-            'Times in ${NightTimeFormatter.deviceZoneCaption(c.night.startUtc)}.',
+            'Times in ${NightTimeFormatter.zoneCaption(c.night.startUtc, zoneId: zoneId)}.',
             style: style,
           ),
         ],

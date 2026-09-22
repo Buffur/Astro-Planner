@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -240,6 +240,45 @@ class AppDatabase extends _$AppDatabase {
                         "AND trim(gain_iso) NOT GLOB '*[^0-9.]*' "
                         "AND trim(gain_iso) GLOB '*[0-9]*' "
                         "THEN CAST(trim(gain_iso) AS REAL) ELSE NULL END",
+                      ),
+                    },
+                  ),
+                );
+              },
+              from11To12: (m, schema) async {
+                // TASK 7.1 (owner decisions): sites gain nullable Bortle with
+                // its source and date, SQM, an IANA zone and notes. Bortle
+                // becomes nullable, which needs a rebuild (SQLite cannot drop
+                // a NOT NULL/DEFAULT in place). A stored 4 was the app's
+                // default, never a measurement (the badge was hidden and the
+                // scraper never succeeded): it becomes NULL with a note.
+                // Any other value is kept, marked `legacy`.
+                final sites = schema.locationProfiles;
+                await m.alterTable(
+                  TableMigration(
+                    sites,
+                    newColumns: [
+                      sites.bortleSource,
+                      sites.bortleDate,
+                      sites.sqm,
+                      sites.sqmSource,
+                      sites.sqmDate,
+                      sites.timeZone,
+                      sites.notes,
+                    ],
+                    columnTransformer: {
+                      sites.bortleClass: const CustomExpression<int>(
+                        'CASE WHEN bortle_class = 4 THEN NULL '
+                        'ELSE bortle_class END',
+                      ),
+                      sites.bortleSource: const CustomExpression<String>(
+                        "CASE WHEN bortle_class IS NULL OR bortle_class = 4 "
+                        "THEN NULL ELSE 'legacy' END",
+                      ),
+                      sites.notes: const CustomExpression<String>(
+                        "CASE WHEN bortle_class = 4 THEN 'Bortle: the stored "
+                        "value 4 was the app default, not a measurement; "
+                        "cleared in schema v12.' ELSE NULL END",
                       ),
                     },
                   ),

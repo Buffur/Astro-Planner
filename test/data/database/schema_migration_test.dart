@@ -119,6 +119,51 @@ void main() {
     });
   });
 
+  group('TASK 7.1: v12 (site semantics)', () {
+    for (final from in [8, 9, 10, 11]) {
+      test('v$from -> v12 matches the v12 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 12);
+        await db.close();
+      });
+    }
+
+    test('v11 -> v12: the default Bortle 4 becomes NULL with a note; other '
+        'values are kept as legacy; coordinates untouched', () async {
+      final schema = await verifier.schemaAt(11);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO location_profiles (id, name, latitude, longitude, "
+        "elevation, bortle_class) VALUES "
+        "(1, 'Custom Location', 51.5, -0.1, 0.0, 4), "
+        "(2, 'Dark Site', 44.1, 7.2, 1850.0, 2);",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.locationProfiles,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+
+      expect(rows[0].bortleClass, isNull);
+      expect(rows[0].bortleSource, isNull);
+      expect(rows[0].notes, contains('app default, not a measurement'));
+      expect(rows[0].latitude, 51.5);
+      expect(rows[0].name, 'Custom Location');
+
+      expect(rows[1].bortleClass, 2);
+      expect(rows[1].bortleSource, 'legacy');
+      expect(rows[1].bortleDate, isNull);
+      expect(rows[1].notes, isNull);
+      expect(rows[1].elevation, 1850.0);
+
+      for (final r in rows) {
+        expect(r.timeZone, isNull);
+        expect(r.sqm, isNull);
+      }
+      await db.close();
+    });
+  });
+
   group('TASK 5.3: v11 (capture-block order, policy, typed gain)', () {
     for (final from in [8, 9, 10]) {
       test('v$from -> v11 matches the v11 snapshot exactly', () async {

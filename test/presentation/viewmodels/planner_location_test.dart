@@ -91,35 +91,54 @@ void main() {
       },
     );
 
-    test('a position from the service becomes the active location', () async {
-      final locId = await locationRepo.insertLocation(
-        const domain.LocationProfile(
-          id: 0,
-          name: 'Home',
-          latitude: 51.5,
-          longitude: -0.1,
-          elevation: 10,
-        ),
-      );
-      // A saved location means startup does not ask the service by itself.
-      SharedPreferences.setMockInitialValues({'activeLocationId': locId});
-      final service = FakeLocationService(
-        location: const DeviceLocation(latitude: 48.8566, longitude: 2.3522),
-      );
+    // TASK 7.1 (owner decision): a GPS fix is a *transient* position. Before
+    // 7.1 this test asserted that the fix overwrote the saved site's
+    // coordinates — the defect TD-027 describes and 7.1's acceptance
+    // forbids ("no code path writes into a saved site without explicit user
+    // action"). It now asserts the new contract instead.
+    test(
+      'a position from the service becomes the transient position',
+      () async {
+        final locId = await locationRepo.insertLocation(
+          domain.LocationProfile(
+            id: 0,
+            name: 'Home',
+            latitude: 51.5,
+            longitude: -0.1,
+            elevation: 10,
+          ),
+        );
+        // A saved location means startup does not ask the service by itself.
+        SharedPreferences.setMockInitialValues({'activeLocationId': locId});
+        final service = FakeLocationService(
+          location: const DeviceLocation(latitude: 48.8566, longitude: 2.3522),
+        );
 
-      final vm = buildViewModel(service);
-      await vm.ready;
-      expect(service.calls, 0);
-      expect(vm.latitude, 51.5);
+        final vm = buildViewModel(service);
+        await vm.ready;
+        expect(service.calls, 0);
+        expect(vm.latitude, 51.5);
 
-      await vm.useCurrentLocation();
+        await vm.useCurrentLocation();
 
-      expect(service.calls, 1);
-      expect(vm.latitude, 48.8566);
-      expect(vm.longitude, 2.3522);
-      final saved = await locationRepo.getLocationById(locId);
-      expect(saved!.latitude, 48.8566);
-      expect(saved.longitude, 2.3522);
-    });
+        expect(service.calls, 1);
+        expect(vm.latitude, 48.8566);
+        expect(vm.longitude, 2.3522);
+        // The saved site is untouched, and no longer active.
+        final saved = await locationRepo.getLocationById(locId);
+        expect(saved!.latitude, 51.5);
+        expect(saved.longitude, -0.1);
+        expect(vm.activeSite, isNull);
+        expect(await locationRepo.getLocations(), hasLength(1));
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getInt('activeLocationId'), isNull);
+        // The transient position is remembered for the next launch.
+        final again = buildViewModel(FakeLocationService());
+        await again.ready;
+        expect(again.latitude, 48.8566);
+        expect(again.longitude, 2.3522);
+        expect(again.activeSite, isNull);
+      },
+    );
   });
 }

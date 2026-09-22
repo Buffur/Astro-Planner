@@ -27,6 +27,29 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   Future<void> setActiveLocationId(int id) async =>
       (await _prefs).setInt(_activeLocationId, id);
 
+  static const _transientLat = 'transientLatitude';
+  static const _transientLon = 'transientLongitude';
+
+  @override
+  Future<void> clearActiveLocationId() async =>
+      (await _prefs).remove(_activeLocationId);
+
+  @override
+  Future<({double latitude, double longitude})?> getTransientPosition() async {
+    final p = await _prefs;
+    final lat = p.getDouble(_transientLat);
+    final lon = p.getDouble(_transientLon);
+    if (lat == null || lon == null) return null;
+    return (latitude: lat, longitude: lon);
+  }
+
+  @override
+  Future<void> setTransientPosition(double latitude, double longitude) async {
+    final p = await _prefs;
+    await p.setDouble(_transientLat, latitude);
+    await p.setDouble(_transientLon, longitude);
+  }
+
   @override
   Future<int?> getSelectedTargetId() async => (await _prefs).getInt(_targetId);
 

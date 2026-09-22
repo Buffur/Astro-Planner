@@ -7,6 +7,14 @@ abstract class PlannerStateRepository {
   Future<int?> getActiveLocationId();
   Future<void> setActiveLocationId(int id);
 
+  /// Deselects the active saved site (TASK 7.1).
+  Future<void> clearActiveLocationId();
+
+  /// The transient current position (map pick or GPS), which is never
+  /// written into a saved site (TASK 7.1). Degrees, north/east positive.
+  Future<({double latitude, double longitude})?> getTransientPosition();
+  Future<void> setTransientPosition(double latitude, double longitude);
+
   Future<int?> getSelectedTargetId();
   Future<void> setSelectedTargetId(int id);
 

@@ -46,7 +46,7 @@ void main() {
     await CatalogSeeder(targets).seedIfNeeded(); // provides M42
     final locations = DriftLocationRepository(database);
     final locId = await locations.insertLocation(
-      const domain.LocationProfile(
+      domain.LocationProfile(
         id: 0,
         name: 'London',
         latitude: 51.5,

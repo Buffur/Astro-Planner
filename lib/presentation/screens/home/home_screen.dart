@@ -109,6 +109,7 @@ class HomeScreen extends StatelessWidget {
                                     target: target,
                                     night: viewModel.sessionNight!,
                                     minAltitude: viewModel.minAltitude,
+                                    zoneId: viewModel.displayZoneId,
                                   ),
                                 ),
                               )
