@@ -73,7 +73,11 @@ void main() {
   Widget wrap() {
     return ChangeNotifierProvider<PlannerViewModel>.value(
       value: vm,
-      child: const MaterialApp(home: Scaffold(body: CapturePlanWidget())),
+      // Home hosts the card inside a scrolling ListView; since TASK 5.6 the
+      // card is taller than the 800x600 test surface, so scroll it here too.
+      child: const MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: CapturePlanWidget())),
+      ),
     );
   }
 
@@ -191,5 +195,80 @@ void main() {
     expect(vm.estimatedStorageMB, isNull);
     expect(find.text('Unknown'), findsOneWidget);
     expect(find.textContaining('0.0 MB'), findsNothing);
+  });
+
+  testWidgets('the dialog saves a calibration policy and a typed gain', (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrap());
+    await tester.tap(find.byIcon(Icons.add_circle));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('LIGHT').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('DARK').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('blockDialog.policy')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('During the window').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('blockDialog.gainKind')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('ISO').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('blockDialog.gainValue')),
+      '800',
+    );
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Exposure (seconds)'),
+      '60',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Frame Count'),
+      '10',
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.pumpAndSettle();
+
+    final b = vm.captureBlocks.single;
+    expect(b.frameType, FrameType.dark);
+    expect(b.calibrationPolicy, CalibrationPolicy.inWindow);
+    expect(b.gain, CaptureGain.iso(800));
+  });
+
+  testWidgets('breakdown, "Not included" assumptions and gain help render', (
+    tester,
+  ) async {
+    await vm.addCaptureBlock(
+      CaptureBlock(
+        frameType: FrameType.light,
+        filterName: 'Ha',
+        exposureTimeSeconds: 300,
+        frameCount: 20,
+      ),
+    );
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Integration (light exposure)'), findsOneWidget);
+    expect(find.text('1h 40m'), findsOneWidget); // 20 x 300 s
+    expect(find.text('Acquisition (lights + overheads)'), findsOneWidget);
+    expect(find.text('Session budget'), findsOneWidget);
+    expect(find.text('Ha · 300 s × 20'), findsOneWidget);
+    expect(find.byKey(const Key('capturePlan.gainHelp')), findsOneWidget);
+    expect(find.textContaining('not a signal-to-noise ratio'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Assumptions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Assumptions'));
+    await tester.pumpAndSettle();
+    // Setup (summary) + dither, refocus, filter change, flip, setup (panel).
+    expect(find.text('Not included'), findsNWidgets(6));
+    expect(find.text('5 s'), findsOneWidget); // per-frame default
+    expect(find.text('15 %'), findsOneWidget);
   });
 }

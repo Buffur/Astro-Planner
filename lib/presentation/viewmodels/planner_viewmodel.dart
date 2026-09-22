@@ -731,6 +731,48 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
+  /// The light block "Fill tonight's window" adjusts: the plan's last light
+  /// block (typically the one to trim or extend). Null without one.
+  int? get fillWindowBlockIndex {
+    for (var i = _captureBlocks.length - 1; i >= 0; i--) {
+      if (_captureBlocks[i].frameType == FrameType.light) return i;
+    }
+    return null;
+  }
+
+  /// The frame count for [fillWindowBlockIndex] that fills tonight's windows
+  /// with the rest of the plan unchanged (TASK 5.6), or null without a light
+  /// block. 0 means not even one frame of it fits.
+  int? get fillWindowFrameCount {
+    final index = fillWindowBlockIndex;
+    if (index == null) return null;
+    final overheads = CaptureOverheads.fromPreferences(_preferences);
+    final budget = captureBudget;
+    final flip = budget.countOf(BudgetEventKind.meridianFlip) > 0;
+    return FitAnalyzer.maxFramesForBlock(
+      blocks: _captureBlocks,
+      blockIndex: index,
+      windows: visibilityWindows,
+      overheads: overheads,
+      targetTransitsInWindow: flip,
+      transitUtc: flip ? _transitUtc : null,
+    );
+  }
+
+  /// Sets [fillWindowBlockIndex]'s frame count to [fillWindowFrameCount].
+  /// Returns false (and changes nothing) when there is no light block or
+  /// not even one frame fits.
+  Future<bool> fillWindow() async {
+    final index = fillWindowBlockIndex;
+    final count = fillWindowFrameCount;
+    if (index == null || count == null || count < 1) return false;
+    await updateCaptureBlock(
+      index,
+      _captureBlocks[index].copyWith(frameCount: count),
+    );
+    return true;
+  }
+
   /// Estimated storage (MB) for every frame taken (library blocks excluded);
   /// null when the rig's file size is unknown (SI-013).
   double? get estimatedStorageMB => captureBudget.storageMB;

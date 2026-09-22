@@ -2,6 +2,7 @@ import '../models/altitude_curve.dart';
 import '../models/capture_block.dart';
 import '../models/planning_preferences.dart';
 import '../models/visibility_window.dart';
+import 'optical_calculator.dart';
 
 /// Capture overheads used by the budget (ADR-009 §4), in integer
 /// milliseconds. A null optional overhead is **off** — "not included",
@@ -83,6 +84,25 @@ class BudgetEvent {
       '${blockIndex == null ? '' : ', block $blockIndex'})';
 }
 
+/// Light frames sharing one filter and one exposure length (ADR-009 §7).
+/// √N is meaningful only within such a group: it is never summed across
+/// groups and never an absolute SNR (SI-003, CALC-15).
+class LightGroup {
+  const LightGroup({
+    required this.filterName,
+    required this.exposureMs,
+    required this.frames,
+  });
+
+  final String? filterName;
+  final int exposureMs;
+  final int frames;
+
+  /// Relative stacking gain vs one frame of this group: √N.
+  double get relativeStackingGain =>
+      OpticalCalculator.calculateRelativeStackingGain(frames);
+}
+
 /// Where a block's time is counted (ADR-009 §2–§3).
 enum BudgetPlacement { window, outsideWindow, library }
 
@@ -127,6 +147,7 @@ class CaptureBudget {
     required this.lightFrameCount,
     required this.storageMB,
     required this.libraryBlockIndexes,
+    required this.lightGroups,
   });
 
   /// Σ light exposure — the science quantity.
@@ -158,6 +179,9 @@ class CaptureBudget {
   /// Blocks reused from a library (consume no time).
   final List<int> libraryBlockIndexes;
 
+  /// Light frames grouped by (filter, exposure), in first-appearance order.
+  final List<LightGroup> lightGroups;
+
   /// Acquisition + in-window calibration: the only quantity fitted into the
   /// windows (ADR-009 §6).
   int get windowLoadMs => acquisitionMs + inWindowCalibrationMs;
@@ -166,6 +190,13 @@ class CaptureBudget {
   /// decision: each shown on its own line).
   int get sessionBudgetMs =>
       windowLoadMs + outsideWindowCalibrationMs + (setupMs ?? 0);
+
+  /// "Start setup by": the first window's start minus [setupMs], or null
+  /// when setup is not included or there is no window (ADR-009 §2).
+  DateTime? setupStartUtc(List<VisibilityWindow> windows) {
+    if (setupMs == null || windows.isEmpty) return null;
+    return windows.first.start.subtract(Duration(milliseconds: setupMs!));
+  }
 
   int countOf(BudgetEventKind kind) =>
       sequence.where((e) => e.kind == kind).length;
@@ -322,7 +353,23 @@ class CaptureBudgetCalculator {
       lightFrameCount: lightTotal,
       storageMB: storage,
       libraryBlockIndexes: List.unmodifiable(library),
+      lightGroups: List.unmodifiable(_lightGroups(blocks)),
     );
+  }
+
+  static List<LightGroup> _lightGroups(List<CaptureBlock> blocks) {
+    final order = <(String?, int)>[];
+    final frames = <(String?, int), int>{};
+    for (final b in blocks) {
+      if (b.frameType != FrameType.light) continue;
+      final key = (b.filterName, (b.exposureTimeSeconds * 1000).round());
+      if (!frames.containsKey(key)) order.add(key);
+      frames[key] = (frames[key] ?? 0) + b.frameCount;
+    }
+    return [
+      for (final k in order)
+        LightGroup(filterName: k.$1, exposureMs: k.$2, frames: frames[k]!),
+    ];
   }
 
   /// The target's upper transit: its highest sample on the night's

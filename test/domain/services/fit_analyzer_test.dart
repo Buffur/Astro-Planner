@@ -341,4 +341,97 @@ void main() {
       );
     });
   });
+
+  group('maxFramesForBlock ("fill the window", TASK 5.6)', () {
+    const o = CaptureOverheads(perFrameMs: 5 * _s);
+
+    test('alone in E2 windows: 52 (same as the inverse answer)', () {
+      expect(
+        FitAnalyzer.maxFramesForBlock(
+          blocks: [_light(300, 53)],
+          blockIndex: 0,
+          windows: w2,
+          overheads: o,
+        ),
+        52,
+      );
+    });
+
+    test('the rest of the plan is kept: an in-window dark block uses room', () {
+      final blocks = [
+        CaptureBlock(
+          frameType: FrameType.dark,
+          exposureTimeSeconds: 300,
+          frameCount: 10,
+          calibrationPolicy: CalibrationPolicy.inWindow,
+        ),
+        _light(300, 1),
+      ];
+      final n = FitAnalyzer.maxFramesForBlock(
+        blocks: blocks,
+        blockIndex: 1,
+        windows: w2,
+        overheads: o,
+      );
+      expect(n, 42); // 52 slots minus the 10 darks
+      final filled = [...blocks]..[1] = blocks[1].copyWith(frameCount: n);
+      expect(_fit(filled, o, w2, margin: 0).state, isNot(FitState.doesNotFit));
+      final over = [...blocks]..[1] = blocks[1].copyWith(frameCount: n! + 1);
+      expect(_fit(over, o, w2).state, FitState.doesNotFit);
+    });
+
+    test('not a light block -> null; no windows -> 0', () {
+      final dark = CaptureBlock(
+        frameType: FrameType.dark,
+        exposureTimeSeconds: 60,
+        frameCount: 5,
+      );
+      expect(
+        FitAnalyzer.maxFramesForBlock(
+          blocks: [dark],
+          blockIndex: 0,
+          windows: w2,
+        ),
+        isNull,
+      );
+      expect(
+        FitAnalyzer.maxFramesForBlock(
+          blocks: [_light(60, 5)],
+          blockIndex: 0,
+          windows: const [],
+        ),
+        0,
+      );
+    });
+  });
+
+  test('light groups: same filter and exposure are grouped, in order', () {
+    final b = CaptureBudgetCalculator.calculate(
+      blocks: [
+        _light(300, 20, filter: 'Ha'),
+        _light(300, 16, filter: 'OIII'),
+        _light(300, 5, filter: 'Ha'),
+        _light(120, 4, filter: 'Ha'),
+      ],
+    );
+    expect(b.lightGroups.map((g) => (g.filterName, g.exposureMs, g.frames)), [
+      ('Ha', 300000, 25),
+      ('OIII', 300000, 16),
+      ('Ha', 120000, 4),
+    ]);
+    expect(b.lightGroups.first.relativeStackingGain, 5.0);
+  });
+
+  test('setupStartUtc: first window start minus setup; null when off', () {
+    final withSetup = CaptureBudgetCalculator.calculate(
+      blocks: [_light(60, 1)],
+      overheads: const CaptureOverheads(setupMs: 2700 * _s),
+    );
+    expect(withSetup.setupStartUtc([_w(_t(21, 30), _t(4, 30))]), _t(20, 45));
+    expect(
+      CaptureBudgetCalculator.calculate(blocks: [_light(60, 1)])
+          .setupStartUtc([_w(_t(21, 30), _t(4, 30))]),
+      isNull,
+    );
+  });
 }

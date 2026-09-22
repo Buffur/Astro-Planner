@@ -278,6 +278,62 @@ class FitAnalyzer {
     return lo;
   }
 
+  /// "Fill tonight's window" (TASK 5.6): the largest frame count for the
+  /// light block at [blockIndex] such that the **whole** plan (every other
+  /// block unchanged, with [overheads]) still places in [windows] — margin
+  /// not applied. Returns 0 when not even one frame of it fits, and null
+  /// when [blockIndex] is not a light block.
+  static int? maxFramesForBlock({
+    required List<CaptureBlock> blocks,
+    required int blockIndex,
+    required List<VisibilityWindow> windows,
+    CaptureOverheads overheads = const CaptureOverheads(),
+    bool targetTransitsInWindow = false,
+    DateTime? transitUtc,
+  }) {
+    if (blockIndex < 0 ||
+        blockIndex >= blocks.length ||
+        blocks[blockIndex].frameType != FrameType.light) {
+      return null;
+    }
+    if (windows.isEmpty) return 0;
+    bool fits(int n) {
+      if (n == 0) return true;
+      final plan = [...blocks];
+      plan[blockIndex] = plan[blockIndex].copyWith(frameCount: n);
+      final budget = CaptureBudgetCalculator.calculate(
+        blocks: plan,
+        overheads: overheads,
+        targetTransitsInWindow: targetTransitsInWindow,
+      );
+      return analyze(
+            budget: budget,
+            windows: windows,
+            marginFraction: 0,
+            transitUtc: transitUtc,
+          ).state !=
+          FitState.doesNotFit;
+    }
+
+    final b = blocks[blockIndex];
+    final unit = (b.exposureTimeSeconds * 1000).round() + overheads.perFrameMs;
+    final total = windows.fold(
+      0,
+      (s, w) => s + w.end.difference(w.start).inMilliseconds,
+    );
+    var lo = 0;
+    var hi = (total ~/ unit).clamp(0, CaptureBlock.maxFrameCount);
+    while (lo < hi) {
+      final mid = (lo + hi + 1) ~/ 2;
+      if (fits(mid)) {
+        lo = mid;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return lo;
+  }
+
   /// Why there is no window tonight, from the night timeline: the Sun never
   /// reaches the darkness limit, or the target never climbs high enough
   /// while it is dark. Thresholds without a timeline entry (−15°) get the
