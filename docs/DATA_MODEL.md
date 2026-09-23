@@ -44,6 +44,7 @@
 > **TASK 5.3 (2026-09-22):** `CaptureBlock` validates at the domain boundary and gains a calibration policy and a typed, descriptive-only gain; schema v11 adds block `position`, `calibration_policy`, `gain_kind`/`gain_value` and drops the free-text `gain_iso` (owner-approved); migrations now use generated per-version step shapes (`schema_versions.dart`).
 > **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display.
 > **TASK 7.3 (2026-09-23):** no schema change. Sites are now written only by the site editor (`LocationProfile.userEdit`): a Bortle/SQM value the user changed is stored with source `user` and the date; an unchanged value keeps its source and date; a cleared value loses both. Deleting the active site stores its coordinates as the transient position (`transientLatitude`/`transientLongitude` preferences) and clears `activeLocationId`. Elevation still cannot be unknown (non-null column), and nothing uses it.
+> **TASK 7.4 (2026-09-23):** no schema change. `SkyDarkness` (domain) is a read-only view of a site's Bortle/SQM with their source and date (or unknown); no value is fetched or derived. PD-05 resolved (DECISIONS E.1).
 
 ---
 

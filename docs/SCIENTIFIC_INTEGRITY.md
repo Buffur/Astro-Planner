@@ -42,6 +42,7 @@
 > **TASK 6.5 (2026-09-22):** CALC-17 corrected to the primary source (recorded formula change); SI-001 resolved for the formula (still hidden).
 > **TASK 7.1 (2026-09-23):** SI-007 and SI-010 progress (unknown Bortle; IANA site zone). No calculation formula changed.
 > **TASK 7.3 (2026-09-23):** SI-010 progress: a site's IANA zone is set in the editor (device zone pre-filled, "Unknown" allowed, then mean solar time). The zone data set is now `latest_all` (includes link ids; canonical zones' rules unchanged). No formula changed.
+> **TASK 7.4 (2026-09-23):** SI-007 resolved: no scraper, no default; Bortle/SQM are user-entered with source and date, or unknown; no Bortle↔SQM conversion (none is sourced); the sky warning uses a known Bortle class only.
 
 ## Purpose and authority
 
@@ -73,7 +74,7 @@ Correct Interpretation → Required Future Action.**
 | SI-004 | ISO / gain limitations | Prototype (descriptive text only) | TD-009 |
 | SI-005 | Aperture semantics and unit problem | Partial (seed value fixed TASK 4.4; field-naming/unit model still open) | TD-008 |
 | SI-006 | Hard-coded astronomy and planning thresholds | Partial (warning wording fixed TASK 4.4; thresholds still hard-coded) | TD-033, TD-043 |
-| SI-007 | Bortle default vs unknown | Broken (fetch), Partial (manual, hidden) | TD-006 |
+| SI-007 | Bortle default vs unknown | **Resolved** (TASK 7.4) | TD-006 |
 | SI-008 | Unknown treated as zero / default presented as fact | Partial (storage/pixel-scale/example-plan/RA-Dec cases fixed TASK 4.4; Bortle/GPS defaults still open) | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
 | SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
@@ -427,7 +428,9 @@ state and must not be silently replaced by a typical value.
 
 **Progress 2026-09-23 (TASK 7.1):** Bortle is nullable end to end (schema v12, domain, ViewModel, the hidden badge offers "unknown"); the default 4 was cleared from stored rows with a note (owner decision); an unknown Bortle no longer counts toward the sky warning. The scraper itself remains until TASK 7.4.
 
-**Status:** Broken (fetch); Partial (manual entry, hidden). **Work item:** TD-006.
+**Resolved 2026-09-23 (TASK 7.4, PD-05):** all four required actions are done. (1) Unknown is represented end to end and shown as "Sky darkness unknown" (`SkyDarkness`). (2) Each value carries its source and date (`user` + the edit date; unchanged values keep theirs; `legacy` rows from 7.1 keep theirs). (3) PD-05 decided: manual Bortle/SQM now, an offline dataset later (deferred, with its licence, size and radiance→SQM uncertainty to be evaluated first). (4) The scraper is deleted. Bortle and SQM are kept as separate scales with no conversion, because none is sourced for this app; an SQM reading alone therefore never triggers the sky warning, whose Bortle ≥ 7 threshold is itself unsourced and stays as it was until G10 (SI-006). `SessionLog.bortleScale` is still not populated at save (G11).
+
+**Status:** Resolved. **Work item:** TD-006 (resolved).
 
 ---
 

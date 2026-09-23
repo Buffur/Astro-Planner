@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **404 tests: 404 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.3) |
+| `flutter test --no-pub` | **420 tests: 420 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -444,3 +444,26 @@ Any test failure from here on is a regression, not a known pre-existing issue
   startup asked the location service once; since the owner's TASK 7.3 decision
   startup asks nothing, and the test asserts that. Its controlled-geocoder helper
   no longer skips a startup lookup, since a first run makes none.
+
+**Added by TASK 7.4** (light-pollution MVP; scraper removed), 16 tests:
+- **No network, no scraper (`planner_sky_darkness_test.dart`):** two location
+  changes create no `HttpClient` (counted through `HttpOverrides`; checked to
+  count a real request); no `lib/` file contains scraping code.
+- **Unknown vs known (`sky_darkness_test.dart`, `planner_sky_darkness_test.dart`):**
+  - nothing entered is unknown, with no default;
+  - a site's values carry source and date;
+  - Bortle and SQM are never derived from each other;
+  - unknown cannot warn; a known Bortle 7 warns; a bright SQM alone does not;
+  - Bortle for a transient position is marked "not saved" and goes with it.
+- **Map link (`light_pollution_map_link_test.dart`):** centred on the position;
+  the hard-coded Slovenia coordinates are gone.
+- **Sky card (`sky_darkness_context_test.dart`):** "unknown" with how to add it;
+  known values with their sources; an SQM reading not turned into a Bortle class.
+- **Editor (`sites_screen_test.dart`, +2):** Bortle and SQM entered are stored as
+  `user` with the date; an out-of-range SQM is rejected.
+- **Updated, with their reasons:** `feature_scope_test.dart` now expects
+  `lightPollutionContext` to be `true` (its PD-06 phase); the Home gated-feature
+  test now expects the map card with a site; `planner_site_test.dart`'s map-pick
+  test used a fake scraper answering 5 and now expects an unknown Bortle class.
+  The scraper argument was removed from every `PlannerViewModel(...)` call in the
+  tests (a mechanical change, no assertion weakened).

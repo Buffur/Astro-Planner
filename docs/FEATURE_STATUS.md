@@ -48,6 +48,7 @@
 > **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display. Affected entries: F-06, F-07, F-10, F-33, F-48.
 > **TASK 7.2 (2026-09-23):** location and geocoding behind domain interfaces. `LocationService` reports each permission outcome (`LocationFound`, or `LocationUnavailable` with `serviceDisabled` / `permissionDenied` / `permissionDeniedForever`) and opens the matching settings page; the location picker explains each outcome (rationale text + "Open settings") and no longer calls Geolocator. A `ReverseGeocoder` interface with a `NominatimReverseGeocoder` (identifying user agent `AstroPlan (com.astroplan.astroplan)`, at most 1 request/s, in-memory cache by coordinates rounded to 0.01°, failures reported, not cached) replaces the ViewModel's inline HTTP; OpenStreetMap attribution on the map and next to place names; the tile user agent is the real app id; typed coordinate entry works offline. No `http`/`geolocator` import in presentation or domain (test-enforced). F-06 updated (still Partial).
 > **TASK 7.3 (2026-09-23):** sites UI. A Sites screen (`/sites`) lists saved sites with the active one marked; sites can be selected, created, edited and deleted (with confirmation); "use current position" and "pick on map" set a transient position, which can be saved as a site. The site editor (`/sites/edit`) validates name, latitude/longitude (typed or picked on the map), elevation (m), an IANA zone picker defaulting to the device zone, and notes; Bortle/SQM with their source sit behind `FeatureScope.lightPollutionContext` until TASK 7.4. Owner decisions: `flutter_timezone` 5.1.0 (Apache-2.0) behind a domain `DeviceTimeZone` seam, only to pre-fill the zone picker; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. `IanaTimeContext` now loads the `latest_all` zone data set (the 10-year set has no link zones such as `Europe/Ljubljana`). F-07 Partial → Implemented; F-06 and F-10 updated.
+> **TASK 7.4 (2026-09-23):** light-pollution MVP (PD-05 resolved). The ClearOutside scraper (`LightPollutionRepository`) is deleted, with its ViewModel argument, provider and per-location-change call; a location change makes no network call beyond weather and the place name. Option A: the external light-pollution map opens centred on the current position (`LightPollutionMapLink`), only when one exists. Option B: manual Bortle and/or SQM in the site editor, stored as source `user` with the date. `FeatureScope.lightPollutionContext` is `true` (its PD-06 phase). The sky card shows the known values with their sources (`SkyDarkness`), "not saved" for a transient position, or "unknown"; Bortle and SQM are never converted into each other; the sky warning still uses a known Bortle class only. Options C (offline dataset) and D (licensed API) are documented as deferred. Group G7 is complete. F-32 Broken → Deprecated (removed); F-33 Prototype → Implemented; F-34 Broken → Implemented; F-04 updated.
 
 ## Status legend
 
@@ -104,9 +105,9 @@ feature exists although its roadmap phase has not been reached in
 | F-29 | Weather fetch and offline cache | Partial | 10 |
 | F-30 | Weather forecast display | Partial | 10 |
 | F-31 | Dew warning | Prototype | 10 |
-| F-32 | Light-pollution auto-fetch (Bortle) | **Broken** | 11 (ahead) |
-| F-33 | Manual Bortle entry | Prototype | 11 (ahead) |
-| F-34 | External light-pollution map handoff | **Broken** | 11 (ahead) |
+| F-32 | Light-pollution auto-fetch (Bortle) | Deprecated (removed, TASK 7.4) | 11 (ahead) |
+| F-33 | Manual Bortle entry | Implemented | 11 (ahead) |
+| F-34 | External light-pollution map handoff | Implemented | 11 (ahead) |
 | F-35 | Capture plan editor (blocks) | Implemented | 9 |
 | F-36 | Session duration and feasibility | Partial | 9 |
 | F-37 | Integration time and relative stacking gain | Implemented | 9 |
@@ -124,8 +125,8 @@ feature exists although its roadmap phase has not been reached in
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
 
-Counts (50 features): Implemented 9 · Partial 20 · Prototype 8 · Broken 4 ·
-Missing 9 · Deprecated 0 · Unknown 0. (The orphaned `equipment_profiles` table
+Counts (50 features): Implemented 11 · Partial 20 · Prototype 7 · Broken 2 ·
+Missing 9 · Deprecated 1 · Unknown 0. (The orphaned `equipment_profiles` table
 recorded under F-23 was dropped entirely in TASK 3.3, not merely deprecated —
 see DATA_MODEL.md B2/B8.)
 
@@ -159,6 +160,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-04 — Feature gating (`FeatureScope`)
 - **Status:** Implemented *(TASK 4.3)*
+- **TASK 7.4:** `lightPollutionContext` is now `true` (its PD-06 phase); `fieldMode` and `metadataImport` stay `false`.
 - **Current implementation:** four flags, all read from the one source and matching PD-06 E.1 exactly: `fieldMode`/`lightPollutionContext`/`metadataImport` are `false` (hidden), `logbook` is `true` (stays visible). Every entry point reads it — the field-mode toggle and Import Metadata buttons and the light-pollution map card in `home_screen.dart` (previously ungated), the Bortle badge in `sky_darkness_widget.dart`, and route registration in `app_router.dart`.
 - **Relevant files:** `lib/core/config/feature_scope.dart`, `app_router.dart`, `sky_darkness_widget.dart`, `home_screen.dart`.
 - **Known issues:** none open. *Resolved (TASK 4.3):* `fieldMode` was never read; the map handoff was ungated; Home's buttons pushed gated routes unconditionally; `metadataImport` was `true` with no recorded approval (DEV-P1; TD-014).
@@ -408,7 +410,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 10.
 
 ## F-32 — Light-pollution auto-fetch (Bortle)
-- **Status:** Broken
+- **Status:** Deprecated — **removed 2026-09-23 (TASK 7.4, PD-05)**. The scraper and its call on every location change are deleted; a test checks that no scraping code remains and that a location change makes no network call. An automatic source is deferred (PD-05 options C/D, DECISIONS E.1). The text below describes the removed code.
 - **Current implementation:** `LightPollutionRepository.fetchBortleClass` scrapes ClearOutside with a regex.
 - **Relevant files:** `lib/data/repositories/light_pollution_repository.dart`.
 - **Known issues:** the URL is never interpolated (`\${…}`), so it can never succeed; scraping a third-party site; not injectable, no interface, no tests; still invoked on every location change (SI-007; TD-006).
@@ -416,7 +418,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 11 (ahead of phase).
 
 ## F-33 — Manual Bortle entry
-- **Status:** Prototype
+- **Status:** Implemented *(TASK 7.4)*
+- **TASK 7.4:** visible (`FeatureScope.lightPollutionContext = true`). Bortle and/or SQM are entered in the site editor (stored as source `user` with the date; unchanged values keep their source) or, for Bortle, on the sky card's badge (for a transient position: in memory, labelled "not saved"). The sky card shows the values with their sources or says sky darkness is unknown (`SkyDarkness`). No Bortle↔SQM conversion; the sky warning uses a known Bortle class only (thresholds are G10's). The known issues below are resolved.
 - **Current implementation:** a `Bortle 1–9` dropdown badge in the sky card, persisted to the active location.
 - **Relevant files:** `sky_darkness_widget.dart:32-40,65-126`, `planner_viewmodel.dart:344-364`.
 - **Known issues:** hidden by `FeatureScope.lightPollutionContext = false`, so **no user path sets Bortle**; default 4 and no "unknown" state (SI-007).
@@ -424,7 +427,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 11.
 
 ## F-34 — External light-pollution map handoff
-- **Status:** Broken
+- **Status:** Implemented *(TASK 7.4)*
+- **TASK 7.4:** the Home card opens lightpollutionmap.info centred on the current position (`LightPollutionMapLink.at`, zoom 10), with a hint to enter the value read there as Bortle or SQM; it is visible (gate on) and shown only when a position exists (not for the London default). The hard-coded Slovenia coordinates are gone (DEV-P1's remaining part). Not run on a device.
 - **Current implementation:** a Home card that opens lightpollutionmap.info in the browser. **TASK 4.3:** the card is now gated behind `FeatureScope.lightPollutionContext` (hidden until TASK 7.4) rather than shown unconditionally — its hard-coded coordinates make a real gate pointless before 7.4 fixes them.
 - **Relevant files:** `home_screen.dart`, `lib/core/config/feature_scope.dart`.
 - **Known issues:** the URL hard-codes lat 45.872, lon 14.547 (Slovenia), not the user's site (DEV-P1; still open, TASK 7.4's job). *Resolved (TASK 4.3):* the card was ungated (TD-014).

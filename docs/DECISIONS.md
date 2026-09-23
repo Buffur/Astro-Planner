@@ -47,6 +47,7 @@
 > **TASK 6.5 (2026-09-22):** SI-001 NPF formula-change record added (E.1).
 > **TASK 7.1 (2026-09-23):** ADR-007 status updated (IANA zone per site; L1 fixed for sites with a zone; zone source = the TASK 7.3 picker). Owner decisions this task: legacy Bortle 4 → NULL with a note (others kept as `legacy`); add the `timezone` package now; map/GPS positions are transient and remembered.
 > **TASK 7.3 (2026-09-23):** ADR-007 status updated (zone source implemented). Owner decisions this task: add `flutter_timezone` (Apache-2.0) so the zone picker defaults to the device zone; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. Implementation choice recorded: `IanaTimeContext` loads the `latest_all` data set (link zones).
+> **TASK 7.4 (2026-09-23):** PD-05 resolved (E.1): manual Bortle/SQM (A) and the external map at the site (B) now; offline dataset (C) and licensed API (D) documented as deferred; scraper removed. PD-06: the light-pollution context became visible in its scheduled phase.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -308,7 +309,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-02 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Site time-zone strategy | SI-010, TD-020 | (a) device zone (status quo); (b) provider offset stored per site (online); (c) bundled time-zone database + coordinate lookup (offline); (d) compute in solar/UTC time, display in a labelled zone | **Resolved — see E.1 and ADR-007 (Part F):** (d) now — compute in UTC through a `SiteTimeContext` seam with a mean-solar fallback; the site's IANA zone and the `timezone` package arrive in TASK 7.1, where (b)/(c) are evaluated as the zone source. (Original proposal: compute in UTC/solar time (no zone needed); choose the display zone explicitly; evaluate (d) with (b) as offline-first, (c) if civil clock times are required. DST must be tested.) | Weather alignment, log display, remote-site planning |
 | PD-03 | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
 | PD-04 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | **Resolved — see E.1 and ADR-008 (Part F):** (b), with the floor at **v8**. (Original proposal: (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules).) | Any schema change |
-| PD-05 | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
+| PD-05 **RESOLVED 2026-09-23** | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
 | PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
 | PD-07 **RESOLVED 2026-09-22** | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | **Resolved — see E.1 and ADR-010:** in-house Meeus ch. 47 with the full tables. (Original: decide with the Moon-geometry requirement.) | Moon services, moving objects |
 | PD-08 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | **Resolved — see E.1 and ADR-009 (Part F).** (Original: owner product decision; configurable overhead.) | Capture planner (central component) |
@@ -473,6 +474,32 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
     them entirely or keeping them with a warning.
 - **Decision:** see **ADR-010** (Part F).
 - **Not implemented** (TASKs 6.2–6.4 and 8.1).
+
+### PD-05 — Light-pollution / Bortle source and the "unknown" policy (RESOLVED 2026-09-23)
+
+- **Decided by:** the approved Master Development Roadmap (TASK 7.4 scope, which
+  adopts the PD-05 recommendation "(a) now, (b) later; remove the scraper"),
+  implemented on the owner's go-ahead for TASK 7.4 on 2026-09-23.
+- **Now (implemented, TASK 7.4):**
+  - **A — external map:** lightpollutionmap.info opened centred on the current
+    position (`LightPollutionMapLink`); the app only links, it fetches nothing.
+  - **B — manual entry:** Bortle (1–9) and/or SQM (mag/arcsec², 15–23) per site in
+    the site editor, stored with source `user` and the date of the edit; unknown
+    is the default and is shown as unknown.
+  - The ClearOutside scraper (`LightPollutionRepository`) is deleted. The feature
+    gate `FeatureScope.lightPollutionContext` is on (PD-06's schedule).
+  - No Bortle↔SQM conversion unless a source for it is adopted.
+- **Deferred (documented, not implemented):**
+  - **C — offline dataset** (e.g. a world artificial-sky-brightness atlas bundled or
+    downloaded). Before adoption: its licence (attribution, redistribution inside
+    an app), its size on a phone, and the uncertainty of converting modelled zenith
+    radiance to SQM or Bortle must be evaluated and documented, with a formula
+    record here.
+  - **D — licensed API**, only if a real service with acceptable terms is verified;
+    it would need key handling that keeps secrets out of the code (rule 15) and
+    must stay optional (offline-first).
+- **Consequences:** TD-006 and SI-007 resolved; F-32 removed, F-33 and F-34
+  implemented. The sky-warning thresholds are unchanged (SI-006, G10).
 
 ### SI-001 — NPF formula correction (formula change record, TASK 6.5, 2026-09-22)
 
