@@ -47,6 +47,7 @@
 > **TASK 8.2 (2026-09-23):** SI-012 progress: the seeded targets are now sourced (OpenNGC v20260501, per-object original text kept in the asset; every object's degrees re-derived from its text in tests; 7 independent spot checks within 0.02°) and carry size and magnitude. No formula changed.
 > **TASK 8.3 (2026-09-23, documentation only):** SI-005 decided by ADR-011 (implemented in TASK 8.4): required focal ratio N plus optional diameter D in mm, N = f/D, 1 % agreement; existing values never reinterpreted, N > 32 flagged for review.
 > **TASK 8.4 (2026-09-23):** SI-005 resolved (ADR-011 implemented: unit-explicit names, focal ratio N plus optional diameter D with N = f / D and 1 % agreement, bounds, review flag for N > 32; no stored value changed).
+> **TASK 8.5 (2026-09-23):** SI-011 resolved for shipped seeds: one seed, camera specs verified against ZWO's page, optics labelled estimated, provenance stored per row; unverified phone seeds dropped (existing rows untouched, provenance unknown).
 
 ## Purpose and authority
 
@@ -82,7 +83,7 @@ Correct Interpretation → Required Future Action.**
 | SI-008 | Unknown treated as zero / default presented as fact | Partial (storage/pixel-scale/example-plan/RA-Dec cases fixed TASK 4.4; Bortle/GPS defaults still open) | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
 | SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
-| SI-011 | Seed equipment data provenance and internal consistency | Unknown / Partial | TD-008 |
+| SI-011 | Seed equipment data provenance and internal consistency | **Resolved** for shipped seeds (TASK 8.5) | TD-008 |
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
 
@@ -645,7 +646,15 @@ Verify each spec against primary sources; store provenance and confidence
 (DATA_MODEL "Provenance"); resolve the inconsistencies; define `manufacturer`
 semantics (device vs sensor vendor); decide whether sensor size is stored or derived.
 
-**Status:** Unknown / Partial. **Work item:** TD-008.
+**Resolved 2026-09-23 (TASK 8.5), limited to what ships:**
+- One seed ships: "ZWO ASI2600MC + example 72 mm f/5.6 refractor". Camera specs **verified** against ZWO's product page (https://www.zwoastro.com/product/asi2600mc-duo/, "ASI2600MC Pro" column: Sony IMX571, APS-C 23.5 × 15.7 mm, 6248 × 4176 px, 3.76 µm; checked 2026-09-23); resolution × pitch = 23.49 × 15.70 mm (within 0.1 %). Optics **estimated**: a generic 400 mm / 72 mm refractor, named as an example.
+- The four phone seeds are **dropped** (owner decision). Their makers publish only megapixels, f-number and a 35 mm-equivalent focal length (e.g. Apple: "48MP Main: 24 mm, ƒ/1.78"); real focal length, sensor size and pixel pitch were community figures, and the pitch depends on the RAW mode (48/50 MP native vs binned).
+- `manufacturer` ambiguity no longer applies to shipped seeds (ZWO is both brand and camera maker).
+- RAW size is left **unknown** rather than estimated (it depends on the capture format).
+- Provenance is stored per row (`camera_modules`/`optical_rigs`.`source`, `confidence`; ADR-008 §6). **Limitation:** installs seeded before TASK 8.5 keep their phone rows unchanged with provenance unknown (never back-filled), including the Xiaomi/Vivo 10.5 % sensor-height mismatch; the editor shows "source unknown" for them.
+- The "stored size vs resolution × pitch within 2 %" check is a test over every seed.
+
+**Status:** Resolved for shipped seeds; limited for legacy rows (above). **Work item:** TD-008.
 
 ---
 

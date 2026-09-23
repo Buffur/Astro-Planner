@@ -356,8 +356,11 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 8.4** — ADR-011 implemented (schema v14; unit-explicit
     equipment fields; bounds; f/ or diameter; tracking type; maximum exposure; f/32
     review flag; dormant repository removed). 483 tests green.
-  - **Next: TASK 8.5 — Seed verification and provenance.** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 8.5** — one verified equipment seed (ZWO camera,
+    example optics), phone seeds dropped, per-row provenance (schema v15). 500 tests
+    green.
+  - **Next: TASK 8.6 — Capability summary and untracked/smartphone guidance.** Not
+    started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

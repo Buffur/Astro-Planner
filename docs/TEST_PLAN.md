@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **483 tests: 483 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.4) |
+| `flutter test --no-pub` | **500 tests: 500 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -527,3 +527,17 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - **Updated, with their reasons:** two editor tests (the "> 0" message became the
   range message; the f/ field is now labelled "Focal ratio (f/)"); constructor
   arguments renamed across 7 test files (mechanical).
+
+**Added by TASK 8.5** (equipment seeds and provenance, schema v15), 17 tests:
+- **Seeder (`equipment_seeder_test.dart`, now 3):** one seed with the ZWO page's
+  values, confidences and N = f / D; every seed's sensor size = resolution ×
+  pitch within 2 %; a non-empty table is left alone. *(Rewritten, with the reason
+  in the file: the old test found the stub by "400mm" in its former name.)*
+- **Migration (+8):** v8–v14 → v15 snapshot equality; a legacy phone row keeps its
+  values with unknown provenance.
+- **Repository (+1):** camera and optics provenance round-trip per row.
+- **Domain (`equipment_provenance_test.dart`, 5):** new profile → user/reported;
+  rename or tracking keeps both; a camera or optics change affects only its group;
+  confidence storage.
+- **Editor (+1):** saving a verified seed unchanged keeps it verified (guards the
+  2-decimal sensor display), and the provenance caption shows.
