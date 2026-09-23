@@ -387,8 +387,10 @@ rewritten to match the code.*
     ADR-013). **Group G10 is complete.**
   - Completed 2026-09-23: **TASK 11.1** — ADR-014 (Session aggregate, lifecycle and
     snapshots); PD-18 resolved by the owner. Documentation only.
-  - **Next: TASK 11.2 — Session schema migration.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-23: **TASK 11.2** — schema v16: Session root columns, SET NULL
+    references, snapshots, block counters, legacy rows. 598 tests green.
+  - **Next: TASK 11.3 — SessionRepository and snapshot builders.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

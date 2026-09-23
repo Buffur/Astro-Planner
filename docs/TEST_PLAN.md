@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **584 tests: 584 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.4) |
+| `flutter test --no-pub` | **598 tests: 598 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -650,3 +650,13 @@ the ADR-012 variables, and a real out-of-range error):
   every catalog target and the selected target's row equals Home's opportunity; no
   site gives nothing; the screen sorts by usable time, the "without a window" toggle
   widens the list, and a tap selects the target and returns.
+
+**Added by TASK 11.2** (schema v16), in `schema_migration_test.dart`:
+- v8, v9 … v15 → v16 each match the v16 snapshot exactly (8 tests).
+- The acceptance: legacy logs (with blocks) become completed legacy sessions, keep
+  every stored value, get no references or snapshot, and are still listed by the
+  logbook repository.
+- On a fresh v16 database: a new row is a non-legacy draft with zero block counters;
+  an unknown status is rejected (CHECK); deleting a site, target or rig clears only
+  that reference and keeps the session (SET NULL); snapshots round-trip as JSON and
+  unreadable text reads as an empty map; a logbook `updateLog` keeps the v16 columns.

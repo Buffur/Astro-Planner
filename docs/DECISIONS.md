@@ -64,6 +64,7 @@
 > **TASK 10.4 (2026-09-23, commit `6bb596f`):** owner decisions: "Tonight's candidates" evaluates **all targets** with type and own-target filters (no favourites concept added), lives on a **new screen** opened from Home, and **hides targets without a window by default** (a toggle shows them with their reason). Sorting only (ADR-013 §5); implementation choice: evaluated on a background isolate.
 > **TASK 10.5 (2026-09-23, owner decision, documentation only, no code changed):** CUT for 1.0. The owner kept the ADR-013 deferral: no azimuth, horizon profile, schema change or editor now; the horizon gate (G3) stays reserved and F-17 stays Missing (a documented limitation: the minimum altitude stands in for obstructions). Group G10 is closed at 10.4; the next task is TASK 11.1 (ADR: Session aggregate, PD-18).
 > **TASK 11.1 (2026-09-23, documentation only, no code changed):** ADR-014 (Session aggregate, lifecycle and snapshots) accepted in Part F of DECISIONS with an entity diagram; PD-18 resolved. Session is the aggregate root (LogbookEntry = a completed Session; ExecutionState = status + block counters + events), with nullable SET NULL references, a night key, UTC timestamps and versioned JSON snapshots; `session_logs` evolves in place. Owner decisions: completed sessions keep only results and notes editable (no reopening; Duplicate instead); the plan snapshot is refreshed on each Save and the execution-start snapshot is frozen; the planner opens the most recent open session (no id in preferences); legacy logs become completed, read-only 'legacy' sessions with no references guessed from names.
+> **TASK 11.2 (2026-09-23, commit `428f673`):** ADR-014 §5 and §7 implemented (schema v16). Implementation choices: the planned count per block is the existing `frame_count` (the new counters are completed and rejected); `status` has a CHECK constraint and defaults to `draft`; timestamps are UTC epoch ms; unreadable snapshot text reads as an empty map (no known `v` → "snapshot unavailable"); the optional `@DataClassName` renames (TD-045) were not done.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -2051,8 +2052,8 @@ expected value is exact).
 
 ## ADR-014: Session aggregate, lifecycle and snapshots
 
-Status: accepted (owner, 2026-09-23, TASK 11.1). Resolves PD-18. Documentation only;
-implemented by TASKs 11.2 (schema), 11.3 (repository, snapshot builders) and 11.4
+Status: accepted (owner, 2026-09-23, TASK 11.1). Resolves PD-18. **Schema implemented in
+TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (repository, snapshot builders) and 11.4
 (planner on a persisted draft). Checked against `app_database.dart` (schema v15),
 `session_log.dart`, `logbook_repository.dart`, `home_screen.dart` (Save Session) and
 `PlannerStateRepository` at commit `7388b1c`.
