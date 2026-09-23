@@ -12,7 +12,6 @@ import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
 import 'package:astroplan/domain/repositories/logbook_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
@@ -120,7 +119,6 @@ void main() {
         equipmentRepo,
         MockWeatherRepository(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await plannerViewModel.ready;
@@ -187,7 +185,6 @@ void main() {
           equipmentRepo,
           MockWeatherRepository(),
           locationRepo,
-          LightPollutionRepository(),
           locationService: FakeLocationService(),
         );
         await plannerViewModel.ready;

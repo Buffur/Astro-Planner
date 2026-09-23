@@ -6,6 +6,7 @@ import '../shared/night_time_formatter.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
+import '../../../domain/models/sky_darkness.dart';
 
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
@@ -43,6 +44,11 @@ class SkyDarknessWidget extends StatelessWidget {
                   ),
               ],
             ),
+            if (FeatureScope.lightPollutionContext)
+              _SkyDarknessLine(
+                darkness: viewModel.skyDarkness,
+                hasSite: viewModel.activeSite != null,
+              ),
             const SizedBox(height: 16),
 
             // Moon Status
@@ -77,6 +83,47 @@ class SkyDarknessWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The known sky darkness with its source, or an explicit "unknown"
+/// (TASK 7.4; SI-007, SI-008). Bortle and SQM are shown as entered — never
+/// converted into each other.
+class _SkyDarknessLine extends StatelessWidget {
+  const _SkyDarknessLine({required this.darkness, required this.hasSite});
+
+  final SkyDarkness darkness;
+  final bool hasSite;
+
+  static String _source(String? source, Object? date) {
+    if (source == null) return 'source unknown';
+    return date == null ? source : '$source, $date';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodySmall;
+    final String text;
+    if (darkness.isUnknown) {
+      text = hasSite
+          ? 'Sky darkness unknown — add Bortle or SQM in the site editor.'
+          : 'Sky darkness unknown — save this position as a site to record '
+                'Bortle or SQM.';
+    } else {
+      final parts = [
+        if (darkness.hasBortle)
+          'Bortle ${darkness.bortleClass} '
+              '(${_source(darkness.bortleSource, darkness.bortleDate?.toIso8601String())})',
+        if (darkness.hasSqm)
+          'SQM ${darkness.sqm!.toStringAsFixed(2)} mag/arcsec² '
+              '(${_source(darkness.sqmSource, darkness.sqmDate?.toIso8601String())})',
+      ];
+      text = parts.join(' · ') + (darkness.isSaved ? '' : ' — not saved');
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(text, style: style),
     );
   }
 }

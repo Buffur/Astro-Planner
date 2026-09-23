@@ -22,7 +22,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -40,12 +39,6 @@ class _MockWeather implements WeatherRepository {
     double lon, {
     bool forceRefresh = false,
   }) async => null;
-}
-
-/// Bortle lookup that never goes to the network.
-class _NoBortle extends LightPollutionRepository {
-  @override
-  Future<int?> fetchBortleClass(double lat, double lon) async => null;
 }
 
 void main() {
@@ -72,7 +65,6 @@ void main() {
       DriftEquipmentRepository(database),
       _MockWeather(),
       locationRepo,
-      _NoBortle(),
       locationService: service,
       reverseGeocoder: geocoder ?? FakeReverseGeocoder(),
     );

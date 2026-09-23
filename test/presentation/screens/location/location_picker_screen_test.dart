@@ -6,7 +6,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/location_service.dart';
@@ -32,11 +31,6 @@ class _NoWeather implements WeatherRepository {
   }) async => null;
 }
 
-class _NoBortle extends LightPollutionRepository {
-  @override
-  Future<int?> fetchBortleClass(double lat, double lon) async => null;
-}
-
 void main() {
   late AppDatabase database;
   late PlannerViewModel vm;
@@ -57,7 +51,6 @@ void main() {
         DriftEquipmentRepository(database),
         _NoWeather(),
         DriftLocationRepository(database),
-        _NoBortle(),
         locationService: service,
         reverseGeocoder: FakeReverseGeocoder(),
       );

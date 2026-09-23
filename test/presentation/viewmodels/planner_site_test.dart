@@ -7,7 +7,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
@@ -27,13 +26,6 @@ class _NoWeather implements WeatherRepository {
     double lon, {
     bool forceRefresh = false,
   }) async => null;
-}
-
-/// A light-pollution source that *does* answer, to prove its result is never
-/// written into a saved site.
-class _Bortle5 extends LightPollutionRepository {
-  @override
-  Future<int?> fetchBortleClass(double lat, double lon) async => 5;
 }
 
 /// Counts every write while delegating to the real Drift repository.
@@ -70,7 +62,6 @@ void main() {
       DriftEquipmentRepository(database),
       _NoWeather(),
       locations,
-      _Bortle5(),
       locationService: gps ?? FakeLocationService(),
       clock: FixedClock(DateTime.utc(2026, 9, 22, 6)), // 20:00 Sep 22 (+14)
     );
@@ -114,15 +105,18 @@ void main() {
     () async {
       final vm = await build();
       await vm.setLocation(48.8566, 2.3522);
-      await Future<void>.delayed(Duration.zero); // let the Bortle lookup finish
+      await Future<void>.delayed(Duration.zero);
 
       expect(locations.inserts, 0);
       expect(locations.updates, 0);
       expect(vm.activeSite, isNull);
       expect(vm.displayZoneId, isNull);
       expect(vm.sessionNight!.timeContextId, 'solar');
-      // The online Bortle value is held in memory only.
-      expect(vm.bortleClass, 5);
+      // TASK 7.4 removed the online Bortle scraper (PD-05). Before 7.4 this
+      // test's fake scraper answered 5 and the test asserted that the value
+      // was held in memory only; now nothing is fetched, so a new position
+      // has an unknown Bortle class.
+      expect(vm.bortleClass, isNull);
       final site = await locations.getLocationById(siteId);
       expect(site!.latitude, 1.8721);
       expect(site.bortleClass, isNull);

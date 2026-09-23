@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/calendar_date.dart';
@@ -228,20 +229,20 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                            // TD-014: hidden until TASK 7.4 — the hard-coded
-                            // Slovenia coordinates below aren't the site's,
-                            // so it stays hidden rather than gaining a real
-                            // gate that just shows a wrong location (PD-06
-                            // E.1; fixing the coordinates is 7.4's job, not
-                            // this one).
-                            if (FeatureScope.lightPollutionContext)
+                            // TASK 7.4 (PD-05 option A): the external map,
+                            // centred on the current position. Hidden
+                            // without one — the London default is not the
+                            // user's sky.
+                            if (FeatureScope.lightPollutionContext &&
+                                !viewModel.isDefaultLocation)
                               Card(
                                 margin: const EdgeInsets.only(bottom: 16),
                                 color: Theme.of(context).cardTheme.color,
                                 child: InkWell(
                                   onTap: () async {
-                                    final url = Uri.parse(
-                                      'https://www.lightpollutionmap.info/#zoom=4.00&lat=45.8720&lon=14.5470&state=eyJiYXNlbWFwIjoiTGF5ZXJCaW5nUm9hZCIsIm92ZXJsYXkiOiJzYl8yMDI1Iiwib3ZlcmxheWNvbG9yIjpmYWxzZSwib3ZlcmxheW9wYWNpdHkiOiI2MCIsImZlYXR1cmVzb3BhY2l0eSI6Ijg1In0=',
+                                    final url = LightPollutionMapLink.at(
+                                      viewModel.latitude,
+                                      viewModel.longitude,
                                     );
                                     if (await canLaunchUrl(url)) {
                                       await launchUrl(
@@ -258,11 +259,22 @@ class HomeScreen extends StatelessWidget {
                                         Icon(Icons.map_outlined),
                                         SizedBox(width: 12),
                                         Expanded(
-                                          child: Text(
-                                            'Open Light Pollution Map',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Open Light Pollution Map',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Centred here. Read the value, '
+                                                'then enter it as Bortle or '
+                                                'SQM for your site.',
+                                              ),
+                                            ],
                                           ),
                                         ),
                                         Icon(Icons.open_in_browser),

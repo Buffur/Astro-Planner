@@ -17,7 +17,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/night_timeline.dart';
 import 'package:astroplan/domain/models/weather_conditions.dart';
@@ -38,11 +37,6 @@ class _NoWeather implements WeatherRepository {
     double lon, {
     bool forceRefresh = false,
   }) async => null;
-}
-
-class _NoBortle extends LightPollutionRepository {
-  @override
-  Future<int?> fetchBortleClass(double lat, double lon) async => null;
 }
 
 domain.LocationProfile _site(
@@ -88,7 +82,6 @@ void main() {
       DriftEquipmentRepository(database),
       _NoWeather(),
       locations,
-      _NoBortle(),
       locationService: FakeLocationService(),
       reverseGeocoder: geocoder,
       deviceTimeZone: FakeDeviceTimeZone('Europe/Ljubljana'),

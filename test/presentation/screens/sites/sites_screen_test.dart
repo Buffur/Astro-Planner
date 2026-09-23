@@ -7,7 +7,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -34,11 +33,6 @@ class _NoWeather implements WeatherRepository {
   }) async => null;
 }
 
-class _NoBortle extends LightPollutionRepository {
-  @override
-  Future<int?> fetchBortleClass(double lat, double lon) async => null;
-}
-
 void main() {
   late AppDatabase database;
   late DriftLocationRepository locations;
@@ -61,7 +55,6 @@ void main() {
         DriftEquipmentRepository(database),
         _NoWeather(),
         locations,
-        _NoBortle(),
         locationService: FakeLocationService(),
         reverseGeocoder: FakeReverseGeocoder(),
         deviceTimeZone: FakeDeviceTimeZone('Europe/Ljubljana'),
@@ -255,5 +248,53 @@ void main() {
     expect(saved.elevation, 300);
     expect(saved.timeZoneId, 'Europe/Ljubljana');
     expect(vm.locationName, 'Garden');
+  });
+
+  // TASK 7.4 (PD-05 option B): manual Bortle/SQM, recorded as "user" with
+  // the date of the edit.
+  testWidgets('Bortle and SQM entered in the editor are stored as user', (
+    tester,
+  ) async {
+    await build(tester, sites: [site('Home', 46.05, 14.51)]);
+    await tester.runAsync(() => vm.selectSite(1));
+    await pump(tester);
+
+    await tester.tap(find.byTooltip('Edit site'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(DropdownButtonFormField<int?>, 'Unknown'),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bortle 5').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
+      '20.4',
+    );
+    await tester.tap(find.byTooltip('Save site'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+
+    final saved = vm.sites.single;
+    expect(saved.bortleClass, 5);
+    expect(saved.bortleSource, 'user');
+    expect(saved.bortleDate, vm.today);
+    expect(saved.sqm, 20.4);
+    expect(saved.sqmSource, 'user');
+    expect(saved.sqmDate, vm.today);
+    expect(vm.skyDarkness.bortleClass, 5);
+  });
+
+  testWidgets('an out-of-range SQM is rejected', (tester) async {
+    await build(tester);
+    await pump(tester, at: '/sites/edit');
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
+      '30',
+    );
+    await tester.tap(find.byTooltip('Save site'));
+    await tester.pumpAndSettle();
+    expect(find.text('SQM must be between 15 and 23'), findsOneWidget);
   });
 }

@@ -22,7 +22,6 @@ import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
 import 'package:astroplan/domain/repositories/logbook_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
@@ -117,7 +116,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -145,7 +143,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -181,7 +178,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -234,7 +230,6 @@ void main() {
           equipmentRepo,
           throwingWeather,
           locationRepo,
-          LightPollutionRepository(),
           locationService: FakeLocationService(),
         );
         await vm.ready;
@@ -281,7 +276,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -356,7 +350,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
         clock: FixedClock(DateTime.utc(2026, 9, 22, 1, 30)),
       );
@@ -411,7 +404,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -478,7 +470,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -489,8 +480,8 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    // Hidden per PD-06 (FeatureScope: fieldMode, lightPollutionContext,
-    // metadataImport all false) — no icon, tooltip, card or route.
+    // Hidden per PD-06 (FeatureScope: fieldMode, metadataImport false) —
+    // no icon, tooltip or route.
     expect(find.byTooltip('Toggle Field Mode'), findsNothing);
     expect(find.byTooltip('Import Metadata'), findsNothing);
     expect(
@@ -508,7 +499,9 @@ void main() {
       const Offset(0, -300),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Open Light Pollution Map'), findsNothing);
+    // Visible since TASK 7.4, its PD-06 phase (before, this asserted
+    // findsNothing): with a site, the map opens at the site's coordinates.
+    expect(find.text('Open Light Pollution Map'), findsOneWidget);
 
     // Stays visible per PD-06 (on the core path).
     expect(find.byTooltip('Logbook'), findsOneWidget);

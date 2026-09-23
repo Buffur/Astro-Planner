@@ -8,7 +8,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
@@ -60,7 +59,6 @@ void main() {
       DriftEquipmentRepository(database),
       _NoWeather(),
       locations,
-      LightPollutionRepository(),
       locationService: FakeLocationService(),
       // An early-March evening: M42 is already above 20° at dusk, so its
       // window starts when the Sun reaches the darkness limit (a December
@@ -122,7 +120,6 @@ void main() {
       DriftEquipmentRepository(database),
       _NoWeather(),
       DriftLocationRepository(database),
-      LightPollutionRepository(),
       locationService: FakeLocationService(),
     );
     await again.ready;

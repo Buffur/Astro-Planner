@@ -1,12 +1,12 @@
-// TASK 6.4: the sky card shows when the Moon is up and its closest approach
-// to the target — annotations only, no "impact %" — from MoonConditions.
+// TASK 7.4: the sky card states the known sky darkness with its source, or
+// says it is unknown — never a default value.
 
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
-import 'package:astroplan/data/services/catalog_seeder.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -18,7 +18,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../support/fake_device_time_zone.dart';
 import '../../support/fake_location_service.dart';
+import '../../support/fake_reverse_geocoder.dart';
 
 class _NoWeather implements WeatherRepository {
   @override
@@ -30,38 +32,41 @@ class _NoWeather implements WeatherRepository {
 }
 
 void main() {
-  testWidgets('Moon illumination, up-times and closest approach render', (
-    tester,
-  ) async {
+  Future<void> pumpCard(WidgetTester tester, {int? bortle, double? sqm}) async {
     late AppDatabase database;
     late PlannerViewModel vm;
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
-      final targets = DriftTargetRepository(database);
-      await CatalogSeeder(targets).seedIfNeeded(); // M42
       final locations = DriftLocationRepository(database);
       final id = await locations.insertLocation(
         domain.LocationProfile(
           id: 0,
-          name: 'London',
-          latitude: 51.5,
-          longitude: -0.1,
-          elevation: 10,
+          name: 'Site',
+          latitude: 46.05,
+          longitude: 14.51,
+          elevation: 300,
+          bortleClass: bortle,
+          bortleSource: bortle == null ? null : 'user',
+          bortleDate: bortle == null ? null : CalendarDate(2026, 9, 23),
+          sqm: sqm,
+          sqmSource: sqm == null ? null : 'meter',
+          sqmDate: sqm == null ? null : CalendarDate(2026, 8, 1),
         ),
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': id});
       vm = PlannerViewModel(
-        targets,
+        DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _NoWeather(),
         locations,
         locationService: FakeLocationService(),
-        clock: FixedClock(DateTime.utc(2026, 3, 1, 18)),
+        reverseGeocoder: FakeReverseGeocoder(),
+        deviceTimeZone: FakeDeviceTimeZone(),
+        clock: FixedClock(DateTime.utc(2026, 9, 23, 12)),
       );
       await vm.ready;
     });
     addTearDown(() => tester.runAsync(database.close));
-
     await tester.pumpWidget(
       ChangeNotifierProvider<PlannerViewModel>.value(
         value: vm,
@@ -73,22 +78,38 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
 
-    final c = vm.moonConditions!;
-    final pct = (c.illuminationAtMidnight * 100).round();
-    expect(find.text('Moon Illumination: $pct%'), findsOneWidget);
-    expect(find.textContaining('approx'), findsNothing);
-    expect(find.byKey(const Key('sky.moonUp')), findsOneWidget);
-    expect(find.textContaining('Moon up'), findsOneWidget);
-    final approach = c.closestApproachWhileBothUp!;
+  testWidgets('unknown sky darkness says so and how to add it', (tester) async {
+    await pumpCard(tester);
     expect(
-      find.textContaining(
-        'Closest to the target while both are up: '
-        '${approach.separationDeg.round()}°',
+      find.text('Sky darkness unknown — add Bortle or SQM in the site editor.'),
+      findsOneWidget,
+    );
+    expect(find.text('Bortle ?'), findsOneWidget);
+  });
+
+  testWidgets('known values are shown with their sources, unconverted', (
+    tester,
+  ) async {
+    await pumpCard(tester, bortle: 4, sqm: 21.3);
+    expect(
+      find.text(
+        'Bortle 4 (user, 2026-09-23) · '
+        'SQM 21.30 mag/arcsec² (meter, 2026-08-01)',
       ),
       findsOneWidget,
     );
-    expect(find.textContaining('%', findRichText: true), findsOneWidget);
-    expect(find.textContaining('impact'), findsNothing);
+  });
+
+  testWidgets('an SQM reading alone is not turned into a Bortle class', (
+    tester,
+  ) async {
+    await pumpCard(tester, sqm: 19.0);
+    expect(
+      find.text('SQM 19.00 mag/arcsec² (meter, 2026-08-01)'),
+      findsOneWidget,
+    );
+    expect(find.text('Bortle ?'), findsOneWidget);
   });
 }

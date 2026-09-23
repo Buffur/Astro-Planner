@@ -9,8 +9,9 @@ class FeatureScope {
   /// Hidden until TASK 12.4 (PD-06 E.1).
   static bool get fieldMode => false;
 
-  /// Hidden until TASK 7.4 (PD-06 E.1).
-  static bool get lightPollutionContext => false;
+  /// Visible since TASK 7.4 (PD-06 E.1): manual Bortle/SQM with a source,
+  /// and the external map at the site's coordinates. No scraping.
+  static bool get lightPollutionContext => true;
 
   /// Hidden until G17 / v1.1 (PD-06 E.1).
   static bool get metadataImport => false;

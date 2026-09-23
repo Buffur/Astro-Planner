@@ -2,8 +2,10 @@
 // docs/DECISIONS.md PD-06 E.1), so an accidental flip of one flag is a
 // failing test, not a silent policy violation.
 //
-//   Hidden: field-mode toggle (until TASK 12.4), light-pollution map card
-//   (until TASK 7.4), metadata import (until G17 / v1.1).
+//   Hidden: field-mode toggle (until TASK 12.4), metadata import (until
+//   G17 / v1.1).
+//   Visible since TASK 7.4 (its scheduled phase): the light-pollution
+//   context — manual Bortle/SQM and the external map at the site.
 //   Stays visible: the logbook (and text sharing, which has no gate of its
 //   own — it only appears inside the logbook screen this already gates).
 
@@ -15,8 +17,10 @@ void main() {
     expect(FeatureScope.fieldMode, isFalse);
   });
 
-  test('lightPollutionContext is hidden (until TASK 7.4)', () {
-    expect(FeatureScope.lightPollutionContext, isFalse);
+  // Before TASK 7.4 this asserted `isFalse` (hidden until 7.4, PD-06 E.1);
+  // 7.4 is the phase PD-06 scheduled it for.
+  test('lightPollutionContext is visible (since TASK 7.4)', () {
+    expect(FeatureScope.lightPollutionContext, isTrue);
   });
 
   test('metadataImport is hidden (until G17 / v1.1)', () {

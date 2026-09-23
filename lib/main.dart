@@ -17,7 +17,6 @@ import 'data/repositories/drift_logbook_repository.dart';
 import 'domain/repositories/logbook_repository.dart';
 import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
-import 'data/repositories/light_pollution_repository.dart';
 import 'data/services/geolocator_location_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 
@@ -29,7 +28,6 @@ void main() async {
   final weatherRepo = OpenMeteoWeatherRepository();
   final logbookRepo = DriftLogbookRepository(database);
   final locationRepo = DriftLocationRepository(database);
-  final lightPollutionRepo = LightPollutionRepository();
   final locationService = GeolocatorLocationService();
 
   final targetSeeder = CatalogSeeder(targetRepo);
@@ -55,14 +53,12 @@ void main() async {
         Provider<WeatherRepository>.value(value: weatherRepo),
         Provider<LogbookRepository>.value(value: logbookRepo),
         Provider<LocationRepository>.value(value: locationRepo),
-        Provider<LightPollutionRepository>.value(value: lightPollutionRepo),
         ChangeNotifierProvider(
           create: (_) => PlannerViewModel(
             targetRepo,
             equipmentRepo,
             weatherRepo,
             locationRepo,
-            lightPollutionRepo,
             locationService: locationService,
           ),
         ),

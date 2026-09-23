@@ -14,7 +14,6 @@ import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/domain/models/location_profile.dart'
     as import_location_profile;
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
@@ -99,16 +98,12 @@ void main() {
           Provider<WeatherRepository>.value(value: weatherRepo),
           Provider<LogbookRepository>.value(value: logbookRepo),
           Provider<LocationRepository>.value(value: locationRepo),
-          Provider<LightPollutionRepository>(
-            create: (_) => LightPollutionRepository(),
-          ),
           ChangeNotifierProvider(
             create: (_) => PlannerViewModel(
               targetRepo,
               eqRepo,
               weatherRepo,
               locationRepo,
-              LightPollutionRepository(),
               locationService: FakeLocationService(),
             ),
           ),

@@ -23,7 +23,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/session_log.dart' as domain;
@@ -77,7 +76,6 @@ void main() {
         DriftEquipmentRepository(database),
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
         clock: clock,
       );
@@ -158,7 +156,6 @@ void main() {
         DriftEquipmentRepository(database),
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
         clock: FixedClock(DateTime.utc(2026, 9, 22, 1, 30)),
       );

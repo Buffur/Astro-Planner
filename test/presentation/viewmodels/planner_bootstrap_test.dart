@@ -15,7 +15,6 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
@@ -64,7 +63,6 @@ void main() {
         equipmentRepo,
         _MockWeather(),
         DriftLocationRepository(database),
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -88,7 +86,6 @@ void main() {
           DriftEquipmentRepository(database),
           _MockWeather(),
           DriftLocationRepository(database),
-          LightPollutionRepository(),
           locationService: FakeLocationService(),
         );
         await vm.ready;
@@ -114,7 +111,6 @@ void main() {
           equipmentRepo,
           _MockWeather(),
           DriftLocationRepository(database),
-          LightPollutionRepository(),
           locationService: FakeLocationService(),
         );
         await vm.ready;
@@ -137,7 +133,6 @@ void main() {
         DriftEquipmentRepository(database),
         _MockWeather(),
         DriftLocationRepository(database),
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;
@@ -163,7 +158,6 @@ void main() {
         DriftEquipmentRepository(database),
         _MockWeather(),
         locationRepo,
-        LightPollutionRepository(),
         locationService: FakeLocationService(),
       );
       await vm.ready;

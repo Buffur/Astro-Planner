@@ -14,6 +14,7 @@ import '../../domain/models/site_time_context.dart';
 import '../../domain/models/weather_conditions.dart';
 import '../../domain/models/iana_time_context.dart';
 import '../../domain/models/location_profile.dart';
+import '../../domain/models/sky_darkness.dart';
 import '../../domain/models/planning_preferences.dart';
 import '../../domain/models/visibility_window.dart';
 import '../../domain/repositories/target_repository.dart';
@@ -24,7 +25,6 @@ import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/planning_preferences_repository.dart';
 import '../../data/repositories/shared_prefs_planner_state_repository.dart';
 import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
-import '../../data/repositories/light_pollution_repository.dart';
 import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
@@ -45,7 +45,6 @@ class PlannerViewModel extends ChangeNotifier {
   final EquipmentRepository _equipmentRepository;
   final WeatherRepository _weatherRepository;
   final LocationRepository _locationRepository;
-  final LightPollutionRepository _lightPollutionRepository;
   final LocationService _locationService;
   final ReverseGeocoder _reverseGeocoder;
   final DeviceTimeZone _deviceTimeZone;
@@ -111,8 +110,7 @@ class PlannerViewModel extends ChangeNotifier {
     this._targetRepository,
     this._equipmentRepository,
     this._weatherRepository,
-    this._locationRepository,
-    this._lightPollutionRepository, {
+    this._locationRepository, {
     LocationService? locationService,
     ReverseGeocoder? reverseGeocoder,
     DeviceTimeZone? deviceTimeZone,
@@ -316,6 +314,22 @@ class PlannerViewModel extends ChangeNotifier {
   /// Bortle class of the active site, or null when unknown.
   int? get bortleClass => _bortleClass;
 
+  /// What is known about the sky darkness here (TASK 7.4): the active
+  /// site's stored Bortle/SQM with their sources, or, for a transient
+  /// position, a Bortle class entered this session (not saved). Never a
+  /// fetched or assumed value.
+  SkyDarkness get skyDarkness {
+    final site = _activeSite;
+    if (site != null) return SkyDarkness.fromSite(site);
+    final bortle = _bortleClass;
+    if (bortle == null) return SkyDarkness.unknown;
+    return SkyDarkness(
+      bortleClass: bortle,
+      bortleSource: 'user',
+      isSaved: false,
+    );
+  }
+
   /// The active saved site; null when the position is transient.
   LocationProfile? get activeSite => _activeSite;
 
@@ -448,17 +462,6 @@ class PlannerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The (currently never-succeeding, TD-006) online Bortle lookup. Its
-  /// result is held in memory only: no code path writes into a saved site
-  /// without an explicit user action (TASK 7.1 acceptance).
-  Future<void> _fetchBortle(double lat, double lon) async {
-    final bortle = await _lightPollutionRepository.fetchBortleClass(lat, lon);
-    if (bortle != null) {
-      _bortleClass = bortle;
-      notifyListeners();
-    }
-  }
-
   /// Sets a **transient** position (a map pick or GPS fix, TASK 7.1): it is
   /// remembered across restarts but never written into a saved site, and it
   /// deselects the active site (whose zone and Bortle no longer apply).
@@ -474,7 +477,6 @@ class PlannerViewModel extends ChangeNotifier {
     await _stateRepository.setTransientPosition(lat, lon);
     await _fetchWeather();
     unawaited(_reverseGeocode(lat, lon));
-    unawaited(_fetchBortle(lat, lon));
   }
 
   /// Asks the [LocationService] for the device position without using it,

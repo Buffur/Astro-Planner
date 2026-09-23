@@ -17,7 +17,6 @@ import 'package:astroplan/data/database/app_database.dart' hide CaptureBlock;
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
-import 'package:astroplan/data/repositories/light_pollution_repository.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
@@ -59,7 +58,6 @@ void main() {
       DriftEquipmentRepository(database),
       _MockWeather(),
       locationRepo,
-      LightPollutionRepository(),
       locationService: FakeLocationService(),
     );
     await vm.ready;
