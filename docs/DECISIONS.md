@@ -51,6 +51,7 @@
 > **TASK 8.1 (2026-09-23):** ADR-010 §3 implemented (moving types hidden/labelled); ADR-008 §6 target `source` column added (v13). Implementation choices recorded here: a catalog entry is a row whose source starts with `seed:` or `catalog:` (unique per catalog id); an edit that changes coordinates, size or magnitude sets source `user`, a rename keeps it; a bare RA number is hours.
 > **TASK 8.2 (2026-09-23):** owner decisions: bundle the OpenNGC-derived catalog under CC BY-SA 4.0 with attribution (About page, licence page, `OPENNGC_NOTICE.txt`); scope Messier + ~55 showpieces (164 objects); on upgrade, untouched old seed rows (id and exact coordinates) are updated in place and edited rows left alone. PD-12 remains open for the release-time review of all third-party terms.
 > **TASK 8.3 (2026-09-23, documentation only, no code changed):** ADR-011 (equipment model and aperture semantics) accepted in Part F of DECISIONS; PD-03 and PD-10 resolved. Owner decisions: flat profile for 1.0 (composition deferred); required focal ratio plus optional diameter in mm (N = f/D, 1 % agreement); tracking type {untracked, tracked, guided, unknown} and an optional per-rig maximum exposure; existing rows never reinterpreted, N > 32 flagged for review; the dormant catalog repository is removed in TASK 8.4.
+> **TASK 8.4 (2026-09-23):** ADR-011 implemented (schema v14; unit-explicit names; bounds in `EquipmentLimits`; `resolveAperture`; tracking type; maximum exposure; review flag; dormant repository removed). Implementation choice: in the form, a diameter makes the f/ field read-only and derived, so the two cannot disagree there; the 1 % rule is enforced by `resolveAperture` for any caller.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1591,9 +1592,9 @@ Each fixture records its query and retrieval date (TASK 6.2).
 
 ## ADR-011: Equipment model and aperture semantics (1.0)
 
-Status: accepted (owner, 2026-09-23, TASK 8.3). Resolves PD-03 and PD-10. Documentation
-only; **implemented by TASK 8.4** (domain and schema), used by TASKs 8.5 (seeds) and 8.6
-(capability summary and exposure guidance).
+Status: accepted (owner, 2026-09-23, TASK 8.3). Resolves PD-03 and PD-10. **Implemented
+2026-09-23 by TASK 8.4** (domain and schema v14; commit `445c781`); used by TASKs 8.5 (seeds)
+and 8.6 (capability summary and exposure guidance).
 
 ### 1. Context (verified for this ADR at commit `6d9a90e`)
 

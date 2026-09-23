@@ -353,8 +353,11 @@ rewritten to match the code.*
     in place (owner decisions). 463 tests green.
   - Completed 2026-09-23: **TASK 8.3** — ADR-011 (equipment model and aperture
     semantics); PD-03 and PD-10 resolved by the owner. Documentation only.
-  - **Next: TASK 8.4 — Equipment domain and schema.** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 8.4** — ADR-011 implemented (schema v14; unit-explicit
+    equipment fields; bounds; f/ or diameter; tracking type; maximum exposure; f/32
+    review flag; dormant repository removed). 483 tests green.
+  - **Next: TASK 8.5 — Seed verification and provenance.** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 

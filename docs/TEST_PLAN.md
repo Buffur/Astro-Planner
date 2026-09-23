@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **463 tests: 463 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.2) |
+| `flutter test --no-pub` | **483 tests: 483 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -509,3 +509,21 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - **Updated, with its reason:** `drift_target_repository_test.dart`'s seeding
   test pinned the old `seed:catalog@1` source and M42 position; it now checks the
   catalog's.
+
+**Added by TASK 8.4** (equipment domain and schema v14), 21 tests (the removed
+`drift_equipment_catalog_repository_test.dart` had 1):
+- **Migration (`schema_migration_test.dart`, +7):** v8–v13 → v14 snapshot
+  equality; a v13 rig with `aperture` 72 and `tracking_state` `tracking` keeps
+  every value, reads as f/72 flagged for review and tracking unknown.
+- **Repository (+2):** diameter, tracking type, maximum exposure and rotation
+  round-trip (N stored in `aperture`); a new profile's tracking is unknown.
+- **Domain (`equipment_limits_test.dart`, 8):** `resolveAperture` (N only, D only,
+  1 % agreement both ways, missing and out-of-range cases including a derived
+  f/40); the review flag at f/32; tracking storage; validator messages with units.
+- **Editor (`equipment_selection_screen_test.dart`, +4):** a diameter derives the
+  f/ (read-only) and saves D, tracking and maximum exposure; f/72 typed in is
+  rejected; a stored f/72 shows the review prompt and is fixed by entering the
+  diameter; every number's label carries its unit.
+- **Updated, with their reasons:** two editor tests (the "> 0" message became the
+  range message; the f/ field is now labelled "Focal ratio (f/)"); constructor
+  arguments renamed across 7 test files (mechanical).
