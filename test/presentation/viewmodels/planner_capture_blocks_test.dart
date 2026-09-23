@@ -17,21 +17,13 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
-import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/no_snapshot_weather.dart';
 
-class _MockWeather with NoSnapshotWeather implements WeatherRepository {
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double lat,
-    double lon, {
-    bool forceRefresh = false,
-  }) async => null;
-}
+class _MockWeather with NoSnapshotWeather implements WeatherRepository {}
 
 CaptureBlock _block(String label, {int frameCount = 10}) {
   return CaptureBlock(

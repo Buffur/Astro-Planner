@@ -42,7 +42,10 @@ class AboutScreen extends StatelessWidget {
             'servers and Nominatim.',
           ),
           const SizedBox(height: 8),
-          const Text('Weather: Open-Meteo (open-meteo.com).'),
+          const Text(
+            'Weather data by Open-Meteo.com (open-meteo.com), CC BY 4.0. '
+            'The model used is shown with each forecast.',
+          ),
           const SizedBox(height: 8),
           const Text(
             'Light-pollution map: lightpollutionmap.info (opened in your '

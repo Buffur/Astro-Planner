@@ -9,7 +9,6 @@ import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/night_weather.dart';
-import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/repositories/weather_snapshot_store.dart';
@@ -64,13 +63,6 @@ class _Weather implements WeatherRepository {
       ),
     );
   }
-
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double latitude,
-    double longitude, {
-    bool forceRefresh = false,
-  }) async => null;
 }
 
 void main() {

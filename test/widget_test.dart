@@ -9,7 +9,6 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/repositories/logbook_repository.dart';
-import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/domain/models/location_profile.dart'
     as import_location_profile;
@@ -25,21 +24,7 @@ import 'support/no_snapshot_weather.dart';
 
 class MockWeatherRepository
     with NoSnapshotWeather
-    implements WeatherRepository {
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double latitude,
-    double longitude, {
-    bool forceRefresh = false,
-  }) async {
-    return const WeatherConditions(
-      temperature: 15.0,
-      cloudCover: 10.0,
-      humidity: 50.0,
-      dewPoint: 5.0,
-    );
-  }
-}
+    implements WeatherRepository {}
 
 class MockLogbookRepository implements LogbookRepository {
   @override

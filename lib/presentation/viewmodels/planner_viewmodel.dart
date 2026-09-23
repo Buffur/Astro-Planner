@@ -11,7 +11,7 @@ import '../../domain/models/capture_block.dart';
 import '../../domain/models/night_timeline.dart';
 import '../../domain/models/session_night.dart';
 import '../../domain/models/site_time_context.dart';
-import '../../domain/models/weather_conditions.dart';
+import '../../domain/models/night_weather_summary.dart';
 import '../../domain/models/iana_time_context.dart';
 import '../../domain/models/location_profile.dart';
 import '../../domain/models/sky_darkness.dart';
@@ -29,6 +29,7 @@ import '../../data/repositories/open_meteo_weather_repository.dart';
 import '../../data/repositories/shared_prefs_weather_snapshot_store.dart';
 import '../../domain/models/night_weather.dart';
 import '../../domain/services/night_weather_service.dart';
+import '../../domain/services/night_weather_summarizer.dart';
 import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
@@ -65,7 +66,7 @@ class PlannerViewModel extends ChangeNotifier {
   bool _isLoading = true;
 
   /// Set when the initial load (location, capture blocks, target, equipment)
-  /// fails. Weather is not part of this — see [weatherError].
+  /// fails. Weather is not part of this — see [nightWeather].
   Object? _bootstrapError;
 
   /// True until a location is resolved, either from a saved profile or from
@@ -75,8 +76,6 @@ class PlannerViewModel extends ChangeNotifier {
 
   AstroTarget? _selectedTarget;
   EquipmentProfile? _selectedEquipment;
-  WeatherConditions? _currentWeather;
-  bool _weatherError = false;
 
   /// The chosen night's forecast state (ADR-012; TASK 9.3).
   NightWeather _nightWeather = const NightWeatherIdle();
@@ -270,11 +269,6 @@ class PlannerViewModel extends ChangeNotifier {
 
   AstroTarget? get selectedTarget => _selectedTarget;
   EquipmentProfile? get selectedEquipment => _selectedEquipment;
-  WeatherConditions? get currentWeather => _currentWeather;
-
-  /// True when the most recent weather fetch threw. Distinct from
-  /// [currentWeather] being null, which can also mean "not loaded yet".
-  bool get weatherError => _weatherError;
 
   /// The weather for the chosen night: loading, available (with its age
   /// and whether it came from the cache or a failed refresh), out of range
@@ -324,11 +318,10 @@ class PlannerViewModel extends ChangeNotifier {
   /// site is set, even if none is set yet (ADR-007 §2).
   void setEveningDate(CalendarDate date) {
     _pickedEveningDate = date;
-    _refreshWeather(); // Date change might need new weather
     notifyListeners();
+    // Another night has its own forecast; a current cached one is reused.
+    unawaited(_fetchWeather());
   }
-
-  Future<void> _refreshWeather() => refreshWeather();
 
   double get latitude => _latitude;
   double get longitude => _longitude;
@@ -532,26 +525,9 @@ class PlannerViewModel extends ChangeNotifier {
 
   Future<void> refreshWeather() => _fetchWeather(forceRefresh: true);
 
-  Future<void> _fetchWeather({bool forceRefresh = false}) async {
-    try {
-      _currentWeather = await _weatherRepository.getCurrentWeather(
-        _latitude,
-        _longitude,
-        forceRefresh: forceRefresh,
-      );
-      _weatherError = false;
-    } catch (e) {
-      _weatherError = true;
-      debugPrint('Weather fetch error: $e');
-    }
-    notifyListeners();
-    await _loadNightWeather(forceRefresh: forceRefresh);
-  }
-
   /// Loads the chosen night's forecast through [NightWeatherService]
-  /// (TASK 9.3). The legacy card above still uses [currentWeather] until
-  /// TASK 9.4.
-  Future<void> _loadNightWeather({bool forceRefresh = false}) async {
+  /// (TASK 9.3; the only weather path since TASK 9.4).
+  Future<void> _fetchWeather({bool forceRefresh = false}) async {
     final night = sessionNight;
     final request = ++_nightWeatherRequest;
     if (night == null) {
@@ -780,10 +756,21 @@ class PlannerViewModel extends ChangeNotifier {
     return (illum != null && illum > 0.8) || (bortle != null && bortle >= 7);
   }
 
-  bool get dewWarning {
-    if (_currentWeather == null) return false;
-    return (_currentWeather!.temperature - _currentWeather!.dewPoint) <=
-        _preferences.dewMarginC;
+  /// The chosen night's weather from sunset to sunrise, as per-hour
+  /// indicators and ranges with the dew-spread heuristic (TASK 9.4). Null
+  /// unless a forecast is available ([nightWeather]).
+  NightWeatherSummary? get nightWeatherSummary {
+    final weather = _nightWeather;
+    final timeline = nightTimeline;
+    if (weather is! NightWeatherAvailable || timeline == null) return null;
+    final span = NightWeatherSummarizer.spanOf(timeline);
+    return NightWeatherSummarizer.summarize(
+      weather.snapshot,
+      fromUtc: span.fromUtc,
+      toUtc: span.toUtc,
+      span: span.span,
+      dewMarginC: _preferences.dewMarginC,
+    );
   }
 
   /// The target's altitude right now. Null without a target or a real site

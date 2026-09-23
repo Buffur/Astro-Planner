@@ -19,7 +19,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
-import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 
 import 'support/fake_location_service.dart';
@@ -27,21 +26,7 @@ import 'support/no_snapshot_weather.dart';
 
 class MockWeatherRepository
     with NoSnapshotWeather
-    implements WeatherRepository {
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double latitude,
-    double longitude, {
-    bool forceRefresh = false,
-  }) async {
-    return const WeatherConditions(
-      temperature: 15.0,
-      cloudCover: 10.0,
-      humidity: 50.0,
-      dewPoint: 5.0,
-    );
-  }
-}
+    implements WeatherRepository {}
 
 void main() {
   late AppDatabase database;

@@ -199,16 +199,11 @@ class HomeScreen extends StatelessWidget {
                                 },
                               ),
                             ),
-                            if (viewModel.currentWeather != null)
+                            // The night's forecast needs a night (ADR-012);
+                            // without a site the location card is shown.
+                            if (viewModel.sessionNight != null)
                               WeatherForecastWidget(
-                                weather: viewModel.currentWeather!,
                                 onTap: () => context.push('/sites'),
-                              )
-                            else if (viewModel.weatherError)
-                              _WeatherErrorCard(
-                                onRetry: () => context
-                                    .read<PlannerViewModel>()
-                                    .refreshWeather(),
                               )
                             else
                               PlannerSummaryCard(
@@ -534,31 +529,6 @@ class _DefaultLocationBanner extends StatelessWidget {
           child: const Text('Set site'),
         ),
       ],
-    );
-  }
-}
-
-/// Shown in place of the weather card when the most recent fetch failed.
-class _WeatherErrorCard extends StatelessWidget {
-  final VoidCallback onRetry;
-
-  const _WeatherErrorCard({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const Icon(Icons.cloud_off, color: Colors.grey),
-            const SizedBox(width: 12),
-            const Expanded(child: Text("Couldn't load weather.")),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
-      ),
     );
   }
 }

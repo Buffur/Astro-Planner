@@ -3,8 +3,8 @@
 // Covers:
 //   - the empty state offers actions to choose a target and equipment
 //   - the default-location banner shows until a location is resolved
-//   - a weather-repository failure renders an error/retry card instead of
-//     hanging or crashing (the first screen never blocks on the network)
+//   - a weather failure (offline, nothing cached) renders an error/retry
+//     card instead of hanging or crashing (the first screen never blocks on the network)
 //   - a bootstrap-repository failure renders an error/retry view
 
 import 'package:flutter/material.dart';
@@ -31,7 +31,7 @@ import 'package:astroplan/domain/models/astro_target.dart' as domain;
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
-import 'package:astroplan/domain/models/weather_conditions.dart';
+import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/shared/night_time_formatter.dart';
 
@@ -39,33 +39,21 @@ import '../../../support/fake_location_service.dart';
 import '../../../support/flaky_target_repository.dart';
 import '../../../support/no_snapshot_weather.dart';
 
-class _MockWeather with NoSnapshotWeather implements WeatherRepository {
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double lat,
-    double lon, {
-    bool forceRefresh = false,
-  }) async {
-    return const WeatherConditions(
-      temperature: 15.0,
-      cloudCover: 10.0,
-      humidity: 50.0,
-      dewPoint: 5.0,
-    );
-  }
-}
+class _MockWeather with NoSnapshotWeather implements WeatherRepository {}
 
-class _ThrowingWeather with NoSnapshotWeather implements WeatherRepository {
+/// Every forecast request fails, as when offline with nothing cached.
+class _FailingWeather implements WeatherRepository {
   int calls = 0;
 
   @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double lat,
-    double lon, {
-    bool forceRefresh = false,
+  Future<WeatherFetch> fetchSnapshot({
+    required double latitude,
+    required double longitude,
+    required DateTime startUtc,
+    required DateTime endUtc,
   }) async {
     calls++;
-    throw Exception('network down');
+    return const WeatherFetchFailed(WeatherFailure.unavailable);
   }
 }
 
@@ -217,13 +205,25 @@ void main() {
       );
       await equipmentRepo.insertEquipment(testEquip);
 
+      // The night's forecast needs a night, so a site (TASK 9.4).
+      final locId = await locationRepo.insertLocation(
+        domain.LocationProfile(
+          id: 0,
+          name: 'Test Site',
+          latitude: 51.5,
+          longitude: -0.1,
+          elevation: 10,
+        ),
+      );
+      SharedPreferences.setMockInitialValues({'activeLocationId': locId});
+
       // A taller surface so the weather section (below the target card and
       // altitude chart) is scrolled into view and actually built.
       tester.view.physicalSize = const Size(800, 1600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
 
-      final throwingWeather = _ThrowingWeather();
+      final throwingWeather = _FailingWeather();
       late PlannerViewModel vm;
       await tester.runAsync(() async {
         vm = PlannerViewModel(
@@ -248,6 +248,8 @@ void main() {
       expect(throwingWeather.calls, greaterThan(0));
       expect(find.text("Couldn't load weather."), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Retry'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
       expect(find.text("Couldn't load weather."), findsOneWidget);

@@ -8,7 +8,6 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
-import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/screens/sites/site_editor_screen.dart';
 import 'package:astroplan/presentation/screens/sites/sites_screen.dart';
@@ -25,14 +24,7 @@ import '../../../support/fake_location_service.dart';
 import '../../../support/fake_reverse_geocoder.dart';
 import '../../../support/no_snapshot_weather.dart';
 
-class _NoWeather with NoSnapshotWeather implements WeatherRepository {
-  @override
-  Future<WeatherConditions?> getCurrentWeather(
-    double lat,
-    double lon, {
-    bool forceRefresh = false,
-  }) async => null;
-}
+class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
   late AppDatabase database;
