@@ -34,6 +34,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:astroplan/data/database/app_database.dart';
+import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/data/database/generated_migrations/schema.dart';
 import 'package:astroplan/data/database/generated_migrations/schema_v8.dart'
     show DatabaseAtV8;
@@ -115,6 +117,66 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('TASK 8.4: v14 (aperture diameter, maximum exposure)', () {
+    for (final from in [8, 9, 10, 11, 12, 13]) {
+      test('v$from -> v14 matches the v14 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 14);
+        await db.close();
+      });
+    }
+
+    test('v13 -> v14: every stored value is kept; f/72 stays 72 and is '
+        'flagged; tracking is never inferred', () async {
+      final schema = await verifier.schemaAt(13);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO devices (id, name) VALUES (1, 'Scope'), (2, 'Phone');",
+      );
+      raw.execute(
+        "INSERT INTO camera_modules (id, device_id, name, sensor_width_mm, "
+        "sensor_height_mm, resolution_width_px, resolution_height_px, "
+        "pixel_pitch_um) VALUES "
+        "(1, 1, 'Scope Camera', 23.5, 15.7, 6248, 4176, 3.76), "
+        "(2, 2, 'Phone Camera', 9.8, 7.3, 8064, 6048, 1.22);",
+      );
+      raw.execute(
+        "INSERT INTO optical_rigs (id, name, camera_module_id, "
+        "focal_length_mm, aperture, tracking_state, rotation_degrees) VALUES "
+        "(1, 'Old scope', 1, 400.0, 72.0, 'tracking', 12.5), "
+        "(2, 'Phone', 2, 6.86, 1.78, 'unknown', NULL);",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.opticalRigs,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(rows[0].aperture, 72.0);
+      expect(rows[0].focalLengthMm, 400.0);
+      expect(rows[0].trackingState, 'tracking');
+      expect(rows[0].rotationDegrees, 12.5);
+      for (final r in rows) {
+        expect(r.apertureDiameterMm, isNull);
+        expect(r.maxExposureS, isNull);
+      }
+
+      final profiles = await DriftEquipmentRepository(db).getAllEquipment();
+      final scope = profiles.firstWhere((p) => p.name == 'Old scope');
+      expect(scope.focalRatio, 72.0, reason: 'never converted to f/5.6');
+      expect(scope.needsApertureReview, isTrue);
+      expect(scope.apertureDiameterMm, isNull);
+      expect(
+        scope.trackingType,
+        TrackingType.unknown,
+        reason: 'an unrecognised stored value is not guessed',
+      );
+      final phone = profiles.firstWhere((p) => p.name == 'Phone');
+      expect(phone.focalRatio, 1.78);
+      expect(phone.needsApertureReview, isFalse);
       await db.close();
     });
   });

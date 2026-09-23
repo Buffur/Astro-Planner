@@ -46,13 +46,13 @@ const _target = AstroTarget(
 const _equipment = EquipmentProfile(
   id: 1,
   name: 'Test Rig',
-  sensorWidth: 23.5,
-  sensorHeight: 15.7,
-  pixelPitch: 3.76,
-  resolutionWidth: 6248,
-  resolutionHeight: 4176,
-  focalLength: 600.0,
-  aperture: 6.0,
+  sensorWidthMm: 23.5,
+  sensorHeightMm: 15.7,
+  pixelPitchUm: 3.76,
+  resolutionWidthPx: 6248,
+  resolutionHeightPx: 4176,
+  focalLengthMm: 600.0,
+  focalRatio: 6.0,
 );
 
 void main() {
@@ -168,19 +168,19 @@ void main() {
       final edited = EquipmentProfile(
         id: _equipment.id,
         name: 'Renamed Rig',
-        sensorWidth: _equipment.sensorWidth,
-        sensorHeight: _equipment.sensorHeight,
-        pixelPitch: _equipment.pixelPitch,
-        resolutionWidth: _equipment.resolutionWidth,
-        resolutionHeight: _equipment.resolutionHeight,
-        focalLength: _equipment.focalLength,
-        aperture: 4.0,
+        sensorWidthMm: _equipment.sensorWidthMm,
+        sensorHeightMm: _equipment.sensorHeightMm,
+        pixelPitchUm: _equipment.pixelPitchUm,
+        resolutionWidthPx: _equipment.resolutionWidthPx,
+        resolutionHeightPx: _equipment.resolutionHeightPx,
+        focalLengthMm: _equipment.focalLengthMm,
+        focalRatio: 4.0,
       );
       await equipmentRepo.updateEquipment(edited);
       await vm.refreshSelectedEquipment();
 
       expect(vm.selectedEquipment?.name, 'Renamed Rig');
-      expect(vm.selectedEquipment?.aperture, 4.0);
+      expect(vm.selectedEquipment?.focalRatio, 4.0);
     });
 
     test('does nothing without a selection', () async {

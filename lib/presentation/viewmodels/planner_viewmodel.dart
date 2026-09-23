@@ -761,9 +761,9 @@ class PlannerViewModel extends ChangeNotifier {
   double? get npfExposure {
     if (_selectedEquipment == null || _selectedTarget == null) return null;
     return OpticalCalculator.calculateNPFExposure(
-      apertureFNumber: _selectedEquipment!.aperture,
-      pixelPitch: _selectedEquipment!.pixelPitch,
-      effectiveFocalLength: _selectedEquipment!.focalLength,
+      apertureFNumber: _selectedEquipment!.focalRatio,
+      pixelPitch: _selectedEquipment!.pixelPitchUm,
+      effectiveFocalLength: _selectedEquipment!.focalLengthMm,
       declinationDegrees: _selectedTarget!.declination,
     );
   }
@@ -893,10 +893,10 @@ class PlannerViewModel extends ChangeNotifier {
   double? get pixelScale {
     if (_selectedEquipment == null) return null;
     final efl = OpticalCalculator.calculateEffectiveFocalLength(
-      focalLength: _selectedEquipment!.focalLength,
+      focalLength: _selectedEquipment!.focalLengthMm,
     );
     return OpticalCalculator.calculatePixelScale(
-      pixelPitch: _selectedEquipment!.pixelPitch,
+      pixelPitch: _selectedEquipment!.pixelPitchUm,
       effectiveFocalLength: efl,
     );
   }

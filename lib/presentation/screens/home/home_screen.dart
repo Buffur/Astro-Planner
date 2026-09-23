@@ -131,10 +131,14 @@ class HomeScreen extends StatelessWidget {
                                 'Pixel Scale': viewModel.pixelScale != null
                                     ? '${viewModel.pixelScale!.toStringAsFixed(2)} arcsec/px'
                                     : 'Unknown',
-                                'Aperture':
-                                    'f/${equipment.aperture.toStringAsFixed(1)}',
+                                'Focal length':
+                                    '${_trimNumber(equipment.focalLengthMm)} mm',
+                                'Focal ratio': equipment.needsApertureReview
+                                    ? 'f/${_trimNumber(equipment.focalRatio)} — please review'
+                                    : 'f/${equipment.focalRatio.toStringAsFixed(1)}',
                                 'Sensor':
-                                    '${equipment.sensorWidth}x${equipment.sensorHeight}mm (${equipment.pixelPitch}µm pixels)',
+                                    '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
+                                'Tracking': equipment.trackingType.label,
                               },
                               onTap: () => context.push('/equipment'),
                             ),
@@ -483,6 +487,10 @@ class _EmptyStateView extends StatelessWidget {
     );
   }
 }
+
+/// A number without trailing zeros (e.g. 400.0 → "400", 3.76 → "3.76").
+String _trimNumber(double value) =>
+    value == value.roundToDouble() ? value.toInt().toString() : '$value';
 
 /// The first-run prompt (TASK 7.3), shown while the ViewModel has no site
 /// or position and is using the hard-coded default. Nothing asks for the

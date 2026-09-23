@@ -34,8 +34,19 @@ class OpticalRigs extends Table {
   IntColumn get cameraModuleId =>
       integer().references(CameraModules, #id, onDelete: KeyAction.restrict)();
   RealColumn get focalLengthMm => real()();
+
+  /// The focal ratio N (f/N), dimensionless (ADR-011 §4). The column keeps
+  /// its historical name; stored values are never reinterpreted.
   RealColumn get aperture => real()();
+
+  /// `untracked` / `tracked` / `guided` / `unknown` (ADR-011 §5).
   TextColumn get trackingState =>
       text().withDefault(const Constant('unknown'))();
   RealColumn get rotationDegrees => real().nullable()();
+
+  /// Aperture diameter, mm; NULL = unknown (ADR-011 §4, schema v14).
+  RealColumn get apertureDiameterMm => real().nullable()();
+
+  /// The user's maximum sub-exposure, s; NULL = none (ADR-011 §5, v14).
+  RealColumn get maxExposureS => real().nullable()();
 }

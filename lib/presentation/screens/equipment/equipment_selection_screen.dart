@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/repositories/equipment_repository.dart';
+import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
+import '../../../domain/models/tracking_type.dart';
+import '../../shared/equipment_form_input.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
 class EquipmentSelectionScreen extends StatefulWidget {
@@ -47,9 +50,46 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     if (eq.cameraModel != null && eq.cameraModel!.isNotEmpty) {
       parts.add(eq.cameraModel!);
     }
-    parts.add('${eq.resolutionWidth}×${eq.resolutionHeight}px');
-    parts.add('${eq.pixelPitch}µm');
+    parts.add('${eq.resolutionWidthPx}×${eq.resolutionHeightPx} px');
+    parts.add('${eq.pixelPitchUm} µm');
+    parts.add('${_trim(eq.focalLengthMm)} mm');
+    parts.add(
+      eq.needsApertureReview
+          ? 'f/${_trim(eq.focalRatio)} — please review'
+          : 'f/${eq.focalRatio.toStringAsFixed(1)}',
+    );
+    if (eq.trackingType != TrackingType.unknown) {
+      parts.add(eq.trackingType.label);
+    }
     return parts.join(' · ');
+  }
+
+  static String _trim(double value) =>
+      value == value.roundToDouble() ? value.toInt().toString() : '$value';
+
+  static String _text(double? value) => value == null ? '' : _trim(value);
+
+  static final _decimal = const TextInputType.numberWithOptions(decimal: true);
+
+  /// ADR-011 §6: a stored focal ratio above f/32 is shown for review, never
+  /// converted. The f/ field's own bounds make the user fix it on save.
+  Widget _reviewBanner(BuildContext context, EquipmentProfile eq) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        'Please review: the stored focal ratio is '
+        'f/${_trim(eq.focalRatio)}, above f/32. It may be an aperture '
+        'diameter typed into the f/ field. Enter the focal ratio, or the '
+        'diameter in mm.',
+        style: TextStyle(color: scheme.onErrorContainer),
+      ),
+    );
   }
 
   Future<void> _showEquipmentDialog({EquipmentProfile? existing}) async {
@@ -65,40 +105,55 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       text: existing?.cameraModel ?? '',
     );
     final resWCtrl = TextEditingController(
-      text: existing != null ? existing.resolutionWidth.toString() : '',
+      text: existing?.resolutionWidthPx.toString() ?? '',
     );
     final resHCtrl = TextEditingController(
-      text: existing != null ? existing.resolutionHeight.toString() : '',
+      text: existing?.resolutionHeightPx.toString() ?? '',
     );
     final pixelCtrl = TextEditingController(
-      text: existing != null ? existing.pixelPitch.toString() : '',
+      text: _text(existing?.pixelPitchUm),
     );
     final sensorWCtrl = TextEditingController(
-      text: existing != null ? existing.sensorWidth.toStringAsFixed(2) : '',
+      text: existing?.sensorWidthMm.toStringAsFixed(2) ?? '',
     );
     final sensorHCtrl = TextEditingController(
-      text: existing != null ? existing.sensorHeight.toStringAsFixed(2) : '',
+      text: existing?.sensorHeightMm.toStringAsFixed(2) ?? '',
     );
     final focalCtrl = TextEditingController(
-      text: existing != null ? existing.focalLength.toString() : '',
+      text: _text(existing?.focalLengthMm),
     );
     final apertureCtrl = TextEditingController(
-      text: existing != null ? existing.aperture.toString() : '',
+      text: _text(existing?.focalRatio),
+    );
+    final diameterCtrl = TextEditingController(
+      text: _text(existing?.apertureDiameterMm),
     );
     final averageRawFileSizeMBCtrl = TextEditingController(
-      text: existing?.averageRawFileSizeMB != null
-          ? existing!.averageRawFileSizeMB!.toString()
-          : '',
+      text: _text(existing?.averageRawFileSizeMB),
     );
     final rotationCtrl = TextEditingController(
-      text: existing?.rotation != null ? existing!.rotation!.toString() : '',
+      text: _text(existing?.rotationDeg),
     );
+    final maxExposureCtrl = TextEditingController(
+      text: _text(existing?.maxExposureS),
+    );
+    var trackingType = existing?.trackingType ?? TrackingType.unknown;
+    String? apertureError;
+
+    /// With a diameter, the focal ratio is derived: N = f / D (ADR-011 §4).
+    void deriveFocalRatio() {
+      final focal = EquipmentFormInput.parse(focalCtrl.text);
+      final diameter = EquipmentFormInput.parse(diameterCtrl.text);
+      if (focal != null && diameter != null && diameter > 0) {
+        apertureCtrl.text = (focal / diameter).toStringAsFixed(2);
+      }
+    }
 
     /// Auto-compute sensor size from resolution × pixel pitch.
     void autoSensorSize() {
       final resW = int.tryParse(resWCtrl.text);
       final resH = int.tryParse(resHCtrl.text);
-      final pitch = double.tryParse(pixelCtrl.text);
+      final pitch = EquipmentFormInput.parse(pixelCtrl.text);
       if (resW != null && resH != null && pitch != null && pitch > 0) {
         final sw = (resW * pitch / 1000);
         final sh = (resH * pitch / 1000);
@@ -180,15 +235,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                             textAlign: TextAlign.center,
                             onChanged: (_) => autoSensorSize(),
                             decoration: const InputDecoration(hintText: '6248'),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = int.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.validateResolution,
                           ),
                           fieldH: TextFormField(
                             controller: resHCtrl,
@@ -196,15 +243,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                             textAlign: TextAlign.center,
                             onChanged: (_) => autoSensorSize(),
                             decoration: const InputDecoration(hintText: '4176'),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = int.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.validateResolution,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -214,40 +253,26 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           unit: 'µm',
                           fieldW: TextFormField(
                             controller: pixelCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
+                            keyboardType: _decimal,
                             textAlign: TextAlign.center,
                             onChanged: (_) => autoSensorSize(),
                             decoration: const InputDecoration(hintText: '3.76'),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = double.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.required(
+                              EquipmentLimits.pixelPitchUm,
+                              'µm',
+                            ),
                           ),
                           // Pixel size is square — show same value label for H
                           fieldH: TextFormField(
                             controller: pixelCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
+                            keyboardType: _decimal,
                             textAlign: TextAlign.center,
                             onChanged: (_) => autoSensorSize(),
                             decoration: const InputDecoration(hintText: '3.76'),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = double.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.required(
+                              EquipmentLimits.pixelPitchUm,
+                              'µm',
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -278,15 +303,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                               hintText: '23.50',
                               filled: true,
                             ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = double.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.required(
+                              EquipmentLimits.sensorSideMm,
+                              'mm',
+                            ),
                           ),
                           fieldH: TextFormField(
                             controller: sensorHCtrl,
@@ -302,15 +322,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                               hintText: '15.70',
                               filled: true,
                             ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              final n = double.tryParse(v);
-                              if (n == null) return 'Invalid';
-                              if (n <= 0) return '> 0';
-                              return null;
-                            },
+                            validator: EquipmentFormInput.required(
+                              EquipmentLimits.sensorSideMm,
+                              'mm',
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -335,52 +350,100 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                               ),
                         ),
                         const SizedBox(height: 8),
+                        if (existing?.needsApertureReview ?? false)
+                          _reviewBanner(context, existing!),
+                        TextFormField(
+                          controller: focalCtrl,
+                          keyboardType: _decimal,
+                          onChanged: (_) => setDialogState(deriveFocalRatio),
+                          decoration: const InputDecoration(
+                            labelText: 'Effective Focal Length (mm)',
+                          ),
+                          validator: EquipmentFormInput.required(
+                            EquipmentLimits.focalLengthMm,
+                            'mm',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: TextFormField(
-                                controller: focalCtrl,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Effective Focal Length (mm)',
+                                controller: apertureCtrl,
+                                // ADR-011 §4: with a diameter, N = f / D.
+                                readOnly: diameterCtrl.text.trim().isNotEmpty,
+                                keyboardType: _decimal,
+                                decoration: InputDecoration(
+                                  labelText: 'Focal ratio (f/)',
+                                  helperText:
+                                      diameterCtrl.text.trim().isNotEmpty
+                                      ? 'From focal length ÷ diameter'
+                                      : null,
                                 ),
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return 'Required';
-                                  }
-                                  final n = double.tryParse(v);
-                                  if (n == null) return 'Invalid';
-                                  if (n <= 0) return 'Must be > 0';
-                                  return null;
-                                },
+                                validator: diameterCtrl.text.trim().isNotEmpty
+                                    ? null
+                                    : EquipmentFormInput.required(
+                                        EquipmentLimits.focalRatio,
+                                        '',
+                                      ),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: TextFormField(
-                                controller: apertureCtrl,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
+                                controller: diameterCtrl,
+                                keyboardType: _decimal,
+                                onChanged: (_) =>
+                                    setDialogState(deriveFocalRatio),
                                 decoration: const InputDecoration(
-                                  labelText: 'Effective Aperture (f/)',
+                                  labelText: 'Aperture diameter (mm)',
+                                  hintText: 'Optional',
                                 ),
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return 'Required';
-                                  }
-                                  final n = double.tryParse(v);
-                                  if (n == null) return 'Invalid';
-                                  if (n <= 0) return 'Must be > 0';
-                                  return null;
-                                },
+                                validator: EquipmentFormInput.optional(
+                                  EquipmentLimits.apertureDiameterMm,
+                                  'mm',
+                                ),
                               ),
                             ),
                           ],
+                        ),
+                        if (apertureError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              apertureError!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<TrackingType>(
+                          initialValue: trackingType,
+                          decoration: const InputDecoration(
+                            labelText: 'Tracking',
+                          ),
+                          items: [
+                            for (final t in TrackingType.values)
+                              DropdownMenuItem(value: t, child: Text(t.label)),
+                          ],
+                          onChanged: (t) {
+                            if (t != null) trackingType = t;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: maxExposureCtrl,
+                          keyboardType: _decimal,
+                          decoration: const InputDecoration(
+                            labelText: 'Maximum sub-exposure (s)',
+                            hintText: 'Optional — your mount/guiding limit',
+                          ),
+                          validator: EquipmentFormInput.optional(
+                            EquipmentLimits.maxExposureS,
+                            's',
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -388,23 +451,15 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                             Expanded(
                               child: TextFormField(
                                 controller: averageRawFileSizeMBCtrl,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
+                                keyboardType: _decimal,
                                 decoration: const InputDecoration(
                                   labelText: 'Average RAW File Size (MB)',
                                   hintText: 'e.g. 50.0',
                                 ),
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return null;
-                                  }
-                                  if (double.tryParse(v) == null) {
-                                    return 'Invalid';
-                                  }
-                                  return null;
-                                },
+                                validator: EquipmentFormInput.optional(
+                                  EquipmentLimits.rawFileSizeMB,
+                                  'MB',
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -420,15 +475,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                                   labelText: 'Rotation (°)',
                                   hintText: 'Optional',
                                 ),
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return null;
-                                  }
-                                  if (double.tryParse(v) == null) {
-                                    return 'Invalid';
-                                  }
-                                  return null;
-                                },
+                                validator: EquipmentFormInput.optional(
+                                  EquipmentLimits.rotationDeg,
+                                  '°',
+                                ),
                               ),
                             ),
                           ],
@@ -449,6 +499,28 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
                     final repo = context.read<EquipmentRepository>();
+                    final focal = EquipmentFormInput.parse(focalCtrl.text)!;
+                    final diameterText = diameterCtrl.text.trim();
+                    final aperture = resolveAperture(
+                      focalLengthMm: focal,
+                      focalRatio: diameterText.isEmpty
+                          ? EquipmentFormInput.parse(apertureCtrl.text)
+                          : null,
+                      diameterMm: diameterText.isEmpty
+                          ? null
+                          : EquipmentFormInput.parse(diameterText),
+                    );
+                    if (!aperture.isValid) {
+                      setDialogState(
+                        () =>
+                            apertureError = EquipmentFormInput.apertureMessage(
+                              aperture.problem!,
+                            ),
+                      );
+                      return;
+                    }
+                    double? optional(TextEditingController c) =>
+                        EquipmentFormInput.parse(c.text);
                     final profile = EquipmentProfile(
                       id: existing?.id ?? 0,
                       name: name,
@@ -458,19 +530,22 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       cameraModel: cameraModelCtrl.text.trim().isEmpty
                           ? null
                           : cameraModelCtrl.text.trim(),
-                      resolutionWidth: int.tryParse(resWCtrl.text) ?? 0,
-                      resolutionHeight: int.tryParse(resHCtrl.text) ?? 0,
-                      pixelPitch: double.tryParse(pixelCtrl.text) ?? 0.0,
-                      sensorWidth: double.tryParse(sensorWCtrl.text) ?? 0.0,
-                      sensorHeight: double.tryParse(sensorHCtrl.text) ?? 0.0,
-                      focalLength: double.tryParse(focalCtrl.text) ?? 0.0,
-                      aperture: double.tryParse(apertureCtrl.text) ?? 0.0,
-                      averageRawFileSizeMB: double.tryParse(
-                        averageRawFileSizeMBCtrl.text,
-                      ),
-                      rotation: rotationCtrl.text.trim().isEmpty
-                          ? null
-                          : double.tryParse(rotationCtrl.text),
+                      resolutionWidthPx: int.parse(resWCtrl.text.trim()),
+                      resolutionHeightPx: int.parse(resHCtrl.text.trim()),
+                      pixelPitchUm: EquipmentFormInput.parse(pixelCtrl.text)!,
+                      sensorWidthMm: EquipmentFormInput.parse(
+                        sensorWCtrl.text,
+                      )!,
+                      sensorHeightMm: EquipmentFormInput.parse(
+                        sensorHCtrl.text,
+                      )!,
+                      focalLengthMm: focal,
+                      focalRatio: aperture.focalRatio!,
+                      apertureDiameterMm: aperture.diameterMm,
+                      averageRawFileSizeMB: optional(averageRawFileSizeMBCtrl),
+                      rotationDeg: optional(rotationCtrl),
+                      trackingType: trackingType,
+                      maxExposureS: optional(maxExposureCtrl),
                     );
                     if (isEdit) {
                       await repo.updateEquipment(profile);

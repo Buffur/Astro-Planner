@@ -205,13 +205,13 @@ void main() {
       final testEquip = domain.EquipmentProfile(
         id: 1,
         name: 'ASI2600MC',
-        aperture: 4.0,
-        focalLength: 400.0,
-        sensorWidth: 23.5,
-        sensorHeight: 15.6,
-        resolutionWidth: 6000,
-        resolutionHeight: 4000,
-        pixelPitch: 3.76,
+        focalRatio: 4.0,
+        focalLengthMm: 400.0,
+        sensorWidthMm: 23.5,
+        sensorHeightMm: 15.6,
+        resolutionWidthPx: 6000,
+        resolutionHeightPx: 4000,
+        pixelPitchUm: 3.76,
         averageRawFileSizeMB: 50.0,
       );
       await equipmentRepo.insertEquipment(testEquip);
@@ -328,13 +328,13 @@ void main() {
     final testEquip = domain.EquipmentProfile(
       id: 1,
       name: 'ASI2600MC',
-      aperture: 4.0,
-      focalLength: 400.0,
-      sensorWidth: 23.5,
-      sensorHeight: 15.6,
-      resolutionWidth: 6000,
-      resolutionHeight: 4000,
-      pixelPitch: 3.76,
+      focalRatio: 4.0,
+      focalLengthMm: 400.0,
+      sensorWidthMm: 23.5,
+      sensorHeightMm: 15.6,
+      resolutionWidthPx: 6000,
+      resolutionHeightPx: 4000,
+      pixelPitchUm: 3.76,
       averageRawFileSizeMB: 50.0,
     );
     await equipmentRepo.insertEquipment(testEquip);
@@ -382,13 +382,13 @@ void main() {
     final testEquip = domain.EquipmentProfile(
       id: 1,
       name: 'ASI2600MC',
-      aperture: 4.0,
-      focalLength: 400.0,
-      sensorWidth: 23.5,
-      sensorHeight: 15.6,
-      resolutionWidth: 6000,
-      resolutionHeight: 4000,
-      pixelPitch: 3.76,
+      focalRatio: 4.0,
+      focalLengthMm: 400.0,
+      sensorWidthMm: 23.5,
+      sensorHeightMm: 15.6,
+      resolutionWidthPx: 6000,
+      resolutionHeightPx: 4000,
+      pixelPitchUm: 3.76,
       averageRawFileSizeMB: 50.0,
     );
     await equipmentRepo.insertEquipment(testEquip);
@@ -448,13 +448,13 @@ void main() {
     final testEquip = domain.EquipmentProfile(
       id: 1,
       name: 'ASI2600MC',
-      aperture: 4.0,
-      focalLength: 400.0,
-      sensorWidth: 23.5,
-      sensorHeight: 15.6,
-      resolutionWidth: 6000,
-      resolutionHeight: 4000,
-      pixelPitch: 3.76,
+      focalRatio: 4.0,
+      focalLengthMm: 400.0,
+      sensorWidthMm: 23.5,
+      sensorHeightMm: 15.6,
+      resolutionWidthPx: 6000,
+      resolutionHeightPx: 4000,
+      pixelPitchUm: 3.76,
       averageRawFileSizeMB: 50.0,
     );
     await equipmentRepo.insertEquipment(testEquip);

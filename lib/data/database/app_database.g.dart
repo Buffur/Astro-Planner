@@ -1127,6 +1127,28 @@ class $OpticalRigsTable extends OpticalRigs
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _apertureDiameterMmMeta =
+      const VerificationMeta('apertureDiameterMm');
+  @override
+  late final GeneratedColumn<double> apertureDiameterMm =
+      GeneratedColumn<double>(
+        'aperture_diameter_mm',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _maxExposureSMeta = const VerificationMeta(
+    'maxExposureS',
+  );
+  @override
+  late final GeneratedColumn<double> maxExposureS = GeneratedColumn<double>(
+    'max_exposure_s',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1136,6 +1158,8 @@ class $OpticalRigsTable extends OpticalRigs
     aperture,
     trackingState,
     rotationDegrees,
+    apertureDiameterMm,
+    maxExposureS,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1208,6 +1232,24 @@ class $OpticalRigsTable extends OpticalRigs
         ),
       );
     }
+    if (data.containsKey('aperture_diameter_mm')) {
+      context.handle(
+        _apertureDiameterMmMeta,
+        apertureDiameterMm.isAcceptableOrUnknown(
+          data['aperture_diameter_mm']!,
+          _apertureDiameterMmMeta,
+        ),
+      );
+    }
+    if (data.containsKey('max_exposure_s')) {
+      context.handle(
+        _maxExposureSMeta,
+        maxExposureS.isAcceptableOrUnknown(
+          data['max_exposure_s']!,
+          _maxExposureSMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1245,6 +1287,14 @@ class $OpticalRigsTable extends OpticalRigs
         DriftSqlType.double,
         data['${effectivePrefix}rotation_degrees'],
       ),
+      apertureDiameterMm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}aperture_diameter_mm'],
+      ),
+      maxExposureS: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}max_exposure_s'],
+      ),
     );
   }
 
@@ -1259,9 +1309,20 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
   final String name;
   final int cameraModuleId;
   final double focalLengthMm;
+
+  /// The focal ratio N (f/N), dimensionless (ADR-011 §4). The column keeps
+  /// its historical name; stored values are never reinterpreted.
   final double aperture;
+
+  /// `untracked` / `tracked` / `guided` / `unknown` (ADR-011 §5).
   final String trackingState;
   final double? rotationDegrees;
+
+  /// Aperture diameter, mm; NULL = unknown (ADR-011 §4, schema v14).
+  final double? apertureDiameterMm;
+
+  /// The user's maximum sub-exposure, s; NULL = none (ADR-011 §5, v14).
+  final double? maxExposureS;
   const OpticalRig({
     required this.id,
     required this.name,
@@ -1270,6 +1331,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     required this.aperture,
     required this.trackingState,
     this.rotationDegrees,
+    this.apertureDiameterMm,
+    this.maxExposureS,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1282,6 +1345,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     map['tracking_state'] = Variable<String>(trackingState);
     if (!nullToAbsent || rotationDegrees != null) {
       map['rotation_degrees'] = Variable<double>(rotationDegrees);
+    }
+    if (!nullToAbsent || apertureDiameterMm != null) {
+      map['aperture_diameter_mm'] = Variable<double>(apertureDiameterMm);
+    }
+    if (!nullToAbsent || maxExposureS != null) {
+      map['max_exposure_s'] = Variable<double>(maxExposureS);
     }
     return map;
   }
@@ -1297,6 +1366,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       rotationDegrees: rotationDegrees == null && nullToAbsent
           ? const Value.absent()
           : Value(rotationDegrees),
+      apertureDiameterMm: apertureDiameterMm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(apertureDiameterMm),
+      maxExposureS: maxExposureS == null && nullToAbsent
+          ? const Value.absent()
+          : Value(maxExposureS),
     );
   }
 
@@ -1313,6 +1388,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       aperture: serializer.fromJson<double>(json['aperture']),
       trackingState: serializer.fromJson<String>(json['trackingState']),
       rotationDegrees: serializer.fromJson<double?>(json['rotationDegrees']),
+      apertureDiameterMm: serializer.fromJson<double?>(
+        json['apertureDiameterMm'],
+      ),
+      maxExposureS: serializer.fromJson<double?>(json['maxExposureS']),
     );
   }
   @override
@@ -1326,6 +1405,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       'aperture': serializer.toJson<double>(aperture),
       'trackingState': serializer.toJson<String>(trackingState),
       'rotationDegrees': serializer.toJson<double?>(rotationDegrees),
+      'apertureDiameterMm': serializer.toJson<double?>(apertureDiameterMm),
+      'maxExposureS': serializer.toJson<double?>(maxExposureS),
     };
   }
 
@@ -1337,6 +1418,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     double? aperture,
     String? trackingState,
     Value<double?> rotationDegrees = const Value.absent(),
+    Value<double?> apertureDiameterMm = const Value.absent(),
+    Value<double?> maxExposureS = const Value.absent(),
   }) => OpticalRig(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1347,6 +1430,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     rotationDegrees: rotationDegrees.present
         ? rotationDegrees.value
         : this.rotationDegrees,
+    apertureDiameterMm: apertureDiameterMm.present
+        ? apertureDiameterMm.value
+        : this.apertureDiameterMm,
+    maxExposureS: maxExposureS.present ? maxExposureS.value : this.maxExposureS,
   );
   OpticalRig copyWithCompanion(OpticalRigsCompanion data) {
     return OpticalRig(
@@ -1365,6 +1452,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       rotationDegrees: data.rotationDegrees.present
           ? data.rotationDegrees.value
           : this.rotationDegrees,
+      apertureDiameterMm: data.apertureDiameterMm.present
+          ? data.apertureDiameterMm.value
+          : this.apertureDiameterMm,
+      maxExposureS: data.maxExposureS.present
+          ? data.maxExposureS.value
+          : this.maxExposureS,
     );
   }
 
@@ -1377,7 +1470,9 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           ..write('focalLengthMm: $focalLengthMm, ')
           ..write('aperture: $aperture, ')
           ..write('trackingState: $trackingState, ')
-          ..write('rotationDegrees: $rotationDegrees')
+          ..write('rotationDegrees: $rotationDegrees, ')
+          ..write('apertureDiameterMm: $apertureDiameterMm, ')
+          ..write('maxExposureS: $maxExposureS')
           ..write(')'))
         .toString();
   }
@@ -1391,6 +1486,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     aperture,
     trackingState,
     rotationDegrees,
+    apertureDiameterMm,
+    maxExposureS,
   );
   @override
   bool operator ==(Object other) =>
@@ -1402,7 +1499,9 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           other.focalLengthMm == this.focalLengthMm &&
           other.aperture == this.aperture &&
           other.trackingState == this.trackingState &&
-          other.rotationDegrees == this.rotationDegrees);
+          other.rotationDegrees == this.rotationDegrees &&
+          other.apertureDiameterMm == this.apertureDiameterMm &&
+          other.maxExposureS == this.maxExposureS);
 }
 
 class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
@@ -1413,6 +1512,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
   final Value<double> aperture;
   final Value<String> trackingState;
   final Value<double?> rotationDegrees;
+  final Value<double?> apertureDiameterMm;
+  final Value<double?> maxExposureS;
   const OpticalRigsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1421,6 +1522,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.aperture = const Value.absent(),
     this.trackingState = const Value.absent(),
     this.rotationDegrees = const Value.absent(),
+    this.apertureDiameterMm = const Value.absent(),
+    this.maxExposureS = const Value.absent(),
   });
   OpticalRigsCompanion.insert({
     this.id = const Value.absent(),
@@ -1430,6 +1533,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     required double aperture,
     this.trackingState = const Value.absent(),
     this.rotationDegrees = const Value.absent(),
+    this.apertureDiameterMm = const Value.absent(),
+    this.maxExposureS = const Value.absent(),
   }) : name = Value(name),
        cameraModuleId = Value(cameraModuleId),
        focalLengthMm = Value(focalLengthMm),
@@ -1442,6 +1547,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Expression<double>? aperture,
     Expression<String>? trackingState,
     Expression<double>? rotationDegrees,
+    Expression<double>? apertureDiameterMm,
+    Expression<double>? maxExposureS,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1451,6 +1558,9 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       if (aperture != null) 'aperture': aperture,
       if (trackingState != null) 'tracking_state': trackingState,
       if (rotationDegrees != null) 'rotation_degrees': rotationDegrees,
+      if (apertureDiameterMm != null)
+        'aperture_diameter_mm': apertureDiameterMm,
+      if (maxExposureS != null) 'max_exposure_s': maxExposureS,
     });
   }
 
@@ -1462,6 +1572,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Value<double>? aperture,
     Value<String>? trackingState,
     Value<double?>? rotationDegrees,
+    Value<double?>? apertureDiameterMm,
+    Value<double?>? maxExposureS,
   }) {
     return OpticalRigsCompanion(
       id: id ?? this.id,
@@ -1471,6 +1583,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       aperture: aperture ?? this.aperture,
       trackingState: trackingState ?? this.trackingState,
       rotationDegrees: rotationDegrees ?? this.rotationDegrees,
+      apertureDiameterMm: apertureDiameterMm ?? this.apertureDiameterMm,
+      maxExposureS: maxExposureS ?? this.maxExposureS,
     );
   }
 
@@ -1498,6 +1612,12 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     if (rotationDegrees.present) {
       map['rotation_degrees'] = Variable<double>(rotationDegrees.value);
     }
+    if (apertureDiameterMm.present) {
+      map['aperture_diameter_mm'] = Variable<double>(apertureDiameterMm.value);
+    }
+    if (maxExposureS.present) {
+      map['max_exposure_s'] = Variable<double>(maxExposureS.value);
+    }
     return map;
   }
 
@@ -1510,7 +1630,9 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
           ..write('focalLengthMm: $focalLengthMm, ')
           ..write('aperture: $aperture, ')
           ..write('trackingState: $trackingState, ')
-          ..write('rotationDegrees: $rotationDegrees')
+          ..write('rotationDegrees: $rotationDegrees, ')
+          ..write('apertureDiameterMm: $apertureDiameterMm, ')
+          ..write('maxExposureS: $maxExposureS')
           ..write(')'))
         .toString();
   }
@@ -5670,6 +5792,8 @@ typedef $$OpticalRigsTableCreateCompanionBuilder =
       required double aperture,
       Value<String> trackingState,
       Value<double?> rotationDegrees,
+      Value<double?> apertureDiameterMm,
+      Value<double?> maxExposureS,
     });
 typedef $$OpticalRigsTableUpdateCompanionBuilder =
     OpticalRigsCompanion Function({
@@ -5680,6 +5804,8 @@ typedef $$OpticalRigsTableUpdateCompanionBuilder =
       Value<double> aperture,
       Value<String> trackingState,
       Value<double?> rotationDegrees,
+      Value<double?> apertureDiameterMm,
+      Value<double?> maxExposureS,
     });
 
 final class $$OpticalRigsTableReferences
@@ -5741,6 +5867,16 @@ class $$OpticalRigsTableFilterComposer
 
   ColumnFilters<double> get rotationDegrees => $composableBuilder(
     column: $table.rotationDegrees,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get apertureDiameterMm => $composableBuilder(
+    column: $table.apertureDiameterMm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get maxExposureS => $composableBuilder(
+    column: $table.maxExposureS,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5807,6 +5943,16 @@ class $$OpticalRigsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get apertureDiameterMm => $composableBuilder(
+    column: $table.apertureDiameterMm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get maxExposureS => $composableBuilder(
+    column: $table.maxExposureS,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CameraModulesTableOrderingComposer get cameraModuleId {
     final $$CameraModulesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5861,6 +6007,16 @@ class $$OpticalRigsTableAnnotationComposer
 
   GeneratedColumn<double> get rotationDegrees => $composableBuilder(
     column: $table.rotationDegrees,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get apertureDiameterMm => $composableBuilder(
+    column: $table.apertureDiameterMm,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get maxExposureS => $composableBuilder(
+    column: $table.maxExposureS,
     builder: (column) => column,
   );
 
@@ -5923,6 +6079,8 @@ class $$OpticalRigsTableTableManager
                 Value<double> aperture = const Value.absent(),
                 Value<String> trackingState = const Value.absent(),
                 Value<double?> rotationDegrees = const Value.absent(),
+                Value<double?> apertureDiameterMm = const Value.absent(),
+                Value<double?> maxExposureS = const Value.absent(),
               }) => OpticalRigsCompanion(
                 id: id,
                 name: name,
@@ -5931,6 +6089,8 @@ class $$OpticalRigsTableTableManager
                 aperture: aperture,
                 trackingState: trackingState,
                 rotationDegrees: rotationDegrees,
+                apertureDiameterMm: apertureDiameterMm,
+                maxExposureS: maxExposureS,
               ),
           createCompanionCallback:
               ({
@@ -5941,6 +6101,8 @@ class $$OpticalRigsTableTableManager
                 required double aperture,
                 Value<String> trackingState = const Value.absent(),
                 Value<double?> rotationDegrees = const Value.absent(),
+                Value<double?> apertureDiameterMm = const Value.absent(),
+                Value<double?> maxExposureS = const Value.absent(),
               }) => OpticalRigsCompanion.insert(
                 id: id,
                 name: name,
@@ -5949,6 +6111,8 @@ class $$OpticalRigsTableTableManager
                 aperture: aperture,
                 trackingState: trackingState,
                 rotationDegrees: rotationDegrees,
+                apertureDiameterMm: apertureDiameterMm,
+                maxExposureS: maxExposureS,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -26,15 +26,15 @@ class _FakeEquipmentRepository implements EquipmentRepository {
         name: profile.name,
         manufacturer: profile.manufacturer,
         cameraModel: profile.cameraModel,
-        sensorWidth: profile.sensorWidth,
-        sensorHeight: profile.sensorHeight,
-        pixelPitch: profile.pixelPitch,
-        resolutionWidth: profile.resolutionWidth,
-        resolutionHeight: profile.resolutionHeight,
-        focalLength: profile.focalLength,
-        aperture: profile.aperture,
+        sensorWidthMm: profile.sensorWidthMm,
+        sensorHeightMm: profile.sensorHeightMm,
+        pixelPitchUm: profile.pixelPitchUm,
+        resolutionWidthPx: profile.resolutionWidthPx,
+        resolutionHeightPx: profile.resolutionHeightPx,
+        focalLengthMm: profile.focalLengthMm,
+        focalRatio: profile.focalRatio,
         averageRawFileSizeMB: profile.averageRawFileSizeMB,
-        rotation: profile.rotation,
+        rotationDeg: profile.rotationDeg,
       ),
     );
     return id;
@@ -63,7 +63,7 @@ void main() {
 
     // aperture stores the f-number (SI-005); a plausible amateur telescope
     // sits well under f/72 — the seed used to store the 72mm diameter here.
-    expect(telescopeStub.aperture, closeTo(400.0 / 72.0, 0.01));
-    expect(telescopeStub.aperture, lessThan(20.0));
+    expect(telescopeStub.focalRatio, closeTo(400.0 / 72.0, 0.01));
+    expect(telescopeStub.focalRatio, lessThan(20.0));
   });
 }

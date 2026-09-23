@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/models/equipment_profile.dart' as domain;
+import '../../domain/models/tracking_type.dart';
 import '../database/app_database.dart';
 
 class DriftEquipmentRepository implements EquipmentRepository {
@@ -19,15 +20,19 @@ class DriftEquipmentRepository implements EquipmentRepository {
       name: rig.name,
       manufacturer: dev.manufacturer,
       cameraModel: cam.model,
-      sensorWidth: cam.sensorWidthMm,
-      sensorHeight: cam.sensorHeightMm,
-      pixelPitch: cam.pixelPitchUm,
-      resolutionWidth: cam.resolutionWidthPx,
-      resolutionHeight: cam.resolutionHeightPx,
-      focalLength: rig.focalLengthMm,
-      aperture: rig.aperture,
+      sensorWidthMm: cam.sensorWidthMm,
+      sensorHeightMm: cam.sensorHeightMm,
+      pixelPitchUm: cam.pixelPitchUm,
+      resolutionWidthPx: cam.resolutionWidthPx,
+      resolutionHeightPx: cam.resolutionHeightPx,
+      focalLengthMm: rig.focalLengthMm,
+      // ADR-011 §4: the `aperture` column holds the focal ratio N.
+      focalRatio: rig.aperture,
+      apertureDiameterMm: rig.apertureDiameterMm,
       averageRawFileSizeMB: cam.averageRawFileSizeMB,
-      rotation: rig.rotationDegrees,
+      rotationDeg: rig.rotationDegrees,
+      trackingType: TrackingType.fromStorage(rig.trackingState),
+      maxExposureS: rig.maxExposureS,
     );
   }
 
@@ -84,11 +89,11 @@ class DriftEquipmentRepository implements EquipmentRepository {
               name: '${profile.name} Camera',
               manufacturer: Value(profile.manufacturer),
               model: Value(profile.cameraModel),
-              sensorWidthMm: profile.sensorWidth,
-              sensorHeightMm: profile.sensorHeight,
-              resolutionWidthPx: profile.resolutionWidth,
-              resolutionHeightPx: profile.resolutionHeight,
-              pixelPitchUm: profile.pixelPitch,
+              sensorWidthMm: profile.sensorWidthMm,
+              sensorHeightMm: profile.sensorHeightMm,
+              resolutionWidthPx: profile.resolutionWidthPx,
+              resolutionHeightPx: profile.resolutionHeightPx,
+              pixelPitchUm: profile.pixelPitchUm,
               averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
             ),
           );
@@ -99,9 +104,12 @@ class DriftEquipmentRepository implements EquipmentRepository {
             OpticalRigsCompanion.insert(
               name: profile.name,
               cameraModuleId: camId,
-              focalLengthMm: profile.focalLength,
-              aperture: profile.aperture,
-              rotationDegrees: Value(profile.rotation),
+              focalLengthMm: profile.focalLengthMm,
+              aperture: profile.focalRatio,
+              apertureDiameterMm: Value(profile.apertureDiameterMm),
+              rotationDegrees: Value(profile.rotationDeg),
+              trackingState: Value(profile.trackingType.name),
+              maxExposureS: Value(profile.maxExposureS),
             ),
           );
 
@@ -175,9 +183,12 @@ class DriftEquipmentRepository implements EquipmentRepository {
       )..where((t) => t.id.equals(rig.id))).write(
         OpticalRigsCompanion(
           name: Value(profile.name),
-          focalLengthMm: Value(profile.focalLength),
-          aperture: Value(profile.aperture),
-          rotationDegrees: Value(profile.rotation),
+          focalLengthMm: Value(profile.focalLengthMm),
+          aperture: Value(profile.focalRatio),
+          apertureDiameterMm: Value(profile.apertureDiameterMm),
+          rotationDegrees: Value(profile.rotationDeg),
+          trackingState: Value(profile.trackingType.name),
+          maxExposureS: Value(profile.maxExposureS),
         ),
       );
 
@@ -189,11 +200,11 @@ class DriftEquipmentRepository implements EquipmentRepository {
             name: Value('${profile.name} Camera'),
             manufacturer: Value(profile.manufacturer),
             model: Value(profile.cameraModel),
-            sensorWidthMm: Value(profile.sensorWidth),
-            sensorHeightMm: Value(profile.sensorHeight),
-            resolutionWidthPx: Value(profile.resolutionWidth),
-            resolutionHeightPx: Value(profile.resolutionHeight),
-            pixelPitchUm: Value(profile.pixelPitch),
+            sensorWidthMm: Value(profile.sensorWidthMm),
+            sensorHeightMm: Value(profile.sensorHeightMm),
+            resolutionWidthPx: Value(profile.resolutionWidthPx),
+            resolutionHeightPx: Value(profile.resolutionHeightPx),
+            pixelPitchUm: Value(profile.pixelPitchUm),
             averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
           ),
         );

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:astroplan/presentation/screens/equipment/equipment_selection_screen.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
+import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
 class MockEquipmentRepository implements EquipmentRepository {
@@ -21,8 +22,11 @@ class MockEquipmentRepository implements EquipmentRepository {
     return 1;
   }
 
+  final List<EquipmentProfile> updated = [];
+
   @override
-  Future<void> updateEquipment(EquipmentProfile equipment) async {}
+  Future<void> updateEquipment(EquipmentProfile equipment) async =>
+      updated.add(equipment);
 
   @override
   Future<void> deleteEquipment(int id) async {}
@@ -124,7 +128,9 @@ void main() {
     await tester.tap(find.text('Save'));
     await tester.pump();
 
-    expect(find.text('> 0'), findsWidgets);
+    // TASK 8.4 (ADR-011 §4): bounds replaced "> 0"; a zero resolution now
+    // shows the plausibility range with its unit.
+    expect(find.text('Must be 100–30000 px'), findsWidgets);
   });
 
   testWidgets('valid values can still be saved', (WidgetTester tester) async {
@@ -154,10 +160,8 @@ void main() {
       TextFormField,
       'Effective Focal Length (mm)',
     );
-    final aperture = find.widgetWithText(
-      TextFormField,
-      'Effective Aperture (f/)',
-    );
+    // TASK 8.4 relabelled the f/ field (ADR-011 §3: unit-explicit names).
+    final aperture = find.widgetWithText(TextFormField, 'Focal ratio (f/)');
 
     await tester.enterText(resW, '6000');
     await tester.enterText(resH, '4000');
@@ -189,13 +193,13 @@ void main() {
         const EquipmentProfile(
           id: 1,
           name: 'Test Rig',
-          sensorWidth: 23.5,
-          sensorHeight: 15.7,
-          pixelPitch: 3.76,
-          resolutionWidth: 6248,
-          resolutionHeight: 4176,
-          focalLength: 400.0,
-          aperture: 5.6,
+          sensorWidthMm: 23.5,
+          sensorHeightMm: 15.7,
+          pixelPitchUm: 3.76,
+          resolutionWidthPx: 6248,
+          resolutionHeightPx: 4176,
+          focalLengthMm: 400.0,
+          focalRatio: 5.6,
         ),
       );
 
@@ -215,4 +219,172 @@ void main() {
       expect(find.text('Rotation (°)'), findsOneWidget);
     },
   );
+
+  // TASK 8.4 (ADR-011)
+  Future<void> tallView(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(900, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+  }
+
+  Future<void> fillSensor(WidgetTester tester) async {
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Profile Name'),
+      'Refractor',
+    );
+    await tester.enterText(find.widgetWithText(TextFormField, '6248'), '6248');
+    await tester.enterText(find.widgetWithText(TextFormField, '4176'), '4176');
+    await tester.enterText(
+      find.widgetWithText(TextFormField, '3.76').first,
+      '3.76',
+    );
+  }
+
+  final focalField = find.widgetWithText(
+    TextFormField,
+    'Effective Focal Length (mm)',
+  );
+  final ratioField = find.widgetWithText(TextFormField, 'Focal ratio (f/)');
+  final diameterField = find.widgetWithText(
+    TextFormField,
+    'Aperture diameter (mm)',
+  );
+
+  testWidgets('a diameter derives the focal ratio (N = f / D) and is saved', (
+    tester,
+  ) async {
+    await tallView(tester);
+    final repo = MockEquipmentRepository();
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    await fillSensor(tester);
+    await tester.enterText(focalField, '400');
+    await tester.enterText(diameterField, '72');
+    await tester.pump();
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: ratioField,
+              matching: find.byType(EditableText),
+            ),
+          )
+          .controller
+          .text,
+      '5.56',
+    );
+    expect(find.text('From focal length ÷ diameter'), findsOneWidget);
+
+    // Open the tracking dropdown (showing "Unknown") and pick "Guided".
+    await tester.tap(find.text('Unknown'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Guided').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Maximum sub-exposure (s)'),
+      '300',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    final saved = repo._profiles.single;
+    expect(saved.focalRatio, closeTo(400 / 72, 1e-9));
+    expect(saved.apertureDiameterMm, 72);
+    expect(saved.trackingType, TrackingType.guided);
+    expect(saved.maxExposureS, 300);
+    expect(find.textContaining('f/5.6'), findsOneWidget);
+  });
+
+  testWidgets('a ratio above f/32 is rejected by the form', (tester) async {
+    await tallView(tester);
+    final repo = MockEquipmentRepository();
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    await fillSensor(tester);
+    await tester.enterText(focalField, '400');
+    await tester.enterText(ratioField, '72');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Must be 0.5–32'), findsOneWidget);
+    expect(repo._profiles, isEmpty);
+  });
+
+  testWidgets('a stored f/72 is flagged for review, never converted', (
+    tester,
+  ) async {
+    await tallView(tester);
+    final repo = MockEquipmentRepository();
+    await repo.insertEquipment(
+      const EquipmentProfile(
+        id: 5,
+        name: 'Old scope',
+        sensorWidthMm: 23.5,
+        sensorHeightMm: 15.7,
+        pixelPitchUm: 3.76,
+        resolutionWidthPx: 6248,
+        resolutionHeightPx: 4176,
+        focalLengthMm: 400,
+        focalRatio: 72,
+      ),
+    );
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('f/72 — please review'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Please review'), findsOneWidget);
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(
+              of: ratioField,
+              matching: find.byType(EditableText),
+            ),
+          )
+          .controller
+          .text,
+      '72',
+      reason: 'the stored value is shown as it is',
+    );
+
+    // The user fixes it by entering the diameter.
+    await tester.enterText(diameterField, '72');
+    await tester.pump();
+    await tester.tap(find.text('Save Changes'));
+    await tester.pumpAndSettle();
+    final fixed = repo.updated.single;
+    expect(fixed.focalRatio, closeTo(400 / 72, 1e-9));
+    expect(fixed.apertureDiameterMm, 72);
+  });
+
+  testWidgets('every equipment number shows its unit', (tester) async {
+    await tallView(tester);
+    await tester.pumpWidget(
+      createTestWidget(MockEquipmentRepository(), MockPlannerViewModel()),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    for (final label in [
+      'px',
+      'µm',
+      'mm',
+      'Effective Focal Length (mm)',
+      'Focal ratio (f/)',
+      'Aperture diameter (mm)',
+      'Maximum sub-exposure (s)',
+      'Average RAW File Size (MB)',
+      'Rotation (°)',
+    ]) {
+      expect(find.text(label), findsWidgets, reason: label);
+    }
+  });
 }

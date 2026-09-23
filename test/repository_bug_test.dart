@@ -12,13 +12,13 @@ void main() {
     final profile = domain.EquipmentProfile(
       id: 0,
       name: 'Test Rig',
-      sensorWidth: 35.0,
-      sensorHeight: 24.0,
-      pixelPitch: 3.76,
-      resolutionWidth: 6000,
-      resolutionHeight: 4000,
-      focalLength: 500,
-      aperture: 5,
+      sensorWidthMm: 35.0,
+      sensorHeightMm: 24.0,
+      pixelPitchUm: 3.76,
+      resolutionWidthPx: 6000,
+      resolutionHeightPx: 4000,
+      focalLengthMm: 500,
+      focalRatio: 5,
       averageRawFileSizeMB: 42.5,
     );
 

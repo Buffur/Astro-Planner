@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -297,6 +297,16 @@ class AppDatabase extends _$AppDatabase {
                 await m.addColumn(targets, targets.angularSizeArcmin);
                 await m.addColumn(targets, targets.magnitude);
                 await m.create(schema.astroTargetsCatalogIdUnique);
+              },
+              from13To14: (m, schema) async {
+                // TASK 8.4 (ADR-011): optional aperture diameter and maximum
+                // exposure per rig. Additive only: the `aperture` column keeps
+                // every stored value exactly (read as the focal ratio N; a
+                // value above 32 is flagged for review in the UI, never
+                // converted), and `tracking_state` keeps `unknown`.
+                final rigs = schema.opticalRigs;
+                await m.addColumn(rigs, rigs.apertureDiameterMm);
+                await m.addColumn(rigs, rigs.maxExposureS);
               },
             ),
           );
