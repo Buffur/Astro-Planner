@@ -44,6 +44,7 @@
 > **TASK 7.3 (2026-09-23):** SI-010 progress: a site's IANA zone is set in the editor (device zone pre-filled, "Unknown" allowed, then mean solar time). The zone data set is now `latest_all` (includes link ids; canonical zones' rules unchanged). No formula changed.
 > **TASK 7.4 (2026-09-23):** SI-007 resolved: no scraper, no default; Bortle/SQM are user-entered with source and date, or unknown; no Bortle↔SQM conversion (none is sourced); the sky warning uses a known Bortle class only.
 > **TASK 8.1 (2026-09-23):** SI-012 largely resolved: epoch stored (J2000 only), source stored, moving types hidden/labelled, RA/Dec entered in sexagesimal or hours through pure, tested parsers (CALC-30). No formula changed.
+> **TASK 8.2 (2026-09-23):** SI-012 progress: the seeded targets are now sourced (OpenNGC v20260501, per-object original text kept in the asset; every object's degrees re-derived from its text in tests; 7 independent spot checks within 0.02°) and carry size and magnitude. No formula changed.
 
 ## Purpose and authority
 
@@ -678,7 +679,7 @@ the `(0, 0)` sentinel; add angular size for FOV-fit.
 
 **Progress 2026-09-22 (TASK 6.2):** J2000 target coordinates are now precessed to the date (Meeus ch. 21, owner decision; 0.32° → 0.017° against USNO). Epoch is still not stored per target (TASK 8.1); the moving types are still offered (TASK 8.1).
 
-**Resolved in large part 2026-09-23 (TASK 8.1):** moving types are hidden for new targets and labelled "Fixed coordinates — this object moves; positions are not tracked" when they exist (ADR-010 §3); every target stores its epoch (`J2000`, the only value the calculators support — they precess J2000 to the date, TASK 6.2) and its source (legacy rows: unknown); angular size (arcmin) and magnitude can be stored; RA is entered in hours or h:m:s and Dec in d:m:s, parsed by `AstroMath.parseRightAscension`/`parseDeclination` (CALC-30: RA° = 15 × (h + m/60 + s/3600); Dec° = sign × (d + m/60 + s/3600), the sign applying to the whole value so −0°30′ = −0.5°; a bare RA number is hours, degrees need a `°` suffix). The `(0,0)` sentinel was already removed. **Still open:** no constellation; the seeds are unverified and have no size/magnitude (TASK 8.2).
+**Resolved in large part 2026-09-23 (TASK 8.1):** moving types are hidden for new targets and labelled "Fixed coordinates — this object moves; positions are not tracked" when they exist (ADR-010 §3); every target stores its epoch (`J2000`, the only value the calculators support — they precess J2000 to the date, TASK 6.2) and its source (legacy rows: unknown); angular size (arcmin) and magnitude can be stored; RA is entered in hours or h:m:s and Dec in d:m:s, parsed by `AstroMath.parseRightAscension`/`parseDeclination` (CALC-30: RA° = 15 × (h + m/60 + s/3600); Dec° = sign × (d + m/60 + s/3600), the sign applying to the whole value so −0°30′ = −0.5°; a bare RA number is hours, degrees need a `°` suffix). The `(0,0)` sentinel was already removed. **Still open:** no constellation. *(TASK 8.2, 2026-09-23: the seeds are replaced by 164 OpenNGC-sourced objects with size and V magnitude where OpenNGC has them; M40 and M73 have no size.)*
 
 **Status:** Largely resolved. **Work item:** TD-016 (resolved).
 

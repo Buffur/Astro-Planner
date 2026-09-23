@@ -348,8 +348,11 @@ rewritten to match the code.*
     source, size, magnitude; catalog uniqueness; HMS/DMS parsers; edits keep the
     catalog id; moving types hidden/labelled; search wildcards escaped). 451 tests
     green.
-  - **Next: TASK 8.2 — Curated catalog with provenance.** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 8.2** — 164-object OpenNGC catalog (CC BY-SA 4.0,
+    About page), versioned seeding without resurrection, untouched old seeds upgraded
+    in place (owner decisions). 463 tests green.
+  - **Next: TASK 8.3 — ADR: equipment model and aperture semantics (PD-03, PD-10).**
+    Not started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

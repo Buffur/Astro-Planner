@@ -46,6 +46,7 @@
 > **TASK 7.3 (2026-09-23):** no schema change. Sites are now written only by the site editor (`LocationProfile.userEdit`): a Bortle/SQM value the user changed is stored with source `user` and the date; an unchanged value keeps its source and date; a cleared value loses both. Deleting the active site stores its coordinates as the transient position (`transientLatitude`/`transientLongitude` preferences) and clears `activeLocationId`. Elevation still cannot be unknown (non-null column), and nothing uses it.
 > **TASK 7.4 (2026-09-23):** no schema change. `SkyDarkness` (domain) is a read-only view of a site's Bortle/SQM with their source and date (or unknown); no value is fetched or derived. PD-05 resolved (DECISIONS E.1).
 > **TASK 8.1 (2026-09-23):** schema v13 — `astro_targets` + `epoch` (default `J2000`), `source`, `angular_size_arcmin`, `magnitude`; partial unique index on `catalog_id` for catalog entries. See B2 and B8.
+> **TASK 8.2 (2026-09-23):** no schema change. Catalog rows carry `source = catalog:openngc@v20260501`; the applied catalog version is the preference `catalogSeedVersion` (int; 2 after this task; absent = never applied). The asset format (`assets/catalog/catalog_v2.json`: version, source, licence, epoch, objects with id, name, type, ra/dec degrees, sizeArcmin, vMag, since, and the OpenNGC name and original RA/Dec text) is documented in `lib/data/services/catalog_seeder.dart`.
 
 ---
 

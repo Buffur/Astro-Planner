@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **451 tests: 451 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.1) |
+| `flutter test --no-pub` | **463 tests: 463 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -493,3 +493,19 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - **Rewritten, with the reason recorded in the file:** the four dialog tests that
   typed bare degrees and expected "Must be a number" / "Must be 0.0 to 360.0" now
   check the same rules in the new input format.
+
+**Added by TASK 8.2** (curated OpenNGC catalog), 12 tests:
+- **Asset (`catalog_seeder_test.dart`):** 164 objects, 109 Messier (M102 absent
+  as an OpenNGC duplicate), unique ids, version/source/epoch; size for all but
+  M40/M73; only fixed-coordinate types; every object's degrees equal its OpenNGC
+  text parsed; 7 independent position spot checks (M31, M1, M42, M13, M51,
+  ω Cen, Helix) within 0.02°; the notice credits OpenNGC and CC BY-SA 4.0.
+- **Seeding:** a fresh install gets the catalog and re-running changes nothing;
+  a deleted target (or all of them) is never resurrected; a newer catalog adds
+  only its new entries; the pre-8.2 upgrade updates untouched old seeds in place
+  (same row id) and leaves an edited M31 and a custom target alone; without
+  preferences a non-empty table is left alone.
+- **About page (`about_screen_test.dart`):** the notice and other credits.
+- **Updated, with its reason:** `drift_target_repository_test.dart`'s seeding
+  test pinned the old `seed:catalog@1` source and M42 position; it now checks the
+  catalog's.
