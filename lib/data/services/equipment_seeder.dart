@@ -1,92 +1,60 @@
 import '../../domain/models/equipment_profile.dart';
+import '../../domain/models/spec_confidence.dart';
 import '../../domain/repositories/equipment_repository.dart';
 
+/// Seeds the default equipment on an empty table (TASK 8.5).
+///
+/// "Fewer correct seeds beat many unverified ones" (roadmap TASK 8.5; owner
+/// decision): only one profile ships.
+///
+/// - **Camera — verified.** ZWO ASI2600MC (Sony IMX571): 23.5 × 15.7 mm,
+///   6248 × 4176 px, 3.76 µm pixels, per ZWO's product page
+///   (https://www.zwoastro.com/product/asi2600mc-duo/, specification table
+///   "ASI2600MC Pro", checked 2026-09-23). Resolution × pitch = 23.49 ×
+///   15.70 mm, consistent with the stated size.
+/// - **Optics — estimated.** A generic 72 mm f/5.6 refractor (400 mm), an
+///   illustrative example rather than a specific product.
+/// - No RAW file size: it depends on the capture format, and an estimate
+///   would carry a different confidence than the verified camera specs.
+///
+/// The four phone profiles shipped before TASK 8.5 were dropped: their makers
+/// publish only megapixels, f-number and a 35 mm-equivalent focal length, so
+/// sensor size, pixel pitch and real focal length were unverified. Existing
+/// installs keep their rows (never deleted or reinterpreted).
 class EquipmentSeeder {
   final EquipmentRepository _repository;
 
   EquipmentSeeder(this._repository);
 
+  /// The provenance id stored on seeded rows (ADR-008 §6).
+  static const String source = 'seed:equipment@2';
+
+  static const List<EquipmentProfile> defaults = [
+    EquipmentProfile(
+      id: 0,
+      name: 'ZWO ASI2600MC + example 72 mm f/5.6 refractor',
+      manufacturer: 'ZWO',
+      cameraModel: 'ASI2600MC',
+      sensorWidthMm: 23.5,
+      sensorHeightMm: 15.7,
+      pixelPitchUm: 3.76,
+      resolutionWidthPx: 6248,
+      resolutionHeightPx: 4176,
+      focalLengthMm: 400.0,
+      // N = f / D = 400 / 72 = f/5.56 (ADR-011 §4).
+      focalRatio: 400.0 / 72.0,
+      apertureDiameterMm: 72.0,
+      cameraSource: source,
+      cameraConfidence: SpecConfidence.verified,
+      opticsSource: source,
+      opticsConfidence: SpecConfidence.estimated,
+    ),
+  ];
+
   Future<void> seedIfNeeded() async {
     final existing = await _repository.getAllEquipment();
     if (existing.isNotEmpty) return;
-
-    // Data Provenance:
-    // Smartphone sensor specifications (sensor dimensions, focal lengths, pixel pitch, and apertures)
-    // were sourced from manufacturer technical specifications and GSMArena device databases.
-    // ZWO ASI2600MC specifications (sensor dimensions, resolution, pixel pitch, bit depth)
-    // were sourced directly from official ZWO product documentation.
-    final initialEquipment = [
-      const EquipmentProfile(
-        id: 0,
-        name: 'iPhone 15 Pro Max (Main)',
-        manufacturer: 'Apple',
-        cameraModel: 'IMX903',
-        sensorWidthMm: 9.8,
-        sensorHeightMm: 7.3,
-        pixelPitchUm: 1.22,
-        resolutionWidthPx: 8064,
-        resolutionHeightPx: 6048,
-        focalLengthMm: 6.86,
-        focalRatio: 1.78,
-      ),
-      const EquipmentProfile(
-        id: 0,
-        name: 'Pixel 8 Pro (Main)',
-        manufacturer: 'Google / Samsung',
-        cameraModel: 'GNK',
-        sensorWidthMm: 9.6,
-        sensorHeightMm: 7.2,
-        pixelPitchUm: 1.2,
-        resolutionWidthPx: 8160,
-        resolutionHeightPx: 6144,
-        focalLengthMm: 6.9,
-        focalRatio: 1.68,
-      ),
-      const EquipmentProfile(
-        id: 0,
-        name: 'Xiaomi 14 Ultra (Main)',
-        manufacturer: 'Sony',
-        cameraModel: 'LYT-900',
-        sensorWidthMm: 13.2,
-        sensorHeightMm: 8.8,
-        pixelPitchUm: 1.6,
-        resolutionWidthPx: 8192,
-        resolutionHeightPx: 6144,
-        focalLengthMm: 8.7,
-        focalRatio: 1.63,
-      ),
-      const EquipmentProfile(
-        id: 0,
-        name: 'Vivo X100 Pro (Main)',
-        manufacturer: 'Sony',
-        cameraModel: 'IMX989',
-        sensorWidthMm: 13.2,
-        sensorHeightMm: 8.8,
-        pixelPitchUm: 1.6,
-        resolutionWidthPx: 8192,
-        resolutionHeightPx: 6144,
-        focalLengthMm: 8.7,
-        focalRatio: 1.75,
-      ),
-      const EquipmentProfile(
-        id: 0,
-        name: 'ZWO ASI2600MC + 400mm (Telescope Stub)',
-        manufacturer: 'ZWO',
-        cameraModel: 'ASI2600MC',
-        sensorWidthMm: 23.5,
-        sensorHeightMm: 15.7,
-        pixelPitchUm: 3.76,
-        resolutionWidthPx: 6248,
-        resolutionHeightPx: 4176,
-        focalLengthMm: 400.0,
-        // A 72 mm aperture at 400 mm: N = f / D = f/5.56 (ADR-011 §4). The
-        // pre-TASK 4.4 seed put the 72 mm diameter in the f/ field (SI-005).
-        focalRatio: 400.0 / 72.0,
-        apertureDiameterMm: 72.0,
-      ),
-    ];
-
-    for (final eq in initialEquipment) {
+    for (final eq in defaults) {
       await _repository.insertEquipment(eq);
     }
   }

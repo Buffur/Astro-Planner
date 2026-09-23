@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
+import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 
 class _FakeEquipmentRepository implements EquipmentRepository {
@@ -53,17 +54,46 @@ class _FakeEquipmentRepository implements EquipmentRepository {
 }
 
 void main() {
-  test('seeded telescope stub has a plausible focal ratio, not f/72', () async {
+  // TASK 8.5 (owner decision) dropped the four unverified phone seeds and
+  // renamed the telescope profile; this test used to find it by "400mm" in
+  // the name, and now checks the single verified seed with its provenance.
+  test('one seed: the verified ZWO camera with example optics', () async {
     final repo = _FakeEquipmentRepository();
     await EquipmentSeeder(repo).seedIfNeeded();
+    final all = await repo.getAllEquipment();
+    expect(all, hasLength(1));
+    final seed = EquipmentSeeder.defaults.single;
 
-    final telescopeStub = (await repo.getAllEquipment()).firstWhere(
-      (e) => e.name.contains('400mm'),
-    );
+    // ZWO product page: 23.5 x 15.7 mm, 6248 x 4176 px, 3.76 um.
+    expect(seed.sensorWidthMm, 23.5);
+    expect(seed.sensorHeightMm, 15.7);
+    expect(seed.resolutionWidthPx, 6248);
+    expect(seed.resolutionHeightPx, 4176);
+    expect(seed.pixelPitchUm, 3.76);
+    expect(seed.cameraConfidence, SpecConfidence.verified);
+    expect(seed.opticsConfidence, SpecConfidence.estimated);
+    expect(seed.cameraSource, 'seed:equipment@2');
+    // SI-005: N = f / D, not the 72 mm diameter.
+    expect(seed.focalRatio, closeTo(400.0 / 72.0, 1e-9));
+    expect(seed.apertureDiameterMm, 72.0);
+    expect(seed.averageRawFileSizeMB, isNull, reason: 'unknown, not guessed');
+  });
 
-    // aperture stores the f-number (SI-005); a plausible amateur telescope
-    // sits well under f/72 — the seed used to store the 72mm diameter here.
-    expect(telescopeStub.focalRatio, closeTo(400.0 / 72.0, 0.01));
-    expect(telescopeStub.focalRatio, lessThan(20.0));
+  // Roadmap TASK 8.5: stored sensor size matches resolution x pitch within
+  // 2 % unless documented.
+  test('every seed: sensor size = resolution x pitch within 2 %', () {
+    for (final s in EquipmentSeeder.defaults) {
+      final w = s.resolutionWidthPx * s.pixelPitchUm / 1000;
+      final h = s.resolutionHeightPx * s.pixelPitchUm / 1000;
+      expect((w - s.sensorWidthMm).abs() / s.sensorWidthMm, lessThan(0.02));
+      expect((h - s.sensorHeightMm).abs() / s.sensorHeightMm, lessThan(0.02));
+    }
+  });
+
+  test('an existing table is left alone', () async {
+    final repo = _FakeEquipmentRepository();
+    await repo.insertEquipment(EquipmentSeeder.defaults.single);
+    await EquipmentSeeder(repo).seedIfNeeded();
+    expect(await repo.getAllEquipment(), hasLength(1));
   });
 }

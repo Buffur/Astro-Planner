@@ -24,12 +24,16 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colorScheme.primary,
-              letterSpacing: 0.5,
+          // Flexible: a long title (e.g. an equipment profile's name) wraps
+          // instead of overflowing the row.
+          Flexible(
+            child: Text(
+              title,
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: colorScheme.primary,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
           if (onAction != null && actionLabel != null)

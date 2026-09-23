@@ -4,6 +4,8 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/tracking_type.dart';
+import 'package:astroplan/data/services/equipment_seeder.dart';
+import 'package:astroplan/domain/models/spec_confidence.dart';
 
 void main() {
   late AppDatabase database;
@@ -107,5 +109,28 @@ void main() {
       (await repository.getEquipmentById(id))!.trackingType,
       TrackingType.unknown,
     );
+  });
+
+  // TASK 8.5: camera and optics provenance round-trip, per row.
+  test('provenance round-trips for camera and optics', () async {
+    final id = await repository.insertEquipment(
+      EquipmentSeeder.defaults.single,
+    );
+    final back = (await repository.getEquipmentById(id))!;
+    expect(back.cameraSource, 'seed:equipment@2');
+    expect(back.cameraConfidence, SpecConfidence.verified);
+    expect(back.opticsSource, 'seed:equipment@2');
+    expect(back.opticsConfidence, SpecConfidence.estimated);
+
+    final cam = await database.select(database.cameraModules).getSingle();
+    final rig = await database.select(database.opticalRigs).getSingle();
+    expect(cam.confidence, 'verified');
+    expect(rig.confidence, 'estimated');
+
+    await repository.updateEquipment(
+      back.withEditProvenance(back), // nothing changed
+    );
+    final same = (await repository.getEquipmentById(id))!;
+    expect(same.cameraConfidence, SpecConfidence.verified);
   });
 }

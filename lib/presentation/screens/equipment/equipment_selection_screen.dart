@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../domain/repositories/equipment_repository.dart';
 import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
+import '../../../domain/models/spec_confidence.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/equipment_form_input.dart';
 import '../../viewmodels/planner_viewmodel.dart';
@@ -68,6 +69,20 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       value == value.roundToDouble() ? value.toInt().toString() : '$value';
 
   static String _text(double? value) => value == null ? '' : _trim(value);
+
+  static String _confidence(SpecConfidence? c) => switch (c) {
+    SpecConfidence.verified => 'verified',
+    SpecConfidence.reported => 'reported',
+    SpecConfidence.estimated => 'estimated',
+    null => 'source unknown',
+  };
+
+  /// Where the specs came from (ADR-008 §6, TASK 8.5).
+  static String _provenance(EquipmentProfile eq) =>
+      'Camera specs: ${_confidence(eq.cameraConfidence)}'
+      '${eq.cameraSource == null ? '' : ' (${eq.cameraSource})'} · '
+      'Optics: ${_confidence(eq.opticsConfidence)}'
+      '${eq.opticsSource == null ? '' : ' (${eq.opticsSource})'}';
 
   static final _decimal = const TextInputType.numberWithOptions(decimal: true);
 
@@ -138,6 +153,11 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       text: _text(existing?.maxExposureS),
     );
     var trackingType = existing?.trackingType ?? TrackingType.unknown;
+    // The sensor fields show 2 decimals; an untouched field keeps the stored
+    // value exactly, so opening and saving never alters verified specs or
+    // their provenance (TASK 8.5).
+    final sensorWShown = sensorWCtrl.text;
+    final sensorHShown = sensorHCtrl.text;
     String? apertureError;
 
     /// With a diameter, the focal ratio is derived: N = f / D (ADR-011 §4).
@@ -352,6 +372,14 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                         const SizedBox(height: 8),
                         if (existing?.needsApertureReview ?? false)
                           _reviewBanner(context, existing!),
+                        if (existing != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Text(
+                              _provenance(existing),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
                         TextFormField(
                           controller: focalCtrl,
                           keyboardType: _decimal,
@@ -533,12 +561,14 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       resolutionWidthPx: int.parse(resWCtrl.text.trim()),
                       resolutionHeightPx: int.parse(resHCtrl.text.trim()),
                       pixelPitchUm: EquipmentFormInput.parse(pixelCtrl.text)!,
-                      sensorWidthMm: EquipmentFormInput.parse(
-                        sensorWCtrl.text,
-                      )!,
-                      sensorHeightMm: EquipmentFormInput.parse(
-                        sensorHCtrl.text,
-                      )!,
+                      sensorWidthMm:
+                          existing != null && sensorWCtrl.text == sensorWShown
+                          ? existing.sensorWidthMm
+                          : EquipmentFormInput.parse(sensorWCtrl.text)!,
+                      sensorHeightMm:
+                          existing != null && sensorHCtrl.text == sensorHShown
+                          ? existing.sensorHeightMm
+                          : EquipmentFormInput.parse(sensorHCtrl.text)!,
                       focalLengthMm: focal,
                       focalRatio: aperture.focalRatio!,
                       apertureDiameterMm: aperture.diameterMm,
@@ -547,10 +577,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       trackingType: trackingType,
                       maxExposureS: optional(maxExposureCtrl),
                     );
+                    // TASK 8.5: changed specs become the user's own.
+                    final recorded = profile.withEditProvenance(existing);
                     if (isEdit) {
-                      await repo.updateEquipment(profile);
+                      await repo.updateEquipment(recorded);
                     } else {
-                      await repo.insertEquipment(profile);
+                      await repo.insertEquipment(recorded);
                     }
                     if (context.mounted) Navigator.of(context).pop();
                   },

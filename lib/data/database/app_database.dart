@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
@@ -307,6 +307,18 @@ class AppDatabase extends _$AppDatabase {
                 final rigs = schema.opticalRigs;
                 await m.addColumn(rigs, rigs.apertureDiameterMm);
                 await m.addColumn(rigs, rigs.maxExposureS);
+              },
+              from14To15: (m, schema) async {
+                // TASK 8.5 (ADR-008 §6): provenance of the camera and optics
+                // specs. Existing rows stay NULL (unknown): seeded and
+                // user-entered rows cannot be told apart, so nothing is
+                // back-filled.
+                final cams = schema.cameraModules;
+                final rigs = schema.opticalRigs;
+                await m.addColumn(cams, cams.source);
+                await m.addColumn(cams, cams.confidence);
+                await m.addColumn(rigs, rigs.source);
+                await m.addColumn(rigs, rigs.confidence);
               },
             ),
           );

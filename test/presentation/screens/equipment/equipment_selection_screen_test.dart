@@ -5,6 +5,8 @@ import 'package:astroplan/presentation/screens/equipment/equipment_selection_scr
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
+import 'package:astroplan/domain/models/spec_confidence.dart';
+import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
 class MockEquipmentRepository implements EquipmentRepository {
@@ -386,5 +388,47 @@ void main() {
     ]) {
       expect(find.text(label), findsWidgets, reason: label);
     }
+  });
+
+  // TASK 8.5
+  testWidgets('saving a verified seed unchanged keeps it verified, and the '
+      'editor shows the provenance', (tester) async {
+    await tallView(tester);
+    final repo = MockEquipmentRepository();
+    final seed = EquipmentSeeder.defaults.single;
+    await repo.insertEquipment(
+      EquipmentProfile(
+        id: 9,
+        name: seed.name,
+        manufacturer: seed.manufacturer,
+        cameraModel: seed.cameraModel,
+        sensorWidthMm: seed.sensorWidthMm,
+        sensorHeightMm: seed.sensorHeightMm,
+        pixelPitchUm: seed.pixelPitchUm,
+        resolutionWidthPx: seed.resolutionWidthPx,
+        resolutionHeightPx: seed.resolutionHeightPx,
+        focalLengthMm: seed.focalLengthMm,
+        focalRatio: seed.focalRatio,
+        apertureDiameterMm: seed.apertureDiameterMm,
+        cameraSource: seed.cameraSource,
+        cameraConfidence: seed.cameraConfidence,
+        opticsSource: seed.opticsSource,
+        opticsConfidence: seed.opticsConfidence,
+      ),
+    );
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Camera specs: verified'), findsOneWidget);
+    expect(find.textContaining('Optics: estimated'), findsOneWidget);
+
+    await tester.tap(find.text('Save Changes'));
+    await tester.pumpAndSettle();
+    final saved = repo.updated.single;
+    expect(saved.cameraConfidence, SpecConfidence.verified);
+    expect(saved.opticsConfidence, SpecConfidence.estimated);
+    expect(saved.sensorWidthMm, seed.sensorWidthMm);
+    expect(saved.focalRatio, seed.focalRatio);
   });
 }

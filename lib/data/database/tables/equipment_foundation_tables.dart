@@ -24,6 +24,12 @@ class CameraModules extends Table {
   IntColumn get resolutionHeightPx => integer()();
   RealColumn get pixelPitchUm => real()();
   RealColumn get averageRawFileSizeMB => real().nullable()();
+
+  /// Provenance of the camera specs (ADR-008 §6, schema v15); NULL = unknown.
+  TextColumn get source => text().nullable()();
+
+  /// `verified` / `reported` / `estimated`; NULL = unknown.
+  TextColumn get confidence => text().nullable()();
 }
 
 class OpticalRigs extends Table {
@@ -49,4 +55,10 @@ class OpticalRigs extends Table {
 
   /// The user's maximum sub-exposure, s; NULL = none (ADR-011 §5, v14).
   RealColumn get maxExposureS => real().nullable()();
+
+  /// Provenance of the optics specs (ADR-008 §6, schema v15); NULL = unknown.
+  TextColumn get source => text().nullable()();
+
+  /// `verified` / `reported` / `estimated`; NULL = unknown.
+  TextColumn get confidence => text().nullable()();
 }

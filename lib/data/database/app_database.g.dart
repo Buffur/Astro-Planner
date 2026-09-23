@@ -477,6 +477,26 @@ class $CameraModulesTable extends CameraModules
         type: DriftSqlType.double,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -490,6 +510,8 @@ class $CameraModulesTable extends CameraModules
     resolutionHeightPx,
     pixelPitchUm,
     averageRawFileSizeMB,
+    source,
+    confidence,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -601,6 +623,18 @@ class $CameraModulesTable extends CameraModules
         ),
       );
     }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
     return context;
   }
 
@@ -654,6 +688,14 @@ class $CameraModulesTable extends CameraModules
         DriftSqlType.double,
         data['${effectivePrefix}average_raw_file_size_m_b'],
       ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      ),
     );
   }
 
@@ -675,6 +717,12 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
   final int resolutionHeightPx;
   final double pixelPitchUm;
   final double? averageRawFileSizeMB;
+
+  /// Provenance of the camera specs (ADR-008 §6, schema v15); NULL = unknown.
+  final String? source;
+
+  /// `verified` / `reported` / `estimated`; NULL = unknown.
+  final String? confidence;
   const CameraModule({
     required this.id,
     required this.deviceId,
@@ -687,6 +735,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     required this.resolutionHeightPx,
     required this.pixelPitchUm,
     this.averageRawFileSizeMB,
+    this.source,
+    this.confidence,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -707,6 +757,12 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     map['pixel_pitch_um'] = Variable<double>(pixelPitchUm);
     if (!nullToAbsent || averageRawFileSizeMB != null) {
       map['average_raw_file_size_m_b'] = Variable<double>(averageRawFileSizeMB);
+    }
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    if (!nullToAbsent || confidence != null) {
+      map['confidence'] = Variable<String>(confidence);
     }
     return map;
   }
@@ -730,6 +786,12 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       averageRawFileSizeMB: averageRawFileSizeMB == null && nullToAbsent
           ? const Value.absent()
           : Value(averageRawFileSizeMB),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      confidence: confidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confidence),
     );
   }
 
@@ -752,6 +814,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       averageRawFileSizeMB: serializer.fromJson<double?>(
         json['averageRawFileSizeMB'],
       ),
+      source: serializer.fromJson<String?>(json['source']),
+      confidence: serializer.fromJson<String?>(json['confidence']),
     );
   }
   @override
@@ -769,6 +833,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       'resolutionHeightPx': serializer.toJson<int>(resolutionHeightPx),
       'pixelPitchUm': serializer.toJson<double>(pixelPitchUm),
       'averageRawFileSizeMB': serializer.toJson<double?>(averageRawFileSizeMB),
+      'source': serializer.toJson<String?>(source),
+      'confidence': serializer.toJson<String?>(confidence),
     };
   }
 
@@ -784,6 +850,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     int? resolutionHeightPx,
     double? pixelPitchUm,
     Value<double?> averageRawFileSizeMB = const Value.absent(),
+    Value<String?> source = const Value.absent(),
+    Value<String?> confidence = const Value.absent(),
   }) => CameraModule(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -798,6 +866,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     averageRawFileSizeMB: averageRawFileSizeMB.present
         ? averageRawFileSizeMB.value
         : this.averageRawFileSizeMB,
+    source: source.present ? source.value : this.source,
+    confidence: confidence.present ? confidence.value : this.confidence,
   );
   CameraModule copyWithCompanion(CameraModulesCompanion data) {
     return CameraModule(
@@ -826,6 +896,10 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       averageRawFileSizeMB: data.averageRawFileSizeMB.present
           ? data.averageRawFileSizeMB.value
           : this.averageRawFileSizeMB,
+      source: data.source.present ? data.source.value : this.source,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
     );
   }
 
@@ -842,7 +916,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ..write('resolutionWidthPx: $resolutionWidthPx, ')
           ..write('resolutionHeightPx: $resolutionHeightPx, ')
           ..write('pixelPitchUm: $pixelPitchUm, ')
-          ..write('averageRawFileSizeMB: $averageRawFileSizeMB')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
+          ..write('source: $source, ')
+          ..write('confidence: $confidence')
           ..write(')'))
         .toString();
   }
@@ -860,6 +936,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     resolutionHeightPx,
     pixelPitchUm,
     averageRawFileSizeMB,
+    source,
+    confidence,
   );
   @override
   bool operator ==(Object other) =>
@@ -875,7 +953,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           other.resolutionWidthPx == this.resolutionWidthPx &&
           other.resolutionHeightPx == this.resolutionHeightPx &&
           other.pixelPitchUm == this.pixelPitchUm &&
-          other.averageRawFileSizeMB == this.averageRawFileSizeMB);
+          other.averageRawFileSizeMB == this.averageRawFileSizeMB &&
+          other.source == this.source &&
+          other.confidence == this.confidence);
 }
 
 class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
@@ -890,6 +970,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
   final Value<int> resolutionHeightPx;
   final Value<double> pixelPitchUm;
   final Value<double?> averageRawFileSizeMB;
+  final Value<String?> source;
+  final Value<String?> confidence;
   const CameraModulesCompanion({
     this.id = const Value.absent(),
     this.deviceId = const Value.absent(),
@@ -902,6 +984,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.resolutionHeightPx = const Value.absent(),
     this.pixelPitchUm = const Value.absent(),
     this.averageRawFileSizeMB = const Value.absent(),
+    this.source = const Value.absent(),
+    this.confidence = const Value.absent(),
   });
   CameraModulesCompanion.insert({
     this.id = const Value.absent(),
@@ -915,6 +999,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     required int resolutionHeightPx,
     required double pixelPitchUm,
     this.averageRawFileSizeMB = const Value.absent(),
+    this.source = const Value.absent(),
+    this.confidence = const Value.absent(),
   }) : deviceId = Value(deviceId),
        name = Value(name),
        sensorWidthMm = Value(sensorWidthMm),
@@ -934,6 +1020,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Expression<int>? resolutionHeightPx,
     Expression<double>? pixelPitchUm,
     Expression<double>? averageRawFileSizeMB,
+    Expression<String>? source,
+    Expression<String>? confidence,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -949,6 +1037,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       if (pixelPitchUm != null) 'pixel_pitch_um': pixelPitchUm,
       if (averageRawFileSizeMB != null)
         'average_raw_file_size_m_b': averageRawFileSizeMB,
+      if (source != null) 'source': source,
+      if (confidence != null) 'confidence': confidence,
     });
   }
 
@@ -964,6 +1054,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Value<int>? resolutionHeightPx,
     Value<double>? pixelPitchUm,
     Value<double?>? averageRawFileSizeMB,
+    Value<String?>? source,
+    Value<String?>? confidence,
   }) {
     return CameraModulesCompanion(
       id: id ?? this.id,
@@ -977,6 +1069,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       resolutionHeightPx: resolutionHeightPx ?? this.resolutionHeightPx,
       pixelPitchUm: pixelPitchUm ?? this.pixelPitchUm,
       averageRawFileSizeMB: averageRawFileSizeMB ?? this.averageRawFileSizeMB,
+      source: source ?? this.source,
+      confidence: confidence ?? this.confidence,
     );
   }
 
@@ -1018,6 +1112,12 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
         averageRawFileSizeMB.value,
       );
     }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
     return map;
   }
 
@@ -1034,7 +1134,9 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           ..write('resolutionWidthPx: $resolutionWidthPx, ')
           ..write('resolutionHeightPx: $resolutionHeightPx, ')
           ..write('pixelPitchUm: $pixelPitchUm, ')
-          ..write('averageRawFileSizeMB: $averageRawFileSizeMB')
+          ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
+          ..write('source: $source, ')
+          ..write('confidence: $confidence')
           ..write(')'))
         .toString();
   }
@@ -1149,6 +1251,26 @@ class $OpticalRigsTable extends OpticalRigs
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1160,6 +1282,8 @@ class $OpticalRigsTable extends OpticalRigs
     rotationDegrees,
     apertureDiameterMm,
     maxExposureS,
+    source,
+    confidence,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1250,6 +1374,18 @@ class $OpticalRigsTable extends OpticalRigs
         ),
       );
     }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
     return context;
   }
 
@@ -1295,6 +1431,14 @@ class $OpticalRigsTable extends OpticalRigs
         DriftSqlType.double,
         data['${effectivePrefix}max_exposure_s'],
       ),
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      ),
     );
   }
 
@@ -1323,6 +1467,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
 
   /// The user's maximum sub-exposure, s; NULL = none (ADR-011 §5, v14).
   final double? maxExposureS;
+
+  /// Provenance of the optics specs (ADR-008 §6, schema v15); NULL = unknown.
+  final String? source;
+
+  /// `verified` / `reported` / `estimated`; NULL = unknown.
+  final String? confidence;
   const OpticalRig({
     required this.id,
     required this.name,
@@ -1333,6 +1483,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     this.rotationDegrees,
     this.apertureDiameterMm,
     this.maxExposureS,
+    this.source,
+    this.confidence,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1351,6 +1503,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     }
     if (!nullToAbsent || maxExposureS != null) {
       map['max_exposure_s'] = Variable<double>(maxExposureS);
+    }
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    if (!nullToAbsent || confidence != null) {
+      map['confidence'] = Variable<String>(confidence);
     }
     return map;
   }
@@ -1372,6 +1530,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       maxExposureS: maxExposureS == null && nullToAbsent
           ? const Value.absent()
           : Value(maxExposureS),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      confidence: confidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(confidence),
     );
   }
 
@@ -1392,6 +1556,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
         json['apertureDiameterMm'],
       ),
       maxExposureS: serializer.fromJson<double?>(json['maxExposureS']),
+      source: serializer.fromJson<String?>(json['source']),
+      confidence: serializer.fromJson<String?>(json['confidence']),
     );
   }
   @override
@@ -1407,6 +1573,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       'rotationDegrees': serializer.toJson<double?>(rotationDegrees),
       'apertureDiameterMm': serializer.toJson<double?>(apertureDiameterMm),
       'maxExposureS': serializer.toJson<double?>(maxExposureS),
+      'source': serializer.toJson<String?>(source),
+      'confidence': serializer.toJson<String?>(confidence),
     };
   }
 
@@ -1420,6 +1588,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     Value<double?> rotationDegrees = const Value.absent(),
     Value<double?> apertureDiameterMm = const Value.absent(),
     Value<double?> maxExposureS = const Value.absent(),
+    Value<String?> source = const Value.absent(),
+    Value<String?> confidence = const Value.absent(),
   }) => OpticalRig(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1434,6 +1604,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
         ? apertureDiameterMm.value
         : this.apertureDiameterMm,
     maxExposureS: maxExposureS.present ? maxExposureS.value : this.maxExposureS,
+    source: source.present ? source.value : this.source,
+    confidence: confidence.present ? confidence.value : this.confidence,
   );
   OpticalRig copyWithCompanion(OpticalRigsCompanion data) {
     return OpticalRig(
@@ -1458,6 +1630,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       maxExposureS: data.maxExposureS.present
           ? data.maxExposureS.value
           : this.maxExposureS,
+      source: data.source.present ? data.source.value : this.source,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
     );
   }
 
@@ -1472,7 +1648,9 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           ..write('trackingState: $trackingState, ')
           ..write('rotationDegrees: $rotationDegrees, ')
           ..write('apertureDiameterMm: $apertureDiameterMm, ')
-          ..write('maxExposureS: $maxExposureS')
+          ..write('maxExposureS: $maxExposureS, ')
+          ..write('source: $source, ')
+          ..write('confidence: $confidence')
           ..write(')'))
         .toString();
   }
@@ -1488,6 +1666,8 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     rotationDegrees,
     apertureDiameterMm,
     maxExposureS,
+    source,
+    confidence,
   );
   @override
   bool operator ==(Object other) =>
@@ -1501,7 +1681,9 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           other.trackingState == this.trackingState &&
           other.rotationDegrees == this.rotationDegrees &&
           other.apertureDiameterMm == this.apertureDiameterMm &&
-          other.maxExposureS == this.maxExposureS);
+          other.maxExposureS == this.maxExposureS &&
+          other.source == this.source &&
+          other.confidence == this.confidence);
 }
 
 class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
@@ -1514,6 +1696,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
   final Value<double?> rotationDegrees;
   final Value<double?> apertureDiameterMm;
   final Value<double?> maxExposureS;
+  final Value<String?> source;
+  final Value<String?> confidence;
   const OpticalRigsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1524,6 +1708,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.rotationDegrees = const Value.absent(),
     this.apertureDiameterMm = const Value.absent(),
     this.maxExposureS = const Value.absent(),
+    this.source = const Value.absent(),
+    this.confidence = const Value.absent(),
   });
   OpticalRigsCompanion.insert({
     this.id = const Value.absent(),
@@ -1535,6 +1721,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.rotationDegrees = const Value.absent(),
     this.apertureDiameterMm = const Value.absent(),
     this.maxExposureS = const Value.absent(),
+    this.source = const Value.absent(),
+    this.confidence = const Value.absent(),
   }) : name = Value(name),
        cameraModuleId = Value(cameraModuleId),
        focalLengthMm = Value(focalLengthMm),
@@ -1549,6 +1737,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Expression<double>? rotationDegrees,
     Expression<double>? apertureDiameterMm,
     Expression<double>? maxExposureS,
+    Expression<String>? source,
+    Expression<String>? confidence,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1561,6 +1751,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       if (apertureDiameterMm != null)
         'aperture_diameter_mm': apertureDiameterMm,
       if (maxExposureS != null) 'max_exposure_s': maxExposureS,
+      if (source != null) 'source': source,
+      if (confidence != null) 'confidence': confidence,
     });
   }
 
@@ -1574,6 +1766,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Value<double?>? rotationDegrees,
     Value<double?>? apertureDiameterMm,
     Value<double?>? maxExposureS,
+    Value<String?>? source,
+    Value<String?>? confidence,
   }) {
     return OpticalRigsCompanion(
       id: id ?? this.id,
@@ -1585,6 +1779,8 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       rotationDegrees: rotationDegrees ?? this.rotationDegrees,
       apertureDiameterMm: apertureDiameterMm ?? this.apertureDiameterMm,
       maxExposureS: maxExposureS ?? this.maxExposureS,
+      source: source ?? this.source,
+      confidence: confidence ?? this.confidence,
     );
   }
 
@@ -1618,6 +1814,12 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     if (maxExposureS.present) {
       map['max_exposure_s'] = Variable<double>(maxExposureS.value);
     }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
     return map;
   }
 
@@ -1632,7 +1834,9 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
           ..write('trackingState: $trackingState, ')
           ..write('rotationDegrees: $rotationDegrees, ')
           ..write('apertureDiameterMm: $apertureDiameterMm, ')
-          ..write('maxExposureS: $maxExposureS')
+          ..write('maxExposureS: $maxExposureS, ')
+          ..write('source: $source, ')
+          ..write('confidence: $confidence')
           ..write(')'))
         .toString();
   }
@@ -5265,6 +5469,8 @@ typedef $$CameraModulesTableCreateCompanionBuilder =
       required int resolutionHeightPx,
       required double pixelPitchUm,
       Value<double?> averageRawFileSizeMB,
+      Value<String?> source,
+      Value<String?> confidence,
     });
 typedef $$CameraModulesTableUpdateCompanionBuilder =
     CameraModulesCompanion Function({
@@ -5279,6 +5485,8 @@ typedef $$CameraModulesTableUpdateCompanionBuilder =
       Value<int> resolutionHeightPx,
       Value<double> pixelPitchUm,
       Value<double?> averageRawFileSizeMB,
+      Value<String?> source,
+      Value<String?> confidence,
     });
 
 final class $$CameraModulesTableReferences
@@ -5381,6 +5589,16 @@ class $$CameraModulesTableFilterComposer
 
   ColumnFilters<double> get averageRawFileSizeMB => $composableBuilder(
     column: $table.averageRawFileSizeMB,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5492,6 +5710,16 @@ class $$CameraModulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DevicesTableOrderingComposer get deviceId {
     final $$DevicesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5566,6 +5794,14 @@ class $$CameraModulesTableAnnotationComposer
 
   GeneratedColumn<double> get averageRawFileSizeMB => $composableBuilder(
     column: $table.averageRawFileSizeMB,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
     builder: (column) => column,
   );
 
@@ -5657,6 +5893,8 @@ class $$CameraModulesTableTableManager
                 Value<int> resolutionHeightPx = const Value.absent(),
                 Value<double> pixelPitchUm = const Value.absent(),
                 Value<double?> averageRawFileSizeMB = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
               }) => CameraModulesCompanion(
                 id: id,
                 deviceId: deviceId,
@@ -5669,6 +5907,8 @@ class $$CameraModulesTableTableManager
                 resolutionHeightPx: resolutionHeightPx,
                 pixelPitchUm: pixelPitchUm,
                 averageRawFileSizeMB: averageRawFileSizeMB,
+                source: source,
+                confidence: confidence,
               ),
           createCompanionCallback:
               ({
@@ -5683,6 +5923,8 @@ class $$CameraModulesTableTableManager
                 required int resolutionHeightPx,
                 required double pixelPitchUm,
                 Value<double?> averageRawFileSizeMB = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
               }) => CameraModulesCompanion.insert(
                 id: id,
                 deviceId: deviceId,
@@ -5695,6 +5937,8 @@ class $$CameraModulesTableTableManager
                 resolutionHeightPx: resolutionHeightPx,
                 pixelPitchUm: pixelPitchUm,
                 averageRawFileSizeMB: averageRawFileSizeMB,
+                source: source,
+                confidence: confidence,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5794,6 +6038,8 @@ typedef $$OpticalRigsTableCreateCompanionBuilder =
       Value<double?> rotationDegrees,
       Value<double?> apertureDiameterMm,
       Value<double?> maxExposureS,
+      Value<String?> source,
+      Value<String?> confidence,
     });
 typedef $$OpticalRigsTableUpdateCompanionBuilder =
     OpticalRigsCompanion Function({
@@ -5806,6 +6052,8 @@ typedef $$OpticalRigsTableUpdateCompanionBuilder =
       Value<double?> rotationDegrees,
       Value<double?> apertureDiameterMm,
       Value<double?> maxExposureS,
+      Value<String?> source,
+      Value<String?> confidence,
     });
 
 final class $$OpticalRigsTableReferences
@@ -5877,6 +6125,16 @@ class $$OpticalRigsTableFilterComposer
 
   ColumnFilters<double> get maxExposureS => $composableBuilder(
     column: $table.maxExposureS,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5953,6 +6211,16 @@ class $$OpticalRigsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CameraModulesTableOrderingComposer get cameraModuleId {
     final $$CameraModulesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6020,6 +6288,14 @@ class $$OpticalRigsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
   $$CameraModulesTableAnnotationComposer get cameraModuleId {
     final $$CameraModulesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6081,6 +6357,8 @@ class $$OpticalRigsTableTableManager
                 Value<double?> rotationDegrees = const Value.absent(),
                 Value<double?> apertureDiameterMm = const Value.absent(),
                 Value<double?> maxExposureS = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
               }) => OpticalRigsCompanion(
                 id: id,
                 name: name,
@@ -6091,6 +6369,8 @@ class $$OpticalRigsTableTableManager
                 rotationDegrees: rotationDegrees,
                 apertureDiameterMm: apertureDiameterMm,
                 maxExposureS: maxExposureS,
+                source: source,
+                confidence: confidence,
               ),
           createCompanionCallback:
               ({
@@ -6103,6 +6383,8 @@ class $$OpticalRigsTableTableManager
                 Value<double?> rotationDegrees = const Value.absent(),
                 Value<double?> apertureDiameterMm = const Value.absent(),
                 Value<double?> maxExposureS = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<String?> confidence = const Value.absent(),
               }) => OpticalRigsCompanion.insert(
                 id: id,
                 name: name,
@@ -6113,6 +6395,8 @@ class $$OpticalRigsTableTableManager
                 rotationDegrees: rotationDegrees,
                 apertureDiameterMm: apertureDiameterMm,
                 maxExposureS: maxExposureS,
+                source: source,
+                confidence: confidence,
               ),
           withReferenceMapper: (p0) => p0
               .map(

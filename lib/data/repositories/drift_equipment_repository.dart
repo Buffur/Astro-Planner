@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/models/equipment_profile.dart' as domain;
+import '../../domain/models/spec_confidence.dart';
 import '../../domain/models/tracking_type.dart';
 import '../database/app_database.dart';
 
@@ -33,6 +34,10 @@ class DriftEquipmentRepository implements EquipmentRepository {
       rotationDeg: rig.rotationDegrees,
       trackingType: TrackingType.fromStorage(rig.trackingState),
       maxExposureS: rig.maxExposureS,
+      cameraSource: cam.source,
+      cameraConfidence: SpecConfidence.fromStorage(cam.confidence),
+      opticsSource: rig.source,
+      opticsConfidence: SpecConfidence.fromStorage(rig.confidence),
     );
   }
 
@@ -95,6 +100,8 @@ class DriftEquipmentRepository implements EquipmentRepository {
               resolutionHeightPx: profile.resolutionHeightPx,
               pixelPitchUm: profile.pixelPitchUm,
               averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
+              source: Value(profile.cameraSource),
+              confidence: Value(profile.cameraConfidence?.name),
             ),
           );
 
@@ -110,6 +117,8 @@ class DriftEquipmentRepository implements EquipmentRepository {
               rotationDegrees: Value(profile.rotationDeg),
               trackingState: Value(profile.trackingType.name),
               maxExposureS: Value(profile.maxExposureS),
+              source: Value(profile.opticsSource),
+              confidence: Value(profile.opticsConfidence?.name),
             ),
           );
 
@@ -189,6 +198,8 @@ class DriftEquipmentRepository implements EquipmentRepository {
           rotationDegrees: Value(profile.rotationDeg),
           trackingState: Value(profile.trackingType.name),
           maxExposureS: Value(profile.maxExposureS),
+          source: Value(profile.opticsSource),
+          confidence: Value(profile.opticsConfidence?.name),
         ),
       );
 
@@ -206,6 +217,8 @@ class DriftEquipmentRepository implements EquipmentRepository {
             resolutionHeightPx: Value(profile.resolutionHeightPx),
             pixelPitchUm: Value(profile.pixelPitchUm),
             averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
+            source: Value(profile.cameraSource),
+            confidence: Value(profile.cameraConfidence?.name),
           ),
         );
 

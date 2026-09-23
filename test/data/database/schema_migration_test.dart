@@ -121,6 +121,46 @@ void main() {
     });
   });
 
+  group('TASK 8.5: v15 (equipment provenance)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14]) {
+      test('v$from -> v15 matches the v15 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 15);
+        await db.close();
+      });
+    }
+
+    test(
+      'v14 -> v15: legacy equipment keeps its values; provenance unknown',
+      () async {
+        final schema = await verifier.schemaAt(14);
+        final raw = schema.rawDatabase;
+        raw.execute("INSERT INTO devices (id, name) VALUES (1, 'Phone');");
+        raw.execute(
+          "INSERT INTO camera_modules (id, device_id, name, sensor_width_mm, "
+          "sensor_height_mm, resolution_width_px, resolution_height_px, "
+          "pixel_pitch_um) VALUES (1, 1, 'Phone Camera', 13.2, 8.8, 8192, "
+          "6144, 1.6);",
+        );
+        raw.execute(
+          "INSERT INTO optical_rigs (id, name, camera_module_id, "
+          "focal_length_mm, aperture) VALUES (1, 'Vivo X100 Pro (Main)', 1, "
+          "8.7, 1.75);",
+        );
+        final db = AppDatabase(schema.newConnection());
+        final p = (await DriftEquipmentRepository(db).getAllEquipment()).single;
+        expect(p.sensorHeightMm, 8.8, reason: 'not corrected silently');
+        expect(p.focalRatio, 1.75);
+        expect(p.cameraSource, isNull);
+        expect(p.cameraConfidence, isNull);
+        expect(p.opticsSource, isNull);
+        expect(p.opticsConfidence, isNull);
+        await db.close();
+      },
+    );
+  });
+
   group('TASK 8.4: v14 (aperture diameter, maximum exposure)', () {
     for (final from in [8, 9, 10, 11, 12, 13]) {
       test('v$from -> v14 matches the v14 snapshot exactly', () async {
