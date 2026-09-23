@@ -119,6 +119,63 @@ void main() {
     });
   });
 
+  group('TASK 8.1: v13 (target epoch, provenance, size, magnitude)', () {
+    for (final from in [8, 9, 10, 11, 12]) {
+      test('v$from -> v13 matches the v13 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 13);
+        await db.close();
+      });
+    }
+
+    test('v12 -> v13: targets keep their data; epoch J2000, provenance and '
+        'the new values unknown (never guessed)', () async {
+      final schema = await verifier.schemaAt(12);
+      schema.rawDatabase.execute(
+        "INSERT INTO astro_targets (id, catalog_id, common_name, "
+        "right_ascension, declination, type) VALUES "
+        "(1, 'M42', 'Orion Nebula', 83.8221, -5.3911, 'Nebula'), "
+        "(2, 'M42', 'My M42', 83.8, -5.4, 'Nebula');",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.astroTargets,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+
+      expect(rows, hasLength(2), reason: 'duplicate legacy ids survive');
+      expect(rows[0].catalogId, 'M42');
+      expect(rows[0].rightAscension, 83.8221);
+      expect(rows[0].declination, -5.3911);
+      for (final r in rows) {
+        expect(r.epoch, 'J2000');
+        expect(r.source, isNull);
+        expect(r.angularSizeArcmin, isNull);
+        expect(r.magnitude, isNull);
+      }
+      await db.close();
+    });
+
+    test('catalog entries are unique per catalog id; user rows are not', () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      Future<void> insert(String id, String? source) => db.customStatement(
+        "INSERT INTO astro_targets (catalog_id, right_ascension, declination, "
+        "type, source) VALUES (?, 10.0, 20.0, 'Galaxy', ?)",
+        [id, source],
+      );
+      await insert('M31', 'seed:catalog@1');
+      await expectLater(insert('M31', 'catalog:openngc@1'), throwsA(anything));
+      await insert('M31', 'user');
+      await insert('M31', 'user');
+      await insert('M31', null);
+      final count = await db
+          .customSelect("SELECT COUNT(*) AS c FROM astro_targets")
+          .getSingle();
+      expect(count.read<int>('c'), 4);
+      await db.close();
+    });
+  });
+
   group('TASK 7.1: v12 (site semantics)', () {
     for (final from in [8, 9, 10, 11]) {
       test('v$from -> v12 matches the v12 snapshot exactly', () async {

@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -283,6 +283,20 @@ class AppDatabase extends _$AppDatabase {
                     },
                   ),
                 );
+              },
+              from12To13: (m, schema) async {
+                // TASK 8.1: targets gain an epoch (default J2000 — the
+                // calculators have always treated every target as J2000,
+                // TASK 6.2), provenance (NULL for legacy rows: seeded and
+                // user rows cannot be told apart, ADR-008 §6), angular size
+                // and magnitude (unknown). The partial unique index covers
+                // catalog entries only, so no legacy row can conflict.
+                final targets = schema.astroTargets;
+                await m.addColumn(targets, targets.epoch);
+                await m.addColumn(targets, targets.source);
+                await m.addColumn(targets, targets.angularSizeArcmin);
+                await m.addColumn(targets, targets.magnitude);
+                await m.create(schema.astroTargetsCatalogIdUnique);
               },
             ),
           );

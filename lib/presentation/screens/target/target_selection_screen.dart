@@ -2,23 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/utils/astro_math.dart';
 import '../../../domain/repositories/target_repository.dart';
 import '../../../domain/models/astro_target.dart';
+import '../../../domain/models/target_types.dart';
+import '../../shared/target_form_input.dart';
 import '../../viewmodels/planner_viewmodel.dart';
-
-// Canonical list of astronomical object types used throughout the app.
-const _kObjectTypes = [
-  'Galaxy',
-  'Nebula',
-  'Globular Cluster',
-  'Open Cluster',
-  'Planet',
-  'Moon',
-  'Comet',
-  'Asteroid',
-  'Star',
-  'Other',
-];
 
 class TargetSelectionScreen extends StatefulWidget {
   const TargetSelectionScreen({super.key});
@@ -72,17 +61,42 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
     _loadTargets();
   }
 
+  /// Types the editor offers: fixed-coordinate types only (ADR-010 §3),
+  /// plus an existing target's own moving type so an edit never retypes it
+  /// silently.
+  List<String> _typeChoices(AstroTarget? existing) => [
+    ...TargetTypes.selectable,
+    if (existing != null && !TargetTypes.selectable.contains(existing.type))
+      existing.type,
+  ];
+
   Future<void> _showTargetDialog({AstroTarget? existing}) async {
     final nameCtrl = TextEditingController(
       text: existing?.commonName ?? existing?.catalogId ?? '',
     );
     final raCtrl = TextEditingController(
-      text: existing != null ? existing.rightAscension.toString() : '',
+      text: existing != null
+          ? AstroMath.formatRightAscension(existing.rightAscension)
+          : '',
     );
     final decCtrl = TextEditingController(
-      text: existing != null ? existing.declination.toString() : '',
+      text: existing != null
+          ? AstroMath.formatDeclination(existing.declination)
+          : '',
     );
-    String selectedType = existing?.type ?? _kObjectTypes.first;
+    final sizeCtrl = TextEditingController(
+      text: existing?.angularSizeArcmin?.toString() ?? '',
+    );
+    final magCtrl = TextEditingController(
+      text: existing?.magnitude?.toString() ?? '',
+    );
+    // The fields show rounded values (0.1 s, 1″); an untouched field keeps
+    // the stored value exactly, so a rename never shifts the coordinates or
+    // their provenance.
+    final raShown = raCtrl.text;
+    final decShown = decCtrl.text;
+    final types = _typeChoices(existing);
+    String selectedType = existing?.type ?? types.first;
     final isEdit = existing != null;
     final formKey = GlobalKey<FormState>();
 
@@ -99,6 +113,11 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isEdit)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text('Catalog ID: ${existing.catalogId}'),
+                        ),
                       TextFormField(
                         controller: nameCtrl,
                         decoration: const InputDecoration(
@@ -114,7 +133,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                         decoration: const InputDecoration(
                           labelText: 'Object Type',
                         ),
-                        items: _kObjectTypes
+                        items: types
                             .map(
                               (t) => DropdownMenuItem(value: t, child: Text(t)),
                             )
@@ -125,47 +144,53 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                           }
                         },
                       ),
+                      if (TargetTypes.isMoving(selectedType))
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(TargetTypes.movingWarning),
+                        ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: raCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                          signed: false,
-                        ),
                         decoration: const InputDecoration(
-                          labelText: 'Right Ascension (Degrees) *',
-                          hintText: '0.0 to 360.0',
+                          labelText: 'Right Ascension (J2000) *',
+                          hintText: '05h35m17s, 5:35:17 or 5.588 h',
                         ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Required';
-                          final n = double.tryParse(v);
-                          if (n == null) return 'Must be a number';
-                          if (n < 0.0 || n >= 360.0) {
-                            return 'Must be 0.0 to 360.0';
-                          }
-                          return null;
-                        },
+                        validator: TargetFormInput.validateRightAscension,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: decCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Declination (J2000) *',
+                          hintText: '−05°23′28″, -5:23:28 or -5.39',
+                        ),
+                        validator: TargetFormInput.validateDeclination,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: sizeCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Apparent size (arcmin)',
+                          hintText: 'Optional',
+                        ),
+                        validator: TargetFormInput.validateAngularSize,
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: magCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                           signed: true,
                         ),
                         decoration: const InputDecoration(
-                          labelText: 'Declination (Degrees) *',
-                          hintText: '-90.0 to +90.0',
+                          labelText: 'Magnitude',
+                          hintText: 'Optional',
                         ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Required';
-                          final n = double.tryParse(v);
-                          if (n == null) return 'Must be a number';
-                          if (n < -90.0 || n > 90.0) {
-                            return 'Must be -90.0 to +90.0';
-                          }
-                          return null;
-                        },
+                        validator: TargetFormInput.validateMagnitude,
                       ),
                     ],
                   ),
@@ -182,13 +207,20 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
                     final repo = context.read<TargetRepository>();
-                    final target = AstroTarget(
-                      id: existing?.id ?? 0,
-                      catalogId: name,
-                      commonName: name,
+                    final target = AstroTarget.userEdit(
+                      original: existing,
+                      name: name,
                       type: selectedType,
-                      rightAscension: double.parse(raCtrl.text),
-                      declination: double.parse(decCtrl.text),
+                      rightAscension: existing != null && raCtrl.text == raShown
+                          ? existing.rightAscension
+                          : AstroMath.parseRightAscension(raCtrl.text)!,
+                      declination: existing != null && decCtrl.text == decShown
+                          ? existing.declination
+                          : AstroMath.parseDeclination(decCtrl.text)!,
+                      angularSizeArcmin: TargetFormInput.optionalNumber(
+                        sizeCtrl.text,
+                      ),
+                      magnitude: TargetFormInput.optionalNumber(magCtrl.text),
                     );
                     if (isEdit) {
                       await repo.updateTarget(target);
@@ -279,7 +311,11 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       _targetLabel(target),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Text(target.type),
+                    subtitle: Text(
+                      TargetTypes.isMoving(target.type)
+                          ? '${target.type} · ${TargetTypes.movingWarning}'
+                          : target.type,
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

@@ -8,6 +8,10 @@ class CatalogSeeder {
 
   CatalogSeeder(this._repository);
 
+  /// Provenance of the seeded rows (ADR-008 §6). The values are not yet
+  /// verified against a cited source (TASK 8.2).
+  static const String _source = 'seed:catalog@1';
+
   /// Seeds the database if it is empty.
   Future<void> seedIfNeeded() async {
     final existing = await _repository.getAllTargets();
@@ -16,6 +20,7 @@ class CatalogSeeder {
     final initialTargets = [
       AstroTarget(
         id: 0, // Ignored by DB auto-increment
+        source: _source,
         catalogId: 'M31',
         commonName: 'Andromeda Galaxy',
         rightAscension: AstroMath.raToDecimalDegrees(0, 42, 44.3),
@@ -24,6 +29,7 @@ class CatalogSeeder {
       ),
       AstroTarget(
         id: 0,
+        source: _source,
         catalogId: 'M42',
         commonName: 'Orion Nebula',
         rightAscension: AstroMath.raToDecimalDegrees(5, 35, 17.3),
@@ -32,6 +38,7 @@ class CatalogSeeder {
       ),
       AstroTarget(
         id: 0,
+        source: _source,
         catalogId: 'M45',
         commonName: 'Pleiades',
         rightAscension: AstroMath.raToDecimalDegrees(3, 47, 24),
@@ -40,6 +47,7 @@ class CatalogSeeder {
       ),
       AstroTarget(
         id: 0,
+        source: _source,
         catalogId: 'M33',
         commonName: 'Triangulum Galaxy',
         rightAscension: AstroMath.raToDecimalDegrees(1, 33, 50.9),
@@ -48,6 +56,7 @@ class CatalogSeeder {
       ),
       AstroTarget(
         id: 0,
+        source: _source,
         catalogId: 'M8',
         commonName: 'Lagoon Nebula',
         rightAscension: AstroMath.raToDecimalDegrees(18, 3, 37),

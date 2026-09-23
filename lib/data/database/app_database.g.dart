@@ -2361,6 +2361,48 @@ class $AstroTargetsTable extends AstroTargets
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _epochMeta = const VerificationMeta('epoch');
+  @override
+  late final GeneratedColumn<String> epoch = GeneratedColumn<String>(
+    'epoch',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('J2000'),
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _angularSizeArcminMeta = const VerificationMeta(
+    'angularSizeArcmin',
+  );
+  @override
+  late final GeneratedColumn<double> angularSizeArcmin =
+      GeneratedColumn<double>(
+        'angular_size_arcmin',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _magnitudeMeta = const VerificationMeta(
+    'magnitude',
+  );
+  @override
+  late final GeneratedColumn<double> magnitude = GeneratedColumn<double>(
+    'magnitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2369,6 +2411,10 @@ class $AstroTargetsTable extends AstroTargets
     rightAscension,
     declination,
     type,
+    epoch,
+    source,
+    angularSizeArcmin,
+    magnitude,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2429,6 +2475,33 @@ class $AstroTargetsTable extends AstroTargets
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('epoch')) {
+      context.handle(
+        _epochMeta,
+        epoch.isAcceptableOrUnknown(data['epoch']!, _epochMeta),
+      );
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('angular_size_arcmin')) {
+      context.handle(
+        _angularSizeArcminMeta,
+        angularSizeArcmin.isAcceptableOrUnknown(
+          data['angular_size_arcmin']!,
+          _angularSizeArcminMeta,
+        ),
+      );
+    }
+    if (data.containsKey('magnitude')) {
+      context.handle(
+        _magnitudeMeta,
+        magnitude.isAcceptableOrUnknown(data['magnitude']!, _magnitudeMeta),
+      );
+    }
     return context;
   }
 
@@ -2462,6 +2535,22 @@ class $AstroTargetsTable extends AstroTargets
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
+      epoch: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}epoch'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      ),
+      angularSizeArcmin: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}angular_size_arcmin'],
+      ),
+      magnitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}magnitude'],
+      ),
     );
   }
 
@@ -2475,9 +2564,25 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
   final int id;
   final String catalogId;
   final String? commonName;
+
+  /// Degrees, [0, 360).
   final double rightAscension;
+
+  /// Degrees, [-90, 90].
   final double declination;
   final String type;
+
+  /// Coordinate epoch (TASK 8.1, schema v13). Only `J2000` is supported.
+  final String epoch;
+
+  /// Provenance (ADR-008 §6); NULL = unknown (legacy rows).
+  final String? source;
+
+  /// Apparent size, arcminutes; NULL = unknown.
+  final double? angularSizeArcmin;
+
+  /// Apparent magnitude; NULL = unknown.
+  final double? magnitude;
   const AstroTarget({
     required this.id,
     required this.catalogId,
@@ -2485,6 +2590,10 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
     required this.rightAscension,
     required this.declination,
     required this.type,
+    required this.epoch,
+    this.source,
+    this.angularSizeArcmin,
+    this.magnitude,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2497,6 +2606,16 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
     map['right_ascension'] = Variable<double>(rightAscension);
     map['declination'] = Variable<double>(declination);
     map['type'] = Variable<String>(type);
+    map['epoch'] = Variable<String>(epoch);
+    if (!nullToAbsent || source != null) {
+      map['source'] = Variable<String>(source);
+    }
+    if (!nullToAbsent || angularSizeArcmin != null) {
+      map['angular_size_arcmin'] = Variable<double>(angularSizeArcmin);
+    }
+    if (!nullToAbsent || magnitude != null) {
+      map['magnitude'] = Variable<double>(magnitude);
+    }
     return map;
   }
 
@@ -2510,6 +2629,16 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
       rightAscension: Value(rightAscension),
       declination: Value(declination),
       type: Value(type),
+      epoch: Value(epoch),
+      source: source == null && nullToAbsent
+          ? const Value.absent()
+          : Value(source),
+      angularSizeArcmin: angularSizeArcmin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(angularSizeArcmin),
+      magnitude: magnitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(magnitude),
     );
   }
 
@@ -2525,6 +2654,12 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
       rightAscension: serializer.fromJson<double>(json['rightAscension']),
       declination: serializer.fromJson<double>(json['declination']),
       type: serializer.fromJson<String>(json['type']),
+      epoch: serializer.fromJson<String>(json['epoch']),
+      source: serializer.fromJson<String?>(json['source']),
+      angularSizeArcmin: serializer.fromJson<double?>(
+        json['angularSizeArcmin'],
+      ),
+      magnitude: serializer.fromJson<double?>(json['magnitude']),
     );
   }
   @override
@@ -2537,6 +2672,10 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
       'rightAscension': serializer.toJson<double>(rightAscension),
       'declination': serializer.toJson<double>(declination),
       'type': serializer.toJson<String>(type),
+      'epoch': serializer.toJson<String>(epoch),
+      'source': serializer.toJson<String?>(source),
+      'angularSizeArcmin': serializer.toJson<double?>(angularSizeArcmin),
+      'magnitude': serializer.toJson<double?>(magnitude),
     };
   }
 
@@ -2547,6 +2686,10 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
     double? rightAscension,
     double? declination,
     String? type,
+    String? epoch,
+    Value<String?> source = const Value.absent(),
+    Value<double?> angularSizeArcmin = const Value.absent(),
+    Value<double?> magnitude = const Value.absent(),
   }) => AstroTarget(
     id: id ?? this.id,
     catalogId: catalogId ?? this.catalogId,
@@ -2554,6 +2697,12 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
     rightAscension: rightAscension ?? this.rightAscension,
     declination: declination ?? this.declination,
     type: type ?? this.type,
+    epoch: epoch ?? this.epoch,
+    source: source.present ? source.value : this.source,
+    angularSizeArcmin: angularSizeArcmin.present
+        ? angularSizeArcmin.value
+        : this.angularSizeArcmin,
+    magnitude: magnitude.present ? magnitude.value : this.magnitude,
   );
   AstroTarget copyWithCompanion(AstroTargetsCompanion data) {
     return AstroTarget(
@@ -2569,6 +2718,12 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
           ? data.declination.value
           : this.declination,
       type: data.type.present ? data.type.value : this.type,
+      epoch: data.epoch.present ? data.epoch.value : this.epoch,
+      source: data.source.present ? data.source.value : this.source,
+      angularSizeArcmin: data.angularSizeArcmin.present
+          ? data.angularSizeArcmin.value
+          : this.angularSizeArcmin,
+      magnitude: data.magnitude.present ? data.magnitude.value : this.magnitude,
     );
   }
 
@@ -2580,14 +2735,28 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
           ..write('commonName: $commonName, ')
           ..write('rightAscension: $rightAscension, ')
           ..write('declination: $declination, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('epoch: $epoch, ')
+          ..write('source: $source, ')
+          ..write('angularSizeArcmin: $angularSizeArcmin, ')
+          ..write('magnitude: $magnitude')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, catalogId, commonName, rightAscension, declination, type);
+  int get hashCode => Object.hash(
+    id,
+    catalogId,
+    commonName,
+    rightAscension,
+    declination,
+    type,
+    epoch,
+    source,
+    angularSizeArcmin,
+    magnitude,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2597,7 +2766,11 @@ class AstroTarget extends DataClass implements Insertable<AstroTarget> {
           other.commonName == this.commonName &&
           other.rightAscension == this.rightAscension &&
           other.declination == this.declination &&
-          other.type == this.type);
+          other.type == this.type &&
+          other.epoch == this.epoch &&
+          other.source == this.source &&
+          other.angularSizeArcmin == this.angularSizeArcmin &&
+          other.magnitude == this.magnitude);
 }
 
 class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
@@ -2607,6 +2780,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
   final Value<double> rightAscension;
   final Value<double> declination;
   final Value<String> type;
+  final Value<String> epoch;
+  final Value<String?> source;
+  final Value<double?> angularSizeArcmin;
+  final Value<double?> magnitude;
   const AstroTargetsCompanion({
     this.id = const Value.absent(),
     this.catalogId = const Value.absent(),
@@ -2614,6 +2791,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
     this.rightAscension = const Value.absent(),
     this.declination = const Value.absent(),
     this.type = const Value.absent(),
+    this.epoch = const Value.absent(),
+    this.source = const Value.absent(),
+    this.angularSizeArcmin = const Value.absent(),
+    this.magnitude = const Value.absent(),
   });
   AstroTargetsCompanion.insert({
     this.id = const Value.absent(),
@@ -2622,6 +2803,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
     required double rightAscension,
     required double declination,
     required String type,
+    this.epoch = const Value.absent(),
+    this.source = const Value.absent(),
+    this.angularSizeArcmin = const Value.absent(),
+    this.magnitude = const Value.absent(),
   }) : catalogId = Value(catalogId),
        rightAscension = Value(rightAscension),
        declination = Value(declination),
@@ -2633,6 +2818,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
     Expression<double>? rightAscension,
     Expression<double>? declination,
     Expression<String>? type,
+    Expression<String>? epoch,
+    Expression<String>? source,
+    Expression<double>? angularSizeArcmin,
+    Expression<double>? magnitude,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2641,6 +2830,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
       if (rightAscension != null) 'right_ascension': rightAscension,
       if (declination != null) 'declination': declination,
       if (type != null) 'type': type,
+      if (epoch != null) 'epoch': epoch,
+      if (source != null) 'source': source,
+      if (angularSizeArcmin != null) 'angular_size_arcmin': angularSizeArcmin,
+      if (magnitude != null) 'magnitude': magnitude,
     });
   }
 
@@ -2651,6 +2844,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
     Value<double>? rightAscension,
     Value<double>? declination,
     Value<String>? type,
+    Value<String>? epoch,
+    Value<String?>? source,
+    Value<double?>? angularSizeArcmin,
+    Value<double?>? magnitude,
   }) {
     return AstroTargetsCompanion(
       id: id ?? this.id,
@@ -2659,6 +2856,10 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
       rightAscension: rightAscension ?? this.rightAscension,
       declination: declination ?? this.declination,
       type: type ?? this.type,
+      epoch: epoch ?? this.epoch,
+      source: source ?? this.source,
+      angularSizeArcmin: angularSizeArcmin ?? this.angularSizeArcmin,
+      magnitude: magnitude ?? this.magnitude,
     );
   }
 
@@ -2683,6 +2884,18 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
+    if (epoch.present) {
+      map['epoch'] = Variable<String>(epoch.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (angularSizeArcmin.present) {
+      map['angular_size_arcmin'] = Variable<double>(angularSizeArcmin.value);
+    }
+    if (magnitude.present) {
+      map['magnitude'] = Variable<double>(magnitude.value);
+    }
     return map;
   }
 
@@ -2694,7 +2907,11 @@ class AstroTargetsCompanion extends UpdateCompanion<AstroTarget> {
           ..write('commonName: $commonName, ')
           ..write('rightAscension: $rightAscension, ')
           ..write('declination: $declination, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('epoch: $epoch, ')
+          ..write('source: $source, ')
+          ..write('angularSizeArcmin: $angularSizeArcmin, ')
+          ..write('magnitude: $magnitude')
           ..write(')'))
         .toString();
   }
@@ -4587,6 +4804,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AstroTargetsTable astroTargets = $AstroTargetsTable(this);
   late final $SessionLogsTable sessionLogs = $SessionLogsTable(this);
   late final $CaptureBlocksTable captureBlocks = $CaptureBlocksTable(this);
+  late final Index astroTargetsCatalogIdUnique = Index(
+    'astro_targets_catalog_id_unique',
+    'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4599,6 +4820,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     astroTargets,
     sessionLogs,
     captureBlocks,
+    astroTargetsCatalogIdUnique,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6168,6 +6390,10 @@ typedef $$AstroTargetsTableCreateCompanionBuilder =
       required double rightAscension,
       required double declination,
       required String type,
+      Value<String> epoch,
+      Value<String?> source,
+      Value<double?> angularSizeArcmin,
+      Value<double?> magnitude,
     });
 typedef $$AstroTargetsTableUpdateCompanionBuilder =
     AstroTargetsCompanion Function({
@@ -6177,6 +6403,10 @@ typedef $$AstroTargetsTableUpdateCompanionBuilder =
       Value<double> rightAscension,
       Value<double> declination,
       Value<String> type,
+      Value<String> epoch,
+      Value<String?> source,
+      Value<double?> angularSizeArcmin,
+      Value<double?> magnitude,
     });
 
 class $$AstroTargetsTableFilterComposer
@@ -6215,6 +6445,26 @@ class $$AstroTargetsTableFilterComposer
 
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get epoch => $composableBuilder(
+    column: $table.epoch,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get angularSizeArcmin => $composableBuilder(
+    column: $table.angularSizeArcmin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get magnitude => $composableBuilder(
+    column: $table.magnitude,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6257,6 +6507,26 @@ class $$AstroTargetsTableOrderingComposer
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get epoch => $composableBuilder(
+    column: $table.epoch,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get angularSizeArcmin => $composableBuilder(
+    column: $table.angularSizeArcmin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get magnitude => $composableBuilder(
+    column: $table.magnitude,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AstroTargetsTableAnnotationComposer
@@ -6291,6 +6561,20 @@ class $$AstroTargetsTableAnnotationComposer
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get epoch =>
+      $composableBuilder(column: $table.epoch, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<double> get angularSizeArcmin => $composableBuilder(
+    column: $table.angularSizeArcmin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get magnitude =>
+      $composableBuilder(column: $table.magnitude, builder: (column) => column);
 }
 
 class $$AstroTargetsTableTableManager
@@ -6330,6 +6614,10 @@ class $$AstroTargetsTableTableManager
                 Value<double> rightAscension = const Value.absent(),
                 Value<double> declination = const Value.absent(),
                 Value<String> type = const Value.absent(),
+                Value<String> epoch = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<double?> angularSizeArcmin = const Value.absent(),
+                Value<double?> magnitude = const Value.absent(),
               }) => AstroTargetsCompanion(
                 id: id,
                 catalogId: catalogId,
@@ -6337,6 +6625,10 @@ class $$AstroTargetsTableTableManager
                 rightAscension: rightAscension,
                 declination: declination,
                 type: type,
+                epoch: epoch,
+                source: source,
+                angularSizeArcmin: angularSizeArcmin,
+                magnitude: magnitude,
               ),
           createCompanionCallback:
               ({
@@ -6346,6 +6638,10 @@ class $$AstroTargetsTableTableManager
                 required double rightAscension,
                 required double declination,
                 required String type,
+                Value<String> epoch = const Value.absent(),
+                Value<String?> source = const Value.absent(),
+                Value<double?> angularSizeArcmin = const Value.absent(),
+                Value<double?> magnitude = const Value.absent(),
               }) => AstroTargetsCompanion.insert(
                 id: id,
                 catalogId: catalogId,
@@ -6353,6 +6649,10 @@ class $$AstroTargetsTableTableManager
                 rightAscension: rightAscension,
                 declination: declination,
                 type: type,
+                epoch: epoch,
+                source: source,
+                angularSizeArcmin: angularSizeArcmin,
+                magnitude: magnitude,
               ),
           withReferenceMapper: (p0) => p0
               .map(

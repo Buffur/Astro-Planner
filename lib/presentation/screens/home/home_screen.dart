@@ -15,6 +15,7 @@ import '../../../domain/models/session_log.dart';
 import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/equipment_profile.dart';
+import '../../../domain/models/target_types.dart';
 import '../../viewmodels/theme_viewmodel.dart';
 import '../../widgets/capture_plan_widget.dart';
 import '../../widgets/altitude_chart_widget.dart';
@@ -92,6 +93,10 @@ class HomeScreen extends StatelessWidget {
                                   : 'Target: ${target.commonName ?? target.catalogId}',
                               data: {
                                 'Type': target.type,
+                                // ADR-010 §3: existing moving-type targets
+                                // stay usable, with a visible warning.
+                                if (TargetTypes.isMoving(target.type))
+                                  'Note': TargetTypes.movingWarning,
                                 if (viewModel.currentAltitude != null)
                                   'Current Altitude':
                                       '${viewModel.currentAltitude?.toStringAsFixed(1)}°',

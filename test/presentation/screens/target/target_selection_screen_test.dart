@@ -21,8 +21,10 @@ class MockTargetRepository implements TargetRepository {
     return 1;
   }
 
+  final List<AstroTarget> updated = [];
+
   @override
-  Future<void> updateTarget(AstroTarget target) async {}
+  Future<void> updateTarget(AstroTarget target) async => updated.add(target);
 
   @override
   Future<void> deleteTarget(int id) async {}
@@ -84,147 +86,166 @@ void main() {
     expect(find.text('Required'), findsNWidgets(3));
   });
 
-  testWidgets('non-numeric input is rejected for RA and Dec', (
+  // TASK 8.1 changed the input format: RA is entered in hours (h:m:s or
+  // decimal hours, or degrees only with an explicit °), Dec in d:m:s or
+  // decimal degrees. The four tests below used to type bare degrees and
+  // expect the old "Must be a number" / "Must be 0.0 to 360.0" messages; they
+  // now check the same rules (garbage, RA out of range, Dec out of range,
+  // valid input saves) in the new format.
+  final raField = find.widgetWithText(
+    TextFormField,
+    'Right Ascension (J2000) *',
+  );
+  final decField = find.widgetWithText(TextFormField, 'Declination (J2000) *');
+  const raError = 'Use hours: 05h35m17s, 5:35:17 or 5.588 (or degrees: 83.82°)';
+  const decError = 'Use −05°23′28″, -5:23:28 or -5.391 (within ±90°)';
+
+  Future<void> openAddDialog(
     WidgetTester tester,
+    MockTargetRepository repo,
+  ) async {
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Target Name *'),
+      'Test Target',
+    );
+  }
+
+  Future<void> save(WidgetTester tester) async {
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+  }
+
+  testWidgets('non-numeric input is rejected for RA and Dec', (tester) async {
+    await openAddDialog(tester, MockTargetRepository());
+    await tester.enterText(raField, 'abc');
+    await tester.enterText(decField, 'xyz');
+    await save(tester);
+    expect(find.text(raError), findsOneWidget);
+    expect(find.text(decError), findsOneWidget);
+  });
+
+  testWidgets('out of bounds RA is rejected', (tester) async {
+    await openAddDialog(tester, MockTargetRepository());
+    await tester.enterText(decField, '45');
+    for (final bad in ['-1', '24:00:00', '5:60:00', '360.1°', '83.82']) {
+      await tester.enterText(raField, bad);
+      await save(tester);
+      expect(find.text(raError), findsOneWidget, reason: bad);
+    }
+  });
+
+  testWidgets('out of bounds Dec is rejected', (tester) async {
+    await openAddDialog(tester, MockTargetRepository());
+    await tester.enterText(raField, '12h00m00s');
+    for (final bad in ['-91', '90:00:01', '45 60 00']) {
+      await tester.enterText(decField, bad);
+      await save(tester);
+      expect(find.text(decError), findsOneWidget, reason: bad);
+    }
+  });
+
+  testWidgets('HMS/DMS input is stored as the correct degrees (acceptance)', (
+    tester,
   ) async {
     final repo = MockTargetRepository();
-    final planner = MockPlannerViewModel();
-
-    await tester.pumpWidget(createTestWidget(repo, planner));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Target Name *'),
-      'Test Target',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '0.0 to 360.0'),
-      'abc',
-    ); // RA
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
-      'xyz',
-    ); // Dec
-
+    await openAddDialog(tester, repo);
+    await tester.enterText(raField, '05h35m17s');
+    await tester.enterText(decField, '−05°23′28″');
     await tester.tap(find.text('Save'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Validation error should appear
-    expect(find.text('Must be a number'), findsNWidgets(2));
+    expect(find.text(raError), findsNothing);
+    expect(find.text(decError), findsNothing);
+    final saved = repo._targets.single;
+    expect(saved.rightAscension, closeTo(83.820833, 1e-6));
+    expect(saved.declination, closeTo(-5.391111, 1e-6));
+    expect(saved.catalogId, 'Test Target');
+    expect(saved.source, 'user');
+    expect(saved.epoch, 'J2000');
+    expect(find.text('Test Target'), findsOneWidget);
   });
 
-  testWidgets('out of bounds RA is rejected', (WidgetTester tester) async {
-    final repo = MockTargetRepository();
-    final planner = MockPlannerViewModel();
-
-    await tester.pumpWidget(createTestWidget(repo, planner));
+  testWidgets('moving types are not offered for a new target', (tester) async {
+    await openAddDialog(tester, MockTargetRepository());
+    await tester.tap(find.text('Galaxy'));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Target Name *'),
-      'Test Target',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '0.0 to 360.0'),
-      '-10.0',
-    ); // RA
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
-      '45.0',
-    ); // Dec
-
-    await tester.tap(find.text('Save'));
-    await tester.pump();
-
-    expect(find.text('Must be 0.0 to 360.0'), findsOneWidget);
-
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '0.0 to 360.0'),
-      '360.1',
-    ); // RA
-    await tester.tap(find.text('Save'));
-    await tester.pump();
-
-    expect(find.text('Must be 0.0 to 360.0'), findsOneWidget);
+    for (final moving in ['Planet', 'Moon', 'Comet', 'Asteroid']) {
+      expect(find.text(moving), findsNothing, reason: moving);
+    }
+    expect(find.text('Nebula'), findsWidgets);
   });
 
-  testWidgets('out of bounds Dec is rejected', (WidgetTester tester) async {
+  testWidgets('an edit keeps the catalog ID; a moving type stays, labelled', (
+    tester,
+  ) async {
     final repo = MockTargetRepository();
-    final planner = MockPlannerViewModel();
-
-    await tester.pumpWidget(createTestWidget(repo, planner));
+    repo._targets.add(
+      const AstroTarget(
+        id: 7,
+        catalogId: 'C/2025 X1',
+        commonName: 'A comet',
+        rightAscension: 83.820833,
+        declination: -5.391111,
+        type: 'Comet',
+        source: 'user',
+      ),
+    );
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
     await tester.pumpAndSettle();
+    expect(find.textContaining('this object moves'), findsOneWidget);
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Edit'));
     await tester.pumpAndSettle();
-
+    expect(find.text('Catalog ID: C/2025 X1'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '05h35m17.0s'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, '−05°23′28″'), findsOneWidget);
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Target Name *'),
-      'Test Target',
+      'Renamed',
     );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '0.0 to 360.0'),
-      '180.0',
-    ); // RA
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
-      '-91.0',
-    ); // Dec
+    await tester.tap(find.text('Save Changes'));
+    await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Save'));
-    await tester.pump();
-
-    expect(find.text('Must be -90.0 to +90.0'), findsOneWidget);
-
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
-      '90.1',
-    ); // Dec
-    await tester.tap(find.text('Save'));
-    await tester.pump();
-
-    expect(find.text('Must be -90.0 to +90.0'), findsOneWidget);
+    final edited = repo.updated.single;
+    expect(edited.catalogId, 'C/2025 X1');
+    expect(edited.commonName, 'Renamed');
+    expect(edited.type, 'Comet', reason: 'never retyped silently');
   });
 
-  testWidgets('valid values can still be saved', (WidgetTester tester) async {
+  testWidgets('a rename keeps the exact coordinates and the source', (
+    tester,
+  ) async {
     final repo = MockTargetRepository();
-    final planner = MockPlannerViewModel();
-
-    await tester.pumpWidget(createTestWidget(repo, planner));
+    repo._targets.add(
+      const AstroTarget(
+        id: 3,
+        catalogId: 'M42',
+        commonName: 'Orion Nebula',
+        rightAscension: 83.82208333,
+        declination: -5.39111111,
+        type: 'Nebula',
+        source: 'seed:catalog@1',
+      ),
+    );
+    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
     await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Edit'));
     await tester.pumpAndSettle();
-
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Target Name *'),
-      'Andromeda',
+      'Great Orion Nebula',
     );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '0.0 to 360.0'),
-      '10.6847',
-    ); // RA
-    await tester.enterText(
-      find.widgetWithText(TextFormField, '-90.0 to +90.0'),
-      '41.2687',
-    ); // Dec
-
-    await tester.tap(find.text('Save'));
+    await tester.tap(find.text('Save Changes'));
     await tester.pumpAndSettle();
 
-    // Dialog should close, no validation errors
-    expect(find.text('Required'), findsNothing);
-    expect(find.text('Must be a number'), findsNothing);
-    expect(find.text('Must be 0.0 to 360.0'), findsNothing);
-    expect(find.text('Must be -90.0 to +90.0'), findsNothing);
-
-    // The list should now contain "Andromeda"
-    expect(find.text('Andromeda'), findsOneWidget);
+    final edited = repo.updated.single;
+    expect(edited.rightAscension, 83.82208333);
+    expect(edited.declination, -5.39111111);
+    expect(edited.source, 'seed:catalog@1');
+    expect(edited.catalogId, 'M42');
   });
 }
