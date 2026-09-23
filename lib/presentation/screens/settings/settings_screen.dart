@@ -76,6 +76,19 @@ class SettingsScreen extends StatelessWidget {
             label: '${p.dewMarginC.toStringAsFixed(1)} °C',
             onChanged: (v) => update(p.copyWith(dewMarginC: v)),
           ),
+          _SliderTile(
+            key: const Key('settings.npfK'),
+            title: 'NPF star-trail tolerance (k)',
+            help:
+                'For untracked exposures (Michaud NPF rule): 1 = round stars, '
+                'up to 3 = slightly elongated. Higher allows longer '
+                'sub-exposures.',
+            value: p.npfK,
+            range: PlanningPreferences.npfKRange,
+            divisions: 4,
+            label: 'k = ${p.npfK.toStringAsFixed(1)}',
+            onChanged: (v) => update(p.copyWith(npfK: v)),
+          ),
           _Section('Capture plan'),
           _SliderTile(
             key: const Key('settings.margin'),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/models/capture_block.dart';
+import '../shared/capability_text.dart';
 import '../viewmodels/planner_viewmodel.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
 import 'capture_plan/capture_block_dialog.dart';
@@ -66,6 +67,7 @@ class _BlockList extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final blocks = viewModel.captureBlocks;
+    final capability = viewModel.rigCapability;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,9 +141,25 @@ class _BlockList extends StatelessWidget {
                   initial: block,
                 ),
                 title: Text('${block.frameType.name.toUpperCase()} $filterStr'),
-                subtitle: Text(
-                  '${block.frameCount}x ${block.exposureTimeSeconds}s'
-                  '${_policyLabel(block.calibrationPolicy)}',
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${block.frameCount}x ${block.exposureTimeSeconds}s'
+                      '${_policyLabel(block.calibrationPolicy)}',
+                    ),
+                    // TASK 8.6: guidance only — never blocks the plan.
+                    if (block.frameType == FrameType.light &&
+                        capability != null &&
+                        capability.exceedsRecommendation(
+                          block.exposureTimeSeconds,
+                        ))
+                      Text(
+                        CapabilityText.subWarning(capability),
+                        key: const Key('capture.subWarning'),
+                        style: TextStyle(color: scheme.error),
+                      ),
+                  ],
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,

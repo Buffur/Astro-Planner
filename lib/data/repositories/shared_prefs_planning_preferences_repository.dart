@@ -22,6 +22,7 @@ class SharedPrefsPlanningPreferencesRepository
   static const _filterChange = 'filterChangeSeconds';
   static const _flip = 'meridianFlipSeconds';
   static const _setup = 'setupMinutes';
+  static const _npfK = 'npfK';
 
   @override
   Future<PlanningPreferences> load() async {
@@ -49,6 +50,7 @@ class SharedPrefsPlanningPreferencesRepository
       filterChangeSeconds: p.getDouble(_filterChange),
       meridianFlipSeconds: p.getDouble(_flip),
       setupMinutes: p.getDouble(_setup),
+      npfK: p.getDouble(_npfK) ?? PlanningPreferences.defaultNpfK,
     );
   }
 
@@ -62,6 +64,7 @@ class SharedPrefsPlanningPreferencesRepository
     await p.setDouble(_perFrame, preferences.perFrameOverheadSeconds);
     await p.setDouble(_ditherSettle, preferences.ditherSettleSeconds);
     await p.setDouble(_refocus, preferences.refocusSeconds);
+    await p.setDouble(_npfK, preferences.npfK);
     await _setOrRemoveInt(p, _ditherEvery, preferences.ditherEveryNFrames);
     await _setOrRemove(p, _refocusEvery, preferences.refocusEveryMinutes);
     await _setOrRemove(p, _filterChange, preferences.filterChangeSeconds);

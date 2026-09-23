@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../shared/capability_text.dart';
 import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_time_formatter.dart';
@@ -131,6 +132,19 @@ class HomeScreen extends StatelessWidget {
                                 'Pixel Scale': viewModel.pixelScale != null
                                     ? '${viewModel.pixelScale!.toStringAsFixed(2)} arcsec/px'
                                     : 'Unknown',
+                                // TASK 8.6: capability summary (guidance).
+                                if (viewModel.rigCapability case final cap?)
+                                  'Field of view': CapabilityText.fov(cap),
+                                if (viewModel.rigCapability case final cap?
+                                    when cap.npf != null)
+                                  'NPF (untracked)': CapabilityText.npf(cap)!,
+                                if (viewModel.rigCapability case final cap?
+                                    when cap.recommendedMaxSubS != null)
+                                  'Max sub (guide)':
+                                      CapabilityText.recommendedMaxSub(cap)!,
+                                if (viewModel.rigCapability case final cap?
+                                    when cap.frameFillFraction != null)
+                                  'Target size': CapabilityText.frameFill(cap)!,
                                 'Focal length':
                                     '${_trimNumber(equipment.focalLengthMm)} mm',
                                 'Focal ratio': equipment.needsApertureReview

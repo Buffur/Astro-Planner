@@ -34,6 +34,7 @@ import '../../domain/services/reverse_geocoder.dart';
 import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/optical_calculator.dart';
+import '../../domain/services/capability_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/models/moon_conditions.dart';
 import '../../domain/services/fit_analyzer.dart';
@@ -758,13 +759,16 @@ class PlannerViewModel extends ChangeNotifier {
     );
   }
 
-  double? get npfExposure {
-    if (_selectedEquipment == null || _selectedTarget == null) return null;
-    return OpticalCalculator.calculateNPFExposure(
-      apertureFNumber: _selectedEquipment!.focalRatio,
-      pixelPitch: _selectedEquipment!.pixelPitchUm,
-      effectiveFocalLength: _selectedEquipment!.focalLengthMm,
-      declinationDegrees: _selectedTarget!.declination,
+  /// The selected rig's capability summary and exposure guidance for the
+  /// selected target (TASK 8.6, PD-11) — computed by the domain
+  /// [CapabilityCalculator]; null without equipment.
+  RigCapability? get rigCapability {
+    final rig = _selectedEquipment;
+    if (rig == null) return null;
+    return CapabilityCalculator.evaluate(
+      rig,
+      target: _selectedTarget,
+      npfK: _preferences.npfK,
     );
   }
 

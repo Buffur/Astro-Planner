@@ -38,6 +38,7 @@ class PlanningPreferences {
     double? filterChangeSeconds,
     double? meridianFlipSeconds,
     double? setupMinutes,
+    double npfK = defaultNpfK,
   }) => PlanningPreferences._(
     minAltitudeDeg: _clamp(minAltitudeDeg, minAltitudeRange),
     darknessLimit: darknessLimit,
@@ -59,6 +60,7 @@ class PlanningPreferences {
     setupMinutes: setupMinutes == null
         ? null
         : _clamp(setupMinutes, setupMinutesRange),
+    npfK: _clamp(npfK, npfKRange),
   );
 
   const PlanningPreferences._({
@@ -74,6 +76,7 @@ class PlanningPreferences {
     required this.filterChangeSeconds,
     required this.meridianFlipSeconds,
     required this.setupMinutes,
+    required this.npfK,
   });
 
   // Defaults (assumptions) ---------------------------------------------------
@@ -107,6 +110,12 @@ class PlanningPreferences {
   static const (double, double) refocusIntervalRange = (10.0, 600.0);
   static const (double, double) flipSecondsRange = (0.0, 1800.0);
   static const (double, double) setupMinutesRange = (0.0, 240.0);
+
+  /// NPF k (Michaud): the accepted star trail in star radii — 1 = round
+  /// stars (the source's default), up to 3 = slightly elongated (TASK 8.6,
+  /// PD-11). The range is the source's.
+  static const double defaultNpfK = 1.0;
+  static const (double, double) npfKRange = (1.0, 3.0);
 
   // Fields -------------------------------------------------------------------
 
@@ -147,6 +156,9 @@ class PlanningPreferences {
   /// ("not included").
   final double? setupMinutes;
 
+  /// NPF k in use (see [defaultNpfK]).
+  final double npfK;
+
   /// The margin as a fraction in [0, 0.5].
   double get feasibilityMarginFraction => feasibilityMarginPercent / 100.0;
 
@@ -158,6 +170,7 @@ class PlanningPreferences {
     double? perFrameOverheadSeconds,
     double? ditherSettleSeconds,
     double? refocusSeconds,
+    double? npfK,
   }) => PlanningPreferences(
     minAltitudeDeg: minAltitudeDeg ?? this.minAltitudeDeg,
     darknessLimit: darknessLimit ?? this.darknessLimit,
@@ -173,6 +186,7 @@ class PlanningPreferences {
     filterChangeSeconds: filterChangeSeconds,
     meridianFlipSeconds: meridianFlipSeconds,
     setupMinutes: setupMinutes,
+    npfK: npfK ?? this.npfK,
   );
 
   /// Copy with optional overheads switched on or off. Pass a value to switch
@@ -204,6 +218,7 @@ class PlanningPreferences {
         ? meridianFlipSeconds.$1
         : this.meridianFlipSeconds,
     setupMinutes: setupMinutes != null ? setupMinutes.$1 : this.setupMinutes,
+    npfK: npfK,
   );
 
   static double _clamp(double value, (double, double) range) {
@@ -225,7 +240,8 @@ class PlanningPreferences {
       refocusSeconds == other.refocusSeconds &&
       filterChangeSeconds == other.filterChangeSeconds &&
       meridianFlipSeconds == other.meridianFlipSeconds &&
-      setupMinutes == other.setupMinutes;
+      setupMinutes == other.setupMinutes &&
+      npfK == other.npfK;
 
   @override
   int get hashCode => Object.hash(
@@ -241,5 +257,6 @@ class PlanningPreferences {
     filterChangeSeconds,
     meridianFlipSeconds,
     setupMinutes,
+    npfK,
   );
 }

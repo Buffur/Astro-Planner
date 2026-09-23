@@ -46,6 +46,18 @@ void main() {
       expect((await repo.load()).ditherEveryNFrames, isNull);
     });
 
+    // TASK 8.6: the NPF k preference.
+    test('NPF k defaults to 1, round-trips and is clamped to 1-3', () async {
+      SharedPreferences.setMockInitialValues({});
+      final repo = SharedPrefsPlanningPreferencesRepository();
+      expect((await repo.load()).npfK, 1.0);
+      await repo.save(PlanningPreferences(npfK: 2));
+      expect((await repo.load()).npfK, 2.0);
+      SharedPreferences.setMockInitialValues({'npfK': 7.0});
+      expect((await repo.load()).npfK, 3.0);
+      expect(PlanningPreferences(npfK: 0).npfK, 1.0);
+    });
+
     test('out-of-range stored values are clamped on load', () async {
       SharedPreferences.setMockInitialValues({'minAltitude': 99.0});
       expect((await repo.load()).minAltitudeDeg, 60.0);

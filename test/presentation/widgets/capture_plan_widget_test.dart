@@ -13,11 +13,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:astroplan/data/database/app_database.dart' hide CaptureBlock;
+import 'package:astroplan/data/database/app_database.dart'
+    hide CaptureBlock, AstroTarget;
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
+import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
+import 'package:astroplan/domain/models/equipment_profile.dart';
+import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -268,5 +272,95 @@ void main() {
     expect(find.text('Not included'), findsNWidgets(6));
     expect(find.text('5 s'), findsOneWidget); // per-frame default
     expect(find.text('15 %'), findsOneWidget);
+  });
+
+  // TASK 8.6 acceptance: a phone with a 30 s block shows the NPF value and a
+  // warning. Guidance only: the block stays in the plan.
+  testWidgets('a phone on a tripod with a 30 s light block is warned', (
+    tester,
+  ) async {
+    const phone = EquipmentProfile(
+      id: 1,
+      name: 'Phone',
+      sensorWidthMm: 9.8,
+      sensorHeightMm: 7.3,
+      pixelPitchUm: 1.22,
+      resolutionWidthPx: 8064,
+      resolutionHeightPx: 6048,
+      focalLengthMm: 6.86,
+      focalRatio: 1.78,
+      trackingType: TrackingType.untracked,
+    );
+    const target = AstroTarget(
+      id: 1,
+      catalogId: 'M42',
+      rightAscension: 83.82,
+      declination: -5.39,
+      type: 'Nebula',
+    );
+    await tester.runAsync(() async {
+      await vm.setEquipment(phone);
+      await vm.setTarget(target);
+      await vm.addCaptureBlock(
+        CaptureBlock(
+          frameType: FrameType.light,
+          exposureTimeSeconds: 30,
+          frameCount: 20,
+        ),
+      );
+      await vm.addCaptureBlock(
+        CaptureBlock(
+          frameType: FrameType.light,
+          exposureTimeSeconds: 2,
+          frameCount: 100,
+        ),
+      );
+    });
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+
+    final npf = vm.rigCapability!.npf!;
+    expect(npf.seconds, lessThan(30));
+    expect(
+      find.byKey(const Key('capture.subWarning')),
+      findsOneWidget,
+      reason: 'only the 30 s block, not the 2 s one',
+    );
+    expect(
+      find.textContaining('Longer than the recommended max sub'),
+      findsOneWidget,
+    );
+    expect(vm.captureBlocks, hasLength(2), reason: 'never blocks the plan');
+  });
+
+  testWidgets('a guided rig without a maximum exposure gets no warning', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await vm.setEquipment(
+        const EquipmentProfile(
+          id: 2,
+          name: 'Guided scope',
+          sensorWidthMm: 23.5,
+          sensorHeightMm: 15.7,
+          pixelPitchUm: 3.76,
+          resolutionWidthPx: 6248,
+          resolutionHeightPx: 4176,
+          focalLengthMm: 400,
+          focalRatio: 5.6,
+          trackingType: TrackingType.guided,
+        ),
+      );
+      await vm.addCaptureBlock(
+        CaptureBlock(
+          frameType: FrameType.light,
+          exposureTimeSeconds: 600,
+          frameCount: 10,
+        ),
+      );
+    });
+    await tester.pumpWidget(wrap());
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('capture.subWarning')), findsNothing);
   });
 }
