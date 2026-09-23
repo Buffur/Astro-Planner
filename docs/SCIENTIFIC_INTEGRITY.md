@@ -45,6 +45,7 @@
 > **TASK 7.4 (2026-09-23):** SI-007 resolved: no scraper, no default; Bortle/SQM are user-entered with source and date, or unknown; no Bortle↔SQM conversion (none is sourced); the sky warning uses a known Bortle class only.
 > **TASK 8.1 (2026-09-23):** SI-012 largely resolved: epoch stored (J2000 only), source stored, moving types hidden/labelled, RA/Dec entered in sexagesimal or hours through pure, tested parsers (CALC-30). No formula changed.
 > **TASK 8.2 (2026-09-23):** SI-012 progress: the seeded targets are now sourced (OpenNGC v20260501, per-object original text kept in the asset; every object's degrees re-derived from its text in tests; 7 independent spot checks within 0.02°) and carry size and magnitude. No formula changed.
+> **TASK 8.3 (2026-09-23, documentation only):** SI-005 decided by ADR-011 (implemented in TASK 8.4): required focal ratio N plus optional diameter D in mm, N = f/D, 1 % agreement; existing values never reinterpreted, N > 32 flagged for review.
 
 ## Purpose and authority
 
@@ -340,7 +341,9 @@ quantity with an explicit unit.
    without guessing, and silent guessing is prohibited (owner decision PD-10).
 5. Add tests.
 
-**Status:** Partial (model unchanged; the one broken seed value is fixed). **Work item:** TD-008 (seed value resolved; field-naming/unit work still open).
+**Decision 2026-09-23 (ADR-011, TASK 8.3):** actions 1, 2 and 4 are decided — `focalRatio` (required, the existing column read as N) plus optional `apertureDiameterMm` with N = focalLengthMm / D (1 % agreement when both are entered; N re-derived when D is stored); unit-explicit names; plausibility bounds (N 0.5–32); existing rows kept exactly, N > 32 flagged for the user. Implementation and tests: TASK 8.4.
+
+**Status:** Partial (decided; model unchanged until TASK 8.4). **Work item:** TD-008 (seed value resolved; field-naming/unit work → TASK 8.4).
 
 ---
 

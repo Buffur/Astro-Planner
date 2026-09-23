@@ -351,8 +351,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 8.2** — 164-object OpenNGC catalog (CC BY-SA 4.0,
     About page), versioned seeding without resurrection, untouched old seeds upgraded
     in place (owner decisions). 463 tests green.
-  - **Next: TASK 8.3 — ADR: equipment model and aperture semantics (PD-03, PD-10).**
-    Not started; it begins only on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 8.3** — ADR-011 (equipment model and aperture
+    semantics); PD-03 and PD-10 resolved by the owner. Documentation only.
+  - **Next: TASK 8.4 — Equipment domain and schema.** Not started; it begins only on
+    the owner's go-ahead.
 
 ### Phase → group map
 

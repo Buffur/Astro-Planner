@@ -47,6 +47,7 @@
 > **TASK 7.4 (2026-09-23):** no schema change. `SkyDarkness` (domain) is a read-only view of a site's Bortle/SQM with their source and date (or unknown); no value is fetched or derived. PD-05 resolved (DECISIONS E.1).
 > **TASK 8.1 (2026-09-23):** schema v13 — `astro_targets` + `epoch` (default `J2000`), `source`, `angular_size_arcmin`, `magnitude`; partial unique index on `catalog_id` for catalog entries. See B2 and B8.
 > **TASK 8.2 (2026-09-23):** no schema change. Catalog rows carry `source = catalog:openngc@v20260501`; the applied catalog version is the preference `catalogSeedVersion` (int; 2 after this task; absent = never applied). The asset format (`assets/catalog/catalog_v2.json`: version, source, licence, epoch, objects with id, name, type, ra/dec degrees, sizeArcmin, vMag, since, and the OpenNGC name and original RA/Dec text) is documented in `lib/data/services/catalog_seeder.dart`.
+> **TASK 8.3 (2026-09-23, documentation only):** ADR-011 decides the 1.0 equipment model: flat profile kept over the three tables; TASK 8.4 adds nullable `optical_rigs.aperture_diameter_mm` and `optical_rigs.max_exposure_s` (schema v14), reads `optical_rigs.aperture` as the focal ratio N, uses `tracking_state` for {untracked, tracked, guided, unknown}, and removes the dormant catalog repository. DEV-D2 updated.
 
 ---
 
@@ -393,6 +394,9 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
 - **Consequence:** Users cannot reuse one camera across rigs; the composability
   goal is unmet; `EquipmentCatalogRepository` stays dead code. Direction is open
   (PD-03).
+- **Decision 2026-09-23 (ADR-011, TASK 8.3):** the flat profile is kept for 1.0 and
+  composition is deferred; the dormant repository and its domain models are removed
+  in TASK 8.4. The deviation remains, by decision, until a post-1.0 composition design.
 
 ### DEV-D3 — Session logs use display strings and record no snapshot
 - **Intended behavior:** Stable relationships (Phase 0 "current issue" #2) and

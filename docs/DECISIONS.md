@@ -50,6 +50,7 @@
 > **TASK 7.4 (2026-09-23):** PD-05 resolved (E.1): manual Bortle/SQM (A) and the external map at the site (B) now; offline dataset (C) and licensed API (D) documented as deferred; scraper removed. PD-06: the light-pollution context became visible in its scheduled phase.
 > **TASK 8.1 (2026-09-23):** ADR-010 §3 implemented (moving types hidden/labelled); ADR-008 §6 target `source` column added (v13). Implementation choices recorded here: a catalog entry is a row whose source starts with `seed:` or `catalog:` (unique per catalog id); an edit that changes coordinates, size or magnitude sets source `user`, a rename keeps it; a bare RA number is hours.
 > **TASK 8.2 (2026-09-23):** owner decisions: bundle the OpenNGC-derived catalog under CC BY-SA 4.0 with attribution (About page, licence page, `OPENNGC_NOTICE.txt`); scope Messier + ~55 showpieces (164 objects); on upgrade, untouched old seed rows (id and exact coordinates) are updated in place and edited rows left alone. PD-12 remains open for the release-time review of all third-party terms.
+> **TASK 8.3 (2026-09-23, documentation only, no code changed):** ADR-011 (equipment model and aperture semantics) accepted in Part F of DECISIONS; PD-03 and PD-10 resolved. Owner decisions: flat profile for 1.0 (composition deferred); required focal ratio plus optional diameter in mm (N = f/D, 1 % agreement); tracking type {untracked, tracked, guided, unknown} and an optional per-rig maximum exposure; existing rows never reinterpreted, N > 32 flagged for review; the dormant catalog repository is removed in TASK 8.4.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -309,14 +310,14 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | --- | --- | --- | --- | --- | --- |
 | PD-01 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Session-night semantics and the default night rule | SI-010, TD-001 | (a) current night if the Sun is below −0.833°, otherwise the upcoming night; (b) always the next evening; (c) explicit date only with a "Tonight" button | **Resolved — see E.1 and ADR-007 (Part F):** civil evening date at the site; mean-solar-noon window; default = the window containing *now* (the roadmap rule, not option (a)). (Original proposal: (a): a site-local solar noon-to-noon window; the date picker means "the night beginning that evening". Proposed first implementation task once the roadmap is approved.) | Capture planner, Imaging Opportunity, weather alignment |
 | PD-02 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Site time-zone strategy | SI-010, TD-020 | (a) device zone (status quo); (b) provider offset stored per site (online); (c) bundled time-zone database + coordinate lookup (offline); (d) compute in solar/UTC time, display in a labelled zone | **Resolved — see E.1 and ADR-007 (Part F):** (d) now — compute in UTC through a `SiteTimeContext` seam with a mean-solar fallback; the site's IANA zone and the `timezone` package arrive in TASK 7.1, where (b)/(c) are evaluated as the zone source. (Original proposal: compute in UTC/solar time (no zone needed); choose the display zone explicitly; evaluate (d) with (b) as offline-first, (c) if civil clock times are required. DST must be tested.) | Weather alignment, log display, remote-site planning |
-| PD-03 | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
+| PD-03 **RESOLVED 2026-09-23** | Equipment model direction (extends the Phase 0 pending decision "normalize … immediately or through a staged migration") | DEV-D2 | (a) keep the flat projection over 1:1:1 storage; (b) expose composition (reusable camera modules and rigs, tracking state); (c) collapse to flat | Decide before further equipment work; (b) matches the Phase 4 intent | Equipment UI, catalog work |
 | PD-04 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Persistence baseline and migration strategy | DEV-D1, DEV-D6, TD-004/005 | (a) repair the v5 step and test every upgrade path; (b) declare v9 the floor (no installs below v8 exist), drop legacy steps, add Drift schema snapshots + migration tests, enable foreign keys, retire the orphan table; (c) recreate the database | **Resolved — see E.1 and ADR-008 (Part F):** (b), with the floor at **v8**. (Original proposal: (b) **if** the owner confirms no external installs — destructive steps need explicit approval (Migration Rules).) | Any schema change |
 | PD-05 **RESOLVED 2026-09-23** | Light-pollution / Bortle source and the "unknown" policy | SI-007, TD-006 | (a) manual Bortle/SQM entry with an unknown state; (b) offline artificial-sky-brightness dataset (licence and size to be evaluated); (c) keyed API (needs secret handling, rule 15); (d) keep scraping (not recommended) | (a) now, (b) later; remove the scraper | Phase 11 |
 | PD-06 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-21** | Declare the active roadmap phase; approve or gate the implemented-ahead features (field mode, light-pollution context, metadata import, logbook, export) and how gates are enforced | DEV-P1, DEV-P3, TD-014, TD-041 | Approve and document each, or hide them; enforce gates in routes **and** buttons | **Resolved — see E.1.** (Original proposal: owner declares the active phase; align `FeatureScope` with approvals.) | The whole roadmap |
 | PD-07 **RESOLVED 2026-09-22** | Ephemeris / astronomical engine (Phase 0 pending decision) | SI-002, SI-009, SI-012 | Keep hand-written code (documented and validated); truncated series (Meeus) in-house; adopt a package | **Resolved — see E.1 and ADR-010:** in-house Meeus ch. 47 with the full tables. (Original: decide with the Moon-geometry requirement.) | Moon services, moving objects |
 | PD-08 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | **Resolved — see E.1 and ADR-009 (Part F).** (Original: owner product decision; configurable overhead.) | Capture planner (central component) |
 | PD-09 **RESOLVED 2026-09-22** | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | **Resolved — see E.1 and ADR-008 §6:** per-row `source` + `confidence`, added by the owning tasks. (Original: decide with PD-04.) | SI-011, SI-007 fixes |
-| PD-10 | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
+| PD-10 **RESOLVED 2026-09-23** | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
 | PD-11 | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
 | PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
@@ -476,6 +477,22 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
     them entirely or keeping them with a warning.
 - **Decision:** see **ADR-010** (Part F).
 - **Not implemented** (TASKs 6.2–6.4 and 8.1).
+
+### PD-03 and PD-10 — Equipment model and aperture semantics (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 8.3), choosing the
+  roadmap's recommendation on each point. Recorded as **ADR-011** (Part F).
+- **PD-03:** keep the flat profile for 1.0 over the existing Device → CameraModule →
+  OpticalRig tables; camera reuse deferred; the dormant `EquipmentCatalogRepository`
+  and its three domain models are removed in TASK 8.4.
+- **PD-10:** required `focalRatio` (the existing `aperture` column, read as N) plus an
+  optional `apertureDiameterMm`, each derivable via the focal length (1 % agreement
+  when both are entered); unit-explicit names in Dart; existing rows never
+  reinterpreted, N > 32 flagged for the user to review.
+- **Also decided:** tracking type {untracked, tracked, guided, unknown} in the existing
+  column (existing rows stay `unknown`); an optional per-rig maximum exposure in
+  seconds; guidance never blocks.
+- **Implementation:** TASK 8.4.
 
 ### PD-05 — Light-pollution / Bortle source and the "unknown" policy (RESOLVED 2026-09-23)
 
@@ -1571,3 +1588,127 @@ Each fixture records its query and retrieval date (TASK 6.2).
   moving-type target keeps its type on edit).
 - SI-002, SI-009, SI-012, TD-032 and TD-036 stay **open** until those tasks land.
   This ADR changes no code.
+
+## ADR-011: Equipment model and aperture semantics (1.0)
+
+Status: accepted (owner, 2026-09-23, TASK 8.3). Resolves PD-03 and PD-10. Documentation
+only; **implemented by TASK 8.4** (domain and schema), used by TASKs 8.5 (seeds) and 8.6
+(capability summary and exposure guidance).
+
+### 1. Context (verified for this ADR at commit `6d9a90e`)
+
+- **Storage** is normalized: `devices` → `camera_modules` → `optical_rigs` (schema v13,
+  foreign keys `ON DELETE RESTRICT`, ADR-008 §4). `DriftEquipmentRepository` always
+  creates one device, one camera module and one rig together (1:1:1), and exposes them as
+  one flat `EquipmentProfile` whose `id` is the rig id (CLAUDE.md trap 1).
+- **Dormant code:** `EquipmentCatalogRepository` / `DriftEquipmentCatalogRepository` and
+  the domain models `EquipmentDevice`, `CameraModule`, `OpticalRig` are implemented and
+  tested but registered nowhere and used by no ViewModel or screen (TD-026, DEV-D2).
+- **Aperture:** `EquipmentProfile.aperture`, `OpticalRig.aperture` and the column
+  `optical_rigs.aperture` are used as an **f-number** everywhere: the editor label
+  "Effective Aperture (f/)", Home's `f/…`, the NPF call (`apertureFNumber`), the session
+  log (`aperture_f` in JSON, `session_logs.aperture`). The one seed that stored a 72 mm
+  diameter was corrected in TASK 4.4 (SI-005). The editor only checks `> 0` and falls
+  back to `0.0` on a parse failure.
+- **Units:** the domain names carry none (`focalLength`, `aperture`, `pixelPitch`,
+  `sensorWidth`, `rotation`); only some columns do (`focal_length_mm`, `pixel_pitch_um`,
+  `sensor_width_mm`, `resolution_width_px`, `rotation_degrees`).
+- **Tracking:** `optical_rigs.tracking_state` (text, default `'unknown'`) exists; nothing
+  shows or edits it, so every row holds `unknown`.
+- **Exposure limits:** no per-rig limit exists. A capture block's exposure is already
+  bounded to (0, 3600] s (TASK 5.3); NPF is implemented but not shown (PD-11).
+
+### 2. Decision: keep the flat profile for 1.0 (PD-03, owner)
+
+- 1.0 keeps **one flat equipment profile** over the existing three tables, still created
+  1:1:1. No table is restructured.
+- **Reusing a camera across rigs (composition UI) is deferred** beyond 1.0. If it comes,
+  it is designed fresh against the tables, with its own ADR.
+- **The dormant repository is removed in TASK 8.4** (owner): `EquipmentCatalogRepository`,
+  `DriftEquipmentCatalogRepository`, the domain models `EquipmentDevice`, `CameraModule`
+  and `OpticalRig`, and their test. The tables stay; the flat repository uses them.
+- **Consequence:** DEV-D2's intended composition stays unmet in 1.0, now by decision
+  rather than by accident; F-23 is scoped down to the flat profile.
+
+### 3. Decision: unit-explicit names (renames happen in Dart)
+
+`EquipmentProfile` fields in TASK 8.4 (columns are renamed only if unavoidable; the
+mapping lives in the repository):
+
+| Field | Unit | Column (existing unless marked **new**) |
+| --- | --- | --- |
+| `focalLengthMm` | mm | `optical_rigs.focal_length_mm` |
+| `focalRatio` | dimensionless N (f/N) | `optical_rigs.aperture` (meaning documented as N) |
+| `apertureDiameterMm?` | mm | `optical_rigs.aperture_diameter_mm` — **new**, nullable |
+| `sensorWidthMm`, `sensorHeightMm` | mm | `camera_modules.sensor_*_mm` |
+| `pixelPitchUm` | µm | `camera_modules.pixel_pitch_um` |
+| `resolutionWidthPx`, `resolutionHeightPx` | px | `camera_modules.resolution_*_px` |
+| `averageRawFileSizeMB?` | MB (10⁶ bytes) | `camera_modules.average_raw_file_size_m_b` |
+| `rotationDeg?` | degrees | `optical_rigs.rotation_degrees` |
+| `trackingType` | enum (§5) | `optical_rigs.tracking_state` |
+| `maxExposureS?` | s | `optical_rigs.max_exposure_s` — **new**, nullable |
+
+The UI shows the unit next to every number (TASK 8.4 acceptance).
+
+### 4. Decision: focal ratio plus an optional diameter (PD-10, owner)
+
+- **`focalRatio` N is required**; it is what every formula uses (NPF, exposure
+  guidance). The existing `aperture` column keeps its values unchanged and is read as N.
+- **`apertureDiameterMm` D is optional.** The user may enter either:
+  - entering D stores D and derives **N = focalLengthMm / D**;
+  - entering N alone stores N and leaves D unknown (null) — D is never back-filled;
+  - entering both: accepted only if they agree within **1 %** (|f/D − N| / N ≤ 0.01);
+    otherwise the form rejects the save and says which values disagree.
+- **When D is stored, N is re-derived from f / D on every save**, so a changed focal
+  length cannot leave the two inconsistent. The form shows N as derived in that case.
+- **Plausibility bounds for the form** (assumptions for input sanity, not physics;
+  TASK 8.4 documents them in code and may refine them with a DECISIONS note):
+  N 0.5–32; D 1–2000 mm; focal length 1–20 000 mm; pixel pitch 0.5–30 µm; sensor
+  side 1–100 mm; resolution 100–30 000 px; maximum exposure 1–3600 s (the capture-block
+  limit). A parse failure is an error, never a silent `0.0`.
+
+### 5. Decision: tracking type and an optional maximum exposure (owner)
+
+- **Tracking type** ∈ {`untracked`, `tracked`, `guided`, `unknown`}, stored in the
+  existing `tracking_state` column. Existing rows stay **`unknown`**; nothing infers a
+  type from a device name or focal length. Phones and tripods are not assumed untracked.
+- **Maximum sub-exposure** `maxExposureS` (seconds, optional, null = no limit): a user
+  setting per rig, from their own mount or guiding experience. It is **not** computed.
+- **Use (TASK 8.6):** the recommended maximum sub is `min(NPF, maxExposureS)` for an
+  untracked rig and `maxExposureS` otherwise, shown as guidance; a light block longer
+  than the recommendation gets a warning. **Guidance never blocks** a plan. Showing NPF
+  itself is PD-11, decided in TASK 8.6.
+
+### 6. Decision: existing rows are never reinterpreted (PD-10 migration policy, owner)
+
+- Every stored value is kept exactly; the migration only **adds** the two nullable
+  columns (`aperture_diameter_mm`, `max_exposure_s`). No value is converted, and no row
+  is classified as "diameter" or "f-number" by guessing (ADR-008 §6 applies).
+- **Review flag:** a profile whose N is **above 32** (most likely a diameter typed into
+  the f/ field) is shown with a "please review this value" prompt in the equipment list
+  and the editor. The flag is **computed at display time** (no column). Saving through
+  the editor clears it only by making N valid (≤ 32) or by entering D.
+- Session logs keep their stored `aperture` values (already f-numbers, `aperture_f`);
+  snapshots are G11's.
+
+### 7. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| Expose composition (reusable cameras and rigs) in 1.0 | Rejected (owner) | Larger scope and migration risk for a benefit most 1.0 users don't need |
+| Collapse the three tables into one flat table | Rejected | Schema churn with no user benefit; the tables already work |
+| f-ratio only, no diameter | Rejected (owner) | Telescope users know D; forcing a manual division invites errors |
+| Store D and derive N always | Rejected | Phone and camera-lens specs are quoted as f-numbers; D is unknown for them |
+| Auto-convert values > 32 into diameters | Rejected | Silent guessing (PD-10, ADR-008 §6) |
+| Keep the dormant repository | Rejected (owner) | Dead, tested code with no caller under a flat model |
+| Compute a maximum exposure from the mount | Rejected | No sourced model; the user knows their mount |
+
+### 8. Consequences and follow-up
+
+- **TASK 8.4:** the renames and bounds of §3–§4; schema v14 adding
+  `aperture_diameter_mm` and `max_exposure_s`; tracking type and maximum exposure in the
+  form; the review prompt of §6; the dormant repository removed; migration tests with
+  sample rows (including a row with N = 72 that stays 72 and is flagged).
+- **TASK 8.5:** seeds get sources and confidence; phone seeds may carry N only.
+- **TASK 8.6:** capability summary and the §5 guidance; PD-11.
+- SI-005 and TD-026 close with TASK 8.4; this ADR changes no code.
