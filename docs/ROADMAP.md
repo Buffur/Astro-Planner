@@ -364,8 +364,10 @@ rewritten to match the code.*
     511 tests green. **Group G8 is complete.**
   - Completed 2026-09-23: **TASK 9.1** — ADR-012 (weather provider, variables,
     alignment, staleness); PD-15 resolved by the owner. Documentation only.
-  - **Next: TASK 9.2 — WeatherSnapshot and UTC parsing.** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 9.2** — `WeatherSnapshot`, UTC parsing and the
+    night-covering request (ADR-012), tested on recorded fixtures. 521 tests green.
+  - **Next: TASK 9.3 — Caching, staleness and failure states.** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 

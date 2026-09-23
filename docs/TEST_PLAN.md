@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **511 tests: 511 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.6) |
+| `flutter test --no-pub` | **521 tests: 521 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -555,3 +555,19 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - **Preferences (+1):** `npfK` default, round trip and clamping.
 - *Caught while writing:* two hand-typed FOV reference constants were off in the
   fourth decimal; the formula-based assertions next to them were already correct.
+
+**Added by TASK 9.2** (WeatherSnapshot and UTC parsing), 10 tests in
+`open_meteo_forecast_test.dart`, on fixtures recorded from api.open-meteo.com on
+2026-09-23 (`test/fixtures/weather/`: a real `best_match` response for Ljubljana with
+the ADR-012 variables, and a real out-of-range error):
+- **Parser:** the recorded response (15 UTC hours, every variable); instants are UTC
+  and independent of the device zone (the acceptance test); a site in another zone
+  (Los Angeles) keeps its UTC instants; nulls, short arrays and missing variables are
+  unknown; the recorded out-of-range error, other errors and malformed bodies
+  (including naive ISO time strings) are typed failures.
+- **Request:** the night's `[start, end)` becomes `start_hour`/`end_hour` in GMT with
+  `best_match` and `timeformat=unixtime`; the end is capped at the 16-day horizon; a
+  night beyond it fails as out of range without a request; non-200, offline and garbage
+  responses.
+- Test doubles of `WeatherRepository` got the new method through a shared
+  `NoSnapshotWeather` mixin (20 files, mechanical).
