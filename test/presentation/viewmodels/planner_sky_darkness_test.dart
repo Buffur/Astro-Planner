@@ -9,6 +9,7 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
+import 'package:astroplan/domain/models/astro_target.dart' as model;
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -109,14 +110,13 @@ void main() {
     expect(offenders, isEmpty);
   });
 
-  test('a site without values is unknown, and cannot warn', () async {
+  test('a site without values is unknown', () async {
     final id = await siteWith();
     final vm = await build();
     await vm.selectSite(id);
 
     expect(vm.skyDarkness.isUnknown, isTrue);
     expect(vm.lunarIllumination!, lessThan(0.1));
-    expect(vm.skyDarknessWarning, isFalse);
   });
 
   test('a site\'s Bortle and SQM come with their sources', () async {
@@ -132,19 +132,31 @@ void main() {
     expect(d.isSaved, isTrue);
   });
 
-  test('a known Bortle 7 warns; a bright SQM alone does not', () async {
-    final bright = await siteWith(bortle: 7);
-    final sqmOnly = await siteWith(sqm: 17.0);
+  // TASK 10.3 (ADR-013 §6): the fixed sky warning is gone; Bortle and SQM
+  // are context on the opportunity and never change the windows.
+  test('Bortle and SQM are context only: no verdict, same windows', () async {
+    final dark = await siteWith(bortle: 2);
+    final bright = await siteWith(bortle: 8, sqm: 17.0);
     final vm = await build();
+    await vm.setTarget(
+      const model.AstroTarget(
+        id: 1,
+        catalogId: 'M31',
+        type: 'Galaxy',
+        rightAscension: 10.68,
+        declination: 41.27,
+      ),
+    );
+
+    await vm.selectSite(dark);
+    final darkWindows = vm.imagingOpportunity!.visibilityWindows;
+    expect(vm.imagingOpportunity!.skyDarkness!.bortleClass, 2);
 
     await vm.selectSite(bright);
-    expect(vm.skyDarknessWarning, isTrue);
-
-    // No sourced SQM threshold or Bortle conversion exists, so an SQM
-    // reading alone never feeds the warning.
-    await vm.selectSite(sqmOnly);
-    expect(vm.skyDarkness.hasSqm, isTrue);
-    expect(vm.skyDarknessWarning, isFalse);
+    final o = vm.imagingOpportunity!;
+    expect(o.skyDarkness!.bortleClass, 8);
+    expect(o.skyDarkness!.sqm, 17.0);
+    expect(o.visibilityWindows, darkWindows);
   });
 
   test('Bortle for a transient position is marked as not saved', () async {

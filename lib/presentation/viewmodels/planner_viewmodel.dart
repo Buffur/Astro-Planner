@@ -794,11 +794,8 @@ class PlannerViewModel extends ChangeNotifier {
   /// TASK 6.4). Null when there is no site.
   double? get lunarIllumination => moonConditions?.illuminationAtMidnight;
 
-  bool get skyDarknessWarning {
-    final illum = lunarIllumination;
-    final bortle = _bortleClass;
-    return (illum != null && illum > 0.8) || (bortle != null && bortle >= 7);
-  }
+  /// "Now" from the injected clock, for the chart's current-time marker.
+  DateTime get nowUtc => _clock.nowUtc();
 
   /// The chosen night's weather from sunset to sunrise, as per-hour
   /// indicators and ranges with the dew-spread heuristic (TASK 9.4). Null
@@ -828,18 +825,6 @@ class PlannerViewModel extends ChangeNotifier {
       _clock.nowUtc(),
       _latitude,
       _longitude,
-    );
-  }
-
-  /// The target's culmination altitude (LHA = 0). Null without a target or a
-  /// real site — see [currentAltitude].
-  double? get maxAltitude {
-    if (_selectedTarget == null || _usingDefaultLocation) return null;
-
-    return VisibilityCalculator.calculateCulminationAltitude(
-      _selectedTarget!,
-      _clock.nowUtc(),
-      _latitude,
     );
   }
 

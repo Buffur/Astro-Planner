@@ -19,7 +19,7 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/target_types.dart';
 import '../../viewmodels/theme_viewmodel.dart';
 import '../../widgets/capture_plan_widget.dart';
-import '../../widgets/altitude_chart_widget.dart';
+import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
 import '../../widgets/weather_forecast_widget.dart';
 
@@ -101,26 +101,18 @@ class HomeScreen extends StatelessWidget {
                                 if (viewModel.currentAltitude != null)
                                   'Current Altitude':
                                       '${viewModel.currentAltitude?.toStringAsFixed(1)}°',
-                                if (viewModel.maxAltitude != null)
-                                  'Max Altitude':
-                                      '${viewModel.maxAltitude?.toStringAsFixed(1)}°',
+                                // TASK 10.3: inside tonight's windows, not
+                                // at culmination (possibly in daylight).
+                                if (viewModel.imagingOpportunity case final o?)
+                                  'Max altitude in windows':
+                                      o.maxAltitudeInWindowsDeg == null
+                                      ? 'no window tonight'
+                                      : '${o.maxAltitudeInWindowsDeg!.toStringAsFixed(1)}°',
                               },
                               onTap: () => context.push('/target'),
                             ),
                             if (viewModel.sessionNight != null)
-                              Card(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                clipBehavior: Clip.antiAlias,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: AltitudeChartWidget(
-                                    target: target,
-                                    night: viewModel.sessionNight!,
-                                    minAltitude: viewModel.minAltitude,
-                                    zoneId: viewModel.displayZoneId,
-                                  ),
-                                ),
-                              )
+                              const TonightOpportunityWidget()
                             else
                               const _NoSiteCard(
                                 message: "Set your site to see tonight's altitude chart.",
@@ -221,32 +213,9 @@ class HomeScreen extends StatelessWidget {
                                 onTap: () => context.push('/sites'),
                               ),
                             const SkyDarknessWidget(),
-                            if (viewModel.skyDarknessWarning)
-                              Card(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                color: Colors.orange.shade100,
-                                child: const Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.warning_amber_rounded,
-                                        color: Colors.deepOrange,
-                                      ),
-                                      SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          'Sky Warning: High light pollution or a bright Moon reduces contrast on faint targets.',
-                                          style: TextStyle(
-                                            color: Colors.deepOrange,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            // TASK 10.3 (ADR-013 §6): the fixed sky warning
+                            // is gone; the Moon and sky darkness are shown as
+                            // facts per window and in the card above.
                             // TASK 7.4 (PD-05 option A): the external map,
                             // centred on the current position. Hidden
                             // without one — the London default is not the

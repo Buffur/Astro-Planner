@@ -149,14 +149,6 @@ void main() {
     },
   );
 
-  test(
-    'with Bortle unknown only the Moon can trigger the sky warning',
-    () async {
-      final vm = await build();
-      expect(vm.bortleClass, isNull);
-      expect(vm.skyDarknessWarning, vm.lunarIllumination! > 0.8);
-      await vm.setBortleClass(7);
-      expect(vm.skyDarknessWarning, isTrue);
-    },
-  );
+  // TASK 10.3 (ADR-013 §6): the fixed Moon > 0.8 / Bortle >= 7 sky warning
+  // was removed; Bortle is context only (see planner_sky_darkness_test).
 }

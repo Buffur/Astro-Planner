@@ -311,25 +311,8 @@ class _NightTimelineVisual extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        // Visual bar
-        Container(
-          height: 12,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
-            gradient: LinearGradient(
-              colors: [
-                Colors.orange.shade300,
-                Colors.indigo.shade300,
-                Colors.indigo.shade900,
-                Colors.indigo.shade900,
-                Colors.indigo.shade300,
-                Colors.orange.shade300,
-              ],
-              stops: const [0.0, 0.2, 0.35, 0.65, 0.8, 1.0],
-            ),
-          ),
-        ),
+        // TASK 10.3 (TD-034): the decorative gradient bar is removed; the
+        // data-driven darkness bands are in "Tonight for this target".
         const SizedBox(height: 8),
         Text(
           'True Night Window: ${dusk(timeline.astronomicalTwilight)} - '

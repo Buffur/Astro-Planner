@@ -70,21 +70,6 @@ class VisibilityCalculator {
     );
   }
 
-  /// A fixed target's culmination (upper transit) altitude at [utcTime]'s
-  /// date, degrees: LHA = 0 with the declination precessed to that date.
-  static double calculateCulminationAltitude(
-    AstroTarget target,
-    DateTime utcTime,
-    double latitude,
-  ) {
-    final (_, dec) = AstronomicalEngine.precessJ2000ToDate(
-      target.rightAscension,
-      target.declination,
-      AstronomicalEngine.calculateJulianDate(utcTime),
-    );
-    return calculateAltitude(lha: 0, declination: dec, latitude: latitude);
-  }
-
   /// Calculates the approximate altitude of the Sun.
   /// Useful for determining sunrise, sunset, and twilights.
   ///

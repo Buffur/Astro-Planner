@@ -1,5 +1,6 @@
 // Widget test for AltitudeChartWidget (roadmap TASK 2.3, updated TASK 2.4
-// for the SessionNight-based constructor).
+// for the SessionNight-based constructor, and TASK 10.3: it now renders an
+// ImagingOpportunity).
 //
 // The widget went from sampling astronomy inside its CustomPainter to
 // consuming a domain-computed AltitudeCurve (TD-023, DEV-A3). This test
@@ -11,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/site_time_context.dart';
+import 'package:astroplan/domain/services/imaging_opportunity_calculator.dart';
 import 'package:astroplan/domain/services/session_night_resolver.dart';
 import 'package:astroplan/presentation/widgets/altitude_chart_widget.dart';
 
@@ -40,9 +42,13 @@ Future<void> pumpChart(
     MaterialApp(
       home: Scaffold(
         body: AltitudeChartWidget(
-          target: target,
-          night: night,
-          minAltitude: minAltitude,
+          opportunity: ImagingOpportunityCalculator.calculate(
+            night: night,
+            target: target,
+            darknessLimitDeg: -18,
+            minAltitudeDeg: minAltitude,
+          ),
+          nowUtc: DateTime.now().toUtc(),
         ),
       ),
     ),
@@ -60,7 +66,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Visibility & Altitude'), findsOneWidget);
+    expect(find.text('Dark (Sun ≤ −18°)'), findsOneWidget);
+    expect(find.text('Imaging window'), findsOneWidget);
     expect(find.byType(CustomPaint), findsWidgets);
   });
 

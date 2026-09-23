@@ -24,6 +24,7 @@ import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
+import 'package:astroplan/presentation/widgets/sky_darkness_widget.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/core/time/clock.dart';
@@ -246,7 +247,25 @@ void main() {
       // Weather loads after the first frame and fails.
       await tester.pumpAndSettle();
       expect(throwingWeather.calls, greaterThan(0));
+
+      // TASK 10.3: one opportunity card; the fixed sky warning is gone.
+      expect(find.text('Tonight for this target'), findsOneWidget);
+      expect(find.text('Max Altitude'), findsNothing);
+
+      // The list builds lazily; scroll the weather card into view.
+      final list = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(
+        find.text("Couldn't load weather."),
+        300,
+        scrollable: list,
+      );
       expect(find.text("Couldn't load weather."), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byType(SkyDarknessWidget),
+        300,
+        scrollable: list,
+      );
+      expect(find.textContaining('Sky Warning'), findsNothing);
 
       await tester.ensureVisible(find.text('Retry'));
       await tester.pumpAndSettle();
@@ -366,6 +385,11 @@ void main() {
 
     final expectedDate = NightTimeFormatter.eveningDate(
       CalendarDate(2026, 9, 21),
+    );
+    await tester.scrollUntilVisible(
+      find.textContaining('Night of $expectedDate'),
+      300,
+      scrollable: find.byType(Scrollable).first,
     );
     expect(find.textContaining('Night of $expectedDate'), findsOneWidget);
     expect(find.textContaining('No site set'), findsNothing);
