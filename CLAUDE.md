@@ -31,7 +31,7 @@ Read these before architectural or feature changes:
 - `docs/SCIENTIFIC_INTEGRITY.md`: Scientific issue register (`SI-###`) and calculation register.
 - `docs/PROJECT_AUDIT.md`: Point-in-time audit evidence, documentation discrepancy log, rule-conformance matrix. A snapshot: do not edit it to track later changes.
 
-Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/TEST_PLAN.md`, `.agents/rules/`.
+Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/TEST_PLAN.md`, `docs/IA_WIREFRAMES.md` (ADR-015 navigation intent), `.agents/rules/`.
 
 `docs/archive/` holds superseded documents. They are historical only and are known to be inaccurate; never use them as a source of truth.
 
@@ -68,7 +68,7 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-23, after TASK 11.4; TASK 10.5 cut)
+## Current Baseline and Known Traps (as of 2026-09-23, after TASK 12.1; TASK 10.5 cut)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 

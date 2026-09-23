@@ -67,6 +67,7 @@
 > **TASK 11.2 (2026-09-23, commit `428f673`):** ADR-014 §5 and §7 implemented (schema v16). Implementation choices: the planned count per block is the existing `frame_count` (the new counters are completed and rejected); `status` has a CHECK constraint and defaults to `draft`; timestamps are UTC epoch ms; unreadable snapshot text reads as an empty map (no known `v` → "snapshot unavailable"); the optional `@DataClassName` renames (TD-045) were not done.
 > **TASK 11.3 (2026-09-23, commit `ad6609c`):** ADR-014 §3–§4 implemented in the repository and the planner's Save. Owner decisions (TASK 11.3): the Logbook lists every non-draft session and the legacy logs with a status label; Save = planned + refreshed plan snapshot; new rows write display labels into the NOT NULL pre-v16 text columns (§10 correction below).
 > **TASK 11.4 (2026-09-23, commit `628fda6`):** ADR-014 §3 and §6 implemented in the planner. Owner decisions (TASK 11.4): a resumed draft whose night has passed rolls forward to tonight (a future night is kept); a saved plan edited since its last Save is listed as "Planned, unsaved changes"; New = tonight + the example plan; opening a completed or legacy session copies it into a new draft. Implementation choice: autosaves are serialized so they reach the database in edit order.
+> **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -337,12 +338,12 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-11 **RESOLVED 2026-09-23** | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
 | PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
-| PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
+| PD-14 **RESOLVED 2026-09-23** | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | **Resolved by PD-19 / ADR-015:** a fixed Tonight view, no customizable dashboard | — | UI roadmap |
 | PD-15 **RESOLVED 2026-09-23** | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 **RESOLVED 2026-09-22** | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | **Resolved — see E.1 and ADR-010 §3:** hidden for new targets in 1.0; existing ones labelled, never deleted. (Original: hide until PD-07.) | Target UI |
 | PD-17 **RESOLVED 2026-09-23** | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | **Resolved — see E.1 and ADR-013.** | — | Opportunity calculator (10.2) |
 | PD-18 **RESOLVED 2026-09-23** | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | **Resolved — see E.1 and ADR-014.** | — | Session schema migration (11.2) |
-| PD-19 *(placeholder, registered 2026-09-21)* | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | Decided in TASK 12.1. Roadmap's candidate (not accepted): bottom navigation Tonight · Sessions · Gear & Targets · Settings; execution as a full-screen route; PD-14 resolved as a fixed Tonight view, not a customizable dashboard | — | Navigation shell (12.2), execution and logbook screens |
+| PD-19 **RESOLVED 2026-09-23** | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | **Resolved — see E.1 and ADR-015.** | — | Navigation shell (12.2), execution and logbook screens |
 | PD-20 *(placeholder, registered 2026-09-21)* | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | Decided in TASK 13.1. Roadmap's candidate (not accepted): foreground only; progress derived from persisted UTC timestamps; every transition persisted; notifications deferred; no camera control, ASCOM or INDI. A wakelock dependency for keep-screen-on would need separate approval | — | Execution tasks 13.2–13.4 |
 | PD-21 *(placeholder, registered 2026-09-21)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
@@ -620,6 +621,16 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Current session:** the most recently updated open session; no id in preferences.
 - **Legacy logs:** completed, read-only, flagged legacy; no references guessed.
 - **Implementation:** TASKs 11.2–11.4.
+
+### PD-19 (and PD-14) — Information architecture (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 12.1), choosing the
+  recommended option on each point. Recorded as **ADR-015** (Part F), wireframes and
+  route map in `docs/IA_WIREFRAMES.md`.
+- **Tabs:** Tonight · Sessions · Library · Settings; the session planner is one page
+  opened from Tonight and Sessions; sites live in Library; execution is full screen.
+- **PD-14:** a fixed Tonight view; no customizable dashboard.
+- **Implementation:** TASKs 12.2, 12.3, 12.5; G13.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2231,3 +2242,70 @@ TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (r
   forward to tonight on resume; an edited saved plan is listed as "Planned, unsaved
   changes"; New = tonight + example plan; opening a frozen session copies it into a
   new draft. The active site and the transient position remain app-level preferences.
+
+## ADR-015: Information architecture and navigation
+
+Status: accepted (owner, 2026-09-23, TASK 12.1). Resolves PD-19 and PD-14. Documentation
+only; wireframes and the route map are in `docs/IA_WIREFRAMES.md`. Implemented by TASK
+12.2 (navigation shell), 12.3 (screen-scoped ViewModels), 12.5 (Tonight dashboard) and
+G13 (execution). Checked against `app_router.dart` and `home_screen.dart` at commit
+`4c3bf69`.
+
+### 1. Context (verified)
+
+- One long Home page holds the planner (target, opportunity, equipment, capture plan,
+  weather, sky darkness, Save) with about ten app-bar icons as entry points; every
+  other screen is a flat `GoRoute` (`/target`, `/equipment`, `/location`,
+  `/location/pick`, `/sites`, `/sites/edit`, `/about`, `/settings`, `/tonight`,
+  `/logbook`, gated `/metadata`). There is no tab state and no place for sessions
+  (G11) or execution (G13) to live.
+
+### 2. Decision (owner)
+
+- **Bottom navigation with four tabs:** **Tonight** (fixed dashboard, TASK 12.5) ·
+  **Sessions** (every session: drafts, planned, in progress, completed, legacy) ·
+  **Library** (rigs, targets, sites) · **Settings** (planning thresholds, gates, NPF k,
+  field mode, about and data sources).
+- **One session planner** (today's Home content, same sections and order) at
+  `/session/:id`, above the tabs, opened from Tonight's current-session card and from
+  the Sessions list.
+- **Sites live in Library** with rigs and targets; the active site is switched from
+  Tonight's header in one tap.
+- **PD-14:** Tonight is a **fixed** view (night window, site, current session with its
+  fit and reason, Moon, weather with its age, quick actions); **no customizable
+  dashboard** in 1.0.
+- **Execution** is a full-screen route `/session/:id/run` above the tabs (G13).
+- **Tonight's candidates** (TASK 10.4) moves to `/tonight/candidates`.
+
+### 3. Decision: navigation rules
+
+- go_router `StatefulShellRoute` with one navigator per tab; each tab keeps its state.
+- Android back pops within a tab; at a tab root it returns to Tonight; at Tonight's
+  root it leaves the app. Pages above the shell return to the tab they came from.
+- `FeatureScope` gates stay the only gate (metadata import under Settings until G17).
+- Deep links are out of scope.
+
+### 4. Decision: field constraints
+
+Touch targets ≥ 48 dp; primary actions in the lower half; pickers over typing; red
+field mode one tap away from Tonight and the planner, dialogs included; destructive
+actions confirmed; unknown shown as unknown (SI-008). Details in `docs/IA_WIREFRAMES.md` §3.
+
+### 5. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| Tonight · Plan · Logbook · More | Rejected (owner) | Splits one session's plan and log across tabs (ADR-014: one aggregate) |
+| Three tabs (Tonight · Sessions · More) | Rejected (owner) | Library items are used often at planning time |
+| Tonight tab = the full planner | Rejected (owner) | The dashboard question ("what can I image tonight?") gets buried again |
+| Sites under Settings | Rejected (owner) | Sites are data the user builds up, like rigs and targets |
+| Customizable dashboard (PD-14) | Rejected (owner) | Scope and testing cost without a demonstrated need |
+
+### 6. Consequences
+
+- **12.2:** the route map as specified; old routes redirect or are replaced; navigation
+  and back-button tests.
+- **12.3:** ViewModels split along these screens (Tonight, SessionPlan, Sessions, Gear,
+  Sites).
+- **12.5:** the Tonight dashboard and first-run flow.
+- This ADR changes no code.
