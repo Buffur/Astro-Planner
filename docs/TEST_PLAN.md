@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **500 tests: 500 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.5) |
+| `flutter test --no-pub` | **511 tests: 511 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.6) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -541,3 +541,17 @@ Any test failure from here on is a regression, not a known pre-existing issue
   confidence storage.
 - **Editor (+1):** saving a verified seed unchanged keeps it verified (guards the
   2-decimal sensor display), and the provenance caption shows.
+
+**Added by TASK 8.6** (capability summary and untracked guidance), 11 tests:
+- **Domain (`capability_calculator_test.dart`, 8; reference values computed in the
+  test):** ASI2600MC at 400 mm FOV 3.3652° × 2.2486° and pixel scale; NPF only for
+  untracked/unknown (unknown marked conditional); field-minimum |δ| (southern
+  target; floored at 0 near the equator); k scales NPF linearly; recommendation =
+  min(NPF, max exposure) / max exposure / none; warning boundary (equal is fine);
+  frame fill; a tripod phone's NPF of a few seconds warns a 30 s sub.
+- **Widget (`capture_plan_widget_test.dart`, +2):** the roadmap acceptance — a
+  phone with a 30 s light block shows the warning (the 2 s block does not) and the
+  plan keeps both blocks; a guided rig without a maximum exposure gets no warning.
+- **Preferences (+1):** `npfK` default, round trip and clamping.
+- *Caught while writing:* two hand-typed FOV reference constants were off in the
+  fourth decimal; the formula-based assertions next to them were already correct.

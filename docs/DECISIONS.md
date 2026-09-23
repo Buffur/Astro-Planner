@@ -53,6 +53,7 @@
 > **TASK 8.3 (2026-09-23, documentation only, no code changed):** ADR-011 (equipment model and aperture semantics) accepted in Part F of DECISIONS; PD-03 and PD-10 resolved. Owner decisions: flat profile for 1.0 (composition deferred); required focal ratio plus optional diameter in mm (N = f/D, 1 % agreement); tracking type {untracked, tracked, guided, unknown} and an optional per-rig maximum exposure; existing rows never reinterpreted, N > 32 flagged for review; the dormant catalog repository is removed in TASK 8.4.
 > **TASK 8.4 (2026-09-23):** ADR-011 implemented (schema v14; unit-explicit names; bounds in `EquipmentLimits`; `resolveAperture`; tracking type; maximum exposure; review flag; dormant repository removed). Implementation choice: in the form, a diameter makes the f/ field read-only and derived, so the two cannot disagree there; the 1 % rule is enforced by `resolveAperture` for any caller.
 > **TASK 8.5 (2026-09-23):** ADR-008 §6 equipment provenance implemented (schema v15; per-row `source`/`confidence` on camera modules and optical rigs). Owner decisions: drop the unverified phone seeds; label the telescope optics an example (confidence `estimated`). Implementation choice: a user edit sets `user`/`reported` only on the group (camera or optics) whose specs changed.
+> **TASK 8.6 (2026-09-23):** PD-11 resolved (E.1): NPF shown for untracked and ("if untracked") unknown-tracking rigs, at the field-minimum |δ|, with a k planning setting (default 1).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -320,7 +321,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-08 ~~[roadmap-blocking]~~ **RESOLVED 2026-09-22** | Capture-budget model: what counts against the night window; overhead model; calibration-frame policy | TD-022, DEV-A4 | Lights only vs all frames; per-frame vs per-N-frames vs per-filter-change vs per-hour overheads; darks/bias off-night, flats at twilight | **Resolved — see E.1 and ADR-009 (Part F).** (Original: owner product decision; configurable overhead.) | Capture planner (central component) |
 | PD-09 **RESOLVED 2026-09-22** | Provenance storage (Phase 0 pending decision) | DEV-D5 | Per-row source columns vs a `data_sources` table; confidence field | **Resolved — see E.1 and ADR-008 §6:** per-row `source` + `confidence`, added by the owning tasks. (Original: decide with PD-04.) | SI-011, SI-007 fixes |
 | PD-10 **RESOLVED 2026-09-23** | Aperture semantics, field naming and migration policy for user-entered rows | SI-005 | `focalRatio` and/or `apertureDiameterMm`; explicit unit suffixes | Owner decision; no silent guessing of existing rows | Equipment fixes, NPF |
-| PD-11 | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
+| PD-11 **RESOLVED 2026-09-23** | Whether and how NPF is surfaced; default K | SI-001 | Hide; show as a labelled recommendation for untracked exposure; K = 1 or parameter | Not before the formula fix and independent tests | UI |
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
 | PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
@@ -495,6 +496,22 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   column (existing rows stay `unknown`); an optional per-rig maximum exposure in
   seconds; guidance never blocks.
 - **Implementation:** TASK 8.4.
+
+### PD-11 — How NPF is surfaced (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 8.6), choosing the
+  recommended option on each point.
+- **Where:** a labelled recommendation for rigs marked untracked; for rigs whose tracking
+  is unknown it is shown too, marked "if untracked"; never for tracked or guided rigs.
+- **Declination:** the field's minimum |δ|, per Michaud: the target's |δ| minus half the
+  field diagonal (the field's rotation is unknown, so the diagonal is the conservative
+  extent), floored at 0 when the field reaches the equator. The value used is shown.
+- **k:** a planning setting, 1–3, default 1 (the source's range and default), always
+  shown with the figure.
+- **Use:** the recommended maximum sub is min(NPF, the rig's maximum exposure) when NPF
+  applies, otherwise the rig's maximum exposure (ADR-011 §5); a longer light block gets
+  a warning; guidance never blocks a plan.
+- **Implementation:** TASK 8.6 (`CapabilityCalculator`, CALC-31).
 
 ### PD-05 — Light-pollution / Bortle source and the "unknown" policy (RESOLVED 2026-09-23)
 
@@ -1679,7 +1696,8 @@ The UI shows the unit next to every number (TASK 8.4 acceptance).
 - **Use (TASK 8.6):** the recommended maximum sub is `min(NPF, maxExposureS)` for an
   untracked rig and `maxExposureS` otherwise, shown as guidance; a light block longer
   than the recommendation gets a warning. **Guidance never blocks** a plan. Showing NPF
-  itself is PD-11, decided in TASK 8.6.
+  itself is PD-11, decided in TASK 8.6. **Implemented 2026-09-23 (TASK 8.6):** as above;
+  for unknown tracking NPF applies too, marked "if untracked" (PD-11).
 
 ### 6. Decision: existing rows are never reinterpreted (PD-10 migration policy, owner)
 

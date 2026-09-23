@@ -50,6 +50,7 @@
 > **TASK 8.3 (2026-09-23, documentation only):** ADR-011 decides the 1.0 equipment model: flat profile kept over the three tables; TASK 8.4 adds nullable `optical_rigs.aperture_diameter_mm` and `optical_rigs.max_exposure_s` (schema v14), reads `optical_rigs.aperture` as the focal ratio N, uses `tracking_state` for {untracked, tracked, guided, unknown}, and removes the dormant catalog repository. DEV-D2 updated.
 > **TASK 8.4 (2026-09-23):** schema v14 (`optical_rigs` + `aperture_diameter_mm`, `max_exposure_s`); `EquipmentProfile` renamed to unit-explicit fields with tracking type and maximum exposure; the dormant domain models removed. See B2, B3, B8.
 > **TASK 8.5 (2026-09-23):** schema v15 — `camera_modules` and `optical_rigs` + `source`, `confidence` (ADR-008 §6); legacy rows NULL. Seeded rows use source `seed:equipment@2`.
+> **TASK 8.6 (2026-09-23):** no schema change. New preference `npfK` (double, 1–3, default 1; `SharedPrefsPlanningPreferencesRepository`).
 
 ---
 
@@ -257,6 +258,7 @@ allows reuse.
 | `equipmentId` | int | `SharedPrefsPlannerStateRepository` (from `setEquipment`) | Selected rig (`optical_rigs.id`) |
 | `minAltitude` | double | `SharedPrefsPlanningPreferencesRepository` | Minimum usable altitude (deg); Settings screen; clamped to [5, 60] on load (TASK 5.2) |
 | `dewPointThreshold` | double | `SharedPrefsPlanningPreferencesRepository` | Dew margin (°C); Settings screen; clamped to [0, 10] |
+| `npfK` | double | `SharedPrefsPlanningPreferencesRepository` | NPF k (star-trail tolerance), Settings screen; clamped to [1, 3], default 1 *(TASK 8.6)* |
 | `darknessLimitDeg` *(TASK 5.2)* | double | same | Sun limit for windows: −18, −15 or −12 (anything else reads as −18) |
 | `feasibilityMarginPercent` *(TASK 5.2)* | double | same | Tight-margin percent, default 15, range [0, 50] |
 | `perFrameOverheadSeconds` *(TASK 5.2)* | double | same | Per-frame overhead (s), default 5 |

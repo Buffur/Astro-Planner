@@ -54,6 +54,7 @@
 > **TASK 8.3 (2026-09-23, documentation only, no code changed):** ADR-011 (equipment model and aperture semantics) accepted in Part F of DECISIONS; PD-03 and PD-10 resolved. Owner decisions: flat profile for 1.0 (composition deferred); required focal ratio plus optional diameter in mm (N = f/D, 1 % agreement); tracking type {untracked, tracked, guided, unknown} and an optional per-rig maximum exposure; existing rows never reinterpreted, N > 32 flagged for review; the dormant catalog repository is removed in TASK 8.4. No status changed (F-23 is scoped to the flat profile for 1.0).
 > **TASK 8.4 (2026-09-23):** ADR-011 implemented, schema v14. `EquipmentProfile` fields carry units (`focalLengthMm`, `focalRatio`, `pixelPitchUm`, `sensorWidthMm`/`HeightMm`, `resolutionWidthPx`/`HeightPx`, `rotationDeg`) plus optional `apertureDiameterMm`, a `TrackingType` {untracked, tracked, guided, unknown} and an optional `maxExposureS`; `optical_rigs` gains nullable `aperture_diameter_mm` and `max_exposure_s`; the `aperture` column keeps every value, read as N. `EquipmentLimits` documents the plausibility bounds and `resolveAperture` the N = f / D rule (1 % agreement); the editor validates every field with units, derives a read-only f/ from a diameter, edits tracking and maximum exposure, and flags a stored ratio above f/32 for review (never converted). The dormant catalog repository and its three domain models are removed. F-22 and F-23 updated.
 > **TASK 8.5 (2026-09-23):** equipment seeds verified, schema v15. Owner decisions: only the verified seed ships (the four phone profiles are dropped — their makers publish only megapixels, f-number and a 35 mm-equivalent focal length); the telescope optics are labelled an example. The seed "ZWO ASI2600MC + example 72 mm f/5.6 refractor" has camera specs verified against ZWO's product page (23.5 × 15.7 mm, 6248 × 4176 px, 3.76 µm; checked 2026-09-23) and estimated optics; RAW size unknown. `camera_modules` and `optical_rigs` gain `source` and `confidence` (ADR-008 §6; legacy rows NULL); a user edit makes a changed group of specs `user`/`reported`. `SectionHeader` titles now wrap instead of overflowing. F-05 updated.
+> **TASK 8.6 (2026-09-23):** capability summary and untracked exposure guidance; PD-11 resolved (owner): NPF is shown as a labelled recommendation for untracked rigs and, marked "if untracked", for rigs of unknown tracking (never for tracked/guided); it uses the field's minimum |δ| (target |δ| − half the field diagonal, floored at 0); k is a planning setting (1–3, default 1) shown with every figure. The pure `CapabilityCalculator` gives FOV, pixel scale, NPF, the ADR-011 §5 recommended maximum sub and the target's frame fill; Home's equipment card shows them and a light block longer than the recommendation gets a warning (guidance only). Group G8 is complete. F-25 and F-26 Partial → Implemented.
 
 ## Status legend
 
@@ -103,8 +104,8 @@ feature exists although its roadmap phase has not been reached in
 | F-22 | Equipment profile CRUD | Implemented | 6 |
 | F-23 | Equipment composition (Device / Camera / Rig) | Partial | 4 |
 | F-24 | Pixel scale | Implemented | 6 |
-| F-25 | Field of view (FOV) | Partial | 6 |
-| F-26 | NPF exposure recommendation | Partial | 6 |
+| F-25 | Field of view (FOV) | Implemented | 6 |
+| F-26 | NPF exposure recommendation | Implemented | 6 |
 | F-27 | Optical multipliers (reducer / Barlow) | Prototype | 6 |
 | F-28 | Storage estimate | Partial | 9 |
 | F-29 | Weather fetch and offline cache | Partial | 10 |
@@ -130,7 +131,7 @@ feature exists although its roadmap phase has not been reached in
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
 
-Counts (50 features): Implemented 12 · Partial 20 · Prototype 6 · Broken 2 ·
+Counts (50 features): Implemented 14 · Partial 18 · Prototype 6 · Broken 2 ·
 Missing 9 · Deprecated 1 · Unknown 0. (The orphaned `equipment_profiles` table
 recorded under F-23 was dropped entirely in TASK 3.3, not merely deprecated —
 see DATA_MODEL.md B2/B8.)
@@ -364,7 +365,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 6. Tests: ASI2600MC reference case.
 
 ## F-25 — Field of view (FOV)
-- **Status:** Partial
+- **Status:** Implemented *(TASK 8.6, 2026-09-23)*
+- **TASK 8.6:** `CapabilityCalculator` gives width × height (and diagonal) in degrees, shown on Home's equipment card with the pixel scale, and the target's frame fill (angular size over the field's short side) when the target's size is known. The known issues below are resolved.
 - **Current implementation:** `2·atan(d/2f)` implemented and unit-tested.
 - **Relevant files:** `optical_calculator.dart:30-37`.
 - **Known issues:** **never used or displayed** anywhere in the app; no target-size or framing comparison (targets have no size) (TD-016).
@@ -372,7 +374,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 6.
 
 ## F-26 — NPF exposure recommendation
-- **Status:** Partial *(was Broken; TASK 6.5)*
+- **Status:** Implemented *(TASK 8.6, 2026-09-23; was Broken, then Partial after TASK 6.5)*
+- **TASK 8.6 (PD-11 resolved):** shown on Home as "NPF (untracked)" with k and the |δ| used, for untracked rigs and — marked "if untracked" — for unknown tracking; the field-minimum declination replaces the centre declination; k is a planning setting (1–3); the recommended maximum sub = min(NPF, the rig's maximum exposure); a longer light block is warned, never blocked. The `npfExposure` getter is replaced by `rigCapability`.
 - **Current implementation:** `calculateNPFExposure` follows Michaud's complete NPF rule from the primary source, with an explicit k (default 1, range 1–3) and |δ| as the field's minimum declination (0 if unknown). A ViewModel getter `npfExposure` exists; **no UI consumer** (PD-11: hidden).
 - **Relevant files:** `lib/domain/services/optical_calculator.dart`, `planner_viewmodel.dart` (`npfExposure`).
 - **Known issues:** not shown (by decision, PD-11). The getter passes the target's centre declination rather than the field minimum, to be revisited when it is surfaced. *Resolved (TASK 6.5):* the `+ 90` constant (2.9× too long for phones), the circular test and the missing k (SI-001, TD-007).

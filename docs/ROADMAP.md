@@ -359,7 +359,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 8.5** — one verified equipment seed (ZWO camera,
     example optics), phone seeds dropped, per-row provenance (schema v15). 500 tests
     green.
-  - **Next: TASK 8.6 — Capability summary and untracked/smartphone guidance.** Not
+  - Completed 2026-09-23: **TASK 8.6** — capability summary (FOV, pixel scale, NPF,
+    recommended max sub, frame fill) and sub-exposure warning; PD-11 resolved (owner).
+    511 tests green. **Group G8 is complete.**
+  - **Next: TASK 9.1 — ADR: provider, variables, alignment, staleness (PD-15).** Not
     started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
