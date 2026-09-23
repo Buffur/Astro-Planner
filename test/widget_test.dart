@@ -21,8 +21,11 @@ import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support/fake_location_service.dart';
+import 'support/no_snapshot_weather.dart';
 
-class MockWeatherRepository implements WeatherRepository {
+class MockWeatherRepository
+    with NoSnapshotWeather
+    implements WeatherRepository {
   @override
   Future<WeatherConditions?> getCurrentWeather(
     double latitude,

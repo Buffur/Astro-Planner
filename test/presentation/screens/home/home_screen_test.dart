@@ -37,8 +37,9 @@ import 'package:astroplan/presentation/shared/night_time_formatter.dart';
 
 import '../../../support/fake_location_service.dart';
 import '../../../support/flaky_target_repository.dart';
+import '../../../support/no_snapshot_weather.dart';
 
-class _MockWeather implements WeatherRepository {
+class _MockWeather with NoSnapshotWeather implements WeatherRepository {
   @override
   Future<WeatherConditions?> getCurrentWeather(
     double lat,
@@ -54,7 +55,7 @@ class _MockWeather implements WeatherRepository {
   }
 }
 
-class _ThrowingWeather implements WeatherRepository {
+class _ThrowingWeather with NoSnapshotWeather implements WeatherRepository {
   int calls = 0;
 
   @override

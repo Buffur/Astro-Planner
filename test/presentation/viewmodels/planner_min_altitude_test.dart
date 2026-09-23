@@ -21,8 +21,9 @@ import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
 import '../../support/fake_location_service.dart';
+import '../../support/no_snapshot_weather.dart';
 
-class _MockWeather implements WeatherRepository {
+class _MockWeather with NoSnapshotWeather implements WeatherRepository {
   @override
   Future<WeatherConditions?> getCurrentWeather(
     double lat,

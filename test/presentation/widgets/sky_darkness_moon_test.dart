@@ -19,8 +19,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../support/fake_location_service.dart';
+import '../../support/no_snapshot_weather.dart';
 
-class _NoWeather implements WeatherRepository {
+class _NoWeather with NoSnapshotWeather implements WeatherRepository {
   @override
   Future<WeatherConditions?> getCurrentWeather(
     double lat,
