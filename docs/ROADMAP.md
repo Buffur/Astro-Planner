@@ -381,8 +381,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 10.3** — "Tonight for this target" (chart + window list
     with reasons from one result); sky warning and decorative bar removed. 577 tests
     green.
-  - **Next: TASK 10.4 — Tonight's candidates.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-23: **TASK 10.4** — "Tonight's candidates" across all targets
+    (column sorting and filters, no score; background isolate). 584 tests green.
+  - **Next: TASK 10.5 — Azimuth and horizon profile (cut line).** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

@@ -55,6 +55,7 @@
 > **TASK 9.3 (2026-09-23):** weather snapshots are cached in SharedPreferences under `weather:<lat 2dp>:<lon 2dp>:<model>:<night start UTC ms>` (JSON format version 1: provider, model, fetch time and hour times as UTC epoch ms, nullable values). The legacy `weather_cache_<lat>_<lon>` keys remain until TASK 9.4.
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** `WeatherConditions`/`HourlyForecast` removed (owner decision) and the legacy `weather_cache_<lat>_<lon>` keys are no longer read or written (existing entries stay on upgraded devices, TD-049). New derived (not persisted) domain type `NightWeatherSummary` (interval, span kind, hourly slots with dew spread/risk, per-variable ranges).
 > **TASK 10.2 (2026-09-23, commit `613b32f`):** no schema change. New preferences `moonGateEnabled` (bool, false), `moonGateMinIlluminationPct` (0–100, 50), `cloudGateEnabled` (bool, false), `cloudGateMaxPct` (0–100, 50). New derived (not persisted) domain `ImagingOpportunity` (C8 now Partial).
+> **TASK 10.4 (2026-09-23, commit `6bb596f`):** no schema change. New derived (not persisted) domain types `TonightCandidate` and `MoonTrack`.
 
 ---
 

@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **577 tests: 577 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.3) |
+| `flutter test --no-pub` | **584 tests: 584 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -639,3 +639,14 @@ the ADR-012 variables, and a real out-of-range error):
   "Bortle and SQM are context only: no verdict, same windows"; the Moon/Bortle
   warning test in `planner_site_test.dart` was removed with the warning (owner
   decision, ADR-013 §6).
+
+**Added by TASK 10.4** (tonight's candidates), 7 tests (584):
+- **Evaluator (`candidate_evaluator_test.dart`, 4):** the acceptance — every batch row
+  equals the single-target view (with `MoonCalculator.conditionsForNight`), with the
+  optional gates off and on, a forecast and equipment; the acceptance — 250 targets
+  in under 1 s (test machine, JIT warmed up; no device run); each sort column with
+  unknown values last and name ties; filters (with a window, type, own targets).
+- **Screen and ViewModel (`tonight_screen_test.dart`, 3):** the ViewModel evaluates
+  every catalog target and the selected target's row equals Home's opportunity; no
+  site gives nothing; the screen sorts by usable time, the "without a window" toggle
+  widens the list, and a tap selects the target and returns.

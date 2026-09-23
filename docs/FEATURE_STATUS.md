@@ -62,6 +62,7 @@
 > **TASK 10.1 (2026-09-23, documentation only, no code changed):** ADR-013 (imaging-opportunity semantics) accepted in Part F of DECISIONS; PD-17 resolved. Owner decisions: gates are darkness and minimum altitude, with a horizon gate reserved (no horizon data in 1.0); the Moon and cloud only annotate by default, each with an optional user gate (off; thresholds 50 %); the fixed sky warning (Moon > 0.8 or Bortle ≥ 7) is replaced by annotations in TASK 10.2. Also decided: unknown never excludes, all failing reasons listed, max altitude inside windows, no composite score (ranking by usable time only); 12 worked examples as test vectors. No status changed (F-17, F-18, F-38 are implemented in TASK 10.2).
 > **TASK 10.2 (2026-09-23, commit `613b32f`):** `ImagingOpportunityCalculator` (pure, domain; CALC-33) implements ADR-013: gates per 5-min grid instant (darkness, minimum altitude, optional Moon and cloud gates), windows with night-edge clip flags, all failing reasons per excluded segment, why a night has no window, max altitude inside each window, Moon and weather annotations (a missing input is a missing annotation; unknown never excludes), and a `SunTrack` shared across targets. `PlanningPreferences` gained the optional gates (off; 50 % when enabled; persisted, no Settings UI yet). `vm.imagingOpportunity`; `vm.visibilityWindows` and so the budget fit now come from it (FitAnalyzer API unchanged; identical windows while the gates are off). Not yet shown in the UI (TASK 10.3). F-38 Missing → Partial.
 > **TASK 10.3 (2026-09-23, commit `e732a0e`):** opportunity presentation. Home's "Tonight for this target" card shows the usable time, a chart (darkness bands at the user's limit, highlighted windows, target and Moon altitude, minimum altitude) and a text list (each window with times, duration, max altitude and Moon/forecast facts; every excluded period with all its reasons; the no-window reason), both rendered from `vm.imagingOpportunity`; wording in `OpportunityText`. Removed: the fixed sky warning (ADR-013 §6), the decorative gradient bar (TD-034), and the culmination-based "Max Altitude" (now "Max altitude in windows"; `calculateCulminationAltitude` removed with its last caller). F-18 Deprecated (removed); F-38 presented, still Partial (TD-050, no horizon).
+> **TASK 10.4 (2026-09-23, commit `6bb596f`):** tonight's candidates. `CandidateEvaluator` (domain) evaluates every target for the chosen night with the single-target opportunity calculator, sharing a `SunTrack` and a new `MoonTrack` (Moon once per night); rows give usable time, first window start / last window end, max altitude in windows, minimum Moon separation in windows, frame fill (CALC-31) and the no-window reason; `CandidateList` sorts by a chosen column (unknown last) and filters (with a window, type, own targets). No score. `vm.tonightCandidates()` runs it on a background isolate; the new "Tonight's candidates" screen (`/tonight`, Home app bar) lists it and a tap selects the target. Owner decisions: all targets with filters (no favourites concept), a new screen, targets without a window hidden by default with a toggle. **Group G10's scope through 10.4 is done** (10.5 is the cut line). New F-51 (Implemented).
 
 ## Status legend
 
@@ -137,6 +138,7 @@ feature exists although its roadmap phase has not been reached in
 | F-48 | Automated tests | Partial | 1, 16 |
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
+| F-51 | Tonight's candidates (all targets for one night) *(new, TASK 10.4)* | Implemented | 8–10 |
 
 Counts (50 features): Implemented 14 · Partial 18 · Prototype 6 · Broken 2 ·
 Missing 9 · Deprecated 1 · Unknown 0. (The orphaned `equipment_profiles` table
@@ -601,3 +603,12 @@ see DATA_MODEL.md B2/B8.)
 - **Known issues:** no Android build or device run was performed in this audit (Unknown); release signing uses the debug key; iOS `Info.plist` lacks location and photo usage strings; `dart:io` file access makes the web target unsupported; `sdk: ^3.13.3` is a very tight Dart constraint (TD-031).
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16 (ADR-001: Android first).
+
+## F-51 — Tonight's candidates (all targets for one night)
+- **Status:** Implemented (TASK 10.4, commit `6bb596f`)
+- **Current implementation:** `CandidateEvaluator` evaluates every target in the database for the chosen night with the same rules and inputs as Home's opportunity card (ADR-013: darkness, minimum altitude, optional Moon/cloud gates, forecast), sharing the Sun and Moon samples; `TonightScreen` (`/tonight`, Home app bar) sorts by usable time (default), window start, max altitude, Moon separation, frame fill or name, filters by type / own targets, hides targets without a window unless toggled (each then shows its reason), and a tap selects the target. Runs on a background isolate. No score or recommendation.
+- **Relevant files:** `lib/domain/services/candidate_evaluator.dart`, `lib/presentation/screens/tonight/tonight_screen.dart`, `planner_viewmodel.dart` (`tonightCandidates`).
+- **Known issues:** the list is not re-evaluated automatically when preferences or the night change (a refresh button re-runs it); 250 targets take about 0.1–0.2 s on the development machine — the mid-range-device figure in the acceptance is **not verified** (no device run, like all Android behaviour); frame fill needs selected equipment and a known target size.
+- **Dependencies:** F-38, F-19 (targets), F-22 (equipment).
+- **Roadmap relevance:** MASTER_ROADMAP TASK 10.4.
+
