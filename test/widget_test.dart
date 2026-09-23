@@ -91,7 +91,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Session Planner'), findsOneWidget);
+    // TASK 12.2 (ADR-015): the app opens on the Tonight tab.
+    expect(find.text('Tonight'), findsWidgets);
+    expect(find.text('Open planner'), findsOneWidget);
 
     await database.close();
   });

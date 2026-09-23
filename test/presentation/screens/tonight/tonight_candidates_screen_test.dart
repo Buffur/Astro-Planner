@@ -11,7 +11,7 @@ import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/candidate_evaluator.dart';
-import 'package:astroplan/presentation/screens/tonight/tonight_screen.dart';
+import 'package:astroplan/presentation/screens/tonight/tonight_candidates_screen.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -105,7 +105,10 @@ void main() {
           path: '/',
           builder: (_, _) => const Scaffold(body: Text('home')),
         ),
-        GoRoute(path: '/tonight', builder: (_, _) => const TonightScreen()),
+        GoRoute(
+          path: '/tonight',
+          builder: (_, _) => const TonightCandidatesScreen(),
+        ),
       ],
     );
     await tester.pumpWidget(

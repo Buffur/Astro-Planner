@@ -1,32 +1,29 @@
 // Roadmap TASK 4.3, TD-014: a gated feature has no entry point — checked
 // here at the route level (home_screen_test.dart checks the button/card
-// level). AppRouter.router only ever registers '/metadata' when
+// level). AppRouter.router only ever registers the metadata route when
 // FeatureScope.metadataImport is true, so with it false (PD-06 E.1) the
 // route must not exist at all, not just be unreachable from the UI.
+// TASK 12.2 (ADR-015): routes are nested in the navigation shell, so the
+// full paths are collected (support/route_paths.dart); metadata import is
+// /settings/metadata and the logbook is the Sessions tab, /sessions.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:astroplan/core/config/feature_scope.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
+
+import '../../support/route_paths.dart';
 
 void main() {
   test('the metadata route does not exist while it is gated', () {
     expect(FeatureScope.metadataImport, isFalse);
 
-    final paths = AppRouter.router.configuration.routes
-        .whereType<GoRoute>()
-        .map((r) => r.path);
-
-    expect(paths, isNot(contains('/metadata')));
+    expect(allRoutePaths(), isNot(contains(AppRouter.metadata)));
+    expect(allRoutePaths(), isNot(contains('/metadata')));
   });
 
   test('the logbook route exists while it stays visible', () {
     expect(FeatureScope.logbook, isTrue);
 
-    final paths = AppRouter.router.configuration.routes
-        .whereType<GoRoute>()
-        .map((r) => r.path);
-
-    expect(paths, contains('/logbook'));
+    expect(allRoutePaths(), contains(AppRouter.sessions));
   });
 }

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/planning_preferences.dart';
 import '../../viewmodels/planner_viewmodel.dart';
+import '../../../core/config/feature_scope.dart';
+import '../../navigation/app_router.dart';
 
 /// Planning preferences (TASK 5.2, SI-006, TD-043).
 ///
@@ -192,8 +194,17 @@ class SettingsScreen extends StatelessWidget {
             leading: const Icon(Icons.info_outline),
             title: const Text('About & data sources'),
             subtitle: const Text('Catalog attribution and licences'),
-            onTap: () => context.push('/about'),
+            onTap: () => context.push(AppRouter.about),
           ),
+          // TASK 12.2 (ADR-015): metadata import lives under Settings; still
+          // gated until G17 (FeatureScope, PD-06).
+          if (FeatureScope.metadataImport)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Import metadata'),
+              onTap: () => context.push(AppRouter.metadata),
+            ),
         ],
       ),
     );

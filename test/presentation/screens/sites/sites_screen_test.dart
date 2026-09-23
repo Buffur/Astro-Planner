@@ -9,6 +9,7 @@ import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/presentation/screens/sites/site_editor_screen.dart';
 import 'package:astroplan/presentation/screens/sites/sites_screen.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
@@ -72,7 +73,7 @@ void main() {
         GoRoute(path: '/', builder: (_, _) => const Scaffold()),
         GoRoute(path: '/sites', builder: (_, _) => const SitesScreen()),
         GoRoute(
-          path: '/sites/edit',
+          path: AppRouter.siteEdit,
           builder: (_, state) => SiteEditorScreen(
             args: state.extra as SiteEditorArgs? ?? const SiteEditorArgs(),
           ),
@@ -150,7 +151,7 @@ void main() {
     tester,
   ) async {
     await build(tester);
-    await pump(tester, at: '/sites/edit');
+    await pump(tester, at: AppRouter.siteEdit);
 
     await tester.tap(find.byTooltip('Save site'));
     await tester.pumpAndSettle();
@@ -172,7 +173,7 @@ void main() {
     tester,
   ) async {
     await build(tester);
-    await pump(tester, at: '/sites/edit');
+    await pump(tester, at: AppRouter.siteEdit);
 
     expect(find.text('Europe/Ljubljana (device zone)'), findsOneWidget);
     await tester.enterText(
@@ -280,7 +281,7 @@ void main() {
 
   testWidgets('an out-of-range SQM is rejected', (tester) async {
     await build(tester);
-    await pump(tester, at: '/sites/edit');
+    await pump(tester, at: AppRouter.siteEdit);
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),

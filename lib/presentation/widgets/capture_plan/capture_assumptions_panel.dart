@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../viewmodels/planner_viewmodel.dart';
+import '../../navigation/app_router.dart';
 
 /// Every assumption behind the capture budget and the fit, visible
 /// (ADR-009 §4; TASK 5.6). An overhead that is off reads "Not included" —
@@ -80,7 +81,8 @@ class CaptureAssumptionsPanel extends StatelessWidget {
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
-            onPressed: () => context.push('/settings'),
+            // The Settings tab (ADR-015); the plan is autosaved.
+            onPressed: () => context.go(AppRouter.settings),
             child: const Text('Change in Planning Settings'),
           ),
         ),

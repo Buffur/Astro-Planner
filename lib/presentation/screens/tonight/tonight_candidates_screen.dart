@@ -11,14 +11,15 @@ import '../../viewmodels/planner_viewmodel.dart';
 /// chosen night with the same rules as Home's opportunity card, sorted by a
 /// column the user picks. Measured facts only — no score, no
 /// recommendation.
-class TonightScreen extends StatefulWidget {
-  const TonightScreen({super.key});
+class TonightCandidatesScreen extends StatefulWidget {
+  const TonightCandidatesScreen({super.key});
 
   @override
-  State<TonightScreen> createState() => _TonightScreenState();
+  State<TonightCandidatesScreen> createState() =>
+      _TonightCandidatesScreenState();
 }
 
-class _TonightScreenState extends State<TonightScreen> {
+class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
   Future<List<TonightCandidate>?>? _rows;
   CandidateSort _sort = CandidateSort.usableTime;
   bool _withWindowOnly = true;

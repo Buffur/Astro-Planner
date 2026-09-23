@@ -42,7 +42,8 @@ void main() {
     // AppRouter.router is a shared static singleton (TD-037): reset it so a
     // navigation in one test doesn't leak into the next (now that this file
     // has more than one test).
-    AppRouter.router.go('/');
+    // TASK 12.2: start in the session planner (ADR-015).
+    AppRouter.router.go(AppRouter.session());
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
@@ -136,7 +137,7 @@ void main() {
     });
     await tester.pumpAndSettle();
 
-    expect(find.text('Session Planner'), findsOneWidget);
+    expect(find.text('Session planner'), findsOneWidget);
 
     // Scroll down to reveal the Save Session button
     final listFinder = find.byType(Scrollable).first;
@@ -160,10 +161,15 @@ void main() {
     await tester.drag(listFinder, const Offset(0, 2000));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.book));
+    // TASK 12.2: the logbook is the Sessions tab.
+    AppRouter.router.go(AppRouter.sessions);
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
     await tester.pumpAndSettle();
 
-    expect(find.text('Logbook'), findsWidgets);
+    expect(find.text('Sessions'), findsWidgets);
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
     // TASK 11.3: Save stores a planned session with a plan snapshot.

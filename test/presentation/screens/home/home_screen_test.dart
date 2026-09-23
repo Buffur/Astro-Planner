@@ -10,9 +10,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
+import 'package:astroplan/presentation/navigation/app_shell.dart';
+
+import '../../../support/route_paths.dart';
+
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
@@ -68,7 +71,8 @@ void main() {
   setUp(() {
     // AppRouter.router is a shared static singleton (TD-037): reset it so a
     // navigation in one test doesn't leak into the next.
-    AppRouter.router.go('/');
+    // TASK 12.2: Home's content is the session planner (ADR-015).
+    AppRouter.router.go(AppRouter.session());
     SharedPreferences.setMockInitialValues({});
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
@@ -176,7 +180,7 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    expect(find.text('Session Planner'), findsOneWidget);
+    expect(find.text('Session planner'), findsOneWidget);
     expect(find.textContaining('default location'), findsNothing);
   });
 
@@ -242,7 +246,7 @@ void main() {
 
       await tester.pumpWidget(wrap(vm));
       await tester.pump();
-      expect(find.text('Session Planner'), findsOneWidget);
+      expect(find.text('Session planner'), findsOneWidget);
 
       // Weather loads after the first frame and fails.
       await tester.pumpAndSettle();
@@ -511,12 +515,7 @@ void main() {
     // no icon, tooltip or route.
     expect(find.byTooltip('Toggle Field Mode'), findsNothing);
     expect(find.byTooltip('Import Metadata'), findsNothing);
-    expect(
-      AppRouter.router.configuration.routes.whereType<GoRoute>().map(
-        (r) => r.path,
-      ),
-      isNot(contains('/metadata')),
-    );
+    expect(allRoutePaths(), isNot(contains(AppRouter.metadata)));
 
     // Scroll through the whole body to check the light-pollution map card.
     final listFinder = find.byType(Scrollable).first;
@@ -530,13 +529,9 @@ void main() {
     // findsNothing): with a site, the map opens at the site's coordinates.
     expect(find.text('Open Light Pollution Map'), findsOneWidget);
 
-    // Stays visible per PD-06 (on the core path).
-    expect(find.byTooltip('Logbook'), findsOneWidget);
-    expect(
-      AppRouter.router.configuration.routes.whereType<GoRoute>().map(
-        (r) => r.path,
-      ),
-      contains('/logbook'),
-    );
+    // Stays visible per PD-06 (on the core path): since TASK 12.2 it is
+    // the Sessions tab (ADR-015).
+    expect(AppShell.destinations.map((d) => d.label), contains('Sessions'));
+    expect(allRoutePaths(), contains(AppRouter.sessions));
   });
 }

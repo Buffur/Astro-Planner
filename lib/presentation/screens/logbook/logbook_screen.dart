@@ -7,6 +7,7 @@ import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/session.dart';
 import '../../../domain/repositories/session_repository.dart';
 import '../../shared/night_time_formatter.dart';
+import '../../navigation/app_router.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
 /// Saved sessions (TASK 11.3, owner decision): every non-draft session —
@@ -59,7 +60,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Logbook')),
+      appBar: AppBar(title: const Text('Sessions')),
       body: FutureBuilder<List<Session>>(
         future: _sessionsFuture,
         builder: (context, snapshot) {
@@ -121,11 +122,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16.0),
                     onTap: () async {
+                      // TASK 12.2: the planner opens above the tabs; a
+                      // frozen session opens as a copy (TASK 11.4).
                       await context.read<PlannerViewModel>().openSession(
                         session,
                       );
                       if (context.mounted) {
-                        context.go('/');
+                        context.push(AppRouter.session());
                       }
                     },
                     title: Text(

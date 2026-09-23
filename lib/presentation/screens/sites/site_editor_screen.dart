@@ -10,6 +10,7 @@ import '../../shared/coordinate_input.dart';
 import '../../shared/site_form_input.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import 'zone_picker_dialog.dart';
+import '../../navigation/app_router.dart';
 
 /// What the site editor starts from: an existing [site] to edit, or a new
 /// site pre-filled with [latitude]/[longitude]/[name] (e.g. "save the
@@ -111,7 +112,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     final start = (lat != null && lon != null && lat.abs() <= 90)
         ? LatLng(lat, lon)
         : null;
-    final point = await context.push<LatLng>('/location/pick', extra: start);
+    final point = await context.push<LatLng>(AppRouter.sitePick, extra: start);
     if (point == null || !mounted) return;
     setState(() {
       _latitude.text = _coordinate(point.latitude);

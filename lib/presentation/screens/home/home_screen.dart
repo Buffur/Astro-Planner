@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/feature_scope.dart';
+import '../../navigation/app_router.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
 import '../../shared/capability_text.dart';
@@ -31,7 +32,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Session Planner'),
+        title: const Text('Session planner'),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -70,28 +71,8 @@ class HomeScreen extends StatelessWidget {
               tooltip: 'Toggle Field Mode',
               onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
             ),
-          IconButton(
-            icon: const Icon(Icons.format_list_numbered),
-            tooltip: "Tonight's candidates",
-            onPressed: () => context.push('/tonight'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: 'Planning Settings',
-            onPressed: () => context.push('/settings'),
-          ),
-          if (FeatureScope.logbook)
-            IconButton(
-              icon: const Icon(Icons.book),
-              tooltip: 'Logbook',
-              onPressed: () => context.push('/logbook'),
-            ),
-          if (FeatureScope.metadataImport)
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              tooltip: 'Import Metadata',
-              onPressed: () => context.push('/metadata'),
-            ),
+          // TASK 12.2 (ADR-015): candidates, settings, the logbook and
+          // metadata import moved to the Tonight, Settings and Sessions tabs.
         ],
       ),
       body: viewModel.hasBootstrapError
@@ -133,7 +114,7 @@ class HomeScreen extends StatelessWidget {
                                       ? 'no window tonight'
                                       : '${o.maxAltitudeInWindowsDeg!.toStringAsFixed(1)}°',
                               },
-                              onTap: () => context.push('/target'),
+                              onTap: () => context.push(AppRouter.selectTarget),
                             ),
                             if (viewModel.sessionNight != null)
                               const TonightOpportunityWidget()
@@ -170,7 +151,7 @@ class HomeScreen extends StatelessWidget {
                                     '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
                                 'Tracking': equipment.trackingType.label,
                               },
-                              onTap: () => context.push('/equipment'),
+                              onTap: () => context.push(AppRouter.selectRig),
                             ),
                             _SectionHeader('Conditions & Timeline / When'),
                             Card(
@@ -219,7 +200,7 @@ class HomeScreen extends StatelessWidget {
                             // without a site the location card is shown.
                             if (viewModel.sessionNight != null)
                               WeatherForecastWidget(
-                                onTap: () => context.push('/sites'),
+                                onTap: () => context.push(AppRouter.selectSite),
                               )
                             else
                               PlannerSummaryCard(
@@ -234,7 +215,7 @@ class HomeScreen extends StatelessWidget {
                                     'Place name':
                                         viewModel.locationNameAttribution!,
                                 },
-                                onTap: () => context.push('/sites'),
+                                onTap: () => context.push(AppRouter.selectSite),
                               ),
                             const SkyDarknessWidget(),
                             // TASK 10.3 (ADR-013 §6): the fixed sky warning
@@ -431,13 +412,13 @@ class _EmptyStateView extends StatelessWidget {
               children: [
                 if (target == null)
                   ElevatedButton.icon(
-                    onPressed: () => context.push('/target'),
+                    onPressed: () => context.push(AppRouter.selectTarget),
                     icon: const Icon(Icons.explore_outlined),
                     label: const Text('Choose a Target'),
                   ),
                 if (equipment == null)
                   ElevatedButton.icon(
-                    onPressed: () => context.push('/equipment'),
+                    onPressed: () => context.push(AppRouter.selectRig),
                     icon: const Icon(Icons.camera_alt_outlined),
                     label: const Text('Choose Equipment'),
                   ),
@@ -478,7 +459,7 @@ class _DefaultLocationBanner extends StatelessWidget {
           child: const Text('Use current position'),
         ),
         TextButton(
-          onPressed: () => context.push('/sites'),
+          onPressed: () => context.push(AppRouter.selectSite),
           child: const Text('Set site'),
         ),
       ],

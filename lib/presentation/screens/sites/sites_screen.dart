@@ -6,6 +6,7 @@ import '../../../domain/models/location_profile.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import 'site_editor_screen.dart';
+import '../../navigation/app_router.dart';
 
 /// Saved sites and the current position (TASK 7.3): select, create, edit
 /// and delete sites; use the device position or a map pick as a transient
@@ -72,7 +73,7 @@ class SitesScreen extends StatelessWidget {
                 ),
                 trailing: TextButton(
                   onPressed: () => context.push(
-                    '/sites/edit',
+                    AppRouter.siteEdit,
                     extra: SiteEditorArgs(
                       latitude: viewModel.latitude,
                       longitude: viewModel.longitude,
@@ -104,7 +105,7 @@ class SitesScreen extends StatelessWidget {
                   label: const Text('Use current position'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: () => context.push('/location'),
+                  onPressed: () => context.push(AppRouter.position),
                   icon: const Icon(Icons.map_outlined),
                   label: const Text('Pick on map'),
                 ),
@@ -146,7 +147,7 @@ class SitesScreen extends StatelessWidget {
                     icon: const Icon(Icons.edit_outlined),
                     tooltip: 'Edit site',
                     onPressed: () => context.push(
-                      '/sites/edit',
+                      AppRouter.siteEdit,
                       extra: SiteEditorArgs(site: site),
                     ),
                   ),
@@ -162,7 +163,7 @@ class SitesScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(
-          '/sites/edit',
+          AppRouter.siteEdit,
           extra: viewModel.isDefaultLocation
               ? const SiteEditorArgs()
               : SiteEditorArgs(
