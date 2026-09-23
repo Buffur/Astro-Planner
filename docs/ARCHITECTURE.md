@@ -40,6 +40,7 @@
 > **TASK 6.4 (2026-09-22):** `MoonConditions` (Moon altitude, separation from the target, rise/set, illumination at mean solar midnight, closest approach while both are up) from `MoonCalculator`, shown on the sky card as annotations; the mean-phase `calculateLunarIllumination` was deleted.
 > **TASK 6.5 (2026-09-22):** the NPF rule now follows F. Michaud's primary source (derivation on sahavre.fr), with an explicit k (default 1, range 1–3); the circular test is replaced by independent worked examples. Still hidden (PD-11). Group G6 is complete.
 > **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display. Presentation passes `vm.displayZoneId` to the one formatter; the ViewModel resolves the time context (IANA or mean solar), never the device zone.
+> **TASK 7.2 (2026-09-23):** location and geocoding behind domain interfaces. `LocationService` reports each permission outcome (`LocationFound`, or `LocationUnavailable` with `serviceDisabled` / `permissionDenied` / `permissionDeniedForever`) and opens the matching settings page; the location picker explains each outcome (rationale text + "Open settings") and no longer calls Geolocator. A `ReverseGeocoder` interface with a `NominatimReverseGeocoder` (identifying user agent `AstroPlan (com.astroplan.astroplan)`, at most 1 request/s, in-memory cache by coordinates rounded to 0.01°, failures reported, not cached) replaces the ViewModel's inline HTTP; OpenStreetMap attribution on the map and next to place names; the tile user agent is the real app id; typed coordinate entry works offline. No `http`/`geolocator` import in presentation or domain (test-enforced).
 
 ---
 
@@ -213,7 +214,7 @@ Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 | 2 | **Selection state** — target and equipment, mirrored to shared preferences | `:330-342` |
 | 3 | **Session night** and **session loading** *(updated TASK 2.4)*: `sessionNight` resolves a `SessionNight` (default via `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)`, or a picked `CalendarDate` via `.forEveningDate(...)`; null without a site, ADR-007 §9); `setEveningDate`, `newSession` (clears the pick), `loadSession` (maps a legacy instant to its device-local evening date), `_activeSessionLog`; target/equipment re-matched from a log by **name** | `:sessionNight/eveningDate/setEveningDate/loadSession/newSession` |
 | 4 | **Location** — coordinates; `setLocation` (persists, and overwrites the active saved profile); `useCurrentLocation` (through the injected `LocationService`; *updated TASK 1.1*); default London until a position is obtained | `:216-280` |
-| 5 | **Reverse geocoding** — raw `http.get` to Nominatim, errors swallowed (the doc comment still says "Open-Meteo") | `:163-187` |
+| 5 | **Reverse geocoding** — *(updated TASK 7.2)* `_reverseGeocode` calls the injected `ReverseGeocoder` (default `NominatimReverseGeocoder`); a failure leaves `locationName` null and is logged; an answer for a position the user has left is ignored; `locationNameAttribution` carries the required attribution. *(Was: raw `http.get` to Nominatim, errors swallowed.)* | `:_reverseGeocode` |
 | 6 | **Light pollution / Bortle** — `_fetchBortle` (calls the concrete repository), `setBortleClass`, default 4 | `:189-214,344-364` |
 | 7 | **Weather** — fetch and refresh via a shared `_fetchWeather()`; loaded post-first-frame, not on the bootstrap path; `weatherError` set on failure *(updated TASK 1.2)* | `:279,324-335` |
 | 8 | **Capture plan** — add/update/remove/reorder blocks; hand-written JSON persistence; default 3-block plan | `:287-328` |
@@ -229,7 +230,9 @@ TASK 1.2)*, `_selectedTarget`, `_selectedEquipment`, `_currentWeather`,
 (default 4), `_dewPointThreshold` (default 2.0), `_activeSessionLog`, `_minAltitude`
 (default 20.0). The `captureBlocks` getter exposes the internal mutable list.
 
-Direct imports that skip the intended layers: `package:http`,
+*(Updated TASK 7.2: `package:http` is no longer imported; the concrete
+`NominatimReverseGeocoder` is built as the constructor default for the injected
+`ReverseGeocoder`, like `GeolocatorLocationService`.)* Direct imports that skip the intended layers: `package:http`,
 `package:shared_preferences`, the concrete
 `lib/data/repositories/light_pollution_repository.dart`, and the concrete
 `lib/data/services/geolocator_location_service.dart` (used only as the constructor
@@ -257,6 +260,15 @@ Per-function documentation: `docs/SCIENTIFIC_INTEGRITY.md` Part B.
 `LocationService` interface (`lib/domain/services/location_service.dart`),
 implemented by `GeolocatorLocationService` (`lib/data/services/`) and replaced by
 `FakeLocationService` in tests (`test/support/`).
+
+**Abstracted (TASK 7.2):** `LocationService` returns a sealed `LocationResult`
+(`LocationFound` / `LocationUnavailable(LocationFailure)`) and opens the location or app
+settings; the location picker uses it through the ViewModel. Reverse geocoding is the
+`ReverseGeocoder` interface (`lib/domain/services/reverse_geocoder.dart`, sealed
+`ReverseGeocodeResult`), implemented by `NominatimReverseGeocoder`
+(`lib/data/services/`) and replaced by `FakeReverseGeocoder` in tests. The app's
+identity for third-party services is `AppIdentity` (`lib/core/config/`). A test fails
+if `lib/presentation` or `lib/domain` imports `package:http` or `package:geolocator`.
 
 **Not abstracted (no interface exists):** light pollution (concrete class in the
 data layer), reverse geocoding (inline HTTP in the ViewModel), device location in
@@ -331,7 +343,7 @@ DEV-P1 — resolved).
 | `HomeScreen` | `PlannerViewModel`, `ThemeViewModel`, `FeatureScope`; `LogbookRepository` for Save | Empty state has **no navigation** to Target/Equipment. **TASK 4.3:** field-mode toggle and light-pollution map card are now gated (`FeatureScope`, DEV-P1 resolved); the map link's coordinates are still hard-coded Slovenia (F-34, TASK 7.4's job) |
 | `TargetSelectionScreen` | `TargetRepository` (direct), VM for selection | Add/edit dialog with validation; no ViewModel for CRUD |
 | `EquipmentSelectionScreen` | `EquipmentRepository` (direct), VM for selection | 260-line dialog with validation; contains mojibake strings |
-| `LocationPickerScreen` | VM + Geolocator + `flutter_map` | Duplicates the ViewModel's Geolocator flow |
+| `LocationPickerScreen` | VM (`locateDevice`, `open*Settings`, `setLocation`) + `flutter_map` | *(Updated TASK 7.2)* explains each permission outcome; typed coordinate entry; OSM attribution; no Geolocator call |
 | `LogbookScreen` | `LogbookRepository` (direct), VM `loadSession`, `share_plus` | Swipe-delete without confirmation |
 | `MetadataImportScreen` | `image_picker`, `MetadataExtractor` | Display-only |
 | `CapturePlanWidget` | VM | Add dialog; reorder; outputs |
@@ -360,11 +372,11 @@ production defaults (the same seam pattern as `LocationService` and `Clock`). De
 | Service | Purpose | Where | Key | Policy / risk notes | Failure behavior |
 | --- | --- | --- | --- | --- | --- |
 | Open-Meteo forecast API | Weather (current + hourly) | `OpenMeteoWeatherRepository`; `models=icon_seamless` hard-coded; `timezone=auto` | None | Free tier is intended for non-commercial use; verify terms before any commercial release. Live query checked 2026-09-21 (London): no nulls in the first 48 h; hourly arrays start at local midnight; `utc_offset_seconds` returned but discarded | Any error → falls back to cache → else `null` (silent) |
-| Nominatim (OSM) | Reverse geocoding | `PlannerViewModel._reverseGeocode` | None (User-Agent `AstroPlan/1.0`) | Usage policy (rate limit, identifying UA, caching); called on each location change | Silent |
+| Nominatim (OSM) | Reverse geocoding | `NominatimReverseGeocoder` behind `ReverseGeocoder` *(TASK 7.2)* | None (User-Agent `AstroPlan (com.astroplan.astroplan)`) | Usage policy followed: identifying UA, ≤ 1 request/s (queued), in-memory cache by coordinates rounded to 0.01° (the rounded point is what is sent), attribution shown with the name; no contact address in the UA (PD-12) | Typed `ReverseGeocodeFailed`, logged; name shown as unknown |
 | ClearOutside (HTML scrape) | Bortle class | `LightPollutionRepository` | None | Third-party scraping; ToS unknown; request URL is malformed so it never succeeds | Returns `null` |
-| OSM tile server | Map picker tiles | `LocationPickerScreen` | None | Tile usage policy requires attribution (none shown) and an accurate UA (`com.example.astroplan` ≠ real `applicationId` `com.astroplan.astroplan`) | Blank tiles |
+| OSM tile server | Map picker tiles | `LocationPickerScreen` | None | *(Updated TASK 7.2)* attribution shown (`SimpleAttributionWidget`, links to the copyright page); UA uses the real `applicationId` `com.astroplan.astroplan`; whether a release may use the public tile servers is open (TD-031, PD-12) | Blank tiles; typed coordinates still work |
 | lightpollutionmap.info | External map link via `url_launcher` | `HomeScreen` | None | Opens a URL with **hard-coded** Slovenia coordinates | — |
-| Geolocator (GPS) | Device location | `GeolocatorLocationService` (behind `LocationService`, used by the VM) and `LocationPickerScreen` | — | Permissions declared for Android; iOS `Info.plist` has no location usage strings | Platform errors still unhandled on the VM startup path |
+| Geolocator (GPS) | Device location | `GeolocatorLocationService` only (behind `LocationService`; the picker goes through the VM since TASK 7.2) | — | Permissions declared for Android; iOS `Info.plist` has no location usage strings | Platform errors still unhandled on the VM startup path |
 | `image_picker`, `share_plus` | Gallery pick; share sheet | Metadata screen; Logbook screen | — | `image_picker` cannot select FITS files | — |
 
 ## B11. Time handling as built
@@ -430,6 +442,10 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   ViewModel; the default `GeolocatorLocationService()` is built inside the ViewModel
   constructor (a presentation → data import); `LocationPickerScreen` still calls
   Geolocator directly; startup still waits on the network (DEV-A5, TASK 1.2).
+- **Status update (2026-09-23, TASK 7.2):** `http` is gone from the ViewModel
+  (reverse geocoding is behind `ReverseGeocoder`) and `LocationPickerScreen` no
+  longer calls Geolocator. **Still open:** the concrete `LightPollutionRepository`
+  (TASK 7.4) and the default implementations built in the ViewModel constructor.
 
 ## DEV-A2 — Presentation bypasses ViewModels
 - **Intended behavior:** `Presentation -> ViewModels -> Repositories`.
@@ -540,7 +556,7 @@ listed with its work item.
 | # | Proposal | Purpose | Work item |
 | --- | --- | --- | --- |
 | P1 | Pure-Dart **time and site model** ("session night", site time zone) in `domain/` | Correct "tonight"; one time base for timeline, windows, chart, weather, log | TD-001, TD-020 (PD-01, PD-02) |
-| P2 | **Interfaces for platform/IO**: device location, reverse geocoding, light-pollution source, key-value preferences, clock | Testability; remove `http`/`geolocator`/`shared_preferences` from the ViewModel | TD-019, TD-003 *(device location: done in TASK 1.1; the rest is open)* |
+| P2 | **Interfaces for platform/IO**: device location, reverse geocoding, light-pollution source, key-value preferences, clock | Testability; remove `http`/`geolocator`/`shared_preferences` from the ViewModel | TD-019, TD-003 *(device location: done in TASK 1.1; reverse geocoding and permission states: TASK 7.2; light pollution open — TASK 7.4)* |
 | P3 | **Deterministic bootstrap**: awaitable initialization; seeding completed before the first read; no network on the critical path; visible error/empty states with navigation | Startup robustness; offline-first | TD-002 |
 | P4 | **Capture-budget domain service** (pure Dart) separating integration, acquisition, calibration and total session budget, with configurable overhead | Central product component; testable | TD-022 (PD-08) |
 | P5 | **Typed value objects** for the night timeline and windows; one shared altitude function used by ViewModel, windows and chart | Remove triplication and stringly-typed maps | TD-023, TD-024 |

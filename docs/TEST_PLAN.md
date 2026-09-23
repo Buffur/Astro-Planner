@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **347 tests: 347 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.1) |
+| `flutter test --no-pub` | **379 tests: 379 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -385,3 +385,31 @@ Any test failure from here on is a regression, not a known pre-existing issue
 - **Updated, with its reason:** `planner_location_test.dart`'s GPS test used to
   assert that the fix overwrote the saved site (the defect TD-027). It now asserts
   the transient, remembered position and an untouched site.
+
+**Added by TASK 7.2** (location and geocoding services), 32 tests:
+- **Geocoder (`nominatim_reverse_geocoder_test.dart`, `MockClient`, manual clock):**
+  - a found name carries the OpenStreetMap attribution;
+  - the identifying user agent and the rounded coordinates are sent;
+  - nearby coordinates and "no name here" are answered from the cache;
+  - HTTP error, offline, malformed body and timeout are reported as failures and
+    not cached (a later call retries);
+  - three simultaneous lookups go out one at a time, at least 1 s apart; no wait
+    when the last request is older; a queued duplicate hits the cache.
+- **Helpers (`location_input_test.dart`):** each permission outcome's text and
+  settings target; coordinate parsing and range validation.
+- **ViewModel (`planner_location_test.dart`):**
+  - a fake for each permission state — every failure is reported and changes
+    nothing, a grant is used;
+  - `locateDevice` previews without using; settings open through the service;
+  - a place name comes with its attribution;
+  - a failed lookup leaves the name unknown, not stale;
+  - an answer for a position the user has left is ignored;
+  - no `http`/`geolocator` import in `lib/presentation` or `lib/domain` (the
+    acceptance test).
+- **Picker (`location_picker_screen_test.dart`):**
+  - denied forever / services off show the explanation, and "Open settings" opens
+    the right page;
+  - a plain denial has no settings action;
+  - a fix moves the marker without changing the ViewModel;
+  - typed coordinates are validated and move the marker;
+  - the OSM attribution and the real tile user agent.
