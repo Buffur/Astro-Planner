@@ -68,7 +68,7 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
 
-## Current Baseline and Known Traps (as of 2026-09-23, after TASK 9.4)
+## Current Baseline and Known Traps (as of 2026-09-23, after TASK 10.1)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 

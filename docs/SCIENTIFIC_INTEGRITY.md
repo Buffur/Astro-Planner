@@ -53,6 +53,7 @@
 > **TASK 9.2 (2026-09-23):** SI-010 (weather part) progress: forecast instants are now parsed as UTC from GMT+0 epoch seconds in the new snapshot path; the display still uses the legacy path until TASK 9.4.
 > **TASK 9.3 (2026-09-23):** no calculation changed; forecast age is computed from UTC instants with the injected Clock (freshness thresholds documented as assumptions, ADR-012 §6).
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** CALC-32 registered (night weather summary and dew-spread heuristic). SI-010 weather part resolved (UTC hours sliced to the night, shown in the site zone). SI-006: the cloud colour bands are removed and the weather horizon is the night within 16 days; the dew margin is now shown in use.
+> **TASK 10.1 (2026-09-23, documentation only):** ADR-013 decides the opportunity semantics: the sky-warning thresholds of SI-006 (Moon > 0.8 or Bortle ≥ 7) are to be replaced by annotations (TASK 10.2); optional Moon/cloud gates have user thresholds (assumptions, default 50 %); the culmination-based max altitude (TD-023 part) is replaced by the maximum inside the windows. No formula changed.
 
 ## Purpose and authority
 
@@ -83,7 +84,7 @@ Correct Interpretation → Required Future Action.**
 | SI-003 | Relative stacking gain (√N) vs physical SNR | Partial (label fixed TASK 4.4; metric documentation still open) | TD-009 |
 | SI-004 | ISO / gain limitations | Prototype (descriptive text only) | TD-009 |
 | SI-005 | Aperture semantics and unit problem | Partial (seed value fixed TASK 4.4; field-naming/unit model still open) | TD-008 |
-| SI-006 | Hard-coded astronomy and planning thresholds | Partial (warning wording fixed TASK 4.4; thresholds still hard-coded) | TD-033, TD-043 |
+| SI-006 | Hard-coded astronomy and planning thresholds | Partial (warning wording fixed TASK 4.4; thresholds still hard-coded; sky warning to be replaced by annotations per ADR-013, TASK 10.2) | TD-033, TD-043 |
 | SI-007 | Bortle default vs unknown | **Resolved** (TASK 7.4) | TD-006 |
 | SI-008 | Unknown treated as zero / default presented as fact | Partial (storage/pixel-scale/example-plan/RA-Dec cases fixed TASK 4.4; Bortle/GPS defaults still open) | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |

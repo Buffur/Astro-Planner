@@ -58,6 +58,7 @@
 > **TASK 9.2 (2026-09-23):** ADR-012 §2–§5 implemented in the data layer (snapshot, UTC parsing, best_match, night-covering request, horizon cap). Implementation choice: time strings that are not epoch seconds are rejected as malformed (they would be naive local times).
 > **TASK 9.3 (2026-09-23):** ADR-012 §6 implemented (freshness constants, cache keyed by site/model/night, failure states). Implementation choices: the cache key also includes the night's UTC start (a snapshot covers one night); a cached snapshot younger than 3 h is used without a request unless refresh is forced; an aging or stale one triggers a refresh and is shown only if that fails.
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** ADR-012 §3–§5 and §7 implemented in the UI; ADR-012 is fully implemented. Owner decisions (TASK 9.4): the weather card and summary cover **sunset to sunrise** of the chosen night (the whole 24 h window, labelled, for midnight sun or polar night); values are shown **neutrally** — the undocumented 20 % / 50 % cloud colour bands are dropped, only the dew-risk flag (the user's margin) is highlighted; the **legacy weather path is removed** now. Implementation choice: changing the evening date reuses a current cached forecast instead of forcing a refresh.
+> **TASK 10.1 (2026-09-23, documentation only, no code changed):** ADR-013 (imaging-opportunity semantics) accepted in Part F of DECISIONS; PD-17 resolved. Owner decisions: gates are darkness and minimum altitude, with a horizon gate reserved (no horizon data in 1.0); the Moon and cloud only annotate by default, each with an optional user gate (off; thresholds 50 %); the fixed sky warning (Moon > 0.8 or Bortle ≥ 7) is replaced by annotations in TASK 10.2. Also decided: unknown never excludes, all failing reasons listed, max altitude inside windows, no composite score (ranking by usable time only); 12 worked examples as test vectors.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -331,7 +332,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
 | PD-15 **RESOLVED 2026-09-23** | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 **RESOLVED 2026-09-22** | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | **Resolved — see E.1 and ADR-010 §3:** hidden for new targets in 1.0; existing ones labelled, never deleted. (Original: hide until PD-07.) | Target UI |
-| PD-17 *(placeholder, registered 2026-09-21)* | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | Decided in TASK 10.1. Roadmap's proposed starting point (not accepted): gates = Sun ≤ the darkness limit, target ≥ the minimum altitude, the horizon; annotations = Moon altitude, illumination and separation, cloud, dew; optional user-enabled Moon or cloud gates; explicitly no composite score | — | Opportunity calculator (10.2) |
+| PD-17 **RESOLVED 2026-09-23** | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | **Resolved — see E.1 and ADR-013.** | — | Opportunity calculator (10.2) |
 | PD-18 *(placeholder, registered 2026-09-21)* | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | Decided in TASK 11.1, before any migration | — | Session schema migration (11.2), information architecture (12.1) |
 | PD-19 *(placeholder, registered 2026-09-21)* | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | Decided in TASK 12.1. Roadmap's candidate (not accepted): bottom navigation Tonight · Sessions · Gear & Targets · Settings; execution as a full-screen route; PD-14 resolved as a fixed Tonight view, not a customizable dashboard | — | Navigation shell (12.2), execution and logbook screens |
 | PD-20 *(placeholder, registered 2026-09-21)* | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | Decided in TASK 13.1. Roadmap's candidate (not accepted): foreground only; progress derived from persisted UTC timestamps; every transition persisted; notifications deferred; no camera control, ASCOM or INDI. A wakelock dependency for keep-screen-on would need separate approval | — | Execution tasks 13.2–13.4 |
@@ -585,6 +586,19 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   be revisited when PD-11 decides how NPF is surfaced.
 
 ---
+
+### PD-17 — Imaging-opportunity semantics (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 10.1), choosing the
+  recommended option on each point. Recorded as **ADR-013** (Part F).
+- **Gates:** Sun ≤ the darkness limit and target ≥ the minimum altitude; a horizon gate
+  is reserved with no data in 1.0 (the minimum altitude stands in).
+- **Moon and cloud:** annotations by default; each has an optional user gate, off by
+  default (Moon up and ≥ X % lit; cloud > Y %; X = Y = 50 % when enabled).
+- **Sky warning:** the fixed Moon > 0.8 / Bortle ≥ 7 warning is replaced by annotations.
+- **Also decided:** unknown never excludes; all failing reasons listed; max altitude
+  inside windows; no composite score.
+- **Implementation:** TASK 10.2.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -1872,3 +1886,130 @@ About & data sources page (TASK 8.2 page), with a link.
   warning; attribution.
 - TD-017 and the weather part of SI-010 close with those tasks; this ADR changes no
   code.
+
+## ADR-013: Imaging-opportunity semantics (gates, annotations, no score)
+
+Status: accepted (owner, 2026-09-23, TASK 10.1). Resolves PD-17. Documentation only;
+implemented in TASK 10.2 (calculator) and later G10 tasks. Checked against
+`visibility_calculator.dart` (CALC-23), `moon_calculator.dart` (CALC-28/29),
+`night_weather_summarizer.dart` (CALC-32), `planning_preferences.dart` and
+`PlannerViewModel.skyDarknessWarning` at commit `bc3a20c`.
+
+### 1. Context (verified)
+
+- **Today:** a visibility window is Sun ≤ the darkness limit ∩ target ≥ the minimum
+  altitude on the night's 5-min grid (CALC-23; both limits are preferences since
+  TASK 5.2). Nothing explains excluded time. "Max altitude" is the altitude at
+  culmination, even when that is in daylight (CALC-20, TD-023).
+- **The sky warning** is a fixed rule — Moon illumination > 0.8 **or** Bortle ≥ 7
+  (`skyDarknessWarning`, TD-033, SI-006) — that ignores whether the Moon is up, the
+  target, and the filters.
+- **Available inputs:** Moon altitude per sample, rise/set, illumination at mean
+  solar midnight and the closest approach to the target (CALC-28/29); the night's
+  hourly weather with freshness (ADR-012, CALC-32); site sky darkness as Bortle/SQM
+  or unknown (TASK 7.4). **No horizon data exists** (no terrain or obstruction model).
+
+### 2. Decision: gates (owner)
+
+A sample belongs to an imaging window only when **every enabled gate passes**:
+
+| Gate | Passes when | Default |
+| --- | --- | --- |
+| G1 Darkness | Sun altitude ≤ the darkness limit (`PlanningPreferences.darknessLimit`: −18°, −15° or −12°) | always on |
+| G2 Altitude | target altitude (J2000 → date, airless; CALC-07/27) ≥ `minAltitudeDeg` | always on |
+| G3 Horizon | target altitude ≥ the site's horizon altitude at the target's azimuth | **reserved** — the input exists but is empty in 1.0; G2 stands in for it (owner) |
+| G4 Moon *(optional)* | **not** (Moon altitude > 0° **and** illumination ≥ X %) | **off**; X is a user preference (owner) |
+| G5 Cloud *(optional)* | the hour's total cloud cover ≤ Y %, or the hour has **no forecast** | **off**; Y is a user preference (owner) |
+
+- Boundaries are inclusive in the passing direction (Sun = limit passes; altitude =
+  minimum passes; cloud = Y passes; illumination = X fails the Moon gate).
+- **Unknown never excludes:** an hour with no forecast, or a Moon value that cannot be
+  computed, passes its optional gate and is annotated as unknown (SI-008).
+- **Moon gate details:** Moon altitude is CALC-28's topocentric, airless altitude of the
+  Moon's centre, per sample; illumination is the night's value at mean solar midnight
+  (changes by ≤ about 0.13 per day — an accepted approximation, stated in the UI).
+- **Cloud gate details:** an hourly value at hour H applies to `[H − 30 min, H + 30 min)`
+  (Open-Meteo cloud cover is instantaneous at H); a forecast that is aging or stale still
+  gates, and the window says so.
+- Default thresholds when the user enables a gate: **X = 50 %**, **Y = 50 %** —
+  assumptions, not physics; editable in Settings.
+
+### 3. Decision: annotations (never exclude time)
+
+Each window carries, for its own time span:
+
+- **Moon:** time above the horizon inside the window, illumination, the minimum
+  separation from the target while both are up (CALC-29) — or "Moon down".
+- **Weather:** cloud total/low/mid/high ranges, the dew-risk hours (CALC-32 heuristic),
+  and the forecast's age state; "no forecast" when uncovered.
+- **Sky darkness:** the site's Bortle/SQM with source, or unknown (never a default).
+- **Max altitude inside the window** (replacing the culmination value, TD-023 part) and
+  whether the window is clipped at the night's edge (ADR-007 §9).
+
+### 4. Decision: reasons for excluded time
+
+- Every excluded segment of the night lists **all** gates that fail in it, not only the
+  first (for example "Sun above −18°; target below 30°").
+- Segments are merged when their set of failing gates is identical.
+- A night with no window says why, per whole-night case: no darkness at this limit
+  (ADR-007 T15), target never above the minimum altitude, target never above it during
+  darkness, or (with optional gates on) excluded by the Moon/cloud gate.
+
+### 5. Decision: no composite score; ranking
+
+- **No composite or weighted score** combines Sun, altitude, Moon, cloud or darkness
+  (G9, G10 purpose). The user's list may be **ranked by usable time** (the sum of
+  window durations after enabled gates) — a measured quantity, not a score — with the
+  annotations shown beside it.
+
+### 6. Decision: the sky warning (owner)
+
+- The fixed Moon > 0.8 / Bortle ≥ 7 warning is **removed in TASK 10.2** and replaced by
+  the per-window Moon annotations and the site's sky-darkness context, with no
+  threshold verdict. TD-033's sky-warning part closes with it.
+
+### 7. Worked examples (test vectors)
+
+Common inputs unless stated: a normal night; darkness limit −18°; Sun ≤ −18° during
+`[20:00, 04:00)`; target ≥ 30° (the minimum) during `[22:00, 06:00)`; all times UTC on
+the night's 5-min grid; boundaries fall on grid points.
+
+| # | Case | Extra inputs | Windows | Excluded segments (reasons) | Annotations |
+| --- | --- | --- | --- | --- | --- |
+| V1 | Broadband, Moon down | Moon below the horizon all night | `[22:00, 04:00)` = 6 h | `[20:00, 22:00)` target below 30°; `[04:00, 06:00)` Sun above −18°; outside both: both reasons | Moon down |
+| V2 | **Narrowband with the Moon up**, gate off | Moon up `[21:00, 02:00)`, 85 % lit, min separation 40° | `[22:00, 04:00)` = 6 h (unchanged) | as V1 | Moon up 4 h of the window (22:00–02:00), 85 %, ≥ 40° away |
+| V3 | Moon gate on, X = 50 % | as V2 | `[02:00, 04:00)` = 2 h | adds `[22:00, 02:00)` Moon up and ≥ 50 % lit | as V2 |
+| V4 | Moon gate on, faint Moon | as V2 but 30 % lit | `[22:00, 04:00)` = 6 h | as V1 | Moon up, 30 % |
+| V5 | Boundary | Moon gate on, X = 50 %, illumination exactly 50 % | as V3 | as V3 (50 % fails the gate) | — |
+| V6 | Cloud gate on, Y = 50 % | hourly cloud at 22:00 20 %, 23:00 70 %, 00:00 no forecast, 01:00–04:00 10 % | `[22:00, 22:30)`, `[23:30, 04:00)` = 5 h | adds `[22:30, 23:30)` cloud above 50 % | `[23:30, 00:30)` no forecast (not excluded) |
+| V7 | Cloud gate off | as V6 | `[22:00, 04:00)` = 6 h | as V1 | cloud 10–70 %, one hour without forecast |
+| V8 | No astronomical darkness (summer, high latitude) | Sun never ≤ −18°; ≤ −12° during `[23:00, 01:00)`; target always ≥ 30° | none at −18° | whole night: no darkness at −18° | — |
+| V9 | Same, limit −12° | as V8 with darkness limit −12° | `[23:00, 01:00)` = 2 h | rest: Sun above −12° | — |
+| V10 | Target never high enough | target max 25° | none | whole night: target never above 30° | max altitude inside darkness: n/a |
+| V11 | Dew risk | spread ≤ margin at 02:00–04:00 | as V1 | as V1 | dew risk 2 h (heuristic) — never excludes |
+| V12 | Max altitude | target culminates at 13:00 (daylight) at 70°; in the window it peaks at 55° at 04:00 | as V1 | as V1 | max altitude in window 55°, not 70° |
+
+These vectors become unit tests in TASK 10.2 (synthetic sampled inputs, so each
+expected value is exact).
+
+### 8. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| Weighted "imaging score" | Rejected | Hides which factor matters; thresholds become hidden physics |
+| Moon always gates | Rejected (owner) | Narrowband imaging works with a bright Moon up (V2) |
+| Cloud always gates | Rejected (owner) | Forecast uncertainty; a planner must work offline and beyond the horizon |
+| A flat per-site horizon now | Deferred (owner) | Needs a schema change inside G10; the minimum altitude covers it for 1.0 |
+| Keep the sky warning with configurable thresholds | Rejected (owner) | A verdict without Moon altitude, target or filter context; annotations say more |
+| Unknown forecast excludes the hour | Rejected | Unknown is not bad weather (SI-008) |
+
+### 9. Consequences and follow-up
+
+- **TASK 10.2:** the `ImagingOpportunity` calculator (gates G1–G5, reasons,
+  annotations, max altitude inside windows, V1–V12 as tests); the fit (CALC-26)
+  consumes its windows; `skyDarknessWarning` removed.
+- New `PlanningPreferences` fields: Moon gate on/off + X, cloud gate on/off + Y
+  (defaults off, 50 %, 50 %), added with 10.2.
+- A per-site horizon profile needs its own decision and data source (future work);
+  G3 stays reserved.
+- This ADR changes no code.
