@@ -398,8 +398,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 12.1** — ADR-015 (information architecture: Tonight ·
     Sessions · Library · Settings; wireframes and route map in `docs/IA_WIREFRAMES.md`);
     PD-19 and PD-14 resolved by the owner. Documentation only.
-  - **Next: TASK 12.2 — Navigation shell.** Not started; it begins only on the owner's
-    go-ahead.
+  - Completed 2026-09-23: **TASK 12.2** — navigation shell (four tabs with kept state,
+    planner and pickers above the tabs, back to Tonight). 625 tests green.
+  - **Next: TASK 12.3 — Complete the PlannerViewModel decomposition.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

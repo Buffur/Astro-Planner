@@ -68,6 +68,7 @@
 > **TASK 11.3 (2026-09-23, commit `ad6609c`):** ADR-014 §3–§4 implemented in the repository and the planner's Save. Owner decisions (TASK 11.3): the Logbook lists every non-draft session and the legacy logs with a status label; Save = planned + refreshed plan snapshot; new rows write display labels into the NOT NULL pre-v16 text columns (§10 correction below).
 > **TASK 11.4 (2026-09-23, commit `628fda6`):** ADR-014 §3 and §6 implemented in the planner. Owner decisions (TASK 11.4): a resumed draft whose night has passed rolls forward to tonight (a future night is kept); a saved plan edited since its last Save is listed as "Planned, unsaved changes"; New = tonight + the example plan; opening a completed or legacy session copies it into a new draft. Implementation choice: autosaves are serialized so they reach the database in edit order.
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
+> **TASK 12.2 (2026-09-23, commit `aa748e6`):** ADR-015 §2–§3 implemented (navigation shell). Implementation notes recorded in ADR-015 §7.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -2309,3 +2310,19 @@ actions confirmed; unknown shown as unknown (SI-008). Details in `docs/IA_WIREFR
   Sites).
 - **12.5:** the Tonight dashboard and first-run flow.
 - This ADR changes no code.
+
+### 7. Implementation notes (TASK 12.2, commit `aa748e6`)
+
+- **Pickers for the planner:** the planner (above the tabs) opens target, rig and
+  site selection as root-navigator routes `/select/target`, `/select/rig`,
+  `/select/site` (the same screens as the Library pages), so choosing returns to the
+  planner instead of switching tabs.
+- **Editors:** the site editor and the map pickers are root-navigator routes
+  (`/site/edit`, `/site/pick`, `/position`) so both the Library and the planner can
+  open them; the rig and target editors stay dialogs, so `/library/rigs/edit` and
+  `/library/targets/edit` from the wireframes do not exist as routes.
+- **Interim Tonight root:** site, night, current session (status, target, rig, usable
+  time) and actions (Open planner, What can I image tonight?, New session) until the
+  TASK 12.5 dashboard.
+- **Settings from the planner:** "Change in Planning Settings" switches to the
+  Settings tab (`go`), leaving the autosaved planner.

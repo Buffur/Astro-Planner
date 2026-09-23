@@ -69,6 +69,7 @@
 > **TASK 11.3 (2026-09-23, commit `ad6609c`):** `SessionRepository` (domain) / `DriftSessionRepository` (data): create, update plan, save plan (→ planned + plan snapshot), start (execution-start snapshot, frozen), complete, abandon, results, get, list by status/night/target, most recent open session, delete — one transaction per write, the ADR-014 lifecycle enforced (`SessionStateError`, nothing written). Pure `SessionSnapshotBuilder` (versioned, unit-keyed JSON of night, site, sky darkness, target, rig, preferences, blocks, budget, opportunity, weather) and `SessionSnapshot` (unknown version = unavailable). `LogbookRepository`/`DriftLogbookRepository` removed: Home's Save calls `vm.saveSession()`; the Logbook lists every non-draft session and the legacy logs with a status label; `vm.openSession` follows references by id (labels only for legacy rows). Owner decisions: the Logbook shows all saved sessions with their status; Save = planned + snapshot; new rows write display labels into the pre-v16 text columns. F-40 and F-41 progress.
 > **TASK 11.4 (2026-09-23, commit `628fda6`):** the planner works on a persisted draft session (ADR-014 §3, §6). At start the most recent open session is resumed (or a draft is created); every plan edit (blocks, target, rig, night, site) is autosaved into it through a serialized `_autosave` before the edit call returns; a plan still in preferences moves once into a new draft and the preferences plan and selected target/rig ids are removed (`PlannerStateRepository.clearPlan`). New (tonight + example plan), Duplicate for another night (Home app bar) and Open (Logbook) create or resume drafts; Save moves the current session to planned with a fresh snapshot. Owner decisions: a draft whose night has passed resumes on tonight (a future night is kept); a saved plan edited since is listed as "Planned, unsaved changes"; New = tonight + example plan; opening a completed/legacy session copies it into a new draft. The site selection and the transient position stay app-level preferences (TASK 7.1/7.3 decisions). **Group G11 is complete.** F-40 Implemented; F-41 progress.
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13). No status changed (F-47 dashboard decided; implemented in TASK 12.5).
+> **TASK 12.2 (2026-09-23, commit `aa748e6`):** navigation shell (ADR-015). go_router `StatefulShellRoute` with four tabs (Tonight · Sessions · Library · Settings) and kept per-tab state; Android back pops within a tab, then returns to Tonight, and leaves the app from Tonight's root. Above the tabs: `/session/:id` (the planner — Home's content), `/select/target|rig|site` (the planner's pickers), `/site/edit`, `/site/pick`, `/position`. `/tonight` is an interim root until the TASK 12.5 dashboard; candidates are `/tonight/candidates`; a Library index; metadata import under Settings (still gated). Paths are `AppRouter` constants. TD-053 recorded. F-47 decided (fixed Tonight view, ADR-015).
 
 ## Status legend
 
@@ -140,7 +141,7 @@ feature exists although its roadmap phase has not been reached in
 | F-44 | Export / interoperability manifest | Prototype | 14 (ahead) |
 | F-45 | Metadata import (EXIF / FITS) | Prototype | 12 (ahead) |
 | F-46 | Field mode | Prototype | 15 (ahead) |
-| F-47 | Custom dashboard | Missing | not in roadmap |
+| F-47 | Custom dashboard | Missing *(decided: fixed Tonight view, TASK 12.5)* | 12.5 |
 | F-48 | Automated tests | Partial | 1, 16 |
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
@@ -582,6 +583,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 15 (ahead of phase).
 
 ## F-47 — Custom dashboard
+- **Decided 2026-09-23 (PD-14 via ADR-015):** no customizable dashboard; a fixed Tonight view instead. **TASK 12.2:** the Tonight tab exists with an interim root (site, night, current session, quick actions); the dashboard itself is TASK 12.5.
 - **Status:** Missing
 - **Current implementation:** none; the Home screen is a fixed vertical list of cards.
 - **Relevant files:** `home_screen.dart`.

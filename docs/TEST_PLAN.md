@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **620 tests: 620 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.4) |
+| `flutter test --no-pub` | **625 tests: 625 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -694,3 +694,15 @@ the ADR-012 variables, and a real out-of-range error):
   owner decisions: a frozen session opens as a copy; a new draft before changing the
   target) and `integration_flow_test.dart` (edits and Save run inside
   `tester.runAsync`, since they now write to the database).
+
+**Added by TASK 12.2** (navigation shell), 5 tests (625):
+- **`app_shell_navigation_test.dart` (5):** the app opens on Tonight with four tabs;
+  the acceptance — every route in the map opens its screen (and the old flat routes
+  are gone); back pops within a tab, then returns to Tonight; each tab keeps its
+  place; the planner opens above the tabs and back returns to Tonight.
+- **Kept:** `app_router_test.dart`'s two gating tests, now on the nested paths
+  (`/settings/metadata` absent while gated; `/sessions` present) via
+  `support/route_paths.dart`.
+- **Updated:** Home tests start at `/session/current`; app boot expects Tonight; the
+  E2E test reaches the logbook through `/sessions`; the Sites test uses the new
+  editor path; the candidates test file follows its screen's rename.
