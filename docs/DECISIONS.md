@@ -56,6 +56,7 @@
 > **TASK 8.6 (2026-09-23):** PD-11 resolved (E.1): NPF shown for untracked and ("if untracked") unknown-tracking rigs, at the field-minimum |δ|, with a k planning setting (default 1).
 > **TASK 9.1 (2026-09-23, documentation only, no code changed):** ADR-012 (weather provider, variables, alignment and staleness) accepted in Part F of DECISIONS; PD-15 resolved. Owner decisions: Open-Meteo `best_match` with the model recorded and shown; staleness 3 h / 12 h; only the chosen night's hours are used, uncovered hours shown as "no forecast". Also decided: UTC (`timeformat=unixtime`), a horizon of at most 16 days, the variable list with visibility labelled horizontal visibility (not transparency), CC BY 4.0 attribution, seeing and transparency deferred, no weather score.
 > **TASK 9.2 (2026-09-23):** ADR-012 §2–§5 implemented in the data layer (snapshot, UTC parsing, best_match, night-covering request, horizon cap). Implementation choice: time strings that are not epoch seconds are rejected as malformed (they would be naive local times).
+> **TASK 9.3 (2026-09-23):** ADR-012 §6 implemented (freshness constants, cache keyed by site/model/night, failure states). Implementation choices: the cache key also includes the night's UTC start (a snapshot covers one night); a cached snapshot younger than 3 h is used without a request unless refresh is forced; an aging or stale one triggers a refresh and is shown only if that fails.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1750,7 +1751,8 @@ The UI shows the unit next to every number (TASK 8.4 acceptance).
 ## ADR-012: Weather provider, variables, alignment and staleness
 
 Status: accepted (owner, 2026-09-23, TASK 9.1). Resolves PD-15. **Implemented in part:**
-TASK 9.2 (snapshot, UTC parsing, request; commit `b3dfc20`); 9.3–9.4 pending. Checked against `open_meteo_weather_repository.dart` and
+TASK 9.2 (snapshot, UTC parsing, request; commit `b3dfc20`), TASK 9.3 (cache, freshness,
+failure states; commit `6aedf1b`); 9.4 pending. Checked against `open_meteo_weather_repository.dart` and
 `weather_conditions.dart` at commit `975f11e`, and against Open-Meteo's own pages
 (docs, terms, licence) read on 2026-09-23.
 

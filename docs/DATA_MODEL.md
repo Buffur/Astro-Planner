@@ -52,6 +52,7 @@
 > **TASK 8.5 (2026-09-23):** schema v15 — `camera_modules` and `optical_rigs` + `source`, `confidence` (ADR-008 §6); legacy rows NULL. Seeded rows use source `seed:equipment@2`.
 > **TASK 8.6 (2026-09-23):** no schema change. New preference `npfK` (double, 1–3, default 1; `SharedPrefsPlanningPreferencesRepository`).
 > **TASK 9.2 (2026-09-23):** new domain `WeatherSnapshot` / `WeatherHour` (UTC, nullable per variable, provider/model/fetch time); not persisted yet (cache: TASK 9.3). `WeatherConditions` remains for the legacy path.
+> **TASK 9.3 (2026-09-23):** weather snapshots are cached in SharedPreferences under `weather:<lat 2dp>:<lon 2dp>:<model>:<night start UTC ms>` (JSON format version 1: provider, model, fetch time and hour times as UTC epoch ms, nullable values). The legacy `weather_cache_<lat>_<lon>` keys remain until TASK 9.4.
 
 ---
 

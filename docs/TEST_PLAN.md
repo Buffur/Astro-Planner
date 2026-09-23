@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **521 tests: 521 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.2) |
+| `flutter test --no-pub` | **535 tests: 535 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -571,3 +571,18 @@ the ADR-012 variables, and a real out-of-range error):
   responses.
 - Test doubles of `WeatherRepository` got the new method through a shared
   `NoSnapshotWeather` mixin (20 files, mechanical).
+
+**Added by TASK 9.3** (weather caching, freshness, failure states), 14 tests:
+- **Service (`night_weather_service_test.dart`, 10; controllable clock):** age
+  thresholds at 2 h 59 m / 3 h / 11 h 59 m / 12 h; a first load fetches and caches;
+  a current cache is used without a request; an aging cache is refreshed; the
+  acceptance — offline, the cached forecast is shown with its age (aging at 5 h,
+  stale at 15 h) and the failure; offline without a cache is unavailable; out of
+  range; a forced refresh; another site never gets this site's cache; the key
+  separates site, model and night.
+- **Store (`shared_prefs_weather_snapshot_store_test.dart`, 2):** round trip keeps
+  UTC instants, the fetch time and nulls; missing, unreadable and unknown-version
+  entries read as absent.
+- **ViewModel (`planner_night_weather_test.dart`, 2):** idle without a site (no
+  request); with a site the night forecast loads, then comes from the cache with its
+  age when offline.

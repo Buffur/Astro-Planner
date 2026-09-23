@@ -51,6 +51,7 @@
 > **TASK 8.6 (2026-09-23):** SI-001 fully resolved (NPF surfaced per PD-11, at the field-minimum |δ|); new CALC-31 (capability summary). No existing formula changed; the NPF call now receives the field-minimum declination instead of the target's centre (a decided input change, DECISIONS PD-11).
 > **TASK 9.1 (2026-09-23, documentation only):** ADR-012 decides the weather part of SI-010 (UTC timestamps sliced to the chosen night) and the variable semantics (visibility is horizontal visibility, not transparency; gusts are a preceding-hour maximum; missing values unknown). Implementation: TASKs 9.2–9.4.
 > **TASK 9.2 (2026-09-23):** SI-010 (weather part) progress: forecast instants are now parsed as UTC from GMT+0 epoch seconds in the new snapshot path; the display still uses the legacy path until TASK 9.4.
+> **TASK 9.3 (2026-09-23):** no calculation changed; forecast age is computed from UTC instants with the injected Clock (freshness thresholds documented as assumptions, ADR-012 §6).
 
 ## Purpose and authority
 
