@@ -1,0 +1,52 @@
+import 'package:flutter/material.dart';
+
+import '../../domain/services/location_service.dart';
+import '../viewmodels/planner_viewmodel.dart';
+import 'location_failure_text.dart';
+
+/// Shows why the device position is unavailable, with "Open settings" when
+/// a settings page fixes it (TASK 7.2).
+void showLocationFailure(
+  BuildContext context,
+  PlannerViewModel viewModel,
+  LocationFailure reason,
+) {
+  final target = LocationFailureText.settingsTarget(reason);
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(LocationFailureText.message(reason)),
+      duration: const Duration(seconds: 8),
+      action: target == null
+          ? null
+          : SnackBarAction(
+              label: 'Open settings',
+              onPressed: () => switch (target) {
+                LocationSettingsTarget.locationSettings =>
+                  viewModel.openLocationSettings(),
+                LocationSettingsTarget.appSettings =>
+                  viewModel.openAppSettings(),
+              },
+            ),
+    ),
+  );
+}
+
+/// Makes the device position the transient current position (TASK 7.3
+/// "use current position"), explaining a failure.
+Future<void> useCurrentPositionWithFeedback(
+  BuildContext context,
+  PlannerViewModel viewModel,
+) async {
+  try {
+    final result = await viewModel.useCurrentLocation();
+    if (result case LocationUnavailable(:final reason) when context.mounted) {
+      showLocationFailure(context, viewModel, reason);
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not get your position: $e')),
+      );
+    }
+  }
+}

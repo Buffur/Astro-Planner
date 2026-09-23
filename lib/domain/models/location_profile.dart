@@ -104,6 +104,48 @@ class LocationProfile {
 
   final String? notes;
 
+  /// The site an explicit user edit produces (TASK 7.3), from [original]
+  /// (null for a new site, which gets id 0 until inserted).
+  ///
+  /// Sky-darkness provenance: a value the user changed gets source `user` and
+  /// [today]; an unchanged value keeps its source and date; a cleared value
+  /// loses both. Throws [ArgumentError] for out-of-range values.
+  static LocationProfile userEdit({
+    LocationProfile? original,
+    required String name,
+    required double latitude,
+    required double longitude,
+    required double elevation,
+    String? timeZoneId,
+    String? notes,
+    int? bortleClass,
+    double? sqm,
+    required CalendarDate today,
+  }) {
+    final bortleKept =
+        bortleClass != null && bortleClass == original?.bortleClass;
+    final sqmKept = sqm != null && sqm == original?.sqm;
+    return LocationProfile(
+      id: original?.id ?? 0,
+      name: name,
+      latitude: latitude,
+      longitude: longitude,
+      elevation: elevation,
+      bortleClass: bortleClass,
+      bortleSource: bortleClass == null
+          ? null
+          : (bortleKept ? original!.bortleSource : 'user'),
+      bortleDate: bortleClass == null
+          ? null
+          : (bortleKept ? original!.bortleDate : today),
+      sqm: sqm,
+      sqmSource: sqm == null ? null : (sqmKept ? original!.sqmSource : 'user'),
+      sqmDate: sqm == null ? null : (sqmKept ? original!.sqmDate : today),
+      timeZoneId: timeZoneId,
+      notes: notes,
+    );
+  }
+
   /// A copy with the Bortle class set by the user on [date].
   LocationProfile withUserBortle(int? bortle, CalendarDate date) =>
       LocationProfile(

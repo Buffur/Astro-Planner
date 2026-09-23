@@ -1,4 +1,4 @@
-import 'package:timezone/data/latest_10y.dart' as tzdata;
+import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'site_time_context.dart';
@@ -6,10 +6,12 @@ import 'site_time_context.dart';
 /// A site's civil time from the IANA time zone database (ADR-007 §6;
 /// TASK 7.1). Its [id] is the zone id, e.g. `Pacific/Kiritimati`.
 ///
-/// Uses the `timezone` package's 10-year data set (rules for roughly the
-/// current decade). Outside that range the package keeps the last known
-/// rule — acceptable for planning; ADR-007's mean-solar fallback covers
-/// sites without a zone.
+/// Uses the `timezone` package's full data set (`latest_all`), which also
+/// holds the link zones platforms report, e.g. `Europe/Ljubljana` (a link to
+/// `Europe/Belgrade`) or `Asia/Calcutta`. TASK 7.1 used the 10-year set, which
+/// has only canonical ids, so a device zone like `Europe/Ljubljana` was
+/// rejected (TASK 7.3). ADR-007's mean-solar fallback covers sites without a
+/// zone.
 class IanaTimeContext extends SiteTimeContext {
   IanaTimeContext._(this._location);
 
@@ -33,6 +35,12 @@ class IanaTimeContext extends SiteTimeContext {
     } on tz.LocationNotFoundException {
       return null;
     }
+  }
+
+  /// Every zone id the bundled database knows, sorted (for a zone picker).
+  static List<String> knownZoneIds() {
+    _ensureInitialized();
+    return tz.timeZoneDatabase.locations.keys.toList()..sort();
   }
 
   @override

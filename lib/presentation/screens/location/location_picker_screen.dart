@@ -8,11 +8,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/app_identity.dart';
 import '../../../domain/services/location_service.dart';
 import '../../shared/coordinate_input.dart';
-import '../../shared/location_failure_text.dart';
+import '../../shared/location_feedback.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
 class LocationPickerScreen extends StatefulWidget {
-  const LocationPickerScreen({super.key});
+  /// With [pickOnly], confirming returns the point to the caller (the site
+  /// editor, TASK 7.3) instead of making it the current position.
+  const LocationPickerScreen({super.key, this.pickOnly = false, this.initial});
+
+  final bool pickOnly;
+
+  /// Where to start instead of the current position.
+  final LatLng? initial;
 
   @override
   State<LocationPickerScreen> createState() => _LocationPickerScreenState();
@@ -27,7 +34,8 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   void initState() {
     super.initState();
     final viewModel = context.read<PlannerViewModel>();
-    _selectedLocation = LatLng(viewModel.latitude, viewModel.longitude);
+    _selectedLocation =
+        widget.initial ?? LatLng(viewModel.latitude, viewModel.longitude);
   }
 
   Future<void> _getCurrentLocation() async {
@@ -40,7 +48,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         case LocationFound(:final location):
           _moveTo(LatLng(location.latitude, location.longitude), zoom: 10.0);
         case LocationUnavailable(:final reason):
-          _showLocationFailure(viewModel, reason);
+          showLocationFailure(context, viewModel, reason);
       }
     } catch (e) {
       if (mounted) {
@@ -51,30 +59,6 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
     }
-  }
-
-  void _showLocationFailure(
-    PlannerViewModel viewModel,
-    LocationFailure reason,
-  ) {
-    final target = LocationFailureText.settingsTarget(reason);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(LocationFailureText.message(reason)),
-        duration: const Duration(seconds: 8),
-        action: target == null
-            ? null
-            : SnackBarAction(
-                label: 'Open settings',
-                onPressed: () => switch (target) {
-                  LocationSettingsTarget.locationSettings =>
-                    viewModel.openLocationSettings(),
-                  LocationSettingsTarget.appSettings =>
-                    viewModel.openAppSettings(),
-                },
-              ),
-      ),
-    );
   }
 
   void _moveTo(LatLng point, {double? zoom}) {
@@ -91,6 +75,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   }
 
   void _saveLocation() {
+    if (_selectedLocation != null && widget.pickOnly) {
+      context.pop(_selectedLocation);
+      return;
+    }
     if (_selectedLocation != null) {
       final viewModel = context.read<PlannerViewModel>();
       viewModel.setLocation(
@@ -105,7 +93,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Location'),
+        title: Text(widget.pickOnly ? 'Pick on map' : 'Select Location'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_location_alt),
@@ -114,6 +102,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.check),
+            tooltip: 'Use this point',
             onPressed: _selectedLocation != null ? _saveLocation : null,
           ),
         ],

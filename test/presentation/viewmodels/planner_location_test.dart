@@ -79,6 +79,10 @@ void main() {
   }
 
   group('PlannerViewModel location (TASK 1.1)', () {
+    // TASK 7.3 (owner decision): the first run shows a site prompt instead
+    // of silently asking for GPS. Before 7.3 this test asserted that startup
+    // asked the service once; it now asserts that startup asks nothing, so
+    // the permission is only requested after the user chooses to.
     test(
       'first launch, permission denied: keeps the default location',
       () async {
@@ -91,14 +95,14 @@ void main() {
         await vm.ready;
 
         expect(vm.isLoading, isFalse);
-        expect(service.calls, 1, reason: 'startup asks for the position once');
+        expect(service.calls, 0, reason: 'startup never asks for the position');
         expect(vm.latitude, 51.5072);
         expect(vm.longitude, -0.1276);
         expect(await locationRepo.getLocations(), isEmpty);
 
-        // Asking again explicitly, still denied, changes nothing and does not throw.
+        // Asking explicitly, denied, changes nothing and does not throw.
         await vm.useCurrentLocation();
-        expect(service.calls, 2);
+        expect(service.calls, 1);
         expect(vm.latitude, 51.5072);
         expect(vm.longitude, -0.1276);
         expect(await locationRepo.getLocations(), isEmpty);
@@ -298,7 +302,7 @@ class _ControlledGeocoder implements ReverseGeocoder {
     return completer.future;
   }
 
-  /// Completes the [index]-th lookup made after startup's own lookup.
+  /// Completes the [index]-th lookup (a first run makes none at startup).
   void answer(int index, ReverseGeocodeResult result) =>
-      _pending[index + 1].complete(result);
+      _pending[index].complete(result);
 }

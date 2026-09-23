@@ -156,6 +156,8 @@ void main() {
 
     expect(find.textContaining('default location'), findsOneWidget);
     expect(find.text('Set site'), findsOneWidget);
+    // TASK 7.3 first-run prompt: the permission is asked only on this tap.
+    expect(find.text('Use current position'), findsOneWidget);
   });
 
   testWidgets('a saved location hides the default-location banner', (

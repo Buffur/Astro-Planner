@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../shared/location_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/calendar_date.dart';
 import '../../../domain/repositories/logbook_repository.dart';
@@ -177,7 +178,7 @@ class HomeScreen extends StatelessWidget {
                             if (viewModel.currentWeather != null)
                               WeatherForecastWidget(
                                 weather: viewModel.currentWeather!,
-                                onTap: () => context.push('/location'),
+                                onTap: () => context.push('/sites'),
                               )
                             else if (viewModel.weatherError)
                               _WeatherErrorCard(
@@ -198,7 +199,7 @@ class HomeScreen extends StatelessWidget {
                                     'Place name':
                                         viewModel.locationNameAttribution!,
                                 },
-                                onTap: () => context.push('/location'),
+                                onTap: () => context.push('/sites'),
                               ),
                             const SkyDarknessWidget(),
                             if (viewModel.skyDarknessWarning)
@@ -466,9 +467,9 @@ class _EmptyStateView extends StatelessWidget {
   }
 }
 
-/// Shown above the content while the ViewModel has not resolved an explicit
-/// location (saved profile or device position) and is using the hard-coded
-/// default.
+/// The first-run prompt (TASK 7.3), shown while the ViewModel has no site
+/// or position and is using the hard-coded default. Nothing asks for the
+/// location permission until the user chooses "Use current position".
 class _DefaultLocationBanner extends StatelessWidget {
   const _DefaultLocationBanner();
 
@@ -478,11 +479,19 @@ class _DefaultLocationBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       leading: const Icon(Icons.location_off_outlined),
       content: const Text(
-        'Using a default location — set your site for accurate results.',
+        'Set up your observing site. Until then a default location is used '
+        'and night times are not shown.',
       ),
       actions: [
         TextButton(
-          onPressed: () => context.push('/location'),
+          onPressed: () => useCurrentPositionWithFeedback(
+            context,
+            context.read<PlannerViewModel>(),
+          ),
+          child: const Text('Use current position'),
+        ),
+        TextButton(
+          onPressed: () => context.push('/sites'),
           child: const Text('Set site'),
         ),
       ],

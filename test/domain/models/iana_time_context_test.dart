@@ -58,4 +58,27 @@ void main() {
     expect(night.timeContextId, 'Pacific/Kiritimati');
     expect(night.startUtc, DateTime.utc(2026, 9, 21, 22, 29, 42, 672));
   });
+
+  // TASK 7.3: platforms report link ids (the device-zone default). The
+  // 10-year data set used in TASK 7.1 had none of them.
+  test(
+    'link zones reported by devices resolve, with the rules of their target',
+    () {
+      final instants = [DateTime.utc(2026, 1, 15), DateTime.utc(2026, 7, 15)];
+      for (final (link, canonical) in [
+        ('Europe/Ljubljana', 'Europe/Belgrade'),
+        ('Asia/Calcutta', 'Asia/Kolkata'),
+        ('UTC', 'Etc/UTC'),
+      ]) {
+        final linked = IanaTimeContext.tryCreate(link);
+        expect(linked, isNotNull, reason: link);
+        expect(linked!.id, link);
+        final target = IanaTimeContext.tryCreate(canonical)!;
+        for (final t in instants) {
+          expect(linked.offsetAt(t), target.offsetAt(t), reason: '$link at $t');
+        }
+      }
+      expect(IanaTimeContext.knownZoneIds(), contains('Europe/Ljubljana'));
+    },
+  );
 }

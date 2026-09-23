@@ -25,8 +25,10 @@ import '../../domain/repositories/planning_preferences_repository.dart';
 import '../../data/repositories/shared_prefs_planner_state_repository.dart';
 import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
 import '../../data/repositories/light_pollution_repository.dart';
+import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
+import '../../domain/services/device_time_zone.dart';
 import '../../domain/services/location_service.dart';
 import '../../domain/services/reverse_geocoder.dart';
 import '../../domain/services/session_night_resolver.dart';
@@ -46,6 +48,7 @@ class PlannerViewModel extends ChangeNotifier {
   final LightPollutionRepository _lightPollutionRepository;
   final LocationService _locationService;
   final ReverseGeocoder _reverseGeocoder;
+  final DeviceTimeZone _deviceTimeZone;
   final Clock _clock;
   final PlanningPreferencesRepository _preferencesRepository;
   final PlannerStateRepository _stateRepository;
@@ -93,6 +96,9 @@ class PlannerViewModel extends ChangeNotifier {
   /// pick or GPS fix, TASK 7.1) or when there is no position yet.
   LocationProfile? _activeSite;
 
+  /// All saved sites, in insertion order (TASK 7.3).
+  List<LocationProfile> _sites = const [];
+
   SessionLog? _activeSessionLog;
   int? get activeSessionId => _activeSessionLog?.id;
   SessionLog? get activeSessionLog => _activeSessionLog;
@@ -109,11 +115,13 @@ class PlannerViewModel extends ChangeNotifier {
     this._lightPollutionRepository, {
     LocationService? locationService,
     ReverseGeocoder? reverseGeocoder,
+    DeviceTimeZone? deviceTimeZone,
     Clock? clock,
     PlanningPreferencesRepository? preferencesRepository,
     PlannerStateRepository? stateRepository,
   }) : _locationService = locationService ?? GeolocatorLocationService(),
        _reverseGeocoder = reverseGeocoder ?? NominatimReverseGeocoder(),
+       _deviceTimeZone = deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
        _clock = clock ?? const SystemClock(),
        _preferencesRepository =
            preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
@@ -167,11 +175,12 @@ class PlannerViewModel extends ChangeNotifier {
         _latitude = transient.latitude;
         _longitude = transient.longitude;
         _usingDefaultLocation = false;
-      } else {
-        // First launch — try getting current location silently
-        unawaited(useCurrentLocation());
       }
+      // Otherwise this is a first run: Home asks for a site. Nothing asks
+      // for the location permission until the user chooses to (owner
+      // decision, TASK 7.3).
     }
+    _sites = await _locationRepository.getLocations();
 
     try {
       final saved = await _stateRepository.loadCaptureBlocks();
@@ -224,7 +233,9 @@ class PlannerViewModel extends ChangeNotifier {
       if (equipment.isNotEmpty) _selectedEquipment = equipment.first;
     }
 
-    unawaited(_reverseGeocode(_latitude, _longitude));
+    if (_activeSite == null && !_usingDefaultLocation) {
+      unawaited(_reverseGeocode(_latitude, _longitude));
+    }
   }
 
   bool get isLoading => _isLoading;
@@ -248,11 +259,13 @@ class PlannerViewModel extends ChangeNotifier {
   /// Place name of the current position from the [ReverseGeocoder], or null
   /// while unknown (not looked up yet, no name for the point, or the lookup
   /// failed).
-  String? get locationName => _locationName;
+  /// An active site shows its own name (TASK 7.3).
+  String? get locationName => _activeSite?.name ?? _locationName;
 
   /// The attribution the place-name source requires wherever [locationName]
   /// is shown (e.g. "© OpenStreetMap contributors"); null with no name.
-  String? get locationNameAttribution => _locationNameAttribution;
+  String? get locationNameAttribution =>
+      _activeSite == null ? _locationNameAttribution : null;
 
   /// The current [SessionNight], or null when there is no site to resolve
   /// one for (ADR-007 §9: "when no site is set, there is no SessionNight").
@@ -305,6 +318,78 @@ class PlannerViewModel extends ChangeNotifier {
 
   /// The active saved site; null when the position is transient.
   LocationProfile? get activeSite => _activeSite;
+
+  /// All saved sites (TASK 7.3).
+  List<LocationProfile> get sites => List.unmodifiable(_sites);
+
+  /// Makes the saved site [id] the active one: its coordinates, zone and
+  /// sky darkness drive every night time, and the choice persists across
+  /// restarts. Does nothing if no such site exists.
+  Future<void> selectSite(int id) async {
+    final site = await _locationRepository.getLocationById(id);
+    if (site == null) return;
+    _applySite(site);
+    await _stateRepository.setActiveLocationId(site.id);
+    notifyListeners();
+    await _fetchWeather();
+  }
+
+  void _applySite(LocationProfile site) {
+    _activeSite = site;
+    _latitude = site.latitude;
+    _longitude = site.longitude;
+    _bortleClass = site.bortleClass;
+    _usingDefaultLocation = false;
+  }
+
+  /// Saves an explicit user edit of a site (TASK 7.3): `id == 0` inserts a
+  /// new site, which becomes the active one; otherwise the site is updated
+  /// and, if it is the active one, its new values apply at once. Returns
+  /// the site's id.
+  Future<int> saveSite(LocationProfile site) async {
+    final int id;
+    if (site.id == 0) {
+      id = await _locationRepository.insertLocation(site);
+    } else {
+      id = site.id;
+      await _locationRepository.updateLocation(site);
+    }
+    _sites = await _locationRepository.getLocations();
+    if (site.id == 0 || _activeSite?.id == id) {
+      await selectSite(id);
+    } else {
+      notifyListeners();
+    }
+    return id;
+  }
+
+  /// Deletes the saved site [id]. If it was the active site, its
+  /// coordinates stay as the transient position, so night times keep
+  /// working, but its zone and sky darkness no longer apply (owner
+  /// decision, TASK 7.3).
+  Future<void> deleteSite(int id) async {
+    await _locationRepository.deleteLocation(id);
+    _sites = await _locationRepository.getLocations();
+    final active = _activeSite;
+    if (active != null && active.id == id) {
+      _activeSite = null;
+      _bortleClass = null;
+      _locationName = null;
+      _locationNameAttribution = null;
+      await _stateRepository.clearActiveLocationId();
+      await _stateRepository.setTransientPosition(_latitude, _longitude);
+      unawaited(_reverseGeocode(_latitude, _longitude));
+    }
+    notifyListeners();
+  }
+
+  /// Today's date for provenance stamps on user edits (the injected clock's
+  /// UTC date, as [setBortleClass] uses).
+  CalendarDate get today => CalendarDate.fromDateTimeFields(_clock.nowUtc());
+
+  /// The device's IANA zone, to pre-fill the site editor's zone picker
+  /// only; never used in a computation (ADR-007 §6).
+  Future<String?> deviceZoneId() => _deviceTimeZone.zoneId();
 
   /// The site's time context: its IANA zone when known (TASK 7.1),
   /// otherwise mean solar time (ADR-007 §6, L1). Never the device zone.
