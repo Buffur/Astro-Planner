@@ -100,32 +100,34 @@ class DriftLogbookRepository implements LogbookRepository {
   @override
   Future<void> updateLog(domain.SessionLog log) async {
     await _db.transaction(() async {
-      await _db
-          .update(_db.sessionLogs)
-          .replace(
-            SessionLog(
-              id: log.id,
-              targetName: log.targetName,
-              equipmentName: log.equipmentName,
-              sessionDate: log.sessionDate,
-              locationName: log.locationName,
-              bortleScale: log.bortleScale,
-              plannedLightFrames: log.plannedLightFrames,
-              plannedDarkFrames: log.plannedDarkFrames,
-              plannedFlatFrames: log.plannedFlatFrames,
-              plannedBiasFrames: log.plannedBiasFrames,
-              integrationTimeSeconds: log.integrationTimeSeconds,
-              focalLength: log.focalLength,
-              aperture: log.aperture,
-              temperature: log.temperature,
-              humidity: log.humidity,
-              cloudCover: log.cloudCover,
-              actualLightFrames: log.actualLightFrames,
-              rejectedFrames: log.rejectedFrames,
-              environmentalNotes: log.environmentalNotes,
-              processingNotes: log.processingNotes,
-            ),
-          );
+      // TASK 11.2: a partial update of the log columns this repository
+      // owns. A full-row replace would reset the v16 columns (status,
+      // references, snapshots, timestamps) that it does not know about.
+      await (_db.update(
+        _db.sessionLogs,
+      )..where((t) => t.id.equals(log.id))).write(
+        SessionLogsCompanion(
+          targetName: Value(log.targetName),
+          equipmentName: Value(log.equipmentName),
+          sessionDate: Value(log.sessionDate),
+          locationName: Value(log.locationName),
+          bortleScale: Value(log.bortleScale),
+          plannedLightFrames: Value(log.plannedLightFrames),
+          plannedDarkFrames: Value(log.plannedDarkFrames),
+          plannedFlatFrames: Value(log.plannedFlatFrames),
+          plannedBiasFrames: Value(log.plannedBiasFrames),
+          integrationTimeSeconds: Value(log.integrationTimeSeconds),
+          focalLength: Value(log.focalLength),
+          aperture: Value(log.aperture),
+          temperature: Value(log.temperature),
+          humidity: Value(log.humidity),
+          cloudCover: Value(log.cloudCover),
+          actualLightFrames: Value(log.actualLightFrames),
+          rejectedFrames: Value(log.rejectedFrames),
+          environmentalNotes: Value(log.environmentalNotes),
+          processingNotes: Value(log.processingNotes),
+        ),
+      );
 
       // Replace all blocks
       await (_db.delete(

@@ -3470,6 +3470,175 @@ class $SessionLogsTable extends SessionLogs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    check: () => status.isIn(const [
+      'draft',
+      'planned',
+      'inProgress',
+      'completed',
+      'abandoned',
+    ]),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('draft'),
+  );
+  static const VerificationMeta _legacyMeta = const VerificationMeta('legacy');
+  @override
+  late final GeneratedColumn<bool> legacy = GeneratedColumn<bool>(
+    'legacy',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("legacy" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _eveningDateMeta = const VerificationMeta(
+    'eveningDate',
+  );
+  @override
+  late final GeneratedColumn<String> eveningDate = GeneratedColumn<String>(
+    'evening_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _timeZoneIdMeta = const VerificationMeta(
+    'timeZoneId',
+  );
+  @override
+  late final GeneratedColumn<String> timeZoneId = GeneratedColumn<String>(
+    'time_zone_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _siteIdMeta = const VerificationMeta('siteId');
+  @override
+  late final GeneratedColumn<int> siteId = GeneratedColumn<int>(
+    'site_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES location_profiles (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _targetIdMeta = const VerificationMeta(
+    'targetId',
+  );
+  @override
+  late final GeneratedColumn<int> targetId = GeneratedColumn<int>(
+    'target_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES astro_targets (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _rigIdMeta = const VerificationMeta('rigId');
+  @override
+  late final GeneratedColumn<int> rigId = GeneratedColumn<int>(
+    'rig_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES optical_rigs (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _createdAtUtcMsMeta = const VerificationMeta(
+    'createdAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtUtcMs = GeneratedColumn<int>(
+    'created_at_utc_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtUtcMsMeta = const VerificationMeta(
+    'updatedAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAtUtcMs = GeneratedColumn<int>(
+    'updated_at_utc_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _plannedAtUtcMsMeta = const VerificationMeta(
+    'plannedAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> plannedAtUtcMs = GeneratedColumn<int>(
+    'planned_at_utc_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startedAtUtcMsMeta = const VerificationMeta(
+    'startedAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> startedAtUtcMs = GeneratedColumn<int>(
+    'started_at_utc_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _completedAtUtcMsMeta = const VerificationMeta(
+    'completedAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> completedAtUtcMs = GeneratedColumn<int>(
+    'completed_at_utc_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+  planSnapshot =
+      GeneratedColumn<String>(
+        'plan_snapshot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Map<String, Object?>?>(
+        $SessionLogsTable.$converterplanSnapshotn,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+  executionStartSnapshot =
+      GeneratedColumn<String>(
+        'execution_start_snapshot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<Map<String, Object?>?>(
+        $SessionLogsTable.$converterexecutionStartSnapshotn,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3492,6 +3661,20 @@ class $SessionLogsTable extends SessionLogs
     rejectedFrames,
     environmentalNotes,
     processingNotes,
+    status,
+    legacy,
+    eveningDate,
+    timeZoneId,
+    siteId,
+    targetId,
+    rigId,
+    createdAtUtcMs,
+    updatedAtUtcMs,
+    plannedAtUtcMs,
+    startedAtUtcMs,
+    completedAtUtcMs,
+    planSnapshot,
+    executionStartSnapshot,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3675,6 +3858,99 @@ class $SessionLogsTable extends SessionLogs
         ),
       );
     }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('legacy')) {
+      context.handle(
+        _legacyMeta,
+        legacy.isAcceptableOrUnknown(data['legacy']!, _legacyMeta),
+      );
+    }
+    if (data.containsKey('evening_date')) {
+      context.handle(
+        _eveningDateMeta,
+        eveningDate.isAcceptableOrUnknown(
+          data['evening_date']!,
+          _eveningDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('time_zone_id')) {
+      context.handle(
+        _timeZoneIdMeta,
+        timeZoneId.isAcceptableOrUnknown(
+          data['time_zone_id']!,
+          _timeZoneIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('site_id')) {
+      context.handle(
+        _siteIdMeta,
+        siteId.isAcceptableOrUnknown(data['site_id']!, _siteIdMeta),
+      );
+    }
+    if (data.containsKey('target_id')) {
+      context.handle(
+        _targetIdMeta,
+        targetId.isAcceptableOrUnknown(data['target_id']!, _targetIdMeta),
+      );
+    }
+    if (data.containsKey('rig_id')) {
+      context.handle(
+        _rigIdMeta,
+        rigId.isAcceptableOrUnknown(data['rig_id']!, _rigIdMeta),
+      );
+    }
+    if (data.containsKey('created_at_utc_ms')) {
+      context.handle(
+        _createdAtUtcMsMeta,
+        createdAtUtcMs.isAcceptableOrUnknown(
+          data['created_at_utc_ms']!,
+          _createdAtUtcMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at_utc_ms')) {
+      context.handle(
+        _updatedAtUtcMsMeta,
+        updatedAtUtcMs.isAcceptableOrUnknown(
+          data['updated_at_utc_ms']!,
+          _updatedAtUtcMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('planned_at_utc_ms')) {
+      context.handle(
+        _plannedAtUtcMsMeta,
+        plannedAtUtcMs.isAcceptableOrUnknown(
+          data['planned_at_utc_ms']!,
+          _plannedAtUtcMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('started_at_utc_ms')) {
+      context.handle(
+        _startedAtUtcMsMeta,
+        startedAtUtcMs.isAcceptableOrUnknown(
+          data['started_at_utc_ms']!,
+          _startedAtUtcMsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_at_utc_ms')) {
+      context.handle(
+        _completedAtUtcMsMeta,
+        completedAtUtcMs.isAcceptableOrUnknown(
+          data['completed_at_utc_ms']!,
+          _completedAtUtcMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3764,6 +4040,68 @@ class $SessionLogsTable extends SessionLogs
         DriftSqlType.string,
         data['${effectivePrefix}processing_notes'],
       ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      legacy: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}legacy'],
+      )!,
+      eveningDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evening_date'],
+      ),
+      timeZoneId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}time_zone_id'],
+      ),
+      siteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}site_id'],
+      ),
+      targetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}target_id'],
+      ),
+      rigId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rig_id'],
+      ),
+      createdAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_utc_ms'],
+      ),
+      updatedAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at_utc_ms'],
+      ),
+      plannedAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}planned_at_utc_ms'],
+      ),
+      startedAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}started_at_utc_ms'],
+      ),
+      completedAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}completed_at_utc_ms'],
+      ),
+      planSnapshot: $SessionLogsTable.$converterplanSnapshotn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}plan_snapshot'],
+        ),
+      ),
+      executionStartSnapshot: $SessionLogsTable
+          .$converterexecutionStartSnapshotn
+          .fromSql(
+            attachedDatabase.typeMapping.read(
+              DriftSqlType.string,
+              data['${effectivePrefix}execution_start_snapshot'],
+            ),
+          ),
     );
   }
 
@@ -3771,6 +4109,17 @@ class $SessionLogsTable extends SessionLogs
   $SessionLogsTable createAlias(String alias) {
     return $SessionLogsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, Object?>, String> $converterplanSnapshot =
+      const JsonMapConverter();
+  static TypeConverter<Map<String, Object?>?, String?> $converterplanSnapshotn =
+      NullAwareTypeConverter.wrap($converterplanSnapshot);
+  static TypeConverter<Map<String, Object?>, String>
+  $converterexecutionStartSnapshot = const JsonMapConverter();
+  static TypeConverter<Map<String, Object?>?, String?>
+  $converterexecutionStartSnapshotn = NullAwareTypeConverter.wrap(
+    $converterexecutionStartSnapshot,
+  );
 }
 
 class SessionLog extends DataClass implements Insertable<SessionLog> {
@@ -3794,6 +4143,37 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
   final int? rejectedFrames;
   final String? environmentalNotes;
   final String? processingNotes;
+
+  /// draft | planned | inProgress | completed | abandoned (ADR-014 §3).
+  final String status;
+
+  /// True for rows saved before v16 (ADR-014 §7): completed, read-only,
+  /// shown from the text columns above; no snapshot, no references.
+  final bool legacy;
+
+  /// Night key (ADR-014 §2): the civil evening date `YYYY-MM-DD` and the zone
+  /// id it was resolved in; NULL for legacy rows.
+  final String? eveningDate;
+  final String? timeZoneId;
+
+  /// Stable references (ADR-014 §2): deleting a source never deletes or
+  /// blocks a session.
+  final int? siteId;
+  final int? targetId;
+  final int? rigId;
+
+  /// Lifecycle instants, UTC epoch milliseconds; NULL = not reached (or
+  /// unknown for legacy rows).
+  final int? createdAtUtcMs;
+  final int? updatedAtUtcMs;
+  final int? plannedAtUtcMs;
+  final int? startedAtUtcMs;
+  final int? completedAtUtcMs;
+
+  /// Versioned JSON snapshots (ADR-014 §4): the plan (refreshed on each
+  /// Save) and the execution start (frozen).
+  final Map<String, Object?>? planSnapshot;
+  final Map<String, Object?>? executionStartSnapshot;
   const SessionLog({
     required this.id,
     required this.targetName,
@@ -3815,6 +4195,20 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     this.rejectedFrames,
     this.environmentalNotes,
     this.processingNotes,
+    required this.status,
+    required this.legacy,
+    this.eveningDate,
+    this.timeZoneId,
+    this.siteId,
+    this.targetId,
+    this.rigId,
+    this.createdAtUtcMs,
+    this.updatedAtUtcMs,
+    this.plannedAtUtcMs,
+    this.startedAtUtcMs,
+    this.completedAtUtcMs,
+    this.planSnapshot,
+    this.executionStartSnapshot,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3871,6 +4265,50 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     if (!nullToAbsent || processingNotes != null) {
       map['processing_notes'] = Variable<String>(processingNotes);
     }
+    map['status'] = Variable<String>(status);
+    map['legacy'] = Variable<bool>(legacy);
+    if (!nullToAbsent || eveningDate != null) {
+      map['evening_date'] = Variable<String>(eveningDate);
+    }
+    if (!nullToAbsent || timeZoneId != null) {
+      map['time_zone_id'] = Variable<String>(timeZoneId);
+    }
+    if (!nullToAbsent || siteId != null) {
+      map['site_id'] = Variable<int>(siteId);
+    }
+    if (!nullToAbsent || targetId != null) {
+      map['target_id'] = Variable<int>(targetId);
+    }
+    if (!nullToAbsent || rigId != null) {
+      map['rig_id'] = Variable<int>(rigId);
+    }
+    if (!nullToAbsent || createdAtUtcMs != null) {
+      map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs);
+    }
+    if (!nullToAbsent || updatedAtUtcMs != null) {
+      map['updated_at_utc_ms'] = Variable<int>(updatedAtUtcMs);
+    }
+    if (!nullToAbsent || plannedAtUtcMs != null) {
+      map['planned_at_utc_ms'] = Variable<int>(plannedAtUtcMs);
+    }
+    if (!nullToAbsent || startedAtUtcMs != null) {
+      map['started_at_utc_ms'] = Variable<int>(startedAtUtcMs);
+    }
+    if (!nullToAbsent || completedAtUtcMs != null) {
+      map['completed_at_utc_ms'] = Variable<int>(completedAtUtcMs);
+    }
+    if (!nullToAbsent || planSnapshot != null) {
+      map['plan_snapshot'] = Variable<String>(
+        $SessionLogsTable.$converterplanSnapshotn.toSql(planSnapshot),
+      );
+    }
+    if (!nullToAbsent || executionStartSnapshot != null) {
+      map['execution_start_snapshot'] = Variable<String>(
+        $SessionLogsTable.$converterexecutionStartSnapshotn.toSql(
+          executionStartSnapshot,
+        ),
+      );
+    }
     return map;
   }
 
@@ -3926,6 +4364,44 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       processingNotes: processingNotes == null && nullToAbsent
           ? const Value.absent()
           : Value(processingNotes),
+      status: Value(status),
+      legacy: Value(legacy),
+      eveningDate: eveningDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eveningDate),
+      timeZoneId: timeZoneId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(timeZoneId),
+      siteId: siteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteId),
+      targetId: targetId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetId),
+      rigId: rigId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rigId),
+      createdAtUtcMs: createdAtUtcMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAtUtcMs),
+      updatedAtUtcMs: updatedAtUtcMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAtUtcMs),
+      plannedAtUtcMs: plannedAtUtcMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plannedAtUtcMs),
+      startedAtUtcMs: startedAtUtcMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startedAtUtcMs),
+      completedAtUtcMs: completedAtUtcMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAtUtcMs),
+      planSnapshot: planSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(planSnapshot),
+      executionStartSnapshot: executionStartSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(executionStartSnapshot),
     );
   }
 
@@ -3959,6 +4435,24 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
         json['environmentalNotes'],
       ),
       processingNotes: serializer.fromJson<String?>(json['processingNotes']),
+      status: serializer.fromJson<String>(json['status']),
+      legacy: serializer.fromJson<bool>(json['legacy']),
+      eveningDate: serializer.fromJson<String?>(json['eveningDate']),
+      timeZoneId: serializer.fromJson<String?>(json['timeZoneId']),
+      siteId: serializer.fromJson<int?>(json['siteId']),
+      targetId: serializer.fromJson<int?>(json['targetId']),
+      rigId: serializer.fromJson<int?>(json['rigId']),
+      createdAtUtcMs: serializer.fromJson<int?>(json['createdAtUtcMs']),
+      updatedAtUtcMs: serializer.fromJson<int?>(json['updatedAtUtcMs']),
+      plannedAtUtcMs: serializer.fromJson<int?>(json['plannedAtUtcMs']),
+      startedAtUtcMs: serializer.fromJson<int?>(json['startedAtUtcMs']),
+      completedAtUtcMs: serializer.fromJson<int?>(json['completedAtUtcMs']),
+      planSnapshot: serializer.fromJson<Map<String, Object?>?>(
+        json['planSnapshot'],
+      ),
+      executionStartSnapshot: serializer.fromJson<Map<String, Object?>?>(
+        json['executionStartSnapshot'],
+      ),
     );
   }
   @override
@@ -3987,6 +4481,22 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       'rejectedFrames': serializer.toJson<int?>(rejectedFrames),
       'environmentalNotes': serializer.toJson<String?>(environmentalNotes),
       'processingNotes': serializer.toJson<String?>(processingNotes),
+      'status': serializer.toJson<String>(status),
+      'legacy': serializer.toJson<bool>(legacy),
+      'eveningDate': serializer.toJson<String?>(eveningDate),
+      'timeZoneId': serializer.toJson<String?>(timeZoneId),
+      'siteId': serializer.toJson<int?>(siteId),
+      'targetId': serializer.toJson<int?>(targetId),
+      'rigId': serializer.toJson<int?>(rigId),
+      'createdAtUtcMs': serializer.toJson<int?>(createdAtUtcMs),
+      'updatedAtUtcMs': serializer.toJson<int?>(updatedAtUtcMs),
+      'plannedAtUtcMs': serializer.toJson<int?>(plannedAtUtcMs),
+      'startedAtUtcMs': serializer.toJson<int?>(startedAtUtcMs),
+      'completedAtUtcMs': serializer.toJson<int?>(completedAtUtcMs),
+      'planSnapshot': serializer.toJson<Map<String, Object?>?>(planSnapshot),
+      'executionStartSnapshot': serializer.toJson<Map<String, Object?>?>(
+        executionStartSnapshot,
+      ),
     };
   }
 
@@ -4011,6 +4521,20 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     Value<int?> rejectedFrames = const Value.absent(),
     Value<String?> environmentalNotes = const Value.absent(),
     Value<String?> processingNotes = const Value.absent(),
+    String? status,
+    bool? legacy,
+    Value<String?> eveningDate = const Value.absent(),
+    Value<String?> timeZoneId = const Value.absent(),
+    Value<int?> siteId = const Value.absent(),
+    Value<int?> targetId = const Value.absent(),
+    Value<int?> rigId = const Value.absent(),
+    Value<int?> createdAtUtcMs = const Value.absent(),
+    Value<int?> updatedAtUtcMs = const Value.absent(),
+    Value<int?> plannedAtUtcMs = const Value.absent(),
+    Value<int?> startedAtUtcMs = const Value.absent(),
+    Value<int?> completedAtUtcMs = const Value.absent(),
+    Value<Map<String, Object?>?> planSnapshot = const Value.absent(),
+    Value<Map<String, Object?>?> executionStartSnapshot = const Value.absent(),
   }) => SessionLog(
     id: id ?? this.id,
     targetName: targetName ?? this.targetName,
@@ -4048,6 +4572,32 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     processingNotes: processingNotes.present
         ? processingNotes.value
         : this.processingNotes,
+    status: status ?? this.status,
+    legacy: legacy ?? this.legacy,
+    eveningDate: eveningDate.present ? eveningDate.value : this.eveningDate,
+    timeZoneId: timeZoneId.present ? timeZoneId.value : this.timeZoneId,
+    siteId: siteId.present ? siteId.value : this.siteId,
+    targetId: targetId.present ? targetId.value : this.targetId,
+    rigId: rigId.present ? rigId.value : this.rigId,
+    createdAtUtcMs: createdAtUtcMs.present
+        ? createdAtUtcMs.value
+        : this.createdAtUtcMs,
+    updatedAtUtcMs: updatedAtUtcMs.present
+        ? updatedAtUtcMs.value
+        : this.updatedAtUtcMs,
+    plannedAtUtcMs: plannedAtUtcMs.present
+        ? plannedAtUtcMs.value
+        : this.plannedAtUtcMs,
+    startedAtUtcMs: startedAtUtcMs.present
+        ? startedAtUtcMs.value
+        : this.startedAtUtcMs,
+    completedAtUtcMs: completedAtUtcMs.present
+        ? completedAtUtcMs.value
+        : this.completedAtUtcMs,
+    planSnapshot: planSnapshot.present ? planSnapshot.value : this.planSnapshot,
+    executionStartSnapshot: executionStartSnapshot.present
+        ? executionStartSnapshot.value
+        : this.executionStartSnapshot,
   );
   SessionLog copyWithCompanion(SessionLogsCompanion data) {
     return SessionLog(
@@ -4105,6 +4655,38 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       processingNotes: data.processingNotes.present
           ? data.processingNotes.value
           : this.processingNotes,
+      status: data.status.present ? data.status.value : this.status,
+      legacy: data.legacy.present ? data.legacy.value : this.legacy,
+      eveningDate: data.eveningDate.present
+          ? data.eveningDate.value
+          : this.eveningDate,
+      timeZoneId: data.timeZoneId.present
+          ? data.timeZoneId.value
+          : this.timeZoneId,
+      siteId: data.siteId.present ? data.siteId.value : this.siteId,
+      targetId: data.targetId.present ? data.targetId.value : this.targetId,
+      rigId: data.rigId.present ? data.rigId.value : this.rigId,
+      createdAtUtcMs: data.createdAtUtcMs.present
+          ? data.createdAtUtcMs.value
+          : this.createdAtUtcMs,
+      updatedAtUtcMs: data.updatedAtUtcMs.present
+          ? data.updatedAtUtcMs.value
+          : this.updatedAtUtcMs,
+      plannedAtUtcMs: data.plannedAtUtcMs.present
+          ? data.plannedAtUtcMs.value
+          : this.plannedAtUtcMs,
+      startedAtUtcMs: data.startedAtUtcMs.present
+          ? data.startedAtUtcMs.value
+          : this.startedAtUtcMs,
+      completedAtUtcMs: data.completedAtUtcMs.present
+          ? data.completedAtUtcMs.value
+          : this.completedAtUtcMs,
+      planSnapshot: data.planSnapshot.present
+          ? data.planSnapshot.value
+          : this.planSnapshot,
+      executionStartSnapshot: data.executionStartSnapshot.present
+          ? data.executionStartSnapshot.value
+          : this.executionStartSnapshot,
     );
   }
 
@@ -4130,13 +4712,27 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
           ..write('actualLightFrames: $actualLightFrames, ')
           ..write('rejectedFrames: $rejectedFrames, ')
           ..write('environmentalNotes: $environmentalNotes, ')
-          ..write('processingNotes: $processingNotes')
+          ..write('processingNotes: $processingNotes, ')
+          ..write('status: $status, ')
+          ..write('legacy: $legacy, ')
+          ..write('eveningDate: $eveningDate, ')
+          ..write('timeZoneId: $timeZoneId, ')
+          ..write('siteId: $siteId, ')
+          ..write('targetId: $targetId, ')
+          ..write('rigId: $rigId, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('updatedAtUtcMs: $updatedAtUtcMs, ')
+          ..write('plannedAtUtcMs: $plannedAtUtcMs, ')
+          ..write('startedAtUtcMs: $startedAtUtcMs, ')
+          ..write('completedAtUtcMs: $completedAtUtcMs, ')
+          ..write('planSnapshot: $planSnapshot, ')
+          ..write('executionStartSnapshot: $executionStartSnapshot')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     targetName,
     equipmentName,
@@ -4157,7 +4753,21 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     rejectedFrames,
     environmentalNotes,
     processingNotes,
-  );
+    status,
+    legacy,
+    eveningDate,
+    timeZoneId,
+    siteId,
+    targetId,
+    rigId,
+    createdAtUtcMs,
+    updatedAtUtcMs,
+    plannedAtUtcMs,
+    startedAtUtcMs,
+    completedAtUtcMs,
+    planSnapshot,
+    executionStartSnapshot,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4181,7 +4791,21 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
           other.actualLightFrames == this.actualLightFrames &&
           other.rejectedFrames == this.rejectedFrames &&
           other.environmentalNotes == this.environmentalNotes &&
-          other.processingNotes == this.processingNotes);
+          other.processingNotes == this.processingNotes &&
+          other.status == this.status &&
+          other.legacy == this.legacy &&
+          other.eveningDate == this.eveningDate &&
+          other.timeZoneId == this.timeZoneId &&
+          other.siteId == this.siteId &&
+          other.targetId == this.targetId &&
+          other.rigId == this.rigId &&
+          other.createdAtUtcMs == this.createdAtUtcMs &&
+          other.updatedAtUtcMs == this.updatedAtUtcMs &&
+          other.plannedAtUtcMs == this.plannedAtUtcMs &&
+          other.startedAtUtcMs == this.startedAtUtcMs &&
+          other.completedAtUtcMs == this.completedAtUtcMs &&
+          other.planSnapshot == this.planSnapshot &&
+          other.executionStartSnapshot == this.executionStartSnapshot);
 }
 
 class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
@@ -4205,6 +4829,20 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
   final Value<int?> rejectedFrames;
   final Value<String?> environmentalNotes;
   final Value<String?> processingNotes;
+  final Value<String> status;
+  final Value<bool> legacy;
+  final Value<String?> eveningDate;
+  final Value<String?> timeZoneId;
+  final Value<int?> siteId;
+  final Value<int?> targetId;
+  final Value<int?> rigId;
+  final Value<int?> createdAtUtcMs;
+  final Value<int?> updatedAtUtcMs;
+  final Value<int?> plannedAtUtcMs;
+  final Value<int?> startedAtUtcMs;
+  final Value<int?> completedAtUtcMs;
+  final Value<Map<String, Object?>?> planSnapshot;
+  final Value<Map<String, Object?>?> executionStartSnapshot;
   const SessionLogsCompanion({
     this.id = const Value.absent(),
     this.targetName = const Value.absent(),
@@ -4226,6 +4864,20 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     this.rejectedFrames = const Value.absent(),
     this.environmentalNotes = const Value.absent(),
     this.processingNotes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.legacy = const Value.absent(),
+    this.eveningDate = const Value.absent(),
+    this.timeZoneId = const Value.absent(),
+    this.siteId = const Value.absent(),
+    this.targetId = const Value.absent(),
+    this.rigId = const Value.absent(),
+    this.createdAtUtcMs = const Value.absent(),
+    this.updatedAtUtcMs = const Value.absent(),
+    this.plannedAtUtcMs = const Value.absent(),
+    this.startedAtUtcMs = const Value.absent(),
+    this.completedAtUtcMs = const Value.absent(),
+    this.planSnapshot = const Value.absent(),
+    this.executionStartSnapshot = const Value.absent(),
   });
   SessionLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -4248,6 +4900,20 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     this.rejectedFrames = const Value.absent(),
     this.environmentalNotes = const Value.absent(),
     this.processingNotes = const Value.absent(),
+    this.status = const Value.absent(),
+    this.legacy = const Value.absent(),
+    this.eveningDate = const Value.absent(),
+    this.timeZoneId = const Value.absent(),
+    this.siteId = const Value.absent(),
+    this.targetId = const Value.absent(),
+    this.rigId = const Value.absent(),
+    this.createdAtUtcMs = const Value.absent(),
+    this.updatedAtUtcMs = const Value.absent(),
+    this.plannedAtUtcMs = const Value.absent(),
+    this.startedAtUtcMs = const Value.absent(),
+    this.completedAtUtcMs = const Value.absent(),
+    this.planSnapshot = const Value.absent(),
+    this.executionStartSnapshot = const Value.absent(),
   }) : targetName = Value(targetName),
        equipmentName = Value(equipmentName),
        sessionDate = Value(sessionDate),
@@ -4273,6 +4939,20 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     Expression<int>? rejectedFrames,
     Expression<String>? environmentalNotes,
     Expression<String>? processingNotes,
+    Expression<String>? status,
+    Expression<bool>? legacy,
+    Expression<String>? eveningDate,
+    Expression<String>? timeZoneId,
+    Expression<int>? siteId,
+    Expression<int>? targetId,
+    Expression<int>? rigId,
+    Expression<int>? createdAtUtcMs,
+    Expression<int>? updatedAtUtcMs,
+    Expression<int>? plannedAtUtcMs,
+    Expression<int>? startedAtUtcMs,
+    Expression<int>? completedAtUtcMs,
+    Expression<String>? planSnapshot,
+    Expression<String>? executionStartSnapshot,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -4297,6 +4977,21 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
       if (rejectedFrames != null) 'rejected_frames': rejectedFrames,
       if (environmentalNotes != null) 'environmental_notes': environmentalNotes,
       if (processingNotes != null) 'processing_notes': processingNotes,
+      if (status != null) 'status': status,
+      if (legacy != null) 'legacy': legacy,
+      if (eveningDate != null) 'evening_date': eveningDate,
+      if (timeZoneId != null) 'time_zone_id': timeZoneId,
+      if (siteId != null) 'site_id': siteId,
+      if (targetId != null) 'target_id': targetId,
+      if (rigId != null) 'rig_id': rigId,
+      if (createdAtUtcMs != null) 'created_at_utc_ms': createdAtUtcMs,
+      if (updatedAtUtcMs != null) 'updated_at_utc_ms': updatedAtUtcMs,
+      if (plannedAtUtcMs != null) 'planned_at_utc_ms': plannedAtUtcMs,
+      if (startedAtUtcMs != null) 'started_at_utc_ms': startedAtUtcMs,
+      if (completedAtUtcMs != null) 'completed_at_utc_ms': completedAtUtcMs,
+      if (planSnapshot != null) 'plan_snapshot': planSnapshot,
+      if (executionStartSnapshot != null)
+        'execution_start_snapshot': executionStartSnapshot,
     });
   }
 
@@ -4321,6 +5016,20 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     Value<int?>? rejectedFrames,
     Value<String?>? environmentalNotes,
     Value<String?>? processingNotes,
+    Value<String>? status,
+    Value<bool>? legacy,
+    Value<String?>? eveningDate,
+    Value<String?>? timeZoneId,
+    Value<int?>? siteId,
+    Value<int?>? targetId,
+    Value<int?>? rigId,
+    Value<int?>? createdAtUtcMs,
+    Value<int?>? updatedAtUtcMs,
+    Value<int?>? plannedAtUtcMs,
+    Value<int?>? startedAtUtcMs,
+    Value<int?>? completedAtUtcMs,
+    Value<Map<String, Object?>?>? planSnapshot,
+    Value<Map<String, Object?>?>? executionStartSnapshot,
   }) {
     return SessionLogsCompanion(
       id: id ?? this.id,
@@ -4344,6 +5053,21 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
       rejectedFrames: rejectedFrames ?? this.rejectedFrames,
       environmentalNotes: environmentalNotes ?? this.environmentalNotes,
       processingNotes: processingNotes ?? this.processingNotes,
+      status: status ?? this.status,
+      legacy: legacy ?? this.legacy,
+      eveningDate: eveningDate ?? this.eveningDate,
+      timeZoneId: timeZoneId ?? this.timeZoneId,
+      siteId: siteId ?? this.siteId,
+      targetId: targetId ?? this.targetId,
+      rigId: rigId ?? this.rigId,
+      createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+      updatedAtUtcMs: updatedAtUtcMs ?? this.updatedAtUtcMs,
+      plannedAtUtcMs: plannedAtUtcMs ?? this.plannedAtUtcMs,
+      startedAtUtcMs: startedAtUtcMs ?? this.startedAtUtcMs,
+      completedAtUtcMs: completedAtUtcMs ?? this.completedAtUtcMs,
+      planSnapshot: planSnapshot ?? this.planSnapshot,
+      executionStartSnapshot:
+          executionStartSnapshot ?? this.executionStartSnapshot,
     );
   }
 
@@ -4412,6 +5136,54 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     if (processingNotes.present) {
       map['processing_notes'] = Variable<String>(processingNotes.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (legacy.present) {
+      map['legacy'] = Variable<bool>(legacy.value);
+    }
+    if (eveningDate.present) {
+      map['evening_date'] = Variable<String>(eveningDate.value);
+    }
+    if (timeZoneId.present) {
+      map['time_zone_id'] = Variable<String>(timeZoneId.value);
+    }
+    if (siteId.present) {
+      map['site_id'] = Variable<int>(siteId.value);
+    }
+    if (targetId.present) {
+      map['target_id'] = Variable<int>(targetId.value);
+    }
+    if (rigId.present) {
+      map['rig_id'] = Variable<int>(rigId.value);
+    }
+    if (createdAtUtcMs.present) {
+      map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs.value);
+    }
+    if (updatedAtUtcMs.present) {
+      map['updated_at_utc_ms'] = Variable<int>(updatedAtUtcMs.value);
+    }
+    if (plannedAtUtcMs.present) {
+      map['planned_at_utc_ms'] = Variable<int>(plannedAtUtcMs.value);
+    }
+    if (startedAtUtcMs.present) {
+      map['started_at_utc_ms'] = Variable<int>(startedAtUtcMs.value);
+    }
+    if (completedAtUtcMs.present) {
+      map['completed_at_utc_ms'] = Variable<int>(completedAtUtcMs.value);
+    }
+    if (planSnapshot.present) {
+      map['plan_snapshot'] = Variable<String>(
+        $SessionLogsTable.$converterplanSnapshotn.toSql(planSnapshot.value),
+      );
+    }
+    if (executionStartSnapshot.present) {
+      map['execution_start_snapshot'] = Variable<String>(
+        $SessionLogsTable.$converterexecutionStartSnapshotn.toSql(
+          executionStartSnapshot.value,
+        ),
+      );
+    }
     return map;
   }
 
@@ -4437,7 +5209,21 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
           ..write('actualLightFrames: $actualLightFrames, ')
           ..write('rejectedFrames: $rejectedFrames, ')
           ..write('environmentalNotes: $environmentalNotes, ')
-          ..write('processingNotes: $processingNotes')
+          ..write('processingNotes: $processingNotes, ')
+          ..write('status: $status, ')
+          ..write('legacy: $legacy, ')
+          ..write('eveningDate: $eveningDate, ')
+          ..write('timeZoneId: $timeZoneId, ')
+          ..write('siteId: $siteId, ')
+          ..write('targetId: $targetId, ')
+          ..write('rigId: $rigId, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('updatedAtUtcMs: $updatedAtUtcMs, ')
+          ..write('plannedAtUtcMs: $plannedAtUtcMs, ')
+          ..write('startedAtUtcMs: $startedAtUtcMs, ')
+          ..write('completedAtUtcMs: $completedAtUtcMs, ')
+          ..write('planSnapshot: $planSnapshot, ')
+          ..write('executionStartSnapshot: $executionStartSnapshot')
           ..write(')'))
         .toString();
   }
@@ -4579,6 +5365,30 @@ class $CaptureBlocksTable extends CaptureBlocks
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _completedFramesMeta = const VerificationMeta(
+    'completedFrames',
+  );
+  @override
+  late final GeneratedColumn<int> completedFrames = GeneratedColumn<int>(
+    'completed_frames',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _rejectedFramesMeta = const VerificationMeta(
+    'rejectedFrames',
+  );
+  @override
+  late final GeneratedColumn<int> rejectedFrames = GeneratedColumn<int>(
+    'rejected_frames',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4592,6 +5402,8 @@ class $CaptureBlocksTable extends CaptureBlocks
     calibrationPolicy,
     gainKind,
     gainValue,
+    completedFrames,
+    rejectedFrames,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4685,6 +5497,24 @@ class $CaptureBlocksTable extends CaptureBlocks
         gainValue.isAcceptableOrUnknown(data['gain_value']!, _gainValueMeta),
       );
     }
+    if (data.containsKey('completed_frames')) {
+      context.handle(
+        _completedFramesMeta,
+        completedFrames.isAcceptableOrUnknown(
+          data['completed_frames']!,
+          _completedFramesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rejected_frames')) {
+      context.handle(
+        _rejectedFramesMeta,
+        rejectedFrames.isAcceptableOrUnknown(
+          data['rejected_frames']!,
+          _rejectedFramesMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4738,6 +5568,14 @@ class $CaptureBlocksTable extends CaptureBlocks
         DriftSqlType.double,
         data['${effectivePrefix}gain_value'],
       ),
+      completedFrames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}completed_frames'],
+      )!,
+      rejectedFrames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rejected_frames'],
+      )!,
     );
   }
 
@@ -4759,6 +5597,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
   final String? calibrationPolicy;
   final String gainKind;
   final double? gainValue;
+  final int completedFrames;
+  final int rejectedFrames;
   const CaptureBlock({
     required this.id,
     required this.sessionLogId,
@@ -4771,6 +5611,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     this.calibrationPolicy,
     required this.gainKind,
     this.gainValue,
+    required this.completedFrames,
+    required this.rejectedFrames,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4792,6 +5634,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     if (!nullToAbsent || gainValue != null) {
       map['gain_value'] = Variable<double>(gainValue);
     }
+    map['completed_frames'] = Variable<int>(completedFrames);
+    map['rejected_frames'] = Variable<int>(rejectedFrames);
     return map;
   }
 
@@ -4814,6 +5658,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       gainValue: gainValue == null && nullToAbsent
           ? const Value.absent()
           : Value(gainValue),
+      completedFrames: Value(completedFrames),
+      rejectedFrames: Value(rejectedFrames),
     );
   }
 
@@ -4838,6 +5684,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       ),
       gainKind: serializer.fromJson<String>(json['gainKind']),
       gainValue: serializer.fromJson<double?>(json['gainValue']),
+      completedFrames: serializer.fromJson<int>(json['completedFrames']),
+      rejectedFrames: serializer.fromJson<int>(json['rejectedFrames']),
     );
   }
   @override
@@ -4855,6 +5703,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
       'calibrationPolicy': serializer.toJson<String?>(calibrationPolicy),
       'gainKind': serializer.toJson<String>(gainKind),
       'gainValue': serializer.toJson<double?>(gainValue),
+      'completedFrames': serializer.toJson<int>(completedFrames),
+      'rejectedFrames': serializer.toJson<int>(rejectedFrames),
     };
   }
 
@@ -4870,6 +5720,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     Value<String?> calibrationPolicy = const Value.absent(),
     String? gainKind,
     Value<double?> gainValue = const Value.absent(),
+    int? completedFrames,
+    int? rejectedFrames,
   }) => CaptureBlock(
     id: id ?? this.id,
     sessionLogId: sessionLogId ?? this.sessionLogId,
@@ -4884,6 +5736,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
         : this.calibrationPolicy,
     gainKind: gainKind ?? this.gainKind,
     gainValue: gainValue.present ? gainValue.value : this.gainValue,
+    completedFrames: completedFrames ?? this.completedFrames,
+    rejectedFrames: rejectedFrames ?? this.rejectedFrames,
   );
   CaptureBlock copyWithCompanion(CaptureBlocksCompanion data) {
     return CaptureBlock(
@@ -4908,6 +5762,12 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           : this.calibrationPolicy,
       gainKind: data.gainKind.present ? data.gainKind.value : this.gainKind,
       gainValue: data.gainValue.present ? data.gainValue.value : this.gainValue,
+      completedFrames: data.completedFrames.present
+          ? data.completedFrames.value
+          : this.completedFrames,
+      rejectedFrames: data.rejectedFrames.present
+          ? data.rejectedFrames.value
+          : this.rejectedFrames,
     );
   }
 
@@ -4924,7 +5784,9 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           ..write('position: $position, ')
           ..write('calibrationPolicy: $calibrationPolicy, ')
           ..write('gainKind: $gainKind, ')
-          ..write('gainValue: $gainValue')
+          ..write('gainValue: $gainValue, ')
+          ..write('completedFrames: $completedFrames, ')
+          ..write('rejectedFrames: $rejectedFrames')
           ..write(')'))
         .toString();
   }
@@ -4942,6 +5804,8 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
     calibrationPolicy,
     gainKind,
     gainValue,
+    completedFrames,
+    rejectedFrames,
   );
   @override
   bool operator ==(Object other) =>
@@ -4957,7 +5821,9 @@ class CaptureBlock extends DataClass implements Insertable<CaptureBlock> {
           other.position == this.position &&
           other.calibrationPolicy == this.calibrationPolicy &&
           other.gainKind == this.gainKind &&
-          other.gainValue == this.gainValue);
+          other.gainValue == this.gainValue &&
+          other.completedFrames == this.completedFrames &&
+          other.rejectedFrames == this.rejectedFrames);
 }
 
 class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
@@ -4972,6 +5838,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
   final Value<String?> calibrationPolicy;
   final Value<String> gainKind;
   final Value<double?> gainValue;
+  final Value<int> completedFrames;
+  final Value<int> rejectedFrames;
   const CaptureBlocksCompanion({
     this.id = const Value.absent(),
     this.sessionLogId = const Value.absent(),
@@ -4984,6 +5852,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     this.calibrationPolicy = const Value.absent(),
     this.gainKind = const Value.absent(),
     this.gainValue = const Value.absent(),
+    this.completedFrames = const Value.absent(),
+    this.rejectedFrames = const Value.absent(),
   });
   CaptureBlocksCompanion.insert({
     this.id = const Value.absent(),
@@ -4997,6 +5867,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     this.calibrationPolicy = const Value.absent(),
     this.gainKind = const Value.absent(),
     this.gainValue = const Value.absent(),
+    this.completedFrames = const Value.absent(),
+    this.rejectedFrames = const Value.absent(),
   }) : sessionLogId = Value(sessionLogId),
        frameType = Value(frameType),
        exposureTimeSeconds = Value(exposureTimeSeconds),
@@ -5013,6 +5885,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     Expression<String>? calibrationPolicy,
     Expression<String>? gainKind,
     Expression<double>? gainValue,
+    Expression<int>? completedFrames,
+    Expression<int>? rejectedFrames,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5027,6 +5901,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
       if (calibrationPolicy != null) 'calibration_policy': calibrationPolicy,
       if (gainKind != null) 'gain_kind': gainKind,
       if (gainValue != null) 'gain_value': gainValue,
+      if (completedFrames != null) 'completed_frames': completedFrames,
+      if (rejectedFrames != null) 'rejected_frames': rejectedFrames,
     });
   }
 
@@ -5042,6 +5918,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     Value<String?>? calibrationPolicy,
     Value<String>? gainKind,
     Value<double?>? gainValue,
+    Value<int>? completedFrames,
+    Value<int>? rejectedFrames,
   }) {
     return CaptureBlocksCompanion(
       id: id ?? this.id,
@@ -5055,6 +5933,8 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
       calibrationPolicy: calibrationPolicy ?? this.calibrationPolicy,
       gainKind: gainKind ?? this.gainKind,
       gainValue: gainValue ?? this.gainValue,
+      completedFrames: completedFrames ?? this.completedFrames,
+      rejectedFrames: rejectedFrames ?? this.rejectedFrames,
     );
   }
 
@@ -5096,6 +5976,12 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
     if (gainValue.present) {
       map['gain_value'] = Variable<double>(gainValue.value);
     }
+    if (completedFrames.present) {
+      map['completed_frames'] = Variable<int>(completedFrames.value);
+    }
+    if (rejectedFrames.present) {
+      map['rejected_frames'] = Variable<int>(rejectedFrames.value);
+    }
     return map;
   }
 
@@ -5112,7 +5998,9 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
           ..write('position: $position, ')
           ..write('calibrationPolicy: $calibrationPolicy, ')
           ..write('gainKind: $gainKind, ')
-          ..write('gainValue: $gainValue')
+          ..write('gainValue: $gainValue, ')
+          ..write('completedFrames: $completedFrames, ')
+          ..write('rejectedFrames: $rejectedFrames')
           ..write(')'))
         .toString();
   }
@@ -5134,6 +6022,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'astro_targets_catalog_id_unique',
     'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
   );
+  late final Index sessionLogsStatus = Index(
+    'session_logs_status',
+    'CREATE INDEX session_logs_status ON session_logs (status)',
+  );
+  late final Index sessionLogsEveningDate = Index(
+    'session_logs_evening_date',
+    'CREATE INDEX session_logs_evening_date ON session_logs (evening_date)',
+  );
+  late final Index sessionLogsTargetId = Index(
+    'session_logs_target_id',
+    'CREATE INDEX session_logs_target_id ON session_logs (target_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5147,9 +6047,33 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sessionLogs,
     captureBlocks,
     astroTargetsCatalogIdUnique,
+    sessionLogsStatus,
+    sessionLogsEveningDate,
+    sessionLogsTargetId,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'location_profiles',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('session_logs', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'astro_targets',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('session_logs', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'optical_rigs',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('session_logs', kind: UpdateKind.update)],
+    ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
         'session_logs',
@@ -6077,6 +7001,24 @@ final class $$OpticalRigsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$SessionLogsTable, List<SessionLog>>
+  _sessionLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sessionLogs,
+    aliasName: 'optical_rigs__id__session_logs__rig_id',
+  );
+
+  $$SessionLogsTableProcessedTableManager get sessionLogsRefs {
+    final manager = $$SessionLogsTableTableManager(
+      $_db,
+      $_db.sessionLogs,
+    ).filter((f) => f.rigId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$OpticalRigsTableFilterComposer
@@ -6159,6 +7101,31 @@ class $$OpticalRigsTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> sessionLogsRefs(
+    Expression<bool> Function($$SessionLogsTableFilterComposer f) f,
+  ) {
+    final $$SessionLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.rigId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -6318,6 +7285,31 @@ class $$OpticalRigsTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> sessionLogsRefs<T extends Object>(
+    Expression<T> Function($$SessionLogsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.rigId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$OpticalRigsTableTableManager
@@ -6333,7 +7325,7 @@ class $$OpticalRigsTableTableManager
           $$OpticalRigsTableUpdateCompanionBuilder,
           (OpticalRig, $$OpticalRigsTableReferences),
           OpticalRig,
-          PrefetchHooks Function({bool cameraModuleId})
+          PrefetchHooks Function({bool cameraModuleId, bool sessionLogsRefs})
         > {
   $$OpticalRigsTableTableManager(_$AppDatabase db, $OpticalRigsTable table)
     : super(
@@ -6406,45 +7398,70 @@ class $$OpticalRigsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({cameraModuleId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (cameraModuleId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.cameraModuleId,
-                        referencedTable: $$OpticalRigsTableReferences
-                            ._cameraModuleIdTable(db),
-                        referencedColumn: $$OpticalRigsTableReferences
-                            ._cameraModuleIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({cameraModuleId = false, sessionLogsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (sessionLogsRefs) db.sessionLogs,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (cameraModuleId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.cameraModuleId,
+                            referencedTable: $$OpticalRigsTableReferences
+                                ._cameraModuleIdTable(db),
+                            referencedColumn: $$OpticalRigsTableReferences
+                                ._cameraModuleIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (sessionLogsRefs)
+                        await $_getPrefetchedData<
+                          OpticalRig,
+                          $OpticalRigsTable,
+                          SessionLog
+                        >(
+                          currentTable: table,
+                          referencedTable: $$OpticalRigsTableReferences
+                              ._sessionLogsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$OpticalRigsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).sessionLogsRefs,
+                          referencedItemsForCurrentItem: (
+                            item,
+                            referencedItems,
+                          ) => referencedItems.where((e) => e.rigId == item.id),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -6461,7 +7478,7 @@ typedef $$OpticalRigsTableProcessedTableManager =
       $$OpticalRigsTableUpdateCompanionBuilder,
       (OpticalRig, $$OpticalRigsTableReferences),
       OpticalRig,
-      PrefetchHooks Function({bool cameraModuleId})
+      PrefetchHooks Function({bool cameraModuleId, bool sessionLogsRefs})
     >;
 typedef $$LocationProfilesTableCreateCompanionBuilder =
     LocationProfilesCompanion Function({
@@ -6495,6 +7512,34 @@ typedef $$LocationProfilesTableUpdateCompanionBuilder =
       Value<String?> timeZone,
       Value<String?> notes,
     });
+
+final class $$LocationProfilesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $LocationProfilesTable, LocationProfile> {
+  $$LocationProfilesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$SessionLogsTable, List<SessionLog>>
+  _sessionLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sessionLogs,
+    aliasName: 'location_profiles__id__session_logs__site_id',
+  );
+
+  $$SessionLogsTableProcessedTableManager get sessionLogsRefs {
+    final manager = $$SessionLogsTableTableManager(
+      $_db,
+      $_db.sessionLogs,
+    ).filter((f) => f.siteId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$LocationProfilesTableFilterComposer
     extends Composer<_$AppDatabase, $LocationProfilesTable> {
@@ -6569,6 +7614,31 @@ class $$LocationProfilesTableFilterComposer
     column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> sessionLogsRefs(
+    Expression<bool> Function($$SessionLogsTableFilterComposer f) f,
+  ) {
+    final $$SessionLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.siteId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocationProfilesTableOrderingComposer
@@ -6699,6 +7769,31 @@ class $$LocationProfilesTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  Expression<T> sessionLogsRefs<T extends Object>(
+    Expression<T> Function($$SessionLogsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.siteId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$LocationProfilesTableTableManager
@@ -6712,16 +7807,9 @@ class $$LocationProfilesTableTableManager
           $$LocationProfilesTableAnnotationComposer,
           $$LocationProfilesTableCreateCompanionBuilder,
           $$LocationProfilesTableUpdateCompanionBuilder,
-          (
-            LocationProfile,
-            BaseReferences<
-              _$AppDatabase,
-              $LocationProfilesTable,
-              LocationProfile
-            >,
-          ),
+          (LocationProfile, $$LocationProfilesTableReferences),
           LocationProfile,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool sessionLogsRefs})
         > {
   $$LocationProfilesTableTableManager(
     _$AppDatabase db,
@@ -6800,15 +7888,40 @@ class $$LocationProfilesTableTableManager
               .map(
                 (e) => (
                   e.readTable<$LocationProfilesTable, LocationProfile>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $LocationProfilesTable,
-                    LocationProfile
-                  >(db, table, e),
+                  $$LocationProfilesTableReferences(db, table, e),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({sessionLogsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (sessionLogsRefs) db.sessionLogs],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (sessionLogsRefs)
+                    await $_getPrefetchedData<
+                      LocationProfile,
+                      $LocationProfilesTable,
+                      SessionLog
+                    >(
+                      currentTable: table,
+                      referencedTable: $$LocationProfilesTableReferences
+                          ._sessionLogsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$LocationProfilesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).sessionLogsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.siteId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -6823,12 +7936,9 @@ typedef $$LocationProfilesTableProcessedTableManager =
       $$LocationProfilesTableAnnotationComposer,
       $$LocationProfilesTableCreateCompanionBuilder,
       $$LocationProfilesTableUpdateCompanionBuilder,
-      (
-        LocationProfile,
-        BaseReferences<_$AppDatabase, $LocationProfilesTable, LocationProfile>,
-      ),
+      (LocationProfile, $$LocationProfilesTableReferences),
       LocationProfile,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool sessionLogsRefs})
     >;
 typedef $$AstroTargetsTableCreateCompanionBuilder =
     AstroTargetsCompanion Function({
@@ -6856,6 +7966,29 @@ typedef $$AstroTargetsTableUpdateCompanionBuilder =
       Value<double?> angularSizeArcmin,
       Value<double?> magnitude,
     });
+
+final class $$AstroTargetsTableReferences
+    extends BaseReferences<_$AppDatabase, $AstroTargetsTable, AstroTarget> {
+  $$AstroTargetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$SessionLogsTable, List<SessionLog>>
+  _sessionLogsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sessionLogs,
+    aliasName: 'astro_targets__id__session_logs__target_id',
+  );
+
+  $$SessionLogsTableProcessedTableManager get sessionLogsRefs {
+    final manager = $$SessionLogsTableTableManager(
+      $_db,
+      $_db.sessionLogs,
+    ).filter((f) => f.targetId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$AstroTargetsTableFilterComposer
     extends Composer<_$AppDatabase, $AstroTargetsTable> {
@@ -6915,6 +8048,31 @@ class $$AstroTargetsTableFilterComposer
     column: $table.magnitude,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> sessionLogsRefs(
+    Expression<bool> Function($$SessionLogsTableFilterComposer f) f,
+  ) {
+    final $$SessionLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.targetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$AstroTargetsTableOrderingComposer
@@ -7023,6 +8181,31 @@ class $$AstroTargetsTableAnnotationComposer
 
   GeneratedColumn<double> get magnitude =>
       $composableBuilder(column: $table.magnitude, builder: (column) => column);
+
+  Expression<T> sessionLogsRefs<T extends Object>(
+    Expression<T> Function($$SessionLogsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.targetId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$AstroTargetsTableTableManager
@@ -7036,12 +8219,9 @@ class $$AstroTargetsTableTableManager
           $$AstroTargetsTableAnnotationComposer,
           $$AstroTargetsTableCreateCompanionBuilder,
           $$AstroTargetsTableUpdateCompanionBuilder,
-          (
-            AstroTarget,
-            BaseReferences<_$AppDatabase, $AstroTargetsTable, AstroTarget>,
-          ),
+          (AstroTarget, $$AstroTargetsTableReferences),
           AstroTarget,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool sessionLogsRefs})
         > {
   $$AstroTargetsTableTableManager(_$AppDatabase db, $AstroTargetsTable table)
     : super(
@@ -7106,15 +8286,40 @@ class $$AstroTargetsTableTableManager
               .map(
                 (e) => (
                   e.readTable<$AstroTargetsTable, AstroTarget>(table),
-                  BaseReferences<
-                    _$AppDatabase,
-                    $AstroTargetsTable,
-                    AstroTarget
-                  >(db, table, e),
+                  $$AstroTargetsTableReferences(db, table, e),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({sessionLogsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (sessionLogsRefs) db.sessionLogs],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (sessionLogsRefs)
+                    await $_getPrefetchedData<
+                      AstroTarget,
+                      $AstroTargetsTable,
+                      SessionLog
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AstroTargetsTableReferences
+                          ._sessionLogsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AstroTargetsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).sessionLogsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.targetId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -7129,12 +8334,9 @@ typedef $$AstroTargetsTableProcessedTableManager =
       $$AstroTargetsTableAnnotationComposer,
       $$AstroTargetsTableCreateCompanionBuilder,
       $$AstroTargetsTableUpdateCompanionBuilder,
-      (
-        AstroTarget,
-        BaseReferences<_$AppDatabase, $AstroTargetsTable, AstroTarget>,
-      ),
+      (AstroTarget, $$AstroTargetsTableReferences),
       AstroTarget,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool sessionLogsRefs})
     >;
 typedef $$SessionLogsTableCreateCompanionBuilder =
     SessionLogsCompanion Function({
@@ -7158,6 +8360,20 @@ typedef $$SessionLogsTableCreateCompanionBuilder =
       Value<int?> rejectedFrames,
       Value<String?> environmentalNotes,
       Value<String?> processingNotes,
+      Value<String> status,
+      Value<bool> legacy,
+      Value<String?> eveningDate,
+      Value<String?> timeZoneId,
+      Value<int?> siteId,
+      Value<int?> targetId,
+      Value<int?> rigId,
+      Value<int?> createdAtUtcMs,
+      Value<int?> updatedAtUtcMs,
+      Value<int?> plannedAtUtcMs,
+      Value<int?> startedAtUtcMs,
+      Value<int?> completedAtUtcMs,
+      Value<Map<String, Object?>?> planSnapshot,
+      Value<Map<String, Object?>?> executionStartSnapshot,
     });
 typedef $$SessionLogsTableUpdateCompanionBuilder =
     SessionLogsCompanion Function({
@@ -7181,11 +8397,77 @@ typedef $$SessionLogsTableUpdateCompanionBuilder =
       Value<int?> rejectedFrames,
       Value<String?> environmentalNotes,
       Value<String?> processingNotes,
+      Value<String> status,
+      Value<bool> legacy,
+      Value<String?> eveningDate,
+      Value<String?> timeZoneId,
+      Value<int?> siteId,
+      Value<int?> targetId,
+      Value<int?> rigId,
+      Value<int?> createdAtUtcMs,
+      Value<int?> updatedAtUtcMs,
+      Value<int?> plannedAtUtcMs,
+      Value<int?> startedAtUtcMs,
+      Value<int?> completedAtUtcMs,
+      Value<Map<String, Object?>?> planSnapshot,
+      Value<Map<String, Object?>?> executionStartSnapshot,
     });
 
 final class $$SessionLogsTableReferences
     extends BaseReferences<_$AppDatabase, $SessionLogsTable, SessionLog> {
   $$SessionLogsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $LocationProfilesTable _siteIdTable(_$AppDatabase db) => db
+      .locationProfiles
+      .createAlias('session_logs__site_id__location_profiles__id');
+
+  $$LocationProfilesTableProcessedTableManager? get siteId {
+    final $_column = $_itemColumn<int>('site_id');
+    if ($_column == null) return null;
+    final manager = $$LocationProfilesTableTableManager(
+      $_db,
+      $_db.locationProfiles,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_siteIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $AstroTargetsTable _targetIdTable(_$AppDatabase db) =>
+      db.astroTargets.createAlias('session_logs__target_id__astro_targets__id');
+
+  $$AstroTargetsTableProcessedTableManager? get targetId {
+    final $_column = $_itemColumn<int>('target_id');
+    if ($_column == null) return null;
+    final manager = $$AstroTargetsTableTableManager(
+      $_db,
+      $_db.astroTargets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_targetIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $OpticalRigsTable _rigIdTable(_$AppDatabase db) =>
+      db.opticalRigs.createAlias('session_logs__rig_id__optical_rigs__id');
+
+  $$OpticalRigsTableProcessedTableManager? get rigId {
+    final $_column = $_itemColumn<int>('rig_id');
+    if ($_column == null) return null;
+    final manager = $$OpticalRigsTableTableManager(
+      $_db,
+      $_db.opticalRigs,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_rigIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static MultiTypedResultKey<$CaptureBlocksTable, List<CaptureBlock>>
   _captureBlocksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -7314,6 +8596,140 @@ class $$SessionLogsTableFilterComposer
     column: $table.processingNotes,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get legacy => $composableBuilder(
+    column: $table.legacy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eveningDate => $composableBuilder(
+    column: $table.eveningDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get plannedAtUtcMs => $composableBuilder(
+    column: $table.plannedAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startedAtUtcMs => $composableBuilder(
+    column: $table.startedAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get completedAtUtcMs => $composableBuilder(
+    column: $table.completedAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, Object?>?,
+    Map<String, Object>?,
+    String
+  >
+  get planSnapshot => $composableBuilder(
+    column: $table.planSnapshot,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    Map<String, Object?>?,
+    Map<String, Object>?,
+    String
+  >
+  get executionStartSnapshot => $composableBuilder(
+    column: $table.executionStartSnapshot,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  $$LocationProfilesTableFilterComposer get siteId {
+    final $$LocationProfilesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.siteId,
+      referencedTable: $db.locationProfiles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationProfilesTableFilterComposer(
+            $db: $db,
+            $table: $db.locationProfiles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AstroTargetsTableFilterComposer get targetId {
+    final $$AstroTargetsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.targetId,
+      referencedTable: $db.astroTargets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AstroTargetsTableFilterComposer(
+            $db: $db,
+            $table: $db.astroTargets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$OpticalRigsTableFilterComposer get rigId {
+    final $$OpticalRigsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.rigId,
+      referencedTable: $db.opticalRigs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OpticalRigsTableFilterComposer(
+            $db: $db,
+            $table: $db.opticalRigs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<bool> captureBlocksRefs(
     Expression<bool> Function($$CaptureBlocksTableFilterComposer f) f,
@@ -7449,6 +8865,130 @@ class $$SessionLogsTableOrderingComposer
     column: $table.processingNotes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get legacy => $composableBuilder(
+    column: $table.legacy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eveningDate => $composableBuilder(
+    column: $table.eveningDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get plannedAtUtcMs => $composableBuilder(
+    column: $table.plannedAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startedAtUtcMs => $composableBuilder(
+    column: $table.startedAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get completedAtUtcMs => $composableBuilder(
+    column: $table.completedAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get planSnapshot => $composableBuilder(
+    column: $table.planSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get executionStartSnapshot => $composableBuilder(
+    column: $table.executionStartSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$LocationProfilesTableOrderingComposer get siteId {
+    final $$LocationProfilesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.siteId,
+      referencedTable: $db.locationProfiles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationProfilesTableOrderingComposer(
+            $db: $db,
+            $table: $db.locationProfiles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AstroTargetsTableOrderingComposer get targetId {
+    final $$AstroTargetsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.targetId,
+      referencedTable: $db.astroTargets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AstroTargetsTableOrderingComposer(
+            $db: $db,
+            $table: $db.astroTargets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$OpticalRigsTableOrderingComposer get rigId {
+    final $$OpticalRigsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.rigId,
+      referencedTable: $db.opticalRigs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OpticalRigsTableOrderingComposer(
+            $db: $db,
+            $table: $db.opticalRigs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$SessionLogsTableAnnotationComposer
@@ -7554,6 +9094,128 @@ class $$SessionLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<bool> get legacy =>
+      $composableBuilder(column: $table.legacy, builder: (column) => column);
+
+  GeneratedColumn<String> get eveningDate => $composableBuilder(
+    column: $table.eveningDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get timeZoneId => $composableBuilder(
+    column: $table.timeZoneId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get plannedAtUtcMs => $composableBuilder(
+    column: $table.plannedAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startedAtUtcMs => $composableBuilder(
+    column: $table.startedAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get completedAtUtcMs => $composableBuilder(
+    column: $table.completedAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+  get planSnapshot => $composableBuilder(
+    column: $table.planSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, Object?>?, String>
+  get executionStartSnapshot => $composableBuilder(
+    column: $table.executionStartSnapshot,
+    builder: (column) => column,
+  );
+
+  $$LocationProfilesTableAnnotationComposer get siteId {
+    final $$LocationProfilesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.siteId,
+      referencedTable: $db.locationProfiles,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$LocationProfilesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.locationProfiles,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$AstroTargetsTableAnnotationComposer get targetId {
+    final $$AstroTargetsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.targetId,
+      referencedTable: $db.astroTargets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AstroTargetsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.astroTargets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$OpticalRigsTableAnnotationComposer get rigId {
+    final $$OpticalRigsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.rigId,
+      referencedTable: $db.opticalRigs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OpticalRigsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.opticalRigs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   Expression<T> captureBlocksRefs<T extends Object>(
     Expression<T> Function($$CaptureBlocksTableAnnotationComposer a) f,
   ) {
@@ -7593,7 +9255,12 @@ class $$SessionLogsTableTableManager
           $$SessionLogsTableUpdateCompanionBuilder,
           (SessionLog, $$SessionLogsTableReferences),
           SessionLog,
-          PrefetchHooks Function({bool captureBlocksRefs})
+          PrefetchHooks Function({
+            bool siteId,
+            bool targetId,
+            bool rigId,
+            bool captureBlocksRefs,
+          })
         > {
   $$SessionLogsTableTableManager(_$AppDatabase db, $SessionLogsTable table)
     : super(
@@ -7628,6 +9295,22 @@ class $$SessionLogsTableTableManager
                 Value<int?> rejectedFrames = const Value.absent(),
                 Value<String?> environmentalNotes = const Value.absent(),
                 Value<String?> processingNotes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<bool> legacy = const Value.absent(),
+                Value<String?> eveningDate = const Value.absent(),
+                Value<String?> timeZoneId = const Value.absent(),
+                Value<int?> siteId = const Value.absent(),
+                Value<int?> targetId = const Value.absent(),
+                Value<int?> rigId = const Value.absent(),
+                Value<int?> createdAtUtcMs = const Value.absent(),
+                Value<int?> updatedAtUtcMs = const Value.absent(),
+                Value<int?> plannedAtUtcMs = const Value.absent(),
+                Value<int?> startedAtUtcMs = const Value.absent(),
+                Value<int?> completedAtUtcMs = const Value.absent(),
+                Value<Map<String, Object?>?> planSnapshot =
+                    const Value.absent(),
+                Value<Map<String, Object?>?> executionStartSnapshot =
+                    const Value.absent(),
               }) => SessionLogsCompanion(
                 id: id,
                 targetName: targetName,
@@ -7649,6 +9332,20 @@ class $$SessionLogsTableTableManager
                 rejectedFrames: rejectedFrames,
                 environmentalNotes: environmentalNotes,
                 processingNotes: processingNotes,
+                status: status,
+                legacy: legacy,
+                eveningDate: eveningDate,
+                timeZoneId: timeZoneId,
+                siteId: siteId,
+                targetId: targetId,
+                rigId: rigId,
+                createdAtUtcMs: createdAtUtcMs,
+                updatedAtUtcMs: updatedAtUtcMs,
+                plannedAtUtcMs: plannedAtUtcMs,
+                startedAtUtcMs: startedAtUtcMs,
+                completedAtUtcMs: completedAtUtcMs,
+                planSnapshot: planSnapshot,
+                executionStartSnapshot: executionStartSnapshot,
               ),
           createCompanionCallback:
               ({
@@ -7672,6 +9369,22 @@ class $$SessionLogsTableTableManager
                 Value<int?> rejectedFrames = const Value.absent(),
                 Value<String?> environmentalNotes = const Value.absent(),
                 Value<String?> processingNotes = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<bool> legacy = const Value.absent(),
+                Value<String?> eveningDate = const Value.absent(),
+                Value<String?> timeZoneId = const Value.absent(),
+                Value<int?> siteId = const Value.absent(),
+                Value<int?> targetId = const Value.absent(),
+                Value<int?> rigId = const Value.absent(),
+                Value<int?> createdAtUtcMs = const Value.absent(),
+                Value<int?> updatedAtUtcMs = const Value.absent(),
+                Value<int?> plannedAtUtcMs = const Value.absent(),
+                Value<int?> startedAtUtcMs = const Value.absent(),
+                Value<int?> completedAtUtcMs = const Value.absent(),
+                Value<Map<String, Object?>?> planSnapshot =
+                    const Value.absent(),
+                Value<Map<String, Object?>?> executionStartSnapshot =
+                    const Value.absent(),
               }) => SessionLogsCompanion.insert(
                 id: id,
                 targetName: targetName,
@@ -7693,6 +9406,20 @@ class $$SessionLogsTableTableManager
                 rejectedFrames: rejectedFrames,
                 environmentalNotes: environmentalNotes,
                 processingNotes: processingNotes,
+                status: status,
+                legacy: legacy,
+                eveningDate: eveningDate,
+                timeZoneId: timeZoneId,
+                siteId: siteId,
+                targetId: targetId,
+                rigId: rigId,
+                createdAtUtcMs: createdAtUtcMs,
+                updatedAtUtcMs: updatedAtUtcMs,
+                plannedAtUtcMs: plannedAtUtcMs,
+                startedAtUtcMs: startedAtUtcMs,
+                completedAtUtcMs: completedAtUtcMs,
+                planSnapshot: planSnapshot,
+                executionStartSnapshot: executionStartSnapshot,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -7702,40 +9429,97 @@ class $$SessionLogsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({captureBlocksRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (captureBlocksRefs) db.captureBlocks,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (captureBlocksRefs)
-                    await $_getPrefetchedData<
-                      SessionLog,
-                      $SessionLogsTable,
-                      CaptureBlock
-                    >(
-                      currentTable: table,
-                      referencedTable: $$SessionLogsTableReferences
-                          ._captureBlocksRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$SessionLogsTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).captureBlocksRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.sessionLogId == item.id,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({
+                siteId = false,
+                targetId = false,
+                rigId = false,
+                captureBlocksRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (captureBlocksRefs) db.captureBlocks,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (siteId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.siteId,
+                            referencedTable: $$SessionLogsTableReferences
+                                ._siteIdTable(db),
+                            referencedColumn: $$SessionLogsTableReferences
+                                ._siteIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (targetId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.targetId,
+                            referencedTable: $$SessionLogsTableReferences
+                                ._targetIdTable(db),
+                            referencedColumn: $$SessionLogsTableReferences
+                                ._targetIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (rigId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.rigId,
+                            referencedTable: $$SessionLogsTableReferences
+                                ._rigIdTable(db),
+                            referencedColumn: $$SessionLogsTableReferences
+                                ._rigIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (captureBlocksRefs)
+                        await $_getPrefetchedData<
+                          SessionLog,
+                          $SessionLogsTable,
+                          CaptureBlock
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SessionLogsTableReferences
+                              ._captureBlocksRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SessionLogsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).captureBlocksRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.sessionLogId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -7752,7 +9536,12 @@ typedef $$SessionLogsTableProcessedTableManager =
       $$SessionLogsTableUpdateCompanionBuilder,
       (SessionLog, $$SessionLogsTableReferences),
       SessionLog,
-      PrefetchHooks Function({bool captureBlocksRefs})
+      PrefetchHooks Function({
+        bool siteId,
+        bool targetId,
+        bool rigId,
+        bool captureBlocksRefs,
+      })
     >;
 typedef $$CaptureBlocksTableCreateCompanionBuilder =
     CaptureBlocksCompanion Function({
@@ -7767,6 +9556,8 @@ typedef $$CaptureBlocksTableCreateCompanionBuilder =
       Value<String?> calibrationPolicy,
       Value<String> gainKind,
       Value<double?> gainValue,
+      Value<int> completedFrames,
+      Value<int> rejectedFrames,
     });
 typedef $$CaptureBlocksTableUpdateCompanionBuilder =
     CaptureBlocksCompanion Function({
@@ -7781,6 +9572,8 @@ typedef $$CaptureBlocksTableUpdateCompanionBuilder =
       Value<String?> calibrationPolicy,
       Value<String> gainKind,
       Value<double?> gainValue,
+      Value<int> completedFrames,
+      Value<int> rejectedFrames,
     });
 
 final class $$CaptureBlocksTableReferences
@@ -7869,6 +9662,16 @@ class $$CaptureBlocksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get completedFrames => $composableBuilder(
+    column: $table.completedFrames,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$SessionLogsTableFilterComposer get sessionLogId {
     final $$SessionLogsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -7952,6 +9755,16 @@ class $$CaptureBlocksTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get completedFrames => $composableBuilder(
+    column: $table.completedFrames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SessionLogsTableOrderingComposer get sessionLogId {
     final $$SessionLogsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -8023,6 +9836,16 @@ class $$CaptureBlocksTableAnnotationComposer
   GeneratedColumn<double> get gainValue =>
       $composableBuilder(column: $table.gainValue, builder: (column) => column);
 
+  GeneratedColumn<int> get completedFrames => $composableBuilder(
+    column: $table.completedFrames,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rejectedFrames => $composableBuilder(
+    column: $table.rejectedFrames,
+    builder: (column) => column,
+  );
+
   $$SessionLogsTableAnnotationComposer get sessionLogId {
     final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -8086,6 +9909,8 @@ class $$CaptureBlocksTableTableManager
                 Value<String?> calibrationPolicy = const Value.absent(),
                 Value<String> gainKind = const Value.absent(),
                 Value<double?> gainValue = const Value.absent(),
+                Value<int> completedFrames = const Value.absent(),
+                Value<int> rejectedFrames = const Value.absent(),
               }) => CaptureBlocksCompanion(
                 id: id,
                 sessionLogId: sessionLogId,
@@ -8098,6 +9923,8 @@ class $$CaptureBlocksTableTableManager
                 calibrationPolicy: calibrationPolicy,
                 gainKind: gainKind,
                 gainValue: gainValue,
+                completedFrames: completedFrames,
+                rejectedFrames: rejectedFrames,
               ),
           createCompanionCallback:
               ({
@@ -8112,6 +9939,8 @@ class $$CaptureBlocksTableTableManager
                 Value<String?> calibrationPolicy = const Value.absent(),
                 Value<String> gainKind = const Value.absent(),
                 Value<double?> gainValue = const Value.absent(),
+                Value<int> completedFrames = const Value.absent(),
+                Value<int> rejectedFrames = const Value.absent(),
               }) => CaptureBlocksCompanion.insert(
                 id: id,
                 sessionLogId: sessionLogId,
@@ -8124,6 +9953,8 @@ class $$CaptureBlocksTableTableManager
                 calibrationPolicy: calibrationPolicy,
                 gainKind: gainKind,
                 gainValue: gainValue,
+                completedFrames: completedFrames,
+                rejectedFrames: rejectedFrames,
               ),
           withReferenceMapper: (p0) => p0
               .map(

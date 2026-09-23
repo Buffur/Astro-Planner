@@ -22,18 +22,22 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
+// Later schema versions add their own groups (v11-v16), each with an
+// every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
 
 import 'dart:io';
 
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:astroplan/data/database/app_database.dart';
+import 'package:astroplan/data/database/json_map_converter.dart';
+import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/data/database/generated_migrations/schema.dart';
@@ -118,6 +122,261 @@ void main() {
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
       await db.close();
+    });
+  });
+
+  group('TASK 11.2: v16 (Session aggregate, ADR-014)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15]) {
+      test('v$from -> v16 matches the v16 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 16);
+        await db.close();
+      });
+    }
+
+    // Acceptance: legacy logs are still listed.
+    test(
+      'v15 -> v16: every log becomes a completed, read-only legacy '
+      'session with its values and blocks kept, and is still listed',
+      () async {
+        final schema = await verifier.schemaAt(15);
+        final raw = schema.rawDatabase;
+        raw.execute(
+          "INSERT INTO session_logs (id, target_name, equipment_name, "
+          "session_date, location_name, planned_light_frames, "
+          "actual_light_frames, processing_notes) VALUES "
+          "(1, 'M31', 'Rig A', 1790000000, 'Home', 40, 35, 'good'), "
+          "(2, 'M42', 'Rig B', 1790100000, NULL, 10, NULL, NULL);",
+        );
+        raw.execute(
+          "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+          "filter_name, exposure_time_seconds, frame_count, position) VALUES "
+          "(1, 1, 'light', 'L', 120.0, 40, 0), "
+          "(2, 1, 'dark', NULL, 120.0, 20, 1);",
+        );
+
+        final db = AppDatabase(schema.newConnection());
+        final rows = await (db.select(
+          db.sessionLogs,
+        )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+        expect(rows, hasLength(2));
+        for (final r in rows) {
+          expect(r.status, 'completed');
+          expect(r.legacy, isTrue);
+          expect(r.eveningDate, isNull);
+          expect(r.timeZoneId, isNull);
+          expect(r.siteId, isNull, reason: 'never guessed from names');
+          expect(r.targetId, isNull, reason: 'never guessed from names');
+          expect(r.rigId, isNull, reason: 'never guessed from names');
+          expect(r.createdAtUtcMs, isNull);
+          expect(r.planSnapshot, isNull);
+          expect(r.executionStartSnapshot, isNull);
+        }
+        expect(rows.first.targetName, 'M31');
+        expect(rows.first.actualLightFrames, 35);
+        expect(rows.first.processingNotes, 'good');
+
+        final blocks = await db.select(db.captureBlocks).get();
+        expect(blocks, hasLength(2));
+        expect(blocks.every((b) => b.completedFrames == 0), isTrue);
+        expect(blocks.every((b) => b.rejectedFrames == 0), isTrue);
+        expect(blocks.first.frameCount, 40);
+
+        final logs = await DriftLogbookRepository(db).getAllLogs();
+        expect(logs.map((l) => l.targetName), ['M42', 'M31']);
+        expect(logs.last.captureBlocks, hasLength(2));
+        await db.close();
+      },
+    );
+
+    group('on a fresh v16 database', () {
+      late AppDatabase db;
+      setUp(() => db = AppDatabase(NativeDatabase.memory()));
+      tearDown(() => db.close());
+
+      Future<int> session({int? siteId, int? targetId, int? rigId}) => db
+          .into(db.sessionLogs)
+          .insert(
+            SessionLogsCompanion.insert(
+              targetName: 'M31',
+              equipmentName: 'Rig',
+              sessionDate: DateTime.utc(2026, 9, 24),
+              plannedLightFrames: 10,
+              status: const Value('planned'),
+              eveningDate: const Value('2026-09-24'),
+              timeZoneId: const Value('Europe/Ljubljana'),
+              siteId: Value(siteId),
+              targetId: Value(targetId),
+              rigId: Value(rigId),
+              createdAtUtcMs: Value(
+                DateTime.utc(2026, 9, 24, 12).millisecondsSinceEpoch,
+              ),
+            ),
+          );
+
+      Future<SessionLog> read(int id) => (db.select(
+        db.sessionLogs,
+      )..where((t) => t.id.equals(id))).getSingle();
+
+      test('a new row is a draft, not legacy, with zero counters', () async {
+        final id = await db
+            .into(db.sessionLogs)
+            .insert(
+              SessionLogsCompanion.insert(
+                targetName: 'M31',
+                equipmentName: 'Rig',
+                sessionDate: DateTime.utc(2026, 9, 24),
+                plannedLightFrames: 0,
+              ),
+            );
+        final row = await read(id);
+        expect(row.status, 'draft');
+        expect(row.legacy, isFalse);
+        await db
+            .into(db.captureBlocks)
+            .insert(
+              CaptureBlocksCompanion.insert(
+                sessionLogId: id,
+                frameType: 'light',
+                exposureTimeSeconds: 60,
+                frameCount: 10,
+              ),
+            );
+        final block = await db.select(db.captureBlocks).getSingle();
+        expect(block.completedFrames, 0);
+        expect(block.rejectedFrames, 0);
+      });
+
+      test('an unknown status is rejected by the CHECK constraint', () async {
+        await expectLater(
+          () => db.customStatement(
+            "INSERT INTO session_logs (target_name, equipment_name, "
+            "session_date, planned_light_frames, status) "
+            "VALUES ('x', 'y', 0, 0, 'done');",
+          ),
+          throwsA(anything),
+        );
+      });
+
+      test('deleting a site, target or rig keeps the session and clears '
+          'only that reference (SET NULL)', () async {
+        final siteId = await db
+            .into(db.locationProfiles)
+            .insert(
+              LocationProfilesCompanion.insert(
+                name: 'Home',
+                latitude: 46.05,
+                longitude: 14.51,
+                elevation: 300,
+              ),
+            );
+        final targetId = await db
+            .into(db.astroTargets)
+            .insert(
+              AstroTargetsCompanion.insert(
+                catalogId: 'M31',
+                rightAscension: 10.68,
+                declination: 41.27,
+                type: 'Galaxy',
+              ),
+            );
+        final deviceId = await db
+            .into(db.devices)
+            .insert(DevicesCompanion.insert(name: 'Camera'));
+        final cameraId = await db
+            .into(db.cameraModules)
+            .insert(
+              CameraModulesCompanion.insert(
+                deviceId: deviceId,
+                name: 'Sensor',
+                sensorWidthMm: 23.5,
+                sensorHeightMm: 15.6,
+                resolutionWidthPx: 6000,
+                resolutionHeightPx: 4000,
+                pixelPitchUm: 3.76,
+              ),
+            );
+        final rigId = await db
+            .into(db.opticalRigs)
+            .insert(
+              OpticalRigsCompanion.insert(
+                name: 'Rig',
+                cameraModuleId: cameraId,
+                focalLengthMm: 400,
+                aperture: 5,
+              ),
+            );
+        final id = await session(
+          siteId: siteId,
+          targetId: targetId,
+          rigId: rigId,
+        );
+
+        await (db.delete(
+          db.astroTargets,
+        )..where((t) => t.id.equals(targetId))).go();
+        var row = await read(id);
+        expect(row.targetId, isNull);
+        expect(row.siteId, siteId);
+        expect(row.rigId, rigId);
+
+        await (db.delete(
+          db.locationProfiles,
+        )..where((t) => t.id.equals(siteId))).go();
+        await (db.delete(
+          db.opticalRigs,
+        )..where((t) => t.id.equals(rigId))).go();
+        row = await read(id);
+        expect(row.siteId, isNull);
+        expect(row.rigId, isNull);
+        expect(row.status, 'planned');
+        expect(row.targetName, 'M31', reason: 'the session itself survives');
+      });
+
+      test('snapshots round-trip as JSON; unreadable text reads as an empty '
+          'map, never an error', () async {
+        final id = await session();
+        final snapshot = <String, Object?>{
+          'v': 1,
+          'takenAtUtcMs': 1790000000000,
+          'site': {'name': 'Home', 'latitudeDeg': 46.05, 'bortle': null},
+          'windows': [
+            {'startUtcMs': 1, 'endUtcMs': 2},
+          ],
+        };
+        await (db.update(db.sessionLogs)..where((t) => t.id.equals(id))).write(
+          SessionLogsCompanion(planSnapshot: Value(snapshot)),
+        );
+        expect((await read(id)).planSnapshot, snapshot);
+        expect((await read(id)).executionStartSnapshot, isNull);
+
+        await db.customStatement(
+          "UPDATE session_logs SET execution_start_snapshot = 'not json' "
+          'WHERE id = $id;',
+        );
+        expect((await read(id)).executionStartSnapshot, isEmpty);
+        expect(const JsonMapConverter().fromSql('[1, 2]'), isEmpty);
+      });
+
+      test('updating a log through the logbook repository keeps the v16 '
+          'columns', () async {
+        final id = await session();
+        await (db.update(db.sessionLogs)..where((t) => t.id.equals(id))).write(
+          const SessionLogsCompanion(planSnapshot: Value({'v': 1})),
+        );
+        final repo = DriftLogbookRepository(db);
+        final log = (await repo.getAllLogs()).single;
+        await repo.updateLog(log.copyWith(targetName: 'M31 (renamed)'));
+
+        final row = await read(id);
+        expect(row.targetName, 'M31 (renamed)');
+        expect(row.status, 'planned');
+        expect(row.eveningDate, '2026-09-24');
+        expect(row.timeZoneId, 'Europe/Ljubljana');
+        expect(row.planSnapshot, {'v': 1});
+        expect(row.createdAtUtcMs, isNotNull);
+      });
     });
   });
 

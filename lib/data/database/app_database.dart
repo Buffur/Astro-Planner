@@ -9,6 +9,7 @@ import 'tables/equipment_foundation_tables.dart';
 import 'tables/locations_table.dart';
 import 'tables/targets_table.dart';
 
+import 'json_map_converter.dart';
 import 'schema_versions.dart';
 
 part 'app_database.g.dart';
@@ -75,8 +76,20 @@ class CaptureBlocks extends Table {
   // gain_iso column in v11.
   TextColumn get gainKind => text().withDefault(const Constant('unknown'))();
   RealColumn get gainValue => real().nullable()();
+
+  // TASK 11.2 (v16, ADR-014 §2): execution counters. The planned count is
+  // the existing frame_count; these start at 0 (nothing captured yet). For
+  // legacy sessions (session_logs.legacy) they carry no information.
+  IntColumn get completedFrames => integer().withDefault(const Constant(0))();
+  IntColumn get rejectedFrames => integer().withDefault(const Constant(0))();
 }
 
+/// The Session aggregate root (ADR-014; evolved in place in v16, TASK
+/// 11.2). The columns up to `processing_notes` are the pre-v16 log and stay
+/// for legacy rows; new code writes the v16 columns.
+@TableIndex(name: 'session_logs_status', columns: {#status})
+@TableIndex(name: 'session_logs_evening_date', columns: {#eveningDate})
+@TableIndex(name: 'session_logs_target_id', columns: {#targetId})
 class SessionLogs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get targetName => text()();
@@ -103,6 +116,66 @@ class SessionLogs extends Table {
   IntColumn get rejectedFrames => integer().nullable()();
   TextColumn get environmentalNotes => text().nullable()();
   TextColumn get processingNotes => text().nullable()();
+
+  // --- TASK 11.2 (v16, ADR-014) -------------------------------------------
+
+  /// draft | planned | inProgress | completed | abandoned (ADR-014 §3).
+  // Drift's documented column-CHECK pattern: the generator reads the
+  // expression; the getter is never evaluated recursively at run time.
+  TextColumn get status => text()
+      .check(
+        // ignore: recursive_getters
+        status.isIn(const [
+          'draft',
+          'planned',
+          'inProgress',
+          'completed',
+          'abandoned',
+        ]),
+      )
+      .withDefault(const Constant('draft'))();
+
+  /// True for rows saved before v16 (ADR-014 §7): completed, read-only,
+  /// shown from the text columns above; no snapshot, no references.
+  BoolColumn get legacy => boolean().withDefault(const Constant(false))();
+
+  /// Night key (ADR-014 §2): the civil evening date `YYYY-MM-DD` and the zone
+  /// id it was resolved in; NULL for legacy rows.
+  TextColumn get eveningDate => text().nullable()();
+  TextColumn get timeZoneId => text().nullable()();
+
+  /// Stable references (ADR-014 §2): deleting a source never deletes or
+  /// blocks a session.
+  IntColumn get siteId => integer().nullable().references(
+    LocationProfiles,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+  IntColumn get targetId => integer().nullable().references(
+    AstroTargets,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+  IntColumn get rigId => integer().nullable().references(
+    OpticalRigs,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+
+  /// Lifecycle instants, UTC epoch milliseconds; NULL = not reached (or
+  /// unknown for legacy rows).
+  IntColumn get createdAtUtcMs => integer().nullable()();
+  IntColumn get updatedAtUtcMs => integer().nullable()();
+  IntColumn get plannedAtUtcMs => integer().nullable()();
+  IntColumn get startedAtUtcMs => integer().nullable()();
+  IntColumn get completedAtUtcMs => integer().nullable()();
+
+  /// Versioned JSON snapshots (ADR-014 §4): the plan (refreshed on each
+  /// Save) and the execution start (frozen).
+  TextColumn get planSnapshot =>
+      text().nullable().map(const JsonMapConverter())();
+  TextColumn get executionStartSnapshot =>
+      text().nullable().map(const JsonMapConverter())();
 }
 
 @DriftDatabase(
@@ -120,7 +193,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration {
@@ -319,6 +392,45 @@ class AppDatabase extends _$AppDatabase {
                 await m.addColumn(cams, cams.confidence);
                 await m.addColumn(rigs, rigs.source);
                 await m.addColumn(rigs, rigs.confidence);
+              },
+              from15To16: (m, schema) async {
+                // TASK 11.2 (ADR-014): session_logs becomes the Session
+                // aggregate root, evolved in place. Additive only: every
+                // stored value is kept. References are nullable with
+                // ON DELETE SET NULL (never guessed from the old name
+                // columns, owner decision).
+                final sessions = schema.sessionLogs;
+                for (final column in [
+                  sessions.status,
+                  sessions.legacy,
+                  sessions.eveningDate,
+                  sessions.timeZoneId,
+                  sessions.siteId,
+                  sessions.targetId,
+                  sessions.rigId,
+                  sessions.createdAtUtcMs,
+                  sessions.updatedAtUtcMs,
+                  sessions.plannedAtUtcMs,
+                  sessions.startedAtUtcMs,
+                  sessions.completedAtUtcMs,
+                  sessions.planSnapshot,
+                  sessions.executionStartSnapshot,
+                ]) {
+                  await m.addColumn(sessions, column);
+                }
+                // ADR-014 §7 (owner): every existing row is a completed,
+                // read-only legacy session.
+                await m.database.customStatement(
+                  "UPDATE session_logs SET status = 'completed', legacy = 1;",
+                );
+
+                final blocks = schema.captureBlocks;
+                await m.addColumn(blocks, blocks.completedFrames);
+                await m.addColumn(blocks, blocks.rejectedFrames);
+
+                await m.create(schema.sessionLogsStatus);
+                await m.create(schema.sessionLogsEveningDate);
+                await m.create(schema.sessionLogsTargetId);
               },
             ),
           );
