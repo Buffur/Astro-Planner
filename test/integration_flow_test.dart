@@ -24,6 +24,8 @@ import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'support/fake_location_service.dart';
 import 'support/no_snapshot_weather.dart';
 
+import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
+
 class MockWeatherRepository
     with NoSnapshotWeather
     implements WeatherRepository {}
@@ -119,8 +121,11 @@ void main() {
         providers: [
           Provider<AppDatabase>.value(value: database),
           Provider<TargetRepository>.value(value: targetRepo),
+          ChangeNotifierProvider(create: (_) => TargetsViewModel(targetRepo)),
           Provider<EquipmentRepository>.value(value: equipmentRepo),
+          ChangeNotifierProvider(create: (_) => GearViewModel(equipmentRepo)),
           Provider<SessionRepository>.value(value: sessionRepo),
+          ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
           Provider<LocationRepository>.value(value: locationRepo),
           ChangeNotifierProvider.value(value: plannerViewModel),
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
@@ -200,8 +205,13 @@ void main() {
           providers: [
             Provider<AppDatabase>.value(value: database),
             Provider<TargetRepository>.value(value: targetRepo),
+            ChangeNotifierProvider(create: (_) => TargetsViewModel(targetRepo)),
             Provider<EquipmentRepository>.value(value: equipmentRepo),
+            ChangeNotifierProvider(create: (_) => GearViewModel(equipmentRepo)),
             Provider<SessionRepository>.value(value: sessionRepo),
+            ChangeNotifierProvider(
+              create: (_) => SessionsViewModel(sessionRepo),
+            ),
             Provider<LocationRepository>.value(value: locationRepo),
             ChangeNotifierProvider.value(value: plannerViewModel),
             ChangeNotifierProvider(create: (_) => ThemeViewModel()),

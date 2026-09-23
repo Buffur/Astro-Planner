@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/session.dart';
-import '../../../domain/repositories/session_repository.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../navigation/app_router.dart';
 import '../../viewmodels/planner_viewmodel.dart';
@@ -31,17 +31,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
   }
 
   void _refresh() {
-    final repo = context.read<SessionRepository>();
+    final sessions = context.read<SessionsViewModel>();
     setState(() {
-      _sessionsFuture = repo.list().then(
-        (all) => [
-          for (final s in all)
-            if (s.legacy ||
-                s.status != SessionStatus.draft ||
-                s.plannedAtUtc != null)
-              s,
-        ],
-      );
+      _sessionsFuture = sessions.saved();
     });
   }
 
@@ -114,7 +106,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
                   );
                 },
                 onDismissed: (_) async {
-                  await context.read<SessionRepository>().delete(session.id);
+                  await context.read<SessionsViewModel>().delete(session.id);
                   _refresh();
                 },
                 child: Card(

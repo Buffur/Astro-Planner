@@ -14,6 +14,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
 
 class _MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
   @override
@@ -27,6 +28,7 @@ void main() {
   Widget wrap() => MultiProvider(
     providers: [
       Provider<SessionRepository>.value(value: repo),
+      ChangeNotifierProvider(create: (_) => SessionsViewModel(repo)),
       ChangeNotifierProvider<PlannerViewModel>(
         create: (_) => _MockPlannerViewModel(),
       ),

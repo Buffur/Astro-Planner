@@ -8,6 +8,7 @@ import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
 
 class MockEquipmentRepository implements EquipmentRepository {
   final List<EquipmentProfile> _profiles = [];
@@ -60,6 +61,7 @@ void main() {
     return MultiProvider(
       providers: [
         Provider<EquipmentRepository>.value(value: repo),
+        ChangeNotifierProvider(create: (_) => GearViewModel(repo)),
         ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
       ],
       child: const MaterialApp(home: EquipmentSelectionScreen()),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../domain/repositories/session_repository.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 import 'home_screen.dart';
 
@@ -27,13 +27,13 @@ class _SessionPlannerRouteState extends State<SessionPlannerRoute> {
     final id = int.tryParse(widget.id);
     final vm = context.read<PlannerViewModel>();
     if (id != null && id != vm.activeSessionId) {
-      _opening = _open(vm, context.read<SessionRepository>(), id);
+      _opening = _open(vm, context.read<SessionsViewModel>(), id);
     }
   }
 
   static Future<void> _open(
     PlannerViewModel vm,
-    SessionRepository sessions,
+    SessionsViewModel sessions,
     int id,
   ) async {
     await vm.ready;

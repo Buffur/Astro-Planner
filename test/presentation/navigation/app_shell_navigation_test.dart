@@ -32,6 +32,8 @@ import '../../support/fake_reverse_geocoder.dart';
 import '../../support/no_snapshot_weather.dart';
 import '../../support/route_paths.dart';
 
+import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
+
 class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
@@ -78,13 +80,20 @@ void main() {
         providers: [
           Provider<AppDatabase>.value(value: db),
           Provider<TargetRepository>.value(value: DriftTargetRepository(db)),
+          ChangeNotifierProvider(
+            create: (_) => TargetsViewModel(DriftTargetRepository(db)),
+          ),
           Provider<EquipmentRepository>.value(
             value: DriftEquipmentRepository(db),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => GearViewModel(DriftEquipmentRepository(db)),
           ),
           Provider<LocationRepository>.value(
             value: DriftLocationRepository(db),
           ),
           Provider<SessionRepository>.value(value: sessions),
+          ChangeNotifierProvider(create: (_) => SessionsViewModel(sessions)),
           ChangeNotifierProvider.value(value: vm),
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],

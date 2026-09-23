@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/astro_math.dart';
-import '../../../domain/repositories/target_repository.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/target_form_input.dart';
@@ -37,8 +37,8 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
   }
 
   Future<void> _loadTargets() async {
-    final repo = context.read<TargetRepository>();
-    final results = await repo.searchTargets(_searchQuery);
+    final targets = context.read<TargetsViewModel>();
+    final results = await targets.search(_searchQuery);
     if (mounted) {
       setState(() {
         _targets = results;
@@ -206,7 +206,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     if (!formKey.currentState!.validate()) return;
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
-                    final repo = context.read<TargetRepository>();
+                    final targets = context.read<TargetsViewModel>();
                     final target = AstroTarget.userEdit(
                       original: existing,
                       name: name,
@@ -223,9 +223,9 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       magnitude: TargetFormInput.optionalNumber(magCtrl.text),
                     );
                     if (isEdit) {
-                      await repo.updateTarget(target);
+                      await targets.update(target);
                     } else {
-                      await repo.insertTarget(target);
+                      await targets.add(target);
                     }
                     if (context.mounted) Navigator.of(context).pop();
                   },
@@ -249,7 +249,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final repo = context.read<TargetRepository>();
+    final targets = context.read<TargetsViewModel>();
     final planner = context.watch<PlannerViewModel>();
 
     return Scaffold(
@@ -370,7 +370,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    await repo.deleteTarget(target.id);
+                    await targets.delete(target.id);
                     // Remove instantly from in-memory list — no flicker.
                     setState(
                       () => _targets.removeWhere((t) => t.id == target.id),

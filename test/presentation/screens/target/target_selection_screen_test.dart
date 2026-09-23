@@ -5,6 +5,7 @@ import 'package:astroplan/presentation/screens/target/target_selection_screen.da
 import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
 
 class MockTargetRepository implements TargetRepository {
   final List<AstroTarget> _targets = [];
@@ -59,6 +60,7 @@ void main() {
     return MultiProvider(
       providers: [
         Provider<TargetRepository>.value(value: repo),
+        ChangeNotifierProvider(create: (_) => TargetsViewModel(repo)),
         ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
       ],
       child: const MaterialApp(home: TargetSelectionScreen()),

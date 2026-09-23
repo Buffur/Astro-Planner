@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../domain/repositories/equipment_repository.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/spec_confidence.dart';
@@ -32,8 +32,8 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
   }
 
   Future<void> _loadEquipment() async {
-    final repo = context.read<EquipmentRepository>();
-    final results = await repo.getAllEquipment();
+    final gear = context.read<GearViewModel>();
+    final results = await gear.all();
     if (mounted) {
       setState(() {
         _equipment = results;
@@ -526,7 +526,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     if (!formKey.currentState!.validate()) return;
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;
-                    final repo = context.read<EquipmentRepository>();
+                    final gear = context.read<GearViewModel>();
                     final focal = EquipmentFormInput.parse(focalCtrl.text)!;
                     final diameterText = diameterCtrl.text.trim();
                     final aperture = resolveAperture(
@@ -580,9 +580,9 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     // TASK 8.5: changed specs become the user's own.
                     final recorded = profile.withEditProvenance(existing);
                     if (isEdit) {
-                      await repo.updateEquipment(recorded);
+                      await gear.update(recorded);
                     } else {
-                      await repo.insertEquipment(recorded);
+                      await gear.add(recorded);
                     }
                     if (context.mounted) Navigator.of(context).pop();
                   },
@@ -606,7 +606,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final repo = context.read<EquipmentRepository>();
+    final gear = context.read<GearViewModel>();
     final planner = context.watch<PlannerViewModel>();
 
     return Scaffold(
@@ -693,7 +693,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    await repo.deleteEquipment(eq.id);
+                    await gear.delete(eq.id);
                     setState(
                       () => _equipment.removeWhere((e) => e.id == eq.id),
                     );

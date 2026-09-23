@@ -21,6 +21,7 @@ import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
 import 'data/services/geolocator_location_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
+import 'presentation/viewmodels/library_viewmodels.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,9 +58,12 @@ void main() async {
       providers: [
         Provider<AppDatabase>.value(value: database),
         Provider<TargetRepository>.value(value: targetRepo),
+        ChangeNotifierProvider(create: (_) => TargetsViewModel(targetRepo)),
         Provider<EquipmentRepository>.value(value: equipmentRepo),
+        ChangeNotifierProvider(create: (_) => GearViewModel(equipmentRepo)),
         Provider<WeatherRepository>.value(value: weatherRepo),
         Provider<SessionRepository>.value(value: sessionRepo),
+        ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
         Provider<LocationRepository>.value(value: locationRepo),
         ChangeNotifierProvider(
           create: (_) => PlannerViewModel(
