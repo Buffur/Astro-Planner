@@ -74,6 +74,31 @@ void main() {
     expect(_total(vm), greaterThan(astronomical));
   });
 
+  // TASK 10.2: the fit's windows are the imaging-opportunity windows.
+  test(
+    'the Moon gate removes Moon-up time from the windows and the fit',
+    () async {
+      final before = _total(vm);
+      final opportunity = vm.imagingOpportunity!;
+      expect(opportunity.visibilityWindows, vm.visibilityWindows);
+      expect(
+        opportunity.windows.any((w) => !w.moon!.moonDown),
+        isTrue,
+        reason: 'a waxing gibbous Moon is up on this March evening',
+      );
+
+      await vm.setPlanningPreferences(
+        vm.planningPreferences.copyWith(
+          moonGateEnabled: true,
+          moonGateMinIlluminationPct: 0,
+        ),
+      );
+      final after = _total(vm);
+      expect(after, lessThan(before));
+      expect(vm.fitAnalysis.availableMs, after.inMilliseconds);
+    },
+  );
+
   test('the minimum altitude preference changes the windows', () async {
     final at20 = _total(vm);
     await vm.setPlanningPreferences(

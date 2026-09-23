@@ -23,6 +23,10 @@ class SharedPrefsPlanningPreferencesRepository
   static const _flip = 'meridianFlipSeconds';
   static const _setup = 'setupMinutes';
   static const _npfK = 'npfK';
+  static const _moonGate = 'moonGateEnabled';
+  static const _moonGatePct = 'moonGateMinIlluminationPct';
+  static const _cloudGate = 'cloudGateEnabled';
+  static const _cloudGatePct = 'cloudGateMaxPct';
 
   @override
   Future<PlanningPreferences> load() async {
@@ -51,6 +55,12 @@ class SharedPrefsPlanningPreferencesRepository
       meridianFlipSeconds: p.getDouble(_flip),
       setupMinutes: p.getDouble(_setup),
       npfK: p.getDouble(_npfK) ?? PlanningPreferences.defaultNpfK,
+      moonGateEnabled: p.getBool(_moonGate) ?? false,
+      moonGateMinIlluminationPct:
+          p.getDouble(_moonGatePct) ?? PlanningPreferences.defaultGatePct,
+      cloudGateEnabled: p.getBool(_cloudGate) ?? false,
+      cloudGateMaxPct:
+          p.getDouble(_cloudGatePct) ?? PlanningPreferences.defaultGatePct,
     );
   }
 
@@ -65,6 +75,10 @@ class SharedPrefsPlanningPreferencesRepository
     await p.setDouble(_ditherSettle, preferences.ditherSettleSeconds);
     await p.setDouble(_refocus, preferences.refocusSeconds);
     await p.setDouble(_npfK, preferences.npfK);
+    await p.setBool(_moonGate, preferences.moonGateEnabled);
+    await p.setDouble(_moonGatePct, preferences.moonGateMinIlluminationPct);
+    await p.setBool(_cloudGate, preferences.cloudGateEnabled);
+    await p.setDouble(_cloudGatePct, preferences.cloudGateMaxPct);
     await _setOrRemoveInt(p, _ditherEvery, preferences.ditherEveryNFrames);
     await _setOrRemove(p, _refocusEvery, preferences.refocusEveryMinutes);
     await _setOrRemove(p, _filterChange, preferences.filterChangeSeconds);

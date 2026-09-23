@@ -30,6 +30,8 @@ import '../../data/repositories/shared_prefs_weather_snapshot_store.dart';
 import '../../domain/models/night_weather.dart';
 import '../../domain/services/night_weather_service.dart';
 import '../../domain/services/night_weather_summarizer.dart';
+import '../../domain/models/imaging_opportunity.dart';
+import '../../domain/services/imaging_opportunity_calculator.dart';
 import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
@@ -716,16 +718,58 @@ class PlannerViewModel extends ChangeNotifier {
     return VisibilityCalculator.calculateNightTimelineForNight(night);
   }
 
-  List<VisibilityWindow> get visibilityWindows {
+  /// The imaging windows of [imagingOpportunity] — the budget fit's input
+  /// since TASK 10.2 (the same windows as before while the optional gates
+  /// are off). Empty without a night or target.
+  List<VisibilityWindow> get visibilityWindows =>
+      imagingOpportunity?.visibilityWindows ?? const [];
+
+  /// When and why the selected target can be imaged tonight (ADR-013, TASK
+  /// 10.2): gates, windows with Moon/weather annotations, reasons for the
+  /// excluded time. Null without a night or target. Cached per input.
+  ImagingOpportunity? get imagingOpportunity {
     final night = sessionNight;
-    if (night == null || _selectedTarget == null) return [];
-    return VisibilityCalculator.calculateVisibilityWindowsForNight(
-      night: night,
-      target: _selectedTarget!,
-      minAltitude: _preferences.minAltitudeDeg,
-      darknessLimitDeg: _preferences.darknessLimit.degrees,
+    final target = _selectedTarget;
+    if (night == null || target == null) return null;
+    final weather = _nightWeather;
+    final key = (
+      night,
+      target.rightAscension,
+      target.declination,
+      _preferences,
+      weather,
+      _activeSite,
+      _bortleClass,
     );
+    if (_opportunityKey != key) {
+      if (_sunTrack?.night != night) _sunTrack = SunTrack.forNight(night);
+      _opportunity = ImagingOpportunityCalculator.calculate(
+        night: night,
+        target: target,
+        darknessLimitDeg: _preferences.darknessLimit.degrees,
+        minAltitudeDeg: _preferences.minAltitudeDeg,
+        sunTrack: _sunTrack,
+        gates: _preferences.optionalGates,
+        moon: moonConditions,
+        weather: weather is NightWeatherAvailable
+            ? OpportunityWeather(
+                snapshot: weather.snapshot,
+                age: weather.age,
+                dewMarginC: _preferences.dewMarginC,
+              )
+            : null,
+        skyDarkness: skyDarkness,
+      );
+      _opportunityKey = key;
+    }
+    return _opportunity;
   }
+
+  Object? _opportunityKey;
+  ImagingOpportunity? _opportunity;
+
+  /// The Sun on the current night's grid, shared by every target (TASK 10.2).
+  SunTrack? _sunTrack;
 
   /// Moon context for [sessionNight] and the selected target (ADR-010,
   /// TASK 6.4), or null without a site. Cached per night and target: it
@@ -865,6 +909,11 @@ class PlannerViewModel extends ChangeNotifier {
       noWindowReason = "Choose a location to see tonight's windows.";
     } else if (_selectedTarget == null) {
       noWindowReason = "Choose a target to see tonight's windows.";
+    } else if (imagingOpportunity?.noWindowReason ==
+        NoWindowReason.excludedByOptionalGates) {
+      noWindowReason =
+          'No usable window: your Moon or cloud gate excludes all of '
+          "tonight's dark time with the target high enough.";
     } else {
       noWindowReason = FitAnalyzer.noWindowReason(
         timeline: nightTimeline!,

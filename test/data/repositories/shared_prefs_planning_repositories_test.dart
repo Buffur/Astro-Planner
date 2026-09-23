@@ -58,6 +58,29 @@ void main() {
       expect(PlanningPreferences(npfK: 0).npfK, 1.0);
     });
 
+    // TASK 10.2: the optional Moon and cloud gates (ADR-013 §2).
+    test('optional gates are off by default and round-trip', () async {
+      SharedPreferences.setMockInitialValues({});
+      final loaded = await repo.load();
+      expect(loaded.moonGateEnabled, isFalse);
+      expect(loaded.cloudGateEnabled, isFalse);
+      expect(loaded.optionalGates.moonMinIlluminationPct, isNull);
+      expect(loaded.optionalGates.cloudMaxPct, isNull);
+
+      final saved = PlanningPreferences(
+        moonGateEnabled: true,
+        moonGateMinIlluminationPct: 70,
+        cloudGateEnabled: true,
+        cloudGateMaxPct: 30,
+      );
+      await repo.save(saved);
+      final back = await repo.load();
+      expect(back, saved);
+      expect(back.optionalGates.moonMinIlluminationPct, 70);
+      expect(back.optionalGates.cloudMaxPct, 30);
+      expect(PlanningPreferences(cloudGateMaxPct: 150).cloudGateMaxPct, 100);
+    });
+
     test('out-of-range stored values are clamped on load', () async {
       SharedPreferences.setMockInitialValues({'minAltitude': 99.0});
       expect((await repo.load()).minAltitudeDeg, 60.0);

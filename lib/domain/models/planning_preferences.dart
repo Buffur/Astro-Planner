@@ -1,3 +1,5 @@
+import 'imaging_opportunity.dart';
+
 /// Sun-altitude limit that defines "dark enough" for imaging windows.
 ///
 /// These are preferences, not laws: −18° is astronomical darkness, and
@@ -39,6 +41,10 @@ class PlanningPreferences {
     double? meridianFlipSeconds,
     double? setupMinutes,
     double npfK = defaultNpfK,
+    bool moonGateEnabled = false,
+    double moonGateMinIlluminationPct = defaultGatePct,
+    bool cloudGateEnabled = false,
+    double cloudGateMaxPct = defaultGatePct,
   }) => PlanningPreferences._(
     minAltitudeDeg: _clamp(minAltitudeDeg, minAltitudeRange),
     darknessLimit: darknessLimit,
@@ -61,6 +67,13 @@ class PlanningPreferences {
         ? null
         : _clamp(setupMinutes, setupMinutesRange),
     npfK: _clamp(npfK, npfKRange),
+    moonGateEnabled: moonGateEnabled,
+    moonGateMinIlluminationPct: _clamp(
+      moonGateMinIlluminationPct,
+      gatePctRange,
+    ),
+    cloudGateEnabled: cloudGateEnabled,
+    cloudGateMaxPct: _clamp(cloudGateMaxPct, gatePctRange),
   );
 
   const PlanningPreferences._({
@@ -77,6 +90,10 @@ class PlanningPreferences {
     required this.meridianFlipSeconds,
     required this.setupMinutes,
     required this.npfK,
+    required this.moonGateEnabled,
+    required this.moonGateMinIlluminationPct,
+    required this.cloudGateEnabled,
+    required this.cloudGateMaxPct,
   });
 
   // Defaults (assumptions) ---------------------------------------------------
@@ -116,6 +133,11 @@ class PlanningPreferences {
   /// PD-11). The range is the source's.
   static const double defaultNpfK = 1.0;
   static const (double, double) npfKRange = (1.0, 3.0);
+
+  /// 50 %: the threshold pre-filled when the user switches the optional
+  /// Moon or cloud gate on (ADR-013 §2) — an assumption, not physics.
+  static const double defaultGatePct = 50.0;
+  static const (double, double) gatePctRange = (0.0, 100.0);
 
   // Fields -------------------------------------------------------------------
 
@@ -159,6 +181,22 @@ class PlanningPreferences {
   /// NPF k in use (see [defaultNpfK]).
   final double npfK;
 
+  /// Optional Moon gate (ADR-013 G4, off by default): exclude time when the
+  /// Moon is up and at least [moonGateMinIlluminationPct] % lit.
+  final bool moonGateEnabled;
+  final double moonGateMinIlluminationPct;
+
+  /// Optional cloud gate (ADR-013 G5, off by default): exclude hours whose
+  /// total cloud cover is above [cloudGateMaxPct] %.
+  final bool cloudGateEnabled;
+  final double cloudGateMaxPct;
+
+  /// The enabled optional gates, as the opportunity calculator takes them.
+  OptionalGates get optionalGates => OptionalGates(
+    moonMinIlluminationPct: moonGateEnabled ? moonGateMinIlluminationPct : null,
+    cloudMaxPct: cloudGateEnabled ? cloudGateMaxPct : null,
+  );
+
   /// The margin as a fraction in [0, 0.5].
   double get feasibilityMarginFraction => feasibilityMarginPercent / 100.0;
 
@@ -171,6 +209,10 @@ class PlanningPreferences {
     double? ditherSettleSeconds,
     double? refocusSeconds,
     double? npfK,
+    bool? moonGateEnabled,
+    double? moonGateMinIlluminationPct,
+    bool? cloudGateEnabled,
+    double? cloudGateMaxPct,
   }) => PlanningPreferences(
     minAltitudeDeg: minAltitudeDeg ?? this.minAltitudeDeg,
     darknessLimit: darknessLimit ?? this.darknessLimit,
@@ -187,6 +229,11 @@ class PlanningPreferences {
     meridianFlipSeconds: meridianFlipSeconds,
     setupMinutes: setupMinutes,
     npfK: npfK ?? this.npfK,
+    moonGateEnabled: moonGateEnabled ?? this.moonGateEnabled,
+    moonGateMinIlluminationPct:
+        moonGateMinIlluminationPct ?? this.moonGateMinIlluminationPct,
+    cloudGateEnabled: cloudGateEnabled ?? this.cloudGateEnabled,
+    cloudGateMaxPct: cloudGateMaxPct ?? this.cloudGateMaxPct,
   );
 
   /// Copy with optional overheads switched on or off. Pass a value to switch
@@ -219,6 +266,10 @@ class PlanningPreferences {
         : this.meridianFlipSeconds,
     setupMinutes: setupMinutes != null ? setupMinutes.$1 : this.setupMinutes,
     npfK: npfK,
+    moonGateEnabled: moonGateEnabled,
+    moonGateMinIlluminationPct: moonGateMinIlluminationPct,
+    cloudGateEnabled: cloudGateEnabled,
+    cloudGateMaxPct: cloudGateMaxPct,
   );
 
   static double _clamp(double value, (double, double) range) {
@@ -241,7 +292,11 @@ class PlanningPreferences {
       filterChangeSeconds == other.filterChangeSeconds &&
       meridianFlipSeconds == other.meridianFlipSeconds &&
       setupMinutes == other.setupMinutes &&
-      npfK == other.npfK;
+      npfK == other.npfK &&
+      moonGateEnabled == other.moonGateEnabled &&
+      moonGateMinIlluminationPct == other.moonGateMinIlluminationPct &&
+      cloudGateEnabled == other.cloudGateEnabled &&
+      cloudGateMaxPct == other.cloudGateMaxPct;
 
   @override
   int get hashCode => Object.hash(
@@ -258,5 +313,9 @@ class PlanningPreferences {
     meridianFlipSeconds,
     setupMinutes,
     npfK,
+    moonGateEnabled,
+    moonGateMinIlluminationPct,
+    cloudGateEnabled,
+    cloudGateMaxPct,
   );
 }
