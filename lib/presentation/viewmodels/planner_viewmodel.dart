@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:http/http.dart' as http;
 
 import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
@@ -28,7 +26,9 @@ import '../../data/repositories/shared_prefs_planner_state_repository.dart';
 import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
 import '../../data/repositories/light_pollution_repository.dart';
 import '../../data/services/geolocator_location_service.dart';
+import '../../data/services/nominatim_reverse_geocoder.dart';
 import '../../domain/services/location_service.dart';
+import '../../domain/services/reverse_geocoder.dart';
 import '../../domain/services/session_night_resolver.dart';
 import '../../domain/services/visibility_calculator.dart';
 import '../../domain/services/optical_calculator.dart';
@@ -45,6 +45,7 @@ class PlannerViewModel extends ChangeNotifier {
   final LocationRepository _locationRepository;
   final LightPollutionRepository _lightPollutionRepository;
   final LocationService _locationService;
+  final ReverseGeocoder _reverseGeocoder;
   final Clock _clock;
   final PlanningPreferencesRepository _preferencesRepository;
   final PlannerStateRepository _stateRepository;
@@ -70,6 +71,7 @@ class PlannerViewModel extends ChangeNotifier {
   WeatherConditions? _currentWeather;
   bool _weatherError = false;
   String? _locationName;
+  String? _locationNameAttribution;
 
   /// The evening date the user picked, or null to use the default (the
   /// night containing "now"; ADR-007 §5). Cleared by [newSession].
@@ -106,10 +108,12 @@ class PlannerViewModel extends ChangeNotifier {
     this._locationRepository,
     this._lightPollutionRepository, {
     LocationService? locationService,
+    ReverseGeocoder? reverseGeocoder,
     Clock? clock,
     PlanningPreferencesRepository? preferencesRepository,
     PlannerStateRepository? stateRepository,
   }) : _locationService = locationService ?? GeolocatorLocationService(),
+       _reverseGeocoder = reverseGeocoder ?? NominatimReverseGeocoder(),
        _clock = clock ?? const SystemClock(),
        _preferencesRepository =
            preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
@@ -241,7 +245,14 @@ class PlannerViewModel extends ChangeNotifier {
   /// [currentWeather] being null, which can also mean "not loaded yet".
   bool get weatherError => _weatherError;
 
+  /// Place name of the current position from the [ReverseGeocoder], or null
+  /// while unknown (not looked up yet, no name for the point, or the lookup
+  /// failed).
   String? get locationName => _locationName;
+
+  /// The attribution the place-name source requires wherever [locationName]
+  /// is shown (e.g. "© OpenStreetMap contributors"); null with no name.
+  String? get locationNameAttribution => _locationNameAttribution;
 
   /// The current [SessionNight], or null when there is no site to resolve
   /// one for (ADR-007 §9: "when no site is set, there is no SessionNight").
@@ -330,32 +341,26 @@ class PlannerViewModel extends ChangeNotifier {
     await setPlanningPreferences(_preferences.copyWith(minAltitudeDeg: value));
   }
 
-  /// Resolves lat/lon to a human-readable city/town name via Open-Meteo geocoding.
-  /// Uses the free Open-Meteo reverse geocoding endpoint — no API key required.
+  /// Looks up a place name for the position through the [ReverseGeocoder]
+  /// (TASK 7.2). Best-effort: a failure leaves the name unknown and is logged,
+  /// and an answer for a position the user has since moved away from is
+  /// ignored.
   Future<void> _reverseGeocode(double lat, double lon) async {
-    try {
-      final uri = Uri.parse(
-        'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json&accept-language=en',
-      );
-      final response = await http
-          .get(uri, headers: {'User-Agent': 'AstroPlan/1.0'})
-          .timeout(const Duration(seconds: 6));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final address = data['address'] as Map<String, dynamic>?;
-        if (address != null) {
-          _locationName =
-              address['city'] as String? ??
-              address['town'] as String? ??
-              address['village'] as String? ??
-              address['county'] as String? ??
-              address['state'] as String?;
-          notifyListeners();
-        }
-      }
-    } catch (_) {
-      // Reverse geocoding is best-effort — silently fail
+    final result = await _reverseGeocoder.placeNameFor(lat, lon);
+    if (lat != _latitude || lon != _longitude) return;
+    switch (result) {
+      case PlaceNameFound(:final name, :final attribution):
+        _locationName = name;
+        _locationNameAttribution = attribution;
+      case PlaceNameNotFound():
+        _locationName = null;
+        _locationNameAttribution = null;
+      case ReverseGeocodeFailed(:final reason):
+        _locationName = null;
+        _locationNameAttribution = null;
+        debugPrint('Reverse geocoding failed: $reason');
     }
+    notifyListeners();
   }
 
   /// The (currently never-succeeding, TD-006) online Bortle lookup. Its
@@ -378,6 +383,8 @@ class PlannerViewModel extends ChangeNotifier {
     _usingDefaultLocation = false;
     _activeSite = null;
     _bortleClass = null;
+    _locationName = null;
+    _locationNameAttribution = null;
     await _stateRepository.clearActiveLocationId();
     await _stateRepository.setTransientPosition(lat, lon);
     await _fetchWeather();
@@ -385,13 +392,29 @@ class PlannerViewModel extends ChangeNotifier {
     unawaited(_fetchBortle(lat, lon));
   }
 
-  Future<void> useCurrentLocation() async {
-    final position = await _locationService.getCurrentLocation();
-    if (position == null) {
-      return;
+  /// Asks the [LocationService] for the device position without using it,
+  /// e.g. for the location picker to preview before the user confirms.
+  Future<LocationResult> locateDevice() =>
+      _locationService.getCurrentLocation();
+
+  /// Makes the device position the (transient) current position. On a
+  /// [LocationUnavailable] nothing changes; the result says why, so the
+  /// caller can explain it.
+  Future<LocationResult> useCurrentLocation() async {
+    final result = await locateDevice();
+    if (result is LocationFound) {
+      await setLocation(result.location.latitude, result.location.longitude);
     }
-    await setLocation(position.latitude, position.longitude);
+    return result;
   }
+
+  /// Opens the device's location settings ([LocationFailure.serviceDisabled]).
+  Future<bool> openLocationSettings() =>
+      _locationService.openLocationSettings();
+
+  /// Opens the app's settings page
+  /// ([LocationFailure.permissionDeniedForever]).
+  Future<bool> openAppSettings() => _locationService.openAppSettings();
 
   Future<void> refreshWeather() => _fetchWeather(forceRefresh: true);
 

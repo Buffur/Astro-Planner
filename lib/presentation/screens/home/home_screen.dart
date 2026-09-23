@@ -194,6 +194,9 @@ class HomeScreen extends StatelessWidget {
                                       .toStringAsFixed(4),
                                   'Longitude': viewModel.longitude
                                       .toStringAsFixed(4),
+                                  if (viewModel.locationNameAttribution != null)
+                                    'Place name':
+                                        viewModel.locationNameAttribution!,
                                 },
                                 onTap: () => context.push('/location'),
                               ),

@@ -6,6 +6,14 @@
 //     ViewModel keeps its default coordinates, saves no location, and does not
 //     throw
 //   - a position from the service becomes the active location
+//   - TASK 7.2: each permission outcome is reported, never silently ignored;
+//     settings pages open through the service; place names come from the
+//     ReverseGeocoder with their attribution; a failure leaves the name
+//     unknown; a stale answer is ignored; no http/geolocator import in
+//     presentation or domain
+
+import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
@@ -19,9 +27,11 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_conditions.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/location_service.dart';
+import 'package:astroplan/domain/services/reverse_geocoder.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
 
 import '../../support/fake_location_service.dart';
+import '../../support/fake_reverse_geocoder.dart';
 
 class _MockWeather implements WeatherRepository {
   @override
@@ -53,7 +63,10 @@ void main() {
     await database.close();
   });
 
-  PlannerViewModel buildViewModel(FakeLocationService service) {
+  PlannerViewModel buildViewModel(
+    FakeLocationService service, {
+    ReverseGeocoder? geocoder,
+  }) {
     return PlannerViewModel(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
@@ -61,6 +74,7 @@ void main() {
       locationRepo,
       _NoBortle(),
       locationService: service,
+      reverseGeocoder: geocoder ?? FakeReverseGeocoder(),
     );
   }
 
@@ -141,4 +155,150 @@ void main() {
       },
     );
   });
+
+  group('Location and geocoding services (TASK 7.2)', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    for (final failure in LocationFailure.values) {
+      test('$failure is reported and changes nothing', () async {
+        final vm = buildViewModel(FakeLocationService(failure: failure));
+        await vm.ready;
+
+        final result = await vm.useCurrentLocation();
+
+        expect(result, isA<LocationUnavailable>());
+        expect((result as LocationUnavailable).reason, failure);
+        expect(vm.isDefaultLocation, isTrue);
+        expect(vm.latitude, 51.5072);
+      });
+    }
+
+    test('granted: the fix is reported and used', () async {
+      final vm = buildViewModel(
+        FakeLocationService(
+          location: const DeviceLocation(latitude: 46.05, longitude: 14.51),
+        ),
+      );
+      await vm.ready;
+
+      final result = await vm.useCurrentLocation();
+
+      expect(result, isA<LocationFound>());
+      expect(vm.latitude, 46.05);
+      expect(vm.longitude, 14.51);
+      expect(vm.isDefaultLocation, isFalse);
+    });
+
+    test('locateDevice previews the fix without using it', () async {
+      final vm = buildViewModel(
+        FakeLocationService(
+          location: const DeviceLocation(latitude: 46.05, longitude: 14.51),
+        ),
+      );
+      await vm.ready;
+      await vm.setLocation(40.0, -3.7);
+
+      final result = await vm.locateDevice();
+
+      expect(result, isA<LocationFound>());
+      expect(vm.latitude, 40.0);
+    });
+
+    test('settings pages open through the service', () async {
+      final service = FakeLocationService();
+      final vm = buildViewModel(service);
+      await vm.ready;
+
+      await vm.openLocationSettings();
+      await vm.openAppSettings();
+
+      expect(service.locationSettingsOpened, 1);
+      expect(service.appSettingsOpened, 1);
+    });
+
+    test('a place name comes with its attribution', () async {
+      final geocoder = FakeReverseGeocoder(
+        result: const PlaceNameFound(
+          'Ljubljana',
+          attribution: '© OpenStreetMap contributors',
+        ),
+      );
+      final vm = buildViewModel(FakeLocationService(), geocoder: geocoder);
+      await vm.ready;
+
+      await vm.setLocation(46.05, 14.51);
+      await pumpEventQueue();
+
+      expect(geocoder.lookups.last, (46.05, 14.51));
+      expect(vm.locationName, 'Ljubljana');
+      expect(vm.locationNameAttribution, '© OpenStreetMap contributors');
+    });
+
+    test('a failed lookup leaves the name unknown, not stale', () async {
+      final geocoder = FakeReverseGeocoder(
+        result: const PlaceNameFound('Ljubljana', attribution: 'OSM'),
+      );
+      final vm = buildViewModel(FakeLocationService(), geocoder: geocoder);
+      await vm.ready;
+      await vm.setLocation(46.05, 14.51);
+      await pumpEventQueue();
+      expect(vm.locationName, 'Ljubljana');
+
+      geocoder.result = const ReverseGeocodeFailed('offline');
+      await vm.setLocation(40.0, -3.7);
+      await pumpEventQueue();
+
+      expect(vm.locationName, isNull);
+      expect(vm.locationNameAttribution, isNull);
+    });
+
+    test('an answer for a position the user left is ignored', () async {
+      final slow = _ControlledGeocoder();
+      final vm = buildViewModel(FakeLocationService(), geocoder: slow);
+      await vm.ready;
+
+      await vm.setLocation(46.05, 14.51); // lookup A pending
+      await vm.setLocation(40.0, -3.7); // lookup B pending
+      slow.answer(1, const PlaceNameFound('Madrid', attribution: 'OSM'));
+      slow.answer(0, const PlaceNameFound('Ljubljana', attribution: 'OSM'));
+      await pumpEventQueue();
+
+      expect(vm.locationName, 'Madrid');
+    });
+
+    // TASK 7.2 acceptance.
+    test('no http or geolocator import in presentation or domain', () {
+      final offenders =
+          [
+                ...Directory('lib/presentation').listSync(recursive: true),
+                ...Directory('lib/domain').listSync(recursive: true),
+              ]
+              .whereType<File>()
+              .where((f) => f.path.endsWith('.dart'))
+              .where((f) {
+                final source = f.readAsStringSync();
+                return source.contains('package:http/') ||
+                    source.contains('package:geolocator/');
+              })
+              .map((f) => f.path)
+              .toList();
+      expect(offenders, isEmpty);
+    });
+  });
+}
+
+/// A geocoder whose answers the test releases by hand, in any order.
+class _ControlledGeocoder implements ReverseGeocoder {
+  final List<Completer<ReverseGeocodeResult>> _pending = [];
+
+  @override
+  Future<ReverseGeocodeResult> placeNameFor(double latitude, double longitude) {
+    final completer = Completer<ReverseGeocodeResult>();
+    _pending.add(completer);
+    return completer.future;
+  }
+
+  /// Completes the [index]-th lookup made after startup's own lookup.
+  void answer(int index, ReverseGeocodeResult result) =>
+      _pending[index + 1].complete(result);
 }

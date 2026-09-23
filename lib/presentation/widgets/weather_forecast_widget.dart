@@ -59,21 +59,35 @@ class WeatherForecastWidget extends StatelessWidget {
                             ),
                             Builder(
                               builder: (ctx) {
-                                final name = ctx
-                                    .watch<PlannerViewModel>()
-                                    .locationName;
+                                final vm = ctx.watch<PlannerViewModel>();
+                                final name = vm.locationName;
+                                final attribution = vm.locationNameAttribution;
                                 final updateStr = weather.lastUpdated != null
                                     ? ' • Updated: ${_formatTime(weather.lastUpdated!)}'
                                     : '';
-                                return Text(
-                                  name != null
-                                      ? '$name$updateStr'
-                                      : 'Tap to set location$updateStr',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.textTheme.bodySmall?.color
-                                        ?.withValues(alpha: 0.75),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                                final style = theme.textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: theme.textTheme.bodySmall?.color
+                                          ?.withValues(alpha: 0.75),
+                                    );
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      name != null
+                                          ? '$name$updateStr'
+                                          : 'Tap to set location$updateStr',
+                                      style: style,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // Required with a place name (TASK 7.2).
+                                    if (name != null && attribution != null)
+                                      Text(
+                                        'Place name $attribution',
+                                        style: style,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                  ],
                                 );
                               },
                             ),

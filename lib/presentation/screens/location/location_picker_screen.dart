@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/app_identity.dart';
+import '../../../domain/services/location_service.dart';
+import '../../shared/coordinate_input.dart';
+import '../../shared/location_failure_text.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
 class LocationPickerScreen extends StatefulWidget {
@@ -27,40 +31,63 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    final viewModel = context.read<PlannerViewModel>();
     setState(() => _isLoadingLocation = true);
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        throw Exception('Location services are disabled.');
+      final result = await viewModel.locateDevice();
+      if (!mounted) return;
+      switch (result) {
+        case LocationFound(:final location):
+          _moveTo(LatLng(location.latitude, location.longitude), zoom: 10.0);
+        case LocationUnavailable(:final reason):
+          _showLocationFailure(viewModel, reason);
       }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          throw Exception('Location permissions are denied');
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        throw Exception('Location permissions are permanently denied.');
-      }
-
-      final position = await Geolocator.getCurrentPosition();
-      final newLoc = LatLng(position.latitude, position.longitude);
-
-      setState(() {
-        _selectedLocation = newLoc;
-      });
-      _mapController.move(newLoc, 10.0);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not get your position: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
     }
+  }
+
+  void _showLocationFailure(
+    PlannerViewModel viewModel,
+    LocationFailure reason,
+  ) {
+    final target = LocationFailureText.settingsTarget(reason);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(LocationFailureText.message(reason)),
+        duration: const Duration(seconds: 8),
+        action: target == null
+            ? null
+            : SnackBarAction(
+                label: 'Open settings',
+                onPressed: () => switch (target) {
+                  LocationSettingsTarget.locationSettings =>
+                    viewModel.openLocationSettings(),
+                  LocationSettingsTarget.appSettings =>
+                    viewModel.openAppSettings(),
+                },
+              ),
+      ),
+    );
+  }
+
+  void _moveTo(LatLng point, {double? zoom}) {
+    setState(() => _selectedLocation = point);
+    _mapController.move(point, zoom ?? _mapController.camera.zoom);
+  }
+
+  Future<void> _enterCoordinates() async {
+    final point = await showDialog<LatLng>(
+      context: context,
+      builder: (_) => _CoordinateEntryDialog(initial: _selectedLocation),
+    );
+    if (point != null && mounted) _moveTo(point);
   }
 
   void _saveLocation() {
@@ -80,6 +107,11 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       appBar: AppBar(
         title: const Text('Select Location'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_location_alt),
+            tooltip: 'Enter coordinates',
+            onPressed: _enterCoordinates,
+          ),
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: _selectedLocation != null ? _saveLocation : null,
@@ -102,7 +134,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.astroplan',
+                userAgentPackageName: AppIdentity.packageName,
               ),
               if (_selectedLocation != null)
                 MarkerLayer(
@@ -119,6 +151,15 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                     ),
                   ],
                 ),
+              // OpenStreetMap tile usage policy: visible attribution linking
+              // to the copyright page. Bottom-left, clear of the FAB.
+              SimpleAttributionWidget(
+                alignment: Alignment.bottomLeft,
+                source: const Text('OpenStreetMap contributors'),
+                onTap: () => launchUrl(
+                  Uri.parse('https://www.openstreetmap.org/copyright'),
+                ),
+              ),
             ],
           ),
           if (_isLoadingLocation)
@@ -137,6 +178,88 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         icon: const Icon(Icons.my_location),
         label: const Text('Current Location'),
       ),
+    );
+  }
+}
+
+/// Typed latitude/longitude entry (TASK 7.2): works offline, without the map
+/// tiles or a location permission.
+class _CoordinateEntryDialog extends StatefulWidget {
+  const _CoordinateEntryDialog({this.initial});
+
+  final LatLng? initial;
+
+  @override
+  State<_CoordinateEntryDialog> createState() => _CoordinateEntryDialogState();
+}
+
+class _CoordinateEntryDialogState extends State<_CoordinateEntryDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _latitude = TextEditingController(
+    text: widget.initial?.latitude.toStringAsFixed(5),
+  );
+  late final TextEditingController _longitude = TextEditingController(
+    text: widget.initial?.longitude.toStringAsFixed(5),
+  );
+
+  @override
+  void dispose() {
+    _latitude.dispose();
+    _longitude.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.of(context).pop(
+      LatLng(
+        CoordinateInput.parse(_latitude.text)!,
+        CoordinateInput.parse(_longitude.text)!,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const keyboard = TextInputType.numberWithOptions(
+      signed: true,
+      decimal: true,
+    );
+    return AlertDialog(
+      title: const Text('Enter coordinates'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _latitude,
+              decoration: const InputDecoration(
+                labelText: 'Latitude (°)',
+                helperText: 'Decimal degrees, north positive',
+              ),
+              keyboardType: keyboard,
+              validator: CoordinateInput.validateLatitude,
+            ),
+            TextFormField(
+              controller: _longitude,
+              decoration: const InputDecoration(
+                labelText: 'Longitude (°)',
+                helperText: 'Decimal degrees, east positive',
+              ),
+              keyboardType: keyboard,
+              validator: CoordinateInput.validateLongitude,
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(onPressed: _submit, child: const Text('Use')),
+      ],
     );
   }
 }
