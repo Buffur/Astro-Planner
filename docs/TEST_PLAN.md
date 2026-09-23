@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **535 tests: 535 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.3) |
+| `flutter test --no-pub` | **547 tests: 547 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -586,3 +586,24 @@ the ADR-012 variables, and a real out-of-range error):
 - **ViewModel (`planner_night_weather_test.dart`, 2):** idle without a site (no
   request); with a site the night forecast loads, then comes from the cache with its
   age when offline.
+
+**Changed by TASK 9.4** (night-aligned weather indicators and UI), +15 / −3 tests (547):
+- **Summary (`night_weather_summarizer_test.dart`, 10):** slots cover every UTC hour
+  overlapping sunset..sunrise; ranges use only covered hours inside the night and
+  ignore missing values (never 0); missing hours are "no forecast"; dew spread flagged
+  at the margin boundary (spread = margin is a risk), unknown without both values; the
+  configured margin is used; span: normal night, a window edge standing in for a
+  missing sunset, midnight sun and polar night (whole window, labelled), a real
+  Ljubljana night; the acceptance — a night 5 days ahead shows its own hours, and
+  another night's hours never stand in for it.
+- **Card (`weather_forecast_widget_test.dart`, 5):** sunset-to-sunrise label, zone
+  caption, age, model, ranges with units, "no forecast" for unknown variables, dew
+  heuristic with the margin, attribution; offline with a 15 h cache is "Stale" and
+  "Offline, showing the cached forecast", never "Updated"; unavailable with Retry;
+  out of range; the acceptance — a night 5 days ahead shows its own hours, or "No
+  forecast for these hours."
+- **Home (`home_screen_test.dart`):** the weather-failure test now uses a saved site
+  and a failing `fetchSnapshot` (the forecast needs a night).
+- **Removed:** `open_meteo_weather_repository_test.dart` (3 tests of the legacy
+  `getCurrentWeather` and its cache), deleted with that code by owner decision; the
+  new path is covered by `open_meteo_forecast_test.dart` and the service/store tests.

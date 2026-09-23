@@ -58,6 +58,7 @@
 > **TASK 9.1 (2026-09-23, documentation only, no code changed):** ADR-012 (weather provider, variables, alignment and staleness) accepted in Part F of DECISIONS; PD-15 resolved. Owner decisions: Open-Meteo `best_match` with the model recorded and shown; staleness 3 h / 12 h; only the chosen night's hours are used, uncovered hours shown as "no forecast". Also decided: UTC (`timeformat=unixtime`), a horizon of at most 16 days, the variable list with visibility labelled horizontal visibility (not transparency), CC BY 4.0 attribution, seeing and transparency deferred, no weather score. No status changed (F-29–F-31 are implemented in 9.2–9.4).
 > **TASK 9.2 (2026-09-23):** `WeatherSnapshot` (provider, model, fetch time UTC, site, hourly `WeatherHour` values for the ADR-012 variables, each nullable) and a pure `OpenMeteoForecastParser` for `timeformat=unixtime` responses (GMT+0 epochs → UTC instants; nulls/short arrays → unknown; provider errors → typed failures). `WeatherRepository.fetchSnapshot` requests exactly the night's `[startUtc, endUtc)` with `best_match`, capped at the 16-day horizon. Tested on recorded fixtures. The current weather card still uses the legacy `getCurrentWeather` path until TASKs 9.3–9.4. F-29 updated (still Partial).
 > **TASK 9.3 (2026-09-23):** weather caching, freshness and failure states. `NightWeatherService` (domain, Clock-driven) uses a cached snapshot younger than 3 h, otherwise fetches and caches; out of range is its own state; a failed refresh returns the cache with its age and the failure, or unavailable without a cache — cached data is never presented as current. Freshness constants `WeatherFreshness` (aging 3 h, stale 12 h); sealed `NightWeather` state; `WeatherSnapshotStore` (SharedPreferences in the data layer) keyed by rounded coordinates, model and night. `PlannerViewModel.nightWeather` loads on the existing weather triggers; the card still shows the legacy path until TASK 9.4. F-29 updated (still Partial until the UI uses it).
+> **TASK 9.4 (2026-09-23, commit `48d7a8c`):** night-aligned weather indicators and UI. `NightWeatherSummarizer` (pure, domain) slices the forecast to sunset..sunrise of the chosen night (the whole window, labelled, for midnight sun or polar night), one slot per UTC hour with "no forecast" gaps, per-variable ranges over the covered hours, and the dew spread (temperature − dew point) against the configured margin, labelled a heuristic (CALC-32). The weather card is rewritten on `vm.nightWeather` / `vm.nightWeatherSummary`: age and model, offline/stale labels, unavailable with retry, out of range, explicit units, hour strip in the site zone, no good/bad colour bands, Open-Meteo CC BY 4.0 attribution. Owner decisions: sunset to sunrise; neutral values; the legacy path removed (`getCurrentWeather`, `WeatherConditions`/`HourlyForecast`, the non-expiring cache, `currentWeather`/`weatherError`/`dewWarning`). **Group G9 is complete.** F-29, F-30, F-31 now Implemented.
 
 ## Status legend
 
@@ -111,9 +112,9 @@ feature exists although its roadmap phase has not been reached in
 | F-26 | NPF exposure recommendation | Implemented | 6 |
 | F-27 | Optical multipliers (reducer / Barlow) | Prototype | 6 |
 | F-28 | Storage estimate | Partial | 9 |
-| F-29 | Weather fetch and offline cache | Partial | 10 |
-| F-30 | Weather forecast display | Partial | 10 |
-| F-31 | Dew warning | Prototype | 10 |
+| F-29 | Weather fetch and offline cache | Implemented | 10 |
+| F-30 | Weather forecast display | Implemented | 10 |
+| F-31 | Dew warning | Implemented | 10 |
 | F-32 | Light-pollution auto-fetch (Bortle) | Deprecated (removed, TASK 7.4) | 11 (ahead) |
 | F-33 | Manual Bortle entry | Implemented | 11 (ahead) |
 | F-34 | External light-pollution map handoff | Implemented | 11 (ahead) |
@@ -404,6 +405,7 @@ see DATA_MODEL.md B2/B8.)
 # Weather and sky conditions
 
 ## F-29 — Weather fetch and offline cache
+- **TASK 9.4 (Implemented):** the card displays the night forecast (`vm.nightWeather`); the legacy `getCurrentWeather` path, its non-expiring cache and `WeatherConditions` are removed (owner decision). The known issues below describe the removed legacy path.
 - **TASK 9.3:** the night forecast is cached per site, model and night with its fetch time; freshness states (current / aging after 3 h / stale after 12 h), offline-cached, unavailable and out of range are modelled and tested (`NightWeatherService`, `vm.nightWeather`). Still Partial: not displayed until TASK 9.4 (the card shows the legacy path).
 - **TASK 9.2:** the night-aligned, UTC `fetchSnapshot` exists and is tested (recorded Open-Meteo fixtures; typed failures; horizon cap). Not yet used by the ViewModel or UI, and not cached — TASKs 9.3–9.4.
 - **Status:** Partial
@@ -414,7 +416,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 10 ("without breaking offline"). Tests: 3 repository tests with a mocked client.
 
 ## F-30 — Weather forecast display
-- **Status:** Partial
+- **TASK 9.4 (Implemented):** "Night weather" card on `vm.nightWeather`: sunset to sunrise of the chosen night (whole window, labelled, for midnight sun or polar night), times in the site zone with a caption; per-hour strip (cloud %, precipitation chance %, wind km/h, temperature °C, dew spread °C) with "no forecast" hours; night ranges for every ADR-012 variable with units (visibility labelled horizontal, not transparency; gusts as the preceding-hour maximum); age and model; offline/aging/stale labels; unavailable with retry; out of range; no good/bad colour bands; Open-Meteo CC BY 4.0 attribution with a link. Widget-tested. The issues below are resolved by this rewrite.
+- **Status:** Implemented (was Partial)
 - **Current implementation:** summary (temperature, cloud, wind) and a horizontal 48-hour strip (cloud, temperature, precipitation probability, humidity, wind).
 - **Relevant files:** `lib/presentation/widgets/weather_forecast_widget.dart`.
 - **Known issues:** strip begins at local midnight, not "now" or the imaging night; no highlight or summary of the dark window; dew point not shown; colour bands hard-coded (SI-006); no widget test.
@@ -422,8 +425,9 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 10.
 
 ## F-31 — Dew warning
-- **Status:** Prototype
-- **Current implementation:** `dewWarning` getter (temperature − dew point ≤ threshold, default 2.0 °C) and a persisted threshold.
+- **TASK 9.4 (Implemented):** shown on the weather card per hour and for the night: hours whose temperature − dew point spread is at or below the Settings margin, labelled a heuristic (CALC-32); unknown when either value is missing. The `dewWarning` getter below is removed.
+- **Status:** Implemented (was Prototype)
+- **Current implementation (before TASK 9.4):** `dewWarning` getter (temperature − dew point ≤ threshold, default 2.0 °C) and a persisted threshold.
 - **Relevant files:** `planner_viewmodel.dart:366-371,438-441`.
 - **Known issues:** **never displayed**; uses current weather. *Resolved (TASK 5.2):* the margin is editable in Settings, not the forecast for the session (SI-006).
 - **Dependencies:** F-29.

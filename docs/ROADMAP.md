@@ -369,8 +369,11 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 9.3** — weather cache (site/model/night), freshness
     states (3 h / 12 h), offline-cached, unavailable and out-of-range states. 535 tests
     green.
-  - **Next: TASK 9.4 — Night-aligned indicators and UI.** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 9.4** — night weather card (sunset to sunrise, ranges
+    with units, dew heuristic, age/model, states, attribution); legacy weather path
+    removed. 547 tests green. **Group G9 is complete.**
+  - **Next: TASK 10.1 — ADR: opportunity semantics (PD-17).** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 

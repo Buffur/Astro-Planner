@@ -52,6 +52,7 @@
 > **TASK 9.1 (2026-09-23, documentation only):** ADR-012 decides the weather part of SI-010 (UTC timestamps sliced to the chosen night) and the variable semantics (visibility is horizontal visibility, not transparency; gusts are a preceding-hour maximum; missing values unknown). Implementation: TASKs 9.2–9.4.
 > **TASK 9.2 (2026-09-23):** SI-010 (weather part) progress: forecast instants are now parsed as UTC from GMT+0 epoch seconds in the new snapshot path; the display still uses the legacy path until TASK 9.4.
 > **TASK 9.3 (2026-09-23):** no calculation changed; forecast age is computed from UTC instants with the injected Clock (freshness thresholds documented as assumptions, ADR-012 §6).
+> **TASK 9.4 (2026-09-23, commit `48d7a8c`):** CALC-32 registered (night weather summary and dew-spread heuristic). SI-010 weather part resolved (UTC hours sliced to the night, shown in the site zone). SI-006: the cloud colour bands are removed and the weather horizon is the night within 16 days; the dew margin is now shown in use.
 
 ## Purpose and authority
 
@@ -86,7 +87,7 @@ Correct Interpretation → Required Future Action.**
 | SI-007 | Bortle default vs unknown | **Resolved** (TASK 7.4) | TD-006 |
 | SI-008 | Unknown treated as zero / default presented as fact | Partial (storage/pixel-scale/example-plan/RA-Dec cases fixed TASK 4.4; Bortle/GPS defaults still open) | TD-013 |
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
-| SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
+| SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4; weather part TASK 9.4) — site-zone display still open | TD-020 |
 | SI-011 | Seed equipment data provenance and internal consistency | **Resolved** for shipped seeds (TASK 8.5) | TD-008 |
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
@@ -374,9 +375,9 @@ document constants).
 | Feasibility "tight" margin | required > 85 % of available | `session_calculator.dart:68` | No | Arbitrary safety margin |
 | Per-frame overhead | 5.0 s flat (live path) | `planner_viewmodel.dart:482` | No | Unsourced; real overhead includes download, dither/settle, autofocus, filter change, meridian flip |
 | Dead overhead model | 15 % of light time; flats 5 s; bias 1 s | `session_calculator.dart:30-48` | No | Unused by the app (see TD-022) |
-| Dew-point margin | default 2.0 °C | `planner_viewmodel.dart:42` | In ViewModel and persisted (`dewPointThreshold`), no UI; result not shown anywhere | Dew risk depends on optics surface temperature, wind and heaters, not ambient − dew point alone |
-| Cloud-cover colour bands | ≤ 20 green, ≤ 50 orange, else red | `weather_forecast_widget.dart:150-154` | No | Display heuristic only; not used in any calculation |
-| Weather horizon | first 48 hourly entries | `open_meteo_weather_repository.dart:44` | No | Data-window choice |
+| Dew-point margin | default 2.0 °C | `planner_viewmodel.dart:42` | In ViewModel and persisted (`dewPointThreshold`), no UI; result not shown anywhere | Dew risk depends on optics surface temperature, wind and heaters, not ambient − dew point alone. *(Editable in Settings since TASK 5.2; **shown since TASK 9.4** per hour and per night, labelled a heuristic — CALC-32.)* |
+| Cloud-cover colour bands | ≤ 20 green, ≤ 50 orange, else red | `weather_forecast_widget.dart:150-154` | No | Display heuristic only; not used in any calculation. **RESOLVED 2026-09-23 (TASK 9.4, owner decision):** removed; values are shown neutrally |
+| Weather horizon | first 48 hourly entries | `open_meteo_weather_repository.dart:44` | No | Data-window choice. **RESOLVED 2026-09-23 (TASKs 9.2–9.4):** the chosen night, sunset to sunrise, within the provider's 16-day horizon (ADR-012) |
 | Default Bortle class | 4 | `planner_viewmodel.dart:41`; DB default; `LocationProfile` default | Hidden (see SI-007) | See SI-007 |
 | Default location | London 51.5072, −0.1276 | `planner_viewmodel.dart:37-38` | Only via GPS/map | Used silently until GPS/permission succeeds (see SI-008) |
 | Time scan steps | 5 min (timeline, windows); 15 min (chart) | `visibility_calculator.dart:104,156`; `altitude_chart_widget.dart:132` | No | Quantization (see SI-009) |
@@ -607,6 +608,8 @@ SI-010 stays open under TD-020.
 
 **Progress 2026-09-23 (TASK 7.1):** the active site's IANA zone now drives the night identity (`IanaTimeContext`) and the display, fixing ADR-007 L1 for sites that have a zone; the IANA offsets agree hourly with the IANA-derived test fakes over 2026–2027.
 
+**Progress 2026-09-23 (TASK 9.4, commit `48d7a8c`):** the weather part is resolved — forecast hours are UTC instants (TASK 9.2), sliced to the chosen night (sunset to sunrise) and shown in the site zone with a caption; the legacy naive-time weather path is removed.
+
 **Status:** Resolved (default path; TASK 2.4). **Open remainder:** site
 time-zone display (TD-020, TASK 7.1). **Work items:** ~~TD-001~~ (resolved),
 TD-020.
@@ -771,6 +774,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-29 *(TASK 6.4)* | `MoonCalculator.conditionsForNight`, `separationFromTarget`, `angularSeparationDeg`; `MoonConditions` | `SessionNight`, optional target (J2000) | On the night's 5-min grid: topocentric Moon altitude (CALC-28); target precessed to date (CALC-27) and its altitude (CALC-07); topocentric separation by the vector form of Meeus ch. 17; closest approach where both altitudes > 0°; illumination at mean solar midnight | Target nutation/aberration ignored (20–40″); 5-min grid; annotations only | **reference:** separation within 0.05° of USNO (45 geocentric Moon–star pairs) and Horizons + USNO (135 topocentric pairs at 3 sites) | Good |
 | CALC-30 *(TASK 8.1)* | `AstroMath.parseRightAscension` / `parseDeclination` / `formatRightAscension` / `formatDeclination` | typed text → RA° [0, 360) / Dec° [−90, 90], or null; degrees → display text | RA° = 15·(h + m/60 + s/3600) (a bare number is hours; degrees need a `°`/`deg`/`d` suffix); Dec° = sign·(d + m/60 + s/3600), the sign applying to the whole value | Only the last field may be fractional; minutes/seconds < 60; RA < 24 h; \|Dec\| ≤ 90°; display resolution 0.1 s (RA) and 1″ (Dec), so the editor keeps an untouched field's stored value | `astro_math_coordinates_test.dart` (hand-computed values, round trips) | Good |
 | CALC-31 *(TASK 8.6)* | `CapabilityCalculator.evaluate` / `fieldMinimumDeclinationDeg` (`lib/domain/services/capability_calculator.dart`) | rig (mm, µm, N, tracking, max exposure s), optional target (δ°, size ′), k → FOV W/H/diag (°), pixel scale (″/px), NPF (s) with the |δ| used, recommended max sub (s), frame fill (fraction) | FOV = 2·atan(s/2f) (CALC for FOV); scale = 206.265·p/f; NPF per CALC (Michaud, SI-001) at |δ|min = max(0, |δ| − diag/2); recommendation = min(NPF, max exposure) when NPF applies (untracked, or unknown marked "if untracked"), else max exposure; fill = size / (60 · min(FOV W, H)) | Field rotation unknown → diagonal used (conservative); no refraction or atmospheric terms; guidance only | `capability_calculator_test.dart` (independent reference values), `capture_plan_widget_test.dart` (acceptance) | Good |
+| CALC-32 *(TASK 9.4)* | `NightWeatherSummarizer.spanOf` / `summarize` (`lib/domain/services/night_weather_summarizer.dart`) | `NightTimeline` (h = −0.833°), `WeatherSnapshot` (UTC hours), dew margin °C → interval, hourly slots, ranges | Interval = sunset..sunrise (window edge when outside the window; whole window for midnight sun / polar night); one slot per whole UTC hour overlapping it, matched to the forecast hour at the same instant (else "no forecast"); range = min/max over covered hours with a value; dew spread = T − Td (°C), risk when spread ≤ margin | The dew rule is a **heuristic**: dew on optics depends on surface temperature, wind and heaters, not ambient T − Td alone; the margin is a user preference (default 2 °C, an assumption); hourly values are instantaneous except gusts (preceding-hour max) | `night_weather_summarizer_test.dart` (hand-built vectors, boundary spread = margin, a real Ljubljana night, a night 5 days ahead) | Good |
 
 ---
 

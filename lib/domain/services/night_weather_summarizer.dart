@@ -52,8 +52,7 @@ abstract final class NightWeatherSummarizer {
   /// snapshot's hour at the same UTC instant ("no forecast" otherwise), and
   /// the per-variable ranges over the covered hours. A dew spread
   /// (temperature − dew point) at or below [dewMarginC] °C is flagged as a
-  /// dew risk — a heuristic (SI register CALC-18), unknown when either value
-  /// is missing.
+  /// dew risk — a heuristic (CALC-32), unknown when either value is missing.
   static NightWeatherSummary summarize(
     WeatherSnapshot snapshot, {
     required DateTime fromUtc,
