@@ -47,6 +47,7 @@
 > **TASK 6.5 (2026-09-22):** the NPF rule now follows F. Michaud's primary source (derivation on sahavre.fr), with an explicit k (default 1, range 1–3); the circular test is replaced by independent worked examples. Still hidden (PD-11). Group G6 is complete. F-26 Broken → Partial (correct but hidden); F-48 updated.
 > **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display. Affected entries: F-06, F-07, F-10, F-33, F-48.
 > **TASK 7.2 (2026-09-23):** location and geocoding behind domain interfaces. `LocationService` reports each permission outcome (`LocationFound`, or `LocationUnavailable` with `serviceDisabled` / `permissionDenied` / `permissionDeniedForever`) and opens the matching settings page; the location picker explains each outcome (rationale text + "Open settings") and no longer calls Geolocator. A `ReverseGeocoder` interface with a `NominatimReverseGeocoder` (identifying user agent `AstroPlan (com.astroplan.astroplan)`, at most 1 request/s, in-memory cache by coordinates rounded to 0.01°, failures reported, not cached) replaces the ViewModel's inline HTTP; OpenStreetMap attribution on the map and next to place names; the tile user agent is the real app id; typed coordinate entry works offline. No `http`/`geolocator` import in presentation or domain (test-enforced). F-06 updated (still Partial).
+> **TASK 7.3 (2026-09-23):** sites UI. A Sites screen (`/sites`) lists saved sites with the active one marked; sites can be selected, created, edited and deleted (with confirmation); "use current position" and "pick on map" set a transient position, which can be saved as a site. The site editor (`/sites/edit`) validates name, latitude/longitude (typed or picked on the map), elevation (m), an IANA zone picker defaulting to the device zone, and notes; Bortle/SQM with their source sit behind `FeatureScope.lightPollutionContext` until TASK 7.4. Owner decisions: `flutter_timezone` 5.1.0 (Apache-2.0) behind a domain `DeviceTimeZone` seam, only to pre-fill the zone picker; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. `IanaTimeContext` now loads the `latest_all` zone data set (the 10-year set has no link zones such as `Europe/Ljubljana`). F-07 Partial → Implemented; F-06 and F-10 updated.
 
 ## Status legend
 
@@ -78,7 +79,7 @@ feature exists although its roadmap phase has not been reached in
 | F-04 | Feature gating (`FeatureScope`) | Implemented *(TASK 4.3)* | governance |
 | F-05 | Seed data and first-run bootstrap | Partial *(bootstrap ordering fixed TASK 1.2)* | 4, 7 |
 | F-06 | Active location (GPS, map, reverse geocoding) | Partial | 8 |
-| F-07 | Saved locations management | Partial | 4 |
+| F-07 | Saved locations management | Implemented | 4 |
 | F-08 | Session date selection (picker) | Partial | 8 |
 | F-09 | Default "tonight" resolution | Implemented *(fixed TASK 2.4)* | 8 |
 | F-10 | Site time-zone handling | Partial | 8 |
@@ -123,7 +124,7 @@ feature exists although its roadmap phase has not been reached in
 | F-49 | CI / build automation | Missing | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
 
-Counts (50 features): Implemented 8 · Partial 21 · Prototype 8 · Broken 4 ·
+Counts (50 features): Implemented 9 · Partial 20 · Prototype 8 · Broken 4 ·
 Missing 9 · Deprecated 0 · Unknown 0. (The orphaned `equipment_profiles` table
 recorded under F-23 was dropped entirely in TASK 3.3, not merely deprecated —
 see DATA_MODEL.md B2/B8.)
@@ -176,6 +177,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-06 — Active location (GPS, map picker, reverse geocoding)
 - **Status:** Partial
+- **TASK 7.3:** the first run shows a site prompt on Home ("Use current position" / "Set site") instead of a silent GPS request, so the permission is asked only when the user chooses (owner decision; this also removes the unguarded startup location call). Home's location and weather cards open `/sites`. An active site shows its own name and is not reverse-geocoded. Still Partial: without any site or position, weather still loads for the default London coordinates (the prompt says so); not run on a device.
 - **TASK 7.2:** each permission outcome (location services off, denied, denied forever, granted) is reported by `LocationService` and explained in the picker, with "Open settings" for the first and third; the picker goes through the ViewModel (no Geolocator call); reverse geocoding goes through `ReverseGeocoder` / `NominatimReverseGeocoder` (identifying user agent, ≤ 1 request/s, cache by rounded coordinates, failure → name unknown and logged, stale answers ignored); "© OpenStreetMap contributors" is shown on the map and with a place name; the tile user agent is `com.astroplan.astroplan`; coordinates can be typed (validated, offline). **Still open:** the startup `unawaited(useCurrentLocation())` has no `try/catch` for an unexpected platform exception (TD-002); silent London default and the sites UI (TASK 7.3); not run on a device.
 - **TASK 7.1:** a GPS fix or map pick is now a **transient** position, remembered across restarts (preferences) and never written into a saved site; it deselects the active site. The first-launch GPS lookup no longer creates a "Custom Location" row.
 - **Current implementation:** `useCurrentLocation` (through the injected `LocationService`, implemented by `GeolocatorLocationService`; *updated TASK 1.1*), a `flutter_map` picker with a marker and "Current Location" button, Nominatim reverse geocoding for a place name; defaults to London until a location is set.
@@ -185,7 +187,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 8 (location + visibility).
 
 ## F-07 — Saved locations management
-- **Status:** Partial
+- **Status:** Implemented *(was Partial; TASK 7.3, 2026-09-23)*
+- **TASK 7.3:** `SitesScreen` (`/sites`) lists, selects, creates, edits and deletes sites (active marked; delete confirmed); `SiteEditorScreen` (`/sites/edit`) validates name, latitude/longitude (typed, or picked on the map via `/location/pick`), elevation in metres, the IANA zone (searchable picker, new sites pre-filled with the device zone via `DeviceTimeZone`/`flutter_timezone`) and notes; Bortle/SQM fields keep provenance (`LocationProfile.userEdit`: changed → `user` + date, unchanged → kept) and are hidden with the light-pollution context until TASK 7.4. A new site becomes active; the selection persists; deleting the active site keeps its position as the transient position (owner decision). The earlier known issues below are resolved except: elevation cannot be unknown (the model requires a number) and is unused by any calculation; not run on a device.
 - **TASK 7.1:** sites carry nullable Bortle with source and date, SQM, an IANA zone and notes (schema v12); nothing writes into a site except an explicit user edit (the Bortle edit writes source `user` and the date). Still no UI to list, create or switch sites (TASK 7.3).
 - **Current implementation:** `LocationProfile` table, `LocationRepository` (CRUD, tested), one "active" row referenced from preferences.
 - **Relevant files:** `lib/data/repositories/drift_location_repository.dart`, `lib/domain/repositories/location_repository.dart`.
@@ -212,6 +215,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-10 — Site time-zone handling
 - **Status:** Partial *(was Missing; TASK 2.2, 2026-09-22)*
+- **TASK 7.3:** the zone can now be set per site (the editor's picker, new sites pre-filled with the device zone; "Unknown" allowed). `IanaTimeContext` loads `latest_all`, so link ids reported by devices (e.g. `Europe/Ljubljana`, `Asia/Calcutta`) resolve. Still Partial: weather timestamps stay naive (G9).
 - **TASK 7.1:** an active site with an IANA zone uses it for the night identity (`IanaTimeContext`; ADR-007 L1 fixed) and for display — `NightTimeFormatter.zoneCaption` labels "site zone Europe/London, BST, UTC+01:00"; the altitude chart's axis also goes through the formatter now. Without a zone (or for a transient position) the mean-solar identity and labelled device zone remain. No UI to set a zone yet (TASK 7.3).
 - **Current implementation:** the domain has a `SiteTimeContext` seam
   (`lib/domain/models/site_time_context.dart`), with a mean-solar fallback and a

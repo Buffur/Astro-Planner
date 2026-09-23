@@ -46,6 +46,7 @@
 > **TASK 6.4 (2026-09-22):** ADR-010 status updated (MoonConditions; mean-phase model deleted with a note; mean solar midnight adopted as the night-level evaluation instant).
 > **TASK 6.5 (2026-09-22):** SI-001 NPF formula-change record added (E.1).
 > **TASK 7.1 (2026-09-23):** ADR-007 status updated (IANA zone per site; L1 fixed for sites with a zone; zone source = the TASK 7.3 picker). Owner decisions this task: legacy Bortle 4 → NULL with a note (others kept as `legacy`); add the `timezone` package now; map/GPS positions are transient and remembered.
+> **TASK 7.3 (2026-09-23):** ADR-007 status updated (zone source implemented). Owner decisions this task: add `flutter_timezone` (Apache-2.0) so the zone picker defaults to the device zone; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. Implementation choice recorded: `IanaTimeContext` loads the `latest_all` data set (link zones).
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -548,6 +549,14 @@ Status: accepted (owner, 2026-09-22, TASK 2.1). Resolves PD-01 and PD-02.
   positions, keep the mean-solar identity. The zone's *source* (PD-02, deferred to
   7.1) is the TASK 7.3 editor's zone picker, defaulting to the device zone. It is
   never inferred from the device in computation.
+- **Done (TASK 7.3, 2026-09-23):** the zone's source is the site editor's picker
+  (searchable IANA ids plus "Unknown"), pre-filled for a new site with the device
+  zone from `flutter_timezone` behind the domain `DeviceTimeZone` seam — a pre-filled
+  choice only, never an input to a computation. `IanaTimeContext` now loads the
+  `timezone` package's `latest_all` data set instead of `latest_10y`: the 10-year set
+  has only canonical ids, so link ids that devices report (`Europe/Ljubljana`,
+  `Asia/Calcutta`, `UTC`) were rejected; a link resolves with its target's rules
+  (tested). Canonical zones' current rules are unchanged.
 - **Not done yet:** weather alignment (G9); persisting `SessionNight` itself instead of mapping legacy
   instant rows (G11, PD-18) — `home_screen.dart`'s Save Session still stores
   local midnight of the picked evening date, per §10's "legacy rows" proposal;

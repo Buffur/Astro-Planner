@@ -41,6 +41,7 @@
 > **TASK 6.4 (2026-09-22):** CALC-09 deleted, new CALC-29 (MoonConditions and separation, reference-tested); SI-002 resolved for precision and geometry.
 > **TASK 6.5 (2026-09-22):** CALC-17 corrected to the primary source (recorded formula change); SI-001 resolved for the formula (still hidden).
 > **TASK 7.1 (2026-09-23):** SI-007 and SI-010 progress (unknown Bortle; IANA site zone). No calculation formula changed.
+> **TASK 7.3 (2026-09-23):** SI-010 progress: a site's IANA zone is set in the editor (device zone pre-filled, "Unknown" allowed, then mean solar time). The zone data set is now `latest_all` (includes link ids; canonical zones' rules unchanged). No formula changed.
 
 ## Purpose and authority
 

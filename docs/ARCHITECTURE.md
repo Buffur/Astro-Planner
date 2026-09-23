@@ -41,6 +41,7 @@
 > **TASK 6.5 (2026-09-22):** the NPF rule now follows F. Michaud's primary source (derivation on sahavre.fr), with an explicit k (default 1, range 1–3); the circular test is replaced by independent worked examples. Still hidden (PD-11). Group G6 is complete.
 > **TASK 7.1 (2026-09-23):** site semantics in schema v12 (nullable Bortle with source and date, SQM, IANA zone, notes; default Bortle 4 cleared with a note); a map pick or GPS fix is a transient, remembered position that never writes into a saved site; the `timezone` package (0.11.1, BSD) backs an `IanaTimeContext`, so a site's zone drives its night (ADR-007 L1 fixed for sites with a zone) and the display. Presentation passes `vm.displayZoneId` to the one formatter; the ViewModel resolves the time context (IANA or mean solar), never the device zone.
 > **TASK 7.2 (2026-09-23):** location and geocoding behind domain interfaces. `LocationService` reports each permission outcome (`LocationFound`, or `LocationUnavailable` with `serviceDisabled` / `permissionDenied` / `permissionDeniedForever`) and opens the matching settings page; the location picker explains each outcome (rationale text + "Open settings") and no longer calls Geolocator. A `ReverseGeocoder` interface with a `NominatimReverseGeocoder` (identifying user agent `AstroPlan (com.astroplan.astroplan)`, at most 1 request/s, in-memory cache by coordinates rounded to 0.01°, failures reported, not cached) replaces the ViewModel's inline HTTP; OpenStreetMap attribution on the map and next to place names; the tile user agent is the real app id; typed coordinate entry works offline. No `http`/`geolocator` import in presentation or domain (test-enforced).
+> **TASK 7.3 (2026-09-23):** sites UI. A Sites screen (`/sites`) lists saved sites with the active one marked; sites can be selected, created, edited and deleted (with confirmation); "use current position" and "pick on map" set a transient position, which can be saved as a site. The site editor (`/sites/edit`) validates name, latitude/longitude (typed or picked on the map), elevation (m), an IANA zone picker defaulting to the device zone, and notes; Bortle/SQM with their source sit behind `FeatureScope.lightPollutionContext` until TASK 7.4. Owner decisions: `flutter_timezone` 5.1.0 (Apache-2.0) behind a domain `DeviceTimeZone` seam, only to pre-fill the zone picker; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. `IanaTimeContext` now loads the `latest_all` zone data set (the 10-year set has no link zones such as `Europe/Ljubljana`).
 
 ---
 
@@ -261,6 +262,12 @@ Per-function documentation: `docs/SCIENTIFIC_INTEGRITY.md` Part B.
 implemented by `GeolocatorLocationService` (`lib/data/services/`) and replaced by
 `FakeLocationService` in tests (`test/support/`).
 
+**Abstracted (TASK 7.3):** the device's IANA zone — `DeviceTimeZone`
+(`lib/domain/services/device_time_zone.dart`), implemented by
+`FlutterTimezoneDeviceTimeZone` (`lib/data/services/`, `flutter_timezone`), replaced by
+`FakeDeviceTimeZone` in tests. It only pre-fills the site editor's zone picker; it is
+never used in a computation (ADR-007 §6).
+
 **Abstracted (TASK 7.2):** `LocationService` returns a sealed `LocationResult`
 (`LocationFound` / `LocationUnavailable(LocationFailure)`) and opens the location or app
 settings; the location picker uses it through the ViewModel. Reverse geocoding is the
@@ -328,6 +335,9 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
 | `/target` | `TargetSelectionScreen` | — |
 | `/equipment` | `EquipmentSelectionScreen` | — |
 | `/location` | `LocationPickerScreen` | — |
+| `/location/pick` | `LocationPickerScreen(pickOnly: true)` — returns the point to the site editor *(TASK 7.3)* | — |
+| `/sites` | `SitesScreen` *(TASK 7.3)* | — |
+| `/sites/edit` | `SiteEditorScreen` (`extra`: `SiteEditorArgs`) *(TASK 7.3)* | — |
 | `/metadata` | `MetadataImportScreen` | `FeatureScope.metadataImport` (currently `false`, TASK 4.3) |
 | `/logbook` | `LogbookScreen` | `FeatureScope.logbook` (currently `true`) |
 
@@ -343,6 +353,8 @@ DEV-P1 — resolved).
 | `HomeScreen` | `PlannerViewModel`, `ThemeViewModel`, `FeatureScope`; `LogbookRepository` for Save | Empty state has **no navigation** to Target/Equipment. **TASK 4.3:** field-mode toggle and light-pollution map card are now gated (`FeatureScope`, DEV-P1 resolved); the map link's coordinates are still hard-coded Slovenia (F-34, TASK 7.4's job) |
 | `TargetSelectionScreen` | `TargetRepository` (direct), VM for selection | Add/edit dialog with validation; no ViewModel for CRUD |
 | `EquipmentSelectionScreen` | `EquipmentRepository` (direct), VM for selection | 260-line dialog with validation; contains mojibake strings |
+| `SitesScreen` *(TASK 7.3)* | VM (`sites`, `activeSite`, `selectSite`, `deleteSite`, `useCurrentLocation`) | Goes through the ViewModel, not the repository (unlike the Target/Equipment screens, DEV-A2) |
+| `SiteEditorScreen` *(TASK 7.3)* | VM (`saveSite`, `deviceZoneId`, `today`), `LocationProfile.userEdit` | Validators in `site_form_input.dart` / `coordinate_input.dart`; Bortle/SQM behind `FeatureScope.lightPollutionContext` |
 | `LocationPickerScreen` | VM (`locateDevice`, `open*Settings`, `setLocation`) + `flutter_map` | *(Updated TASK 7.2)* explains each permission outcome; typed coordinate entry; OSM attribution; no Geolocator call |
 | `LogbookScreen` | `LogbookRepository` (direct), VM `loadSession`, `share_plus` | Swipe-delete without confirmation |
 | `MetadataImportScreen` | `image_picker`, `MetadataExtractor` | Display-only |

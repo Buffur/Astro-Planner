@@ -336,8 +336,13 @@ rewritten to match the code.*
     rationale and "open settings"; `ReverseGeocoder` + Nominatim implementation
     (identifying UA, ≤ 1 request/s, rounded-coordinate cache, attribution); map
     attribution and the real app id; typed coordinates offline. 379 tests green.
-  - **Next: TASK 7.3 — Sites UI and first-run site setup.** Not started; it begins
-    only on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 7.3** — sites list and editor (validated
+    coordinates, elevation, zone picker defaulting to the device zone, Bortle/SQM
+    with source behind the light-pollution gate); first-run site prompt (owner
+    decisions: `flutter_timezone`; prompt replaces the silent GPS request; deleting
+    the active site keeps its position). 404 tests green.
+  - **Next: TASK 7.4 — Light-pollution MVP; remove the scraper (PD-05).** Not
+    started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

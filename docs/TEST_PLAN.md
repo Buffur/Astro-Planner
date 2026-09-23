@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **379 tests: 379 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.2) |
+| `flutter test --no-pub` | **404 tests: 404 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -413,3 +413,34 @@ Any test failure from here on is a regression, not a known pre-existing issue
   - a fix moves the marker without changing the ViewModel;
   - typed coordinates are validated and move the marker;
   - the OSM attribution and the real tile user agent.
+
+**Added by TASK 7.3** (sites UI and first-run site setup), 25 tests:
+- **Domain (`location_profile_user_edit_test.dart`):** what a user edit writes —
+  new sites get user-sourced values dated today; unchanged values keep their
+  source and date; changed ones become `user`; cleared ones lose both; range
+  errors.
+- **Zones (`iana_time_context_test.dart`, +1):** link ids devices report
+  (`Europe/Ljubljana`, `Asia/Calcutta`, `UTC`) resolve with their target's rules.
+- **Validators (`site_form_input_test.dart`):** name, elevation, SQM, notes.
+- **ViewModel (`planner_sites_test.dart`):**
+  - the acceptance test: switching sites changes all night times (window,
+    astronomical dusk, display zone);
+  - the selection persists across a restart;
+  - a new site becomes active; editing the active site applies at once; editing
+    another site leaves the active one;
+  - deleting the active site keeps its position as transient (and persists it);
+    deleting another site changes nothing else;
+  - an active site shows its own name without reverse geocoding;
+  - the device zone is passed through.
+- **Screens (`sites_screen_test.dart`):**
+  - the active site is marked and tapping another selects it;
+  - deleting the active site (confirmed) leaves an unsaved current position;
+  - the editor rejects missing and out-of-range values;
+  - a new site defaults to the device zone and becomes active;
+  - "Save as site" starts from the current position;
+  - editing keeps the unchanged fields.
+- **Home:** the first-run prompt offers "Use current position".
+- **Updated, with its reason:** `planner_location_test.dart` asserted that
+  startup asked the location service once; since the owner's TASK 7.3 decision
+  startup asks nothing, and the test asserts that. Its controlled-geocoder helper
+  no longer skips a startup lookup, since a first run makes none.
