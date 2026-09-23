@@ -385,8 +385,10 @@ rewritten to match the code.*
     (column sorting and filters, no score; background isolate). 584 tests green.
   - 2026-09-23: **TASK 10.5 cut for 1.0** (owner decision; horizon stays deferred per
     ADR-013). **Group G10 is complete.**
-  - **Next: TASK 11.1 — ADR: Session aggregate, lifecycle and snapshots (PD-18).** Not
-    started; it begins only on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 11.1** — ADR-014 (Session aggregate, lifecycle and
+    snapshots); PD-18 resolved by the owner. Documentation only.
+  - **Next: TASK 11.2 — Session schema migration.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

@@ -56,6 +56,7 @@
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** `WeatherConditions`/`HourlyForecast` removed (owner decision) and the legacy `weather_cache_<lat>_<lon>` keys are no longer read or written (existing entries stay on upgraded devices, TD-049). New derived (not persisted) domain type `NightWeatherSummary` (interval, span kind, hourly slots with dew spread/risk, per-variable ranges).
 > **TASK 10.2 (2026-09-23, commit `613b32f`):** no schema change. New preferences `moonGateEnabled` (bool, false), `moonGateMinIlluminationPct` (0–100, 50), `cloudGateEnabled` (bool, false), `cloudGateMaxPct` (0–100, 50). New derived (not persisted) domain `ImagingOpportunity` (C8 now Partial).
 > **TASK 10.4 (2026-09-23, commit `6bb596f`):** no schema change. New derived (not persisted) domain types `TonightCandidate` and `MoonTrack`.
+> **TASK 11.1 (2026-09-23, documentation only):** ADR-014 decides C4 Session, C9 ExecutionState and C10 LogbookEntry (see DECISIONS Part F for the entity diagram); no schema change yet (TASK 11.2 evolves `session_logs` in place).
 
 ---
 
@@ -522,7 +523,10 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
 - **Gaps:** no stable references (DEV-D3); no coordinates/time zone; plan, execution
   and log are conflated in one row; no identity feedback after Save (duplicates).
 - **Open decisions:** is Session the aggregate root; snapshot immutability;
-  relation to CapturePlan and LogbookEntry.
+  relation to CapturePlan and LogbookEntry. *(Decided 2026-09-23, ADR-014: Session is
+  the root with status, night key, UTC timestamps, SET NULL references and versioned
+  plan/execution-start snapshots; LogbookEntry = a completed Session; implemented in
+  TASKs 11.2–11.4.)*
 - **Roadmap:** Phase 9, 13.
 
 ## C5. CapturePlan
@@ -580,7 +584,9 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
   reasons) feeding the logbook. **No hardware control** (ASCOM/INDI are out of
   scope).
 - **Nearest:** none — **Missing**. (`SessionLog.actualLightFrames`,
-  `rejectedFrames` are end-of-session fields with no entry UI.)
+  `rejectedFrames` are end-of-session fields with no entry UI.) *(Decided 2026-09-23,
+  ADR-014: status + per-block planned/completed/rejected counters (TASK 11.2) + events
+  (G13).)*
 - **Roadmap:** Phases 13, 15.
 
 ## C10. LogbookEntry

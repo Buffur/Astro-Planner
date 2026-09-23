@@ -63,6 +63,7 @@
 > **TASK 10.3 (2026-09-23, commit `e732a0e`):** ADR-013 §3–§6 presented: the sky warning is removed (as corrected in §10), windows are listed with their annotations and every excluded period with all its reasons. No decision changed.
 > **TASK 10.4 (2026-09-23, commit `6bb596f`):** owner decisions: "Tonight's candidates" evaluates **all targets** with type and own-target filters (no favourites concept added), lives on a **new screen** opened from Home, and **hides targets without a window by default** (a toggle shows them with their reason). Sorting only (ADR-013 §5); implementation choice: evaluated on a background isolate.
 > **TASK 10.5 (2026-09-23, owner decision, documentation only, no code changed):** CUT for 1.0. The owner kept the ADR-013 deferral: no azimuth, horizon profile, schema change or editor now; the horizon gate (G3) stays reserved and F-17 stays Missing (a documented limitation: the minimum altitude stands in for obstructions). Group G10 is closed at 10.4; the next task is TASK 11.1 (ADR: Session aggregate, PD-18).
+> **TASK 11.1 (2026-09-23, documentation only, no code changed):** ADR-014 (Session aggregate, lifecycle and snapshots) accepted in Part F of DECISIONS with an entity diagram; PD-18 resolved. Session is the aggregate root (LogbookEntry = a completed Session; ExecutionState = status + block counters + events), with nullable SET NULL references, a night key, UTC timestamps and versioned JSON snapshots; `session_logs` evolves in place. Owner decisions: completed sessions keep only results and notes editable (no reopening; Duplicate instead); the plan snapshot is refreshed on each Save and the execution-start snapshot is frozen; the planner opens the most recent open session (no id in preferences); legacy logs become completed, read-only 'legacy' sessions with no references guessed from names.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -337,7 +338,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-15 **RESOLVED 2026-09-23** | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 **RESOLVED 2026-09-22** | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | **Resolved — see E.1 and ADR-010 §3:** hidden for new targets in 1.0; existing ones labelled, never deleted. (Original: hide until PD-07.) | Target UI |
 | PD-17 **RESOLVED 2026-09-23** | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | **Resolved — see E.1 and ADR-013.** | — | Opportunity calculator (10.2) |
-| PD-18 *(placeholder, registered 2026-09-21)* | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | Decided in TASK 11.1, before any migration | — | Session schema migration (11.2), information architecture (12.1) |
+| PD-18 **RESOLVED 2026-09-23** | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | **Resolved — see E.1 and ADR-014.** | — | Session schema migration (11.2) |
 | PD-19 *(placeholder, registered 2026-09-21)* | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | Decided in TASK 12.1. Roadmap's candidate (not accepted): bottom navigation Tonight · Sessions · Gear & Targets · Settings; execution as a full-screen route; PD-14 resolved as a fixed Tonight view, not a customizable dashboard | — | Navigation shell (12.2), execution and logbook screens |
 | PD-20 *(placeholder, registered 2026-09-21)* | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | Decided in TASK 13.1. Roadmap's candidate (not accepted): foreground only; progress derived from persisted UTC timestamps; every transition persisted; notifications deferred; no camera control, ASCOM or INDI. A wakelock dependency for keep-screen-on would need separate approval | — | Execution tasks 13.2–13.4 |
 | PD-21 *(placeholder, registered 2026-09-21)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
@@ -603,6 +604,19 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Also decided:** unknown never excludes; all failing reasons listed; max altitude
   inside windows; no composite score.
 - **Implementation:** TASK 10.2.
+
+### PD-18 — Session aggregate, lifecycle and snapshots (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 11.1), choosing the
+  recommended option on each point. Recorded as **ADR-014** (Part F).
+- **Aggregate:** Session is the root; LogbookEntry = a completed Session; references
+  nullable with SET NULL; versioned JSON snapshots; `session_logs` evolves in place.
+- **Completed sessions:** only results and notes stay editable; no reopening.
+- **Snapshots:** the plan snapshot is refreshed on each Save; the execution-start
+  snapshot is frozen.
+- **Current session:** the most recently updated open session; no id in preferences.
+- **Legacy logs:** completed, read-only, flagged legacy; no references guessed.
+- **Implementation:** TASKs 11.2–11.4.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2034,3 +2048,160 @@ expected value is exact).
 - **Preferences:** `moonGateEnabled`/`moonGateMinIlluminationPct`,
   `cloudGateEnabled`/`cloudGateMaxPct` (off; 50 %), persisted; no Settings control
   yet (recorded as TD-050).
+
+## ADR-014: Session aggregate, lifecycle and snapshots
+
+Status: accepted (owner, 2026-09-23, TASK 11.1). Resolves PD-18. Documentation only;
+implemented by TASKs 11.2 (schema), 11.3 (repository, snapshot builders) and 11.4
+(planner on a persisted draft). Checked against `app_database.dart` (schema v15),
+`session_log.dart`, `logbook_repository.dart`, `home_screen.dart` (Save Session) and
+`PlannerStateRepository` at commit `7388b1c`.
+
+### 1. Context (verified)
+
+- `session_logs` stores one row per saved session with **display strings** for the
+  target, rig and site (`target_name`, `equipment_name`, `location_name`), a
+  `session_date` instant, planned/actual counts and three weather columns that are
+  never filled (DEV-D3). Its blocks are in `capture_blocks` (`ON DELETE CASCADE`).
+- The plan being edited lives elsewhere: the blocks as JSON and the selected
+  target/equipment/site ids in SharedPreferences (`PlannerStateRepository`), the
+  night and the "active log" in ViewModel memory (DEV-D4). Save Session copies the
+  current state into a `SessionLog`; there is no status, no night key, no time zone
+  and no snapshot.
+- Everything a snapshot needs already exists as pure domain values: `SessionNight`
+  (ADR-007), `LocationProfile` with zone and sky darkness, `AstroTarget` with
+  provenance, `EquipmentProfile` (ADR-011), `PlanningPreferences`, `CaptureBudget`
+  (ADR-009), `ImagingOpportunity` (ADR-013) and `WeatherSnapshot` (ADR-012).
+
+### 2. Decision: the aggregate
+
+```
+                 ┌──────────────────────────────────────────────┐
+                 │ Session  (root; table session_logs, evolved) │
+                 │  id                                          │
+                 │  status: draft | planned | inProgress |      │
+                 │          completed | abandoned               │
+                 │  legacy: bool                                │
+                 │  night key: eveningDate + siteId? + zoneId   │
+                 │  createdAt / updatedAt / plannedAt /         │
+                 │  startedAt / completedAt   (UTC ms)          │
+                 │  results: actual/rejected counts, notes      │
+                 └───┬──────────────┬──────────────┬────────────┘
+      references     │              │              │  owns
+  (nullable, SET NULL│on delete)    │              │
+        ┌────────────┴──┐   ┌───────┴──────┐   ┌───┴──────────────────────────┐
+        │ Site (0..1)   │   │ Target (0..1)│   │ CaptureBlock (0..n, ordered)  │
+        │ location_     │   │ astro_       │   │  frame type, filter, exposure,│
+        │ profiles      │   │ targets      │   │  count, binning, gain, policy │
+        └───────────────┘   └──────────────┘   │  planned / completed /        │
+        ┌───────────────┐                      │  rejected counters            │
+        │ Rig (0..1)    │                      └───────────────────────────────┘
+        │ optical_rigs  │   ┌──────────────────────────────────────────────────┐
+        └───────────────┘   │ SessionSnapshot (0..2, owned, versioned JSON)    │
+                            │  kind: plan | executionStart                     │
+                            │  v, takenAtUtc, site, target, rig, night,        │
+                            │  preferences (assumptions), budget, opportunity  │
+                            │  summary, weather summary + provenance           │
+                            └──────────────────────────────────────────────────┘
+```
+
+- **Session is the aggregate root.** A plan, its execution and its log are one
+  Session in different states. **LogbookEntry = a completed Session** (plus legacy
+  rows, §7); there is no separate log entity.
+- **ExecutionState = status + per-block counters + events.** The status and counters
+  are columns (TASK 11.2); the event list (started, paused, block done, interrupted
+  with a reason, …) is persisted by the execution group (G13), not in 11.2.
+- **References** to site, target and rig are nullable foreign keys with
+  `ON DELETE SET NULL`: deleting a source never deletes or blocks a session.
+- **Night key** = evening date (`YYYY-MM-DD`, ADR-007) + site id (nullable) + the
+  zone id used to resolve it. The night's UTC window is recomputed from the snapshot's
+  site values, never from the live site. Several sessions may share a night key (two
+  targets in one night); no uniqueness constraint.
+
+### 3. Decision: lifecycle (owner)
+
+| From → to | Allowed | Effect |
+| --- | --- | --- |
+| (new) → draft | yes | created by the planner or by Duplicate |
+| draft → planned | Save | plan snapshot taken (replaces any earlier one) |
+| planned → planned | Save again | plan snapshot **replaced** (owner: refreshed on Save) |
+| planned → draft | edit after Save | the plan changes; the next Save re-takes the snapshot |
+| draft/planned → inProgress | Start | executionStart snapshot taken — **never changed afterwards** (owner) |
+| inProgress → completed | Finish | completedAt set; becomes a logbook entry |
+| draft/planned/inProgress → abandoned | Abandon | kept, listed, not in the logbook's completed list |
+| completed → any | **no** (owner) | only results and notes stay editable; the plan, references and snapshots are frozen |
+| abandoned → draft | no | use Duplicate |
+| any → (deleted) | with confirmation | cascades to blocks and snapshots |
+
+- **Duplicate** copies the plan (blocks, references) into a new draft for another
+  night; counters, results, snapshots and events are not copied.
+- **Current session (owner):** the planner opens the most recently updated session
+  whose status is draft, planned or inProgress; with none, it creates a draft. No
+  "current id" is stored in SharedPreferences — the database alone decides (DEV-D4).
+
+### 4. Decision: snapshots
+
+- Stored as **versioned JSON** (`{"v": 1, ...}`) per snapshot kind, with UTC epoch
+  milliseconds for instants and explicit unit-suffixed keys (`focalLengthMm`,
+  `latitudeDeg`). Readers accept known versions and treat unknown ones as "snapshot
+  unavailable", never as zeros (SI-008).
+- **Contents v1:** site (name, latitude, longitude, elevation, zone id, Bortle/SQM
+  with source and date); target (catalog id, name, type, RA/Dec J2000, size,
+  source); rig (the `EquipmentProfile` fields with units, tracking, spec
+  confidence/provenance); night (evening date, start/end UTC); preferences in force
+  (darkness limit, minimum altitude, margins, overheads, gates, dew margin); budget
+  totals (integration, acquisition, window load, session budget); opportunity
+  summary (windows with max altitude, excluded reasons, usable time, Moon
+  illumination); weather summary with provider, model, fetch time and age.
+- **History reads snapshots, never live joins.** A completed or in-progress session
+  is displayed from its snapshot; the references only offer "open the current
+  site/target/rig" and may be null.
+- Snapshots are built by **pure builders** in the domain from domain values (TASK
+  11.3), not by widgets.
+
+### 5. Decision: storage
+
+- **Evolve `session_logs` in place** (roadmap recommendation): additive columns for
+  status, legacy flag, night key, timestamps, reference ids (SET NULL) and the two
+  snapshot JSON columns; `capture_blocks` gains planned/completed/rejected counters.
+  Indexes on status, evening date and target id. Drift type converters for the JSON.
+  Renaming the table or the row classes (TD-045) is optional in 11.2.
+- The old denormalized columns (`target_name`, `equipment_name`, planned counts,
+  weather columns) stay for legacy rows and are not written by new code; their
+  removal is a later cleanup.
+
+### 6. Decision: the plan's single source
+
+- From TASK 11.4 the plan being edited **is** the current Session's blocks in the
+  database (autosaved); the SharedPreferences plan JSON and selected ids are migrated
+  once into a draft and then retired.
+
+### 7. Decision: legacy rows (owner)
+
+- Every existing `session_logs` row becomes a **completed, legacy** session:
+  read-only, still listed and shareable, shown from its stored text columns, with no
+  snapshot and **no references guessed from names** (names are not unique).
+
+### 8. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| Separate Plan, Execution and Log tables | Rejected | Three copies of one night's story; the roadmap's aggregate is simpler |
+| Reopen completed sessions | Rejected (owner) | The log would drift from what happened; Duplicate covers "do it again" |
+| Keep every plan snapshot version | Rejected (owner) | Storage and UI cost without a clear use; the execution-start snapshot is the frozen record |
+| Current session id in preferences | Rejected (owner) | Re-creates split state (DEV-D4) |
+| Relink legacy rows by name | Rejected (owner) | Wrong matches are worse than no link |
+| Live joins for history | Rejected | Edited or deleted sources would rewrite history (DEV-D3) |
+| New `sessions` table | Rejected | Evolving in place keeps legacy rows and the cascade; roadmap recommendation |
+
+### 9. Consequences and follow-up
+
+- **TASK 11.2:** schema v16 — the columns and indexes in §5, block counters, legacy
+  rows marked (status completed, legacy true), SET NULL references; migration tests
+  with legacy rows.
+- **TASK 11.3:** `SessionRepository` (one transaction per aggregate write; status and
+  night queries) and pure snapshot builders; replaces `LogbookRepository` usages.
+- **TASK 11.4:** the planner works on the current Session; the preferences plan is
+  migrated once.
+- **G13:** execution events.
+- This ADR changes no code.
