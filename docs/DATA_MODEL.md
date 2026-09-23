@@ -58,6 +58,7 @@
 > **TASK 10.4 (2026-09-23, commit `6bb596f`):** no schema change. New derived (not persisted) domain types `TonightCandidate` and `MoonTrack`.
 > **TASK 11.1 (2026-09-23, documentation only):** ADR-014 decides C4 Session, C9 ExecutionState and C10 LogbookEntry (see DECISIONS Part F for the entity diagram); no schema change yet (TASK 11.2 evolves `session_logs` in place).
 > **TASK 11.2 (2026-09-23, commit `428f673`):** schema v16 (ADR-014 §5). `session_logs` evolved in place into the Session root: `status` (draft/planned/inProgress/completed/abandoned, CHECK, default draft), `legacy`, the night key (`evening_date`, `time_zone_id`), nullable references `site_id`/`target_id`/`rig_id` with ON DELETE SET NULL, UTC-ms lifecycle timestamps and two versioned JSON snapshot columns (`JsonMapConverter`); `capture_blocks` + `completed_frames`, `rejected_frames` (planned = `frame_count`); indexes on status, evening date and target id. Every existing log became a completed legacy session (no references guessed). `DriftLogbookRepository.updateLog` now writes only its own columns (a full-row replace would reset the v16 columns). No domain or repository API change.
+> **TASK 11.3 (2026-09-23, commit `ad6609c`):** no schema change. New domain types `Session`, `SessionStatus`, `SessionPlan`, `SessionResults`, `SessionSnapshot` (versioned JSON, v1) and the pure `SessionSnapshotBuilder`; `SessionRepository` replaces `LogbookRepository`. New rows write display labels into the pre-v16 text columns (ADR-014 §10). DEV-D3 resolved for new sessions.
 
 ---
 
@@ -434,6 +435,9 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
 - **Progress 2026-09-23 (TASK 11.2, schema v16):** the storage for stable references
   (SET NULL), the night key, status and versioned snapshots exists (ADR-014); nothing
   writes them yet (TASKs 11.3–11.4).
+- **RESOLVED 2026-09-23 (TASK 11.3, commit `ad6609c`) for new sessions:** Save writes
+  references, the night key, the status and a versioned plan snapshot; the Logbook and
+  `openSession` read references by id. Legacy rows stay labels-only (owner decision).
 
 ### DEV-D4 — Active planner state is split across three stores
 - **Intended behavior:** Active location persisted in `LocationProfiles`, not

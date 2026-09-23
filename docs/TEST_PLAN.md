@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **598 tests: 598 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.2) |
+| `flutter test --no-pub` | **613 tests: 613 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -660,3 +660,24 @@ the ADR-012 variables, and a real out-of-range error):
   an unknown status is rejected (CHECK); deleting a site, target or rig clears only
   that reference and keeps the session (SET NULL); snapshots round-trip as JSON and
   unreadable text reads as an empty map; a logbook `updateLog` keeps the v16 columns.
+
+**Changed by TASK 11.3** (SessionRepository, snapshot builders), 613 tests:
+- **Repository (`drift_session_repository_test.dart`, 12; replaces the 5
+  `drift_logbook_repository_test.dart` tests with their order, block-fidelity and
+  rejected-row checks):** create; newest-updated order and filters; blocks through
+  update; save → planned and snapshot replaced, edit → draft; lifecycle (start freezes
+  the plan and the execution-start snapshot, completed keeps results/notes editable);
+  forbidden transitions; **rollback** of a failing write (blocks restored); legacy and
+  night-key-less rows read-only; most recent open session; delete; the acceptance —
+  editing a rig after saving leaves the saved snapshot unchanged.
+- **Snapshot (`session_snapshot_builder_test.dart`, 4):** deterministic and unchanged
+  by a JSON round trip; unit-keyed contents; missing inputs null; unknown version
+  unavailable.
+- **ViewModel (`planner_session_save_test.dart`, 3):** Save creates a planned session
+  with references and a snapshot and updates it on the next Save; a completed session
+  is never modified; opening follows references by id.
+- **Logbook screen (4, was 3):** saved sessions and legacy logs listed with status,
+  drafts hidden; delete confirmation (on a real in-memory repository).
+- Updated: integration flow (Save → Logbook shows "Planned"; double Save = one
+  session with a snapshot), Home and app-boot providers, the legacy-date `openSession`
+  test, and the v16 migration tests (legacy rows listed by `SessionRepository`).

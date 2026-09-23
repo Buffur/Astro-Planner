@@ -56,6 +56,7 @@
 > **TASK 10.3 (2026-09-23, commit `e732a0e`):** opportunity presentation. Home's "Tonight for this target" card shows the usable time, a chart (darkness bands at the user's limit, highlighted windows, target and Moon altitude, minimum altitude) and a text list (each window with times, duration, max altitude and Moon/forecast facts; every excluded period with all its reasons; the no-window reason), both rendered from `vm.imagingOpportunity`; wording in `OpportunityText`. Removed: the fixed sky warning (ADR-013 §6), the decorative gradient bar (TD-034), and the culmination-based "Max Altitude" (now "Max altitude in windows"; `calculateCulminationAltitude` removed with its last caller).
 > **TASK 10.4 (2026-09-23, commit `6bb596f`):** tonight's candidates. `CandidateEvaluator` (domain) evaluates every target for the chosen night with the single-target opportunity calculator, sharing a `SunTrack` and a new `MoonTrack` (Moon once per night); rows give usable time, first window start / last window end, max altitude in windows, minimum Moon separation in windows, frame fill (CALC-31) and the no-window reason; `CandidateList` sorts by a chosen column (unknown last) and filters (with a window, type, own targets). No score. `vm.tonightCandidates()` runs it on a background isolate; the new "Tonight's candidates" screen (`/tonight`, Home app bar) lists it and a tap selects the target. Owner decisions: all targets with filters (no favourites concept), a new screen, targets without a window hidden by default with a toggle. **Group G10's scope through 10.4 is done** (10.5 is the cut line).
 > **TASK 11.2 (2026-09-23, commit `428f673`):** schema v16 (ADR-014 §5). `session_logs` evolved in place into the Session root: `status` (draft/planned/inProgress/completed/abandoned, CHECK, default draft), `legacy`, the night key (`evening_date`, `time_zone_id`), nullable references `site_id`/`target_id`/`rig_id` with ON DELETE SET NULL, UTC-ms lifecycle timestamps and two versioned JSON snapshot columns (`JsonMapConverter`); `capture_blocks` + `completed_frames`, `rejected_frames` (planned = `frame_count`); indexes on status, evening date and target id. Every existing log became a completed legacy session (no references guessed). `DriftLogbookRepository.updateLog` now writes only its own columns (a full-row replace would reset the v16 columns). No domain or repository API change.
+> **TASK 11.3 (2026-09-23, commit `ad6609c`):** `SessionRepository` (domain) / `DriftSessionRepository` (data): create, update plan, save plan (→ planned + plan snapshot), start (execution-start snapshot, frozen), complete, abandon, results, get, list by status/night/target, most recent open session, delete — one transaction per write, the ADR-014 lifecycle enforced (`SessionStateError`, nothing written). Pure `SessionSnapshotBuilder` (versioned, unit-keyed JSON of night, site, sky darkness, target, rig, preferences, blocks, budget, opportunity, weather) and `SessionSnapshot` (unknown version = unavailable). `LogbookRepository`/`DriftLogbookRepository` removed: Home's Save calls `vm.saveSession()`; the Logbook lists every non-draft session and the legacy logs with a status label; `vm.openSession` follows references by id (labels only for legacy rows). Owner decisions: the Logbook shows all saved sessions with their status; Save = planned + snapshot; new rows write display labels into the pre-v16 text columns.
 
 ---
 
@@ -171,6 +172,7 @@ approval.
         │
         ├─► Equipment / Target screens ─► repository interfaces directly (no ViewModel)
         ├─► Logbook screen, Home "Save Session" ─► LogbookRepository directly
+        │   *(since TASK 11.3: Save → `PlannerViewModel.saveSession` → `SessionRepository`; the Logbook reads `SessionRepository`)*
         ├─► Location picker ─► PlannerViewModel + Geolocator directly + OSM tiles
         ├─► AltitudeChartWidget ─► VisibilityCalculator.calculateAltitudeCurve directly
         │   (target/lat/lon/date passed in from Home; no PlannerViewModel reference,
@@ -200,7 +202,7 @@ The largest files are `equipment_selection_screen.dart` (591), `planner_viewmode
   `MultiProvider`.
 - Registered providers: `Provider<AppDatabase>` (**never read anywhere** in `lib/`
   or `test/`), `Provider<TargetRepository>`, `Provider<EquipmentRepository>`,
-  `Provider<WeatherRepository>`, `Provider<LogbookRepository>`,
+  `Provider<WeatherRepository>`, `Provider<LogbookRepository>` *(replaced by `Provider<SessionRepository>`, TASK 11.3)*,
   `Provider<LocationRepository>`, `Provider<LightPollutionRepository>` (concrete
   type), `ChangeNotifierProvider(PlannerViewModel)`, `ChangeNotifierProvider(ThemeViewModel)`.
 - `EquipmentCatalogRepository` is **not** registered.
@@ -268,7 +270,7 @@ Per-function documentation: `docs/SCIENTIFIC_INTEGRITY.md` Part B.
 **Models:** see `docs/DATA_MODEL.md` Part B3.
 
 **Repository interfaces (6):** `TargetRepository`, `EquipmentRepository`,
-`EquipmentCatalogRepository` (**unused**), `LocationRepository`, `LogbookRepository`,
+`EquipmentCatalogRepository` (**unused**), `LocationRepository`, `LogbookRepository` *(removed TASK 11.3; `SessionRepository`, ADR-014)*,
 `WeatherRepository`. *(Updated TASK 8.4: `EquipmentCatalogRepository` is removed, ADR-011 §2; the planner-state, planning-preferences and other seams added since TASK 5.2 are described in their sections.)*
 
 **Abstracted (TASK 1.1):** device location for the ViewModel — the pure-Dart
@@ -330,7 +332,7 @@ data layer), reverse geocoding (inline HTTP in the ViewModel), device location i
   the flat `EquipmentProfile`; **TASK 3.3:** `deleteEquipment` now checks for other
   references before deleting a shared camera module or device, since a `RESTRICT`
   violation would otherwise throw), `DriftEquipmentCatalogRepository` (dormant),
-  `DriftLocationRepository`, `DriftLogbookRepository` (session rows plus a separate
+  `DriftLocationRepository`, `DriftLogbookRepository` *(removed TASK 11.3; replaced by `DriftSessionRepository`: lifecycle, one transaction per write, partial row writes)* (session rows plus a separate
   `capture_blocks` table, joined in memory; manual cascade on delete, now backed by
   a real `ON DELETE CASCADE` too),
   `OpenMeteoWeatherRepository` (HTTP + shared-preferences cache; `http.Client`
