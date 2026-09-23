@@ -11,9 +11,6 @@ import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/calendar_date.dart';
-import '../../../domain/repositories/logbook_repository.dart';
-import '../../../domain/models/session_log.dart';
-import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/target_types.dart';
@@ -299,49 +296,9 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      final int lightFrames = viewModel.captureBlocks
-                          .where((b) => b.frameType == FrameType.light)
-                          .fold(0, (sum, b) => sum + b.frameCount);
-                      // The button is only shown when sessionNight != null.
-                      final evening = viewModel.eveningDate!;
-                      // Legacy storage: SessionLog.sessionDate is still an
-                      // instant (G11 persists SessionNight properly). Local
-                      // midnight of the evening date round-trips correctly
-                      // through loadSession (ADR-007 §10 "legacy rows").
-                      final sessionDateInstant = DateTime(
-                        evening.year,
-                        evening.month,
-                        evening.day,
-                      );
-
-                      final log =
-                          viewModel.activeSessionLog?.copyWith(
-                            targetName: target.commonName ?? target.catalogId,
-                            equipmentName: equipment.name,
-                            sessionDate: sessionDateInstant,
-                            plannedLightFrames: lightFrames,
-                            captureBlocks: viewModel.captureBlocks,
-                          ) ??
-                          SessionLog(
-                            id: 0,
-                            targetName: target.commonName ?? target.catalogId,
-                            equipmentName: equipment.name,
-                            sessionDate: sessionDateInstant,
-                            plannedLightFrames: lightFrames,
-                            captureBlocks: viewModel.captureBlocks,
-                          );
-
-                      // TD-011: track the saved row's id so a second tap
-                      // updates it instead of inserting a duplicate.
-                      if (viewModel.activeSessionId != null) {
-                        await context.read<LogbookRepository>().updateLog(log);
-                        viewModel.markSessionSaved(log);
-                      } else {
-                        final newId = await context
-                            .read<LogbookRepository>()
-                            .addLog(log);
-                        viewModel.markSessionSaved(log.copyWith(id: newId));
-                      }
+                      // TASK 11.3 (ADR-014): saves the plan as a planned
+                      // session with a fresh plan snapshot.
+                      await viewModel.saveSession();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

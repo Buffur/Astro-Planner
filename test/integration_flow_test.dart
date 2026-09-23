@@ -8,8 +8,8 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
-import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
-import 'package:astroplan/domain/repositories/logbook_repository.dart';
+import 'package:astroplan/data/repositories/drift_session_repository.dart';
+import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
@@ -32,7 +32,7 @@ void main() {
   late AppDatabase database;
   late DriftTargetRepository targetRepo;
   late DriftEquipmentRepository equipmentRepo;
-  late DriftLogbookRepository logbookRepo;
+  late DriftSessionRepository sessionRepo;
   late DriftLocationRepository locationRepo;
   late PlannerViewModel plannerViewModel;
   late domain.AstroTarget testTarget;
@@ -46,7 +46,7 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
-    logbookRepo = DriftLogbookRepository(database);
+    sessionRepo = DriftSessionRepository(database);
     locationRepo = DriftLocationRepository(database);
 
     // A saved location, so isDefaultLocation is false and sessionNight
@@ -108,6 +108,7 @@ void main() {
         MockWeatherRepository(),
         locationRepo,
         locationService: FakeLocationService(),
+        sessionRepository: sessionRepo,
       );
       await plannerViewModel.ready;
     });
@@ -118,7 +119,7 @@ void main() {
           Provider<AppDatabase>.value(value: database),
           Provider<TargetRepository>.value(value: targetRepo),
           Provider<EquipmentRepository>.value(value: equipmentRepo),
-          Provider<LogbookRepository>.value(value: logbookRepo),
+          Provider<SessionRepository>.value(value: sessionRepo),
           Provider<LocationRepository>.value(value: locationRepo),
           ChangeNotifierProvider.value(value: plannerViewModel),
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
@@ -158,6 +159,8 @@ void main() {
     expect(find.text('Logbook'), findsWidgets);
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
+    // TASK 11.3: Save stores a planned session with a plan snapshot.
+    expect(find.text('Planned'), findsOneWidget);
   });
 
   testWidgets(
@@ -174,6 +177,7 @@ void main() {
           MockWeatherRepository(),
           locationRepo,
           locationService: FakeLocationService(),
+          sessionRepository: sessionRepo,
         );
         await plannerViewModel.ready;
       });
@@ -184,7 +188,7 @@ void main() {
             Provider<AppDatabase>.value(value: database),
             Provider<TargetRepository>.value(value: targetRepo),
             Provider<EquipmentRepository>.value(value: equipmentRepo),
-            Provider<LogbookRepository>.value(value: logbookRepo),
+            Provider<SessionRepository>.value(value: sessionRepo),
             Provider<LocationRepository>.value(value: locationRepo),
             ChangeNotifierProvider.value(value: plannerViewModel),
             ChangeNotifierProvider(create: (_) => ThemeViewModel()),
@@ -211,8 +215,9 @@ void main() {
       await tester.tap(saveButtonFinder);
       await tester.pump(const Duration(seconds: 1));
 
-      final logs = await logbookRepo.getAllLogs();
-      expect(logs, hasLength(1));
+      final sessions = (await tester.runAsync(sessionRepo.list))!;
+      expect(sessions, hasLength(1));
+      expect(sessions.single.planSnapshot, isNotNull);
     },
   );
 }

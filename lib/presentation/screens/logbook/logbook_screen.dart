@@ -4,11 +4,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../domain/models/calendar_date.dart';
-import '../../../domain/models/session_log.dart';
-import '../../../domain/repositories/logbook_repository.dart';
+import '../../../domain/models/session.dart';
+import '../../../domain/repositories/session_repository.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/planner_viewmodel.dart';
 
+/// Saved sessions (TASK 11.3, owner decision): every non-draft session —
+/// planned, in progress, completed, abandoned — and the legacy logs, newest
+/// first, each with its status.
 class LogbookScreen extends StatefulWidget {
   const LogbookScreen({super.key});
 
@@ -17,27 +20,43 @@ class LogbookScreen extends StatefulWidget {
 }
 
 class _LogbookScreenState extends State<LogbookScreen> {
-  late Future<List<SessionLog>> _logsFuture;
+  late Future<List<Session>> _sessionsFuture;
 
   @override
   void initState() {
     super.initState();
-    _refreshLogs();
+    _refresh();
   }
 
-  void _refreshLogs() {
-    final repo = context.read<LogbookRepository>();
+  void _refresh() {
+    final repo = context.read<SessionRepository>();
     setState(() {
-      _logsFuture = repo.getAllLogs();
+      _sessionsFuture = repo.list().then(
+        (all) => [
+          for (final s in all)
+            if (s.legacy || s.status != SessionStatus.draft) s,
+        ],
+      );
     });
+  }
+
+  static String statusLabel(Session s) {
+    if (s.legacy) return 'Legacy log';
+    return switch (s.status) {
+      SessionStatus.draft => 'Draft',
+      SessionStatus.planned => 'Planned',
+      SessionStatus.inProgress => 'In progress',
+      SessionStatus.completed => 'Completed',
+      SessionStatus.abandoned => 'Abandoned',
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Logbook')),
-      body: FutureBuilder<List<SessionLog>>(
-        future: _logsFuture,
+      body: FutureBuilder<List<Session>>(
+        future: _sessionsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -46,14 +65,20 @@ class _LogbookScreenState extends State<LogbookScreen> {
             return const Center(child: Text('No sessions saved yet.'));
           }
 
-          final logs = snapshot.data!;
+          final sessions = snapshot.data!;
           return ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: logs.length,
+            itemCount: sessions.length,
             itemBuilder: (context, index) {
-              final log = logs[index];
+              final session = sessions[index];
+              final log = session.record;
+              // The night key; a legacy instant maps to its device-local
+              // calendar date, as it was shown before (ADR-007 §10).
+              final evening =
+                  session.eveningDate ??
+                  CalendarDate.fromDateTimeFields(log.sessionDate.toLocal());
               return Dismissible(
-                key: ValueKey(log.id),
+                key: ValueKey(session.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
                   color: Colors.red,
@@ -83,23 +108,23 @@ class _LogbookScreenState extends State<LogbookScreen> {
                   );
                 },
                 onDismissed: (_) async {
-                  await context.read<LogbookRepository>().deleteLog(log.id);
-                  _refreshLogs();
+                  await context.read<SessionRepository>().delete(session.id);
+                  _refresh();
                 },
                 child: Card(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16.0),
                     onTap: () async {
-                      await context.read<PlannerViewModel>().loadSession(log);
+                      await context.read<PlannerViewModel>().openSession(
+                        session,
+                      );
                       if (context.mounted) {
                         context.go('/');
                       }
                     },
                     title: Text(
-                      // A legacy instant (ADR-007 §10): its device-local
-                      // calendar date is the evening it was shown as.
-                      '${NightTimeFormatter.eveningDate(CalendarDate.fromDateTimeFields(log.sessionDate.toLocal()))} - ${log.targetName}',
+                      '${NightTimeFormatter.eveningDate(evening)} - ${log.targetName}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -109,6 +134,11 @@ class _LogbookScreenState extends State<LogbookScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 8),
+                        Text(
+                          statusLabel(session),
+                          key: Key('logbook.status.${session.id}'),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         Text('Equipment: ${log.equipmentName}'),
                         Text('Planned Frames: ${log.plannedLightFrames}'),
                         if (log.actualLightFrames != null)

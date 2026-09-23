@@ -37,7 +37,8 @@ import 'package:path/path.dart' as p;
 
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/database/json_map_converter.dart';
-import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
+import 'package:astroplan/data/repositories/drift_session_repository.dart';
+import 'package:astroplan/domain/models/session.dart' show SessionResults;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/data/database/generated_migrations/schema.dart';
@@ -183,9 +184,10 @@ void main() {
         expect(blocks.every((b) => b.rejectedFrames == 0), isTrue);
         expect(blocks.first.frameCount, 40);
 
-        final logs = await DriftLogbookRepository(db).getAllLogs();
-        expect(logs.map((l) => l.targetName), ['M42', 'M31']);
-        expect(logs.last.captureBlocks, hasLength(2));
+        final sessions = await DriftSessionRepository(db).list();
+        expect(sessions.map((s) => s.record.targetName), ['M42', 'M31']);
+        expect(sessions.every((s) => s.legacy), isTrue);
+        expect(sessions.last.blocks, hasLength(2));
         await db.close();
       },
     );
@@ -359,18 +361,17 @@ void main() {
         expect(const JsonMapConverter().fromSql('[1, 2]'), isEmpty);
       });
 
-      test('updating a log through the logbook repository keeps the v16 '
+      test('a partial write (session results) keeps the other v16 '
           'columns', () async {
         final id = await session();
         await (db.update(db.sessionLogs)..where((t) => t.id.equals(id))).write(
           const SessionLogsCompanion(planSnapshot: Value({'v': 1})),
         );
-        final repo = DriftLogbookRepository(db);
-        final log = (await repo.getAllLogs()).single;
-        await repo.updateLog(log.copyWith(targetName: 'M31 (renamed)'));
+        await DriftSessionRepository(db)
+            .updateResults(id, const SessionResults(processingNotes: 'ok'));
 
         final row = await read(id);
-        expect(row.targetName, 'M31 (renamed)');
+        expect(row.processingNotes, 'ok');
         expect(row.status, 'planned');
         expect(row.eveningDate, '2026-09-24');
         expect(row.timeZoneId, 'Europe/Ljubljana');

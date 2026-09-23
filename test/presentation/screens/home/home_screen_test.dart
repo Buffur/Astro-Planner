@@ -18,8 +18,8 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
-import 'package:astroplan/data/repositories/drift_logbook_repository.dart';
-import 'package:astroplan/domain/repositories/logbook_repository.dart';
+import 'package:astroplan/data/repositories/drift_session_repository.dart';
+import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
 import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
@@ -62,7 +62,7 @@ void main() {
   late AppDatabase database;
   late DriftTargetRepository targetRepo;
   late DriftEquipmentRepository equipmentRepo;
-  late DriftLogbookRepository logbookRepo;
+  late DriftSessionRepository sessionRepo;
   late DriftLocationRepository locationRepo;
 
   setUp(() {
@@ -73,7 +73,7 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
-    logbookRepo = DriftLogbookRepository(database);
+    sessionRepo = DriftSessionRepository(database);
     locationRepo = DriftLocationRepository(database);
   });
 
@@ -87,7 +87,7 @@ void main() {
         Provider<AppDatabase>.value(value: database),
         Provider<TargetRepository>.value(value: targetRepo),
         Provider<EquipmentRepository>.value(value: equipmentRepo),
-        Provider<LogbookRepository>.value(value: logbookRepo),
+        Provider<SessionRepository>.value(value: sessionRepo),
         Provider<LocationRepository>.value(value: locationRepo),
         ChangeNotifierProvider.value(value: vm),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),

@@ -8,8 +8,8 @@ import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/domain/repositories/equipment_repository.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/domain/repositories/logbook_repository.dart';
-import 'package:astroplan/domain/models/session_log.dart' as domain;
+import 'package:astroplan/data/repositories/drift_session_repository.dart';
+import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart'
     as import_location_profile;
 import 'package:astroplan/domain/repositories/location_repository.dart';
@@ -25,17 +25,6 @@ import 'support/no_snapshot_weather.dart';
 class MockWeatherRepository
     with NoSnapshotWeather
     implements WeatherRepository {}
-
-class MockLogbookRepository implements LogbookRepository {
-  @override
-  Future<List<domain.SessionLog>> getAllLogs() async => [];
-  @override
-  Future<int> addLog(domain.SessionLog log) async => 1;
-  @override
-  Future<void> updateLog(domain.SessionLog log) async {}
-  @override
-  Future<void> deleteLog(int id) async {}
-}
 
 class MockLocationRepository implements LocationRepository {
   @override
@@ -74,7 +63,7 @@ void main() {
     await eqSeeder.seedIfNeeded();
 
     final weatherRepo = MockWeatherRepository();
-    final logbookRepo = MockLogbookRepository();
+    final sessionRepo = DriftSessionRepository(database);
     final locationRepo = MockLocationRepository();
 
     await tester.pumpWidget(
@@ -84,7 +73,7 @@ void main() {
           Provider<TargetRepository>.value(value: targetRepo),
           Provider<EquipmentRepository>.value(value: eqRepo),
           Provider<WeatherRepository>.value(value: weatherRepo),
-          Provider<LogbookRepository>.value(value: logbookRepo),
+          Provider<SessionRepository>.value(value: sessionRepo),
           Provider<LocationRepository>.value(value: locationRepo),
           ChangeNotifierProvider(
             create: (_) => PlannerViewModel(

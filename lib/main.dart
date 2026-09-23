@@ -15,8 +15,8 @@ import 'domain/repositories/equipment_repository.dart';
 import 'data/services/equipment_seeder.dart';
 import 'data/repositories/open_meteo_weather_repository.dart';
 import 'domain/repositories/weather_repository.dart';
-import 'data/repositories/drift_logbook_repository.dart';
-import 'domain/repositories/logbook_repository.dart';
+import 'data/repositories/drift_session_repository.dart';
+import 'domain/repositories/session_repository.dart';
 import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
 import 'data/services/geolocator_location_service.dart';
@@ -34,7 +34,7 @@ void main() async {
   final targetRepo = DriftTargetRepository(database);
   final equipmentRepo = DriftEquipmentRepository(database);
   final weatherRepo = OpenMeteoWeatherRepository();
-  final logbookRepo = DriftLogbookRepository(database);
+  final sessionRepo = DriftSessionRepository(database);
   final locationRepo = DriftLocationRepository(database);
   final locationService = GeolocatorLocationService();
 
@@ -59,7 +59,7 @@ void main() async {
         Provider<TargetRepository>.value(value: targetRepo),
         Provider<EquipmentRepository>.value(value: equipmentRepo),
         Provider<WeatherRepository>.value(value: weatherRepo),
-        Provider<LogbookRepository>.value(value: logbookRepo),
+        Provider<SessionRepository>.value(value: sessionRepo),
         Provider<LocationRepository>.value(value: locationRepo),
         ChangeNotifierProvider(
           create: (_) => PlannerViewModel(
@@ -68,6 +68,7 @@ void main() async {
             weatherRepo,
             locationRepo,
             locationService: locationService,
+            sessionRepository: sessionRepo,
           ),
         ),
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),

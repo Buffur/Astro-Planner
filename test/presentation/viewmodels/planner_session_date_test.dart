@@ -25,6 +25,7 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
+import 'package:astroplan/domain/models/session.dart';
 import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/moon_calculator.dart';
@@ -159,7 +160,7 @@ void main() {
       expect(vm.eveningDate, isNull);
     });
 
-    test('loadSession() maps a legacy instant to its device-local evening date '
+    test('openSession() maps a legacy instant to its device-local evening date '
         '— a load round trip', () async {
       vm = await buildViewModel(
         clock: FixedClock(DateTime.utc(2026, 9, 22, 1, 30)),
@@ -170,13 +171,17 @@ void main() {
       final picked = CalendarDate(2026, 11, 3);
       final storedInstant = DateTime(picked.year, picked.month, picked.day);
 
-      await vm.loadSession(
-        domain.SessionLog(
-          id: 1,
-          targetName: 'M42',
-          equipmentName: 'Test Rig',
-          sessionDate: storedInstant,
-          plannedLightFrames: 10,
+      await vm.openSession(
+        Session(
+          record: domain.SessionLog(
+            id: 1,
+            targetName: 'M42',
+            equipmentName: 'Test Rig',
+            sessionDate: storedInstant,
+            plannedLightFrames: 10,
+          ),
+          status: SessionStatus.completed,
+          legacy: true,
         ),
       );
 

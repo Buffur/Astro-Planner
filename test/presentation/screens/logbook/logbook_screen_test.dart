@@ -1,41 +1,19 @@
-// Widget tests for LogbookScreen (roadmap TASK 4.2, TD-039).
+// Widget tests for LogbookScreen (roadmap TASK 4.2, TD-039; on sessions
+// since TASK 11.3).
 //
-// Covers what the roadmap's acceptance test calls out explicitly: delete
-// requires confirmation. Ordering (newest-first) is a repository concern,
-// already covered by drift_logbook_repository_test.dart.
+// Delete requires confirmation; the list shows every saved (non-draft)
+// session and the legacy logs, each with its status (owner decision, TASK
+// 11.3). Ordering is a repository concern (drift_session_repository_test).
 
+import 'package:astroplan/data/database/app_database.dart';
+import 'package:astroplan/data/repositories/drift_session_repository.dart';
+import 'package:astroplan/domain/repositories/session_repository.dart';
+import 'package:astroplan/presentation/screens/logbook/logbook_screen.dart';
+import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:astroplan/domain/models/session_log.dart';
-import 'package:astroplan/domain/repositories/logbook_repository.dart';
-import 'package:astroplan/presentation/screens/logbook/logbook_screen.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
-
-class _FakeLogbookRepository implements LogbookRepository {
-  final List<SessionLog> logs;
-  int deleteCount = 0;
-
-  _FakeLogbookRepository(this.logs);
-
-  @override
-  Future<List<SessionLog>> getAllLogs() async => List.of(logs);
-
-  @override
-  Future<int> addLog(SessionLog log) async {
-    logs.add(log);
-    return log.id;
-  }
-
-  @override
-  Future<void> updateLog(SessionLog log) async {}
-
-  @override
-  Future<void> deleteLog(int id) async {
-    deleteCount++;
-    logs.removeWhere((l) => l.id == id);
-  }
-}
 
 class _MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
   @override
@@ -43,69 +21,92 @@ class _MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
 }
 
 void main() {
-  Widget wrap(LogbookRepository repo) {
-    return MultiProvider(
-      providers: [
-        Provider<LogbookRepository>.value(value: repo),
-        ChangeNotifierProvider<PlannerViewModel>(
-          create: (_) => _MockPlannerViewModel(),
-        ),
-      ],
-      child: const MaterialApp(home: LogbookScreen()),
+  late AppDatabase db;
+  late DriftSessionRepository repo;
+
+  Widget wrap() => MultiProvider(
+    providers: [
+      Provider<SessionRepository>.value(value: repo),
+      ChangeNotifierProvider<PlannerViewModel>(
+        create: (_) => _MockPlannerViewModel(),
+      ),
+    ],
+    child: const MaterialApp(home: LogbookScreen()),
+  );
+
+  /// Rows written directly: a legacy log, a planned session and a draft.
+  Future<void> seed(WidgetTester tester) => tester.runAsync(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    repo = DriftSessionRepository(db);
+    await db.customStatement(
+      "INSERT INTO session_logs (id, target_name, equipment_name, "
+      "session_date, planned_light_frames, status, legacy, evening_date) "
+      "VALUES (1, 'M31', 'Rig', 1767225600, 10, 'completed', 1, NULL), "
+      "(2, 'M42', 'Rig', 1767225600, 10, 'planned', 0, '2026-01-01'), "
+      "(3, 'M45', 'Rig', 1767225600, 10, 'draft', 0, '2026-01-01');",
     );
+  });
+
+  Future<int> rows(WidgetTester tester) async =>
+      (await tester.runAsync(() => db.select(db.sessionLogs).get()))!.length;
+
+  tearDown(() async => db.close());
+
+  Future<void> pumpList(WidgetTester tester) async {
+    await tester.pumpWidget(wrap());
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
   }
 
-  SessionLog buildLog(int id, String name) {
-    return SessionLog(
-      id: id,
-      targetName: name,
-      equipmentName: 'Rig',
-      sessionDate: DateTime(2026, 1, 1),
-      plannedLightFrames: 10,
-    );
-  }
+  testWidgets('saved sessions and legacy logs are listed with their status; '
+      'drafts are not', (tester) async {
+    await seed(tester);
+    await pumpList(tester);
+
+    expect(find.textContaining('M31'), findsOneWidget);
+    expect(find.textContaining('M42'), findsOneWidget);
+    expect(find.textContaining('M45'), findsNothing);
+    expect(find.text('Legacy log'), findsOneWidget);
+    expect(find.text('Planned'), findsOneWidget);
+  });
 
   testWidgets('swiping to delete asks for confirmation before deleting', (
     tester,
   ) async {
-    final repo = _FakeLogbookRepository([buildLog(1, 'M31')]);
-    await tester.pumpWidget(wrap(repo));
-    await tester.pumpAndSettle();
+    await seed(tester);
+    await pumpList(tester);
 
-    await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
+    await tester.drag(find.byType(Dismissible).first, const Offset(-500, 0));
     await tester.pumpAndSettle();
 
     expect(find.text('Delete Session?'), findsOneWidget);
-    expect(repo.deleteCount, 0);
+    expect(await rows(tester), 3);
   });
 
   testWidgets('cancelling the confirmation keeps the entry', (tester) async {
-    final repo = _FakeLogbookRepository([buildLog(1, 'M31')]);
-    await tester.pumpWidget(wrap(repo));
-    await tester.pumpAndSettle();
+    await seed(tester);
+    await pumpList(tester);
 
-    await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
+    await tester.drag(find.byType(Dismissible).first, const Offset(-500, 0));
     await tester.pumpAndSettle();
-
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
-    expect(repo.deleteCount, 0);
-    expect(find.textContaining('M31'), findsOneWidget);
+    expect(await rows(tester), 3);
+    expect(find.byType(Dismissible), findsNWidgets(2));
   });
 
   testWidgets('confirming the dialog deletes the entry', (tester) async {
-    final repo = _FakeLogbookRepository([buildLog(1, 'M31')]);
-    await tester.pumpWidget(wrap(repo));
-    await tester.pumpAndSettle();
+    await seed(tester);
+    await pumpList(tester);
 
-    await tester.drag(find.byType(Dismissible), const Offset(-500, 0));
+    await tester.drag(find.byType(Dismissible).first, const Offset(-500, 0));
     await tester.pumpAndSettle();
-
     await tester.tap(find.text('Delete'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 
-    expect(repo.deleteCount, 1);
-    expect(find.textContaining('M31'), findsNothing);
+    expect(await rows(tester), 2);
+    expect(find.byType(Dismissible), findsOneWidget);
   });
 }

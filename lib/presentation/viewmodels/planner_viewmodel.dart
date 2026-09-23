@@ -48,7 +48,9 @@ import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/models/moon_conditions.dart';
 import '../../domain/services/fit_analyzer.dart';
 import '../../domain/services/moon_calculator.dart';
-import '../../domain/models/session_log.dart';
+import '../../domain/models/session.dart';
+import '../../domain/repositories/session_repository.dart';
+import '../../domain/services/session_snapshot_builder.dart';
 
 class PlannerViewModel extends ChangeNotifier {
   final TargetRepository _targetRepository;
@@ -114,9 +116,16 @@ class PlannerViewModel extends ChangeNotifier {
   /// All saved sites, in insertion order (TASK 7.3).
   List<LocationProfile> _sites = const [];
 
-  SessionLog? _activeSessionLog;
-  int? get activeSessionId => _activeSessionLog?.id;
-  SessionLog? get activeSessionLog => _activeSessionLog;
+  /// The session a Save updates (ADR-014): an open, non-legacy session
+  /// that was saved or opened. Null after [newSession] or after opening a
+  /// frozen (completed, abandoned or legacy) session — then Save creates a
+  /// new one, and the frozen session is never modified.
+  Session? _activeSession;
+  int? get activeSessionId => _activeSession?.id;
+  Session? get activeSession => _activeSession;
+
+  /// Where sessions are stored (TASK 11.3); null in tests that never save.
+  final SessionRepository? _sessionRepository;
 
   /// Planning thresholds and overhead defaults (TASK 5.2). Defaults,
   /// rationale and valid ranges are documented on [PlanningPreferences].
@@ -134,6 +143,7 @@ class PlannerViewModel extends ChangeNotifier {
     PlanningPreferencesRepository? preferencesRepository,
     PlannerStateRepository? stateRepository,
     NightWeatherService? nightWeatherService,
+    this._sessionRepository,
   }) : _locationService = locationService ?? GeolocatorLocationService(),
        _reverseGeocoder = reverseGeocoder ?? NominatimReverseGeocoder(),
        _deviceTimeZone = deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
@@ -625,68 +635,129 @@ class PlannerViewModel extends ChangeNotifier {
     await setPlanningPreferences(_preferences.copyWith(dewMarginC: threshold));
   }
 
-  Future<void> loadSession(SessionLog log) async {
-    _activeSessionLog = log;
-    // log.sessionDate is a legacy instant (Drift hands it back as a
-    // device-local DateTime); its device-local calendar date is what the
-    // app showed for this session before, so that is what it maps to
-    // (ADR-007 §10 "legacy rows" proposal).
-    _pickedEveningDate = CalendarDate.fromDateTimeFields(
-      log.sessionDate.toLocal(),
-    );
+  /// Opens [session] in the planner (TASK 11.3): its night, site, target,
+  /// rig and blocks. References are followed by id; a legacy session (no
+  /// references) falls back to matching its labels, as before. Only an
+  /// open, non-legacy session becomes the one Save updates (ADR-014 §3).
+  Future<void> openSession(Session session) async {
+    _activeSession =
+        session.planEditable || session.status == SessionStatus.inProgress
+        ? session
+        : null;
+    final log = session.record;
 
-    // Look up target
-    final targets = await _targetRepository.searchTargets(log.targetName);
-    if (targets.isNotEmpty) {
-      try {
+    final siteId = session.siteId;
+    if (siteId != null) {
+      final site = await _locationRepository.getLocationById(siteId);
+      if (site != null) {
+        _applySite(site);
+        await _stateRepository.setActiveLocationId(site.id);
+      }
+    }
+
+    // The night key; a legacy instant (a device-local DateTime from Drift)
+    // maps to its device-local calendar date, as the app showed it before
+    // (ADR-007 §10 "legacy rows").
+    _pickedEveningDate =
+        session.eveningDate ??
+        CalendarDate.fromDateTimeFields(log.sessionDate.toLocal());
+
+    final targetId = session.targetId;
+    final byId = targetId == null
+        ? null
+        : await _targetRepository.getTargetById(targetId);
+    if (byId != null) {
+      _selectedTarget = byId;
+    } else if (session.legacy) {
+      final targets = await _targetRepository.searchTargets(log.targetName);
+      if (targets.isNotEmpty) {
         _selectedTarget = targets.firstWhere(
           (t) =>
               (t.commonName ?? t.catalogId).toLowerCase() ==
               log.targetName.toLowerCase(),
+          orElse: () => targets.first,
         );
-      } catch (e) {
-        _selectedTarget = targets.first;
       }
     }
 
-    // Look up equipment
-    final equipments = await _equipmentRepository.getAllEquipment();
-    if (equipments.isNotEmpty) {
-      try {
-        _selectedEquipment = equipments.firstWhere(
-          (e) => e.name.toLowerCase() == log.equipmentName.toLowerCase(),
-        );
-      } catch (e) {
-        // Keep current or clear
+    final rigId = session.rigId;
+    final rigById = rigId == null
+        ? null
+        : await _equipmentRepository.getEquipmentById(rigId);
+    if (rigById != null) {
+      _selectedEquipment = rigById;
+    } else if (session.legacy) {
+      final equipments = await _equipmentRepository.getAllEquipment();
+      for (final e in equipments) {
+        if (e.name.toLowerCase() == log.equipmentName.toLowerCase()) {
+          _selectedEquipment = e;
+          break;
+        }
       }
     }
 
-    if (log.captureBlocks.isNotEmpty) {
-      _captureBlocks = List.from(log.captureBlocks);
+    if (session.blocks.isNotEmpty) {
+      _captureBlocks = List.from(session.blocks);
       _isExampleCapturePlan = false;
       await _saveBlocks();
     }
 
     notifyListeners();
+    unawaited(_fetchWeather());
   }
 
   void newSession() {
-    _activeSessionLog = null;
+    _activeSession = null;
     // Back to the default night (the one containing "now"), not a fixed
     // wrong-zone date (TD-001: this used to re-set DateTime.now().toUtc()).
     _pickedEveningDate = null;
-    // we could also clear capture blocks or target if desired, but retaining them might be fine.
-    // The requirement says "resets the planner state."
     notifyListeners();
   }
 
-  /// Records [log] as the active session after a successful save (TASK 4.2,
-  /// TD-011), without `loadSession`'s heavier re-derivation of target/
-  /// equipment/date from the log. A second Save while [log]'s id is set
-  /// routes to `updateLog` instead of inserting a duplicate row.
-  void markSessionSaved(SessionLog log) {
-    _activeSessionLog = log;
+  /// Saves the current plan as a planned session with a fresh plan snapshot
+  /// (ADR-014 §3-§4; TASK 11.3): updates the active open session, or
+  /// creates a new one. Needs a night, a target and a rig.
+  Future<Session> saveSession() async {
+    final repository = _sessionRepository;
+    final night = sessionNight;
+    final target = _selectedTarget;
+    final rig = _selectedEquipment;
+    if (repository == null || night == null || target == null || rig == null) {
+      throw StateError('Saving needs a site, a target and a rig.');
+    }
+    final plan = SessionPlan(
+      eveningDate: night.eveningDate,
+      timeZoneId: displayZoneId,
+      siteId: _activeSite?.id,
+      targetId: target.id,
+      rigId: rig.id,
+      blocks: List.of(_captureBlocks),
+      targetLabel: target.commonName ?? target.catalogId,
+      rigLabel: rig.name,
+      siteLabel: locationName,
+    );
+    final snapshot = SessionSnapshotBuilder.build(
+      takenAtUtc: _clock.nowUtc(),
+      night: night,
+      timeZoneId: displayZoneId,
+      preferences: _preferences,
+      budget: captureBudget,
+      blocks: plan.blocks,
+      site: _activeSite,
+      skyDarkness: skyDarkness,
+      target: target,
+      rig: rig,
+      opportunity: imagingOpportunity,
+      weather: _nightWeather,
+      weatherSummary: nightWeatherSummary,
+    );
+    final active = _activeSession;
+    final id = active != null && active.planEditable
+        ? active.id
+        : (await repository.create(plan)).id;
+    _activeSession = await repository.savePlan(id, plan, snapshot);
     notifyListeners();
+    return _activeSession!;
   }
 
   /// Re-reads the selected target from the repository by id (TASK 4.2,
