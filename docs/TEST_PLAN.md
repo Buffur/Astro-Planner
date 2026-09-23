@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **613 tests: 613 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.3) |
+| `flutter test --no-pub` | **620 tests: 620 pass, 0 fail** (`dart run tool/check.dart`, after TASK 11.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -681,3 +681,16 @@ the ADR-012 variables, and a real out-of-range error):
 - Updated: integration flow (Save → Logbook shows "Planned"; double Save = one
   session with a snapshot), Home and app-boot providers, the legacy-date `openSession`
   test, and the v16 migration tests (legacy rows listed by `SessionRepository`).
+
+**Added by TASK 11.4** (planner on a persisted draft), 7 tests (620):
+- **`planner_draft_session_test.dart` (7):** a first run creates one draft with the
+  example plan and a restart resumes it; the acceptance — every edit is in the database
+  when the call returns and a rebuilt ViewModel (restart) shows the same plan; the
+  preferences plan moves once into a draft and is removed; duplicate for another night
+  gets a new night key and leaves the original unchanged; a past night rolls forward
+  on resume, a future one is kept; New = tonight + example plan; editing after Save
+  gives "unsaved changes", and opening a completed session copies it into a new draft.
+- **Updated:** `planner_session_save_test.dart` (two expectations follow the 11.4
+  owner decisions: a frozen session opens as a copy; a new draft before changing the
+  target) and `integration_flow_test.dart` (edits and Save run inside
+  `tester.runAsync`, since they now write to the database).

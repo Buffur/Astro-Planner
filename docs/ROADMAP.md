@@ -392,8 +392,11 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 11.3** — SessionRepository (lifecycle, one transaction
     per write) and pure snapshot builders; Save and the Logbook use it. 613 tests
     green.
-  - **Next: TASK 11.4 — Planner works on a persisted draft session.** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 11.4** — the planner works on a persisted draft session
+    (autosave, New / Duplicate / Open, one-time preferences migration). 620 tests
+    green. **Group G11 is complete.**
+  - **Next: TASK 12.1 — Information architecture ADR (PD-19).** Not started; it begins
+    only on the owner's go-ahead.
 
 ### Phase → group map
 

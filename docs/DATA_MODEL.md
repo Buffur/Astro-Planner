@@ -59,6 +59,7 @@
 > **TASK 11.1 (2026-09-23, documentation only):** ADR-014 decides C4 Session, C9 ExecutionState and C10 LogbookEntry (see DECISIONS Part F for the entity diagram); no schema change yet (TASK 11.2 evolves `session_logs` in place).
 > **TASK 11.2 (2026-09-23, commit `428f673`):** schema v16 (ADR-014 §5). `session_logs` evolved in place into the Session root: `status` (draft/planned/inProgress/completed/abandoned, CHECK, default draft), `legacy`, the night key (`evening_date`, `time_zone_id`), nullable references `site_id`/`target_id`/`rig_id` with ON DELETE SET NULL, UTC-ms lifecycle timestamps and two versioned JSON snapshot columns (`JsonMapConverter`); `capture_blocks` + `completed_frames`, `rejected_frames` (planned = `frame_count`); indexes on status, evening date and target id. Every existing log became a completed legacy session (no references guessed). `DriftLogbookRepository.updateLog` now writes only its own columns (a full-row replace would reset the v16 columns). No domain or repository API change.
 > **TASK 11.3 (2026-09-23, commit `ad6609c`):** no schema change. New domain types `Session`, `SessionStatus`, `SessionPlan`, `SessionResults`, `SessionSnapshot` (versioned JSON, v1) and the pure `SessionSnapshotBuilder`; `SessionRepository` replaces `LogbookRepository`. New rows write display labels into the pre-v16 text columns (ADR-014 §10). DEV-D3 resolved for new sessions.
+> **TASK 11.4 (2026-09-23, commit `628fda6`):** no schema change. The working plan and the selected target/rig ids moved from SharedPreferences (`captureBlocks`, `targetId`, `equipmentId`) into the current draft session (migrated once, then removed). DEV-D4 resolved for the plan; the active site id and the transient position stay in preferences by the TASK 7.1/7.3 owner decisions.
 
 ---
 
@@ -449,6 +450,11 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
   list, name or switch locations, so the table holds effectively one row.
 - **Consequence:** "Saved locations" (PRODUCT_SPEC MVP) is not delivered; state is
   hard to reason about and to test. TD-027.
+- **RESOLVED 2026-09-23 (TASK 11.4, commit `628fda6`) for the plan:** the capture plan
+  and the selected target and rig live in the current draft session in the database
+  (autosaved; the preferences copy migrated once and removed). Sites are managed in
+  `location_profiles` since TASK 7.3; the active-site id and the transient position
+  stay in preferences as app-level state (TASK 7.1/7.3 owner decisions).
 
 ### DEV-D5 — Provenance is not stored
 - **Intended behavior:** Preserve source information for weather provider, target

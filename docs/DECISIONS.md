@@ -66,6 +66,7 @@
 > **TASK 11.1 (2026-09-23, documentation only, no code changed):** ADR-014 (Session aggregate, lifecycle and snapshots) accepted in Part F of DECISIONS with an entity diagram; PD-18 resolved. Session is the aggregate root (LogbookEntry = a completed Session; ExecutionState = status + block counters + events), with nullable SET NULL references, a night key, UTC timestamps and versioned JSON snapshots; `session_logs` evolves in place. Owner decisions: completed sessions keep only results and notes editable (no reopening; Duplicate instead); the plan snapshot is refreshed on each Save and the execution-start snapshot is frozen; the planner opens the most recent open session (no id in preferences); legacy logs become completed, read-only 'legacy' sessions with no references guessed from names.
 > **TASK 11.2 (2026-09-23, commit `428f673`):** ADR-014 §5 and §7 implemented (schema v16). Implementation choices: the planned count per block is the existing `frame_count` (the new counters are completed and rejected); `status` has a CHECK constraint and defaults to `draft`; timestamps are UTC epoch ms; unreadable snapshot text reads as an empty map (no known `v` → "snapshot unavailable"); the optional `@DataClassName` renames (TD-045) were not done.
 > **TASK 11.3 (2026-09-23, commit `ad6609c`):** ADR-014 §3–§4 implemented in the repository and the planner's Save. Owner decisions (TASK 11.3): the Logbook lists every non-draft session and the legacy logs with a status label; Save = planned + refreshed plan snapshot; new rows write display labels into the NOT NULL pre-v16 text columns (§10 correction below).
+> **TASK 11.4 (2026-09-23, commit `628fda6`):** ADR-014 §3 and §6 implemented in the planner. Owner decisions (TASK 11.4): a resumed draft whose night has passed rolls forward to tonight (a future night is kept); a saved plan edited since its last Save is listed as "Planned, unsaved changes"; New = tonight + the example plan; opening a completed or legacy session copies it into a new draft. Implementation choice: autosaves are serialized so they reach the database in edit order.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -2224,3 +2225,9 @@ TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (r
   without changing anything. The execution-start snapshot is written once by `start`.
 - **Logbook (owner, 11.3):** lists every non-draft session and the legacy logs with a
   status label, since no session can reach "completed" before execution (G13).
+- **Planner (11.4, `628fda6`):** the current session is resumed at start (most recent
+  open) or created; every plan edit is autosaved (serialized) before the edit returns;
+  the preferences plan migrates once into a draft. Owner decisions: past nights roll
+  forward to tonight on resume; an edited saved plan is listed as "Planned, unsaved
+  changes"; New = tonight + example plan; opening a frozen session copies it into a
+  new draft. The active site and the transient position remain app-level preferences.
