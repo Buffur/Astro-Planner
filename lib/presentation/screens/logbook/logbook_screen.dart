@@ -11,7 +11,8 @@ import '../../viewmodels/planner_viewmodel.dart';
 
 /// Saved sessions (TASK 11.3, owner decision): every non-draft session —
 /// planned, in progress, completed, abandoned — and the legacy logs, newest
-/// first, each with its status.
+/// first, each with its status. A saved plan edited since its last Save is
+/// a draft again but stays listed as "unsaved changes" (owner, TASK 11.4).
 class LogbookScreen extends StatefulWidget {
   const LogbookScreen({super.key});
 
@@ -34,7 +35,10 @@ class _LogbookScreenState extends State<LogbookScreen> {
       _sessionsFuture = repo.list().then(
         (all) => [
           for (final s in all)
-            if (s.legacy || s.status != SessionStatus.draft) s,
+            if (s.legacy ||
+                s.status != SessionStatus.draft ||
+                s.plannedAtUtc != null)
+              s,
         ],
       );
     });
@@ -43,7 +47,8 @@ class _LogbookScreenState extends State<LogbookScreen> {
   static String statusLabel(Session s) {
     if (s.legacy) return 'Legacy log';
     return switch (s.status) {
-      SessionStatus.draft => 'Draft',
+      SessionStatus.draft =>
+        s.plannedAtUtc != null ? 'Planned, unsaved changes' : 'Draft',
       SessionStatus.planned => 'Planned',
       SessionStatus.inProgress => 'In progress',
       SessionStatus.completed => 'Completed',

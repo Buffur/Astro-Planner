@@ -102,8 +102,9 @@ void main() {
     await sessions.start(saved.id, saved.planSnapshot!);
     await sessions.complete(saved.id);
 
+    // TASK 11.4 (owner): a frozen session opens as a copy in a new draft.
     await vm.openSession((await sessions.get(saved.id))!);
-    expect(vm.activeSessionId, isNull);
+    expect(vm.activeSessionId, isNot(saved.id));
     final again = await vm.saveSession();
     expect(again.id, isNot(saved.id));
     expect((await sessions.get(saved.id))!.status, SessionStatus.completed);
@@ -114,8 +115,10 @@ void main() {
     final saved = await vm.saveSession();
     final all = await targets.getAllTargets();
     final other = all.firstWhere((t) => t.id != vm.selectedTarget!.id);
+    // TASK 11.4: edits autosave into the current session, so start a new
+    // draft before changing the target.
+    await vm.newSession();
     await vm.setTarget(other);
-    vm.newSession();
 
     await vm.openSession((await sessions.get(saved.id))!);
     expect(vm.selectedTarget!.id, saved.targetId);

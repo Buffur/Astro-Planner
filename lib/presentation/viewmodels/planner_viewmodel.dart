@@ -116,11 +116,15 @@ class PlannerViewModel extends ChangeNotifier {
   /// All saved sites, in insertion order (TASK 7.3).
   List<LocationProfile> _sites = const [];
 
-  /// The session a Save updates (ADR-014): an open, non-legacy session
-  /// that was saved or opened. Null after [newSession] or after opening a
-  /// frozen (completed, abandoned or legacy) session — then Save creates a
-  /// new one, and the frozen session is never modified.
+  /// The current session (TASK 11.4, ADR-014 §3): the draft or planned
+  /// session the planner works on. The plan is autosaved into it; a frozen
+  /// (completed, abandoned, in-progress or legacy) session is never the
+  /// target of an edit — edits then go into a new draft. Null only without
+  /// a [SessionRepository].
   Session? _activeSession;
+
+  /// Serializes autosaves so they reach the database in edit order.
+  Future<void> _autosaveChain = Future.value();
   int? get activeSessionId => _activeSession?.id;
   Session? get activeSession => _activeSession;
 
@@ -215,8 +219,10 @@ class PlannerViewModel extends ChangeNotifier {
     }
     _sites = await _locationRepository.getLocations();
 
+    List<CaptureBlock>? preferencesPlan;
     try {
       final saved = await _stateRepository.loadCaptureBlocks();
+      preferencesPlan = saved;
       if (saved != null) {
         _captureBlocks = saved;
         _isExampleCapturePlan = _captureBlocks.isEmpty;
@@ -226,24 +232,7 @@ class PlannerViewModel extends ChangeNotifier {
     }
     if (_captureBlocks.isEmpty) {
       _isExampleCapturePlan = true;
-      _captureBlocks = [
-        CaptureBlock(
-          frameType: FrameType.light,
-          filterName: 'L',
-          exposureTimeSeconds: 60.0,
-          frameCount: 100,
-        ),
-        CaptureBlock(
-          frameType: FrameType.dark,
-          exposureTimeSeconds: 60.0,
-          frameCount: 20,
-        ),
-        CaptureBlock(
-          frameType: FrameType.flat,
-          exposureTimeSeconds: 2.0,
-          frameCount: 20,
-        ),
-      ];
+      _captureBlocks = _examplePlan();
     }
 
     _preferences = await _preferencesRepository.load();
@@ -269,6 +258,163 @@ class PlannerViewModel extends ChangeNotifier {
     if (_activeSite == null && !_usingDefaultLocation) {
       unawaited(_reverseGeocode(_latitude, _longitude));
     }
+
+    final repository = _sessionRepository;
+    if (repository != null) {
+      await _resumeCurrentSession(repository, preferencesPlan != null);
+    }
+  }
+
+  /// The example plan shown on a first run and by [newSession] (TASK 4.4:
+  /// it must not look like the user's own plan).
+  static List<CaptureBlock> _examplePlan() => [
+    CaptureBlock(
+      frameType: FrameType.light,
+      filterName: 'L',
+      exposureTimeSeconds: 60.0,
+      frameCount: 100,
+    ),
+    CaptureBlock(
+      frameType: FrameType.dark,
+      exposureTimeSeconds: 60.0,
+      frameCount: 20,
+    ),
+    CaptureBlock(
+      frameType: FrameType.flat,
+      exposureTimeSeconds: 2.0,
+      frameCount: 20,
+    ),
+  ];
+
+  static bool _isExample(List<CaptureBlock> blocks) {
+    final example = _examplePlan();
+    if (blocks.length != example.length) return false;
+    for (var i = 0; i < blocks.length; i++) {
+      final a = blocks[i];
+      final e = example[i];
+      if (a.frameType != e.frameType ||
+          a.filterName != e.filterName ||
+          a.exposureTimeSeconds != e.exposureTimeSeconds ||
+          a.frameCount != e.frameCount ||
+          a.binning != e.binning ||
+          a.gain != e.gain ||
+          a.calibrationPolicy != e.calibrationPolicy) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// TASK 11.4 (ADR-014 §3, §6): the database is the plan's single source.
+  /// A plan still kept in preferences (before 11.4) moves once into a new
+  /// draft, which becomes current, and the preferences plan is removed.
+  /// Otherwise the most recent open session is resumed; with none, a draft
+  /// is created from the current (example) state.
+  Future<void> _resumeCurrentSession(
+    SessionRepository repository,
+    bool hadPreferencesPlan,
+  ) async {
+    if (hadPreferencesPlan) {
+      _activeSession = await repository.create(_currentPlan());
+      await _stateRepository.clearPlan();
+      return;
+    }
+    final open = await repository.mostRecentOpen();
+    if (open == null) {
+      _activeSession = await repository.create(_currentPlan());
+      return;
+    }
+    _activeSession = open;
+    await _applySessionPlan(open);
+    // Owner decision (TASK 11.4): a draft whose night has passed resumes on
+    // tonight's night; a night picked in the future is kept.
+    final stored = open.eveningDate;
+    _pickedEveningDate = null;
+    final tonight = eveningDate ?? today;
+    if (stored != null && stored.compareTo(tonight) > 0) {
+      _pickedEveningDate = stored;
+    }
+  }
+
+  /// Applies [session]'s target, rig and blocks to the planner state, by
+  /// reference; a legacy session (no references) matches its labels.
+  Future<void> _applySessionPlan(Session session) async {
+    final log = session.record;
+    final targetId = session.targetId;
+    final byId = targetId == null
+        ? null
+        : await _targetRepository.getTargetById(targetId);
+    if (byId != null) {
+      _selectedTarget = byId;
+    } else if (session.legacy) {
+      final targets = await _targetRepository.searchTargets(log.targetName);
+      if (targets.isNotEmpty) {
+        _selectedTarget = targets.firstWhere(
+          (t) =>
+              (t.commonName ?? t.catalogId).toLowerCase() ==
+              log.targetName.toLowerCase(),
+          orElse: () => targets.first,
+        );
+      }
+    }
+
+    final rigId = session.rigId;
+    final rigById = rigId == null
+        ? null
+        : await _equipmentRepository.getEquipmentById(rigId);
+    if (rigById != null) {
+      _selectedEquipment = rigById;
+    } else if (session.legacy) {
+      final equipments = await _equipmentRepository.getAllEquipment();
+      for (final e in equipments) {
+        if (e.name.toLowerCase() == log.equipmentName.toLowerCase()) {
+          _selectedEquipment = e;
+          break;
+        }
+      }
+    }
+
+    if (session.blocks.isNotEmpty) {
+      _captureBlocks = List.from(session.blocks);
+    }
+    _isExampleCapturePlan = _isExample(_captureBlocks);
+  }
+
+  /// The plan as the planner shows it now (ADR-014 §2). Without a site the
+  /// night key is the picked date, else today's date.
+  SessionPlan _currentPlan() {
+    final target = _selectedTarget;
+    final rig = _selectedEquipment;
+    return SessionPlan(
+      eveningDate: eveningDate ?? _pickedEveningDate ?? today,
+      timeZoneId: displayZoneId,
+      siteId: _activeSite?.id,
+      targetId: target?.id,
+      rigId: rig?.id,
+      blocks: List.of(_captureBlocks),
+      targetLabel: target == null
+          ? '(no target)'
+          : target.commonName ?? target.catalogId,
+      rigLabel: rig?.name ?? '(no rig)',
+      siteLabel: locationName,
+    );
+  }
+
+  /// Writes the current plan into the current session (TASK 11.4): every
+  /// plan edit is persisted before the edit method returns, so a force-stop
+  /// never loses it. A saved (planned) session goes back to draft until the
+  /// next Save (ADR-014 §3); a frozen current session is left untouched and
+  /// the plan goes into a new draft.
+  Future<void> _autosave() {
+    final repository = _sessionRepository;
+    if (repository == null) return Future.value();
+    return _autosaveChain = _autosaveChain.then((_) async {
+      final plan = _currentPlan();
+      final current = _activeSession;
+      _activeSession = current != null && current.planEditable
+          ? await repository.updatePlan(current.id, plan)
+          : await repository.create(plan);
+    });
   }
 
   bool get isLoading => _isLoading;
@@ -330,11 +476,12 @@ class PlannerViewModel extends ChangeNotifier {
   /// Picks a specific evening date, overriding the default (the night
   /// containing "now"). The date alone is stored — it takes effect once a
   /// site is set, even if none is set yet (ADR-007 §2).
-  void setEveningDate(CalendarDate date) {
+  Future<void> setEveningDate(CalendarDate date) async {
     _pickedEveningDate = date;
     notifyListeners();
     // Another night has its own forecast; a current cached one is reused.
     unawaited(_fetchWeather());
+    await _autosave();
   }
 
   double get latitude => _latitude;
@@ -379,6 +526,7 @@ class PlannerViewModel extends ChangeNotifier {
     _applySite(site);
     await _stateRepository.setActiveLocationId(site.id);
     notifyListeners();
+    await _autosave();
     await _fetchWeather();
   }
 
@@ -509,6 +657,7 @@ class PlannerViewModel extends ChangeNotifier {
     _locationNameAttribution = null;
     await _stateRepository.clearActiveLocationId();
     await _stateRepository.setTransientPosition(lat, lon);
+    await _autosave();
     await _fetchWeather();
     unawaited(_reverseGeocode(lat, lon));
   }
@@ -597,21 +746,35 @@ class PlannerViewModel extends ChangeNotifier {
     await _saveBlocks();
   }
 
+  /// Persists the plan: into the current session (TASK 11.4), or — only
+  /// without a [SessionRepository] — into preferences as before.
   Future<void> _saveBlocks() async {
     notifyListeners();
-    await _stateRepository.saveCaptureBlocks(_captureBlocks);
+    if (_sessionRepository == null) {
+      await _stateRepository.saveCaptureBlocks(_captureBlocks);
+    } else {
+      await _autosave();
+    }
   }
 
   Future<void> setEquipment(EquipmentProfile profile) async {
     _selectedEquipment = profile;
     notifyListeners();
-    await _stateRepository.setSelectedEquipmentId(profile.id);
+    if (_sessionRepository == null) {
+      await _stateRepository.setSelectedEquipmentId(profile.id);
+    } else {
+      await _autosave();
+    }
   }
 
   Future<void> setTarget(AstroTarget target) async {
     _selectedTarget = target;
     notifyListeners();
-    await _stateRepository.setSelectedTargetId(target.id);
+    if (_sessionRepository == null) {
+      await _stateRepository.setSelectedTargetId(target.id);
+    } else {
+      await _autosave();
+    }
   }
 
   /// An explicit user edit of the Bortle class (null = unknown). For an
@@ -635,17 +798,12 @@ class PlannerViewModel extends ChangeNotifier {
     await setPlanningPreferences(_preferences.copyWith(dewMarginC: threshold));
   }
 
-  /// Opens [session] in the planner (TASK 11.3): its night, site, target,
-  /// rig and blocks. References are followed by id; a legacy session (no
-  /// references) falls back to matching its labels, as before. Only an
-  /// open, non-legacy session becomes the one Save updates (ADR-014 §3).
+  /// Opens [session] in the planner (TASKs 11.3–11.4): its site, night,
+  /// target, rig and blocks. A draft or planned session becomes the current
+  /// session; a frozen one (completed, abandoned, in progress or legacy) is
+  /// copied into a new draft on its night and never modified (owner
+  /// decision, TASK 11.4).
   Future<void> openSession(Session session) async {
-    _activeSession =
-        session.planEditable || session.status == SessionStatus.inProgress
-        ? session
-        : null;
-    final log = session.record;
-
     final siteId = session.siteId;
     if (siteId != null) {
       final site = await _locationRepository.getLocationById(siteId);
@@ -654,64 +812,51 @@ class PlannerViewModel extends ChangeNotifier {
         await _stateRepository.setActiveLocationId(site.id);
       }
     }
-
     // The night key; a legacy instant (a device-local DateTime from Drift)
     // maps to its device-local calendar date, as the app showed it before
     // (ADR-007 §10 "legacy rows").
     _pickedEveningDate =
         session.eveningDate ??
-        CalendarDate.fromDateTimeFields(log.sessionDate.toLocal());
+        CalendarDate.fromDateTimeFields(session.record.sessionDate.toLocal());
+    await _applySessionPlan(session);
 
-    final targetId = session.targetId;
-    final byId = targetId == null
-        ? null
-        : await _targetRepository.getTargetById(targetId);
-    if (byId != null) {
-      _selectedTarget = byId;
-    } else if (session.legacy) {
-      final targets = await _targetRepository.searchTargets(log.targetName);
-      if (targets.isNotEmpty) {
-        _selectedTarget = targets.firstWhere(
-          (t) =>
-              (t.commonName ?? t.catalogId).toLowerCase() ==
-              log.targetName.toLowerCase(),
-          orElse: () => targets.first,
-        );
-      }
+    final repository = _sessionRepository;
+    if (repository != null) {
+      _activeSession = session.planEditable
+          ? session
+          : await repository.create(_currentPlan());
     }
-
-    final rigId = session.rigId;
-    final rigById = rigId == null
-        ? null
-        : await _equipmentRepository.getEquipmentById(rigId);
-    if (rigById != null) {
-      _selectedEquipment = rigById;
-    } else if (session.legacy) {
-      final equipments = await _equipmentRepository.getAllEquipment();
-      for (final e in equipments) {
-        if (e.name.toLowerCase() == log.equipmentName.toLowerCase()) {
-          _selectedEquipment = e;
-          break;
-        }
-      }
-    }
-
-    if (session.blocks.isNotEmpty) {
-      _captureBlocks = List.from(session.blocks);
-      _isExampleCapturePlan = false;
-      await _saveBlocks();
-    }
-
     notifyListeners();
     unawaited(_fetchWeather());
   }
 
-  void newSession() {
-    _activeSession = null;
+  /// A new draft for tonight with the current site, target and rig and the
+  /// example plan (owner decision, TASK 11.4). The previous session stays
+  /// as it was.
+  Future<void> newSession() async {
     // Back to the default night (the one containing "now"), not a fixed
     // wrong-zone date (TD-001: this used to re-set DateTime.now().toUtc()).
     _pickedEveningDate = null;
+    _captureBlocks = _examplePlan();
+    _isExampleCapturePlan = true;
+    await _startNewDraft();
+  }
+
+  /// A new draft with the current plan on [date] (TASK 11.4: "Duplicate for
+  /// another night"); the original session is not changed.
+  Future<void> duplicateForNight(CalendarDate date) async {
+    _pickedEveningDate = date;
+    await _startNewDraft();
+  }
+
+  Future<void> _startNewDraft() async {
+    final repository = _sessionRepository;
+    if (repository != null) {
+      await _autosaveChain;
+      _activeSession = await repository.create(_currentPlan());
+    }
     notifyListeners();
+    unawaited(_fetchWeather());
   }
 
   /// Saves the current plan as a planned session with a fresh plan snapshot
@@ -751,6 +896,7 @@ class PlannerViewModel extends ChangeNotifier {
       weather: _nightWeather,
       weatherSummary: nightWeatherSummary,
     );
+    await _autosaveChain;
     final active = _activeSession;
     final id = active != null && active.planEditable
         ? active.id

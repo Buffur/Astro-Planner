@@ -38,6 +38,28 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'New Session',
             onPressed: () => context.read<PlannerViewModel>().newSession(),
           ),
+          // TASK 11.4: a copy of the current plan as a new draft for another
+          // night; the current session is not changed.
+          IconButton(
+            icon: const Icon(Icons.copy_all),
+            tooltip: 'Duplicate for another night',
+            onPressed: () async {
+              final vm = context.read<PlannerViewModel>();
+              final now = DateTime.now();
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: now.add(const Duration(days: 1)),
+                firstDate: DateTime(now.year - 1, now.month, now.day),
+                lastDate: DateTime(now.year + 5, now.month, now.day),
+                helpText: 'Duplicate for which night?',
+              );
+              if (picked != null) {
+                await vm.duplicateForNight(
+                  CalendarDate.fromDateTimeFields(picked),
+                );
+              }
+            },
+          ),
           if (FeatureScope.fieldMode)
             IconButton(
               icon: Icon(

@@ -157,4 +157,12 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
       jsonEncode({'version': planJsonVersion, 'blocks': list}),
     );
   }
+
+  @override
+  Future<void> clearPlan() async {
+    final p = await _prefs;
+    await p.remove(_captureBlocks);
+    await p.remove(_targetId);
+    await p.remove(_equipmentId);
+  }
 }

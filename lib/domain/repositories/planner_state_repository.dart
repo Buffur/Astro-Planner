@@ -25,4 +25,9 @@ abstract class PlannerStateRepository {
   /// plan cannot be read.
   Future<List<CaptureBlock>?> loadCaptureBlocks();
   Future<void> saveCaptureBlocks(List<CaptureBlock> blocks);
+
+  /// Removes the working plan and the selected target and rig ids after
+  /// they moved into a draft session (TASK 11.4, ADR-014 §6). The site
+  /// selection and the transient position stay (app-level, TASK 7.1).
+  Future<void> clearPlan();
 }

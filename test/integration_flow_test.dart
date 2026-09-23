@@ -128,8 +128,12 @@ void main() {
       ),
     );
 
-    plannerViewModel.setTarget(testTarget);
-    plannerViewModel.setEquipment(testEquip);
+    // TASK 11.4: these autosave to the database, which needs the real
+    // event loop.
+    await tester.runAsync(() async {
+      await plannerViewModel.setTarget(testTarget);
+      await plannerViewModel.setEquipment(testEquip);
+    });
     await tester.pumpAndSettle();
 
     expect(find.text('Session Planner'), findsOneWidget);
@@ -145,6 +149,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.tap(saveButtonFinder);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
     await tester.pump(const Duration(seconds: 1)); // allow SnackBar to render
 
     expect(find.text('Session saved to Logbook!'), findsOneWidget);
@@ -197,8 +204,10 @@ void main() {
         ),
       );
 
-      plannerViewModel.setTarget(testTarget);
-      plannerViewModel.setEquipment(testEquip);
+      await tester.runAsync(() async {
+        await plannerViewModel.setTarget(testTarget);
+        await plannerViewModel.setEquipment(testEquip);
+      });
       await tester.pumpAndSettle();
 
       final listFinder = find.byType(Scrollable).first;
@@ -210,10 +219,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(saveButtonFinder);
-      await tester.pump(const Duration(seconds: 1));
-      await tester.tap(saveButtonFinder);
-      await tester.pump(const Duration(seconds: 1));
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(saveButtonFinder);
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 200)),
+        );
+        await tester.pump(const Duration(seconds: 1));
+      }
 
       final sessions = (await tester.runAsync(sessionRepo.list))!;
       expect(sessions, hasLength(1));
