@@ -907,6 +907,7 @@
 - **Risk · Complexity · Model:** Low · M · Sonnet
 
 ### TASK 10.5 — Azimuth and horizon profile (cut line)
+- **Status (2026-09-23): CUT for 1.0 by the owner** (keeps the ADR-013 horizon deferral; the gate stays reserved). Not implemented.
 - **Goal:** real obstructions act as a gate.
 - **Current problem (F-17):** azimuth isn't computed anywhere; the horizon is assumed flat.
 - **Why now:** the biggest practical constraint for backyard imagers, and small once 10.2 exists.
