@@ -58,7 +58,10 @@ void main() {
       locationService: FakeLocationService(),
     );
     await vm.ready;
-    vm.captureBlocks.clear();
+    // TASK 12.3: the plan is read-only outside the ViewModel.
+    while (vm.captureBlocks.isNotEmpty) {
+      await vm.removeCaptureBlock(0);
+    }
   });
 
   tearDown(() async {

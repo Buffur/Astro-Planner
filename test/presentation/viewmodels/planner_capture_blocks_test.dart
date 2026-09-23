@@ -67,7 +67,10 @@ void main() {
     await vm.ready;
     // Start from a known, empty plan — the default seed (3 blocks) would
     // make the reorder assertions harder to read.
-    vm.captureBlocks.clear();
+    // TASK 12.3: the plan is read-only outside the ViewModel.
+    while (vm.captureBlocks.isNotEmpty) {
+      await vm.removeCaptureBlock(0);
+    }
     for (final label in ['A', 'B', 'C', 'D']) {
       await vm.addCaptureBlock(_block(label));
     }

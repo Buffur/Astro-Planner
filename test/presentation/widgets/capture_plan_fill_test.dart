@@ -55,16 +55,18 @@ void main() {
       );
       await vm.ready;
       // A plan far larger than one night: 500 x 300 s of Ha.
-      vm.captureBlocks
-        ..clear()
-        ..add(
-          CaptureBlock(
-            frameType: FrameType.light,
-            filterName: 'Ha',
-            exposureTimeSeconds: 300,
-            frameCount: 500,
-          ),
-        );
+      // TASK 12.3: the plan is read-only outside the ViewModel.
+      while (vm.captureBlocks.isNotEmpty) {
+        await vm.removeCaptureBlock(0);
+      }
+      await vm.addCaptureBlock(
+        CaptureBlock(
+          frameType: FrameType.light,
+          filterName: 'Ha',
+          exposureTimeSeconds: 300,
+          frameCount: 500,
+        ),
+      );
     });
     addTearDown(() => tester.runAsync(database.close));
     await tester.pumpWidget(
