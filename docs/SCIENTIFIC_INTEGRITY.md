@@ -49,6 +49,7 @@
 > **TASK 8.4 (2026-09-23):** SI-005 resolved (ADR-011 implemented: unit-explicit names, focal ratio N plus optional diameter D with N = f / D and 1 % agreement, bounds, review flag for N > 32; no stored value changed).
 > **TASK 8.5 (2026-09-23):** SI-011 resolved for shipped seeds: one seed, camera specs verified against ZWO's page, optics labelled estimated, provenance stored per row; unverified phone seeds dropped (existing rows untouched, provenance unknown).
 > **TASK 8.6 (2026-09-23):** SI-001 fully resolved (NPF surfaced per PD-11, at the field-minimum |δ|); new CALC-31 (capability summary). No existing formula changed; the NPF call now receives the field-minimum declination instead of the target's centre (a decided input change, DECISIONS PD-11).
+> **TASK 9.1 (2026-09-23, documentation only):** ADR-012 decides the weather part of SI-010 (UTC timestamps sliced to the chosen night) and the variable semantics (visibility is horizontal visibility, not transparency; gusts are a preceding-hour maximum; missing values unknown). Implementation: TASKs 9.2–9.4.
 
 ## Purpose and authority
 

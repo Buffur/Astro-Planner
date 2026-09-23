@@ -54,6 +54,7 @@
 > **TASK 8.4 (2026-09-23):** ADR-011 implemented (schema v14; unit-explicit names; bounds in `EquipmentLimits`; `resolveAperture`; tracking type; maximum exposure; review flag; dormant repository removed). Implementation choice: in the form, a diameter makes the f/ field read-only and derived, so the two cannot disagree there; the 1 % rule is enforced by `resolveAperture` for any caller.
 > **TASK 8.5 (2026-09-23):** ADR-008 §6 equipment provenance implemented (schema v15; per-row `source`/`confidence` on camera modules and optical rigs). Owner decisions: drop the unverified phone seeds; label the telescope optics an example (confidence `estimated`). Implementation choice: a user edit sets `user`/`reported` only on the group (camera or optics) whose specs changed.
 > **TASK 8.6 (2026-09-23):** PD-11 resolved (E.1): NPF shown for untracked and ("if untracked") unknown-tracking rigs, at the field-minimum |δ|, with a k planning setting (default 1).
+> **TASK 9.1 (2026-09-23, documentation only, no code changed):** ADR-012 (weather provider, variables, alignment and staleness) accepted in Part F of DECISIONS; PD-15 resolved. Owner decisions: Open-Meteo `best_match` with the model recorded and shown; staleness 3 h / 12 h; only the chosen night's hours are used, uncovered hours shown as "no forecast". Also decided: UTC (`timeformat=unixtime`), a horizon of at most 16 days, the variable list with visibility labelled horizontal visibility (not transparency), CC BY 4.0 attribution, seeing and transparency deferred, no weather score.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -325,7 +326,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-12 | Licence intent (repository is GPL-3.0) and third-party terms (Open-Meteo, Nominatim, OSM tiles) for distribution | TD-031 | Confirm GPL-3.0; review store distribution and commercial-use terms | Owner decision before any release | Release |
 | PD-13 **RESOLVED 2026-09-21** | `GEMINI.md` deliverable / agent-instruction file policy | DEV-P7 | Restore as tracked; drop from roadmap deliverables; keep ignored | **Resolved — see E.1.** (Original: owner decision.) | — |
 | PD-14 | "Custom Dashboard" scope | Listed by the previous audit as a next step; absent from PRODUCT_SPEC and ROADMAP | Add to the roadmap with a phase; drop | Owner decision | UI roadmap |
-| PD-15 | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
+| PD-15 **RESOLVED 2026-09-23** | Weather provider/model and date alignment | TD-017 | Keep `icon_seamless`; make the model configurable; fetch by session date within the provider horizon | Decide with PD-02 | Phase 10 |
 | PD-16 **RESOLVED 2026-09-22** | Moving-object target types (Planet, Moon, Comet, Asteroid) | SI-012 | Hide until an ephemeris exists; keep with a warning | **Resolved — see E.1 and ADR-010 §3:** hidden for new targets in 1.0; existing ones labelled, never deleted. (Original: hide until PD-07.) | Target UI |
 | PD-17 *(placeholder, registered 2026-09-21)* | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | Decided in TASK 10.1. Roadmap's proposed starting point (not accepted): gates = Sun ≤ the darkness limit, target ≥ the minimum altitude, the horizon; annotations = Moon altitude, illumination and separation, cloud, dew; optional user-enabled Moon or cloud gates; explicitly no composite score | — | Opportunity calculator (10.2) |
 | PD-18 *(placeholder, registered 2026-09-21)* | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | Decided in TASK 11.1, before any migration | — | Session schema migration (11.2), information architecture (12.1) |
@@ -496,6 +497,18 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   column (existing rows stay `unknown`); an optional per-rig maximum exposure in
   seconds; guidance never blocks.
 - **Implementation:** TASK 8.4.
+
+### PD-15 — Weather provider/model and date alignment (RESOLVED 2026-09-23)
+
+- **Decided by:** the project owner, in chat, on 2026-09-23 (TASK 9.1), choosing the
+  recommended option on each point. Recorded as **ADR-012** (Part F).
+- **Provider/model:** Open-Meteo, `best_match`, with provider and model stored per fetch
+  and shown.
+- **Alignment:** UTC timestamps (`timeformat=unixtime`), sliced to the chosen
+  `SessionNight`, up to the 16-day horizon; uncovered hours are "no forecast".
+- **Staleness:** under 3 h current, 3–12 h aging, over 12 h stale (labelled, refresh
+  offered); cached data never shown as current.
+- **Implementation:** TASKs 9.2–9.4.
 
 ### PD-11 — How NPF is surfaced (RESOLVED 2026-09-23)
 
@@ -1732,3 +1745,125 @@ The UI shows the unit next to every number (TASK 8.4 acceptance).
 - **TASK 8.5:** seeds get sources and confidence; phone seeds may carry N only.
 - **TASK 8.6:** capability summary and the §5 guidance; PD-11.
 - SI-005 and TD-026 close with TASK 8.4; this ADR changes no code.
+
+## ADR-012: Weather provider, variables, alignment and staleness
+
+Status: accepted (owner, 2026-09-23, TASK 9.1). Resolves PD-15. Documentation only;
+implemented by TASKs 9.2–9.4. Checked against `open_meteo_weather_repository.dart` and
+`weather_conditions.dart` at commit `975f11e`, and against Open-Meteo's own pages
+(docs, terms, licence) read on 2026-09-23.
+
+### 1. Context (verified)
+
+- **Today:** `OpenMeteoWeatherRepository` requests `current` and `hourly` values with
+  `timezone=auto` and `models=icon_seamless` hard-coded; keeps the first **48 hours from
+  local midnight today**, whatever night is being planned; parses times as **naive local
+  strings** and discards `utc_offset_seconds`; caches the last response in preferences
+  per rounded coordinates with **no expiry**, returning it silently when the network
+  fails; substitutes `0.0` for a missing wind value; records no provider or model
+  (TD-017, SI-010 weather part, F-29–F-31).
+- **Provider facts (Open-Meteo, 2026-09-23):**
+  - forecast horizon: `forecast_days` 0–16 (default 7); `start_date`/`end_date` select
+    an interval; `past_days` 0–92;
+  - `timeformat=unixtime` returns every time as UNIX epoch seconds **in GMT+0**;
+  - models: "Best match" is the default, alongside national models (DWD ICON, ECMWF,
+    NOAA GFS, Météo-France, …);
+  - terms: the free API is for **non-commercial** use, under 10 000 calls per day,
+    5 000 per hour and 600 per minute; commercial use needs an API key (subscription);
+  - licence: API data are **CC BY 4.0** — attribution required.
+
+### 2. Decision: provider and model (owner)
+
+- **Open-Meteo stays** as the only provider for 1.0, behind the existing
+  `WeatherRepository` interface. Its non-commercial terms are recorded for the release
+  review (PD-12, TD-031); a commercial release would need a key held outside the code
+  (rule 15).
+- **Model: `best_match`** (the provider's per-location choice), replacing the hard-coded
+  `icon_seamless`. Every fetch stores the **provider and the model requested**
+  (`provider:open-meteo/best_match`, ADR-008 §6 style) and the UI shows it. A user-chosen
+  model can be added later without reopening this decision.
+
+### 3. Decision: variables (hourly), meaning and limits
+
+| Variable (Open-Meteo) | Unit | Meaning shown to the user | Limits stated in the app |
+| --- | --- | --- | --- |
+| `cloud_cover` | % | Total cloud cover | A model area fraction, not a sky view |
+| `cloud_cover_low` / `_mid` / `_high` | % | Cloud below 3 km (incl. fog) / 3–8 km / above 8 km | High thin cloud matters for imaging even when total cover is low |
+| `precipitation_probability` | % | Chance of precipitation | Not every model provides it — then **unknown**, never 0 |
+| `wind_speed_10m` | km/h | Wind at 10 m | Site exposure differs |
+| `wind_gusts_10m` | km/h | Maximum gust of the **preceding hour** | Labelled as a preceding-hour maximum |
+| `temperature_2m` | °C | Air temperature | — |
+| `dew_point_2m` | °C | Dew point (feeds the dew warning, PlanningPreferences) | — |
+| `relative_humidity_2m` | % | Relative humidity | — |
+| `visibility` | m | **Horizontal visibility** (viewing distance; low cloud, humidity, aerosols) | Labelled horizontal visibility — **not transparency** |
+
+- **Not used:** `is_day` (darkness comes from the app's own Sun calculations, ADR-007).
+- **Deferred:** seeing and transparency — no provider variable measures them; any future
+  index needs its own source and ADR.
+- **No weather score.** Indicators are shown per hour and summarised per night; nothing
+  combines them into a single "good night" number (G9 purpose).
+- **Missing values are unknown (null), never a default** (SI-008): a missing value
+  never becomes 0 (as the current wind fallback does).
+
+### 4. Decision: time alignment (UTC)
+
+- Request `timeformat=unixtime`; store and compute **every timestamp in UTC**. The
+  provider's `utc_offset_seconds`/`timezone` are kept only as metadata; display goes
+  through `NightTimeFormatter` in the site's zone (ADR-007 §6).
+- The forecast is **sliced to the chosen `SessionNight`** (`[startUtc, endUtc)`), not to
+  "the next 48 hours from local midnight". The request covers that night
+  (`forecast_days` or `start_date`/`end_date`), capped at the provider's 16-day horizon.
+
+### 5. Decision: horizon and partial coverage (owner)
+
+- Only hours inside the chosen night are used.
+- Hours of the night beyond the horizon, or missing from the response, are shown as
+  **"no forecast"** — never as zero cloud or a clear sky.
+- A night entirely beyond 16 days shows **"no forecast yet"**; the planner works without
+  weather (offline-first).
+
+### 6. Decision: staleness and cache (owner)
+
+- Each stored forecast keeps its **fetch time (UTC)**, provider, model and site
+  coordinates.
+- **Age thresholds** (assumptions, documented; configurable later):
+  - under **3 h**: current;
+  - **3–12 h**: "aging", shown with its age;
+  - over **12 h**: "stale" — still shown, clearly labelled, with a refresh offered.
+
+  Model runs update every few hours, so 3 h tracks them.
+- A cached forecast is **never presented as current**: when a refresh fails, the cached
+  data is shown with its age state, and the failure is shown (TD-029 style), not
+  swallowed.
+- The cache key includes the rounded coordinates and the model; data for another site is
+  never shown.
+- Fetching stays well inside the free limits: on site or night change and on explicit
+  refresh, plus a refresh when the data is aging and the planner is opened.
+
+### 7. Decision: attribution
+
+"Weather data by Open-Meteo.com" (CC BY 4.0) is shown on the weather card and on the
+About & data sources page (TASK 8.2 page), with a link.
+
+### 8. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| Keep `icon_seamless` | Rejected (owner) | Strong over Europe, coarser elsewhere; best_match adapts per location |
+| User-chosen model now | Deferred (owner) | Adds a setting before there is a need; the stored model makes it easy later |
+| All-or-nothing coverage | Rejected (owner) | Loses useful early-night hours near the horizon |
+| Stricter 1 h / 6 h staleness | Rejected (owner) | More refreshes without a quality gain; model runs are hours apart |
+| A combined weather score | Rejected | Hides which factor matters; G9 purpose: indicators, no score |
+| Treat visibility as transparency | Rejected | Horizontal visibility near the ground is a different quantity |
+
+### 9. Consequences and follow-up
+
+- **TASK 9.2:** a `WeatherSnapshot` (UTC hourly values, nullable per variable, provider,
+  model, fetch time, coordinates) and UTC parsing with `timeformat=unixtime`; tests with
+  recorded responses, including missing variables.
+- **TASK 9.3:** fetch and slice for the chosen night; horizon and partial coverage;
+  staleness states and cache; failures shown.
+- **TASK 9.4:** the night's weather indicators (per variable, no score) and the dew
+  warning; attribution.
+- TD-017 and the weather part of SI-010 close with those tasks; this ADR changes no
+  code.

@@ -362,8 +362,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 8.6** — capability summary (FOV, pixel scale, NPF,
     recommended max sub, frame fill) and sub-exposure warning; PD-11 resolved (owner).
     511 tests green. **Group G8 is complete.**
-  - **Next: TASK 9.1 — ADR: provider, variables, alignment, staleness (PD-15).** Not
-    started; it begins only on the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 9.1** — ADR-012 (weather provider, variables,
+    alignment, staleness); PD-15 resolved by the owner. Documentation only.
+  - **Next: TASK 9.2 — WeatherSnapshot and UTC parsing.** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 
