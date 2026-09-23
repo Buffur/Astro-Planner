@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **547 tests: 547 pass, 0 fail** (`dart run tool/check.dart`, after TASK 9.4) |
+| `flutter test --no-pub` | **572 tests: 572 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -607,3 +607,19 @@ the ADR-012 variables, and a real out-of-range error):
 - **Removed:** `open_meteo_weather_repository_test.dart` (3 tests of the legacy
   `getCurrentWeather` and its cache), deleted with that code by owner decision; the
   new path is covered by `open_meteo_forecast_test.dart` and the service/store tests.
+
+**Added by TASK 10.2** (ImagingOpportunity calculator), 25 tests (572):
+- **Calculator (`imaging_opportunity_calculator_test.dart`, 23):** ADR-013 vectors
+  V1–V12 on synthetic samples (exact windows, all failing reasons, Moon and weather
+  annotations, the 50 % boundary, cloud hour neighbourhoods and "no forecast" hours,
+  no darkness at −18° but a window at −12°, max altitude inside the window);
+  equality limits; exclusion only by optional gates; missing inputs give no
+  annotations and exclude nothing; mismatched Moon grid rejected; real sky —
+  agreement with the previous windows (M42), polar night (one window clipped at
+  both ends), midnight sun, a never-rising target, a circumpolar dip split at lower
+  culmination, a shared Sun track, MoonCalculator input.
+- **Preferences (`shared_prefs_planning_repositories_test.dart`, 1):** the optional
+  gates default off, round-trip and clamp.
+- **ViewModel (`planner_preferences_test.dart`, 1):** the acceptance — enabling the
+  Moon gate on a moonlit March night shortens the windows, and the fit's available
+  time equals the gated windows.

@@ -59,6 +59,7 @@
 > **TASK 9.3 (2026-09-23):** ADR-012 §6 implemented (freshness constants, cache keyed by site/model/night, failure states). Implementation choices: the cache key also includes the night's UTC start (a snapshot covers one night); a cached snapshot younger than 3 h is used without a request unless refresh is forced; an aging or stale one triggers a refresh and is shown only if that fails.
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** ADR-012 §3–§5 and §7 implemented in the UI; ADR-012 is fully implemented. Owner decisions (TASK 9.4): the weather card and summary cover **sunset to sunrise** of the chosen night (the whole 24 h window, labelled, for midnight sun or polar night); values are shown **neutrally** — the undocumented 20 % / 50 % cloud colour bands are dropped, only the dew-risk flag (the user's margin) is highlighted; the **legacy weather path is removed** now. Implementation choice: changing the evening date reuses a current cached forecast instead of forcing a refresh.
 > **TASK 10.1 (2026-09-23, documentation only, no code changed):** ADR-013 (imaging-opportunity semantics) accepted in Part F of DECISIONS; PD-17 resolved. Owner decisions: gates are darkness and minimum altitude, with a horizon gate reserved (no horizon data in 1.0); the Moon and cloud only annotate by default, each with an optional user gate (off; thresholds 50 %); the fixed sky warning (Moon > 0.8 or Bortle ≥ 7) is replaced by annotations in TASK 10.2. Also decided: unknown never excludes, all failing reasons listed, max altitude inside windows, no composite score (ranking by usable time only); 12 worked examples as test vectors.
+> **TASK 10.2 (2026-09-23, commit `613b32f`):** ADR-013 §2–§5 implemented in the domain (CALC-33). Corrections recorded in ADR-013 §10: the sky warning is removed in **TASK 10.3** (the roadmap puts that UI change there; §6/§9 said 10.2), and V12's in-window peak is at 03:00 (04:00 is outside the half-open window). Implementation choices: a sample's state holds until the next grid instant; a window that would start on the night's last instant is not created (the previous code produced a zero-length window there); the optional gates have no Settings control yet.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -2013,3 +2014,20 @@ expected value is exact).
 - A per-site horizon profile needs its own decision and data source (future work);
   G3 stays reserved.
 - This ADR changes no code.
+
+### 10. Implementation notes and corrections (TASK 10.2, commit `613b32f`)
+
+- **Implemented** in `ImagingOpportunityCalculator` (CALC-33); V1–V12 are unit tests.
+- **Correction (§6, §9):** the fixed sky warning is removed in **TASK 10.3**, not 10.2 —
+  MASTER_ROADMAP puts "remove the heuristic warning" in 10.3's (UI) scope, and 10.2 is
+  UI-free. The owner decision itself is unchanged.
+- **Correction (V12):** the in-window peak is at **03:00** — 04:00 is the window's
+  exclusive end, so a peak there would be outside it.
+- **Grid semantics:** sample i's gate state holds for `[t_i, t_{i+1})`; the last grid
+  instant (`night.endUtc`) only decides the end clip flag. The previous windows code
+  could emit a zero-length window when a target became usable exactly at `endUtc`;
+  the calculator does not.
+- **G3 (horizon):** no input and no enum value until a horizon decision exists.
+- **Preferences:** `moonGateEnabled`/`moonGateMinIlluminationPct`,
+  `cloudGateEnabled`/`cloudGateMaxPct` (off; 50 %), persisted; no Settings control
+  yet (recorded as TD-050).

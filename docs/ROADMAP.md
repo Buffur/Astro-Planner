@@ -375,8 +375,11 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 10.1** — ADR-013 (imaging-opportunity semantics:
     gates, annotations, reasons, no score); PD-17 resolved by the owner. Documentation
     only.
-  - **Next: TASK 10.2 — ImagingOpportunity calculator.** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 10.2** — `ImagingOpportunity` calculator (ADR-013 gates,
+    reasons, annotations, max altitude in windows); the budget fit uses its windows.
+    572 tests green.
+  - **Next: TASK 10.3 — Opportunity presentation.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

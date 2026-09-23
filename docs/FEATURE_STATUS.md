@@ -60,6 +60,7 @@
 > **TASK 9.3 (2026-09-23):** weather caching, freshness and failure states. `NightWeatherService` (domain, Clock-driven) uses a cached snapshot younger than 3 h, otherwise fetches and caches; out of range is its own state; a failed refresh returns the cache with its age and the failure, or unavailable without a cache — cached data is never presented as current. Freshness constants `WeatherFreshness` (aging 3 h, stale 12 h); sealed `NightWeather` state; `WeatherSnapshotStore` (SharedPreferences in the data layer) keyed by rounded coordinates, model and night. `PlannerViewModel.nightWeather` loads on the existing weather triggers; the card still shows the legacy path until TASK 9.4. F-29 updated (still Partial until the UI uses it).
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** night-aligned weather indicators and UI. `NightWeatherSummarizer` (pure, domain) slices the forecast to sunset..sunrise of the chosen night (the whole window, labelled, for midnight sun or polar night), one slot per UTC hour with "no forecast" gaps, per-variable ranges over the covered hours, and the dew spread (temperature − dew point) against the configured margin, labelled a heuristic (CALC-32). The weather card is rewritten on `vm.nightWeather` / `vm.nightWeatherSummary`: age and model, offline/stale labels, unavailable with retry, out of range, explicit units, hour strip in the site zone, no good/bad colour bands, Open-Meteo CC BY 4.0 attribution. Owner decisions: sunset to sunrise; neutral values; the legacy path removed (`getCurrentWeather`, `WeatherConditions`/`HourlyForecast`, the non-expiring cache, `currentWeather`/`weatherError`/`dewWarning`). **Group G9 is complete.** F-29, F-30, F-31 now Implemented.
 > **TASK 10.1 (2026-09-23, documentation only, no code changed):** ADR-013 (imaging-opportunity semantics) accepted in Part F of DECISIONS; PD-17 resolved. Owner decisions: gates are darkness and minimum altitude, with a horizon gate reserved (no horizon data in 1.0); the Moon and cloud only annotate by default, each with an optional user gate (off; thresholds 50 %); the fixed sky warning (Moon > 0.8 or Bortle ≥ 7) is replaced by annotations in TASK 10.2. Also decided: unknown never excludes, all failing reasons listed, max altitude inside windows, no composite score (ranking by usable time only); 12 worked examples as test vectors. No status changed (F-17, F-18, F-38 are implemented in TASK 10.2).
+> **TASK 10.2 (2026-09-23, commit `613b32f`):** `ImagingOpportunityCalculator` (pure, domain; CALC-33) implements ADR-013: gates per 5-min grid instant (darkness, minimum altitude, optional Moon and cloud gates), windows with night-edge clip flags, all failing reasons per excluded segment, why a night has no window, max altitude inside each window, Moon and weather annotations (a missing input is a missing annotation; unknown never excludes), and a `SunTrack` shared across targets. `PlanningPreferences` gained the optional gates (off; 50 % when enabled; persisted, no Settings UI yet). `vm.imagingOpportunity`; `vm.visibilityWindows` and so the budget fit now come from it (FitAnalyzer API unchanged; identical windows while the gates are off). Not yet shown in the UI (TASK 10.3). F-38 Missing → Partial.
 
 ## Status legend
 
@@ -122,7 +123,7 @@ feature exists although its roadmap phase has not been reached in
 | F-35 | Capture plan editor (blocks) | Implemented | 9 |
 | F-36 | Session duration and feasibility | Partial | 9 |
 | F-37 | Integration time and relative stacking gain | Implemented | 9 |
-| F-38 | Imaging Opportunity | Missing | 8–10 |
+| F-38 | Imaging Opportunity | Partial | 8–10 |
 | F-39 | Calibration-frame planning | Partial | 9 |
 | F-40 | Save session (planned) | Partial | 13 (ahead) |
 | F-41 | Logbook list / reload / delete / share | Partial | 13 (ahead) |
@@ -490,7 +491,8 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 9.
 
 ## F-38 — Imaging Opportunity
-- **Status:** Missing
+- **TASK 10.2 (Partial):** `ImagingOpportunityCalculator` (ADR-013) computes gated windows, reasons for excluded time, the no-window reason, max altitude inside windows and Moon/weather annotations; the budget fit consumes its windows. Still Partial: not presented (TASK 10.3); the optional Moon/cloud gates have no Settings control yet; no horizon input (reserved, F-17).
+- **Status:** Partial (was Missing)
 - **Current implementation:** none; the nearest equivalent is the darkness ∩ altitude window list (F-13).
 - **Relevant files:** —
 - **Known issues:** the central product concept (darkness, visibility, Moon and weather combined) does not exist; it must be a transparent model, not a black-box score.

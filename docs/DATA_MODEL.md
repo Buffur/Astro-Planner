@@ -54,6 +54,7 @@
 > **TASK 9.2 (2026-09-23):** new domain `WeatherSnapshot` / `WeatherHour` (UTC, nullable per variable, provider/model/fetch time); not persisted yet (cache: TASK 9.3). `WeatherConditions` remains for the legacy path.
 > **TASK 9.3 (2026-09-23):** weather snapshots are cached in SharedPreferences under `weather:<lat 2dp>:<lon 2dp>:<model>:<night start UTC ms>` (JSON format version 1: provider, model, fetch time and hour times as UTC epoch ms, nullable values). The legacy `weather_cache_<lat>_<lon>` keys remain until TASK 9.4.
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** `WeatherConditions`/`HourlyForecast` removed (owner decision) and the legacy `weather_cache_<lat>_<lon>` keys are no longer read or written (existing entries stay on upgraded devices, TD-049). New derived (not persisted) domain type `NightWeatherSummary` (interval, span kind, hourly slots with dew spread/risk, per-variable ranges).
+> **TASK 10.2 (2026-09-23, commit `613b32f`):** no schema change. New preferences `moonGateEnabled` (bool, false), `moonGateMinIlluminationPct` (0–100, 50), `cloudGateEnabled` (bool, false), `cloudGateMaxPct` (0–100, 50). New derived (not persisted) domain `ImagingOpportunity` (C8 now Partial).
 
 ---
 
@@ -264,6 +265,8 @@ allows reuse.
 | `minAltitude` | double | `SharedPrefsPlanningPreferencesRepository` | Minimum usable altitude (deg); Settings screen; clamped to [5, 60] on load (TASK 5.2) |
 | `dewPointThreshold` | double | `SharedPrefsPlanningPreferencesRepository` | Dew margin (°C); Settings screen; clamped to [0, 10] |
 | `npfK` | double | `SharedPrefsPlanningPreferencesRepository` | NPF k (star-trail tolerance), Settings screen; clamped to [1, 3], default 1 *(TASK 8.6)* |
+| `moonGateEnabled`, `cloudGateEnabled` *(TASK 10.2)* | bool | same | Optional opportunity gates (ADR-013 G4/G5); absent = off |
+| `moonGateMinIlluminationPct`, `cloudGateMaxPct` *(TASK 10.2)* | double | same | Gate thresholds, %, clamped to [0, 100], default 50 |
 | `darknessLimitDeg` *(TASK 5.2)* | double | same | Sun limit for windows: −18, −15 or −12 (anything else reads as −18) |
 | `feasibilityMarginPercent` *(TASK 5.2)* | double | same | Tight-margin percent, default 15, range [0, 50] |
 | `perFrameOverheadSeconds` *(TASK 5.2)* | double | same | Per-frame overhead (s), default 5 |
@@ -560,7 +563,10 @@ this file, covering the full ADR-008 §7 matrix through M9 (M10 is the rest of
   site/target/equipment; the input to the capture budget. Must **not** become an
   opaque "Astro Score" (product principle).
 - **Nearest:** `List<VisibilityWindow>` (darkness ∩ altitude only) — **Partial**;
-  the concept itself is **Missing**.
+  the concept itself is **Missing**. *(Since TASK 10.2: `ImagingOpportunity` — windows
+  with clip flags and max altitude, excluded segments with every failing gate, the
+  no-window reason, per-window Moon and weather annotations, optional Moon/cloud gates
+  (ADR-013) — **Partial**: no horizon, not yet presented.)*
 - **Gaps:** no Moon, weather, horizon; no typed result, uncertainty, or per-window
   annotations.
 - **Open decisions:** which conditions gate vs annotate; thresholds and their
