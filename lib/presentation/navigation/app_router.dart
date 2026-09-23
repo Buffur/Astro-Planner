@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../core/config/feature_scope.dart';
+import '../screens/about/about_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/target/target_selection_screen.dart';
 import '../screens/equipment/equipment_selection_screen.dart';
@@ -44,6 +45,7 @@ class AppRouter {
           args: state.extra as SiteEditorArgs? ?? const SiteEditorArgs(),
         ),
       ),
+      GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),

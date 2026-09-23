@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
@@ -22,6 +24,12 @@ import 'presentation/viewmodels/theme_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // TASK 8.2: the target catalog's CC BY-SA 4.0 notice in the licence page.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(const [
+      'OpenNGC (target catalog)',
+    ], await rootBundle.loadString('assets/catalog/OPENNGC_NOTICE.txt'));
+  });
   final database = AppDatabase();
   final targetRepo = DriftTargetRepository(database);
   final equipmentRepo = DriftEquipmentRepository(database);

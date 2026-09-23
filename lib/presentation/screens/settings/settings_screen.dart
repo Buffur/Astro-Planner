@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/planning_preferences.dart';
@@ -171,6 +172,14 @@ class SettingsScreen extends StatelessWidget {
             'measure your rig. Optional overheads are saved now and will be '
             'applied to the capture plan in a later update.',
             style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const Divider(height: AppSpacing.lg * 2),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About & data sources'),
+            subtitle: const Text('Catalog attribution and licences'),
+            onTap: () => context.push('/about'),
           ),
         ],
       ),

@@ -1,11 +1,14 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late AppDatabase database;
   late DriftTargetRepository repository;
 
@@ -130,13 +133,18 @@ void main() {
     expect(DriftTargetRepository.escapeLike(r'a%b_c\d'), r'a\%b\_c\\d');
   });
 
-  test('seeded targets carry seed provenance', () async {
+  // TASK 8.2 replaced the five hard-coded seeds (source `seed:catalog@1`)
+  // with the OpenNGC catalog asset; this test used to expect that source and
+  // the old M42 position, and now checks the catalog's.
+  test('seeded targets carry the catalog provenance', () async {
+    SharedPreferences.setMockInitialValues({});
     await CatalogSeeder(repository).seedIfNeeded();
     final all = await repository.getAllTargets();
-    expect(all, isNotEmpty);
-    expect(all.every((t) => t.source == 'seed:catalog@1'), isTrue);
+    expect(all, hasLength(164));
+    expect(all.every((t) => t.source == 'catalog:openngc@v20260501'), isTrue);
     final m42 = all.firstWhere((t) => t.catalogId == 'M42');
-    expect(m42.rightAscension, closeTo(83.8221, 1e-4));
-    expect(m42.declination, closeTo(-5.3911, 1e-4));
+    // OpenNGC NGC1976: 05:35:16.48 −05:23:22.8.
+    expect(m42.rightAscension, closeTo(83.818667, 1e-6));
+    expect(m42.declination, closeTo(-5.389667, 1e-6));
   });
 }
