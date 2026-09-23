@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -32,6 +33,7 @@ import '../../domain/services/night_weather_service.dart';
 import '../../domain/services/night_weather_summarizer.dart';
 import '../../domain/models/imaging_opportunity.dart';
 import '../../domain/services/imaging_opportunity_calculator.dart';
+import '../../domain/services/candidate_evaluator.dart';
 import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
@@ -770,6 +772,43 @@ class PlannerViewModel extends ChangeNotifier {
 
   /// The Sun on the current night's grid, shared by every target (TASK 10.2).
   SunTrack? _sunTrack;
+
+  /// Every target in the database evaluated for [sessionNight] with the
+  /// same inputs as [imagingOpportunity] (TASK 10.4), unsorted; null without
+  /// a night. Runs on a background isolate so the UI stays responsive.
+  Future<List<TonightCandidate>?> tonightCandidates() async {
+    final night = sessionNight;
+    if (night == null) return null;
+    final targets = await _targetRepository.getAllTargets();
+    final weather = _nightWeather;
+    final opportunityWeather = weather is NightWeatherAvailable
+        ? OpportunityWeather(
+            snapshot: weather.snapshot,
+            age: weather.age,
+            dewMarginC: _preferences.dewMarginC,
+          )
+        : null;
+    final darknessLimit = _preferences.darknessLimit.degrees;
+    final minAltitude = _preferences.minAltitudeDeg;
+    final gates = _preferences.optionalGates;
+    final sky = skyDarkness;
+    final equipment = _selectedEquipment;
+    final npfK = _preferences.npfK;
+    // Only plain values cross into the isolate (never `this`).
+    return Isolate.run(
+      () => CandidateEvaluator.evaluate(
+        night: night,
+        targets: targets,
+        darknessLimitDeg: darknessLimit,
+        minAltitudeDeg: minAltitude,
+        gates: gates,
+        weather: opportunityWeather,
+        skyDarkness: sky,
+        equipment: equipment,
+        npfK: npfK,
+      ),
+    );
+  }
 
   /// Moon context for [sessionNight] and the selected target (ADR-010,
   /// TASK 6.4), or null without a site. Cached per night and target: it

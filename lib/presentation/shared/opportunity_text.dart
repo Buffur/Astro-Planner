@@ -39,19 +39,26 @@ abstract final class OpportunityText {
       v < 0 ? '−${(-v).round()}°' : '${v.round()}°';
 
   /// Why there is no window tonight (ADR-013 §4).
-  static String noWindow(NoWindowReason r, ImagingOpportunity o) => switch (r) {
+  static String noWindow(NoWindowReason r, ImagingOpportunity o) =>
+      'No imaging window: ${noWindowShort(r, darknessLimitDeg: o.darknessLimitDeg, minAltitudeDeg: o.minAltitudeDeg)}';
+
+  /// The reason alone, for a list row (TASK 10.4), for example "the Sun
+  /// never gets below −18° tonight."
+  static String noWindowShort(
+    NoWindowReason r, {
+    required double darknessLimitDeg,
+    required double minAltitudeDeg,
+  }) => switch (r) {
     NoWindowReason.noDarkness =>
-      'No imaging window: the Sun never gets below '
-          '${_signed(o.darknessLimitDeg)} tonight.',
+      'the Sun never gets below ${_signed(darknessLimitDeg)} tonight.',
     NoWindowReason.targetNeverHighEnough =>
-      'No imaging window: the target never rises above '
-          '${_deg(o.minAltitudeDeg)} tonight.',
+      'the target never rises above ${_deg(minAltitudeDeg)} tonight.',
     NoWindowReason.targetNeverHighEnoughInDarkness =>
-      'No imaging window: the target is above ${_deg(o.minAltitudeDeg)} '
-          'only while the Sun is above ${_signed(o.darknessLimitDeg)}.',
+      'the target is above ${_deg(minAltitudeDeg)} only while the Sun is '
+          'above ${_signed(darknessLimitDeg)}.',
     NoWindowReason.excludedByOptionalGates =>
-      'No imaging window: your Moon or cloud gate excludes all of '
-          "tonight's dark time with the target high enough.",
+      "your Moon or cloud gate excludes all of tonight's dark time with the "
+          'target high enough.',
   };
 
   /// "max 55° at 01:20" — [at] is the formatted instant.

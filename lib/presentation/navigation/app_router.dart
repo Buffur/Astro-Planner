@@ -10,6 +10,7 @@ import '../screens/location/location_picker_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
 import '../screens/settings/settings_screen.dart';
+import '../screens/tonight/tonight_screen.dart';
 import '../screens/sites/site_editor_screen.dart';
 import '../screens/sites/sites_screen.dart';
 
@@ -46,6 +47,11 @@ class AppRouter {
         ),
       ),
       GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
+      // TASK 10.4: tonight's candidates across all targets.
+      GoRoute(
+        path: '/tonight',
+        builder: (context, state) => const TonightScreen(),
+      ),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),

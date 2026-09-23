@@ -52,6 +52,11 @@ class HomeScreen extends StatelessWidget {
               onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
             ),
           IconButton(
+            icon: const Icon(Icons.format_list_numbered),
+            tooltip: "Tonight's candidates",
+            onPressed: () => context.push('/tonight'),
+          ),
+          IconButton(
             icon: const Icon(Icons.tune),
             tooltip: 'Planning Settings',
             onPressed: () => context.push('/settings'),
