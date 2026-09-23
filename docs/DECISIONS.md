@@ -48,6 +48,7 @@
 > **TASK 7.1 (2026-09-23):** ADR-007 status updated (IANA zone per site; L1 fixed for sites with a zone; zone source = the TASK 7.3 picker). Owner decisions this task: legacy Bortle 4 → NULL with a note (others kept as `legacy`); add the `timezone` package now; map/GPS positions are transient and remembered.
 > **TASK 7.3 (2026-09-23):** ADR-007 status updated (zone source implemented). Owner decisions this task: add `flutter_timezone` (Apache-2.0) so the zone picker defaults to the device zone; the first run shows a site prompt instead of a silent GPS request; deleting the active site keeps its position as the transient position. Implementation choice recorded: `IanaTimeContext` loads the `latest_all` data set (link zones).
 > **TASK 7.4 (2026-09-23):** PD-05 resolved (E.1): manual Bortle/SQM (A) and the external map at the site (B) now; offline dataset (C) and licensed API (D) documented as deferred; scraper removed. PD-06: the light-pollution context became visible in its scheduled phase.
+> **TASK 8.1 (2026-09-23):** ADR-010 §3 implemented (moving types hidden/labelled); ADR-008 §6 target `source` column added (v13). Implementation choices recorded here: a catalog entry is a row whose source starts with `seed:` or `catalog:` (unique per catalog id); an edit that changes coordinates, size or magnitude sets source `user`, a rename keeps it; a bare RA number is hours.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -1565,6 +1566,7 @@ Each fixture records its query and retrieval date (TASK 6.2).
   separation once frames match) as annotations only, with no "impact %". The
   mean-phase model is deleted, with a DECISIONS note.
 - **TASK 8.1:** the moving types are hidden in the editor, and existing ones are
-  labelled (§3).
+  labelled (§3). **Done 2026-09-23** (target list, editor and Home; an existing
+  moving-type target keeps its type on edit).
 - SI-002, SI-009, SI-012, TD-032 and TD-036 stay **open** until those tasks land.
   This ADR changes no code.

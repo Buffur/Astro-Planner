@@ -43,6 +43,7 @@
 > **TASK 7.1 (2026-09-23):** SI-007 and SI-010 progress (unknown Bortle; IANA site zone). No calculation formula changed.
 > **TASK 7.3 (2026-09-23):** SI-010 progress: a site's IANA zone is set in the editor (device zone pre-filled, "Unknown" allowed, then mean solar time). The zone data set is now `latest_all` (includes link ids; canonical zones' rules unchanged). No formula changed.
 > **TASK 7.4 (2026-09-23):** SI-007 resolved: no scraper, no default; Bortle/SQM are user-entered with source and date, or unknown; no Bortle↔SQM conversion (none is sourced); the sky warning uses a known Bortle class only.
+> **TASK 8.1 (2026-09-23):** SI-012 largely resolved: epoch stored (J2000 only), source stored, moving types hidden/labelled, RA/Dec entered in sexagesimal or hours through pure, tested parsers (CALC-30). No formula changed.
 
 ## Purpose and authority
 
@@ -79,7 +80,7 @@ Correct Interpretation → Required Future Action.**
 | SI-009 | Undocumented astronomical model simplifications | Implemented (adequate for planning, undocumented) | TD-036 |
 | SI-010 | "Night" definition and date/time-zone semantics | Resolved (default path; TASK 2.4) — site-zone display still open | TD-020 |
 | SI-011 | Seed equipment data provenance and internal consistency | Unknown / Partial | TD-008 |
-| SI-012 | Target coordinates, epoch and object types | Partial | TD-016 |
+| SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
 
 ---
@@ -677,7 +678,9 @@ the `(0, 0)` sentinel; add angular size for FOV-fit.
 
 **Progress 2026-09-22 (TASK 6.2):** J2000 target coordinates are now precessed to the date (Meeus ch. 21, owner decision; 0.32° → 0.017° against USNO). Epoch is still not stored per target (TASK 8.1); the moving types are still offered (TASK 8.1).
 
-**Status:** Partial. **Work item:** TD-016.
+**Resolved in large part 2026-09-23 (TASK 8.1):** moving types are hidden for new targets and labelled "Fixed coordinates — this object moves; positions are not tracked" when they exist (ADR-010 §3); every target stores its epoch (`J2000`, the only value the calculators support — they precess J2000 to the date, TASK 6.2) and its source (legacy rows: unknown); angular size (arcmin) and magnitude can be stored; RA is entered in hours or h:m:s and Dec in d:m:s, parsed by `AstroMath.parseRightAscension`/`parseDeclination` (CALC-30: RA° = 15 × (h + m/60 + s/3600); Dec° = sign × (d + m/60 + s/3600), the sign applying to the whole value so −0°30′ = −0.5°; a bare RA number is hours, degrees need a `°` suffix). The `(0,0)` sentinel was already removed. **Still open:** no constellation; the seeds are unverified and have no size/magnitude (TASK 8.2).
+
+**Status:** Largely resolved. **Work item:** TD-016 (resolved).
 
 ---
 
@@ -746,6 +749,7 @@ already carries purpose/units/assumptions. All times are UTC unless noted.
 | CALC-27 *(TASK 6.2)* | `AstronomicalEngine.precessJ2000ToDate` | J2000 RA°, Dec°, JD → RA°, Dec° of date | Meeus ch. 21, eq. 21.2 (IAU 1976 ζ, z, θ) and 21.4 (rigorous) | Mean equinox of date; no nutation, aberration or proper motion (about 20–40″) | identity at J2000.0; precessed Dec within 0.03° of USNO Dec of date for all 67 observations | Good |
 | CALC-28 *(TASK 6.3)* | `MoonCalculator.position` / `topocentricAltitude` / `illuminatedFraction` / `phaseLongitudeDeg` / `riseSetForNight` (`lib/domain/services/moon_calculator.dart`, tables in `moon_series.dart`) | UTC (as UT1), lat°, lon°, `SessionNight` | Meeus ch. 47 full ELP-2000/82 tables (+ additive terms), ch. 22 nutation (4 terms) and obliquity, ch. 13 transforms, ch. 40 topocentric parallax, ch. 25 Sun (low accuracy), ch. 48 illumination, ch. 15 rise/set h₀ = 0.7275π − 0.5667°; ΔT = 69.2 s | Airless altitudes; rise/set on the 5-min grid; ΔT constant (±10 s ≈ 6″) | **reference (ADR-010 §4):** 32 Horizons instants over 2026–27: RA·cosδ 7.5″, Dec 2.3″, λ 7.4″, β 1.8″ (tolerance 72″); illumination 0.008 pp (≤ 1 pp); topocentric altitude 0.0016° at 3 sites incl. 69.65°N (≤ 0.05°); all 99 USNO phases ≤ 10 min; USNO moonrise/moonset on 15 site-nights matched one-to-one within [−2, +7] min | Good (**not yet used by the app**, TASK 6.4) |
 | CALC-29 *(TASK 6.4)* | `MoonCalculator.conditionsForNight`, `separationFromTarget`, `angularSeparationDeg`; `MoonConditions` | `SessionNight`, optional target (J2000) | On the night's 5-min grid: topocentric Moon altitude (CALC-28); target precessed to date (CALC-27) and its altitude (CALC-07); topocentric separation by the vector form of Meeus ch. 17; closest approach where both altitudes > 0°; illumination at mean solar midnight | Target nutation/aberration ignored (20–40″); 5-min grid; annotations only | **reference:** separation within 0.05° of USNO (45 geocentric Moon–star pairs) and Horizons + USNO (135 topocentric pairs at 3 sites) | Good |
+| CALC-30 *(TASK 8.1)* | `AstroMath.parseRightAscension` / `parseDeclination` / `formatRightAscension` / `formatDeclination` | typed text → RA° [0, 360) / Dec° [−90, 90], or null; degrees → display text | RA° = 15·(h + m/60 + s/3600) (a bare number is hours; degrees need a `°`/`deg`/`d` suffix); Dec° = sign·(d + m/60 + s/3600), the sign applying to the whole value | Only the last field may be fractional; minutes/seconds < 60; RA < 24 h; \|Dec\| ≤ 90°; display resolution 0.1 s (RA) and 1″ (Dec), so the editor keeps an untouched field's stored value | `astro_math_coordinates_test.dart` (hand-computed values, round trips) | Good |
 
 ---
 

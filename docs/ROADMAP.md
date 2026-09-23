@@ -344,8 +344,12 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 7.4** — scraper removed; the external map at the
     current position; manual Bortle/SQM with source; unknown-aware sky card;
     PD-05 resolved (C/D deferred). 420 tests green. **Group G7 is complete.**
-  - **Next: TASK 8.1 — Target model hardening (G8).** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-23: **TASK 8.1** — target model hardening (schema v13: epoch,
+    source, size, magnitude; catalog uniqueness; HMS/DMS parsers; edits keep the
+    catalog id; moving types hidden/labelled; search wildcards escaped). 451 tests
+    green.
+  - **Next: TASK 8.2 — Curated catalog with provenance.** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 

@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **420 tests: 420 pass, 0 fail** (`dart run tool/check.dart`, after TASK 7.4) |
+| `flutter test --no-pub` | **451 tests: 451 pass, 0 fail** (`dart run tool/check.dart`, after TASK 8.1) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -467,3 +467,29 @@ Any test failure from here on is a regression, not a known pre-existing issue
   test used a fake scraper answering 5 and now expects an unknown Bortle class.
   The scraper argument was removed from every `PlannerViewModel(...)` call in the
   tests (a mechanical change, no assertion weakened).
+
+**Added by TASK 8.1** (target model hardening, schema v13), 31 tests:
+- **Parsers (`astro_math_coordinates_test.dart`, hand-computed values):**
+  - the acceptance example `05h35m17s` / `−05°23′28″` → 83.820833° / −5.391111°,
+    in six RA and five Dec spellings;
+  - `−0°30′` in three spellings is −0.5°;
+  - decimal hours and seconds, `h m`, explicit degrees with `°`/`deg`/`d`;
+  - a bare `83.82` is rejected (hours > 24);
+  - out-of-range and malformed input rejected;
+  - format output, and format → parse round trips within the display resolution.
+- **Domain (`astro_target_user_edit_test.dart`):** a new target's catalog id and
+  source; edits keep the catalog id; rename/retype keep the source; data edits
+  make it `user`; what counts as a catalog entry; moving types not selectable.
+- **Repository (`drift_target_repository_test.dart`, +5):** new fields round-trip;
+  an update never changes the catalog id; catalog entries unique, user rows not;
+  `%`/`_` searched literally; seeds carry `seed:catalog@1`.
+- **Migration (`schema_migration_test.dart`, +7):** v8–v12 → v13 snapshot
+  equality; v12 → v13 preserves data (including duplicate legacy ids) with epoch
+  J2000 and unknown source/size/magnitude; the partial unique index.
+- **Screen (`target_selection_screen_test.dart`):** the acceptance example is
+  stored as the correct degrees; moving types not offered; an edit keeps the
+  catalog id and a moving type (with its warning); a rename keeps the exact
+  coordinates and the source (this caught a real rounding bug before commit).
+- **Rewritten, with the reason recorded in the file:** the four dialog tests that
+  typed bare degrees and expected "Must be a number" / "Must be 0.0 to 360.0" now
+  check the same rules in the new input format.
