@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **572 tests: 572 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.2) |
+| `flutter test --no-pub` | **577 tests: 577 pass, 0 fail** (`dart run tool/check.dart`, after TASK 10.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -623,3 +623,19 @@ the ADR-012 variables, and a real out-of-range error):
 - **ViewModel (`planner_preferences_test.dart`, 1):** the acceptance — enabling the
   Moon gate on a moonlit March night shortens the windows, and the fit's available
   time equals the gated windows.
+
+**Changed by TASK 10.3** (opportunity presentation), +6 / −1 tests (577):
+- **List and wording (`tonight_opportunity_widget_test.dart`, 6):** durations;
+  reasons list every failing gate in a fixed order; Moon and forecast annotations
+  (no verdict); every no-window reason has its own sentence; the acceptance — every
+  excluded period is listed with its reasons (ADR-013 V3); a night without a window
+  says why.
+- **Chart (`altitude_chart_widget_test.dart`):** renders an `ImagingOpportunity`
+  (legend shows the darkness limit and the window swatch), including polar night.
+- **Home (`home_screen_test.dart`):** the "Tonight for this target" card is shown,
+  no "Sky Warning", no culmination "Max Altitude"; two tests now scroll to what they
+  check (the list builds lazily and the new card is taller).
+- **Sky darkness (`planner_sky_darkness_test.dart`):** the warning tests became
+  "Bortle and SQM are context only: no verdict, same windows"; the Moon/Bortle
+  warning test in `planner_site_test.dart` was removed with the warning (owner
+  decision, ADR-013 §6).

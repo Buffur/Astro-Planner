@@ -61,6 +61,7 @@
 > **TASK 9.4 (2026-09-23, commit `48d7a8c`):** night-aligned weather indicators and UI. `NightWeatherSummarizer` (pure, domain) slices the forecast to sunset..sunrise of the chosen night (the whole window, labelled, for midnight sun or polar night), one slot per UTC hour with "no forecast" gaps, per-variable ranges over the covered hours, and the dew spread (temperature − dew point) against the configured margin, labelled a heuristic (CALC-32). The weather card is rewritten on `vm.nightWeather` / `vm.nightWeatherSummary`: age and model, offline/stale labels, unavailable with retry, out of range, explicit units, hour strip in the site zone, no good/bad colour bands, Open-Meteo CC BY 4.0 attribution. Owner decisions: sunset to sunrise; neutral values; the legacy path removed (`getCurrentWeather`, `WeatherConditions`/`HourlyForecast`, the non-expiring cache, `currentWeather`/`weatherError`/`dewWarning`). **Group G9 is complete.** F-29, F-30, F-31 now Implemented.
 > **TASK 10.1 (2026-09-23, documentation only, no code changed):** ADR-013 (imaging-opportunity semantics) accepted in Part F of DECISIONS; PD-17 resolved. Owner decisions: gates are darkness and minimum altitude, with a horizon gate reserved (no horizon data in 1.0); the Moon and cloud only annotate by default, each with an optional user gate (off; thresholds 50 %); the fixed sky warning (Moon > 0.8 or Bortle ≥ 7) is replaced by annotations in TASK 10.2. Also decided: unknown never excludes, all failing reasons listed, max altitude inside windows, no composite score (ranking by usable time only); 12 worked examples as test vectors. No status changed (F-17, F-18, F-38 are implemented in TASK 10.2).
 > **TASK 10.2 (2026-09-23, commit `613b32f`):** `ImagingOpportunityCalculator` (pure, domain; CALC-33) implements ADR-013: gates per 5-min grid instant (darkness, minimum altitude, optional Moon and cloud gates), windows with night-edge clip flags, all failing reasons per excluded segment, why a night has no window, max altitude inside each window, Moon and weather annotations (a missing input is a missing annotation; unknown never excludes), and a `SunTrack` shared across targets. `PlanningPreferences` gained the optional gates (off; 50 % when enabled; persisted, no Settings UI yet). `vm.imagingOpportunity`; `vm.visibilityWindows` and so the budget fit now come from it (FitAnalyzer API unchanged; identical windows while the gates are off). Not yet shown in the UI (TASK 10.3). F-38 Missing → Partial.
+> **TASK 10.3 (2026-09-23, commit `e732a0e`):** opportunity presentation. Home's "Tonight for this target" card shows the usable time, a chart (darkness bands at the user's limit, highlighted windows, target and Moon altitude, minimum altitude) and a text list (each window with times, duration, max altitude and Moon/forecast facts; every excluded period with all its reasons; the no-window reason), both rendered from `vm.imagingOpportunity`; wording in `OpportunityText`. Removed: the fixed sky warning (ADR-013 §6), the decorative gradient bar (TD-034), and the culmination-based "Max Altitude" (now "Max altitude in windows"; `calculateCulminationAltitude` removed with its last caller). F-18 Deprecated (removed); F-38 presented, still Partial (TD-050, no horizon).
 
 ## Status legend
 
@@ -103,7 +104,7 @@ feature exists although its roadmap phase has not been reached in
 | F-15 | Lunar illumination | Implemented | 8 |
 | F-16 | Moon position, rise/set, Moon–target separation | Implemented | 8 |
 | F-17 | Horizon / obstruction model | Missing | 8 |
-| F-18 | Sky-darkness warning | Prototype | 11 |
+| F-18 | Sky-darkness warning | Deprecated | 11 |
 | F-19 | Target selection, search, custom target CRUD | Implemented | 7 |
 | F-20 | Curated target catalog with provenance | Implemented | 7 |
 | F-21 | Moving-object targets | Missing | 7 |
@@ -259,7 +260,7 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Partial
 - **Current implementation:** low-precision Sun altitude; sunset, civil/nautical/astronomical dusk and dawn, sunrise on a 5-minute scan. **New (TASK 2.3):** a `SessionNight`-based `calculateNightTimelineForNight` returns a typed `NightTimeline` (`SunCrossing`/`SunNeverBelow`/`SunAlwaysBelow` per threshold, never a bare null); the old `Map<String, DateTime?>`-returning `calculateNightTimeline` is now a thin wrapper over it. UI (`sky_darkness_widget.dart`) still shows sunset, astro dusk/dawn, sunrise and a "True Night Window" from the old wrapper, unchanged.
 - **Relevant files:** `visibility_calculator.dart`, `lib/domain/models/night_timeline.dart`, `lib/presentation/widgets/sky_darkness_widget.dart`.
-- **Known issues:** 5-minute quantization (TD-036); the gradient bar is decorative and unrelated to the data. *Resolved (TASK 2.3):* the stale "refine to 1-minute" comment is gone with the scan loop it was attached to (TD-024). *Resolved (TASK 2.4):* wrong night by default (F-09); `sky_darkness_widget.dart` now consumes the typed `NightTimeline?` directly (sealed-class pattern matching, `null` when there is no site) instead of the deprecated `Map<String, DateTime?>` wrapper; times are labelled with the device zone via `NightTimeFormatter` instead of printed bare.
+- **Known issues:** 5-minute quantization (TD-036); ~~the gradient bar is decorative and unrelated to the data~~ *(removed TASK 10.3, TD-034; data-driven darkness bands are in the opportunity chart)*; the "True Night Window" line always uses astronomical twilight, not the user's darkness limit (TD-051). *Resolved (TASK 2.3):* the stale "refine to 1-minute" comment is gone with the scan loop it was attached to (TD-024). *Resolved (TASK 2.4):* wrong night by default (F-09); `sky_darkness_widget.dart` now consumes the typed `NightTimeline?` directly (sealed-class pattern matching, `null` when there is no site) instead of the deprecated `Map<String, DateTime?>` wrapper; times are labelled with the device zone via `NightTimeFormatter` instead of printed bare.
 - **Dependencies:** F-11, F-09.
 - **Roadmap relevance:** Phase 8.
 
@@ -305,7 +306,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 8 (optional).
 
 ## F-18 — Sky-darkness warning
-- **Status:** Prototype
+- **Status:** Deprecated — **removed 2026-09-23 (TASK 10.3, ADR-013 §6, owner decision)**. The fixed Moon > 0.8 / Bortle ≥ 7 card and `skyDarknessWarning` are gone; the Moon (per window) and sky darkness (Bortle/SQM with source) are shown as facts, with no threshold verdict. The text below describes the removed card.
 - **Current implementation:** an orange card on Home when Moon illumination > 0.8 or Bortle ≥ 7.
 - **Relevant files:** `planner_viewmodel.dart:434-436`, `home_screen.dart:147-166`.
 - **Known issues:** hard-coded thresholds; ignores Moon altitude and target; the Bortle half is unreachable (F-32, F-33); message asserts targets "will wash out" (SI-006; TD-033).
@@ -491,6 +492,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 9.
 
 ## F-38 — Imaging Opportunity
+- **TASK 10.3:** presented on Home as "Tonight for this target" (chart + list from the same result; every excluded period with its reasons). Still Partial: the optional Moon/cloud gates have no Settings control (TD-050); no horizon input (F-17).
 - **TASK 10.2 (Partial):** `ImagingOpportunityCalculator` (ADR-013) computes gated windows, reasons for excluded time, the no-window reason, max altitude inside windows and Moon/weather annotations; the budget fit consumes its windows. Still Partial: not presented (TASK 10.3); the optional Moon/cloud gates have no Settings control yet; no horizon input (reserved, F-17).
 - **Status:** Partial (was Missing)
 - **Current implementation:** none; the nearest equivalent is the darkness ∩ altitude window list (F-13).

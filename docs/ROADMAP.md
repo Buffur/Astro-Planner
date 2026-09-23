@@ -378,7 +378,10 @@ rewritten to match the code.*
   - Completed 2026-09-23: **TASK 10.2** — `ImagingOpportunity` calculator (ADR-013 gates,
     reasons, annotations, max altitude in windows); the budget fit uses its windows.
     572 tests green.
-  - **Next: TASK 10.3 — Opportunity presentation.** Not started; it begins only on the
+  - Completed 2026-09-23: **TASK 10.3** — "Tonight for this target" (chart + window list
+    with reasons from one result); sky warning and decorative bar removed. 577 tests
+    green.
+  - **Next: TASK 10.4 — Tonight's candidates.** Not started; it begins only on the
     owner's go-ahead.
 
 ### Phase → group map
