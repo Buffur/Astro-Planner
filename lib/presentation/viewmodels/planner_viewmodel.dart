@@ -25,6 +25,10 @@ import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/planning_preferences_repository.dart';
 import '../../data/repositories/shared_prefs_planner_state_repository.dart';
 import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
+import '../../data/repositories/open_meteo_weather_repository.dart';
+import '../../data/repositories/shared_prefs_weather_snapshot_store.dart';
+import '../../domain/models/night_weather.dart';
+import '../../domain/services/night_weather_service.dart';
 import '../../data/services/flutter_timezone_device_time_zone.dart';
 import '../../data/services/geolocator_location_service.dart';
 import '../../data/services/nominatim_reverse_geocoder.dart';
@@ -73,6 +77,14 @@ class PlannerViewModel extends ChangeNotifier {
   EquipmentProfile? _selectedEquipment;
   WeatherConditions? _currentWeather;
   bool _weatherError = false;
+
+  /// The chosen night's forecast state (ADR-012; TASK 9.3).
+  NightWeather _nightWeather = const NightWeatherIdle();
+  late final NightWeatherService _nightWeatherService;
+
+  /// Increments with each night-weather request, so a slow answer for a
+  /// previous site or night is dropped.
+  int _nightWeatherRequest = 0;
   String? _locationName;
   String? _locationNameAttribution;
 
@@ -118,6 +130,7 @@ class PlannerViewModel extends ChangeNotifier {
     Clock? clock,
     PlanningPreferencesRepository? preferencesRepository,
     PlannerStateRepository? stateRepository,
+    NightWeatherService? nightWeatherService,
   }) : _locationService = locationService ?? GeolocatorLocationService(),
        _reverseGeocoder = reverseGeocoder ?? NominatimReverseGeocoder(),
        _deviceTimeZone = deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
@@ -126,6 +139,14 @@ class PlannerViewModel extends ChangeNotifier {
            preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
        _stateRepository =
            stateRepository ?? SharedPrefsPlannerStateRepository() {
+    _nightWeatherService =
+        nightWeatherService ??
+        NightWeatherService(
+          repository: _weatherRepository,
+          store: SharedPrefsWeatherSnapshotStore(),
+          clock: _clock,
+          model: OpenMeteoWeatherRepository.model,
+        );
     ready = _init();
   }
 
@@ -254,6 +275,11 @@ class PlannerViewModel extends ChangeNotifier {
   /// True when the most recent weather fetch threw. Distinct from
   /// [currentWeather] being null, which can also mean "not loaded yet".
   bool get weatherError => _weatherError;
+
+  /// The weather for the chosen night: loading, available (with its age
+  /// and whether it came from the cache or a failed refresh), out of range
+  /// or unavailable (TASK 9.3). Idle without a site.
+  NightWeather get nightWeather => _nightWeather;
 
   /// Place name of the current position from the [ReverseGeocoder], or null
   /// while unknown (not looked up yet, no name for the point, or the lookup
@@ -518,6 +544,33 @@ class PlannerViewModel extends ChangeNotifier {
       _weatherError = true;
       debugPrint('Weather fetch error: $e');
     }
+    notifyListeners();
+    await _loadNightWeather(forceRefresh: forceRefresh);
+  }
+
+  /// Loads the chosen night's forecast through [NightWeatherService]
+  /// (TASK 9.3). The legacy card above still uses [currentWeather] until
+  /// TASK 9.4.
+  Future<void> _loadNightWeather({bool forceRefresh = false}) async {
+    final night = sessionNight;
+    final request = ++_nightWeatherRequest;
+    if (night == null) {
+      _nightWeather = const NightWeatherIdle();
+      notifyListeners();
+      return;
+    }
+    _nightWeather = const NightWeatherLoading();
+    notifyListeners();
+    final latitude = _latitude;
+    final longitude = _longitude;
+    final result = await _nightWeatherService.load(
+      night,
+      latitude: latitude,
+      longitude: longitude,
+      forceRefresh: forceRefresh,
+    );
+    if (request != _nightWeatherRequest) return; // superseded
+    _nightWeather = result;
     notifyListeners();
   }
 
