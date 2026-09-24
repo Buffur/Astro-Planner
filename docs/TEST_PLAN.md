@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **835 tests: 835 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.4) |
+| `flutter test --no-pub` | **857 tests: 857 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.1) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -846,3 +846,24 @@ the ADR-012 variables, and a real out-of-range error):
   emulator. On an Android emulator: back up to Files, uninstall, reinstall, restore, close
   and reopen the app; check sessions, sites, rigs and targets; also try a backup made by a
   newer build (refused). The automated round trip above runs on desktop SQLite.
+
+**Added by TASK 15.1** (error handling and diagnostics), 22 tests (857):
+- **`data/repositories/storage_failure_test.dart` (10):** **a failure-path test per
+  repository** — equipment, locations, targets and sessions on a database whose statements
+  fail (a test `QueryInterceptor`): a typed, logged `StorageFailure`; a failed session write
+  is rolled back; a lifecycle refusal stays a `SessionStateError`. Display preferences, first
+  run, planning preferences and planner state with an unreadable stored value; the weather
+  cache (unreadable store fails, unreadable entry is absent and logged). The weather
+  repository's failures are covered by `open_meteo_forecast_test.dart`.
+- **`domain/services/current_session_failure_test.dart` (3):** a failed autosave is reported,
+  not thrown; the next write retries the whole plan and clears it; later operations are not
+  blocked.
+- **`core/diagnostics/app_log_test.dart` (3):** levels, scope and error kept; bounded buffer;
+  read-only view.
+- **`core/diagnostics/no_empty_catch_test.dart` (2):** **acceptance: no empty catch blocks
+  remain** in `lib` (including `catch (_) {}` and comment-only bodies); the pattern itself.
+- **`presentation/shared/failure_feedback_test.dart` (4):** user wording without the cause;
+  `runWithFeedback` shows and logs a failure, stays silent on success; `LoadFailureView`
+  with retry.
+- `shared_prefs_planning_repositories_test.dart`: the corrupt-plan case now expects a
+  `StorageFailure` whose cause is the `FormatException` (the typed failure is the task).

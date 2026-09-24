@@ -70,6 +70,7 @@
 > **TASK 14.2 (2026-09-24, commit `4274175`):** integration so far per target (owner: build it, although it was a roadmap cut line). `TargetProgress` (pure, CALC-38) sums confirmed light frames × exposure of completed, non-legacy sessions with a target, per filter, with the last imaged night and the session count; Library → Progress (`/library/progress`) lists every target, newest first, and a session's detail shows "This target so far". No project goals (out of scope); no schema change.
 > **TASK 14.3 (2026-09-24, commit `a234ff6`):** export manifest v2 (schema in `docs/EXPORT_MANIFEST.md`). `SessionManifestCodec` (data layer) writes UTC epoch-ms instants, the night key and zone, status, the snapshots as stored, blocks with confirmed/rejected counts replayed from the events, results and conditions, and the run's event log (owner decision); it reads v1 as a legacy log and refuses unknown versions. `ShareSessionExporter` shares a `.json` file plus a text summary; owner decision: Export file on a session's detail and Export all in the Sessions app bar. Import deferred. `AppIdentity.version` stays in step with `pubspec.yaml` (tested).
 > **TASK 14.4 (2026-09-24, commit `a847f87`):** backup and restore. Owner decisions: one `.astroplan` file (ZIP: header with format, schema and app version, time and session count; a consistent database copy made with `VACUUM INTO`; the v2 manifest) shared to a place the user picks; restore picked with `file_picker` 13.1.0 (MIT), checked (AstroPlan backup, header = the file's SQLite `user_version`, newer schema refused, below the v8 floor refused — older supported schemas are upgraded by the existing migrations), confirmed with a preview, staged, and applied at the next start before the database opens, the replaced database and its WAL kept as a safety copy. New dependencies `file_picker` 13.1.0 and `archive` 4.3.0 (both MIT, checked on pub.dev). Android Auto Backup: documented, not changed (owner decision). TD-056 recorded (preferences are not in the backup).
+> **TASK 15.1 (2026-09-24, commits `aac1c6a`, `0854d0a`):** error handling and diagnostics — no silent failures. `AppLog` (`lib/core/diagnostics/`, pure Dart) is a local debug logger: `dart:developer` plus a bounded in-memory buffer (200 entries); nothing is written to disk or sent anywhere, and crash reporting is deferred for privacy (roadmap). It replaces every `debugPrint`, and every catch that used to swallow an error now logs it. `StorageFailure` (`lib/domain/repositories/`) is the typed failure every repository throws when its store cannot be read or written: the Drift repositories get it from one `StorageFailureInterceptor` on the `AppDatabase` connection (opening and migrations are not intercepted), the SharedPreferences repositories from `guardStorage`; domain refusals (`SessionStateError`, `ExecutionError`, `ArgumentError`) pass through unchanged. Failures become UI states: save, delete, select and export actions (rigs, targets, sites, sessions, results, Save/Start, New/Duplicate) show a message through `runWithFeedback`/`FailureText` (`presentation/shared/failure_feedback.dart`; the cause goes to the log, never onto the screen); Equipment, Targets, Sessions, session detail, Progress and Tonight candidates show `LoadFailureView` (with a retry where the page can reload) instead of looking empty, "no longer exists" or spinning forever. A failed autosave no longer leaves `CurrentSession`'s write chain failed (which silently dropped every later edit): it is kept in `writeFailure`, the next edit retries the whole plan, and the planner shows a banner. In `main.dart` a failure restoring the backup/run state no longer stops the first frame. `empty_catches` is enabled in `analysis_options.yaml`, and a source-scan test also rejects `catch (_) {}` and comment-only catches (which the lint allows). TD-029 resolved; TD-038 progress. Test baseline 857.
 
 ---
 
@@ -530,6 +531,37 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
 3. **Manual repository instantiation** — Not a defect; no DI container is required.
 4. **`LightPollutionRepository` HTML regex** — Confirmed brittle **and** found
    non-functional (malformed URL) (TD-006).
+
+## B14. Error handling and diagnostics (TASK 15.1)
+
+- **Repositories throw `StorageFailure`** (`lib/domain/repositories/storage_failure.dart`;
+  `action` + `cause`) when their store cannot be read or written; each interface says so.
+  Drift: `StorageFailureInterceptor` (`lib/data/database/`) wraps every statement of the
+  `AppDatabase` connection (constructor), so a raw SQLite error never leaves the data
+  layer; opening and migrations are not intercepted and keep their own exceptions
+  (`UnsupportedSchemaVersionException`). SharedPreferences: each method runs inside
+  `guardStorage` (`lib/data/repositories/storage_guard.dart`), which also turns an
+  unreadable stored value (wrong type, bad JSON) into the failure. Domain refusals
+  (`SessionStateError`, `ExecutionError`, `ArgumentError`) are not storage failures and
+  pass through unchanged. The weather repository keeps its typed results
+  (`WeatherFetchFailed`), the reverse geocoder its `ReverseGeocodeFailed`.
+- **Logging:** `AppLog` (`lib/core/diagnostics/app_log.dart`, pure Dart, usable from the
+  domain) with levels info/warning/error and a scope; output to `dart:developer` and a
+  200-entry in-memory buffer (`AppLog.recent`). Local only — no file, no network; crash
+  reporting is deferred for privacy. Nothing in `lib` calls `debugPrint` any more.
+- **UI states:** one-shot actions go through `runWithFeedback(context, action, run)`, which
+  logs and shows `FailureText.message(action, error)` (the cause is never shown);
+  pages that load a list show `LoadFailureView` on an error. The planner shows a banner
+  while `SessionPlanViewModel.autosaveFailure` (`CurrentSession.writeFailure`) is set; a
+  failed autosave never blocks later writes.
+- **Deliberate fallbacks** (logged, documented where they happen): an unreadable
+  weather-cache entry is absent; an unreadable JSON snapshot column reads as unavailable
+  (`JsonMapConverter`); an invalid stored capture block is skipped; unreadable display or
+  first-run settings fall back to their defaults; a missing wakelock or device zone is
+  tolerated.
+- **Enforced:** `empty_catches` (`analysis_options.yaml`) and
+  `test/core/diagnostics/no_empty_catch_test.dart` (also rejects `catch (_) {}` and
+  comment-only bodies).
 
 ---
 

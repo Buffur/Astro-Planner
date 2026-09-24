@@ -433,8 +433,12 @@ rewritten to match the code.*
     checked, confirmed, staged restore applied at the next start) (commit `a847f87`). 835
     tests green. Emulator round trip is an owner checklist item; TD-056 recorded.
     **Group G14 is complete.**
-  - **Next: TASK 15.1 — Error handling and diagnostics (G15).** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 15.1** — error handling and diagnostics (`AppLog` local
+    debug logger; typed `StorageFailure` from every repository; failures shown as UI
+    states; autosave failure no longer jams the write chain; `empty_catches` + scan test)
+    (commits `aac1c6a`, `0854d0a`). 857 tests green. TD-029 resolved.
+  - **Next: TASK 15.2 — Performance and caching (G15).** Not started; it begins only on
+    the owner's go-ahead.
 
 ### Phase → group map
 
