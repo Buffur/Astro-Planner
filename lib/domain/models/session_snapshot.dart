@@ -1,4 +1,6 @@
+import 'astro_target.dart';
 import 'calendar_date.dart';
+import 'session_night.dart';
 
 /// A frozen, versioned record of a session's context (ADR-014 §4): site,
 /// target, rig, night, the preferences in force, the budget, the
@@ -51,6 +53,74 @@ class SessionSnapshot {
     return ms == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  }
+
+  /// The snapshot's night, rebuilt from its stored values (never from the
+  /// live site, ADR-014 §2); null when incomplete.
+  SessionNight? get night {
+    final n = _section('night');
+    final date = n?['eveningDate'] as String?;
+    final start = n?['startUtcMs'] as int?;
+    final end = n?['endUtcMs'] as int?;
+    final lat = (n?['latitudeDeg'] as num?)?.toDouble();
+    final lon = (n?['longitudeDeg'] as num?)?.toDouble();
+    if (date == null || start == null || end == null) return null;
+    if (lat == null || lon == null) return null;
+    try {
+      return SessionNight(
+        eveningDate: CalendarDate.parse(date),
+        startUtc: DateTime.fromMillisecondsSinceEpoch(start, isUtc: true),
+        endUtc: DateTime.fromMillisecondsSinceEpoch(end, isUtc: true),
+        latitude: lat,
+        longitude: lon,
+        timeContextId: n?['timeContextId'] as String? ?? '',
+      );
+    } on ArgumentError {
+      return null; // an inconsistent window reads as unavailable
+    }
+  }
+
+  /// The IANA zone the night's times were shown in (null = device zone).
+  String? get timeZoneId => _section('night')?['timeZoneId'] as String?;
+
+  /// The target as it was (J2000 coordinates); null when none was chosen.
+  AstroTarget? get target {
+    final t = _section('target');
+    final ra = (t?['raDegJ2000'] as num?)?.toDouble();
+    final dec = (t?['decDegJ2000'] as num?)?.toDouble();
+    if (t == null || ra == null || dec == null) return null;
+    return AstroTarget(
+      id: t['id'] as int? ?? 0,
+      catalogId: t['catalogId'] as String? ?? '',
+      commonName: t['commonName'] as String?,
+      type: t['type'] as String? ?? '',
+      rightAscension: ra,
+      declination: dec,
+    );
+  }
+
+  /// The minimum target altitude in force, degrees.
+  double? get minAltitudeDeg =>
+      (_section('preferences')?['minAltitudeDeg'] as num?)?.toDouble();
+
+  /// The imaging windows planned for the night (UTC), in order; empty when
+  /// there were none or no opportunity was recorded.
+  List<(DateTime, DateTime)> get windows {
+    final list = _section('opportunity')?['windows'] as List?;
+    return [
+      for (final w in list ?? const [])
+        if (w is Map)
+          (
+            DateTime.fromMillisecondsSinceEpoch(
+              w['startUtcMs'] as int,
+              isUtc: true,
+            ),
+            DateTime.fromMillisecondsSinceEpoch(
+              w['endUtcMs'] as int,
+              isUtc: true,
+            ),
+          ),
+    ];
   }
 
   /// The per-frame overhead in force when the snapshot was taken, seconds.

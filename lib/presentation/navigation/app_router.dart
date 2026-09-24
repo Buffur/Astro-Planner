@@ -14,6 +14,7 @@ import '../screens/settings/settings_screen.dart';
 import '../screens/sites/site_editor_screen.dart';
 import '../screens/sites/sites_screen.dart';
 import '../screens/target/target_selection_screen.dart';
+import '../screens/execution/execution_screen.dart';
 import '../screens/welcome/welcome_screen.dart';
 import '../screens/tonight/tonight_candidates_screen.dart';
 import '../screens/tonight/tonight_home_screen.dart';
@@ -43,6 +44,9 @@ class AppRouter {
   /// The session planner for the current session (`/session/current`) or
   /// a stored session id.
   static String session([Object id = 'current']) => '/session/$id';
+
+  /// The tracking screen of session [id] (ADR-016, TASK 13.3).
+  static String run(int id) => '/session/$id/run';
   static const selectTarget = '/select/target';
   static const selectRig = '/select/rig';
   static const selectSite = '/select/site';
@@ -136,6 +140,12 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) =>
             SessionPlannerRoute(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/session/:id/run',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            ExecutionScreen(sessionId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(
         path: selectTarget,

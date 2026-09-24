@@ -28,6 +28,7 @@ import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
 import 'data/services/flutter_timezone_device_time_zone.dart';
 import 'data/services/geolocator_location_service.dart';
 import 'data/services/nominatim_reverse_geocoder.dart';
+import 'data/services/wakelock_screen_wake.dart';
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 
@@ -81,6 +82,7 @@ void main() async {
     clock: clock,
     display: SharedPrefsDisplayPreferencesRepository(),
     firstRun: SharedPrefsFirstRunRepository(),
+    screenWake: WakelockScreenWake(),
     sessions: sessionRepo,
   );
   // Field mode is restored before the first frame, so a restart in field
@@ -88,6 +90,7 @@ void main() async {
   await vms.theme.load();
   await vms.tonight.load();
   await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
+  await vms.execution?.loadActive();
 
   runApp(
     MultiProvider(

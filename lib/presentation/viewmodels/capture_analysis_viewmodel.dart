@@ -4,6 +4,7 @@ import '../../core/time/clock.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/models/imaging_opportunity.dart';
 import '../../domain/models/session.dart';
+import '../../domain/models/session_snapshot.dart';
 import '../../domain/services/capability_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/services/fit_analyzer.dart';
@@ -179,27 +180,32 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
 
   /// Save (ADR-014 §3–§4): the plan becomes a planned session with a fresh
   /// snapshot of its whole context.
-  Future<Session> saveSession() {
+  Future<Session> saveSession() => _plan.savePlan(_snapshot());
+
+  /// Start (ADR-016; owner: same requirements as Save): the session starts
+  /// with its execution-start snapshot; the planner goes on with a copy.
+  /// Refused while another session is in progress (SessionStateError).
+  Future<Session> startSession() => _plan.startPlan(_snapshot());
+
+  SessionSnapshot _snapshot() {
     final night = _plan.sessionNight;
     if (night == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    return _plan.savePlan(
-      SessionSnapshotBuilder.build(
-        takenAtUtc: _clock.nowUtc(),
-        night: night,
-        timeZoneId: _site.displayZoneId,
-        preferences: _settings.planningPreferences,
-        budget: captureBudget,
-        blocks: _plan.captureBlocks,
-        site: _site.activeSite,
-        skyDarkness: _site.skyDarkness,
-        target: _plan.selectedTarget,
-        rig: _plan.selectedEquipment,
-        opportunity: _conditions.imagingOpportunity,
-        weather: _conditions.nightWeather,
-        weatherSummary: _conditions.nightWeatherSummary,
-      ),
+    return SessionSnapshotBuilder.build(
+      takenAtUtc: _clock.nowUtc(),
+      night: night,
+      timeZoneId: _site.displayZoneId,
+      preferences: _settings.planningPreferences,
+      budget: captureBudget,
+      blocks: _plan.captureBlocks,
+      site: _site.activeSite,
+      skyDarkness: _site.skyDarkness,
+      target: _plan.selectedTarget,
+      rig: _plan.selectedEquipment,
+      opportunity: _conditions.imagingOpportunity,
+      weather: _conditions.nightWeather,
+      weatherSummary: _conditions.nightWeatherSummary,
     );
   }
 

@@ -48,6 +48,8 @@ import 'package:astroplan/presentation/viewmodels/settings_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
+import 'package:astroplan/domain/services/screen_wake.dart';
+import 'package:astroplan/presentation/viewmodels/execution_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/resume_run_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/tonight_viewmodel.dart';
 import 'package:provider/single_child_widget.dart';
@@ -75,6 +77,7 @@ class PlannerHarness extends ChangeNotifier {
     SessionRepository? sessionRepository,
     DisplayPreferencesRepository? displayPreferences,
     FirstRunRepository? firstRun,
+    ScreenWake? screenWake,
   }) {
     final time = clock ?? const SystemClock();
     vms = AppViewModels(
@@ -98,6 +101,7 @@ class PlannerHarness extends ChangeNotifier {
       clock: time,
       display: displayPreferences ?? InMemoryDisplayPreferences(),
       firstRun: firstRun ?? InMemoryFirstRun(),
+      screenWake: screenWake ?? FakeScreenWake(),
       sessions: sessionRepository,
     );
     for (final vm in [site, settings, plan, conditions, analysis, startup]) {
@@ -115,6 +119,7 @@ class PlannerHarness extends ChangeNotifier {
   ThemeViewModel get theme => vms.theme;
   TonightViewModel get tonight => vms.tonight;
   ResumeRunViewModel? get resumeRun => vms.resumeRun;
+  ExecutionViewModel? get execution => vms.execution;
 
   /// The ViewModels' providers, for a widget tree under test.
   List<SingleChildWidget> get providers => vms.providers;

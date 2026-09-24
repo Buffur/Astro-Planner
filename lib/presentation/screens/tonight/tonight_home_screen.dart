@@ -14,6 +14,9 @@ import '../../shared/night_text.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
+import '../../../domain/models/execution.dart';
+import '../../shared/start_session.dart';
+import '../../viewmodels/execution_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
 import 'resume_run_dialog.dart';
@@ -79,6 +82,7 @@ class TonightHomeScreen extends StatelessWidget {
       body = ListView(
         padding: const EdgeInsets.all(16),
         children: const [
+          _RunCard(),
           _SiteCard(),
           _NightCard(),
           _SessionCard(),
@@ -94,6 +98,40 @@ class TonightHomeScreen extends StatelessWidget {
         actions: const [FieldModeButton()],
       ),
       body: body,
+    );
+  }
+}
+
+/// The session in progress, if any (ADR-016): tracked on its own screen,
+/// separate from the plan below (owner decision, TASK 13.3).
+class _RunCard extends StatelessWidget {
+  const _RunCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final execution = context.watch<ExecutionViewModel?>();
+    final session = execution?.session;
+    final state = execution?.state;
+    if (execution == null ||
+        session == null ||
+        state == null ||
+        !state.isActive) {
+      return const SizedBox.shrink();
+    }
+    final block = execution.block;
+    return Card(
+      key: const Key('tonight.run'),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: const Icon(Icons.radio_button_checked),
+        title: Text('In progress: ${session.record.targetName}'),
+        subtitle: Text(
+          '${state.phase == ExecutionPhase.running ? 'Running' : 'Paused'}'
+          '${block == null ? '' : ' · ${state.completedFor(block.id)} of ${block.frameCount} confirmed'}',
+        ),
+        trailing: const Text('Open tracker'),
+        onTap: () => context.push(AppRouter.run(session.id)),
+      ),
     );
   }
 }
@@ -340,6 +378,19 @@ class _SessionCard extends StatelessWidget {
                 minimumSize: const Size.fromHeight(48),
               ),
             ),
+            // TASK 13.3 (ADR-016; owner: same requirements as Save).
+            if (hasNight && target != null && rig != null) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const Key('tonight.start'),
+                onPressed: () => startSessionWithFeedback(context),
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Start'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+              ),
+            ],
           ],
         ),
       ),

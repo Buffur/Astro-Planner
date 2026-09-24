@@ -123,6 +123,9 @@ class SessionPlanViewModel extends ChangeNotifier {
             stored != null && stored.compareTo(eveningDate ?? today) > 0
             ? stored
             : null;
+        // A run in progress is tracked, never edited: plan on a copy
+        // (owner decision, TASK 13.3; TD-055).
+        if (!open.planEditable) await current.adopt(open, _plan);
       }
     }
     _loaded = true;
@@ -263,7 +266,15 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   /// Save (ADR-014 §3): the current open session — or a new one — becomes
   /// planned with [snapshot]. Needs a repository, a night, target and rig.
-  Future<Session> savePlan(SessionSnapshot snapshot) async {
+  Future<Session> savePlan(SessionSnapshot snapshot) =>
+      _commit((c) => c.save(_plan(), snapshot));
+
+  /// Start (ADR-016; owner: same requirements as Save): the plan starts
+  /// with [snapshot] and the planner continues on a fresh draft copy.
+  Future<Session> startPlan(SessionSnapshot snapshot) =>
+      _commit((c) => c.start(_plan(), snapshot));
+
+  Future<Session> _commit(Future<Session> Function(CurrentSession) f) async {
     final current = _current;
     if (current == null ||
         sessionNight == null ||
@@ -271,9 +282,9 @@ class SessionPlanViewModel extends ChangeNotifier {
         _rig == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    final saved = await current.save(_plan(), snapshot);
+    final result = await f(current);
     notifyListeners();
-    return saved;
+    return result;
   }
 
   @override

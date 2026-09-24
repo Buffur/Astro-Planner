@@ -45,6 +45,21 @@ class CurrentSession {
             : await _repository.create(plan());
       });
 
+  /// Start (ADR-016): [plan] is written to the current session (or a new
+  /// one), which starts with [snapshot]; the planner then continues on a
+  /// fresh draft copy, so it never edits a running session (owner
+  /// decision, TASK 13.3). Returns the started session.
+  Future<Session> start(SessionPlan plan, SessionSnapshot snapshot) async {
+    await _chain;
+    final current = _session;
+    final id = current != null && current.planEditable
+        ? (await _repository.updatePlan(current.id, plan)).id
+        : (await _repository.create(plan)).id;
+    final started = await _repository.start(id, snapshot);
+    _session = await _repository.create(plan);
+    return started;
+  }
+
   /// Save: the current open session — or a new one — becomes planned with
   /// [snapshot] (ADR-014 §3–§4).
   Future<Session> save(SessionPlan plan, SessionSnapshot snapshot) async {

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
 import '../../../domain/models/execution.dart';
+import '../../navigation/app_router.dart';
+import '../../viewmodels/execution_viewmodel.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
 
@@ -20,7 +25,12 @@ Future<void> showResumeRunDialog(BuildContext context, ResumeRunViewModel vm) {
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) {
-      void close() => Navigator.of(dialogContext).pop();
+      void close() {
+        Navigator.of(dialogContext).pop();
+        // The tracker re-reads the run after any answer.
+        context.read<ExecutionViewModel?>()?.loadActive();
+      }
+
       return AlertDialog(
         key: const Key('resumeRun.dialog'),
         title: Text('$target is in progress'),
@@ -117,6 +127,8 @@ Future<void> showResumeRunDialog(BuildContext context, ResumeRunViewModel vm) {
             onPressed: () {
               vm.keepGoing();
               close();
+              // TASK 13.3: keep going = back to the tracker.
+              context.push(AppRouter.run(o.session.id));
             },
             child: Text(running ? 'Keep going' : 'Keep paused'),
           ),

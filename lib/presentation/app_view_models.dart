@@ -14,7 +14,9 @@ import '../domain/services/device_time_zone.dart';
 import '../domain/services/location_service.dart';
 import '../domain/services/night_weather_service.dart';
 import '../domain/services/reverse_geocoder.dart';
+import '../domain/services/screen_wake.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
+import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
 import 'viewmodels/night_conditions_viewmodel.dart';
 import 'viewmodels/session_plan_viewmodel.dart';
@@ -43,6 +45,7 @@ class AppViewModels {
     required Clock clock,
     required DisplayPreferencesRepository display,
     required FirstRunRepository firstRun,
+    required ScreenWake screenWake,
     SessionRepository? sessions,
   }) {
     site = SiteViewModel(
@@ -87,6 +90,9 @@ class AppViewModels {
     targetList = TargetsViewModel(targets);
     sessionList = sessions == null ? null : SessionsViewModel(sessions);
     resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
+    execution = sessions == null
+        ? null
+        : ExecutionViewModel(sessions, clock, display, screenWake);
     theme = ThemeViewModel(display);
     tonight = TonightViewModel(
       site: site,
@@ -107,6 +113,7 @@ class AppViewModels {
 
   /// Null without a session repository (some tests).
   late final ResumeRunViewModel? resumeRun;
+  late final ExecutionViewModel? execution;
   late final ThemeViewModel theme;
   late final TonightViewModel tonight;
 
@@ -124,5 +131,6 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: theme),
     ChangeNotifierProvider.value(value: tonight),
     ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
+    ChangeNotifierProvider<ExecutionViewModel?>.value(value: execution),
   ];
 }

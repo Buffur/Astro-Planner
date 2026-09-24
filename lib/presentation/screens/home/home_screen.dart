@@ -14,6 +14,7 @@ import '../../widgets/planner_summary_card.dart';
 import '../../shared/capability_text.dart';
 import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
+import '../../shared/start_session.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/astro_target.dart';
@@ -300,24 +301,43 @@ class HomeScreen extends StatelessWidget {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      // TASK 11.3 (ADR-014): saves the plan as a planned
-                      // session with a fresh plan snapshot.
-                      await analysisVm.saveSession();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Session saved to Logbook!'),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            // TASK 11.3 (ADR-014): saves the plan as a
+                            // planned session with a fresh plan snapshot.
+                            await analysisVm.saveSession();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Session saved to Logbook!'),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.save),
+                          label: const Text('Save Session'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
                           ),
-                        );
-                      }
-                    },
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save Session'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                    ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // TASK 13.3 (ADR-016): start tracking this plan.
+                      Expanded(
+                        child: FilledButton.icon(
+                          key: const Key('planner.start'),
+                          onPressed: () => startSessionWithFeedback(context),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Start'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
