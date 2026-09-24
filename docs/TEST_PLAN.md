@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **780 tests: 780 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.3) |
+| `flutter test --no-pub` | **795 tests: 795 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -788,3 +788,19 @@ the ADR-012 variables, and a real out-of-range error):
 - **Owner checklist (manual, not yet done):** on an Android device, start a session, lock
   and unlock the phone, kill the app mid-block and reopen it (resume prompt, exact
   counts), and check keep-screen-on keeps the screen awake only on the tracker.
+
+**Added by TASK 13.4** (reconciliation), 15 tests (795):
+- **`domain/services/session_reconciliation_test.dart` (4):** CALC-37 — planned light
+  integration; actual integration excludes rejected frames and calibration; more than
+  planned; no fraction without lights.
+- **`drift_session_execution_test.dart` (+5):** complete writes the light totals; a
+  correction after completion is a timestamped event after `finished` and updates the
+  counters, totals and `updated_at`; no pause after completion; no correction after
+  abandoning; optional conditions stored, empty stays unknown.
+- **`screens/execution/results_screen_test.dart` (6):** the page's summary and counts; a
+  stepper stores an event; out-of-range conditions refused; Complete stores notes and
+  conditions; Abandon asks first; **acceptance: a completed session shows planned vs
+  actual in Sessions, and Edit results corrects it with a timestamped event**.
+- **Updated (owner decisions):** the transition table allows confirm/reject after
+  `finished`; the tracker's Finish test now expects the results page (the run is completed
+  only by Complete).

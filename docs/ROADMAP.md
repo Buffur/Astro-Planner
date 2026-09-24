@@ -418,8 +418,11 @@ rewritten to match the code.*
     green.
   - Completed 2026-09-24: **TASK 13.3** — tracking screen, Start in the planner and on
     Tonight, opt-in keep-screen-on (`wakelock_plus`) (commit `c8e2240`). 780 tests green.
-  - **Next: TASK 13.4 — End-of-session reconciliation.** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 13.4** — reconciliation (results page, corrections after
+    completion, planned vs actual in Sessions) (commit `c1e52ce`). 795 tests green. **Group G13
+    is complete.**
+  - **Next: TASK 14.1 — Logbook list and detail.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 
