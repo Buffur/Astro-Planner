@@ -126,6 +126,11 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: AppIdentity.packageName,
+                // TASK 16.3: the app's identifying user agent, with a
+                // contact URL (OSM tile usage policy).
+                tileProvider: NetworkTileProvider(
+                  headers: {'User-Agent': AppIdentity.userAgent},
+                ),
               ),
               if (_selectedLocation != null)
                 MarkerLayer(

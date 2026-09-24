@@ -18,6 +18,19 @@ abstract final class AppIdentity {
   /// two in step.
   static const String version = '1.0.0';
 
-  /// HTTP `User-Agent` for requests to third-party services.
-  static const String userAgent = '$appName ($packageName)';
+  /// The project's public page: the contact in the user agent (the OSM tile
+  /// and Nominatim policies ask for one) and the home of the privacy policy
+  /// (TASK 16.3; GitHub Pages of the owner's repository).
+  static const String projectUrl = 'https://chacha12.github.io/astro-planner/';
+
+  /// The privacy policy (Google Play requires a public URL).
+  static const String privacyPolicyUrl = '${projectUrl}privacy/';
+
+  /// The source code (GPL-3.0 asks that it be offered with the app).
+  static const String sourceUrl = 'https://github.com/chacha12/astro-planner';
+
+  /// HTTP `User-Agent` for requests to third-party services: the app, its
+  /// version and a contact URL, as the OSM tile policy's example.
+  static const String userAgent =
+      '$appName/$version (+$projectUrl; $packageName)';
 }

@@ -229,6 +229,13 @@ class SiteViewModel extends ChangeNotifier {
 
   /// Place name for the position (TASK 7.2), best-effort; an answer for a
   /// position the user has left is ignored.
+  /// Looks the chosen unsaved position's name up again (TASK 16.3); a saved
+  /// site shows its own name, and the default position is never looked up.
+  void refreshPlaceName() {
+    if (_activeSite != null || isDefaultLocation) return;
+    unawaited(_reverseGeocode(_latitude, _longitude));
+  }
+
   Future<void> _reverseGeocode(double lat, double lon) async {
     final result = await _reverseGeocoder.placeNameFor(lat, lon);
     if (lat != _latitude || lon != _longitude) return;

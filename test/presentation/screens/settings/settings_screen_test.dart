@@ -67,6 +67,21 @@ void main() {
     expect(find.textContaining('not scientific laws'), findsOneWidget);
   });
 
+  // TASK 16.3: place names are opt-in, and the switch says what is sent.
+  testWidgets('the place-name switch turns lookups on', (tester) async {
+    await build(tester);
+    await tester.runAsync(() => vm.settings.setPlaceNameLookup(false));
+    await pump(tester);
+    final tile = find.byKey(const Key('settings.placeNames'));
+    await tester.ensureVisible(tile);
+    expect(find.textContaining('OpenStreetMap Nominatim'), findsOneWidget);
+    expect(tester.widget<SwitchListTile>(tile).value, isFalse);
+    await tester.tap(tile);
+    await tester.pump();
+    expect(vm.settings.placeNameLookup, isTrue);
+    expect(tester.widget<SwitchListTile>(tile).value, isTrue);
+  });
+
   testWidgets('moving a slider persists its value', (tester) async {
     await build(tester);
     await pump(tester);

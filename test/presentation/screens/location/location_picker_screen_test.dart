@@ -173,7 +173,7 @@ void main() {
     final tiles = tester.widget<TileLayer>(find.byType(TileLayer));
     expect(
       tiles.tileProvider.headers['User-Agent'],
-      'flutter_map (${AppIdentity.packageName})',
+      AppIdentity.userAgent, // with a contact URL (TASK 16.3)
     );
   });
 }

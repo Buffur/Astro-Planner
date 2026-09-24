@@ -8,11 +8,13 @@ import '../domain/repositories/first_run_repository.dart';
 import '../domain/repositories/location_repository.dart';
 import '../domain/repositories/planner_state_repository.dart';
 import '../domain/repositories/planning_preferences_repository.dart';
+import '../domain/repositories/privacy_preferences_repository.dart';
 import '../domain/repositories/session_repository.dart';
 import '../domain/repositories/target_repository.dart';
 import '../domain/services/device_time_zone.dart';
 import '../domain/services/location_service.dart';
 import '../domain/services/night_weather_service.dart';
+import '../domain/services/opt_in_reverse_geocoder.dart';
 import '../domain/services/reverse_geocoder.dart';
 import '../domain/services/backup_service.dart';
 import '../domain/services/screen_wake.dart';
@@ -50,19 +52,23 @@ class AppViewModels {
     required DisplayPreferencesRepository display,
     required FirstRunRepository firstRun,
     required ScreenWake screenWake,
+    required PrivacyPreferencesRepository privacy,
     SessionExporter? exporter,
     BackupService? backup,
     SessionRepository? sessions,
   }) {
+    // TASK 16.3: place names only when the user switches them on.
+    final placeNames = OptInReverseGeocoder(reverseGeocoder);
     site = SiteViewModel(
       locationRepository: locations,
       stateRepository: plannerState,
       locationService: locationService,
-      reverseGeocoder: reverseGeocoder,
+      reverseGeocoder: placeNames,
       deviceTimeZone: deviceTimeZone,
       clock: clock,
     );
-    settings = SettingsViewModel(preferences);
+    settings = SettingsViewModel(preferences, privacy, placeNames)
+      ..onPlaceNameLookupChanged = site.refreshPlaceName;
     plan = SessionPlanViewModel(
       site: site,
       targetRepository: targets,

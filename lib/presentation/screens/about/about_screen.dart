@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/app_identity.dart';
 
 /// Data sources, attribution and licences (TASK 8.2). The target catalog is
 /// an adapted subset of OpenNGC (CC BY-SA 4.0), whose notice is shown in
-/// full; the other external data the app uses is credited too.
+/// full; the other external data the app uses is credited too. Since TASK
+/// 16.3 also the app's licence (GPL-3.0) with its source, and privacy.
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key, this.loadNotice});
 
@@ -57,6 +59,37 @@ class AboutScreen extends StatelessWidget {
             'Light-pollution map: lightpollutionmap.info (opened in your '
             'browser; nothing is fetched by the app).',
           ),
+          const Divider(height: 32),
+          Text('Privacy', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          const Text(
+            'No account, no ads, no analytics and no tracking. Your sites, '
+            'rigs, plans and sessions stay on this device. The app sends a '
+            'position only to fetch the weather (Open-Meteo), to show map '
+            'tiles (OpenStreetMap) and — if you switch it on in Settings — '
+            'to look up a place name (Nominatim). Location permission is '
+            'asked only when you choose "use current position".',
+            key: Key('about.privacy'),
+          ),
+          _LinkButton(
+            key: const Key('about.privacyPolicy'),
+            label: 'Privacy policy',
+            url: AppIdentity.privacyPolicyUrl,
+          ),
+          const Divider(height: 32),
+          Text('Licence', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Text(
+            '${AppIdentity.appName} ${AppIdentity.version} is free software '
+            'under the GNU General Public License v3.0 (GPL-3.0). You may '
+            'use, study, share and change it under that licence.',
+            key: const Key('about.licence'),
+          ),
+          _LinkButton(
+            key: const Key('about.source'),
+            label: 'Source code',
+            url: AppIdentity.sourceUrl,
+          ),
           const SizedBox(height: 24),
           OutlinedButton(
             onPressed: () => showLicensePage(
@@ -69,4 +102,23 @@ class AboutScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Opens [url] in the browser (TASK 16.3).
+class _LinkButton extends StatelessWidget {
+  const _LinkButton({super.key, required this.label, required this.url});
+
+  final String label;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    child: TextButton.icon(
+      onPressed: () =>
+          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      icon: const Icon(Icons.open_in_new),
+      label: Text(label),
+    ),
+  );
 }

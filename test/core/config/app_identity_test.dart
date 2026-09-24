@@ -17,7 +17,9 @@ void main() {
     expect(AppIdentity.packageName, 'io.github.chacha12.astroplanner');
     expect(
       AppIdentity.userAgent,
-      'Astro Planner (io.github.chacha12.astroplanner)',
+      'Astro Planner/${AppIdentity.version} '
+      '(+https://chacha12.github.io/astro-planner/; '
+      'io.github.chacha12.astroplanner)',
     );
   });
 

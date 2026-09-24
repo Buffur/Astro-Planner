@@ -25,6 +25,7 @@ import 'data/repositories/shared_prefs_display_preferences_repository.dart';
 import 'data/repositories/shared_prefs_first_run_repository.dart';
 import 'data/repositories/shared_prefs_planner_state_repository.dart';
 import 'data/repositories/shared_prefs_planning_preferences_repository.dart';
+import 'data/repositories/shared_prefs_privacy_preferences_repository.dart';
 import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
 import 'data/services/flutter_timezone_device_time_zone.dart';
 import 'data/services/geolocator_location_service.dart';
@@ -105,6 +106,7 @@ void main() async {
     clock: clock,
     display: SharedPrefsDisplayPreferencesRepository(),
     firstRun: SharedPrefsFirstRunRepository(),
+    privacy: SharedPrefsPrivacyPreferencesRepository(),
     screenWake: WakelockScreenWake(),
     exporter: ShareSessionExporter(),
     backup: FileBackupService(database, sessionRepo),

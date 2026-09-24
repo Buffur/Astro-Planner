@@ -40,6 +40,7 @@ import 'package:astroplan/domain/services/night_weather_service.dart';
 import 'package:astroplan/domain/services/reverse_geocoder.dart';
 import 'package:astroplan/domain/repositories/display_preferences_repository.dart';
 import 'package:astroplan/domain/repositories/first_run_repository.dart';
+import 'package:astroplan/domain/repositories/privacy_preferences_repository.dart';
 import 'package:astroplan/presentation/app_view_models.dart';
 import 'package:astroplan/presentation/viewmodels/capture_analysis_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/night_conditions_viewmodel.dart';
@@ -58,6 +59,7 @@ import 'package:astroplan/presentation/viewmodels/tonight_viewmodel.dart';
 import 'package:provider/single_child_widget.dart';
 
 import 'in_memory_display_preferences.dart';
+import 'in_memory_privacy_preferences.dart';
 import 'in_memory_first_run.dart';
 
 /// One object over the app's ViewModels, for tests (TASK 12.3). It builds
@@ -80,6 +82,7 @@ class PlannerHarness extends ChangeNotifier {
     SessionRepository? sessionRepository,
     DisplayPreferencesRepository? displayPreferences,
     FirstRunRepository? firstRun,
+    PrivacyPreferencesRepository? privacyPreferences,
     ScreenWake? screenWake,
     SessionExporter? exporter,
     BackupService? backup,
@@ -106,6 +109,11 @@ class PlannerHarness extends ChangeNotifier {
       clock: time,
       display: displayPreferences ?? InMemoryDisplayPreferences(),
       firstRun: firstRun ?? InMemoryFirstRun(),
+      // Place-name lookups ON in tests (the app's default is off, TASK
+      // 16.3), so the geocoding tests keep exercising the lookup path.
+      privacy:
+          privacyPreferences ??
+          InMemoryPrivacyPreferences(placeNameLookup: true),
       screenWake: screenWake ?? FakeScreenWake(),
       exporter: exporter,
       backup: backup,

@@ -2,14 +2,27 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/models/planning_preferences.dart';
 import '../../domain/repositories/planning_preferences_repository.dart';
+import '../../domain/repositories/privacy_preferences_repository.dart';
+import '../../domain/services/opt_in_reverse_geocoder.dart';
 
 /// The user's planning thresholds and overhead defaults (TASK 5.2; split
 /// out of the planner ViewModel in TASK 12.3). Defaults, rationale and
-/// valid ranges are documented on [PlanningPreferences].
+/// valid ranges are documented on [PlanningPreferences]. Since TASK 16.3
+/// also the privacy choice of place-name lookups.
 class SettingsViewModel extends ChangeNotifier {
-  SettingsViewModel(this._repository);
+  SettingsViewModel(this._repository, this._privacy, this._placeNames);
 
   final PlanningPreferencesRepository _repository;
+  final PrivacyPreferencesRepository _privacy;
+  final OptInReverseGeocoder _placeNames;
+
+  /// Called when place-name lookups are switched (the site looks its
+  /// position up again, or clears the name).
+  void Function()? onPlaceNameLookupChanged;
+
+  /// Whether positions are sent to OpenStreetMap Nominatim for place names
+  /// (off by default; TASK 16.3).
+  bool get placeNameLookup => _placeNames.enabled;
 
   PlanningPreferences _preferences = PlanningPreferences();
 
@@ -23,7 +36,16 @@ class SettingsViewModel extends ChangeNotifier {
 
   Future<void> load() async {
     _preferences = await _repository.load();
+    _placeNames.enabled = await _privacy.loadPlaceNameLookup();
     notifyListeners();
+    if (_placeNames.enabled) onPlaceNameLookupChanged?.call();
+  }
+
+  Future<void> setPlaceNameLookup(bool on) async {
+    _placeNames.enabled = on;
+    notifyListeners();
+    onPlaceNameLookupChanged?.call();
+    await _privacy.savePlaceNameLookup(on);
   }
 
   /// Replaces the planning preferences, persists them, and lets every value
