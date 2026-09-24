@@ -50,6 +50,7 @@ import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/domain/services/screen_wake.dart';
 import 'package:astroplan/presentation/viewmodels/execution_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/results_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/resume_run_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/tonight_viewmodel.dart';
 import 'package:provider/single_child_widget.dart';
@@ -120,6 +121,7 @@ class PlannerHarness extends ChangeNotifier {
   TonightViewModel get tonight => vms.tonight;
   ResumeRunViewModel? get resumeRun => vms.resumeRun;
   ExecutionViewModel? get execution => vms.execution;
+  ResultsViewModel? get results => vms.results;
 
   /// The ViewModels' providers, for a widget tree under test.
   List<SingleChildWidget> get providers => vms.providers;

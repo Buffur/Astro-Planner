@@ -10,6 +10,7 @@ import '../../domain/models/session_log.dart' as domain;
 import '../../domain/models/session_snapshot.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/services/execution_machine.dart';
+import '../../domain/services/session_reconciliation.dart';
 import '../database/app_database.dart';
 
 /// [SessionRepository] on the v16 `session_logs` table (ADR-014; TASK 11.3).
@@ -122,15 +123,25 @@ class DriftSessionRepository implements SessionRepository {
   @override
   Future<Session> complete(int id) => _change(id, (s) async {
     _requireTransition(s, SessionStatus.completed);
-    await _appendEvent(s, ExecutionEventKind.finished);
+    final after = await _appendEvent(s, ExecutionEventKind.finished);
     await _writeRow(
       id,
-      SessionLogsCompanion(
+      _totals(s, after).copyWith(
         status: const Value('completed'),
         completedAtUtcMs: Value(_nowMs),
       ),
     );
   });
+
+  /// The result totals (actual and rejected light frames) from the run's
+  /// counters (TASK 13.4, CALC-37).
+  static SessionLogsCompanion _totals(Session s, ExecutionState state) {
+    final r = SessionReconciliation.of(s.blocks, state);
+    return SessionLogsCompanion(
+      actualLightFrames: Value(r.actualLightFrames),
+      rejectedFrames: Value(r.rejectedLightFrames),
+    );
+  }
 
   @override
   Future<Session> abandon(int id) => _change(id, (s) async {
@@ -155,16 +166,24 @@ class DriftSessionRepository implements SessionRepository {
       throw ArgumentError.value(kind, 'kind', 'use start/complete/abandon');
     }
     await _change(id, (s) async {
-      if (s.legacy || s.status != SessionStatus.inProgress) {
+      // A completed session accepts count corrections only (owner decision,
+      // TASK 13.4): each is a timestamped event, and the result totals
+      // follow in the same transaction.
+      final correcting =
+          s.status == SessionStatus.completed &&
+          (kind == ExecutionEventKind.framesConfirmed ||
+              kind == ExecutionEventKind.framesRejected);
+      if (s.legacy || (s.status != SessionStatus.inProgress && !correcting)) {
         throw SessionStateError('Session $id is not in progress.');
       }
-      await _appendEvent(
+      final after = await _appendEvent(
         s,
         kind,
         blockId: blockId,
         delta: delta,
         reason: reason,
       );
+      if (correcting) await _writeRow(id, _totals(s, after));
     });
     return execution(id);
   }
@@ -172,7 +191,7 @@ class DriftSessionRepository implements SessionRepository {
   /// Validates [kind] against the run's state and stores the event with
   /// its effect on the block counters — the projection (ADR-016 §4). Runs
   /// inside the caller's transaction.
-  Future<void> _appendEvent(
+  Future<ExecutionState> _appendEvent(
     Session s,
     ExecutionEventKind kind, {
     int? blockId,
@@ -216,6 +235,7 @@ class DriftSessionRepository implements SessionRepository {
         ),
       );
     }
+    return after;
   }
 
   Future<ExecutionState> _fold(Session s) async => ExecutionMachine.fold({
@@ -272,6 +292,9 @@ class DriftSessionRepository implements SessionRepository {
             rejectedFrames: Value(results.rejectedFrames),
             environmentalNotes: Value(results.environmentalNotes),
             processingNotes: Value(results.processingNotes),
+            temperature: Value(results.temperatureC),
+            humidity: Value(results.humidityPct),
+            cloudCover: Value(results.cloudCoverPct),
           ),
         );
       });

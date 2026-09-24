@@ -319,6 +319,100 @@ void main() {
     expect(await db.select(db.sessionEvents).get(), isEmpty);
   });
 
+  group('TASK 13.4: completion and corrections (owner decisions)', () {
+    test('complete writes the result totals from the counters', () async {
+      final s = await started();
+      final light = s.blocks[1].id;
+      await repo.record(
+        s.id,
+        ExecutionEventKind.framesConfirmed,
+        blockId: light,
+        delta: 12,
+      );
+      await repo.record(
+        s.id,
+        ExecutionEventKind.framesRejected,
+        blockId: light,
+        delta: 2,
+      );
+      await repo.record(
+        s.id,
+        ExecutionEventKind.framesConfirmed,
+        blockId: s.blocks[0].id, // darks: not in the light totals
+        delta: 5,
+      );
+      final done = await repo.complete(s.id);
+      expect(done.record.actualLightFrames, 12);
+      expect(done.record.rejectedFrames, 2);
+    });
+
+    test('a correction after completion is a timestamped event after '
+        '"finished"; counters and totals follow', () async {
+      final s = await started();
+      final light = s.blocks[1].id;
+      await repo.record(
+        s.id,
+        ExecutionEventKind.framesConfirmed,
+        blockId: light,
+        delta: 10,
+      );
+      await repo.complete(s.id);
+      clock.minutes(600); // the next day
+      await repo.record(
+        s.id,
+        ExecutionEventKind.framesConfirmed,
+        blockId: light,
+        delta: -3,
+      );
+      final events = await repo.events(s.id);
+      expect(events[events.length - 2].kind, ExecutionEventKind.finished);
+      expect(events.last.kind, ExecutionEventKind.framesConfirmed);
+      expect(events.last.atUtc, clock.now);
+      final row = (await repo.get(s.id))!;
+      expect(row.status, SessionStatus.completed);
+      expect(row.record.actualLightFrames, 7);
+      expect(row.updatedAtUtc, clock.now);
+      expect((await storedBlocks(s.id))[1].completedFrames, 7);
+    });
+
+    test('after completion only corrections: no pause, no resume', () async {
+      final s = await started();
+      await repo.complete(s.id);
+      await expectLater(
+        repo.record(s.id, ExecutionEventKind.paused),
+        throwsA(isA<SessionStateError>()),
+      );
+    });
+
+    test('an abandoned run takes no corrections', () async {
+      final s = await started();
+      await repo.abandon(s.id);
+      await expectLater(
+        repo.record(
+          s.id,
+          ExecutionEventKind.framesConfirmed,
+          blockId: s.blocks[1].id,
+          delta: 1,
+        ),
+        throwsA(isA<SessionStateError>()),
+      );
+    });
+
+    test('optional conditions are stored, and unknown stays unknown', () async {
+      final s = await started();
+      await repo.complete(s.id);
+      var row = await repo.updateResults(
+        s.id,
+        const SessionResults(temperatureC: -4.5, cloudCoverPct: 20),
+      );
+      expect(row.record.temperature, -4.5);
+      expect(row.record.cloudCover, 20);
+      expect(row.record.humidity, isNull);
+      row = await repo.updateResults(s.id, const SessionResults());
+      expect(row.record.temperature, isNull);
+    });
+  });
+
   test('the snapshot exposes the night end and the per-frame overhead', () {
     final snap = _snapshot();
     expect(snap.nightEndUtc, DateTime.utc(2026, 12, 16, 11));

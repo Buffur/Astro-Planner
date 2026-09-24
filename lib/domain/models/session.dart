@@ -91,12 +91,21 @@ class SessionResults {
     this.rejectedFrames,
     this.environmentalNotes,
     this.processingNotes,
+    this.temperatureC,
+    this.humidityPct,
+    this.cloudCoverPct,
   });
 
   final int? actualLightFrames;
   final int? rejectedFrames;
   final String? environmentalNotes;
   final String? processingNotes;
+
+  /// Optional conditions as observed (TASK 13.4); null = not entered,
+  /// never 0 (SI-008).
+  final double? temperatureC;
+  final double? humidityPct;
+  final int? cloudCoverPct;
 }
 
 /// One imaging session — plan, execution and log (ADR-014): the aggregate

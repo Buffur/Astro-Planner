@@ -15,6 +15,7 @@ import '../screens/sites/site_editor_screen.dart';
 import '../screens/sites/sites_screen.dart';
 import '../screens/target/target_selection_screen.dart';
 import '../screens/execution/execution_screen.dart';
+import '../screens/execution/results_screen.dart';
 import '../screens/welcome/welcome_screen.dart';
 import '../screens/tonight/tonight_candidates_screen.dart';
 import '../screens/tonight/tonight_home_screen.dart';
@@ -47,6 +48,10 @@ class AppRouter {
 
   /// The tracking screen of session [id] (ADR-016, TASK 13.3).
   static String run(int id) => '/session/$id/run';
+
+  /// Reconciliation of session [id]: counts, notes, planned vs actual
+  /// (TASK 13.4).
+  static String results(int id) => '/session/$id/results';
   static const selectTarget = '/select/target';
   static const selectRig = '/select/rig';
   static const selectSite = '/select/site';
@@ -146,6 +151,12 @@ class AppRouter {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) =>
             ExecutionScreen(sessionId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/session/:id/results',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) =>
+            ResultsScreen(sessionId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(
         path: selectTarget,

@@ -63,7 +63,11 @@ void main() {
         ExecutionEventKind.finished,
         ExecutionEventKind.abandoned,
       },
-      ExecutionPhase.finished: {},
+      // TASK 13.4 (owner): count corrections after finishing.
+      ExecutionPhase.finished: {
+        ExecutionEventKind.framesConfirmed,
+        ExecutionEventKind.framesRejected,
+      },
       ExecutionPhase.abandoned: {},
     };
     final states = <ExecutionPhase, ExecutionState Function()>{

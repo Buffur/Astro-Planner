@@ -167,8 +167,6 @@ class ExecutionViewModel extends ChangeNotifier {
   Future<void> selectBlock(int id) =>
       _record(ExecutionEventKind.blockSelected, blockId: id);
 
-  Future<void> finish() => _end(() => _sessions.complete(_session!.id));
-
   Future<void> abandon() => _end(() => _sessions.abandon(_session!.id));
 
   Future<void> setKeepScreenOn(bool on) async {

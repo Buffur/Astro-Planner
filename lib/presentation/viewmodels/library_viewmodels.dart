@@ -6,6 +6,7 @@ import '../../domain/models/session.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/target_repository.dart';
+import '../../domain/services/session_reconciliation.dart';
 
 /// The Library's rigs (TASK 12.3): screens read and change equipment
 /// through this, never through the repository.
@@ -75,6 +76,19 @@ class SessionsViewModel extends ChangeNotifier {
   ];
 
   Future<Session?> get(int id) => _repository.get(id);
+
+  /// Planned vs actual (CALC-37) for each completed, non-legacy session in
+  /// [sessions], by id (TASK 13.4, owner: shown in the Sessions list).
+  Future<Map<int, SessionReconciliation>> reconciliations(
+    List<Session> sessions,
+  ) async => {
+    for (final s in sessions)
+      if (!s.legacy && s.status == SessionStatus.completed)
+        s.id: SessionReconciliation.of(
+          s.blocks,
+          await _repository.execution(s.id),
+        ),
+  };
 
   Future<void> delete(int id) async {
     await _repository.delete(id);

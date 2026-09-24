@@ -247,13 +247,21 @@ void main() {
       expect(find.text('0 of 20'), findsOneWidget);
     });
 
-    testWidgets('Finish asks, then ends the run', (tester) async {
+    // TASK 13.4 (owner): Finish opens reconciliation and completes nothing
+    // by itself (in 13.3 it asked, then completed).
+    testWidgets('Finish opens the results page; the run is not completed '
+        'until Complete', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await open(tester);
       await tap(tester, 'run.more');
       await tap(tester, 'run.finish');
-      await tap(tester, 'run.confirm.Finish');
-      expect(find.byKey(const Key('run.ended')), findsOneWidget);
-      final s = await tester.runAsync(() => sessions.get(runId));
+      expect(find.byKey(const Key('results.summary')), findsOneWidget);
+      var s = await tester.runAsync(() => sessions.get(runId));
+      expect(s!.status, SessionStatus.inProgress);
+      await tap(tester, 'results.save');
+      s = await tester.runAsync(() => sessions.get(runId));
       expect(s!.status, SessionStatus.completed);
     });
 

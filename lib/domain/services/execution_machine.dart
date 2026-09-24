@@ -119,7 +119,12 @@ abstract final class ExecutionMachine {
         );
       case ExecutionEventKind.framesConfirmed:
       case ExecutionEventKind.framesRejected:
-        require(state.isActive, 'not running or paused');
+        // After finishing, count corrections are the only events allowed
+        // (owner decision, TASK 13.4; ADR-016 §11).
+        require(
+          state.isActive || phase == ExecutionPhase.finished,
+          'not running, paused or finished',
+        );
         final id = block();
         final delta = e.delta;
         require(delta != null && delta != 0, 'no change');

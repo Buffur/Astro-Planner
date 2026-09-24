@@ -486,11 +486,12 @@ class _Controls extends StatelessWidget {
             key: const Key('run.finish'),
             leading: const Icon(Icons.flag_outlined),
             title: const Text('Finish'),
-            onTap: () async {
+            subtitle: const Text('Review the counts, then complete'),
+            onTap: () {
               Navigator.of(sheet).pop();
-              if (await _confirm(context, 'Finish this session?', 'Finish')) {
-                await run(vm.finish);
-              }
+              // Owner decision (TASK 13.4): Finish opens reconciliation;
+              // nothing is completed until Complete there.
+              context.push(AppRouter.results(vm.session!.id));
             },
           ),
           ListTile(
@@ -559,8 +560,15 @@ class _Ended extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () => context.go(AppRouter.tonight),
+              key: const Key('run.results'),
+              onPressed: () => context.push(AppRouter.results(vm.session!.id)),
               style: FilledButton.styleFrom(minimumSize: const Size(200, 56)),
+              child: const Text('Results'),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton(
+              onPressed: () => context.go(AppRouter.tonight),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(200, 48)),
               child: const Text('Back to Tonight'),
             ),
           ],

@@ -24,6 +24,7 @@ import 'viewmodels/settings_viewmodel.dart';
 import 'viewmodels/site_viewmodel.dart';
 import 'viewmodels/startup_viewmodel.dart';
 import 'viewmodels/theme_viewmodel.dart';
+import 'viewmodels/results_viewmodel.dart';
 import 'viewmodels/resume_run_viewmodel.dart';
 import 'viewmodels/tonight_viewmodel.dart';
 
@@ -93,6 +94,7 @@ class AppViewModels {
     execution = sessions == null
         ? null
         : ExecutionViewModel(sessions, clock, display, screenWake);
+    results = sessions == null ? null : ResultsViewModel(sessions);
     theme = ThemeViewModel(display);
     tonight = TonightViewModel(
       site: site,
@@ -114,6 +116,7 @@ class AppViewModels {
   /// Null without a session repository (some tests).
   late final ResumeRunViewModel? resumeRun;
   late final ExecutionViewModel? execution;
+  late final ResultsViewModel? results;
   late final ThemeViewModel theme;
   late final TonightViewModel tonight;
 
@@ -132,5 +135,6 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: tonight),
     ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
     ChangeNotifierProvider<ExecutionViewModel?>.value(value: execution),
+    ChangeNotifierProvider<ResultsViewModel?>.value(value: results),
   ];
 }

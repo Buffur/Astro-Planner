@@ -9,6 +9,8 @@ import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../navigation/app_router.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../../domain/services/session_reconciliation.dart';
+import '../execution/results_screen.dart';
 
 /// Saved sessions (TASK 11.3, owner decision): every non-draft session —
 /// planned, in progress, completed, abandoned — and the legacy logs, newest
@@ -24,6 +26,9 @@ class LogbookScreen extends StatefulWidget {
 class _LogbookScreenState extends State<LogbookScreen> {
   late Future<List<Session>> _sessionsFuture;
 
+  /// Planned vs actual for completed sessions (TASK 13.4), by id.
+  Map<int, SessionReconciliation> _results = const {};
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +38,11 @@ class _LogbookScreenState extends State<LogbookScreen> {
   void _refresh() {
     final sessions = context.read<SessionsViewModel>();
     setState(() {
-      _sessionsFuture = sessions.saved();
+      _sessionsFuture = sessions.saved().then((list) async {
+        final results = await sessions.reconciliations(list);
+        if (mounted) setState(() => _results = results);
+        return list;
+      });
     });
   }
 
@@ -146,6 +155,27 @@ class _LogbookScreenState extends State<LogbookScreen> {
                         Text('Planned Frames: ${log.plannedLightFrames}'),
                         if (log.actualLightFrames != null)
                           Text('Actual Frames: ${log.actualLightFrames}'),
+                        // TASK 13.4 (owner): planned vs actual integration
+                        // and corrections for a completed session.
+                        if (_results[session.id] case final r?) ...[
+                          Text(
+                            ResultsText.integration(r),
+                            key: Key('logbook.integration.${session.id}'),
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              key: Key('logbook.editResults.${session.id}'),
+                              onPressed: () async {
+                                await context.push(
+                                  AppRouter.results(session.id),
+                                );
+                                if (mounted) _refresh();
+                              },
+                              child: const Text('Edit results'),
+                            ),
+                          ),
+                        ],
                         if (log.rejectedFrames != null &&
                             log.rejectedFrames! > 0)
                           Text(
