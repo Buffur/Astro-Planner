@@ -411,8 +411,10 @@ rewritten to match the code.*
     fit with reason; drill-down) and a once-only first-run setup (site, rig, target;
     skippable) (commit `b13f7c7`). 665 tests green. The owner walkthrough is pending. **Group G12
     is complete.**
-  - **Next: TASK 13.1 — ADR: execution model under Android constraints (G13).** Not started; it begins only
-    on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 13.1** — ADR-016 (execution model under Android
+    constraints); PD-20 resolved by the owner. Documentation only.
+  - **Next: TASK 13.2 — Execution state machine and persistence.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

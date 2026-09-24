@@ -72,6 +72,7 @@
 > **TASK 12.3 (2026-09-24, commits `6c703f3`, `03c0b34`, `64caa58`):** the planner ViewModel is split into screen-scoped ViewModels over domain interfaces: `SiteViewModel` (sites, transient position, zone, place name, sky darkness), `SettingsViewModel` (planning preferences), `SessionPlanViewModel` (the current session: night, target, rig, blocks, autosave, open/new/duplicate/save), `NightConditionsViewModel` (weather, timeline, Moon, imaging opportunity, candidates), `CaptureAnalysisViewModel` (budget, fit, fill window, capability, the Save snapshot), `StartupViewModel` (load order, bootstrap error and retry), and `GearViewModel` / `TargetsViewModel` / `SessionsViewModel` for the Library and Sessions screens. Screens no longer call repositories (DEV-A2, except the gated metadata import screen, G17). `AppViewModels` composes the graph; `main.dart` is the only place that picks implementations (DEV-A1). `PlannerViewModel` is deleted; tests build the same graph through `PlannerHarness` (`test/support/`). Moved-out domain helpers: `CurrentSession`, `SessionReferenceResolver`, `ExampleCapturePlan`, `SessionNightResolver.resolve`. The block list is exposed read-only. A test enforces no HTTP / SharedPreferences / Drift / Geolocator / data-layer import in a ViewModel and at most 250 code lines (300 physical) per ViewModel. TD-019, TD-021 and TD-044 resolved (field-mode persistence stays with TASK 12.4); TD-053 still open. No user-visible behavior change.
 > **TASK 12.4 (2026-09-24, commit `3c27b15`):** semantic theme tokens and complete red field mode. `AppPalette` (a `ThemeExtension`: muted, night events, altitude chart, Bortle scale) for light, dark and field; `lib/presentation` names no colour itself — the 52 `Colors.*`/colour literals found (not the ~100 the roadmap estimated) now read `ColorScheme` or `AppPalette`. The field theme sets every `ColorScheme` role and theme colour to red or black, so dialogs, date pickers, snackbars and menus stay red. Owner decisions: (1) in field mode the whole app also goes through a red colour filter (R' = R + 0.7152 G + 0.0722 B, G' = B' = 0; Rec. 709 luma weights; pure red unchanged), covering map tiles and anything a token misses; (2) the gate is lifted in this task after the automated darkness checks, and the on-device check in real darkness is an owner checklist item. Field mode is persisted (`DisplayPreferencesRepository`, SharedPreferences) and restored before the first frame; one tap from Tonight and the planner (`FieldModeButton`) and a switch in Settings. `FeatureScope.fieldMode` is `true` (PD-06 schedule). No text under 12 sp; the section header's action keeps its 48 dp tap target. Light and dark look as before, except swipe-to-delete and the map pin now use the scheme's error colour and chart labels are 12 sp. F-46 Implemented; TD-044 fully resolved.
 > **TASK 12.5 (2026-09-24, commit `b13f7c7`):** Tonight dashboard and first-run setup. Tonight shows the site and night, the night (sunset to sunrise, dark with the Sun below −18°), the Moon (% lit, when it is up), the weather (cloud range and age, or why there is no forecast) and the current session (status, target, rig or "No rig chosen", fit label with its one-line reason, usable time); each row drills down into the planner or a picker. Without a site, a site prompt replaces the night rows. No new calculations: the wording is shared with the planner (`WeatherText`, `MoonText`, `FitText` in `presentation/shared/night_text.dart`, moved out of the weather, sky and budget widgets). First run (owner decisions): a full-screen page (`/welcome`, above the tabs) with site (the location-permission rationale comes before "Use current position"), rig and target steps reusing the pickers; offered once, only on a start without a site; Skip, Done and back close it for good (`FirstRunRepository`, `TonightViewModel`). TD-054 recorded.
+> **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -349,7 +350,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-17 **RESOLVED 2026-09-23** | Imaging-opportunity semantics: which conditions **gate** a window and which only **annotate** it | Fixed gates and a heuristic warning (Moon > 0.8 or Bortle ≥ 7); MASTER_ROADMAP TASK 10.1 | **Resolved — see E.1 and ADR-013.** | — | Opportunity calculator (10.2) |
 | PD-18 **RESOLVED 2026-09-23** | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | **Resolved — see E.1 and ADR-014.** | — | Session schema migration (11.2) |
 | PD-19 **RESOLVED 2026-09-23** | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | **Resolved — see E.1 and ADR-015.** | — | Navigation shell (12.2), execution and logbook screens |
-| PD-20 *(placeholder, registered 2026-09-21)* | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | Decided in TASK 13.1. Roadmap's candidate (not accepted): foreground only; progress derived from persisted UTC timestamps; every transition persisted; notifications deferred; no camera control, ASCOM or INDI. A wakelock dependency for keep-screen-on would need separate approval | — | Execution tasks 13.2–13.4 |
+| PD-20 **RESOLVED 2026-09-24** | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | **Resolved — see E.1 and ADR-016.** | — | Execution tasks 13.2–13.4 |
 | PD-21 *(placeholder, registered 2026-09-21)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
@@ -637,6 +638,17 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   opened from Tonight and Sessions; sites live in Library; execution is full screen.
 - **PD-14:** a fixed Tonight view; no customizable dashboard.
 - **Implementation:** TASKs 12.2, 12.3, 12.5; G13.
+
+### PD-20 — Execution model under Android constraints (RESOLVED 2026-09-24)
+
+- **Decided by:** the project owner, in chat, on 2026-09-24 (TASK 13.1), choosing the
+  recommended option on each point. Recorded as **ADR-016** (Part F).
+- **Keep screen on:** opt-in, off by default, only while tracking; a wakelock plugin is
+  approved for TASK 13.3 (licence re-checked when added).
+- **Concurrency:** one session in progress at a time.
+- **Stale run:** a resume prompt after the night ends; never auto-finished.
+- **Events:** a new append-only `session_events` table (schema v17).
+- **Implementation:** TASKs 13.2–13.4.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2335,3 +2347,148 @@ lower half" is not audited yet — TASK 12.5 designs the Tonight dashboard.)*
   TASK 12.5 dashboard.
 - **Settings from the planner:** "Change in Planning Settings" switches to the
   Settings tab (`go`), leaving the autosaved planner.
+
+## ADR-016: Execution model under Android constraints
+
+Status: accepted (owner, 2026-09-24, TASK 13.1). Resolves PD-20. Documentation only —
+this ADR changes no code. Checked against `session_repository.dart`, `session.dart`,
+`app_database.dart` (schema v16: `capture_blocks.completed_frames` /
+`rejected_frames`, `session_logs.started_at_utc_ms` / `completed_at_utc_ms` and the
+execution-start snapshot column) and `capture_budget_calculator.dart` at commit
+`a8ad5b5`.
+
+### 1. Context (verified)
+
+- ADR-014 already gives execution its frame: the `inProgress` status, **Start**
+  (draft/planned → inProgress, taking the execution-start snapshot once, never
+  changed afterwards), **Finish** (→ completed) and **Abandon**, each one transaction
+  in `SessionRepository` (`start`, `complete`, `abandon`); per-block
+  `completed_frames` / `rejected_frames` counters exist but nothing writes them; the
+  plan cannot be edited once a session is in progress (`updatePlan` accepts draft and
+  planned only).
+- Nothing records *what happened during* a run: no running/paused state, no current
+  block, no events (ADR-014 §2 left the event list to G13).
+- **Android constraints.** A backgrounded app's Dart timers stop, and the process can
+  be killed at any time without a callback; the phone can reboot; the wall clock can
+  be changed by the user or by network time; a time-zone change does not change UTC.
+  The app has no background service, and adding one (a foreground service with a
+  permanent notification) is out of scope.
+- The imaging itself happens on the user's camera or capture software; AstroPlan
+  controls no hardware (no camera control, ASCOM or INDI — CLAUDE.md scope).
+
+### 2. Decision: states
+
+The session status stays ADR-014's. Inside `inProgress`, the execution state is
+**running(block)** or **paused**:
+
+```
+  draft / planned ──Start──►┌──────────────────── inProgress ────────────────────┐
+  (refused while another    │                                                    │
+   session is in progress)  │   ┌──────────────┐   Pause / Interrupt(reason)     │
+                            │   │ running(b)   │ ─────────────────────► ┌──────┐ │
+                            │   │              │ ◄───────────────────── │paused│ │
+                            │   └──────┬───────┘        Resume          └──────┘ │
+                            │          │ Select block b' (running or paused)     │
+                            │          ▼                                         │
+                            │   running(b') …    Confirm / Reject frames on b    │
+                            └──────┬───────────────────────────┬─────────────────┘
+                                   │ Finish                    │ Abandon
+                                   ▼                           ▼
+                               completed                   abandoned
+```
+
+- **Start** puts the session in `running` on the first light block with frames left
+  (or the one the user picks).
+- **One session in progress at a time (owner).** Start is refused while another
+  session is in progress; the app offers to open, finish or abandon that one. The
+  repository enforces it (a `SessionStateError`, nothing written).
+- Frames are **confirmed or rejected by the user** (+1, −1, "accept the estimate",
+  reject) in either sub-state; counters never go below zero.
+- Finish and Abandon are allowed from running or paused; ADR-014 §3 governs what
+  stays editable afterwards (results and notes only).
+
+### 3. Decision: progress comes from persisted UTC timestamps
+
+- **No timer holds state.** Everything the execution screen shows is recomputed from
+  the stored events and "now" (the injected `Clock`), so backgrounding, a kill or a
+  reboot loses nothing: the screen is a pure function of the database and the clock.
+- **Running time in the current block** = the sum of the running intervals since the
+  block was selected, each from its event's UTC instant to the next event's (or now).
+- **Estimated frames** = ⌊running time ÷ (exposure + per-frame overhead)⌋, with the
+  per-frame overhead taken from the **execution-start snapshot's** preferences (frozen,
+  so a Settings change mid-run does not move the estimate). Dither, refocus and
+  meridian-flip time are **not** subtracted: the estimate is an upper-bound
+  approximation, labelled "about N (estimated)", never shown as a count. It is capped
+  at the block's frames left, with "plan reached" shown instead of a larger number.
+- **Estimates are never written.** Only a user confirmation changes a counter;
+  "accept the estimate" writes the estimate as a confirmation event, so the stored
+  number is always one the user saw and accepted. (The formula is registered in
+  `SCIENTIFIC_INTEGRITY.md`'s calculation register when TASK 13.2 implements it.)
+
+### 4. Decision: every transition is persisted
+
+- **Events, append-only (owner): a new `session_events` table** (schema v17): id,
+  session id (`ON DELETE CASCADE`), a per-session sequence number (unique with the
+  session id), `at_utc_ms`, kind, block id (nullable), an integer delta (confirm /
+  reject), an interruption reason tag (nullable), and a clock-adjusted flag.
+- **Kinds:** started, blockSelected, paused, interrupted (a pause with a reason:
+  clouds, wind, dew, equipment, other), resumed, framesConfirmed, framesRejected,
+  finished, abandoned.
+- **One transaction per transition:** the event row plus its effects (status and
+  timestamps on `session_logs`, the block counters on `capture_blocks`). The events
+  are the source of truth; the counters are a projection kept in the same
+  transaction, and replaying the events must reproduce them (a test in 13.2).
+- The execution state is a **pure fold** over the events (domain, no Flutter), and
+  each transition is a pure function that accepts or rejects an event for a state.
+
+### 5. Decision: kill, reboot, clock and stale scenarios
+
+| Scenario | Behaviour |
+| --- | --- |
+| App backgrounded, screen off | Nothing runs; on return the screen recomputes from the events and now. |
+| Process killed while running | At the next start the in-progress session is found (`mostRecentOpen`) and a **resume prompt** shows the block, how long it has been running and the estimate. Options: continue (the time the app was closed counts — the camera may have kept shooting), pause now, finish, abandon. Counts stay as last confirmed until the user confirms more. |
+| Process killed while paused | Resumes paused; the prompt says since when. |
+| Phone rebooted | Same as a kill: stored UTC instants survive; no uptime counter is used. |
+| Wall clock moved **back** (now earlier than the last event) | The current interval counts as zero; new events are stamped at the last event's instant and flagged `clockAdjusted`; the screen says the phone's clock changed and the estimate may be off. Event order is always by sequence number, never by time. |
+| Wall clock moved **forward** | Indistinguishable from elapsed time; bounded by the cap on the estimate (frames left) and by the stale rule below. |
+| Time-zone change or travel | No effect on progress (UTC); times are shown in the site's zone as everywhere else (ADR-007). |
+| Night over (now after the night's end in the execution-start snapshot) | **Resume prompt, never auto-finish (owner):** continue, finish (confirm counts) or abandon. Nothing is completed or estimated into the counters without the user. |
+| Start pressed while another session is in progress | Refused; offer to open, finish or abandon the running one (owner: one at a time). |
+
+### 6. Decision: foreground only; what is not built
+
+- **Foreground only.** No background or foreground service, no alarms, no
+  notifications (deferred; a later ADR would cover them), no reminders.
+- **Keep screen on (owner): opt-in**, off by default, a persisted display preference,
+  active only while the execution screen is visible and a session is running. It needs
+  a wakelock plugin (candidate: `wakelock_plus`, BSD-3-Clause — the licence and the
+  Android permission are re-checked when TASK 13.3 adds it; the owner approved adding
+  such a dependency for this purpose).
+- **No hardware control:** no camera control, ASCOM, INDI or capture-software
+  integration; the user reports frames.
+
+### 7. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| In-memory timer driving the counters | Rejected | Dies with the process or in the background; the state would be lost |
+| Android foreground service with a notification | Rejected for 1.0 | Permissions, a permanent notification and platform code for little gain while the user is at the telescope with the app open |
+| Auto-increment counters from the estimate | Rejected | The roadmap requires user confirmation; an estimate is not a count (dither, refocus, failed frames) |
+| Monotonic uptime clock via a platform channel | Rejected for 1.0 | Lost on reboot and needs platform code; UTC wall clock with the guards in §5 covers the cases |
+| Several sessions in progress | Rejected (owner) | Harder to reason about after a kill; one rig per session in 1.0 |
+| Auto-finish when the night ends | Rejected (owner) | Would complete a log the user never confirmed |
+| Events as a JSON list on the session | Rejected (owner) | Every transition would rewrite the whole list; a table appends one row and is easy to query |
+| No keep-screen-on | Rejected (owner) | Opt-in keeps the tracker glanceable without changing the phone's settings |
+
+### 8. Consequences
+
+- **TASK 13.2:** schema v17 (`session_events`, migration and snapshot tests); the pure
+  execution state machine (fold + transitions, the estimate); repository methods that
+  append an event and apply its effects in one transaction, refuse a second in-progress
+  session and replay events; the resume prompt at start. Tests: the transition table,
+  a restart mid-block, clock jumps both ways, a replay equal to the counters.
+- **TASK 13.3:** the execution screen (one-thumb, red-safe, large text); the opt-in
+  keep-screen-on switch and the wakelock dependency.
+- **TASK 13.4:** reconciliation from the confirmed counters into results; planned vs
+  actual.
+- This ADR changes no code.
