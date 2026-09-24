@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_palette.dart';
 
 import '../shared/night_time_formatter.dart';
+import '../shared/opportunity_text.dart';
 
 import '../../domain/models/imaging_opportunity.dart';
 
@@ -41,16 +42,23 @@ class AltitudeChartWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 200,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: _AltitudeChartPainter(
-              opportunity: opportunity,
-              moonAltitudesDeg: moonAltitudesDeg,
-              palette: palette,
-              zoneId: zoneId,
-              nowUtc: nowUtc,
+        // TASK 15.3: the chart's text alternative for screen readers; the
+        // window list below it has the details.
+        Semantics(
+          key: const Key('chart.altitude'),
+          label: semanticsLabel(opportunity),
+          excludeSemantics: true,
+          child: SizedBox(
+            height: 200,
+            width: double.infinity,
+            child: CustomPaint(
+              painter: _AltitudeChartPainter(
+                opportunity: opportunity,
+                moonAltitudesDeg: moonAltitudesDeg,
+                palette: palette,
+                zoneId: zoneId,
+                nowUtc: nowUtc,
+              ),
             ),
           ),
         ),
@@ -81,6 +89,19 @@ class AltitudeChartWidget extends StatelessWidget {
     );
   }
 
+  /// What the chart shows, for screen readers (TASK 15.3).
+  static String semanticsLabel(ImagingOpportunity o) {
+    final n = o.windows.length;
+    final windows = switch (n) {
+      0 => 'no imaging window',
+      1 => 'one imaging window',
+      _ => '$n imaging windows',
+    };
+    return "Chart of the target's altitude through the night: $windows, "
+        'usable time ${OpportunityText.duration(o.usableTime)}. '
+        'The windows are listed below the chart.';
+  }
+
   static String _signed(double v) =>
       v < 0 ? '−${(-v).round()}°' : '${v.round()}°';
 
@@ -99,7 +120,9 @@ class AltitudeChartWidget extends StatelessWidget {
         ),
       ),
       const SizedBox(width: 4),
-      Text(label, style: Theme.of(context).textTheme.labelSmall),
+      Flexible(
+        child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ),
     ],
   );
 
@@ -108,7 +131,9 @@ class AltitudeChartWidget extends StatelessWidget {
     children: [
       Container(width: 12, height: 2, color: color),
       const SizedBox(width: 4),
-      Text(label, style: Theme.of(context).textTheme.labelSmall),
+      Flexible(
+        child: Text(label, style: Theme.of(context).textTheme.labelSmall),
+      ),
     ],
   );
 }

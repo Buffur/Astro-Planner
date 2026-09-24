@@ -416,6 +416,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Add target',
         onPressed: () => _showTargetDialog(),
         child: const Icon(Icons.add),
       ),

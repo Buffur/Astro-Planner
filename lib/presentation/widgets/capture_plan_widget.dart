@@ -73,36 +73,42 @@ class _BlockList extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                const Text(
-                  'Sequence Plan',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                if (viewModel.isExampleCapturePlan) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Example plan',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onPrimaryContainer,
+            // TASK 15.3: the title and the example badge wrap rather than
+            // push the add button off a narrow screen.
+            Expanded(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  const Text(
+                    'Sequence Plan',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  if (viewModel.isExampleCapturePlan)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Example plan',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onPrimaryContainer,
+                        ),
                       ),
                     ),
-                  ),
                 ],
-              ],
+              ),
             ),
             IconButton(
+              tooltip: 'Add capture block',
               icon: const Icon(Icons.add_circle),
               color: scheme.primary,
               onPressed: () => showCaptureBlockDialog(context, viewModel),
@@ -165,6 +171,7 @@ class _BlockList extends StatelessWidget {
                   children: [
                     Icon(Icons.drag_handle, color: scheme.outline),
                     IconButton(
+                      tooltip: 'Delete block',
                       icon: Icon(Icons.delete_outline, color: scheme.error),
                       onPressed: () => viewModel.removeCaptureBlock(index),
                     ),

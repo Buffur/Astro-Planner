@@ -737,6 +737,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Add rig',
         onPressed: () => _showEquipmentDialog(),
         child: const Icon(Icons.add),
       ),

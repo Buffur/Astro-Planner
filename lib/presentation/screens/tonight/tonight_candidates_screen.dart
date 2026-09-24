@@ -140,28 +140,56 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
+          // TASK 15.3: the dropdowns share a row and ellipsize, so 200 %
+          // text does not overflow.
           child: Wrap(
             spacing: 12,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              DropdownButton<CandidateSort>(
-                key: const Key('tonight.sort'),
-                value: _sort,
-                items: [
-                  for (final e in _sortLabels.entries)
-                    DropdownMenuItem(value: e.key, child: Text(e.value)),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButton<CandidateSort>(
+                      key: const Key('tonight.sort'),
+                      isExpanded: true,
+                      value: _sort,
+                      items: [
+                        for (final e in _sortLabels.entries)
+                          DropdownMenuItem(
+                            value: e.key,
+                            child: Text(
+                              e.value,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _sort = v ?? _sort),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButton<String?>(
+                      key: const Key('tonight.type'),
+                      isExpanded: true,
+                      value: _type,
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text(
+                            'All types',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        for (final t in types)
+                          DropdownMenuItem(
+                            value: t,
+                            child: Text(t, overflow: TextOverflow.ellipsis),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _type = v),
+                    ),
+                  ),
                 ],
-                onChanged: (v) => setState(() => _sort = v ?? _sort),
-              ),
-              DropdownButton<String?>(
-                key: const Key('tonight.type'),
-                value: _type,
-                items: [
-                  const DropdownMenuItem(value: null, child: Text('All types')),
-                  for (final t in types)
-                    DropdownMenuItem(value: t, child: Text(t)),
-                ],
-                onChanged: (v) => setState(() => _type = v),
               ),
               FilterChip(
                 key: const Key('tonight.own'),

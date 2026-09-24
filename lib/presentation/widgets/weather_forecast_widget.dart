@@ -136,10 +136,19 @@ class WeatherForecastWidget extends StatelessWidget {
                 Uri.parse('https://open-meteo.com/'),
                 mode: LaunchMode.externalApplication,
               ),
-              child: Text(
-                'Weather data by Open-Meteo.com (CC BY 4.0)',
-                key: const Key('weather.attribution'),
-                style: small?.copyWith(decoration: TextDecoration.underline),
+              // TASK 15.3: a 48 px tap target.
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Weather data by Open-Meteo.com (CC BY 4.0)',
+                    key: const Key('weather.attribution'),
+                    style: small?.copyWith(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

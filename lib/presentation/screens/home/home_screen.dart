@@ -305,7 +305,11 @@ class HomeScreen extends StatelessWidget {
               startupVm.hasBootstrapError ||
               planVm.sessionNight == null
           ? null
-          : BottomAppBar(
+          // TASK 15.3: not a BottomAppBar — its fixed 80 px height squeezed
+          // the buttons below the 48 px tap target (and clips large text).
+          : Material(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              elevation: 3,
               child: SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

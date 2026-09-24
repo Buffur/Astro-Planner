@@ -24,13 +24,17 @@ class AboutScreen extends StatelessWidget {
           const SizedBox(height: 8),
           FutureBuilder<String>(
             future: (loadNotice ?? () => rootBundle.loadString(noticeAsset))(),
-            builder: (context, snapshot) => SelectableText(
-              snapshot.data ??
-                  (snapshot.hasError
-                      ? 'Target catalog: adapted from OpenNGC by Mattia '
-                            'Verga, CC BY-SA 4.0.'
-                      : ''),
-              style: theme.textTheme.bodySmall,
+            // TASK 15.3: selectable text is a long-press target (48 px).
+            builder: (context, snapshot) => ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: SelectableText(
+                snapshot.data ??
+                    (snapshot.hasError
+                        ? 'Target catalog: adapted from OpenNGC by Mattia '
+                              'Verga, CC BY-SA 4.0.'
+                        : ''),
+                style: theme.textTheme.bodySmall,
+              ),
             ),
           ),
           const Divider(height: 32),

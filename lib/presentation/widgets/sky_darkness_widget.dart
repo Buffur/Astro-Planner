@@ -32,8 +32,12 @@ class SkyDarknessWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // TASK 15.3: wraps instead of overflowing at large text.
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 Text(
                   'Sky Darkness & Timeline',
@@ -64,11 +68,13 @@ class SkyDarknessWidget extends StatelessWidget {
                   color: AppPalette.of(context).moon,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  illum == null
-                      ? 'Moon Illumination: $lunarIllum'
-                      : 'Moon Illumination: $lunarIllum%',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                Expanded(
+                  child: Text(
+                    illum == null
+                        ? 'Moon Illumination: $lunarIllum'
+                        : 'Moon Illumination: $lunarIllum%',
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
                 ),
               ],
             ),
@@ -255,8 +261,10 @@ class _NightTimelineVisual extends StatelessWidget {
     final palette = AppPalette.of(context);
     return Column(
       children: [
+        // TASK 15.3: four equal columns whose text wraps, so neither a
+        // narrow phone nor 200 % text overflows.
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _TimelinePoint(
               label: 'Sunset',
@@ -314,16 +322,23 @@ class _TimelinePoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(height: 4),
-        Text(
-          time,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-        ),
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(height: 4),
+          Text(
+            time,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ],
+      ),
     );
   }
 }

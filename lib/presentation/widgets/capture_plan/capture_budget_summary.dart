@@ -100,16 +100,22 @@ class CaptureBudgetSummary extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Fit tonight',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const Flexible(
+              child: Text(
+                'Fit tonight',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-            Text(
-              FitText.label(fit.state),
-              key: const Key('capturePlan.fitState'),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: FitText.color(fit.state, scheme),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                FitText.label(fit.state),
+                key: const Key('capturePlan.fitState'),
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: FitText.color(fit.state, scheme),
+                ),
               ),
             ),
           ],
@@ -242,7 +248,10 @@ class _Line extends StatelessWidget {
         children: [
           Flexible(child: Text(label, style: style)),
           const SizedBox(width: 8),
-          Text(value, style: style),
+          // TASK 15.3: the value wraps too at 200 % text.
+          Flexible(
+            child: Text(value, style: style, textAlign: TextAlign.end),
+          ),
         ],
       ),
     );
