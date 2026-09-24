@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **651 tests: 651 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.4) |
+| `flutter test --no-pub` | **665 tests: 665 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -740,3 +740,15 @@ the ADR-012 variables, and a real out-of-range error):
   a snackbar, the site map picker and Settings; look for any non-red or bright pixel and
   any white flash on navigation or restart. The status and navigation bars are the
   system's and are out of scope (no system-brightness control).
+
+**Added by TASK 12.5** (Tonight dashboard, first run), 14 tests (665):
+- **`screens/tonight/tonight_home_screen_test.dart` (14):** no site (site prompt, no night
+  or fit rows); with a site (night, dark, Moon rows); no forecast ("No forecast", no
+  number); no rig (says so, opens the rig picker); a small plan fits (label, reason,
+  usable time); a huge plan doesn't fit (label, reason); no overflow at 200 % text on a
+  360 × 640 dp phone for the dashboard with and without a site and for the first-run
+  page; the first run is offered without a site and Skip or Done store it as done, a step
+  opens its picker and comes back, and it is not offered with a site or once done.
+- **Owner walkthrough (manual, not yet done):** on a device, a fresh install shows the
+  setup; set a site by GPS (the permission prompt appears only after the rationale) and
+  by hand; skip it on a second fresh install; check Tonight at large text sizes.

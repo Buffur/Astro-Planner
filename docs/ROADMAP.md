@@ -407,8 +407,12 @@ rewritten to match the code.*
     red field mode (red-only tokens plus a whole-app red filter, persisted, one tap from
     Tonight and the planner; gate lifted) (commit `3c27b15`). 651 tests green. The on-device
     darkness check is an owner checklist item.
-  - **Next: TASK 12.5 — Tonight dashboard and first-run flow.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-24: **TASK 12.5** — Tonight dashboard (night, Moon, weather with age,
+    fit with reason; drill-down) and a once-only first-run setup (site, rig, target;
+    skippable) (commit `b13f7c7`). 665 tests green. The owner walkthrough is pending. **Group G12
+    is complete.**
+  - **Next: TASK 13.1 — ADR: execution model under Android constraints (G13).** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 
