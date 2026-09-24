@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **665 tests: 665 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.5) |
+| `flutter test --no-pub` | **760 tests: 760 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -752,3 +752,21 @@ the ADR-012 variables, and a real out-of-range error):
 - **Owner walkthrough (manual, not yet done):** on a device, a fresh install shows the
   setup; set a site by GPS (the permission prompt appears only after the rationale) and
   by hand; skip it on a second fresh install; check Tonight at large text sizes.
+
+**Added by TASK 13.2** (execution engine, schema v17), 95 tests (760):
+- **`domain/services/execution_machine_test.dart` (62):** the full transition table (5
+  phases × 9 event kinds, 45 cases); interruption needs a reason; unknown blocks; counts
+  never below zero; sequence order; fold equals step-by-step; running time across pauses,
+  block changes and a restart; clock behind (event stamped at the last one, flagged;
+  interval counted as zero), clock far ahead (capped); the estimate formula, reported
+  frames, a paused run, a non-positive cycle; staleness.
+- **`data/repositories/drift_session_execution_test.dart` (11):** start on the first light
+  block; one session in progress; no blocks, no start; counters written with each event
+  and equal to the replayed events; a refused event rolls back; events only while in
+  progress; finish/abandon events; **acceptance: a kill mid-block on a file database
+  restores the exact state**; clock set back; delete cascades; snapshot accessors.
+- **`schema_migration_test.dart` (+13):** v8–v16 → v17 exact; v16 data kept, no events;
+  kind CHECK; unique seq per session; cascade on delete.
+- **`screens/tonight/resume_run_prompt_test.dart` (9):** the prompt with running time and
+  estimate; keep going writes nothing; pause now; finish; abandon asks first; a past night
+  is flagged and not finished; a paused run; a clock behind; no prompt without a run.

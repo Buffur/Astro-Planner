@@ -413,8 +413,11 @@ rewritten to match the code.*
     is complete.**
   - Completed 2026-09-24: **TASK 13.1** — ADR-016 (execution model under Android
     constraints); PD-20 resolved by the owner. Documentation only.
-  - **Next: TASK 13.2 — Execution state machine and persistence.** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 13.2** — execution state machine, `session_events`
+    (schema v17), repository methods and the resume prompt (commit `14467e7`). 760 tests
+    green.
+  - **Next: TASK 13.3 — Execution screen.** Not started; it begins only on the owner's
+    go-ahead.
 
 ### Phase → group map
 
