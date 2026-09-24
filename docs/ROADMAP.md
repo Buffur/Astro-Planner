@@ -403,8 +403,12 @@ rewritten to match the code.*
   - Completed 2026-09-24: **TASK 12.3** — `PlannerViewModel` split into screen-scoped
     ViewModels over domain interfaces; screens no longer call repositories; `main.dart`
     composes the graph (commits `6c703f3`, `03c0b34`, `64caa58`). 631 tests green.
-  - **Next: TASK 12.4 — Semantic theme tokens; complete red field mode.** Not started;
-    it begins only on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 12.4** — semantic theme tokens (`AppPalette`) and complete
+    red field mode (red-only tokens plus a whole-app red filter, persisted, one tap from
+    Tonight and the planner; gate lifted) (commit `3c27b15`). 651 tests green. The on-device
+    darkness check is an owner checklist item.
+  - **Next: TASK 12.5 — Tonight dashboard and first-run flow.** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

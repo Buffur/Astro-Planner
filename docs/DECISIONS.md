@@ -70,6 +70,7 @@
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
 > **TASK 12.2 (2026-09-23, commit `aa748e6`):** ADR-015 §2–§3 implemented (navigation shell). Implementation notes recorded in ADR-015 §7.
 > **TASK 12.3 (2026-09-24, commits `6c703f3`, `03c0b34`, `64caa58`):** the planner ViewModel is split into screen-scoped ViewModels over domain interfaces: `SiteViewModel` (sites, transient position, zone, place name, sky darkness), `SettingsViewModel` (planning preferences), `SessionPlanViewModel` (the current session: night, target, rig, blocks, autosave, open/new/duplicate/save), `NightConditionsViewModel` (weather, timeline, Moon, imaging opportunity, candidates), `CaptureAnalysisViewModel` (budget, fit, fill window, capability, the Save snapshot), `StartupViewModel` (load order, bootstrap error and retry), and `GearViewModel` / `TargetsViewModel` / `SessionsViewModel` for the Library and Sessions screens. Screens no longer call repositories (DEV-A2, except the gated metadata import screen, G17). `AppViewModels` composes the graph; `main.dart` is the only place that picks implementations (DEV-A1). `PlannerViewModel` is deleted; tests build the same graph through `PlannerHarness` (`test/support/`). Moved-out domain helpers: `CurrentSession`, `SessionReferenceResolver`, `ExampleCapturePlan`, `SessionNightResolver.resolve`. The block list is exposed read-only. A test enforces no HTTP / SharedPreferences / Drift / Geolocator / data-layer import in a ViewModel and at most 250 code lines (300 physical) per ViewModel. TD-019, TD-021 and TD-044 resolved (field-mode persistence stays with TASK 12.4); TD-053 still open. No user-visible behavior change.
+> **TASK 12.4 (2026-09-24, commit `3c27b15`):** semantic theme tokens and complete red field mode. `AppPalette` (a `ThemeExtension`: muted, night events, altitude chart, Bortle scale) for light, dark and field; `lib/presentation` names no colour itself — the 52 `Colors.*`/colour literals found (not the ~100 the roadmap estimated) now read `ColorScheme` or `AppPalette`. The field theme sets every `ColorScheme` role and theme colour to red or black, so dialogs, date pickers, snackbars and menus stay red. Owner decisions: (1) in field mode the whole app also goes through a red colour filter (R' = R + 0.7152 G + 0.0722 B, G' = B' = 0; Rec. 709 luma weights; pure red unchanged), covering map tiles and anything a token misses; (2) the gate is lifted in this task after the automated darkness checks, and the on-device check in real darkness is an owner checklist item. Field mode is persisted (`DisplayPreferencesRepository`, SharedPreferences) and restored before the first frame; one tap from Tonight and the planner (`FieldModeButton`) and a switch in Settings. `FeatureScope.fieldMode` is `true` (PD-06 schedule). No text under 12 sp; the section header's action keeps its 48 dp tap target. Light and dark look as before, except swipe-to-delete and the map pin now use the scheme's error colour and chart labels are 12 sp. F-46 Implemented; TD-044 fully resolved.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -364,6 +365,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - **Stay visible** (they are on the core path): the **logbook** and **text sharing**.
   - **Hidden** until their group: **metadata import** until G17 (v1.1); the
     **light-pollution map card** until TASK 7.4; the **field-mode toggle** until TASK 12.4.
+    *(Field mode lifted 2026-09-24, TASK 12.4, commit `3c27b15`, on its schedule.)*
 - **Enforcement — DONE 2026-09-22 (TASK 4.3, commit `576c069`):** every entry point
   (buttons, cards, routes) gated from one source (`FeatureScope`), with tests that
   a gated feature has no entry point. **This decision was recorded only when
@@ -2293,6 +2295,10 @@ G13 (execution). Checked against `app_router.dart` and `home_screen.dart` at com
 Touch targets ≥ 48 dp; primary actions in the lower half; pickers over typing; red
 field mode one tap away from Tonight and the planner, dialogs included; destructive
 actions confirmed; unknown shown as unknown (SI-008). Details in `docs/IA_WIREFRAMES.md` §3.
+*(Status 2026-09-24, TASK 12.4: red field mode is one tap from Tonight and the planner,
+with dialogs, date pickers and snackbars included; tap targets keep 48 dp — the one
+shrink-wrapped action was fixed and a test forbids new ones. "Primary actions in the
+lower half" is not audited yet — TASK 12.5 designs the Tonight dashboard.)*
 
 ### 5. Alternatives considered
 

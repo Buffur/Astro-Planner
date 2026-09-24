@@ -61,6 +61,7 @@
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
 > **TASK 12.2 (2026-09-23, commit `aa748e6`):** navigation shell (ADR-015). go_router `StatefulShellRoute` with four tabs (Tonight · Sessions · Library · Settings) and kept per-tab state; Android back pops within a tab, then returns to Tonight, and leaves the app from Tonight's root. Above the tabs: `/session/:id` (the planner — Home's content), `/select/target|rig|site` (the planner's pickers), `/site/edit`, `/site/pick`, `/position`. `/tonight` is an interim root until the TASK 12.5 dashboard; candidates are `/tonight/candidates`; a Library index; metadata import under Settings (still gated). Paths are `AppRouter` constants. TD-053 recorded.
 > **TASK 12.3 (2026-09-24, commits `6c703f3`, `03c0b34`, `64caa58`):** the planner ViewModel is split into screen-scoped ViewModels over domain interfaces: `SiteViewModel` (sites, transient position, zone, place name, sky darkness), `SettingsViewModel` (planning preferences), `SessionPlanViewModel` (the current session: night, target, rig, blocks, autosave, open/new/duplicate/save), `NightConditionsViewModel` (weather, timeline, Moon, imaging opportunity, candidates), `CaptureAnalysisViewModel` (budget, fit, fill window, capability, the Save snapshot), `StartupViewModel` (load order, bootstrap error and retry), and `GearViewModel` / `TargetsViewModel` / `SessionsViewModel` for the Library and Sessions screens. Screens no longer call repositories (DEV-A2, except the gated metadata import screen, G17). `AppViewModels` composes the graph; `main.dart` is the only place that picks implementations (DEV-A1). `PlannerViewModel` is deleted; tests build the same graph through `PlannerHarness` (`test/support/`). Moved-out domain helpers: `CurrentSession`, `SessionReferenceResolver`, `ExampleCapturePlan`, `SessionNightResolver.resolve`. The block list is exposed read-only. A test enforces no HTTP / SharedPreferences / Drift / Geolocator / data-layer import in a ViewModel and at most 250 code lines (300 physical) per ViewModel. TD-019, TD-021 and TD-044 resolved (field-mode persistence stays with TASK 12.4); TD-053 still open. No user-visible behavior change.
+> **TASK 12.4 (2026-09-24, commit `3c27b15`):** semantic theme tokens and complete red field mode. `AppPalette` (a `ThemeExtension`: muted, night events, altitude chart, Bortle scale) for light, dark and field; `lib/presentation` names no colour itself — the 52 `Colors.*`/colour literals found (not the ~100 the roadmap estimated) now read `ColorScheme` or `AppPalette`. The field theme sets every `ColorScheme` role and theme colour to red or black, so dialogs, date pickers, snackbars and menus stay red. Owner decisions: (1) in field mode the whole app also goes through a red colour filter (R' = R + 0.7152 G + 0.0722 B, G' = B' = 0; Rec. 709 luma weights; pure red unchanged), covering map tiles and anything a token misses; (2) the gate is lifted in this task after the automated darkness checks, and the on-device check in real darkness is an owner checklist item. Field mode is persisted (`DisplayPreferencesRepository`, SharedPreferences) and restored before the first frame; one tap from Tonight and the planner (`FieldModeButton`) and a switch in Settings. `FeatureScope.fieldMode` is `true` (PD-06 schedule). No text under 12 sp; the section header's action keeps its 48 dp tap target. Light and dark look as before, except swipe-to-delete and the map pin now use the scheme's error colour and chart labels are 12 sp. F-46 Implemented; TD-044 fully resolved.
 
 ---
 
@@ -415,6 +416,17 @@ DEV-P1 — resolved).
 Theming: `AppTheme.light`, `AppTheme.dark`, `AppTheme.fieldTheme`; `MaterialApp.router`
 uses `ThemeMode.system`, but field mode overrides both light and dark with the field
 theme.
+
+> **Since TASK 12.4 (commit `3c27b15`):** colours are tokens. `ColorScheme` roles cover the
+> generic ones (error, primary, outline); `AppPalette` (`lib/core/theme/app_palette.dart`, a
+> `ThemeExtension`, read with `AppPalette.of(context)`) covers the rest: muted text, the
+> night's events, the altitude chart and the Bortle scale. `lib/presentation` names no
+> colour and sets no font under 12 sp (test-enforced). The field theme's colour scheme and
+> theme colours are all red or black; in field mode `AstroPlanApp`'s `builder` wraps the
+> navigator in `ColorFiltered(AppTheme.fieldFilter)` (owner decision), keeping the app's
+> state through a `GlobalKey` when the filter is added or removed. `ThemeViewModel` is part
+> of `AppViewModels`, persists through `DisplayPreferencesRepository`, and `main.dart`
+> awaits `theme.load()` before `runApp`.
 
 ## B9. Persistence
 

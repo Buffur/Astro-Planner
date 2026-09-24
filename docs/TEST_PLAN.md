@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **631 tests: 631 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.3) |
+| `flutter test --no-pub` | **651 tests: 651 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -718,3 +718,25 @@ the ADR-012 variables, and a real out-of-range error):
   provides every ViewModel; tests that cleared `captureBlocks` directly now remove blocks
   through the API (the list is read-only); the Equipment, Target and Logbook screen tests
   mock `SessionPlanViewModel` instead of the planner.
+
+**Added by TASK 12.4** (theme tokens, red field mode), 20 tests (651):
+- **`core/theme/app_theme_test.dart` (9):** every field palette token, `ColorScheme` role,
+  theme colour and text colour is red or black; every theme carries its palette; no
+  theme text style is under 12 sp (after localisation); the field filter keeps green and
+  blue at zero, leaves pure red unchanged, keeps brightness order and passes alpha.
+- **`presentation/theme/presentation_style_rules_test.dart` (3):** no `Colors.` or
+  `Color(0x…)` in `lib/presentation`; no font size under 12; no shrink-wrapped tap target.
+- **`viewmodels/theme_viewmodel_test.dart` (3):** off by default; a toggle is saved and
+  restored by a new ViewModel (a restart); an unreadable store leaves it off.
+- **`presentation/theme/field_mode_darkness_test.dart` (5), the automated darkness
+  checklist:** real pixels (`RenderRepaintBoundary.toImage`) have zero green and blue on
+  Tonight, the planner, the date picker, a dialog and a snackbar in field mode; one tap on
+  Tonight turns it on and saves it; a restart comes back in field mode; the Settings switch
+  works; a sanity test sees colour outside field mode.
+- **Updated:** `feature_scope_test.dart` (field mode is visible since TASK 12.4, on the
+  PD-06 schedule); Home's gating test expects the planner's field-mode button.
+- **Owner checklist (manual, not yet done):** on an Android device in real darkness, with
+  field mode on, go through Tonight, the planner, the date picker, a delete confirmation,
+  a snackbar, the site map picker and Settings; look for any non-red or bright pixel and
+  any white flash on navigation or restart. The status and navigation bars are the
+  system's and are out of scope (no system-brightness control).
