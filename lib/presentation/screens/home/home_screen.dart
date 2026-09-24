@@ -19,11 +19,12 @@ import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/target_types.dart';
-import '../../viewmodels/theme_viewmodel.dart';
+import '../../shared/field_mode_button.dart';
 import '../../widgets/capture_plan_widget.dart';
 import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
 import '../../widgets/weather_forecast_widget.dart';
+import '../../../core/theme/app_palette.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -69,16 +70,7 @@ class HomeScreen extends StatelessWidget {
               }
             },
           ),
-          if (FeatureScope.fieldMode)
-            IconButton(
-              icon: Icon(
-                context.watch<ThemeViewModel>().isFieldMode
-                    ? Icons.wb_sunny
-                    : Icons.nightlight_round,
-              ),
-              tooltip: 'Toggle Field Mode',
-              onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
-            ),
+          const FieldModeButton(),
           // TASK 12.2 (ADR-015): candidates, settings, the logbook and
           // metadata import moved to the Tonight, Settings and Sessions tabs.
         ],
@@ -372,7 +364,11 @@ class _BootstrapErrorView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             const Text(
               "Couldn't load your data.",
@@ -408,12 +404,19 @@ class _EmptyStateView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.auto_awesome, size: 48, color: Colors.grey),
+            Icon(
+              Icons.auto_awesome,
+              size: 48,
+              color: AppPalette.of(context).muted,
+            ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Select a Target and Equipment profile to begin planning.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: TextStyle(
+                color: AppPalette.of(context).muted,
+                fontSize: 16,
+              ),
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -495,7 +498,10 @@ class _NoSiteCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            const Icon(Icons.location_off_outlined, color: Colors.grey),
+            Icon(
+              Icons.location_off_outlined,
+              color: AppPalette.of(context).muted,
+            ),
             const SizedBox(width: 12),
             Expanded(child: Text(message)),
           ],

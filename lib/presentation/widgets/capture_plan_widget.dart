@@ -93,7 +93,7 @@ class _BlockList extends StatelessWidget {
                     child: Text(
                       'Example plan',
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: scheme.onPrimaryContainer,
                       ),

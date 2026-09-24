@@ -9,6 +9,7 @@ import '../shared/night_time_formatter.dart';
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/session_plan_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
+import '../../core/theme/app_palette.dart';
 
 /// The chosen night's weather (ADR-012; TASK 9.4): sunset to sunrise only,
 /// per-hour indicators and per-variable ranges with explicit units, the
@@ -102,7 +103,7 @@ class WeatherForecastWidget extends StatelessWidget {
               NightWeatherUnavailable(:final failure) => Row(
                 key: const Key('weather.unavailable'),
                 children: [
-                  const Icon(Icons.cloud_off, color: Colors.grey),
+                  Icon(Icons.cloud_off, color: AppPalette.of(context).muted),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -409,7 +410,7 @@ class _HourStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11);
+    final style = Theme.of(context).textTheme.bodySmall;
     final slots = summary.slots;
     return SizedBox(
       height: 130,

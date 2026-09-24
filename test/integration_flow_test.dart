@@ -15,7 +15,6 @@ import 'package:astroplan/domain/repositories/location_repository.dart';
 
 import 'support/planner_harness.dart';
 
-import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
@@ -130,7 +129,6 @@ void main() {
           ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
           Provider<LocationRepository>.value(value: locationRepo),
           ...plannerViewModel.providers,
-          ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
       ),
@@ -216,7 +214,6 @@ void main() {
             ),
             Provider<LocationRepository>.value(value: locationRepo),
             ...plannerViewModel.providers,
-            ChangeNotifierProvider(create: (_) => ThemeViewModel()),
           ],
           child: const AstroPlanApp(),
         ),

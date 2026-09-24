@@ -11,6 +11,7 @@ import '../../../domain/models/spec_confidence.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/equipment_form_input.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../../core/theme/app_palette.dart';
 
 class EquipmentSelectionScreen extends StatefulWidget {
   const EquipmentSelectionScreen({super.key});
@@ -628,7 +629,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     side: BorderSide(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.transparent,
+                          : Theme.of(context).colorScheme.primary.withAlpha(0),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -648,7 +649,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           onPressed: () => _showEquipmentDialog(existing: eq),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check_circle, color: Colors.blue),
+                          Icon(
+                            Icons.check_circle,
+                            color: AppPalette.of(context).selected,
+                          ),
                       ],
                     ),
                     onTap: () {
@@ -663,13 +667,16 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                   direction: DismissDirection.endToStart,
                   background: Container(
                     decoration: BoxDecoration(
-                      color: Colors.red.shade400,
+                      color: Theme.of(context).colorScheme.error,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 16),
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: const Icon(Icons.delete, color: Colors.white),
+                    child: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
                   ),
                   confirmDismiss: (direction) async {
                     return await showDialog<bool>(

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../shared/night_time_formatter.dart';
+import '../../core/theme/app_palette.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
@@ -56,10 +57,10 @@ class SkyDarknessWidget extends StatelessWidget {
             // Moon Status
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.nightlight_round,
                   size: 20,
-                  color: Colors.blueGrey,
+                  color: AppPalette.of(context).moon,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -139,42 +140,10 @@ class _BortleBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color badgeColor;
-    Color textColor = Colors.white;
-    switch (bortleClass) {
-      case 1:
-        badgeColor = Colors.black;
-        break;
-      case 2:
-        badgeColor = Colors.blueGrey.shade900;
-        break;
-      case 3:
-        badgeColor = Colors.blue.shade900;
-        break;
-      case 4:
-        badgeColor = Colors.green.shade700;
-        break;
-      case 5:
-        badgeColor = Colors.yellow.shade700;
-        textColor = Colors.black;
-        break;
-      case 6:
-        badgeColor = Colors.orange;
-        break;
-      case 7:
-        badgeColor = Colors.deepOrange;
-        break;
-      case 8:
-        badgeColor = Colors.red;
-        break;
-      case 9:
-        badgeColor = Colors.white;
-        textColor = Colors.red;
-        break;
-      default:
-        badgeColor = Colors.grey;
-        break;
-    }
+    final palette = AppPalette.of(context);
+    final i = bortleClass ?? 0;
+    final badgeColor = palette.bortle[i];
+    final textColor = palette.onBortle[i];
 
     return Container(
       height: 32,
@@ -182,7 +151,7 @@ class _BortleBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        border: Border.all(color: palette.swatchBorder, width: 0.5),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int?>(
@@ -249,11 +218,11 @@ class _NightTimelineVisual extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeline = this.timeline;
     if (timeline == null) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8.0),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Text(
           'Set your site to see tonight\'s timeline.',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: AppPalette.of(context).muted),
         ),
       );
     }
@@ -282,6 +251,7 @@ class _NightTimelineVisual extends StatelessWidget {
       SunAlwaysBelow() => 'All night',
     };
 
+    final palette = AppPalette.of(context);
     return Column(
       children: [
         Row(
@@ -291,25 +261,25 @@ class _NightTimelineVisual extends StatelessWidget {
               label: 'Sunset',
               time: dusk(timeline.sunriseSunset),
               icon: Icons.wb_sunny_outlined,
-              color: Colors.orange,
+              color: palette.sunEvent,
             ),
             _TimelinePoint(
               label: 'Astro Dusk',
               time: dusk(timeline.astronomicalTwilight),
               icon: Icons.nights_stay_outlined,
-              color: Colors.indigo,
+              color: palette.twilightEvent,
             ),
             _TimelinePoint(
               label: 'Astro Dawn',
               time: dawn(timeline.astronomicalTwilight),
               icon: Icons.nights_stay,
-              color: Colors.indigo,
+              color: palette.twilightEvent,
             ),
             _TimelinePoint(
               label: 'Sunrise',
               time: dawn(timeline.sunriseSunset),
               icon: Icons.wb_sunny,
-              color: Colors.orange,
+              color: palette.sunEvent,
             ),
           ],
         ),
@@ -351,10 +321,7 @@ class _TimelinePoint extends StatelessWidget {
           time,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
-        ),
+        Text(label, style: Theme.of(context).textTheme.labelSmall),
       ],
     );
   }

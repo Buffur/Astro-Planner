@@ -21,7 +21,6 @@ import 'package:astroplan/presentation/navigation/app_router.dart';
 
 import '../../support/planner_harness.dart';
 
-import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,7 +96,6 @@ void main() {
           Provider<SessionRepository>.value(value: sessions),
           ChangeNotifierProvider(create: (_) => SessionsViewModel(sessions)),
           ...vm.providers,
-          ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
       ),

@@ -16,7 +16,6 @@ import 'package:astroplan/domain/repositories/location_repository.dart';
 
 import 'support/planner_harness.dart';
 
-import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,7 +88,6 @@ void main() {
             locationRepo,
             locationService: FakeLocationService(),
           ).providers,
-          ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
       ),

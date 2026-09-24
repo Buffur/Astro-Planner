@@ -8,6 +8,7 @@ import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/target_form_input.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../../core/theme/app_palette.dart';
 
 class TargetSelectionScreen extends StatefulWidget {
   const TargetSelectionScreen({super.key});
@@ -301,7 +302,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     side: BorderSide(
                       color: isSelected
                           ? Theme.of(context).colorScheme.primary
-                          : Colors.transparent,
+                          : Theme.of(context).colorScheme.primary.withAlpha(0),
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -325,7 +326,10 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                           onPressed: () => _showTargetDialog(existing: target),
                         ),
                         if (isSelected)
-                          const Icon(Icons.check_circle, color: Colors.blue),
+                          Icon(
+                            Icons.check_circle,
+                            color: AppPalette.of(context).selected,
+                          ),
                       ],
                     ),
                     onTap: () {
@@ -340,13 +344,16 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                   direction: DismissDirection.endToStart,
                   background: Container(
                     decoration: BoxDecoration(
-                      color: Colors.red.shade400,
+                      color: Theme.of(context).colorScheme.error,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 16),
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: const Icon(Icons.delete, color: Colors.white),
+                    child: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.onError,
+                    ),
                   ),
                   confirmDismiss: (direction) async {
                     return await showDialog<bool>(

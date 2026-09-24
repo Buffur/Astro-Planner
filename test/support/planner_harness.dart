@@ -38,6 +38,7 @@ import 'package:astroplan/domain/services/fit_analyzer.dart';
 import 'package:astroplan/domain/services/location_service.dart';
 import 'package:astroplan/domain/services/night_weather_service.dart';
 import 'package:astroplan/domain/services/reverse_geocoder.dart';
+import 'package:astroplan/domain/repositories/display_preferences_repository.dart';
 import 'package:astroplan/presentation/app_view_models.dart';
 import 'package:astroplan/presentation/viewmodels/capture_analysis_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/night_conditions_viewmodel.dart';
@@ -45,7 +46,10 @@ import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/settings_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:provider/single_child_widget.dart';
+
+import 'in_memory_display_preferences.dart';
 
 /// One object over the app's ViewModels, for tests (TASK 12.3). It builds
 /// the same [AppViewModels] graph `main.dart` does and delegates to it, so
@@ -65,6 +69,7 @@ class PlannerHarness extends ChangeNotifier {
     PlannerStateRepository? stateRepository,
     NightWeatherService? nightWeatherService,
     SessionRepository? sessionRepository,
+    DisplayPreferencesRepository? displayPreferences,
   }) {
     final time = clock ?? const SystemClock();
     vms = AppViewModels(
@@ -86,6 +91,7 @@ class PlannerHarness extends ChangeNotifier {
       reverseGeocoder: reverseGeocoder ?? NominatimReverseGeocoder(),
       deviceTimeZone: deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
       clock: time,
+      display: displayPreferences ?? InMemoryDisplayPreferences(),
       sessions: sessionRepository,
     );
     for (final vm in [site, settings, plan, conditions, analysis, startup]) {
@@ -100,6 +106,7 @@ class PlannerHarness extends ChangeNotifier {
   NightConditionsViewModel get conditions => vms.conditions;
   CaptureAnalysisViewModel get analysis => vms.analysis;
   StartupViewModel get startup => vms.startup;
+  ThemeViewModel get theme => vms.theme;
 
   /// The ViewModels' providers, for a widget tree under test.
   List<SingleChildWidget> get providers => vms.providers;

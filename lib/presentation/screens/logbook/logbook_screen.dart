@@ -79,10 +79,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
                 key: ValueKey(session.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  child: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
                 ),
                 confirmDismiss: (direction) async {
                   return await showDialog<bool>(
@@ -147,7 +150,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
                             log.rejectedFrames! > 0)
                           Text(
                             'Rejected Frames: ${log.rejectedFrames}',
-                            style: const TextStyle(color: Colors.red),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
                       ],
                     ),

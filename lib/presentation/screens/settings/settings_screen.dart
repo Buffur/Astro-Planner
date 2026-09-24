@@ -7,6 +7,7 @@ import '../../../domain/models/planning_preferences.dart';
 import '../../viewmodels/settings_viewmodel.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
+import '../../shared/field_mode_button.dart';
 
 /// Planning preferences (TASK 5.2, SI-006, TD-043).
 ///
@@ -190,6 +191,7 @@ class SettingsScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const Divider(height: AppSpacing.lg * 2),
+          const FieldModeTile(),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.info_outline),

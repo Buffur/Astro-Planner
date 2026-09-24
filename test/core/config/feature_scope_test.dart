@@ -2,8 +2,8 @@
 // docs/DECISIONS.md PD-06 E.1), so an accidental flip of one flag is a
 // failing test, not a silent policy violation.
 //
-//   Hidden: field-mode toggle (until TASK 12.4), metadata import (until
-//   G17 / v1.1).
+//   Hidden: metadata import (until G17 / v1.1).
+//   Visible since TASK 12.4 (its scheduled phase): red field mode.
 //   Visible since TASK 7.4 (its scheduled phase): the light-pollution
 //   context — manual Bortle/SQM and the external map at the site.
 //   Stays visible: the logbook (and text sharing, which has no gate of its
@@ -13,8 +13,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/core/config/feature_scope.dart';
 
 void main() {
-  test('fieldMode is hidden (until TASK 12.4)', () {
-    expect(FeatureScope.fieldMode, isFalse);
+  // Before TASK 12.4 this asserted `isFalse` (hidden until 12.4, PD-06
+  // E.1); 12.4 is the phase PD-06 scheduled it for.
+  test('fieldMode is visible (since TASK 12.4)', () {
+    expect(FeatureScope.fieldMode, isTrue);
   });
 
   // Before TASK 7.4 this asserted `isFalse` (hidden until 7.4, PD-06 E.1);

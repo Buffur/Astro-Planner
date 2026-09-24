@@ -20,6 +20,7 @@ import 'data/repositories/drift_session_repository.dart';
 import 'domain/repositories/session_repository.dart';
 import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
+import 'data/repositories/shared_prefs_display_preferences_repository.dart';
 import 'data/repositories/shared_prefs_planner_state_repository.dart';
 import 'data/repositories/shared_prefs_planning_preferences_repository.dart';
 import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
@@ -77,8 +78,12 @@ void main() async {
     reverseGeocoder: NominatimReverseGeocoder(),
     deviceTimeZone: FlutterTimezoneDeviceTimeZone(),
     clock: clock,
+    display: SharedPrefsDisplayPreferencesRepository(),
     sessions: sessionRepo,
   );
+  // Field mode is restored before the first frame, so a restart in field
+  // mode never flashes the normal theme (TASK 12.4).
+  await vms.theme.load();
 
   runApp(
     MultiProvider(
@@ -90,7 +95,6 @@ void main() async {
         Provider<SessionRepository>.value(value: sessionRepo),
         Provider<LocationRepository>.value(value: locationRepo),
         ...vms.providers,
-        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
     ),
@@ -99,6 +103,9 @@ void main() async {
 
 class AstroPlanApp extends StatelessWidget {
   const AstroPlanApp({super.key});
+
+  /// Keeps the app's state when the field filter is added or removed.
+  static final _content = GlobalKey(debugLabel: 'app content');
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +117,14 @@ class AstroPlanApp extends StatelessWidget {
       darkTheme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.dark,
       themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
+      // Field mode: every pixel below the app root, dialogs and snackbars
+      // included, goes through the red filter (owner decision, TASK 12.4).
+      builder: (context, child) {
+        final content = KeyedSubtree(key: _content, child: child!);
+        return themeVM.isFieldMode
+            ? ColorFiltered(colorFilter: AppTheme.fieldFilter, child: content)
+            : content;
+      },
       debugShowCheckedModeBanner: false,
     );
   }

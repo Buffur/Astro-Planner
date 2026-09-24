@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../domain/models/session.dart';
 import '../../navigation/app_router.dart';
+import '../../shared/field_mode_button.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/startup_viewmodel.dart';
@@ -143,7 +144,10 @@ class TonightHomeScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tonight')),
+      appBar: AppBar(
+        title: const Text('Tonight'),
+        actions: const [FieldModeButton()],
+      ),
       body: body,
     );
   }

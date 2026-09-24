@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../core/time/clock.dart';
+import '../domain/repositories/display_preferences_repository.dart';
 import '../domain/repositories/equipment_repository.dart';
 import '../domain/repositories/location_repository.dart';
 import '../domain/repositories/planner_state_repository.dart';
@@ -19,6 +20,7 @@ import 'viewmodels/session_plan_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
 import 'viewmodels/site_viewmodel.dart';
 import 'viewmodels/startup_viewmodel.dart';
+import 'viewmodels/theme_viewmodel.dart';
 
 /// The app's screen-scoped ViewModels and how they depend on each other
 /// (TASK 12.3). Takes interfaces only: `main.dart` passes the real
@@ -36,6 +38,7 @@ class AppViewModels {
     required ReverseGeocoder reverseGeocoder,
     required DeviceTimeZone deviceTimeZone,
     required Clock clock,
+    required DisplayPreferencesRepository display,
     SessionRepository? sessions,
   }) {
     site = SiteViewModel(
@@ -79,6 +82,7 @@ class AppViewModels {
     gear = GearViewModel(equipment);
     targetList = TargetsViewModel(targets);
     sessionList = sessions == null ? null : SessionsViewModel(sessions);
+    theme = ThemeViewModel(display);
   }
 
   late final SiteViewModel site;
@@ -90,6 +94,7 @@ class AppViewModels {
   late final GearViewModel gear;
   late final TargetsViewModel targetList;
   late final SessionsViewModel? sessionList;
+  late final ThemeViewModel theme;
 
   /// One provider per ViewModel, for the widget tree.
   List<SingleChildWidget> get providers => [
@@ -102,5 +107,6 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: gear),
     ChangeNotifierProvider.value(value: targetList),
     if (sessionList case final s?) ChangeNotifierProvider.value(value: s),
+    ChangeNotifierProvider.value(value: theme),
   ];
 }

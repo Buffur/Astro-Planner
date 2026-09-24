@@ -28,7 +28,6 @@ import 'package:astroplan/domain/repositories/location_repository.dart';
 
 import '../../../support/planner_harness.dart';
 
-import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/presentation/widgets/sky_darkness_widget.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -101,7 +100,6 @@ void main() {
         ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
         Provider<LocationRepository>.value(value: locationRepo),
         ...vm.providers,
-        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
     );
@@ -518,9 +516,10 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    // Hidden per PD-06 (FeatureScope: fieldMode, metadataImport false) —
-    // no icon, tooltip or route.
-    expect(find.byTooltip('Toggle Field Mode'), findsNothing);
+    // Metadata import is hidden per PD-06 (FeatureScope.metadataImport
+    // false) — no icon, tooltip or route. Field mode is visible since
+    // TASK 12.4: one tap from the planner's app bar.
+    expect(find.byKey(const Key('fieldMode.toggle')), findsOneWidget);
     expect(find.byTooltip('Import Metadata'), findsNothing);
     expect(allRoutePaths(), isNot(contains(AppRouter.metadata)));
 
