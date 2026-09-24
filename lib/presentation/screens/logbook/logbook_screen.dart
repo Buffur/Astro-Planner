@@ -78,7 +78,19 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sessions')),
+      appBar: AppBar(
+        title: const Text('Sessions'),
+        actions: [
+          // TASK 14.3 (owner): every saved session in one manifest file.
+          if (context.read<SessionsViewModel>().canExport)
+            IconButton(
+              key: const Key('logbook.exportAll'),
+              tooltip: 'Export all sessions',
+              icon: const Icon(Icons.file_download_outlined),
+              onPressed: () => context.read<SessionsViewModel>().exportAll(),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           _FilterBar(filter: _filter, options: _options, onChanged: _setFilter),

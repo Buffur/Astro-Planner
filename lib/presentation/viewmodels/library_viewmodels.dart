@@ -7,6 +7,7 @@ import '../../domain/models/session.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/target_repository.dart';
+import '../../domain/services/session_exporter.dart';
 import '../../domain/services/session_reconciliation.dart';
 import '../../domain/services/target_progress.dart';
 
@@ -111,9 +112,29 @@ typedef SessionDetail = ({
 /// logbook lists — every non-draft session, a draft saved before
 /// ("unsaved changes"), and the legacy logs (owner decisions).
 class SessionsViewModel extends ChangeNotifier {
-  SessionsViewModel(this._repository);
+  SessionsViewModel(this._repository, {this._exporter});
 
   final SessionRepository _repository;
+
+  /// Null in tests that do not export.
+  final SessionExporter? _exporter;
+
+  bool get canExport => _exporter != null;
+
+  /// Shares session [id] as a manifest v2 file with its events (TASK 14.3).
+  Future<void> exportOne(int id) async {
+    final s = await _repository.get(id);
+    if (s != null) await _exporter?.share([await _exported(s)]);
+  }
+
+  /// Shares every saved session, legacy logs included (owner decision).
+  Future<void> exportAll() async {
+    final all = await saved();
+    await _exporter?.share([for (final s in all) await _exported(s)]);
+  }
+
+  Future<ExportedSession> _exported(Session s) async =>
+      ExportedSession(s, s.legacy ? const [] : await _repository.events(s.id));
 
   /// The saved sessions matching [filter] (TASK 14.1; the filtering runs in
   /// the repository's query).

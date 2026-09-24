@@ -16,6 +16,7 @@ import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/execution.dart';
 import 'package:astroplan/domain/models/session.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/domain/services/session_exporter.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:drift/native.dart';
@@ -30,6 +31,15 @@ import '../../../support/no_snapshot_weather.dart';
 import '../../../support/planner_harness.dart';
 
 class _NoForecast with NoSnapshotWeather implements WeatherRepository {}
+
+/// Records what would be shared (TASK 14.3).
+class _RecordingExporter implements SessionExporter {
+  final List<List<ExportedSession>> shared = [];
+
+  @override
+  Future<void> share(List<ExportedSession> sessions) async =>
+      shared.add(sessions);
+}
 
 const _m42 = AstroTarget(
   id: 1,
@@ -59,6 +69,7 @@ void main() {
   late PlannerHarness vm;
   late int completedId;
   late int plannedId;
+  late _RecordingExporter exporter;
   const legacyId = 900;
   const noSnapshotId = 901;
 
@@ -70,6 +81,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.runAsync(() async {
       SharedPreferences.setMockInitialValues({});
+      exporter = _RecordingExporter();
       final clock = FixedClock(DateTime.utc(2026, 12, 15, 19));
       database = AppDatabase(NativeDatabase.memory());
       sessions = DriftSessionRepository(database, clock: clock);
@@ -84,6 +96,7 @@ void main() {
         reverseGeocoder: FakeReverseGeocoder(),
         sessionRepository: sessions,
         clock: clock,
+        exporter: exporter,
       );
       await vm.ready;
       await vm.site.setLocation(46.05, 14.5);
@@ -274,6 +287,30 @@ void main() {
     await tester.runAsync(() => sessions.delete(completedId));
     await pumpAt(tester, AppRouter.libraryProgress);
     expect(find.byKey(const Key('progress.empty')), findsOneWidget);
+  });
+
+  testWidgets('TASK 14.3: Export file shares that session with its events', (
+    tester,
+  ) async {
+    await seed(tester);
+    await pumpAt(tester, AppRouter.sessionDetail(completedId));
+    await tester.tap(find.byKey(const Key('detail.export')));
+    await settle(tester);
+    final shared = exporter.shared.single.single;
+    expect(shared.session.id, completedId);
+    expect(shared.events.first.kind, ExecutionEventKind.started);
+    expect(shared.events.last.kind, ExecutionEventKind.finished);
+  });
+
+  testWidgets('TASK 14.3: Export all shares every saved session', (
+    tester,
+  ) async {
+    await seed(tester);
+    await pumpAt(tester, AppRouter.sessions);
+    await tester.tap(find.byKey(const Key('logbook.exportAll')));
+    await settle(tester);
+    final ids = {for (final e in exporter.shared.single) e.session.id};
+    expect(ids, {completedId, plannedId, legacyId, noSnapshotId});
   });
 
   testWidgets('no overflow at 200 % text on a 360 × 640 dp phone', (

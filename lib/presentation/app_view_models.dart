@@ -15,6 +15,7 @@ import '../domain/services/location_service.dart';
 import '../domain/services/night_weather_service.dart';
 import '../domain/services/reverse_geocoder.dart';
 import '../domain/services/screen_wake.dart';
+import '../domain/services/session_exporter.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
 import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
@@ -47,6 +48,7 @@ class AppViewModels {
     required DisplayPreferencesRepository display,
     required FirstRunRepository firstRun,
     required ScreenWake screenWake,
+    SessionExporter? exporter,
     SessionRepository? sessions,
   }) {
     site = SiteViewModel(
@@ -89,7 +91,9 @@ class AppViewModels {
     );
     gear = GearViewModel(equipment);
     targetList = TargetsViewModel(targets);
-    sessionList = sessions == null ? null : SessionsViewModel(sessions);
+    sessionList = sessions == null
+        ? null
+        : SessionsViewModel(sessions, exporter: exporter);
     resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
     execution = sessions == null
         ? null

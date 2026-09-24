@@ -382,6 +382,17 @@ class _Actions extends StatelessWidget {
           label: const Text('Share'),
           style: OutlinedButton.styleFrom(minimumSize: tall),
         ),
+        // TASK 14.3: the portable manifest v2 file (with the event log).
+        if (context.read<SessionsViewModel>().canExport) ...[
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            key: const Key('detail.export'),
+            onPressed: () => context.read<SessionsViewModel>().exportOne(s.id),
+            icon: const Icon(Icons.file_download_outlined),
+            label: const Text('Export file'),
+            style: OutlinedButton.styleFrom(minimumSize: tall),
+          ),
+        ],
       ],
     );
   }

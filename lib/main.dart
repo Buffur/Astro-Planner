@@ -29,6 +29,7 @@ import 'data/services/flutter_timezone_device_time_zone.dart';
 import 'data/services/geolocator_location_service.dart';
 import 'data/services/nominatim_reverse_geocoder.dart';
 import 'data/services/wakelock_screen_wake.dart';
+import 'data/export/share_session_exporter.dart';
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 
@@ -83,6 +84,7 @@ void main() async {
     display: SharedPrefsDisplayPreferencesRepository(),
     firstRun: SharedPrefsFirstRunRepository(),
     screenWake: WakelockScreenWake(),
+    exporter: ShareSessionExporter(),
     sessions: sessionRepo,
   );
   // Field mode is restored before the first frame, so a restart in field
