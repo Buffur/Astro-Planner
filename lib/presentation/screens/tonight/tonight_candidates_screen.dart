@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/services/candidate_evaluator.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/site_viewmodel.dart';
@@ -79,9 +80,10 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
           : FutureBuilder<List<TonightCandidate>?>(
               future: _rows,
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text("Couldn't evaluate: ${snapshot.error}"),
+                if (snapshot.error case final error?) {
+                  return LoadFailureView(
+                    action: "evaluate tonight's targets",
+                    error: error,
                   );
                 }
                 final all = snapshot.data;
