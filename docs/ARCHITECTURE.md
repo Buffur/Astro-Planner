@@ -60,6 +60,7 @@
 > **TASK 11.4 (2026-09-23, commit `628fda6`):** the planner works on a persisted draft session (ADR-014 §3, §6). At start the most recent open session is resumed (or a draft is created); every plan edit (blocks, target, rig, night, site) is autosaved into it through a serialized `_autosave` before the edit call returns; a plan still in preferences moves once into a new draft and the preferences plan and selected target/rig ids are removed (`PlannerStateRepository.clearPlan`). New (tonight + example plan), Duplicate for another night (Home app bar) and Open (Logbook) create or resume drafts; Save moves the current session to planned with a fresh snapshot. Owner decisions: a draft whose night has passed resumes on tonight (a future night is kept); a saved plan edited since is listed as "Planned, unsaved changes"; New = tonight + example plan; opening a completed/legacy session copies it into a new draft. The site selection and the transient position stay app-level preferences (TASK 7.1/7.3 decisions). **Group G11 is complete.**
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
 > **TASK 12.2 (2026-09-23, commit `aa748e6`):** navigation shell (ADR-015). go_router `StatefulShellRoute` with four tabs (Tonight · Sessions · Library · Settings) and kept per-tab state; Android back pops within a tab, then returns to Tonight, and leaves the app from Tonight's root. Above the tabs: `/session/:id` (the planner — Home's content), `/select/target|rig|site` (the planner's pickers), `/site/edit`, `/site/pick`, `/position`. `/tonight` is an interim root until the TASK 12.5 dashboard; candidates are `/tonight/candidates`; a Library index; metadata import under Settings (still gated). Paths are `AppRouter` constants. TD-053 recorded.
+> **TASK 12.3 (2026-09-24, commits `6c703f3`, `03c0b34`, `64caa58`):** the planner ViewModel is split into screen-scoped ViewModels over domain interfaces: `SiteViewModel` (sites, transient position, zone, place name, sky darkness), `SettingsViewModel` (planning preferences), `SessionPlanViewModel` (the current session: night, target, rig, blocks, autosave, open/new/duplicate/save), `NightConditionsViewModel` (weather, timeline, Moon, imaging opportunity, candidates), `CaptureAnalysisViewModel` (budget, fit, fill window, capability, the Save snapshot), `StartupViewModel` (load order, bootstrap error and retry), and `GearViewModel` / `TargetsViewModel` / `SessionsViewModel` for the Library and Sessions screens. Screens no longer call repositories (DEV-A2, except the gated metadata import screen, G17). `AppViewModels` composes the graph; `main.dart` is the only place that picks implementations (DEV-A1). `PlannerViewModel` is deleted; tests build the same graph through `PlannerHarness` (`test/support/`). Moved-out domain helpers: `CurrentSession`, `SessionReferenceResolver`, `ExampleCapturePlan`, `SessionNightResolver.resolve`. The block list is exposed read-only. A test enforces no HTTP / SharedPreferences / Drift / Geolocator / data-layer import in a ViewModel and at most 250 code lines (300 physical) per ViewModel. TD-019, TD-021 and TD-044 resolved (field-mode persistence stays with TASK 12.4); TD-053 still open. No user-visible behavior change.
 
 ---
 
@@ -159,6 +160,16 @@ approval.
 
 ## B1. Overview and data flow
 
+> **Since TASK 12.3 (commits `6c703f3`, `03c0b34`, `64caa58`)** the diagram below is historical. Screens and widgets watch
+> screen-scoped ViewModels (`lib/presentation/viewmodels/`): `SiteViewModel`, `SettingsViewModel`,
+> `SessionPlanViewModel` (listens to the site), `NightConditionsViewModel` (site + plan + settings),
+> `CaptureAnalysisViewModel` (all four), `StartupViewModel` (load order: site, settings, plan,
+> conditions), plus `GearViewModel`, `TargetsViewModel`, `SessionsViewModel` and `ThemeViewModel`.
+> They take domain interfaces only; `AppViewModels` (`lib/presentation/app_view_models.dart`)
+> composes them and `main.dart` passes the concrete repositories and services (the only
+> place that knows SharedPreferences, HTTP, Geolocator and the time-zone plugin). No screen
+> calls a repository any more, except the gated metadata import screen (G17).
+
 ```text
                      ┌────────────────────────────────────────────────────────────┐
   Screens/Widgets ──►│ PlannerViewModel  (513 lines; ChangeNotifier)              │
@@ -220,6 +231,14 @@ The largest files are `equipment_selection_screen.dart` (591), `planner_viewmode
   (The previous audit suggested `get_it`; that is **not** recommended.)
 
 ## B4. State management (Provider / ChangeNotifier)
+
+> **Since TASK 12.3** `PlannerViewModel` no longer exists; the table below records what it
+> owned. Where each responsibility went: bootstrap to `StartupViewModel`; location, sites,
+> geocoding and Bortle to `SiteViewModel`; thresholds to `SettingsViewModel`; selection, night,
+> sessions and the capture plan to `SessionPlanViewModel` (with `CurrentSession`,
+> `SessionReferenceResolver`, `ExampleCapturePlan`); weather, timeline, Moon, opportunity and
+> candidates to `NightConditionsViewModel`; budget, fit, capability and the Save snapshot to
+> `CaptureAnalysisViewModel`. Tests build the same graph through `PlannerHarness`.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local
@@ -491,6 +510,10 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   the ViewModel's constructor takes repository interfaces plus optional seams.
   **Still open:** default implementations (Geolocator, Nominatim, flutter_timezone,
   SharedPreferences) are built inside the ViewModel constructor.
+- **Status: RESOLVED 2026-09-24 (TASK 12.3, commits `6c703f3`, `03c0b34`, `64caa58`).** The ViewModels take
+  domain interfaces only; `main.dart` builds them through `AppViewModels` with the
+  concrete implementations. A test fails if a ViewModel imports `http`,
+  `shared_preferences`, `drift`, `geolocator` or the data layer.
 
 ## DEV-A2 — Presentation bypasses ViewModels
 - **Intended behavior:** `Presentation -> ViewModels -> Repositories`.
@@ -503,6 +526,11 @@ CI configuration exists in the repository. Details and gaps: `docs/TEST_PLAN.md`
   the ViewModel (TD-028) — the screens now call `PlannerViewModel.refreshSelectedTarget`/
   `refreshSelectedEquipment` afterward, a targeted fix on top of the deviation
   rather than a fix to the deviation itself.
+- **Status: RESOLVED 2026-09-24 (TASK 12.3, commits `6c703f3`, `03c0b34`, `64caa58`)** for every reachable screen:
+  the Equipment, Target and Sessions screens use `GearViewModel`, `TargetsViewModel` and
+  `SessionsViewModel`; Save goes through `CaptureAnalysisViewModel`; the location picker
+  goes through `SiteViewModel`. **Still open:** the metadata import screen (gated until
+  G17) calls `ImagePicker` and `MetadataExtractor` directly.
 
 ## DEV-A3 — Astronomy is computed inside a widget, and the pipeline is triplicated
 - **Intended behavior:** "Do not place non-trivial astronomy or capture calculations

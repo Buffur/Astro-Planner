@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **625 tests: 625 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.2) |
+| `flutter test --no-pub` | **631 tests: 631 pass, 0 fail** (`dart run tool/check.dart`, after TASK 12.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -706,3 +706,15 @@ the ADR-012 variables, and a real out-of-range error):
 - **Updated:** Home tests start at `/session/current`; app boot expects Tonight; the
   E2E test reaches the logbook through `/sessions`; the Sites test uses the new
   editor path; the candidates test file follows its screen's rename.
+
+**Added by TASK 12.3** (ViewModel decomposition), 6 tests (631):
+- **`viewmodel_rules_test.dart` (4):** the ViewModels directory is not empty; no
+  ViewModel imports `http`, `shared_preferences`, `drift`, `geolocator` or the data
+  layer; none is over 250 code lines (300 physical); `planner_viewmodel.dart` is gone.
+- **`session_night_resolver_test.dart` (+2):** `resolve` is the default night without a
+  picked date and the picked night with one.
+- **Updated:** the former `PlannerViewModel` tests run on `PlannerHarness`
+  (`test/support/planner_harness.dart`), which builds the real `AppViewModels` graph and
+  provides every ViewModel; tests that cleared `captureBlocks` directly now remove blocks
+  through the API (the list is read-only); the Equipment, Target and Logbook screen tests
+  mock `SessionPlanViewModel` instead of the planner.

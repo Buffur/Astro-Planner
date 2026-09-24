@@ -400,8 +400,11 @@ rewritten to match the code.*
     PD-19 and PD-14 resolved by the owner. Documentation only.
   - Completed 2026-09-23: **TASK 12.2** — navigation shell (four tabs with kept state,
     planner and pickers above the tabs, back to Tonight). 625 tests green.
-  - **Next: TASK 12.3 — Complete the PlannerViewModel decomposition.** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 12.3** — `PlannerViewModel` split into screen-scoped
+    ViewModels over domain interfaces; screens no longer call repositories; `main.dart`
+    composes the graph (commits `6c703f3`, `03c0b34`, `64caa58`). 631 tests green.
+  - **Next: TASK 12.4 — Semantic theme tokens; complete red field mode.** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

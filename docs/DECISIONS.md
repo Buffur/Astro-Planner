@@ -69,6 +69,7 @@
 > **TASK 11.4 (2026-09-23, commit `628fda6`):** ADR-014 §3 and §6 implemented in the planner. Owner decisions (TASK 11.4): a resumed draft whose night has passed rolls forward to tonight (a future night is kept); a saved plan edited since its last Save is listed as "Planned, unsaved changes"; New = tonight + the example plan; opening a completed or legacy session copies it into a new draft. Implementation choice: autosaves are serialized so they reach the database in edit order.
 > **TASK 12.1 (2026-09-23, documentation only, no code changed):** ADR-015 (information architecture) accepted in Part F of DECISIONS with low-fidelity wireframes and a route map in `docs/IA_WIREFRAMES.md`; PD-19 and PD-14 resolved. Owner decisions: bottom navigation Tonight · Sessions · Library · Settings; the session planner is one page opened from Tonight and from Sessions; sites live in Library with rigs and targets; PD-14 = a fixed Tonight view, no customizable dashboard. Execution is a full-screen route above the tabs (G13).
 > **TASK 12.2 (2026-09-23, commit `aa748e6`):** ADR-015 §2–§3 implemented (navigation shell). Implementation notes recorded in ADR-015 §7.
+> **TASK 12.3 (2026-09-24, commits `6c703f3`, `03c0b34`, `64caa58`):** the planner ViewModel is split into screen-scoped ViewModels over domain interfaces: `SiteViewModel` (sites, transient position, zone, place name, sky darkness), `SettingsViewModel` (planning preferences), `SessionPlanViewModel` (the current session: night, target, rig, blocks, autosave, open/new/duplicate/save), `NightConditionsViewModel` (weather, timeline, Moon, imaging opportunity, candidates), `CaptureAnalysisViewModel` (budget, fit, fill window, capability, the Save snapshot), `StartupViewModel` (load order, bootstrap error and retry), and `GearViewModel` / `TargetsViewModel` / `SessionsViewModel` for the Library and Sessions screens. Screens no longer call repositories (DEV-A2, except the gated metadata import screen, G17). `AppViewModels` composes the graph; `main.dart` is the only place that picks implementations (DEV-A1). `PlannerViewModel` is deleted; tests build the same graph through `PlannerHarness` (`test/support/`). Moved-out domain helpers: `CurrentSession`, `SessionReferenceResolver`, `ExampleCapturePlan`, `SessionNightResolver.resolve`. The block list is exposed read-only. A test enforces no HTTP / SharedPreferences / Drift / Geolocator / data-layer import in a ViewModel and at most 250 code lines (300 physical) per ViewModel. TD-019, TD-021 and TD-044 resolved (field-mode persistence stays with TASK 12.4); TD-053 still open. No user-visible behavior change.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -159,7 +160,7 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
 | ADR | Decision | Conformance | Detail |
 | --- | --- | --- | --- |
 | ADR-001 | Flutter and Dart | **Complies** | Flutter 3.47.4 / Dart 3.13.3. Android configured; iOS scaffold only (no location/photo usage strings); web/desktop folders are unverified scaffolds |
-| ADR-002 | Provider and explicit ViewModels | **Partial** | Provider + `ChangeNotifier` only, no other framework. But only two ViewModels exist, one of which (`PlannerViewModel`) owns everything, and several screens bypass ViewModels — DEV-P5 → DEV-A1, DEV-A2 |
+| ADR-002 | Provider and explicit ViewModels | **Partial** | Provider + `ChangeNotifier` only, no other framework. But only two ViewModels exist, one of which (`PlannerViewModel`) owns everything, and several screens bypass ViewModels — DEV-P5 → DEV-A1, DEV-A2 *(Updated 2026-09-24, TASK 12.3: screen-scoped ViewModels replace `PlannerViewModel` and reachable screens no longer bypass them; conforms except the gated metadata import screen, G17.)* |
 | ADR-003 | SQLite via Drift ("typed queries, migrations, relationships, and testability") | **Partial** | Drift is used correctly for typed queries. Migrations are untested and one path fails; relationships are declared but not enforced — DEV-P4 → DEV-D1, DEV-D6 |
 | ADR-004 | Out of planetarium scope | **Complies** | No planetarium, AR, embedded Stellarium, camera preview or camera control exists |
 | ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Complies** *(label, TASK 4.4)* | DEV-P2 (partially resolved) |
@@ -234,7 +235,8 @@ foreign keys not enforced).
 
 ## DEV-P5 — ADR-002: explicit ViewModels
 See DEV-A1 and DEV-A2 in `docs/ARCHITECTURE.md` (one god ViewModel; screens bypass
-ViewModels).
+ViewModels). *Both resolved 2026-09-24 (TASK 12.3); DEV-A2 except the gated metadata
+import screen (G17).*
 
 ## DEV-P6 — PRODUCT_SPEC MVP scope not fully met
 - **Intended behavior** (`docs/PRODUCT_SPEC.md` MVP Scope): equipment profiles with
