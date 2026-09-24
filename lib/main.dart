@@ -87,6 +87,7 @@ void main() async {
   // mode never flashes the normal theme (TASK 12.4).
   await vms.theme.load();
   await vms.tonight.load();
+  await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
 
   runApp(
     MultiProvider(

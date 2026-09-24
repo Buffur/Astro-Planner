@@ -178,6 +178,54 @@ class SessionLogs extends Table {
       text().nullable().map(const JsonMapConverter())();
 }
 
+/// A session's run, append-only (ADR-016 §4; TASK 13.2, v17). The events
+/// are the record of truth; `capture_blocks.completed_frames` /
+/// `rejected_frames` are a projection written in the same transaction.
+@TableIndex(
+  name: 'session_events_session_seq',
+  columns: {#sessionLogId, #seq},
+  unique: true,
+)
+class SessionEvents extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get sessionLogId =>
+      integer().references(SessionLogs, #id, onDelete: KeyAction.cascade)();
+
+  /// Orders the events of one session (never the timestamp, ADR-016 §5).
+  IntColumn get seq => integer()();
+  IntColumn get atUtcMs => integer()();
+
+  /// ExecutionEventKind.name.
+  TextColumn get kind => text().check(
+    // ignore: recursive_getters
+    kind.isIn(const [
+      'started',
+      'blockSelected',
+      'paused',
+      'interrupted',
+      'resumed',
+      'framesConfirmed',
+      'framesRejected',
+      'finished',
+      'abandoned',
+    ]),
+  )();
+
+  /// The block concerned, when any. The plan is frozen while a session is
+  /// in progress, so its blocks outlive its events.
+  IntColumn get blockId => integer().nullable().references(
+    CaptureBlocks,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
+  IntColumn get delta => integer().nullable()();
+
+  /// InterruptionReason.name, for interruptions.
+  TextColumn get reason => text().nullable()();
+  BoolColumn get clockAdjusted =>
+      boolean().withDefault(const Constant(false))();
+}
+
 @DriftDatabase(
   tables: [
     Devices,
@@ -187,13 +235,14 @@ class SessionLogs extends Table {
     AstroTargets,
     SessionLogs,
     CaptureBlocks,
+    SessionEvents,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration {
@@ -431,6 +480,12 @@ class AppDatabase extends _$AppDatabase {
                 await m.create(schema.sessionLogsStatus);
                 await m.create(schema.sessionLogsEveningDate);
                 await m.create(schema.sessionLogsTargetId);
+              },
+              from16To17: (m, schema) async {
+                // TASK 13.2 (ADR-016 §4): the append-only execution events.
+                // New table only; no existing row changes.
+                await m.createTable(schema.sessionEvents);
+                await m.create(schema.sessionEventsSessionSeq);
               },
             ),
           );

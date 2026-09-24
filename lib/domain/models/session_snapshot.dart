@@ -45,6 +45,18 @@ class SessionSnapshot {
     return s == null ? null : CalendarDate.parse(s);
   }
 
+  /// The end of the snapshot's night (ADR-016 §5: a run past it is stale).
+  DateTime? get nightEndUtc {
+    final ms = _section('night')?['endUtcMs'] as int?;
+    return ms == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  }
+
+  /// The per-frame overhead in force when the snapshot was taken, seconds.
+  double? get perFrameOverheadSeconds =>
+      (_section('preferences')?['perFrameOverheadS'] as num?)?.toDouble();
+
   String? get siteName => _section('site')?['name'] as String?;
   String? get targetName =>
       _section('target')?['commonName'] as String? ??

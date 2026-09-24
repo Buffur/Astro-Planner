@@ -22,6 +22,7 @@ import 'viewmodels/settings_viewmodel.dart';
 import 'viewmodels/site_viewmodel.dart';
 import 'viewmodels/startup_viewmodel.dart';
 import 'viewmodels/theme_viewmodel.dart';
+import 'viewmodels/resume_run_viewmodel.dart';
 import 'viewmodels/tonight_viewmodel.dart';
 
 /// The app's screen-scoped ViewModels and how they depend on each other
@@ -85,6 +86,7 @@ class AppViewModels {
     gear = GearViewModel(equipment);
     targetList = TargetsViewModel(targets);
     sessionList = sessions == null ? null : SessionsViewModel(sessions);
+    resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
     theme = ThemeViewModel(display);
     tonight = TonightViewModel(
       site: site,
@@ -102,6 +104,9 @@ class AppViewModels {
   late final GearViewModel gear;
   late final TargetsViewModel targetList;
   late final SessionsViewModel? sessionList;
+
+  /// Null without a session repository (some tests).
+  late final ResumeRunViewModel? resumeRun;
   late final ThemeViewModel theme;
   late final TonightViewModel tonight;
 
@@ -118,5 +123,6 @@ class AppViewModels {
     if (sessionList case final s?) ChangeNotifierProvider.value(value: s),
     ChangeNotifierProvider.value(value: theme),
     ChangeNotifierProvider.value(value: tonight),
+    ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
   ];
 }

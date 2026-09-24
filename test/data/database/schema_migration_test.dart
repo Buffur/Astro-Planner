@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v16), each with an
+// Later schema versions add their own groups (v11-v17), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -123,6 +123,81 @@ void main() {
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
       await db.close();
+    });
+  });
+
+  group('TASK 13.2: v17 (execution events, ADR-016)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15, 16]) {
+      test('v$from -> v17 matches the v17 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 17);
+        await db.close();
+      });
+    }
+
+    test('v16 -> v17: sessions and blocks are kept; no events yet', () async {
+      final schema = await verifier.schemaAt(16);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "started_at_utc_ms) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'inProgress', 0, '2026-12-15', "
+        "1790000000000);",
+      );
+      raw.execute(
+        "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+        "exposure_time_seconds, frame_count, position, completed_frames) "
+        "VALUES (1, 1, 'light', 60.0, 10, 0, 3);",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      final row = await db.select(db.sessionLogs).getSingle();
+      expect(row.status, 'inProgress');
+      expect(row.startedAtUtcMs, 1790000000000);
+      final block = await db.select(db.captureBlocks).getSingle();
+      expect(block.completedFrames, 3);
+      expect(await db.select(db.sessionEvents).get(), isEmpty);
+      await db.close();
+    });
+
+    group('on a fresh v17 database', () {
+      late AppDatabase db;
+      setUp(() async {
+        db = AppDatabase(NativeDatabase.memory());
+        await db.customStatement(
+          "INSERT INTO session_logs (id, target_name, equipment_name, "
+          "session_date, planned_light_frames, status, legacy, evening_date) "
+          "VALUES (1, 'M42', 'Rig', 1790000000, 10, 'inProgress', 0, "
+          "'2026-12-15');",
+        );
+        await db.customStatement(
+          "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+          "exposure_time_seconds, frame_count) VALUES (1, 1, 'light', 60, 10);",
+        );
+      });
+      tearDown(() => db.close());
+
+      Future<void> event(int seq, String kind) => db.customStatement(
+        "INSERT INTO session_events (session_log_id, seq, at_utc_ms, kind, "
+        "block_id) VALUES (1, $seq, 1790000000000, '$kind', 1);",
+      );
+
+      test('an unknown kind is rejected by the CHECK constraint', () async {
+        await expectLater(event(1, 'teleported'), throwsA(anything));
+      });
+
+      test('a sequence number is unique within a session', () async {
+        await event(1, 'started');
+        await expectLater(event(1, 'paused'), throwsA(anything));
+      });
+
+      test('deleting a session deletes its events', () async {
+        await event(1, 'started');
+        await db.customStatement('DELETE FROM session_logs WHERE id = 1;');
+        expect(await db.select(db.sessionEvents).get(), isEmpty);
+      });
     });
   });
 

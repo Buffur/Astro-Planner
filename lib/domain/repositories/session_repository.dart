@@ -1,4 +1,5 @@
 import '../models/calendar_date.dart';
+import '../models/execution.dart';
 import '../models/session.dart';
 import '../models/session_snapshot.dart';
 
@@ -18,14 +19,41 @@ abstract class SessionRepository {
   Future<Session> savePlan(int id, SessionPlan plan, SessionSnapshot snapshot);
 
   /// Draft/planned → in progress, taking the execution-start snapshot,
-  /// which is never changed afterwards.
-  Future<Session> start(int id, SessionSnapshot snapshot);
+  /// which is never changed afterwards, and recording the run's start on
+  /// [blockId] — by default the first light block with frames, else the
+  /// first block (ADR-016 §2). Refused while another session is in progress
+  /// (owner: one at a time), or when the plan has no block.
+  Future<Session> start(int id, SessionSnapshot snapshot, {int? blockId});
 
-  /// In progress → completed.
+  /// In progress → completed; the run's `finished` event is recorded in the
+  /// same transaction.
   Future<Session> complete(int id);
 
-  /// Draft, planned or in progress → abandoned.
+  /// Draft, planned or in progress → abandoned; for a session in progress
+  /// the run's `abandoned` event is recorded in the same transaction.
   Future<Session> abandon(int id);
+
+  /// Records one execution event on the session in progress [id] (ADR-016
+  /// §4): the event and its effect on the block counters in one
+  /// transaction. Finishing and abandoning go through [complete] and
+  /// [abandon]. Throws [ExecutionError] when the event is not allowed now,
+  /// and [SessionStateError] when the session is not in progress.
+  Future<ExecutionState> record(
+    int id,
+    ExecutionEventKind kind, {
+    int? blockId,
+    int? delta,
+    InterruptionReason? reason,
+  });
+
+  /// The run's stored events, in order.
+  Future<List<ExecutionEvent>> events(int id);
+
+  /// The run's state: the fold of its events (ADR-016 §4).
+  Future<ExecutionState> execution(int id);
+
+  /// The session in progress, if any (at most one, ADR-016 §2).
+  Future<Session?> inProgress();
 
   /// Results and notes — editable in every non-legacy status, including
   /// completed (ADR-014 §3).

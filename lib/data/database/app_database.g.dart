@@ -6006,6 +6006,588 @@ class CaptureBlocksCompanion extends UpdateCompanion<CaptureBlock> {
   }
 }
 
+class $SessionEventsTable extends SessionEvents
+    with TableInfo<$SessionEventsTable, SessionEvent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SessionEventsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _sessionLogIdMeta = const VerificationMeta(
+    'sessionLogId',
+  );
+  @override
+  late final GeneratedColumn<int> sessionLogId = GeneratedColumn<int>(
+    'session_log_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES session_logs (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _seqMeta = const VerificationMeta('seq');
+  @override
+  late final GeneratedColumn<int> seq = GeneratedColumn<int>(
+    'seq',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _atUtcMsMeta = const VerificationMeta(
+    'atUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> atUtcMs = GeneratedColumn<int>(
+    'at_utc_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    check: () => kind.isIn(const [
+      'started',
+      'blockSelected',
+      'paused',
+      'interrupted',
+      'resumed',
+      'framesConfirmed',
+      'framesRejected',
+      'finished',
+      'abandoned',
+    ]),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _blockIdMeta = const VerificationMeta(
+    'blockId',
+  );
+  @override
+  late final GeneratedColumn<int> blockId = GeneratedColumn<int>(
+    'block_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES capture_blocks (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _deltaMeta = const VerificationMeta('delta');
+  @override
+  late final GeneratedColumn<int> delta = GeneratedColumn<int>(
+    'delta',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _clockAdjustedMeta = const VerificationMeta(
+    'clockAdjusted',
+  );
+  @override
+  late final GeneratedColumn<bool> clockAdjusted = GeneratedColumn<bool>(
+    'clock_adjusted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("clock_adjusted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sessionLogId,
+    seq,
+    atUtcMs,
+    kind,
+    blockId,
+    delta,
+    reason,
+    clockAdjusted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'session_events';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SessionEvent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('session_log_id')) {
+      context.handle(
+        _sessionLogIdMeta,
+        sessionLogId.isAcceptableOrUnknown(
+          data['session_log_id']!,
+          _sessionLogIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionLogIdMeta);
+    }
+    if (data.containsKey('seq')) {
+      context.handle(
+        _seqMeta,
+        seq.isAcceptableOrUnknown(data['seq']!, _seqMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seqMeta);
+    }
+    if (data.containsKey('at_utc_ms')) {
+      context.handle(
+        _atUtcMsMeta,
+        atUtcMs.isAcceptableOrUnknown(data['at_utc_ms']!, _atUtcMsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_atUtcMsMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('block_id')) {
+      context.handle(
+        _blockIdMeta,
+        blockId.isAcceptableOrUnknown(data['block_id']!, _blockIdMeta),
+      );
+    }
+    if (data.containsKey('delta')) {
+      context.handle(
+        _deltaMeta,
+        delta.isAcceptableOrUnknown(data['delta']!, _deltaMeta),
+      );
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('clock_adjusted')) {
+      context.handle(
+        _clockAdjustedMeta,
+        clockAdjusted.isAcceptableOrUnknown(
+          data['clock_adjusted']!,
+          _clockAdjustedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SessionEvent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SessionEvent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      sessionLogId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}session_log_id'],
+      )!,
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seq'],
+      )!,
+      atUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}at_utc_ms'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      blockId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}block_id'],
+      ),
+      delta: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}delta'],
+      ),
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      clockAdjusted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}clock_adjusted'],
+      )!,
+    );
+  }
+
+  @override
+  $SessionEventsTable createAlias(String alias) {
+    return $SessionEventsTable(attachedDatabase, alias);
+  }
+}
+
+class SessionEvent extends DataClass implements Insertable<SessionEvent> {
+  final int id;
+  final int sessionLogId;
+
+  /// Orders the events of one session (never the timestamp, ADR-016 §5).
+  final int seq;
+  final int atUtcMs;
+
+  /// ExecutionEventKind.name.
+  final String kind;
+
+  /// The block concerned, when any. The plan is frozen while a session is
+  /// in progress, so its blocks outlive its events.
+  final int? blockId;
+  final int? delta;
+
+  /// InterruptionReason.name, for interruptions.
+  final String? reason;
+  final bool clockAdjusted;
+  const SessionEvent({
+    required this.id,
+    required this.sessionLogId,
+    required this.seq,
+    required this.atUtcMs,
+    required this.kind,
+    this.blockId,
+    this.delta,
+    this.reason,
+    required this.clockAdjusted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['session_log_id'] = Variable<int>(sessionLogId);
+    map['seq'] = Variable<int>(seq);
+    map['at_utc_ms'] = Variable<int>(atUtcMs);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || blockId != null) {
+      map['block_id'] = Variable<int>(blockId);
+    }
+    if (!nullToAbsent || delta != null) {
+      map['delta'] = Variable<int>(delta);
+    }
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['clock_adjusted'] = Variable<bool>(clockAdjusted);
+    return map;
+  }
+
+  SessionEventsCompanion toCompanion(bool nullToAbsent) {
+    return SessionEventsCompanion(
+      id: Value(id),
+      sessionLogId: Value(sessionLogId),
+      seq: Value(seq),
+      atUtcMs: Value(atUtcMs),
+      kind: Value(kind),
+      blockId: blockId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(blockId),
+      delta: delta == null && nullToAbsent
+          ? const Value.absent()
+          : Value(delta),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      clockAdjusted: Value(clockAdjusted),
+    );
+  }
+
+  factory SessionEvent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SessionEvent(
+      id: serializer.fromJson<int>(json['id']),
+      sessionLogId: serializer.fromJson<int>(json['sessionLogId']),
+      seq: serializer.fromJson<int>(json['seq']),
+      atUtcMs: serializer.fromJson<int>(json['atUtcMs']),
+      kind: serializer.fromJson<String>(json['kind']),
+      blockId: serializer.fromJson<int?>(json['blockId']),
+      delta: serializer.fromJson<int?>(json['delta']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      clockAdjusted: serializer.fromJson<bool>(json['clockAdjusted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'sessionLogId': serializer.toJson<int>(sessionLogId),
+      'seq': serializer.toJson<int>(seq),
+      'atUtcMs': serializer.toJson<int>(atUtcMs),
+      'kind': serializer.toJson<String>(kind),
+      'blockId': serializer.toJson<int?>(blockId),
+      'delta': serializer.toJson<int?>(delta),
+      'reason': serializer.toJson<String?>(reason),
+      'clockAdjusted': serializer.toJson<bool>(clockAdjusted),
+    };
+  }
+
+  SessionEvent copyWith({
+    int? id,
+    int? sessionLogId,
+    int? seq,
+    int? atUtcMs,
+    String? kind,
+    Value<int?> blockId = const Value.absent(),
+    Value<int?> delta = const Value.absent(),
+    Value<String?> reason = const Value.absent(),
+    bool? clockAdjusted,
+  }) => SessionEvent(
+    id: id ?? this.id,
+    sessionLogId: sessionLogId ?? this.sessionLogId,
+    seq: seq ?? this.seq,
+    atUtcMs: atUtcMs ?? this.atUtcMs,
+    kind: kind ?? this.kind,
+    blockId: blockId.present ? blockId.value : this.blockId,
+    delta: delta.present ? delta.value : this.delta,
+    reason: reason.present ? reason.value : this.reason,
+    clockAdjusted: clockAdjusted ?? this.clockAdjusted,
+  );
+  SessionEvent copyWithCompanion(SessionEventsCompanion data) {
+    return SessionEvent(
+      id: data.id.present ? data.id.value : this.id,
+      sessionLogId: data.sessionLogId.present
+          ? data.sessionLogId.value
+          : this.sessionLogId,
+      seq: data.seq.present ? data.seq.value : this.seq,
+      atUtcMs: data.atUtcMs.present ? data.atUtcMs.value : this.atUtcMs,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      blockId: data.blockId.present ? data.blockId.value : this.blockId,
+      delta: data.delta.present ? data.delta.value : this.delta,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      clockAdjusted: data.clockAdjusted.present
+          ? data.clockAdjusted.value
+          : this.clockAdjusted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionEvent(')
+          ..write('id: $id, ')
+          ..write('sessionLogId: $sessionLogId, ')
+          ..write('seq: $seq, ')
+          ..write('atUtcMs: $atUtcMs, ')
+          ..write('kind: $kind, ')
+          ..write('blockId: $blockId, ')
+          ..write('delta: $delta, ')
+          ..write('reason: $reason, ')
+          ..write('clockAdjusted: $clockAdjusted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sessionLogId,
+    seq,
+    atUtcMs,
+    kind,
+    blockId,
+    delta,
+    reason,
+    clockAdjusted,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SessionEvent &&
+          other.id == this.id &&
+          other.sessionLogId == this.sessionLogId &&
+          other.seq == this.seq &&
+          other.atUtcMs == this.atUtcMs &&
+          other.kind == this.kind &&
+          other.blockId == this.blockId &&
+          other.delta == this.delta &&
+          other.reason == this.reason &&
+          other.clockAdjusted == this.clockAdjusted);
+}
+
+class SessionEventsCompanion extends UpdateCompanion<SessionEvent> {
+  final Value<int> id;
+  final Value<int> sessionLogId;
+  final Value<int> seq;
+  final Value<int> atUtcMs;
+  final Value<String> kind;
+  final Value<int?> blockId;
+  final Value<int?> delta;
+  final Value<String?> reason;
+  final Value<bool> clockAdjusted;
+  const SessionEventsCompanion({
+    this.id = const Value.absent(),
+    this.sessionLogId = const Value.absent(),
+    this.seq = const Value.absent(),
+    this.atUtcMs = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.blockId = const Value.absent(),
+    this.delta = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.clockAdjusted = const Value.absent(),
+  });
+  SessionEventsCompanion.insert({
+    this.id = const Value.absent(),
+    required int sessionLogId,
+    required int seq,
+    required int atUtcMs,
+    required String kind,
+    this.blockId = const Value.absent(),
+    this.delta = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.clockAdjusted = const Value.absent(),
+  }) : sessionLogId = Value(sessionLogId),
+       seq = Value(seq),
+       atUtcMs = Value(atUtcMs),
+       kind = Value(kind);
+  static Insertable<SessionEvent> custom({
+    Expression<int>? id,
+    Expression<int>? sessionLogId,
+    Expression<int>? seq,
+    Expression<int>? atUtcMs,
+    Expression<String>? kind,
+    Expression<int>? blockId,
+    Expression<int>? delta,
+    Expression<String>? reason,
+    Expression<bool>? clockAdjusted,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sessionLogId != null) 'session_log_id': sessionLogId,
+      if (seq != null) 'seq': seq,
+      if (atUtcMs != null) 'at_utc_ms': atUtcMs,
+      if (kind != null) 'kind': kind,
+      if (blockId != null) 'block_id': blockId,
+      if (delta != null) 'delta': delta,
+      if (reason != null) 'reason': reason,
+      if (clockAdjusted != null) 'clock_adjusted': clockAdjusted,
+    });
+  }
+
+  SessionEventsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? sessionLogId,
+    Value<int>? seq,
+    Value<int>? atUtcMs,
+    Value<String>? kind,
+    Value<int?>? blockId,
+    Value<int?>? delta,
+    Value<String?>? reason,
+    Value<bool>? clockAdjusted,
+  }) {
+    return SessionEventsCompanion(
+      id: id ?? this.id,
+      sessionLogId: sessionLogId ?? this.sessionLogId,
+      seq: seq ?? this.seq,
+      atUtcMs: atUtcMs ?? this.atUtcMs,
+      kind: kind ?? this.kind,
+      blockId: blockId ?? this.blockId,
+      delta: delta ?? this.delta,
+      reason: reason ?? this.reason,
+      clockAdjusted: clockAdjusted ?? this.clockAdjusted,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (sessionLogId.present) {
+      map['session_log_id'] = Variable<int>(sessionLogId.value);
+    }
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
+    if (atUtcMs.present) {
+      map['at_utc_ms'] = Variable<int>(atUtcMs.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (blockId.present) {
+      map['block_id'] = Variable<int>(blockId.value);
+    }
+    if (delta.present) {
+      map['delta'] = Variable<int>(delta.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (clockAdjusted.present) {
+      map['clock_adjusted'] = Variable<bool>(clockAdjusted.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionEventsCompanion(')
+          ..write('id: $id, ')
+          ..write('sessionLogId: $sessionLogId, ')
+          ..write('seq: $seq, ')
+          ..write('atUtcMs: $atUtcMs, ')
+          ..write('kind: $kind, ')
+          ..write('blockId: $blockId, ')
+          ..write('delta: $delta, ')
+          ..write('reason: $reason, ')
+          ..write('clockAdjusted: $clockAdjusted')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6018,6 +6600,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AstroTargetsTable astroTargets = $AstroTargetsTable(this);
   late final $SessionLogsTable sessionLogs = $SessionLogsTable(this);
   late final $CaptureBlocksTable captureBlocks = $CaptureBlocksTable(this);
+  late final $SessionEventsTable sessionEvents = $SessionEventsTable(this);
   late final Index astroTargetsCatalogIdUnique = Index(
     'astro_targets_catalog_id_unique',
     'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
@@ -6034,6 +6617,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'session_logs_target_id',
     'CREATE INDEX session_logs_target_id ON session_logs (target_id)',
   );
+  late final Index sessionEventsSessionSeq = Index(
+    'session_events_session_seq',
+    'CREATE UNIQUE INDEX session_events_session_seq ON session_events (session_log_id, seq)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6046,10 +6633,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     astroTargets,
     sessionLogs,
     captureBlocks,
+    sessionEvents,
     astroTargetsCatalogIdUnique,
     sessionLogsStatus,
     sessionLogsEveningDate,
     sessionLogsTargetId,
+    sessionEventsSessionSeq,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -6080,6 +6669,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('capture_blocks', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'session_logs',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('session_events', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'capture_blocks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('session_events', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -8486,6 +9089,24 @@ final class $$SessionLogsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$SessionEventsTable, List<SessionEvent>>
+  _sessionEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sessionEvents,
+    aliasName: 'session_logs__id__session_events__session_log_id',
+  );
+
+  $$SessionEventsTableProcessedTableManager get sessionEventsRefs {
+    final manager = $$SessionEventsTableTableManager(
+      $_db,
+      $_db.sessionEvents,
+    ).filter((f) => f.sessionLogId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionEventsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$SessionLogsTableFilterComposer
@@ -8747,6 +9368,31 @@ class $$SessionLogsTableFilterComposer
           }) => $$CaptureBlocksTableFilterComposer(
             $db: $db,
             $table: $db.captureBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> sessionEventsRefs(
+    Expression<bool> Function($$SessionEventsTableFilterComposer f) f,
+  ) {
+    final $$SessionEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionEvents,
+      getReferencedColumn: (t) => t.sessionLogId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionEvents,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9240,6 +9886,31 @@ class $$SessionLogsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> sessionEventsRefs<T extends Object>(
+    Expression<T> Function($$SessionEventsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionEvents,
+      getReferencedColumn: (t) => t.sessionLogId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$SessionLogsTableTableManager
@@ -9260,6 +9931,7 @@ class $$SessionLogsTableTableManager
             bool targetId,
             bool rigId,
             bool captureBlocksRefs,
+            bool sessionEventsRefs,
           })
         > {
   $$SessionLogsTableTableManager(_$AppDatabase db, $SessionLogsTable table)
@@ -9435,11 +10107,13 @@ class $$SessionLogsTableTableManager
                 targetId = false,
                 rigId = false,
                 captureBlocksRefs = false,
+                sessionEventsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (captureBlocksRefs) db.captureBlocks,
+                    if (sessionEventsRefs) db.sessionEvents,
                   ],
                   addJoins:
                       <
@@ -9516,6 +10190,27 @@ class $$SessionLogsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (sessionEventsRefs)
+                        await $_getPrefetchedData<
+                          SessionLog,
+                          $SessionLogsTable,
+                          SessionEvent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$SessionLogsTableReferences
+                              ._sessionEventsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$SessionLogsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).sessionEventsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.sessionLogId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9541,6 +10236,7 @@ typedef $$SessionLogsTableProcessedTableManager =
         bool targetId,
         bool rigId,
         bool captureBlocksRefs,
+        bool sessionEventsRefs,
       })
     >;
 typedef $$CaptureBlocksTableCreateCompanionBuilder =
@@ -9599,6 +10295,24 @@ final class $$CaptureBlocksTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$SessionEventsTable, List<SessionEvent>>
+  _sessionEventsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.sessionEvents,
+    aliasName: 'capture_blocks__id__session_events__block_id',
+  );
+
+  $$SessionEventsTableProcessedTableManager get sessionEventsRefs {
+    final manager = $$SessionEventsTableTableManager(
+      $_db,
+      $_db.sessionEvents,
+    ).filter((f) => f.blockId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_sessionEventsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -9693,6 +10407,31 @@ class $$CaptureBlocksTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> sessionEventsRefs(
+    Expression<bool> Function($$SessionEventsTableFilterComposer f) f,
+  ) {
+    final $$SessionEventsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionEvents,
+      getReferencedColumn: (t) => t.blockId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionEventsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -9868,6 +10607,31 @@ class $$CaptureBlocksTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> sessionEventsRefs<T extends Object>(
+    Expression<T> Function($$SessionEventsTableAnnotationComposer a) f,
+  ) {
+    final $$SessionEventsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.sessionEvents,
+      getReferencedColumn: (t) => t.blockId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionEventsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionEvents,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CaptureBlocksTableTableManager
@@ -9883,7 +10647,7 @@ class $$CaptureBlocksTableTableManager
           $$CaptureBlocksTableUpdateCompanionBuilder,
           (CaptureBlock, $$CaptureBlocksTableReferences),
           CaptureBlock,
-          PrefetchHooks Function({bool sessionLogId})
+          PrefetchHooks Function({bool sessionLogId, bool sessionEventsRefs})
         > {
   $$CaptureBlocksTableTableManager(_$AppDatabase db, $CaptureBlocksTable table)
     : super(
@@ -9964,7 +10728,497 @@ class $$CaptureBlocksTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({sessionLogId = false}) {
+          prefetchHooksCallback:
+              ({sessionLogId = false, sessionEventsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (sessionEventsRefs) db.sessionEvents,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (sessionLogId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sessionLogId,
+                            referencedTable: $$CaptureBlocksTableReferences
+                                ._sessionLogIdTable(db),
+                            referencedColumn: $$CaptureBlocksTableReferences
+                                ._sessionLogIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (sessionEventsRefs)
+                        await $_getPrefetchedData<
+                          CaptureBlock,
+                          $CaptureBlocksTable,
+                          SessionEvent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CaptureBlocksTableReferences
+                              ._sessionEventsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CaptureBlocksTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).sessionEventsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.blockId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$CaptureBlocksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CaptureBlocksTable,
+      CaptureBlock,
+      $$CaptureBlocksTableFilterComposer,
+      $$CaptureBlocksTableOrderingComposer,
+      $$CaptureBlocksTableAnnotationComposer,
+      $$CaptureBlocksTableCreateCompanionBuilder,
+      $$CaptureBlocksTableUpdateCompanionBuilder,
+      (CaptureBlock, $$CaptureBlocksTableReferences),
+      CaptureBlock,
+      PrefetchHooks Function({bool sessionLogId, bool sessionEventsRefs})
+    >;
+typedef $$SessionEventsTableCreateCompanionBuilder =
+    SessionEventsCompanion Function({
+      Value<int> id,
+      required int sessionLogId,
+      required int seq,
+      required int atUtcMs,
+      required String kind,
+      Value<int?> blockId,
+      Value<int?> delta,
+      Value<String?> reason,
+      Value<bool> clockAdjusted,
+    });
+typedef $$SessionEventsTableUpdateCompanionBuilder =
+    SessionEventsCompanion Function({
+      Value<int> id,
+      Value<int> sessionLogId,
+      Value<int> seq,
+      Value<int> atUtcMs,
+      Value<String> kind,
+      Value<int?> blockId,
+      Value<int?> delta,
+      Value<String?> reason,
+      Value<bool> clockAdjusted,
+    });
+
+final class $$SessionEventsTableReferences
+    extends BaseReferences<_$AppDatabase, $SessionEventsTable, SessionEvent> {
+  $$SessionEventsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $SessionLogsTable _sessionLogIdTable(_$AppDatabase db) => db
+      .sessionLogs
+      .createAlias('session_events__session_log_id__session_logs__id');
+
+  $$SessionLogsTableProcessedTableManager get sessionLogId {
+    final $_column = $_itemColumn<int>('session_log_id')!;
+
+    final manager = $$SessionLogsTableTableManager(
+      $_db,
+      $_db.sessionLogs,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sessionLogIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CaptureBlocksTable _blockIdTable(_$AppDatabase db) => db.captureBlocks
+      .createAlias('session_events__block_id__capture_blocks__id');
+
+  $$CaptureBlocksTableProcessedTableManager? get blockId {
+    final $_column = $_itemColumn<int>('block_id');
+    if ($_column == null) return null;
+    final manager = $$CaptureBlocksTableTableManager(
+      $_db,
+      $_db.captureBlocks,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_blockIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$SessionEventsTableFilterComposer
+    extends Composer<_$AppDatabase, $SessionEventsTable> {
+  $$SessionEventsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get atUtcMs => $composableBuilder(
+    column: $table.atUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get delta => $composableBuilder(
+    column: $table.delta,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get clockAdjusted => $composableBuilder(
+    column: $table.clockAdjusted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$SessionLogsTableFilterComposer get sessionLogId {
+    final $$SessionLogsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionLogId,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableFilterComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CaptureBlocksTableFilterComposer get blockId {
+    final $$CaptureBlocksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.blockId,
+      referencedTable: $db.captureBlocks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaptureBlocksTableFilterComposer(
+            $db: $db,
+            $table: $db.captureBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SessionEventsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SessionEventsTable> {
+  $$SessionEventsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get seq => $composableBuilder(
+    column: $table.seq,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get atUtcMs => $composableBuilder(
+    column: $table.atUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get delta => $composableBuilder(
+    column: $table.delta,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get clockAdjusted => $composableBuilder(
+    column: $table.clockAdjusted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$SessionLogsTableOrderingComposer get sessionLogId {
+    final $$SessionLogsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionLogId,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableOrderingComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CaptureBlocksTableOrderingComposer get blockId {
+    final $$CaptureBlocksTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.blockId,
+      referencedTable: $db.captureBlocks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaptureBlocksTableOrderingComposer(
+            $db: $db,
+            $table: $db.captureBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SessionEventsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SessionEventsTable> {
+  $$SessionEventsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get seq =>
+      $composableBuilder(column: $table.seq, builder: (column) => column);
+
+  GeneratedColumn<int> get atUtcMs =>
+      $composableBuilder(column: $table.atUtcMs, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get delta =>
+      $composableBuilder(column: $table.delta, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<bool> get clockAdjusted => $composableBuilder(
+    column: $table.clockAdjusted,
+    builder: (column) => column,
+  );
+
+  $$SessionLogsTableAnnotationComposer get sessionLogId {
+    final $$SessionLogsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.sessionLogId,
+      referencedTable: $db.sessionLogs,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SessionLogsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sessionLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CaptureBlocksTableAnnotationComposer get blockId {
+    final $$CaptureBlocksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.blockId,
+      referencedTable: $db.captureBlocks,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CaptureBlocksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.captureBlocks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$SessionEventsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SessionEventsTable,
+          SessionEvent,
+          $$SessionEventsTableFilterComposer,
+          $$SessionEventsTableOrderingComposer,
+          $$SessionEventsTableAnnotationComposer,
+          $$SessionEventsTableCreateCompanionBuilder,
+          $$SessionEventsTableUpdateCompanionBuilder,
+          (SessionEvent, $$SessionEventsTableReferences),
+          SessionEvent,
+          PrefetchHooks Function({bool sessionLogId, bool blockId})
+        > {
+  $$SessionEventsTableTableManager(_$AppDatabase db, $SessionEventsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SessionEventsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SessionEventsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SessionEventsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> sessionLogId = const Value.absent(),
+                Value<int> seq = const Value.absent(),
+                Value<int> atUtcMs = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<int?> blockId = const Value.absent(),
+                Value<int?> delta = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<bool> clockAdjusted = const Value.absent(),
+              }) => SessionEventsCompanion(
+                id: id,
+                sessionLogId: sessionLogId,
+                seq: seq,
+                atUtcMs: atUtcMs,
+                kind: kind,
+                blockId: blockId,
+                delta: delta,
+                reason: reason,
+                clockAdjusted: clockAdjusted,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int sessionLogId,
+                required int seq,
+                required int atUtcMs,
+                required String kind,
+                Value<int?> blockId = const Value.absent(),
+                Value<int?> delta = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<bool> clockAdjusted = const Value.absent(),
+              }) => SessionEventsCompanion.insert(
+                id: id,
+                sessionLogId: sessionLogId,
+                seq: seq,
+                atUtcMs: atUtcMs,
+                kind: kind,
+                blockId: blockId,
+                delta: delta,
+                reason: reason,
+                clockAdjusted: clockAdjusted,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SessionEventsTable, SessionEvent>(table),
+                  $$SessionEventsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({sessionLogId = false, blockId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -9988,10 +11242,21 @@ class $$CaptureBlocksTableTableManager
                       state = state.withJoin(
                         currentTable: table,
                         currentColumn: table.sessionLogId,
-                        referencedTable: $$CaptureBlocksTableReferences
+                        referencedTable: $$SessionEventsTableReferences
                             ._sessionLogIdTable(db),
-                        referencedColumn: $$CaptureBlocksTableReferences
+                        referencedColumn: $$SessionEventsTableReferences
                             ._sessionLogIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+                    if (blockId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.blockId,
+                        referencedTable: $$SessionEventsTableReferences
+                            ._blockIdTable(db),
+                        referencedColumn: $$SessionEventsTableReferences
+                            ._blockIdTable(db)
                             .id,
                       ) as T;
                     }
@@ -10007,19 +11272,19 @@ class $$CaptureBlocksTableTableManager
       );
 }
 
-typedef $$CaptureBlocksTableProcessedTableManager =
+typedef $$SessionEventsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $CaptureBlocksTable,
-      CaptureBlock,
-      $$CaptureBlocksTableFilterComposer,
-      $$CaptureBlocksTableOrderingComposer,
-      $$CaptureBlocksTableAnnotationComposer,
-      $$CaptureBlocksTableCreateCompanionBuilder,
-      $$CaptureBlocksTableUpdateCompanionBuilder,
-      (CaptureBlock, $$CaptureBlocksTableReferences),
-      CaptureBlock,
-      PrefetchHooks Function({bool sessionLogId})
+      $SessionEventsTable,
+      SessionEvent,
+      $$SessionEventsTableFilterComposer,
+      $$SessionEventsTableOrderingComposer,
+      $$SessionEventsTableAnnotationComposer,
+      $$SessionEventsTableCreateCompanionBuilder,
+      $$SessionEventsTableUpdateCompanionBuilder,
+      (SessionEvent, $$SessionEventsTableReferences),
+      SessionEvent,
+      PrefetchHooks Function({bool sessionLogId, bool blockId})
     >;
 
 class $AppDatabaseManager {
@@ -10039,4 +11304,6 @@ class $AppDatabaseManager {
       $$SessionLogsTableTableManager(_db, _db.sessionLogs);
   $$CaptureBlocksTableTableManager get captureBlocks =>
       $$CaptureBlocksTableTableManager(_db, _db.captureBlocks);
+  $$SessionEventsTableTableManager get sessionEvents =>
+      $$SessionEventsTableTableManager(_db, _db.sessionEvents);
 }

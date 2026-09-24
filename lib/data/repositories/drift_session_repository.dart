@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import '../../core/time/clock.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/capture_block.dart' as domain;
+import '../../domain/models/execution.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_log.dart' as domain;
 import '../../domain/models/session_snapshot.dart';
 import '../../domain/repositories/session_repository.dart';
+import '../../domain/services/execution_machine.dart';
 import '../database/app_database.dart';
 
 /// [SessionRepository] on the v16 `session_logs` table (ADR-014; TASK 11.3).
@@ -84,22 +86,44 @@ class DriftSessionRepository implements SessionRepository {
   });
 
   @override
-  Future<Session> start(int id, SessionSnapshot snapshot) => _change(id, (s) {
-    _requireTransition(s, SessionStatus.inProgress);
-    return _writeRow(
-      id,
-      SessionLogsCompanion(
-        status: const Value('inProgress'),
-        startedAtUtcMs: Value(_nowMs),
-        executionStartSnapshot: Value(snapshot.json),
-      ),
-    );
-  });
+  Future<Session> start(int id, SessionSnapshot snapshot, {int? blockId}) =>
+      _change(id, (s) async {
+        _requireTransition(s, SessionStatus.inProgress);
+        final running = await inProgress();
+        if (running != null) {
+          throw SessionStateError(
+            'Session ${running.id} is already in progress; finish or '
+            'abandon it first.',
+          );
+        }
+        final block = blockId ?? _firstBlockToCapture(s.blocks);
+        if (block == null) throw SessionStateError('The plan has no block.');
+        await _appendEvent(s, ExecutionEventKind.started, blockId: block);
+        await _writeRow(
+          id,
+          SessionLogsCompanion(
+            status: const Value('inProgress'),
+            startedAtUtcMs: Value(_nowMs),
+            executionStartSnapshot: Value(snapshot.json),
+          ),
+        );
+      });
+
+  /// The first light block with frames, else the first block.
+  static int? _firstBlockToCapture(List<domain.CaptureBlock> blocks) {
+    for (final b in blocks) {
+      if (b.frameType == domain.FrameType.light && b.frameCount > 0) {
+        return b.id;
+      }
+    }
+    return blocks.isEmpty ? null : blocks.first.id;
+  }
 
   @override
-  Future<Session> complete(int id) => _change(id, (s) {
+  Future<Session> complete(int id) => _change(id, (s) async {
     _requireTransition(s, SessionStatus.completed);
-    return _writeRow(
+    await _appendEvent(s, ExecutionEventKind.finished);
+    await _writeRow(
       id,
       SessionLogsCompanion(
         status: const Value('completed'),
@@ -109,13 +133,131 @@ class DriftSessionRepository implements SessionRepository {
   });
 
   @override
-  Future<Session> abandon(int id) => _change(id, (s) {
+  Future<Session> abandon(int id) => _change(id, (s) async {
     _requireTransition(s, SessionStatus.abandoned);
-    return _writeRow(
-      id,
-      const SessionLogsCompanion(status: Value('abandoned')),
-    );
+    if (s.status == SessionStatus.inProgress) {
+      await _appendEvent(s, ExecutionEventKind.abandoned);
+    }
+    await _writeRow(id, const SessionLogsCompanion(status: Value('abandoned')));
   });
+
+  @override
+  Future<ExecutionState> record(
+    int id,
+    ExecutionEventKind kind, {
+    int? blockId,
+    int? delta,
+    InterruptionReason? reason,
+  }) async {
+    if (kind == ExecutionEventKind.started ||
+        kind == ExecutionEventKind.finished ||
+        kind == ExecutionEventKind.abandoned) {
+      throw ArgumentError.value(kind, 'kind', 'use start/complete/abandon');
+    }
+    await _change(id, (s) async {
+      if (s.legacy || s.status != SessionStatus.inProgress) {
+        throw SessionStateError('Session $id is not in progress.');
+      }
+      await _appendEvent(
+        s,
+        kind,
+        blockId: blockId,
+        delta: delta,
+        reason: reason,
+      );
+    });
+    return execution(id);
+  }
+
+  /// Validates [kind] against the run's state and stores the event with
+  /// its effect on the block counters — the projection (ADR-016 §4). Runs
+  /// inside the caller's transaction.
+  Future<void> _appendEvent(
+    Session s,
+    ExecutionEventKind kind, {
+    int? blockId,
+    int? delta,
+    InterruptionReason? reason,
+  }) async {
+    final state = await _fold(s);
+    final event = ExecutionMachine.next(
+      state,
+      kind,
+      _clock.nowUtc(),
+      blockId: blockId,
+      delta: delta,
+      reason: reason,
+    );
+    final after = ExecutionMachine.apply(state, event);
+    await _db
+        .into(_db.sessionEvents)
+        .insert(
+          SessionEventsCompanion.insert(
+            sessionLogId: s.id,
+            seq: event.seq,
+            atUtcMs: event.atUtc.millisecondsSinceEpoch,
+            kind: event.kind.name,
+            blockId: Value(event.blockId),
+            delta: Value(event.delta),
+            reason: Value(event.reason?.name),
+            clockAdjusted: Value(event.clockAdjusted),
+          ),
+        );
+    final block = event.blockId;
+    if (block != null &&
+        (kind == ExecutionEventKind.framesConfirmed ||
+            kind == ExecutionEventKind.framesRejected)) {
+      await (_db.update(
+        _db.captureBlocks,
+      )..where((t) => t.id.equals(block))).write(
+        CaptureBlocksCompanion(
+          completedFrames: Value(after.completedFor(block)),
+          rejectedFrames: Value(after.rejectedFor(block)),
+        ),
+      );
+    }
+  }
+
+  Future<ExecutionState> _fold(Session s) async => ExecutionMachine.fold({
+    for (final b in s.blocks) b.id,
+  }, await events(s.id));
+
+  @override
+  Future<List<ExecutionEvent>> events(int id) async {
+    final rows =
+        await (_db.select(_db.sessionEvents)
+              ..where((t) => t.sessionLogId.equals(id))
+              ..orderBy([(t) => OrderingTerm.asc(t.seq)]))
+            .get();
+    return [
+      for (final r in rows)
+        ExecutionEvent(
+          seq: r.seq,
+          atUtc: DateTime.fromMillisecondsSinceEpoch(r.atUtcMs, isUtc: true),
+          kind: ExecutionEventKind.tryParse(r.kind)!,
+          blockId: r.blockId,
+          delta: r.delta,
+          reason: InterruptionReason.tryParse(r.reason),
+          clockAdjusted: r.clockAdjusted,
+        ),
+    ];
+  }
+
+  @override
+  Future<ExecutionState> execution(int id) async {
+    final s = await get(id);
+    if (s == null) throw SessionStateError('No session $id.');
+    return _fold(s);
+  }
+
+  @override
+  Future<Session?> inProgress() async {
+    final running = await list(
+      statuses: {SessionStatus.inProgress},
+      includeLegacy: false,
+    );
+    return running.isEmpty ? null : running.first;
+  }
 
   @override
   Future<Session> updateResults(int id, SessionResults results) =>
@@ -136,7 +278,7 @@ class DriftSessionRepository implements SessionRepository {
 
   @override
   Future<void> delete(int id) async {
-    // capture_blocks cascade (ADR-008 §4).
+    // capture_blocks and session_events cascade (ADR-008 §4, ADR-016 §4).
     await (_db.delete(_db.sessionLogs)..where((t) => t.id.equals(id))).go();
   }
 

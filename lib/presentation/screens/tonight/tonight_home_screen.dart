@@ -15,6 +15,8 @@ import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
+import '../../viewmodels/resume_run_viewmodel.dart';
+import 'resume_run_dialog.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/startup_viewmodel.dart';
@@ -46,6 +48,14 @@ class TonightHomeScreen extends StatelessWidget {
       tonightVm.markOffered();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) context.push(AppRouter.welcome);
+      });
+    }
+    // A run left in progress (ADR-016 §5): ask once, at start.
+    final resumeVm = context.watch<ResumeRunViewModel?>();
+    if (resumeVm != null && resumeVm.promptDue && !startupVm.isLoading) {
+      resumeVm.markShown();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) showResumeRunDialog(context, resumeVm);
       });
     }
 
