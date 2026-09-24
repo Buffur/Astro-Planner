@@ -445,8 +445,13 @@ rewritten to match the code.*
     main screen × light/dark/field × 100/200 % text; labels, 48 px targets, overflow fixes,
     the chart's text alternative; red-mode contrast limit documented) (commit `c191eb4`).
     871 tests green. The TalkBack walkthrough is an owner checklist item.
-  - **Next: TASK 15.4 — Lifecycle, process-death and offline matrix (G15).** Not started;
-    it begins only on the owner's go-ahead.
+  - **In progress: TASK 15.4 — Lifecycle, process-death and offline matrix (G15).** Host
+    rows automated and a full disk made visible in six more actions (commit `323cc23`; 878
+    tests green). **Open:** the device rows of `TEST_PLAN.md` § Lifecycle matrix (L1–L8)
+    need an Android device or emulator — none exists on the development machine (owner
+    decision, 2026-09-24). The task is complete when those rows pass and are recorded.
+  - **Next after 15.4: TASK 15.5 — End-to-end regression suite (G15)** (also needs an
+    emulator). Not started; it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

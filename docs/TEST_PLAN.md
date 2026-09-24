@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **871 tests: 871 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.3) |
+| `flutter test --no-pub` | **878 tests: 878 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.4 host rows) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -904,3 +904,37 @@ the ADR-012 variables, and a real out-of-range error):
   altitude chart's description, save → start the run, confirm frames → finish and complete
   → Sessions → the session's detail. Note anything unlabeled, read in a confusing order,
   or cut off; repeat the tracker part in field mode.
+
+**Added by TASK 15.4** (lifecycle matrix, host rows), 7 tests (878):
+- **`lifecycle/lifecycle_matrix_test.dart` (7):** L1, L3, L4, L5 (2), L6, L8 of the
+  lifecycle matrix below. Mutation check: without the tracker's `StorageFailure` handling,
+  L8 fails.
+
+## Lifecycle matrix (TASK 15.4)
+
+The roadmap's device matrix. **Host** = automated in `flutter test` (runs in the quality
+gate); **Device** = the scripted manual step on an Android phone or emulator. Status as of
+2026-09-24: every host check passes; **no device row has been run** — no Android device or
+emulator exists on the development machine, and the Android build has never been run.
+Record each device run below the table (date, device, Android version, build, result).
+
+| Row | Scenario | Host (automated) | Device steps (manual) | Device result |
+| --- | --- | --- | --- | --- |
+| L1 | Fresh install while offline | `lifecycle/lifecycle_matrix_test.dart` L1: first-run page, location denied changes nothing, a typed site gives the night and the opportunity, forecast "unavailable" | Airplane mode on; install the APK on a clean device; open. Expect the first-run page. Skip; set a site by typing coordinates; open the planner: night times, the chart and the plan work; the weather card says no forecast, with Retry; no crash, no spinner that never ends. | Not run |
+| L2 | Location permission denied, and denied forever | `location_picker_screen_test.dart` (services off, plain denial, denied forever with "Open settings"), `planner_location_test.dart` (each failure reported, nothing changed) | "Use current position" → Deny: an explanation, the site unchanged. Deny again with "Don't ask again" (or twice on Android 11+): the explanation offers "Open settings", which opens the app's settings page. Turn location services off: "Open location settings". | Not run |
+| L3 | "Don't keep activities" while planning | L3: plan, night, target, site and field mode restored after the database is closed and reopened | Developer options → Don't keep activities ON. Edit the plan (target, night, a block), turn field mode on, press Home, reopen from recents: everything is as left. Repeat after `adb shell am kill com.astroplan.astroplan`. | Not run |
+| L4 | Process death during a run | L4: counts kept; running time follows the clock while running and stops while paused. Also `execution_machine_test` (restart from events), `resume_run_prompt_test`, `execution_screen_test` (TD-055) | Start a run, confirm frames, pause/resume once; swipe the app away (or `adb shell am kill`), wait a few minutes, reopen: the resume prompt shows the run with its time and estimate; Keep going returns to the tracker with the same counts. Repeat while paused. | Not run |
+| L5 | Rotation and theme changes | L5: typed site-editor input survives rotation, dark mode and field mode; every screen lays out in landscape (915 × 412) | Auto-rotate on. On the planner, the site editor (with typed text), the tracker and the results page: rotate both ways; switch system dark mode; toggle field mode. Nothing typed is lost, nothing is cut off, the tracker keeps its counts. | Not run |
+| L6 | A time-zone change during execution | L6: moving to another site and zone during a run changes nothing on the tracker (start snapshot, UTC events). `open_meteo_forecast_test` (UTC independent of the device zone), `session_night_resolver_test` | Start a run at a site with a zone. Settings → Date & time → automatic zone off → pick a zone several hours away; return: the tracker's times, counts and running time are unchanged (times stay in the site's zone). Change back. A site without a zone shows times in the device zone, labelled so. | Not run |
+| L7 | Upgrade from the beta database | `schema_migration_test.dart` (every schema v8–v16 → v17, data kept; refusal below v8 and above the app), `backup_restore_test.dart` (older schema accepted); L3/L4 reopen a v17 file | No beta has shipped; its schema will be v17. When the beta exists: install it, create sites, rigs, targets and sessions (one with a run), then install the next build over it (`adb install -r`): everything is kept, the run resumes. Any later schema bump must add a v17 → vN migration test (the TASK 3.2 workflow). | Not run (no beta yet) |
+| L8 | Low storage | L8: a full disk (SQLITE_FULL) while planning (autosave banner, Save message) and tracking (+1 message, frame not counted) loses nothing stored and recovers; `storage_failure_test.dart` | Fill the device (e.g. `adb shell dd if=/dev/zero of=/sdcard/fill bs=1M count=<free MB>`), then edit a plan, Save, start a run and press +1, back up: each says it could not be saved; nothing crashes. Delete the fill file: the next edit and +1 work. | Not run |
+
+**Found and fixed by TASK 15.4 (host rows):** with a full disk, the tracker's buttons
+(+1, −1, Reject, Accept, Pause/Resume, block change, Abandon) did nothing visible — they
+caught only `StateError`; keep-screen-on, Abandon on the results page, the resume prompt's
+Abandon/Finish/Pause, first-run Done and the field-mode toggle had the same gap. All now
+report through `runWithFeedback`/`FailureText`.
+
+### Device runs
+
+*(none yet)*
