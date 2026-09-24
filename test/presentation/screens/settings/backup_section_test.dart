@@ -133,7 +133,10 @@ void main() {
     backup.refuse = BackupProblem.newerSchema;
     await tester.tap(find.byKey(const Key('backup.restore')));
     await tester.pumpAndSettle();
-    expect(find.textContaining('newer version of AstroPlan'), findsOneWidget);
+    expect(
+      find.textContaining('newer version of Astro Planner'),
+      findsOneWidget,
+    );
     expect(backup.staged, isFalse);
   });
 }

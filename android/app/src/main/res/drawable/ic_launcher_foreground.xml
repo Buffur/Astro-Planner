@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Astro Planner icon (TASK 16.1): a target's altitude arc over the
+     horizon, its imaging window in red, a star at the peak. 108 dp adaptive
+     canvas; everything stays inside the 66 dp safe zone. The PNG launcher
+     icons are drawn from the same geometry by tool/make_launcher_icons.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- horizon -->
+    <path
+        android:pathData="M26,70 L82,70"
+        android:strokeWidth="3"
+        android:strokeColor="#6F7BA8"
+        android:strokeLineCap="round" />
+    <!-- the target's altitude through the night -->
+    <path
+        android:pathData="M28,70 Q54,22 80,70"
+        android:strokeWidth="5"
+        android:strokeColor="#E8ECF8"
+        android:strokeLineCap="round" />
+    <!-- the imaging window -->
+    <path
+        android:pathData="M43.6,49.84 Q54,42.16 64.4,49.84"
+        android:strokeWidth="7"
+        android:strokeColor="#FF4D3D"
+        android:strokeLineCap="round" />
+    <!-- the star -->
+    <path
+        android:pathData="M54,24 L56,29 L61,31 L56,33 L54,38 L52,33 L47,31 L52,29 Z"
+        android:fillColor="#FFFFFF" />
+</vector>

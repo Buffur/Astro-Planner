@@ -38,6 +38,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
+import 'core/config/app_identity.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -150,7 +151,7 @@ class AstroPlanApp extends StatelessWidget {
     final themeVM = context.watch<ThemeViewModel>();
 
     return MaterialApp.router(
-      title: 'AstroPlan',
+      title: AppIdentity.appName,
       theme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.light,
       darkTheme: themeVM.isFieldMode ? AppTheme.fieldTheme : AppTheme.dark,
       themeMode: ThemeMode.system,

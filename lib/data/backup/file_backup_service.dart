@@ -86,7 +86,8 @@ class FileBackupService implements BackupService {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/zip')],
-        text: 'AstroPlan backup ($stamp UTC). Keep this file to restore.',
+        text:
+            '${AppIdentity.appName} backup ($stamp UTC). Keep this file to restore.',
       ),
     );
   }
@@ -101,7 +102,9 @@ class FileBackupService implements BackupService {
 
   @override
   Future<({BackupPreview preview, Object file})?> pick() async {
-    final picked = await FilePicker.pickFiles(dialogTitle: 'AstroPlan backup');
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: '${AppIdentity.appName} backup',
+    );
     if (picked.isEmpty) return null;
     final bytes = await picked.first.xFile.readAsBytes();
     final checked = check(bytes);

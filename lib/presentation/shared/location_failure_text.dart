@@ -1,4 +1,5 @@
 import '../../domain/services/location_service.dart';
+import '../../core/config/app_identity.dart';
 
 /// Which settings page, if any, fixes a [LocationFailure].
 enum LocationSettingsTarget { locationSettings, appSettings }
@@ -13,10 +14,10 @@ abstract final class LocationFailureText {
     LocationFailure.serviceDisabled =>
       'Location services are turned off on this device. $_alternatives',
     LocationFailure.permissionDenied =>
-      'AstroPlan uses your position only to compute night times, target '
+      '${AppIdentity.appName} uses your position only to compute night times, target '
           'visibility and weather for where you are. $_alternatives',
     LocationFailure.permissionDeniedForever =>
-      'Location permission is blocked for AstroPlan. Allow it in the app '
+      'Location permission is blocked for ${AppIdentity.appName}. Allow it in the app '
           'settings to use your current position. $_alternatives',
   };
 

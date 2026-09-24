@@ -8,6 +8,7 @@ import '../../shared/location_feedback.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/tonight_viewmodel.dart';
+import '../../../core/config/app_identity.dart';
 
 /// The first-run setup (TASK 12.5, owner decisions): site, rig and target,
 /// each skippable, on one page above the tabs. The steps reuse the normal
@@ -41,7 +42,7 @@ class WelcomeScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Welcome to AstroPlan'),
+          title: const Text('Welcome to ${AppIdentity.appName}'),
           automaticallyImplyLeading: false,
           actions: [
             TextButton(
@@ -69,7 +70,7 @@ class WelcomeScreen extends StatelessWidget {
                   : siteVm.locationName ?? 'Current position',
               explanation:
                   'Night times, the Moon and target altitudes are computed '
-                  'for your site. AstroPlan asks for location permission '
+                  'for your site. ${AppIdentity.appName} asks for location permission '
                   'only if you tap "Use current position", and uses your '
                   'position on this device to compute the night. You can '
                   'enter a site by hand instead.',

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../domain/services/backup_service.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/backup_viewmodel.dart';
+import '../../../core/config/app_identity.dart';
 
 /// Backup and restore (TASK 14.4, owner decisions): a backup is one
 /// `.astroplan` file shared wherever the user wants it; a restore is
@@ -13,12 +14,12 @@ class BackupSection extends StatelessWidget {
 
   static String problemText(BackupProblem p) => switch (p) {
     BackupProblem.notABackup =>
-      'This file is not an AstroPlan backup, or it is damaged.',
+      'This file is not an ${AppIdentity.appName} backup, or it is damaged.',
     BackupProblem.newerSchema =>
-      'This backup was made by a newer version of AstroPlan. Update the '
+      'This backup was made by a newer version of ${AppIdentity.appName}. Update the '
           'app first.',
     BackupProblem.tooOld =>
-      'This backup is too old for this version of AstroPlan.',
+      'This backup is too old for this version of ${AppIdentity.appName}.',
   };
 
   Future<void> _restore(BuildContext context, BackupViewModel vm) async {
@@ -38,9 +39,9 @@ class BackupSection extends StatelessWidget {
         title: const Text('Restore this backup?'),
         content: Text(
           'Made ${NightTimeFormatter.deviceZoneCaption(p.createdAtUtc)} '
-          'by AstroPlan ${p.appVersion}, with ${p.sessionCount} '
+          'by ${AppIdentity.appName} ${p.appVersion}, with ${p.sessionCount} '
           'sessions.\n\nAll current sessions, sites, rigs, targets and '
-          'settings stored in the database are replaced when AstroPlan next '
+          'settings stored in the database are replaced when ${AppIdentity.appName} next '
           'starts. The current data is kept as a safety copy on this device.',
           key: const Key('backup.preview'),
         ),
@@ -84,7 +85,9 @@ class BackupSection extends StatelessWidget {
             key: const Key('backup.staged'),
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.restart_alt),
-            title: const Text('Restore ready: close and reopen AstroPlan'),
+            title: const Text(
+              'Restore ready: close and reopen ${AppIdentity.appName}',
+            ),
             subtitle: const Text('Tap to cancel the restore.'),
             enabled: !vm.busy,
             onTap: vm.cancelRestore,

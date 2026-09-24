@@ -39,13 +39,13 @@ class ShareSessionExporter implements SessionExporter {
     );
   }
 
-  /// "AstroPlan export: 3 sessions (M42, M31, …)".
+  /// "Astro Planner export: 3 sessions (M42, M31, …)".
   static String summary(List<ExportedSession> sessions) {
     final names = sessions.map((e) => e.session.record.targetName).toSet();
     final shown = names.take(3).join(', ');
     final more = names.length > 3 ? ', …' : '';
     final n = sessions.length;
-    return 'AstroPlan export: $n ${n == 1 ? 'session' : 'sessions'} '
+    return '${AppIdentity.appName} export: $n ${n == 1 ? 'session' : 'sessions'} '
         '($shown$more). Manifest v${SessionManifestCodec.version}.';
   }
 }

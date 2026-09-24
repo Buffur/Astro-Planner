@@ -1,5 +1,6 @@
 import '../../core/time/clock.dart';
 import 'capture_block.dart';
+import '../../core/config/app_identity.dart';
 
 class SessionLog {
   final int id;
@@ -60,7 +61,7 @@ class SessionLog {
 
   String toShareableText() {
     final buffer = StringBuffer();
-    buffer.writeln('AstroPlan Session Log');
+    buffer.writeln('${AppIdentity.appName} Session Log');
     buffer.writeln('----------------------');
     buffer.writeln('Target: $targetName');
     buffer.writeln('Date: ${sessionDate.toLocal().toString().split(' ')[0]}');

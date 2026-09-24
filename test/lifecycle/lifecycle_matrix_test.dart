@@ -187,7 +187,7 @@ void main() {
     });
     addTearDown(() => tester.runAsync(db.close));
     await _pumpApp(tester, vm);
-    expect(find.text('Welcome to AstroPlan'), findsOneWidget);
+    expect(find.text('Welcome to Astro Planner'), findsOneWidget);
 
     // Location permission denied: nothing changes, the app says why.
     await tester.runAsync(() async {

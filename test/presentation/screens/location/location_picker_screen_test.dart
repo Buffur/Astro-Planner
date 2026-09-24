@@ -2,6 +2,7 @@
 // explained with the right remedy, coordinates can be typed (offline, no
 // permission needed), and the OpenStreetMap attribution is visible.
 
+import 'package:astroplan/core/config/app_identity.dart';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
@@ -172,7 +173,7 @@ void main() {
     final tiles = tester.widget<TileLayer>(find.byType(TileLayer));
     expect(
       tiles.tileProvider.headers['User-Agent'],
-      'flutter_map (com.astroplan.astroplan)',
+      'flutter_map (${AppIdentity.packageName})',
     );
   });
 }

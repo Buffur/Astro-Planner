@@ -195,7 +195,7 @@ void main() {
     testWidgets('the first-run page', (tester) async {
       await big(tester);
       await start(tester, site: false, firstRunDone: false);
-      expect(find.text('Welcome to AstroPlan'), findsOneWidget);
+      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
       await tester.drag(find.byType(ListView).last, const Offset(0, -3000));
       await settle(tester);
       expect(tester.takeException(), isNull);
@@ -207,12 +207,12 @@ void main() {
       tester,
     ) async {
       await start(tester, site: false, firstRunDone: false);
-      expect(find.text('Welcome to AstroPlan'), findsOneWidget);
+      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
       expect(find.textContaining('asks for location permission'), findsOne);
 
       await tester.tap(find.byKey(const Key('welcome.skip')));
       await settle(tester);
-      expect(find.text('Welcome to AstroPlan'), findsNothing);
+      expect(find.text('Welcome to Astro Planner'), findsNothing);
       expect(find.byKey(const Key('tonight.noSite')), findsOneWidget);
       expect(firstRun.done, isTrue);
     });
@@ -226,7 +226,7 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('welcome.done')));
       await settle(tester);
-      expect(find.text('Welcome to AstroPlan'), findsNothing);
+      expect(find.text('Welcome to Astro Planner'), findsNothing);
       expect(firstRun.done, isTrue);
     });
 
@@ -239,17 +239,17 @@ void main() {
       expect(find.text('Select Equipment'), findsWidgets);
       await tester.pageBack();
       await settle(tester);
-      expect(find.text('Welcome to AstroPlan'), findsOneWidget);
+      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
     });
 
     testWidgets('not offered when a site is already set', (tester) async {
       await start(tester, firstRunDone: false);
-      expect(find.text('Welcome to AstroPlan'), findsNothing);
+      expect(find.text('Welcome to Astro Planner'), findsNothing);
     });
 
     testWidgets('not offered again once done', (tester) async {
       await start(tester, site: false);
-      expect(find.text('Welcome to AstroPlan'), findsNothing);
+      expect(find.text('Welcome to Astro Planner'), findsNothing);
     });
   });
 }

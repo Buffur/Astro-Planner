@@ -233,7 +233,7 @@ void main() {
   test('the share summary names the targets', () async {
     expect(
       ShareSessionExporter.summary(await sessions()),
-      'AstroPlan export: 3 sessions (M42, M31, M45). Manifest v2.',
+      'Astro Planner export: 3 sessions (M42, M31, M45). Manifest v2.',
     );
   });
 

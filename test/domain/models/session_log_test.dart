@@ -16,7 +16,7 @@ void main() {
 
     final text = log.toShareableText();
 
-    expect(text.contains('AstroPlan Session Log'), isTrue);
+    expect(text.contains('Astro Planner Session Log'), isTrue);
     expect(text.contains('Target: Andromeda Galaxy'), isTrue);
     expect(text.contains('Date: 2026-09-17'), isTrue);
     expect(text.contains('Rig: Pixel 8 Pro'), isTrue);

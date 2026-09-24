@@ -74,7 +74,7 @@ void main() {
 
     final request = requests.single;
     expect(request.headers['User-Agent'], AppIdentity.userAgent);
-    expect(AppIdentity.userAgent, contains('com.astroplan.astroplan'));
+    expect(AppIdentity.userAgent, contains(AppIdentity.packageName));
     expect(AppIdentity.userAgent, isNot(contains('com.example')));
     expect(request.url.host, 'nominatim.openstreetmap.org');
     expect(request.url.queryParameters['lat'], '46.06');

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../../core/config/app_identity.dart';
+
 /// Data sources, attribution and licences (TASK 8.2). The target catalog is
 /// an adapted subset of OpenNGC (CC BY-SA 4.0), whose notice is shown in
 /// full; the other external data the app uses is credited too.
@@ -57,8 +59,10 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           OutlinedButton(
-            onPressed: () =>
-                showLicensePage(context: context, applicationName: 'AstroPlan'),
+            onPressed: () => showLicensePage(
+              context: context,
+              applicationName: AppIdentity.appName,
+            ),
             child: const Text('Open-source licences'),
           ),
         ],
