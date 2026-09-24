@@ -8,6 +8,7 @@ import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/home/session_planner_route.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/location/location_picker_screen.dart';
+import '../screens/library/progress_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
 import '../screens/logbook/session_detail_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
@@ -42,6 +43,9 @@ class AppRouter {
   static const libraryRigs = '/library/rigs';
   static const libraryTargets = '/library/targets';
   static const librarySites = '/library/sites';
+
+  /// Integration so far per target (TASK 14.2).
+  static const libraryProgress = '/library/progress';
   static const settings = '/settings';
   static const about = '/settings/about';
   static const metadata = '/settings/metadata';
@@ -126,6 +130,10 @@ class AppRouter {
                   GoRoute(
                     path: 'sites',
                     builder: (context, state) => const SitesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'progress',
+                    builder: (context, state) => const ProgressScreen(),
                   ),
                 ],
               ),

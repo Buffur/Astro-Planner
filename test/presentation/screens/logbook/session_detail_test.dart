@@ -254,6 +254,28 @@ void main() {
     expect(find.byKey(const Key('detail.noSnapshot')), findsOneWidget);
   });
 
+  testWidgets('TASK 14.2: the detail shows the target so far; Library → '
+      'Progress lists it', (tester) async {
+    await seed(tester);
+    await pumpAt(tester, AppRouter.sessionDetail(completedId));
+    expect(find.text('This target so far'), findsOneWidget);
+    expect(find.text('50 min over 1 session'), findsOneWidget);
+    expect(find.text('L: 50 min'), findsOneWidget);
+    AppRouter.router.go(AppRouter.libraryProgress);
+    await settle(tester);
+    expect(find.byKey(const Key('progress.1')), findsOneWidget);
+    expect(find.text('Orion Nebula'), findsWidgets);
+  });
+
+  testWidgets('TASK 14.2: Progress says so when nothing is completed', (
+    tester,
+  ) async {
+    await seed(tester);
+    await tester.runAsync(() => sessions.delete(completedId));
+    await pumpAt(tester, AppRouter.libraryProgress);
+    expect(find.byKey(const Key('progress.empty')), findsOneWidget);
+  });
+
   testWidgets('no overflow at 200 % text on a 360 × 640 dp phone', (
     tester,
   ) async {

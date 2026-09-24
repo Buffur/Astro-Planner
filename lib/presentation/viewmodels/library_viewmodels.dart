@@ -8,6 +8,7 @@ import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/session_reconciliation.dart';
+import '../../domain/services/target_progress.dart';
 
 /// The Library's rigs (TASK 12.3): screens read and change equipment
 /// through this, never through the repository.
@@ -98,6 +99,14 @@ class SessionFilter {
       to == null;
 }
 
+/// A session for its detail page: the planned vs actual of its run (null
+/// for legacy) and its target's progress so far (TASK 14.2).
+typedef SessionDetail = ({
+  Session session,
+  SessionReconciliation? reconciliation,
+  TargetProgress? progress,
+});
+
 /// The Sessions tab (TASKs 11.3–11.4; TASK 12.3): the saved sessions the
 /// logbook lists — every non-draft session, a draft saved before
 /// ("unsaved changes"), and the legacy logs (owner decisions).
@@ -142,16 +151,21 @@ class SessionsViewModel extends ChangeNotifier {
 
   /// A session with its planned vs actual (CALC-37) for the detail page;
   /// legacy rows have no run, so no reconciliation.
-  Future<({Session session, SessionReconciliation? reconciliation})?> detail(
-    int id,
-  ) async {
+  Future<SessionDetail?> detail(int id) async {
     final s = await _repository.get(id);
     if (s == null) return null;
+    final targetId = s.targetId;
     return (
       session: s,
       reconciliation: s.legacy
           ? null
           : SessionReconciliation.of(s.blocks, await _repository.execution(id)),
+      // TASK 14.2: this target's progress across nights.
+      progress: targetId == null
+          ? null
+          : (await targetProgress())
+                .where((p) => p.targetId == targetId)
+                .firstOrNull,
     );
   }
 
@@ -167,6 +181,26 @@ class SessionsViewModel extends ChangeNotifier {
           await _repository.execution(s.id),
         ),
   };
+
+  /// Accumulated progress per target (TASK 14.2, CALC-38), newest first.
+  Future<List<TargetProgress>> targetProgress() async {
+    final completed = await _repository.list(
+      statuses: {SessionStatus.completed},
+      includeLegacy: false,
+    );
+    final runs = [
+      for (final s in completed)
+        if (s.targetId != null) (s, await _repository.execution(s.id)),
+    ];
+    final list = TargetProgress.of(runs).values.toList()
+      ..sort((a, b) {
+        final x = a.lastNight, y = b.lastNight;
+        if (x == null && y == null) return 0;
+        if (x == null || y == null) return x == null ? 1 : -1;
+        return y.compareTo(x);
+      });
+    return list;
+  }
 
   Future<void> delete(int id) async {
     await _repository.delete(id);

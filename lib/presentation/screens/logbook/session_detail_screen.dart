@@ -13,6 +13,7 @@ import '../../shared/opportunity_text.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../execution/results_screen.dart';
+import '../library/progress_screen.dart';
 import 'logbook_screen.dart';
 
 /// One saved session (TASK 14.1): read-only, from its snapshot — history
@@ -29,8 +30,7 @@ class SessionDetailScreen extends StatefulWidget {
 }
 
 class _SessionDetailScreenState extends State<SessionDetailScreen> {
-  late Future<({Session session, SessionReconciliation? reconciliation})?>
-  _detail;
+  late Future<SessionDetail?> _detail;
 
   @override
   void initState() {
@@ -72,6 +72,14 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               if (!s.legacy) _SnapshotSections(session: s),
               _PlanVsActual(session: s, reconciliation: data.reconciliation),
               _Notes(session: s),
+              if (data.progress case final p?) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'This target so far',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                TargetProgressCard(progress: p),
+              ],
               const SizedBox(height: 12),
               _Actions(session: s, onBack: _load),
             ],

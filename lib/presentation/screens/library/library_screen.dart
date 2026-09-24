@@ -49,6 +49,15 @@ class LibraryScreen extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRouter.librarySites),
           ),
+          // TASK 14.2: integration so far per target.
+          ListTile(
+            key: const Key('library.progress'),
+            leading: const Icon(Icons.stacked_line_chart),
+            title: const Text('Progress'),
+            subtitle: const Text('Integration so far, per target'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRouter.libraryProgress),
+          ),
         ],
       ),
     );
