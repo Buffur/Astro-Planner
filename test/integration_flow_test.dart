@@ -178,7 +178,14 @@ void main() {
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
     // TASK 11.3: Save stores a planned session with a plan snapshot.
-    expect(find.text('Planned'), findsOneWidget);
+    // The row's status (TASK 14.1 added a "Planned" filter chip).
+    expect(
+      find.descendant(
+        of: find.byType(ListTile),
+        matching: find.text('Planned'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

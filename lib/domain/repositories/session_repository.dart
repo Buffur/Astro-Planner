@@ -61,11 +61,17 @@ abstract class SessionRepository {
 
   Future<Session?> get(int id);
 
-  /// Newest-updated first (legacy rows by id). Filters combine.
+  /// Newest-updated first (legacy rows by id). Filters combine. [from] and
+  /// [to] bound the night (inclusive); a legacy row without a night key
+  /// matches by its stored date. A site or target filter never matches a
+  /// legacy row (its references are unknown, ADR-014 §7).
   Future<List<Session>> list({
     Set<SessionStatus>? statuses,
     CalendarDate? eveningDate,
     int? targetId,
+    int? siteId,
+    CalendarDate? from,
+    CalendarDate? to,
     bool includeLegacy = true,
   });
 

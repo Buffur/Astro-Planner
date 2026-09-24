@@ -419,6 +419,9 @@ class DriftSessionRepository implements SessionRepository {
     Set<SessionStatus>? statuses,
     CalendarDate? eveningDate,
     int? targetId,
+    int? siteId,
+    CalendarDate? from,
+    CalendarDate? to,
     bool includeLegacy = true,
   }) async {
     final query = _db.select(_db.sessionLogs);
@@ -431,6 +434,34 @@ class DriftSessionRepository implements SessionRepository {
         e = e & t.eveningDate.equals(eveningDate.toIso8601String());
       }
       if (targetId != null) e = e & t.targetId.equals(targetId);
+      if (siteId != null) e = e & t.siteId.equals(siteId);
+      if (from != null || to != null) {
+        // A night key compares as text (YYYY-MM-DD). Rows without one
+        // (legacy) match by their stored date on the device's calendar, as
+        // the list shows it (TASK 14.1).
+        Expression<bool> night = t.eveningDate.isNotNull();
+        Expression<bool> label = t.eveningDate.isNull();
+        if (from != null) {
+          night =
+              night &
+              t.eveningDate.isBiggerOrEqualValue(from.toIso8601String());
+          label =
+              label &
+              t.sessionDate.isBiggerOrEqualValue(
+                DateTime(from.year, from.month, from.day),
+              );
+        }
+        if (to != null) {
+          night =
+              night & t.eveningDate.isSmallerOrEqualValue(to.toIso8601String());
+          label =
+              label &
+              t.sessionDate.isSmallerThanValue(
+                DateTime(to.year, to.month, to.day + 1),
+              );
+        }
+        e = e & (night | label);
+      }
       if (!includeLegacy) {
         e = e & t.legacy.equals(false) & t.eveningDate.isNotNull();
       }

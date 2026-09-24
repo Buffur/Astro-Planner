@@ -70,7 +70,14 @@ void main() {
     expect(find.textContaining('M42'), findsOneWidget);
     expect(find.textContaining('M45'), findsNothing);
     expect(find.text('Legacy log'), findsOneWidget);
-    expect(find.text('Planned'), findsOneWidget);
+    // The row's status (TASK 14.1 added a "Planned" filter chip).
+    expect(
+      find.descendant(
+        of: find.byType(ListTile),
+        matching: find.text('Planned'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('swiping to delete asks for confirmation before deleting', (

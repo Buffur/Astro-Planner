@@ -286,7 +286,11 @@ class _Summary extends StatelessWidget {
 /// Wording for planned vs actual, shared with the Sessions list.
 abstract final class ResultsText {
   static String integration(SessionReconciliation r) =>
-      'Integration: ${OpportunityText.duration(r.actualIntegration)} of '
+      'Integration: ${integrationValue(r)}';
+
+  /// "1 h 40 min of 2 h planned".
+  static String integrationValue(SessionReconciliation r) =>
+      '${OpportunityText.duration(r.actualIntegration)} of '
       '${OpportunityText.duration(r.plannedIntegration)} planned';
 }
 

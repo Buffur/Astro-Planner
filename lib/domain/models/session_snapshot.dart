@@ -127,6 +127,43 @@ class SessionSnapshot {
   double? get perFrameOverheadSeconds =>
       (_section('preferences')?['perFrameOverheadS'] as num?)?.toDouble();
 
+  // Detail-page reads (TASK 14.1). Every value is null when absent —
+  // never a default (SI-008).
+  double? _num(String section, String key) =>
+      (_section(section)?[key] as num?)?.toDouble();
+  Duration? _ms(String section, String key) {
+    final ms = _section(section)?[key] as int?;
+    return ms == null ? null : Duration(milliseconds: ms);
+  }
+
+  double? get siteLatitudeDeg => _num('site', 'latitudeDeg');
+  double? get siteLongitudeDeg => _num('site', 'longitudeDeg');
+  double? get siteElevationM => _num('site', 'elevationM');
+  int? get bortleClass => _section('skyDarkness')?['bortleClass'] as int?;
+  double? get sqm => _num('skyDarkness', 'sqmMagArcsec2');
+  double? get rigFocalRatio => _num('rig', 'focalRatio');
+  double? get rigPixelPitchUm => _num('rig', 'pixelPitchUm');
+  double? get darknessLimitDeg => _num('preferences', 'darknessLimitDeg');
+  Duration? get integration => _ms('budget', 'integrationMs');
+  Duration? get windowLoad => _ms('budget', 'windowLoadMs');
+  Duration? get sessionBudget => _ms('budget', 'sessionBudgetMs');
+  Duration? get usableTime => _ms('opportunity', 'usableMs');
+
+  /// `available`, `outOfRange`, `unavailable` or `none`; null if absent.
+  String? get weatherState => _section('weather')?['state'] as String?;
+  String? get weatherSource {
+    final w = _section('weather');
+    final provider = w?['provider'] as String?, model = w?['model'] as String?;
+    return provider == null ? null : '$provider / ${model ?? '?'}';
+  }
+
+  DateTime? get weatherFetchedAtUtc {
+    final ms = _section('weather')?['fetchedAtUtcMs'] as int?;
+    return ms == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+  }
+
   String? get siteName => _section('site')?['name'] as String?;
   String? get targetName =>
       _section('target')?['commonName'] as String? ??

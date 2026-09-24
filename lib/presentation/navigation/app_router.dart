@@ -9,6 +9,7 @@ import '../screens/home/session_planner_route.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/location/location_picker_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
+import '../screens/logbook/session_detail_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/sites/site_editor_screen.dart';
@@ -34,6 +35,9 @@ class AppRouter {
   static const tonight = '/tonight';
   static const candidates = '/tonight/candidates';
   static const sessions = '/sessions';
+
+  /// A saved session's detail (TASK 14.1).
+  static String sessionDetail(int id) => '/sessions/$id';
   static const library = '/library';
   static const libraryRigs = '/library/rigs';
   static const libraryTargets = '/library/targets';
@@ -92,6 +96,15 @@ class AppRouter {
                 GoRoute(
                   path: sessions,
                   builder: (context, state) => const LogbookScreen(),
+                  routes: [
+                    // TASK 14.1: a session's detail, from its snapshots.
+                    GoRoute(
+                      path: ':id',
+                      builder: (context, state) => SessionDetailScreen(
+                        sessionId: int.parse(state.pathParameters['id']!),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

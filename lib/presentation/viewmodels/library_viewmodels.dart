@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../domain/models/astro_target.dart';
+import '../../domain/models/calendar_date.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/session.dart';
 import '../../domain/repositories/equipment_repository.dart';
@@ -61,6 +62,42 @@ class TargetsViewModel extends ChangeNotifier {
   }
 }
 
+/// The Sessions list's status chips (TASK 14.1). Planned includes a saved
+/// plan edited since ("unsaved changes"); legacy logs are completed.
+enum SessionListStatus {
+  planned({SessionStatus.draft, SessionStatus.planned}),
+  inProgress({SessionStatus.inProgress}),
+  completed({SessionStatus.completed}),
+  abandoned({SessionStatus.abandoned});
+
+  const SessionListStatus(this.stored);
+  final Set<SessionStatus> stored;
+}
+
+/// The Sessions list's filters; empty means "all" (TASK 14.1).
+class SessionFilter {
+  const SessionFilter({
+    this.statuses = const {},
+    this.targetId,
+    this.siteId,
+    this.from,
+    this.to,
+  });
+
+  final Set<SessionListStatus> statuses;
+  final int? targetId;
+  final int? siteId;
+  final CalendarDate? from;
+  final CalendarDate? to;
+
+  bool get isEmpty =>
+      statuses.isEmpty &&
+      targetId == null &&
+      siteId == null &&
+      from == null &&
+      to == null;
+}
+
 /// The Sessions tab (TASKs 11.3–11.4; TASK 12.3): the saved sessions the
 /// logbook lists — every non-draft session, a draft saved before
 /// ("unsaved changes"), and the legacy logs (owner decisions).
@@ -69,13 +106,54 @@ class SessionsViewModel extends ChangeNotifier {
 
   final SessionRepository _repository;
 
-  Future<List<Session>> saved() async => [
-    for (final s in await _repository.list())
+  /// The saved sessions matching [filter] (TASK 14.1; the filtering runs in
+  /// the repository's query).
+  Future<List<Session>> saved([
+    SessionFilter filter = const SessionFilter(),
+  ]) async => [
+    for (final s in await _repository.list(
+      statuses: filter.statuses.isEmpty
+          ? null
+          : {for (final f in filter.statuses) ...f.stored},
+      targetId: filter.targetId,
+      siteId: filter.siteId,
+      from: filter.from,
+      to: filter.to,
+    ))
       if (s.legacy || s.status != SessionStatus.draft || s.plannedAtUtc != null)
         s,
   ];
 
+  /// The targets and sites the saved sessions refer to, for the filter
+  /// pickers: id → the label stored with the session.
+  Future<({Map<int, String> targets, Map<int, String> sites})>
+  filterOptions() async {
+    final targets = <int, String>{}, sites = <int, String>{};
+    for (final s in await saved()) {
+      if (s.targetId case final id?) targets[id] ??= s.record.targetName;
+      if (s.siteId case final id?) {
+        sites[id] ??= s.record.locationName ?? 'Site $id';
+      }
+    }
+    return (targets: targets, sites: sites);
+  }
+
   Future<Session?> get(int id) => _repository.get(id);
+
+  /// A session with its planned vs actual (CALC-37) for the detail page;
+  /// legacy rows have no run, so no reconciliation.
+  Future<({Session session, SessionReconciliation? reconciliation})?> detail(
+    int id,
+  ) async {
+    final s = await _repository.get(id);
+    if (s == null) return null;
+    return (
+      session: s,
+      reconciliation: s.legacy
+          ? null
+          : SessionReconciliation.of(s.blocks, await _repository.execution(id)),
+    );
+  }
 
   /// Planned vs actual (CALC-37) for each completed, non-legacy session in
   /// [sessions], by id (TASK 13.4, owner: shown in the Sessions list).
