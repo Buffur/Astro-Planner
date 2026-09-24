@@ -116,7 +116,8 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **878 tests: 878 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.4 host rows) |
+| `flutter test --no-pub` | **878 tests: 878 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.5) |
+| `flutter test --no-pub integration_test -d flutter-tester` | **2 end-to-end tests pass** (the gate's "E2E (host)" step, TASK 15.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -938,3 +939,32 @@ report through `runWithFeedback`/`FailureText`.
 ### Device runs
 
 *(none yet)*
+
+## End-to-end suite (TASK 15.5)
+
+`integration_test/core_loop_test.dart` (2 tests) drives the real UI; the database is a real
+SQLite file, the network (forecast), GPS, the device zone and the share sheet are fakes.
+
+- **The core loop, with a restart:** first-run Skip → a site typed in the Sites editor
+  (the zone defaults to the device zone) → Tonight → the planner → M31 and the seeded rig
+  through the pickers → the night (10 Nov 2026), the forecast, the opportunity's window →
+  Save → Start → three frames → the process dies (widgets gone, database file closed) →
+  45 minutes later the app starts again → the resume prompt → Keep going (three frames) →
+  More → Finish → Results → Complete → the session is completed in the Sessions log and
+  its detail → Export: the manifest v2 is re-parsed (status, zone, evening date, three
+  confirmed light frames).
+- **Time zones:** a site in America/New_York on a device in Europe/Ljubljana — the night is
+  the site's evening (31 Oct) and equals an independent `SessionNightResolver`
+  resolution; a run from 01:30 EDT to 01:30 EST across the DST end has exactly two hours of
+  running time; after a restart the start instant is UTC and the zone is stored with it.
+- **How to run:**
+  - host (in the quality gate): `flutter test --no-pub integration_test -d flutter-tester`;
+  - Android device or emulator (the roadmap's acceptance): `flutter test integration_test
+    -d <device id>`;
+  - Windows desktop: `flutter run -d windows integration_test/core_loop_test.dart` —
+    passed 2026-09-24 (the first native build of the app). `flutter test integration_test
+    -d windows` fails inside flutter_tools (the `integration_test` plugin has no Windows
+    part), not in the app.
+- **Mutation check:** with the resume offer suppressed after a restart, the core-loop test
+  fails.
+- **Emulator run:** not done — no Android device or emulator on the development machine.

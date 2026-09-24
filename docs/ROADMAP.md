@@ -450,8 +450,13 @@ rewritten to match the code.*
     tests green). **Open:** the device rows of `TEST_PLAN.md` § Lifecycle matrix (L1–L8)
     need an Android device or emulator — none exists on the development machine (owner
     decision, 2026-09-24). The task is complete when those rows pass and are recorded.
-  - **Next after 15.4: TASK 15.5 — End-to-end regression suite (G15)** (also needs an
-    emulator). Not started; it begins only on the owner's go-ahead.
+  - **In progress: TASK 15.5 — End-to-end regression suite (G15).** The suite
+    (`integration_test/core_loop_test.dart`: the core loop with a restart, and time-zone
+    cases) is green on the host — it runs in the quality gate — and as a native Windows
+    app (commit `4ead647`). **Open:** "green on the emulator" (no Android device or
+    emulator on the development machine, as for 15.4).
+  - **Next: G16 — Release preparation (TASK 16.1, app identity).** Not started; it begins
+    only on the owner's go-ahead. G15's "done when" also needs 15.4 and 15.5 on a device.
 
 ### Phase → group map
 
