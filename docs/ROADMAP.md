@@ -429,8 +429,12 @@ rewritten to match the code.*
   - Completed 2026-09-24: **TASK 14.3** — export manifest v2 (one session or all, with the
     event log; v1 readable; schema in `docs/EXPORT_MANIFEST.md`) (commit `a234ff6`). 822 tests
     green.
-  - **Next: TASK 14.4 — Backup and restore.** Not started; it begins only on the owner's
-    go-ahead.
+  - Completed 2026-09-24: **TASK 14.4** — backup and restore (one `.astroplan` file;
+    checked, confirmed, staged restore applied at the next start) (commit `a847f87`). 835
+    tests green. Emulator round trip is an owner checklist item; TD-056 recorded.
+    **Group G14 is complete.**
+  - **Next: the first task of group G15 in `docs/MASTER_ROADMAP.md`.** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

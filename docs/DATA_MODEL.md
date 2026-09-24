@@ -65,6 +65,7 @@
 > **TASK 13.4 (2026-09-24, commit `c1e52ce`):** end-of-session reconciliation. A results page (`/session/:id/results`) with per-block confirmed and rejected steppers (each change a stored event), notes, optional conditions (temperature, humidity, cloud cover — empty means unknown, range-checked) and planned vs actual light integration (`SessionReconciliation`, CALC-37); Complete or Abandon. Owner decisions: the tracker's Finish opens this page and completes nothing by itself; after completion the counts may be corrected, each correction a timestamped confirm/reject event after `finished` (the only events allowed then; ADR-016 §11); Sessions shows planned vs actual integration and "Edit results" for completed sessions. `complete()` and every correction write the actual/rejected light-frame totals in the same transaction. No schema change (the condition columns existed). **Group G13 is complete.**
 > **TASK 14.1 (2026-09-24, commit `e212f6a`):** Sessions list and detail. Filters by status (chips), target and site (pickers built from the saved sessions) and night date range, run in the query (`SessionRepository.list` gains `siteId`, `from`, `to`); legacy rows match a date range by their stored date and never a site or target filter, and carry a Legacy badge. Owner decisions: a tap opens the read-only detail (`/sessions/:id`); a started session shows its execution-start snapshot, a planned one its plan snapshot, labelled with when it was taken. The detail shows the night (window, zone, darkness limit, minimum altitude, usable time, windows), site (with Bortle/SQM), target, rig, budget, weather source, plan vs actual per block (CALC-37), notes and conditions, and the actions Open tracker / Edit results / Open in planner (a copy for frozen sessions) / Share. Legacy logs show their stored text only; a missing snapshot says so. Typed `SessionSnapshot` readers keep JSON out of widgets. No schema change.
 > **TASK 14.3 (2026-09-24, commit `a234ff6`):** export manifest v2 (schema in `docs/EXPORT_MANIFEST.md`). `SessionManifestCodec` (data layer) writes UTC epoch-ms instants, the night key and zone, status, the snapshots as stored, blocks with confirmed/rejected counts replayed from the events, results and conditions, and the run's event log (owner decision); it reads v1 as a legacy log and refuses unknown versions. `ShareSessionExporter` shares a `.json` file plus a text summary; owner decision: Export file on a session's detail and Export all in the Sessions app bar. Import deferred. `AppIdentity.version` stays in step with `pubspec.yaml` (tested).
+> **TASK 14.4 (2026-09-24, commit `a847f87`):** backup and restore. Owner decisions: one `.astroplan` file (ZIP: header with format, schema and app version, time and session count; a consistent database copy made with `VACUUM INTO`; the v2 manifest) shared to a place the user picks; restore picked with `file_picker` 13.1.0 (MIT), checked (AstroPlan backup, header = the file's SQLite `user_version`, newer schema refused, below the v8 floor refused — older supported schemas are upgraded by the existing migrations), confirmed with a preview, staged, and applied at the next start before the database opens, the replaced database and its WAL kept as a safety copy. New dependencies `file_picker` 13.1.0 and `archive` 4.3.0 (both MIT, checked on pub.dev). Android Auto Backup: documented, not changed (owner decision). TD-056 recorded (preferences are not in the backup).
 
 ---
 
@@ -296,6 +297,28 @@ allows reuse.
   (SI-005, SI-011).
 - Seeding is started unawaited in `main()` (race with the ViewModel's first read,
   TD-002).
+
+## B8a. Backup and restore (TASK 14.4)
+
+- **Backup:** one `.astroplan` file — a ZIP with `backup.json` (format
+  `astroplan-backup`, `format_version` 1, `schema_version`, `app_version`,
+  `created_at_utc_ms`, `session_count`), `astroplan.sqlite` (a consistent copy made with
+  `VACUUM INTO`) and `manifest.json` (export manifest v2, `docs/EXPORT_MANIFEST.md`).
+- **Restore:** refused when the file is not a backup, when the header disagrees with the
+  database's own `user_version`, when the schema is newer than the app's, or below the v8
+  floor; otherwise confirmed, staged as `astroplan.restore.sqlite` and swapped in by
+  `main.dart` before the database opens (`BackupStaging.apply`), the replaced file and its
+  `-wal`/`-shm` renamed `*.before-restore-<time>.bak`, never deleted. An older supported
+  schema is upgraded by the normal migrations when the database opens.
+- **Not included:** SharedPreferences (TD-056).
+- **Android Auto Backup (documented, not changed — owner decision; unverified on a
+  device):** the manifest sets no `allowBackup`/backup rules, so Android's default
+  applies: for apps targeting API 23+ Auto Backup is on, and it backs up the app's files,
+  databases and shared preferences (up to 25 MB) to the user's Google Drive, roughly daily
+  when idle, charging and on Wi-Fi, and restores them when the app is reinstalled with the
+  same account. The database lives in the documents directory (`app_flutter`), which the
+  default includes. None of this has been verified on a device; the manual backup is the
+  supported path.
 
 ## B8. Schema and migration history (v1 → v10)
 

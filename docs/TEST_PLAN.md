@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **822 tests: 822 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.3) |
+| `flutter test --no-pub` | **835 tests: 835 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.4) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -831,3 +831,18 @@ the ADR-012 variables, and a real out-of-range error):
   malformed versions refused; the share summary; `AppIdentity.version` = pubspec.
 - **`session_detail_test.dart` (+2):** Export file shares the session with its events;
   Export all shares every saved session.
+
+**Added by TASK 14.4** (backup and restore), 13 tests (835):
+- **`data/backup/backup_restore_test.dart` (9):** **acceptance: a restore on a clean install
+  reproduces all sessions** (backup from a file database → check → stage → apply at the
+  next start → open: every session and event identical, compared as manifests); the
+  archive carries the database and manifest; a safety copy of the replaced database;
+  cancel; refused backups (newer schema, below the floor, header/database mismatch, not a
+  backup) and an older supported schema accepted.
+- **`screens/settings/backup_section_test.dart` (4):** Back up now; restore confirmed then
+  staged, and cancelled; cancel at the confirmation stages nothing; a newer backup refused
+  with its reason.
+- **Owner checklist (manual, not yet done):** the roadmap asks for the round trip on an
+  emulator. On an Android emulator: back up to Files, uninstall, reinstall, restore, close
+  and reopen the app; check sessions, sites, rigs and targets; also try a backup made by a
+  newer build (refused). The automated round trip above runs on desktop SQLite.
