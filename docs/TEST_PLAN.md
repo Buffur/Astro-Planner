@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **760 tests: 760 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.2) |
+| `flutter test --no-pub` | **780 tests: 780 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -770,3 +770,21 @@ the ADR-012 variables, and a real out-of-range error):
 - **`screens/tonight/resume_run_prompt_test.dart` (9):** the prompt with running time and
   estimate; keep going writes nothing; pause now; finish; abandon asks first; a past night
   is flagged and not finished; a paused run; a clock behind; no prompt without a run.
+
+**Added by TASK 13.3** (tracking screen, Start), 20 tests (780):
+- **`domain/services/execution_outlook_test.dart` (7):** CALC-36 — dawn ahead or passed;
+  the target's next crossing and "below now"; the Moon up/down and next rise; window
+  left; plan left (lights and in-window calibration, minus confirmed); nothing guessed
+  without inputs; the snapshot accessors (night, zone, limit, target, windows).
+- **`screens/execution/execution_screen_test.dart` (13):** Start runs the plan and the
+  planner goes on with a draft copy; a second Start is refused; TD-055 after a restart
+  (the run is never edited); the running screen with counts and outlook; +1, −1, Reject;
+  Accept estimate after time passes; Pause with a reason and Resume; the block switcher;
+  Finish with confirmation; keep-screen-on opt-in and released on leaving; **acceptance:
+  every action in the lower half, ≥ 48 dp and labelled**; no overflow at 200 % text on
+  360 × 640 dp; Start on Tonight opens the tracker and Tonight shows the run.
+- **Updated:** `theme_viewmodel_test.dart`'s broken store implements the new
+  keep-screen-on methods.
+- **Owner checklist (manual, not yet done):** on an Android device, start a session, lock
+  and unlock the phone, kill the app mid-block and reopen it (resume prompt, exact
+  counts), and check keep-screen-on keeps the screen awake only on the tracker.

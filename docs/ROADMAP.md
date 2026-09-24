@@ -416,8 +416,10 @@ rewritten to match the code.*
   - Completed 2026-09-24: **TASK 13.2** — execution state machine, `session_events`
     (schema v17), repository methods and the resume prompt (commit `14467e7`). 760 tests
     green.
-  - **Next: TASK 13.3 — Execution screen.** Not started; it begins only on the owner's
-    go-ahead.
+  - Completed 2026-09-24: **TASK 13.3** — tracking screen, Start in the planner and on
+    Tonight, opt-in keep-screen-on (`wakelock_plus`) (commit `c8e2240`). 780 tests green.
+  - **Next: TASK 13.4 — End-of-session reconciliation.** Not started; it begins only on
+    the owner's go-ahead.
 
 ### Phase → group map
 

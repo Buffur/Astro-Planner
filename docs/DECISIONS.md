@@ -73,6 +73,7 @@
 > **TASK 12.4 (2026-09-24, commit `3c27b15`):** semantic theme tokens and complete red field mode. `AppPalette` (a `ThemeExtension`: muted, night events, altitude chart, Bortle scale) for light, dark and field; `lib/presentation` names no colour itself — the 52 `Colors.*`/colour literals found (not the ~100 the roadmap estimated) now read `ColorScheme` or `AppPalette`. The field theme sets every `ColorScheme` role and theme colour to red or black, so dialogs, date pickers, snackbars and menus stay red. Owner decisions: (1) in field mode the whole app also goes through a red colour filter (R' = R + 0.7152 G + 0.0722 B, G' = B' = 0; Rec. 709 luma weights; pure red unchanged), covering map tiles and anything a token misses; (2) the gate is lifted in this task after the automated darkness checks, and the on-device check in real darkness is an owner checklist item. Field mode is persisted (`DisplayPreferencesRepository`, SharedPreferences) and restored before the first frame; one tap from Tonight and the planner (`FieldModeButton`) and a switch in Settings. `FeatureScope.fieldMode` is `true` (PD-06 schedule). No text under 12 sp; the section header's action keeps its 48 dp tap target. Light and dark look as before, except swipe-to-delete and the map pin now use the scheme's error colour and chart labels are 12 sp. F-46 Implemented; TD-044 fully resolved.
 > **TASK 12.5 (2026-09-24, commit `b13f7c7`):** Tonight dashboard and first-run setup. Tonight shows the site and night, the night (sunset to sunrise, dark with the Sun below −18°), the Moon (% lit, when it is up), the weather (cloud range and age, or why there is no forecast) and the current session (status, target, rig or "No rig chosen", fit label with its one-line reason, usable time); each row drills down into the planner or a picker. Without a site, a site prompt replaces the night rows. No new calculations: the wording is shared with the planner (`WeatherText`, `MoonText`, `FitText` in `presentation/shared/night_text.dart`, moved out of the weather, sky and budget widgets). First run (owner decisions): a full-screen page (`/welcome`, above the tabs) with site (the location-permission rationale comes before "Use current position"), rig and target steps reusing the pickers; offered once, only on a start without a site; Skip, Done and back close it for good (`FirstRunRepository`, `TonightViewModel`). TD-054 recorded.
 > **TASK 13.2 (2026-09-24, commit `14467e7`):** execution state machine and persistence (ADR-016). A pure `ExecutionMachine` (domain) validates every transition per phase (not started, running on a block, paused, finished, abandoned), folds a run's events into its state, measures running time from UTC timestamps, stamps an event taken with a clock behind the last one at that event and flags it, estimates frames (CALC-35) and detects a run past its night. Schema v17 adds the append-only `session_events` table. `SessionRepository.start` records the start on the first light block and refuses a second session in progress; `record` stores an event and its counter projection in one transaction; `complete`/`abandon` close the run with an event. A resume prompt at start (Tonight) offers keep going, pause now, finish or abandon (confirmed), flags a finished night and a clock that went back, and changes nothing without an answer. No tracking screen yet (TASK 13.3). TD-055 recorded.
+> **TASK 13.3 (2026-09-24, commit `c8e2240`):** the tracking screen (`/session/:id/run`, ADR-016). The current block with confirmed and estimated counts; +1, −1, Reject, Accept estimate, Pause (plain or with a reason: clouds, wind, dew, equipment, other) / Resume, a block switcher and Finish / Abandon (confirmed) — all in the lower half, 56 dp, labelled for screen readers; countdowns to astronomical dawn, the target below its limit and moonrise; remaining window vs remaining plan (CALC-36). The tracker reads its night, target and Moon from the execution-start snapshot (`ExecutionOutlook`, pure), never from the planner. Owner decisions: Start is in the planner and on Tonight, with the same requirements as Save; after Start the planner goes on with a draft copy, and on a restart it resumes a copy when the most recent open session is running (TD-055 resolved). Tonight shows the run in progress; the resume prompt's Keep going opens the tracker. Opt-in keep-screen-on (off by default, persisted as `keepScreenOnWhileTracking`, only while the tracker is visible and a run is active) behind a `ScreenWake` interface, implemented with `wakelock_plus` 1.8.0 (BSD-3-Clause, verified on pub.dev; a screen wakelock only, no Android permission).
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 >
 > Structure:
@@ -2352,7 +2353,7 @@ lower half" is not audited yet — TASK 12.5 designs the Tonight dashboard.)*
 ## ADR-016: Execution model under Android constraints
 
 Status: accepted (owner, 2026-09-24, TASK 13.1). Resolves PD-20. **§2–§5 implemented in
-TASK 13.2 (commit `14467e7`, schema v17).** Documentation only —
+TASK 13.2 (commit `14467e7`, schema v17); §6 in TASK 13.3 (commit `c8e2240`).** Documentation only —
 this ADR changes no code. Checked against `session_repository.dart`, `session.dart`,
 `app_database.dart` (schema v16: `capture_blocks.completed_frames` /
 `rejected_frames`, `session_logs.started_at_utc_ms` / `completed_at_utc_ms` and the
@@ -2511,3 +2512,24 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
   editing results after completion goes through `updateResults` (ADR-014 §3; 13.4).
 - **Resume prompt:** keep going (nothing written), pause now (a `paused` event), finish,
   abandon (after a confirmation); it is shown once per start, on Tonight.
+
+### 10. Implementation notes (TASK 13.3, commit `c8e2240`)
+
+- **Status:** §6 implemented (tracking screen, opt-in keep-screen-on); ADR-016 is
+  implemented except reconciliation (TASK 13.4).
+- **Owner decisions (TASK 13.3):** Start is in the planner and on Tonight's session card;
+  it needs what Save needs (site, target, rig) and takes the execution-start snapshot
+  itself (no prior Save). After Start the planner continues on a new draft copy of the
+  plan; on a restart, when the most recent open session is in progress, the planner
+  adopts a copy too — it never edits a run (TD-055 resolved).
+- **The tracker reads the snapshot:** night, site, target and minimum altitude come from
+  the execution-start snapshot; the timeline, the target's altitude curve and the Moon's
+  rise/set are computed once from them (existing calculations CALC-22, CALC-24, CALC-28)
+  and turned into countdowns by `ExecutionOutlook` (CALC-36). A later site or target
+  change in the planner cannot move a run's countdowns.
+- **Keep screen on:** `wakelock_plus` 1.8.0, licence verified on pub.dev (BSD-3-Clause),
+  a screen wakelock only (no Android permission); behind the `ScreenWake` interface,
+  off by default, persisted, enabled only while the tracker is visible and the run is
+  running or paused.
+- **Accept estimate** stores the shown estimate as confirmed frames (§3); Resume/Keep
+  going in the resume prompt opens the tracker.
