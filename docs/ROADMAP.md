@@ -465,8 +465,13 @@ rewritten to match the code.*
     **Open (owner):** create the upload key and `key.properties`, install SDK
     cmdline-tools, build the signed bundle ("a signed AAB builds locally") and install a
     release build on a device.
-  - **Next: TASK 16.3 — Legal and compliance (PD-12) (G16).** Not started; it begins only
-    on the owner's go-ahead.
+  - **In progress: TASK 16.3 — Legal and compliance (G16).** PD-12 resolved; opt-in place
+    names, licence and privacy on the About screen, the privacy policy and
+    `docs/COMPLIANCE.md` (commit `2521f42`; 896 tests + 2 end-to-end green). **Open
+    (owner):** publish the policy (acceptance: "the policy URL is live") with the contact
+    email filled in; make the repository public; fill in the Data Safety form.
+  - **Next: TASK 16.4 — Beta and release QA (G16).** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

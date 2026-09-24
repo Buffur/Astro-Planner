@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **889 tests: 889 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.2) |
+| `flutter test --no-pub` | **896 tests: 896 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.3) |
 | `flutter test --no-pub integration_test -d flutter-tester` | **2 end-to-end tests pass** (the gate's "E2E (host)" step, TASK 15.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Debug APK and release bundle build (2026-09-24); never installed or run on a device |
@@ -994,3 +994,16 @@ SQLite file, the network (forecast), GPS, the device zone and the share sheet ar
   — follow `docs/RELEASE.md`: install SDK cmdline-tools, create the upload key and
   `android/key.properties`, build the signed bundle, `tool/check_bundle.dart` passes, a
   release build installs and runs on a device.
+
+**Added by TASK 16.3** (legal and compliance), 7 tests (896):
+- **`screens/about/about_screen_test.dart` (+2; the roadmap's attribution test):** every
+  third-party credit (OpenNGC with its notice, OpenStreetMap, Open-Meteo CC BY 4.0,
+  lightpollutionmap.info); GPL-3.0 with the version and a source link; the privacy summary
+  and the policy link.
+- **`viewmodels/place_name_lookup_test.dart` (4):** off by default; while off a chosen
+  position is never sent; on looks it up, off clears the name, the choice is saved; a saved
+  "on" is restored at start.
+- **`screens/settings/settings_screen_test.dart` (+1):** the place-name switch.
+- **Owner checklist (manual, not yet done):** the policy URL opens (with the contact
+  filled in); the About screen's links open; the Data Safety form is filled in from
+  `docs/COMPLIANCE.md`.
