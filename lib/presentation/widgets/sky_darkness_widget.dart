@@ -9,6 +9,7 @@ import '../../../core/config/feature_scope.dart';
 import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/sky_darkness.dart';
+import '../shared/night_text.dart';
 
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
@@ -349,15 +350,7 @@ class _MoonDetails extends StatelessWidget {
       zoneId: zoneId,
     );
 
-    final String upText;
-    if (c.riseSet.alwaysAbove) {
-      upText = 'Moon up all night.';
-    } else if (c.riseSet.alwaysBelow) {
-      upText = 'Moon below the horizon all night.';
-    } else {
-      upText =
-          'Moon up ${c.upIntervals.map((i) => '${i.$1 == c.night.startUtc ? 'from noon' : at(i.$1)}–${i.$2 == c.night.endUtc ? 'noon' : at(i.$2)}').join(', ')}.';
-    }
+    final upText = MoonText.up(c, at);
 
     final hasTarget =
         c.samples.isNotEmpty && c.samples.first.separationDeg != null;

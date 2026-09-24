@@ -10,6 +10,7 @@ import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/session_plan_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../../core/theme/app_palette.dart';
+import '../shared/night_text.dart';
 
 /// The chosen night's weather (ADR-012; TASK 9.4): sunset to sunrise only,
 /// per-hour indicators and per-variable ranges with explicit units, the
@@ -110,7 +111,7 @@ class WeatherForecastWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Couldn't load weather."),
-                        Text(_failureText(failure), style: small),
+                        Text(WeatherText.failure(failure), style: small),
                       ],
                     ),
                   ),
@@ -146,12 +147,6 @@ class WeatherForecastWidget extends StatelessWidget {
       ),
     );
   }
-
-  static String _failureText(WeatherFailure failure) => switch (failure) {
-    WeatherFailure.unavailable => 'Offline or the service did not answer.',
-    WeatherFailure.malformed => 'The forecast could not be read.',
-    WeatherFailure.outOfRange => 'Beyond the forecast horizon.',
-  };
 }
 
 class _AvailableBody extends StatelessWidget {
@@ -248,12 +243,7 @@ class _FreshnessLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ago = _ago(state.ageDuration);
-    final text = switch (state.age) {
-      WeatherAge.current => 'Updated $ago',
-      WeatherAge.aging => 'Aging forecast: updated $ago',
-      WeatherAge.stale => 'Stale forecast: updated $ago. Refresh to update.',
-    };
+    final text = WeatherText.freshness(state);
     final failed = state.refreshFailed;
     final prefix = failed == null
         ? ''
@@ -280,19 +270,6 @@ class _FreshnessLine extends StatelessWidget {
       ],
     );
   }
-
-  static String _ago(Duration d) {
-    if (d.inMinutes < 1) return 'just now';
-    if (d.inMinutes < 60) return '${d.inMinutes} min ago';
-    return '${d.inHours} h ago';
-  }
-}
-
-String _range(WeatherRange? r, String unit, {int digits = 0}) {
-  if (r == null) return 'no forecast';
-  final lo = r.min.toStringAsFixed(digits);
-  final hi = r.max.toStringAsFixed(digits);
-  return lo == hi ? '$lo $unit' : '$lo–$hi $unit';
 }
 
 WeatherRange? _km(WeatherRange? m) =>
@@ -307,19 +284,22 @@ class _Ranges extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = summary;
     final rows = <(String, String)>[
-      ('Cloud cover (total)', _range(s.cloudCover, '%')),
-      ('Low cloud (below 3 km)', _range(s.cloudCoverLow, '%')),
-      ('Mid cloud (3–8 km)', _range(s.cloudCoverMid, '%')),
-      ('High cloud (above 8 km)', _range(s.cloudCoverHigh, '%')),
-      ('Chance of precipitation', _range(s.precipitationProbability, '%')),
-      ('Wind at 10 m', _range(s.windSpeed, 'km/h')),
-      ('Gusts (max of preceding hour)', _range(s.windGusts, 'km/h')),
-      ('Temperature', _range(s.temperature, '°C')),
-      ('Dew point', _range(s.dewPoint, '°C')),
-      ('Relative humidity', _range(s.relativeHumidity, '%')),
+      ('Cloud cover (total)', WeatherText.range(s.cloudCover, '%')),
+      ('Low cloud (below 3 km)', WeatherText.range(s.cloudCoverLow, '%')),
+      ('Mid cloud (3–8 km)', WeatherText.range(s.cloudCoverMid, '%')),
+      ('High cloud (above 8 km)', WeatherText.range(s.cloudCoverHigh, '%')),
+      (
+        'Chance of precipitation',
+        WeatherText.range(s.precipitationProbability, '%'),
+      ),
+      ('Wind at 10 m', WeatherText.range(s.windSpeed, 'km/h')),
+      ('Gusts (max of preceding hour)', WeatherText.range(s.windGusts, 'km/h')),
+      ('Temperature', WeatherText.range(s.temperature, '°C')),
+      ('Dew point', WeatherText.range(s.dewPoint, '°C')),
+      ('Relative humidity', WeatherText.range(s.relativeHumidity, '%')),
       (
         'Horizontal visibility (not transparency)',
-        _range(_km(s.visibility), 'km', digits: 1),
+        WeatherText.range(_km(s.visibility), 'km', digits: 1),
       ),
     ];
     final style = Theme.of(context).textTheme.bodySmall;

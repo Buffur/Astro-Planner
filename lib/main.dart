@@ -21,6 +21,7 @@ import 'domain/repositories/session_repository.dart';
 import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
 import 'data/repositories/shared_prefs_display_preferences_repository.dart';
+import 'data/repositories/shared_prefs_first_run_repository.dart';
 import 'data/repositories/shared_prefs_planner_state_repository.dart';
 import 'data/repositories/shared_prefs_planning_preferences_repository.dart';
 import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
@@ -79,11 +80,13 @@ void main() async {
     deviceTimeZone: FlutterTimezoneDeviceTimeZone(),
     clock: clock,
     display: SharedPrefsDisplayPreferencesRepository(),
+    firstRun: SharedPrefsFirstRunRepository(),
     sessions: sessionRepo,
   );
   // Field mode is restored before the first frame, so a restart in field
   // mode never flashes the normal theme (TASK 12.4).
   await vms.theme.load();
+  await vms.tonight.load();
 
   runApp(
     MultiProvider(

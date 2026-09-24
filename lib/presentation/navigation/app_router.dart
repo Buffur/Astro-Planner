@@ -14,6 +14,7 @@ import '../screens/settings/settings_screen.dart';
 import '../screens/sites/site_editor_screen.dart';
 import '../screens/sites/sites_screen.dart';
 import '../screens/target/target_selection_screen.dart';
+import '../screens/welcome/welcome_screen.dart';
 import '../screens/tonight/tonight_candidates_screen.dart';
 import '../screens/tonight/tonight_home_screen.dart';
 import 'app_shell.dart';
@@ -48,6 +49,9 @@ class AppRouter {
   static const siteEdit = '/site/edit';
   static const sitePick = '/site/pick';
   static const position = '/position';
+
+  /// The first-run setup (TASK 12.5).
+  static const welcome = '/welcome';
 
   static final router = GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -163,6 +167,11 @@ class AppRouter {
           pickOnly: true,
           initial: state.extra as LatLng?,
         ),
+      ),
+      GoRoute(
+        path: welcome,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const WelcomeScreen(),
       ),
       // A transient position: map pick or GPS (TASK 7.1).
       GoRoute(

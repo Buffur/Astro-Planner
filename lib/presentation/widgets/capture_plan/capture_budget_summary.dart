@@ -7,6 +7,7 @@ import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
+import '../../shared/night_text.dart';
 
 /// Formats a millisecond duration as "Xh Ym" (or "Z s" under a minute).
 String formatBudgetDuration(int ms) {
@@ -104,11 +105,11 @@ class CaptureBudgetSummary extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(
-              _fitLabel(fit.state),
+              FitText.label(fit.state),
               key: const Key('capturePlan.fitState'),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: _fitColor(fit.state, scheme),
+                color: FitText.color(fit.state, scheme),
               ),
             ),
           ],
@@ -172,21 +173,6 @@ class CaptureBudgetSummary extends StatelessWidget {
     final s = ms / 1000;
     return s == s.roundToDouble() ? '${s.round()} s' : '$s s';
   }
-
-  static String _fitLabel(FitState state) => switch (state) {
-    FitState.fits => 'Fits',
-    FitState.tight => 'Tight',
-    FitState.doesNotFit => "Doesn't fit",
-    FitState.noWindow => 'No window',
-    FitState.nothingToFit => 'Nothing to fit',
-  };
-
-  static Color _fitColor(FitState state, ColorScheme scheme) => switch (state) {
-    FitState.fits => scheme.primary,
-    FitState.tight => scheme.tertiary,
-    FitState.doesNotFit || FitState.noWindow => scheme.error,
-    FitState.nothingToFit => scheme.outline,
-  };
 }
 
 /// "Fill tonight's window": one action that sets the plan's last light
