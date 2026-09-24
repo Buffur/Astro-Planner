@@ -433,7 +433,7 @@ rewritten to match the code.*
     checked, confirmed, staged restore applied at the next start) (commit `a847f87`). 835
     tests green. Emulator round trip is an owner checklist item; TD-056 recorded.
     **Group G14 is complete.**
-  - **Next: the first task of group G15 in `docs/MASTER_ROADMAP.md`.** Not started; it
+  - **Next: TASK 15.1 — Error handling and diagnostics (G15).** Not started; it
     begins only on the owner's go-ahead.
 
 ### Phase → group map
