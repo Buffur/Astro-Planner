@@ -441,8 +441,12 @@ rewritten to match the code.*
     planner's timeline, weather summary, transit, budget, fit and fill count memoized: a
     rebuild 2.5 ms → 0.08 ms; candidates ~95 ms for 164 targets) (commit `2e923e6`). 864
     tests green. Device profile traces are an owner checklist item.
-  - **Next: TASK 15.3 — Accessibility pass (G15).** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-24: **TASK 15.3** — accessibility pass (guideline tests for every
+    main screen × light/dark/field × 100/200 % text; labels, 48 px targets, overflow fixes,
+    the chart's text alternative; red-mode contrast limit documented) (commit `c191eb4`).
+    871 tests green. The TalkBack walkthrough is an owner checklist item.
+  - **Next: TASK 15.4 — Lifecycle, process-death and offline matrix (G15).** Not started;
+    it begins only on the owner's go-ahead.
 
 ### Phase → group map
 

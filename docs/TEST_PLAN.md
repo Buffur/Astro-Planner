@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **864 tests: 864 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.2) |
+| `flutter test --no-pub` | **871 tests: 871 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -884,3 +884,23 @@ the ADR-012 variables, and a real out-of-range error):
   (`flutter run --profile`), record a DevTools performance trace while editing the plan,
   changing the night and scrolling the planner and the candidates list; check for frames
   over 16 ms.
+
+**Added by TASK 15.3** (accessibility pass), 7 tests (871):
+- **`presentation/accessibility_test.dart` (7):** **acceptance: the guideline tests pass** —
+  six sweeps (light, dark and field theme × 100 % and 200 % text) over 16 routes with a
+  planned session and a run in progress: no layout exception, `androidTapTargetGuideline`,
+  `labeledTapTargetGuideline`, and `textContrastGuideline` in light and dark (field mode's
+  documented limit, ARCHITECTURE B16); the altitude chart's text alternative. A mutation
+  check (the rigs' add button without its label) makes the sweep fail.
+- **What the first audit found** (before the fixes): unlabeled add buttons (Rigs,
+  Targets); Save/Start 40 px tall; the About notice and the Open-Meteo link under 48 px;
+  overflow in the sky card (even at 100 % on a 412 px phone), the chart legend, the
+  candidates' dropdowns, the budget lines, the fit row and the Sequence Plan header at
+  200 %; field-mode secondary text 2.71:1.
+- **Not covered:** dialogs, the map picker, the hidden metadata import.
+- **Owner checklist (manual, not yet done):** the roadmap asks for a recorded TalkBack
+  walkthrough. On an Android device with TalkBack on and the font size at its largest:
+  first run → set a site → Tonight → open the planner, pick a target and a rig, hear the
+  altitude chart's description, save → start the run, confirm frames → finish and complete
+  → Sessions → the session's detail. Note anything unlabeled, read in a confusing order,
+  or cut off; repeat the tracker part in field mode.
