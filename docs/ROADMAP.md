@@ -459,9 +459,14 @@ rewritten to match the code.*
     (OD-07: "Astro Planner", `io.github.chacha12.astroplanner`, an original adaptive icon
     and splash) (commits `92afaa4`, `98045f7`). 881 tests + 2 end-to-end green. The
     roadmap's test, build and install, needs the Android toolchain.
-  - **Next: TASK 16.2 — Release build and signing (G16).** Not started; it begins only on
-    the owner's go-ahead. It needs a working Android build (Gradle, SDK licenses, a keystore
-    only the owner should hold). G15's "done when" also needs 15.4 and 15.5 on a device.
+  - **In progress: TASK 16.2 — Release build and signing (G16).** Signing from
+    `android/key.properties`, the bundle check and `docs/RELEASE.md` are in (commit
+    `09f16bf`; 889 tests + 2 end-to-end green); a release bundle builds (debug-signed).
+    **Open (owner):** create the upload key and `key.properties`, install SDK
+    cmdline-tools, build the signed bundle ("a signed AAB builds locally") and install a
+    release build on a device.
+  - **Next: TASK 16.3 — Legal and compliance (PD-12) (G16).** Not started; it begins only
+    on the owner's go-ahead.
 
 ### Phase → group map
 

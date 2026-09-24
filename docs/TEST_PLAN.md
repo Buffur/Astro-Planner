@@ -78,7 +78,7 @@ is informational and should be rechecked after each change.
 | `flutter test --no-pub` | **71 tests: 70 pass, 1 fails** |
 | Failing test | `test/integration_flow_test.dart` "E2E Flow: Planner -> Save -> Logbook" — `pumpAndSettle timed out` at its first call. Root cause (verified): the ViewModel is created in `setUp` outside the fake-async zone so its initialization never advances; an unhandled `MissingPluginException` from `Geolocator` is the only exception. **Not an HTTP problem** (weather is mocked). See `docs/TECH_DEBT.md` TD-003 |
 | CI | None configured |
-| Android build / device run | Not verified |
+| Android build / device run | Debug APK and release bundle build (2026-09-24); never installed or run on a device |
 
 Tests per area (total 71): domain services 27 (astronomy 6, optics 6,
 session/feasibility 6, visibility 3 + 4, metadata 2) · domain models 3 · Drift
@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **881 tests: 881 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.1) |
+| `flutter test --no-pub` | **889 tests: 889 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.2) |
 | `flutter test --no-pub integration_test -d flutter-tester` | **2 end-to-end tests pass** (the gate's "E2E (host)" step, TASK 15.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
@@ -980,3 +980,17 @@ SQLite file, the network (forecast), GPS, the device zone and the share sheet ar
   Planner" with the new icon (and a themed icon on Android 13+ with themed icons on); the
   splash is night navy with the icon on Android 12+ and before; Settings → Apps lists
   `io.github.chacha12.astroplanner`.
+
+**Added by TASK 16.2** (release build and signing), 8 tests (889):
+- **`tool/release_config_test.dart` (8):** the bundle check's ELF reader on synthetic
+  32- and 64-bit ELF files (16/64 KB alignments pass, 4 KB fails, debug sections found,
+  no LOAD segment is not "aligned", a non-ELF is refused); signing secrets gitignored at
+  the root and in `android/`; the release build reads the upload key from
+  `key.properties` with no password literal in the build file; the version is `x.y.z+N`.
+- **Release bundle, 2026-09-24:** `flutter build appbundle --release` built it;
+  `dart run tool/check_bundle.dart`: all 15 native libraries 16 KB/64 KB aligned with no
+  debug sections; **signer check fails** (debug key — the upload key does not exist yet).
+- **Owner checklist (manual, not yet done):** the roadmap's test and acceptance for 16.2
+  — follow `docs/RELEASE.md`: install SDK cmdline-tools, create the upload key and
+  `android/key.properties`, build the signed bundle, `tool/check_bundle.dart` passes, a
+  release build installs and runs on a device.
