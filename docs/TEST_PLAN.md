@@ -78,7 +78,7 @@ is informational and should be rechecked after each change.
 | `flutter test --no-pub` | **71 tests: 70 pass, 1 fails** |
 | Failing test | `test/integration_flow_test.dart` "E2E Flow: Planner -> Save -> Logbook" — `pumpAndSettle timed out` at its first call. Root cause (verified): the ViewModel is created in `setUp` outside the fake-async zone so its initialization never advances; an unhandled `MissingPluginException` from `Geolocator` is the only exception. **Not an HTTP problem** (weather is mocked). See `docs/TECH_DEBT.md` TD-003 |
 | CI | None configured |
-| Android build / device run | Debug APK and release bundle build (2026-09-24); never installed or run on a device |
+| Android build / device run | Not verified |
 
 Tests per area (total 71): domain services 27 (astronomy 6, optics 6,
 session/feasibility 6, visibility 3 + 4, metadata 2) · domain models 3 · Drift
@@ -119,7 +119,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | `flutter test --no-pub` | **889 tests: 889 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.2) |
 | `flutter test --no-pub integration_test -d flutter-tester` | **2 end-to-end tests pass** (the gate's "E2E (host)" step, TASK 15.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
-| Android build / device run | Not verified |
+| Android build / device run | Debug APK and release bundle build (2026-09-24); never installed or run on a device |
 
 **Resolved by TASK 1.1 (commit `2357755`):** the red `integration_flow_test.dart`
 (TD-003) — repaired, not weakened: the ViewModel is now built and awaited (`ready`)
