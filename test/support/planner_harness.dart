@@ -49,6 +49,7 @@ import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/domain/services/screen_wake.dart';
+import 'package:astroplan/domain/services/backup_service.dart';
 import 'package:astroplan/domain/services/session_exporter.dart';
 import 'package:astroplan/presentation/viewmodels/execution_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/results_viewmodel.dart';
@@ -81,6 +82,7 @@ class PlannerHarness extends ChangeNotifier {
     FirstRunRepository? firstRun,
     ScreenWake? screenWake,
     SessionExporter? exporter,
+    BackupService? backup,
   }) {
     final time = clock ?? const SystemClock();
     vms = AppViewModels(
@@ -106,6 +108,7 @@ class PlannerHarness extends ChangeNotifier {
       firstRun: firstRun ?? InMemoryFirstRun(),
       screenWake: screenWake ?? FakeScreenWake(),
       exporter: exporter,
+      backup: backup,
       sessions: sessionRepository,
     );
     for (final vm in [site, settings, plan, conditions, analysis, startup]) {

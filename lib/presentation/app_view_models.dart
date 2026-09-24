@@ -14,8 +14,10 @@ import '../domain/services/device_time_zone.dart';
 import '../domain/services/location_service.dart';
 import '../domain/services/night_weather_service.dart';
 import '../domain/services/reverse_geocoder.dart';
+import '../domain/services/backup_service.dart';
 import '../domain/services/screen_wake.dart';
 import '../domain/services/session_exporter.dart';
+import 'viewmodels/backup_viewmodel.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
 import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
@@ -49,6 +51,7 @@ class AppViewModels {
     required FirstRunRepository firstRun,
     required ScreenWake screenWake,
     SessionExporter? exporter,
+    BackupService? backup,
     SessionRepository? sessions,
   }) {
     site = SiteViewModel(
@@ -95,6 +98,7 @@ class AppViewModels {
         ? null
         : SessionsViewModel(sessions, exporter: exporter);
     resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
+    this.backup = backup == null ? null : BackupViewModel(backup);
     execution = sessions == null
         ? null
         : ExecutionViewModel(sessions, clock, display, screenWake);
@@ -119,6 +123,9 @@ class AppViewModels {
 
   /// Null without a session repository (some tests).
   late final ResumeRunViewModel? resumeRun;
+
+  /// Null when no backup service is given (tests).
+  late final BackupViewModel? backup;
   late final ExecutionViewModel? execution;
   late final ResultsViewModel? results;
   late final ThemeViewModel theme;
@@ -138,6 +145,7 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: theme),
     ChangeNotifierProvider.value(value: tonight),
     ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
+    ChangeNotifierProvider<BackupViewModel?>.value(value: backup),
     ChangeNotifierProvider<ExecutionViewModel?>.value(value: execution),
     ChangeNotifierProvider<ResultsViewModel?>.value(value: results),
   ];

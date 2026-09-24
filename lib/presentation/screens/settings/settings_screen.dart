@@ -8,6 +8,7 @@ import '../../viewmodels/settings_viewmodel.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/field_mode_button.dart';
+import 'backup_section.dart';
 
 /// Planning preferences (TASK 5.2, SI-006, TD-043).
 ///
@@ -192,6 +193,8 @@ class SettingsScreen extends StatelessWidget {
           ),
           const Divider(height: AppSpacing.lg * 2),
           const FieldModeTile(),
+          // TASK 14.4: backup and restore.
+          const BackupSection(),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.info_outline),

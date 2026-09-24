@@ -30,6 +30,11 @@ import 'data/services/geolocator_location_service.dart';
 import 'data/services/nominatim_reverse_geocoder.dart';
 import 'data/services/wakelock_screen_wake.dart';
 import 'data/export/share_session_exporter.dart';
+import 'data/backup/backup_staging.dart';
+import 'data/backup/file_backup_service.dart';
+
+import 'package:path_provider/path_provider.dart';
+
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
 
@@ -41,6 +46,16 @@ void main() async {
       'OpenNGC (target catalog)',
     ], await rootBundle.loadString('assets/catalog/OPENNGC_NOTICE.txt'));
   });
+  // TASK 14.4: a restore confirmed last time replaces the database before
+  // it opens (the replaced file is kept as a safety copy).
+  try {
+    await BackupStaging.apply(
+      await getApplicationDocumentsDirectory(),
+      nowUtc: DateTime.now().toUtc(),
+    );
+  } catch (e) {
+    debugPrint('Staged restore could not be applied: $e');
+  }
   final database = AppDatabase();
   final targetRepo = DriftTargetRepository(database);
   final equipmentRepo = DriftEquipmentRepository(database);
@@ -85,12 +100,14 @@ void main() async {
     firstRun: SharedPrefsFirstRunRepository(),
     screenWake: WakelockScreenWake(),
     exporter: ShareSessionExporter(),
+    backup: FileBackupService(database, sessionRepo),
     sessions: sessionRepo,
   );
   // Field mode is restored before the first frame, so a restart in field
   // mode never flashes the normal theme (TASK 12.4).
   await vms.theme.load();
   await vms.tonight.load();
+  await vms.backup?.load();
   await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
   await vms.execution?.loadActive();
 
