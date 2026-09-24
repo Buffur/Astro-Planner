@@ -137,7 +137,12 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
     if (sure != true || !mounted) return;
     final execution = context.read<ExecutionViewModel?>();
-    await vm.abandon();
+    final done = await runWithFeedback(
+      context,
+      'abandon the session',
+      vm.abandon,
+    );
+    if (!done) return;
     await execution?.loadActive();
     if (mounted) context.go(AppRouter.sessions);
   }

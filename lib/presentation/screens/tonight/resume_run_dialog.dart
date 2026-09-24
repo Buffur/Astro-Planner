@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../domain/models/execution.dart';
 import '../../navigation/app_router.dart';
 import '../../viewmodels/execution_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
 
@@ -99,17 +100,28 @@ Future<void> showResumeRunDialog(BuildContext context, ResumeRunViewModel vm) {
                   ],
                 ),
               );
-              if (sure != true) return;
-              await vm.abandon();
-              close();
+              if (sure != true || !dialogContext.mounted) return;
+              // TASK 15.4: a write that fails keeps the prompt open.
+              if (await runWithFeedback(
+                dialogContext,
+                'abandon the session',
+                vm.abandon,
+              )) {
+                close();
+              }
             },
             child: const Text('Abandon'),
           ),
           TextButton(
             key: const Key('resumeRun.finish'),
             onPressed: () async {
-              await vm.finish();
-              close();
+              if (await runWithFeedback(
+                dialogContext,
+                'finish the session',
+                vm.finish,
+              )) {
+                close();
+              }
             },
             child: const Text('Finish'),
           ),
@@ -117,8 +129,13 @@ Future<void> showResumeRunDialog(BuildContext context, ResumeRunViewModel vm) {
             TextButton(
               key: const Key('resumeRun.pause'),
               onPressed: () async {
-                await vm.pauseNow();
-                close();
+                if (await runWithFeedback(
+                  dialogContext,
+                  'pause the session',
+                  vm.pauseNow,
+                )) {
+                  close();
+                }
               },
               child: const Text('Pause now'),
             ),

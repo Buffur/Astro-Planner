@@ -7,8 +7,10 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/execution.dart';
+import '../../../domain/repositories/storage_failure.dart';
 import '../../../domain/services/execution_outlook.dart';
 import '../../navigation/app_router.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
@@ -51,7 +53,9 @@ class _ExecutionScreenState extends State<ExecutionScreen> {
     super.dispose();
   }
 
-  /// Runs [action]; a refused event (ExecutionError) is shown, not thrown.
+  /// Runs [action]; a refused event (ExecutionError) or a write that could
+  /// not be stored (StorageFailure, e.g. a full disk; TASK 15.4) is shown,
+  /// not thrown.
   Future<void> _do(Future<void> Function() action) async {
     try {
       await action();
@@ -59,6 +63,12 @@ class _ExecutionScreenState extends State<ExecutionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    } on StorageFailure catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(FailureText.message('record that', e))),
+        );
       }
     }
   }
@@ -477,7 +487,11 @@ class _Controls extends StatelessWidget {
               title: const Text('Keep the screen on while tracking'),
               value: vm.keepScreenOn,
               onChanged: (on) async {
-                await vm.setKeepScreenOn(on);
+                await runWithFeedback(
+                  context,
+                  'save the keep-screen-on setting',
+                  () => vm.setKeepScreenOn(on),
+                );
                 setState(() {});
               },
             ),

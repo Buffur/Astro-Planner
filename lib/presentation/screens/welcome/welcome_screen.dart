@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
@@ -15,7 +16,13 @@ class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   static Future<void> _close(BuildContext context) async {
-    await context.read<TonightViewModel>().finishFirstRun();
+    // TASK 15.4: if it cannot be stored the page is offered again at the
+    // next start; say so, and still close it now.
+    await runWithFeedback(
+      context,
+      'remember that the setup is done',
+      context.read<TonightViewModel>().finishFirstRun,
+    );
     if (context.mounted) context.go(AppRouter.tonight);
   }
 

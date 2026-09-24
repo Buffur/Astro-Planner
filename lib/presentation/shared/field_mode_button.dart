@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/config/feature_scope.dart';
 import '../viewmodels/theme_viewmodel.dart';
+import 'failure_feedback.dart';
 
 /// Red field mode, one tap from Tonight and the planner (ADR-015 §4,
 /// TASK 12.4). Reads the gate itself, so call sites never gate it again.
@@ -17,7 +18,7 @@ class FieldModeButton extends StatelessWidget {
       key: const Key('fieldMode.toggle'),
       icon: Icon(on ? Icons.wb_sunny_outlined : Icons.nightlight_round),
       tooltip: on ? 'Leave field mode' : 'Red field mode',
-      onPressed: () => context.read<ThemeViewModel>().toggleFieldMode(),
+      onPressed: () => _toggle(context),
     );
   }
 }
@@ -39,7 +40,15 @@ class FieldModeTile extends StatelessWidget {
         'restart.',
       ),
       value: context.watch<ThemeViewModel>().isFieldMode,
-      onChanged: (_) => context.read<ThemeViewModel>().toggleFieldMode(),
+      onChanged: (_) => _toggle(context),
     );
   }
 }
+
+/// Switches field mode; it switches even when it cannot be stored, and
+/// then says it will not survive a restart (TASK 15.4).
+Future<void> _toggle(BuildContext context) => runWithFeedback(
+  context,
+  'remember field mode for the next start',
+  context.read<ThemeViewModel>().toggleFieldMode,
+);
