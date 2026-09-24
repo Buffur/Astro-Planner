@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/services/device_time_zone.dart';
 
 /// [DeviceTimeZone] backed by the `flutter_timezone` plugin (Apache-2.0;
@@ -13,7 +13,7 @@ class FlutterTimezoneDeviceTimeZone implements DeviceTimeZone {
       final id = info.identifier;
       return id.isEmpty ? null : id;
     } catch (e) {
-      debugPrint('Device time zone unavailable: $e');
+      AppLog.warning('time', 'Device time zone unavailable', error: e);
       return null;
     }
   }

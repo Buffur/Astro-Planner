@@ -1,3 +1,4 @@
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../models/night_weather.dart';
 import '../models/session_night.dart';
@@ -62,8 +63,9 @@ class NightWeatherService {
       case WeatherFetched(:final snapshot):
         try {
           await _store.write(key, snapshot);
-        } catch (_) {
+        } catch (e) {
           // A cache that cannot be written only costs a later refetch.
+          AppLog.warning('weather', 'Could not cache the forecast', error: e);
         }
         return _available(snapshot, _clock.nowUtc(), false);
       case WeatherFetchFailed(failure: WeatherFailure.outOfRange):
@@ -77,8 +79,10 @@ class NightWeatherService {
   Future<WeatherSnapshot?> _readSafely(String key) async {
     try {
       return await _store.read(key);
-    } catch (_) {
-      return null; // an unreadable cache entry is treated as absent
+    } catch (e) {
+      // An unreadable cache entry is treated as absent.
+      AppLog.warning('weather', 'Could not read the forecast cache', error: e);
+      return null;
     }
   }
 

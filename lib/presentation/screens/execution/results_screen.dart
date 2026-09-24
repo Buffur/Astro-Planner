@@ -8,6 +8,7 @@ import '../../navigation/app_router.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/execution_viewmodel.dart';
 import '../../viewmodels/results_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 
 /// Reconciliation (TASK 13.4): turn a run into a log entry. Counts per
 /// block (each change is a stored, timestamped event), notes, optional
@@ -91,13 +92,18 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (!(_form.currentState?.validate() ?? false)) return;
     final completing = vm.inProgress;
     final execution = context.read<ExecutionViewModel?>();
-    await vm.save(
-      environmentalNotes: _optional(_environment.text),
-      processingNotes: _optional(_processing.text),
-      temperatureC: _number(_temperature.text),
-      humidityPct: _number(_humidity.text),
-      cloudCoverPct: _number(_cloud.text)?.round(),
+    final saved = await runWithFeedback(
+      context,
+      completing ? 'complete the session' : 'save the results',
+      () => vm.save(
+        environmentalNotes: _optional(_environment.text),
+        processingNotes: _optional(_processing.text),
+        temperatureC: _number(_temperature.text),
+        humidityPct: _number(_humidity.text),
+        cloudCoverPct: _number(_cloud.text)?.round(),
+      ),
     );
+    if (!saved) return;
     await execution?.loadActive();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

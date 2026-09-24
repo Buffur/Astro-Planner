@@ -1,6 +1,10 @@
 import '../models/astro_target.dart';
+import 'storage_failure.dart';
 
 /// Abstract repository for managing astronomical targets.
+///
+/// Every method throws [StorageFailure] when the store cannot be read or
+/// written (TASK 15.1).
 abstract class TargetRepository {
   /// Searches for targets by catalog ID or common name.
   Future<List<AstroTarget>> searchTargets(String query);

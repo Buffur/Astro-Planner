@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:exif/exif.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../models/image_metadata.dart';
 
 class MetadataExtractor {
@@ -45,6 +46,7 @@ class MetadataExtractor {
         rawTags: tags.map((k, v) => MapEntry(k, v.printable)),
       );
     } catch (e) {
+      AppLog.warning('metadata', 'Unreadable EXIF data', error: e);
       return null;
     }
   }
@@ -93,6 +95,7 @@ class MetadataExtractor {
         rawTags: rawTags,
       );
     } catch (e) {
+      AppLog.warning('metadata', 'Unreadable FITS header', error: e);
       return null;
     }
   }

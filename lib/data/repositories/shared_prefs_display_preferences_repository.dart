@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/display_preferences_repository.dart';
+import 'storage_guard.dart';
 
 /// [DisplayPreferencesRepository] backed by SharedPreferences.
 class SharedPrefsDisplayPreferencesRepository
@@ -9,18 +10,29 @@ class SharedPrefsDisplayPreferencesRepository
   static const _keepScreenOn = 'keepScreenOnWhileTracking';
 
   @override
-  Future<bool> loadFieldMode() async =>
-      (await SharedPreferences.getInstance()).getBool(_fieldMode) ?? false;
+  Future<bool> loadFieldMode() => guardStorage(
+    'read the display preferences',
+    () async =>
+        (await SharedPreferences.getInstance()).getBool(_fieldMode) ?? false,
+  );
 
   @override
-  Future<void> saveFieldMode(bool on) async =>
-      (await SharedPreferences.getInstance()).setBool(_fieldMode, on);
+  Future<void> saveFieldMode(bool on) => guardStorage(
+    'save the display preferences',
+    () async => (await SharedPreferences.getInstance()).setBool(_fieldMode, on),
+  );
 
   @override
-  Future<bool> loadKeepScreenOn() async =>
-      (await SharedPreferences.getInstance()).getBool(_keepScreenOn) ?? false;
+  Future<bool> loadKeepScreenOn() => guardStorage(
+    'read the display preferences',
+    () async =>
+        (await SharedPreferences.getInstance()).getBool(_keepScreenOn) ?? false,
+  );
 
   @override
-  Future<void> saveKeepScreenOn(bool on) async =>
-      (await SharedPreferences.getInstance()).setBool(_keepScreenOn, on);
+  Future<void> saveKeepScreenOn(bool on) => guardStorage(
+    'save the display preferences',
+    () async =>
+        (await SharedPreferences.getInstance()).setBool(_keepScreenOn, on),
+  );
 }

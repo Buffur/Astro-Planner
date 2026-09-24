@@ -1,8 +1,12 @@
 import '../models/capture_block.dart';
+import 'storage_failure.dart';
 
 /// Persistence for the planner's current selections: the active saved
 /// location, the selected target and rig, and the working capture plan
 /// (TASK 5.2). Keeps storage details out of the ViewModel.
+///
+/// Every method throws [StorageFailure] when the store cannot be read or
+/// written (TASK 15.1).
 abstract class PlannerStateRepository {
   Future<int?> getActiveLocationId();
   Future<void> setActiveLocationId(int id);
@@ -21,8 +25,8 @@ abstract class PlannerStateRepository {
   Future<int?> getSelectedEquipmentId();
   Future<void> setSelectedEquipmentId(int id);
 
-  /// The saved working plan, or null when none is saved. Throws if the saved
-  /// plan cannot be read.
+  /// The saved working plan, or null when none is saved. Throws
+  /// [StorageFailure] if the saved plan cannot be read.
   Future<List<CaptureBlock>?> loadCaptureBlocks();
   Future<void> saveCaptureBlocks(List<CaptureBlock> blocks);
 

@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/models/planning_preferences.dart';
 import '../../domain/repositories/planning_preferences_repository.dart';
+import 'storage_guard.dart';
 
 /// [PlanningPreferencesRepository] backed by SharedPreferences.
 ///
@@ -29,7 +30,10 @@ class SharedPrefsPlanningPreferencesRepository
   static const _cloudGatePct = 'cloudGateMaxPct';
 
   @override
-  Future<PlanningPreferences> load() async {
+  Future<PlanningPreferences> load() =>
+      guardStorage('read the planning preferences', _load);
+
+  Future<PlanningPreferences> _load() async {
     final p = await SharedPreferences.getInstance();
     return PlanningPreferences(
       minAltitudeDeg:
@@ -65,7 +69,10 @@ class SharedPrefsPlanningPreferencesRepository
   }
 
   @override
-  Future<void> save(PlanningPreferences preferences) async {
+  Future<void> save(PlanningPreferences preferences) =>
+      guardStorage('save the planning preferences', () => _save(preferences));
+
+  Future<void> _save(PlanningPreferences preferences) async {
     final p = await SharedPreferences.getInstance();
     await p.setDouble(_minAltitude, preferences.minAltitudeDeg);
     await p.setDouble(_darknessLimit, preferences.darknessLimit.degrees);

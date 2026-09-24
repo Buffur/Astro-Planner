@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import 'night_conditions_viewmodel.dart';
 import 'session_plan_viewmodel.dart';
 import 'settings_viewmodel.dart';
@@ -41,9 +42,9 @@ class StartupViewModel extends ChangeNotifier {
       await _settings.load();
       await _plan.load();
       _error = null;
-    } catch (e) {
+    } catch (e, s) {
       _error = e;
-      debugPrint('Startup error: $e');
+      AppLog.error('startup', 'Startup failed', error: e, stackTrace: s);
     } finally {
       _isLoading = false;
       notifyListeners();

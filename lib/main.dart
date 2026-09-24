@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
+import 'core/diagnostics/app_log.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/navigation/app_router.dart';
 import 'core/time/clock.dart';
@@ -53,8 +54,13 @@ void main() async {
       await getApplicationDocumentsDirectory(),
       nowUtc: DateTime.now().toUtc(),
     );
-  } catch (e) {
-    debugPrint('Staged restore could not be applied: $e');
+  } catch (e, s) {
+    AppLog.error(
+      'backup',
+      'Staged restore could not be applied',
+      error: e,
+      stackTrace: s,
+    );
   }
   final database = AppDatabase();
   final targetRepo = DriftTargetRepository(database);
@@ -73,8 +79,8 @@ void main() async {
   try {
     await targetSeeder.seedIfNeeded();
     await equipmentSeeder.seedIfNeeded();
-  } catch (e) {
-    debugPrint('Seeding error: $e');
+  } catch (e, s) {
+    AppLog.error('seeding', 'Seeding failed', error: e, stackTrace: s);
   }
 
   // The only place that picks implementations (TASK 12.3): ViewModels see
@@ -107,9 +113,15 @@ void main() async {
   // mode never flashes the normal theme (TASK 12.4).
   await vms.theme.load();
   await vms.tonight.load();
-  await vms.backup?.load();
-  await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
-  await vms.execution?.loadActive();
+  try {
+    await vms.backup?.load();
+    await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
+    await vms.execution?.loadActive();
+  } catch (e, s) {
+    // TASK 15.1: the app still starts; its bootstrap shows the failure
+    // with a retry instead of a blank screen.
+    AppLog.error('startup', 'Could not restore state', error: e, stackTrace: s);
+  }
 
   runApp(
     MultiProvider(

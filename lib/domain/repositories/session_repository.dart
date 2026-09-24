@@ -2,10 +2,14 @@ import '../models/calendar_date.dart';
 import '../models/execution.dart';
 import '../models/session.dart';
 import '../models/session_snapshot.dart';
+import 'storage_failure.dart';
 
 /// Persistence of the Session aggregate (ADR-014; TASK 11.3). Every write is
 /// one transaction; lifecycle rules (ADR-014 §3) are enforced here and a
 /// forbidden write throws [SessionStateError] without changing anything.
+///
+/// Every method throws [StorageFailure] when the store cannot be read or
+/// written (TASK 15.1).
 abstract class SessionRepository {
   /// A new draft for [plan].
   Future<Session> create(SessionPlan plan);

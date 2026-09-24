@@ -1,7 +1,11 @@
 import '../models/weather_snapshot.dart';
+import 'storage_failure.dart';
 
 /// Persistent cache of weather snapshots (TASK 9.3). Keys are built by
 /// [WeatherSnapshotStore.keyFor]; the store only saves and returns them.
+///
+/// Every method throws [StorageFailure] when the store cannot be read or
+/// written (TASK 15.1).
 abstract class WeatherSnapshotStore {
   Future<WeatherSnapshot?> read(String key);
   Future<void> write(String key, WeatherSnapshot snapshot);

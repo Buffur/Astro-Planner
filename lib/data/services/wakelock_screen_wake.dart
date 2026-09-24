@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:wakelock_plus/wakelock_plus.dart';
+
+import '../../core/diagnostics/app_log.dart';
 
 import '../../domain/services/screen_wake.dart';
 
@@ -11,7 +12,8 @@ class WakelockScreenWake implements ScreenWake {
     try {
       await WakelockPlus.toggle(enable: on);
     } catch (e) {
-      debugPrint('Screen wakelock unavailable: $e'); // the screen just sleeps
+      // The screen just sleeps.
+      AppLog.warning('display', 'Screen wakelock unavailable', error: e);
     }
   }
 }

@@ -10,6 +10,7 @@ import 'tables/locations_table.dart';
 import 'tables/targets_table.dart';
 
 import 'json_map_converter.dart';
+import 'storage_failure_interceptor.dart';
 import 'schema_versions.dart';
 
 part 'app_database.g.dart';
@@ -239,7 +240,11 @@ class SessionEvents extends Table {
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
+  /// Every statement error surfaces as a `StorageFailure` (TASK 15.1).
+  AppDatabase([QueryExecutor? e])
+    : super(
+        (e ?? _openConnection()).interceptWith(StorageFailureInterceptor()),
+      );
 
   @override
   int get schemaVersion => 17;

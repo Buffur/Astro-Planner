@@ -13,6 +13,7 @@ import '../../domain/models/session_snapshot.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/session_repository.dart';
+import '../../domain/repositories/storage_failure.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
 import '../../domain/services/example_capture_plan.dart';
@@ -42,6 +43,7 @@ class SessionPlanViewModel extends ChangeNotifier {
          equipmentRepository,
        ) {
     _site.addListener(_onSiteChanged);
+    _current?.onWriteFailureChanged = notifyListeners;
   }
 
   final SiteViewModel _site;
@@ -73,6 +75,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   bool get isExampleCapturePlan => _isExample;
   Session? get activeSession => _current?.session;
   int? get activeSessionId => activeSession?.id;
+  Object? get autosaveFailure => _current?.writeFailure; // TASK 15.1
 
   /// Completes when every autosave started so far has reached the database.
   Future<void> get idle => _current?.idle ?? Future.value();
@@ -94,12 +97,12 @@ class SessionPlanViewModel extends ChangeNotifier {
   /// Restores the plan (call after the site has loaded): a plan still kept
   /// in preferences moves once into a new draft (ADR-014 §6); otherwise the
   /// most recent open session is resumed — a past night rolls forward to
-  /// tonight (owner decision, TASK 11.4) — or a draft is created.
+  /// tonight (owner decision, TASK 11.4) — or a draft is created. An
+  /// unreadable saved plan is logged by the repository and dropped.
   Future<void> load() async {
-    List<CaptureBlock>? preferencesPlan;
-    try {
-      preferencesPlan = await _stateRepository.loadCaptureBlocks();
-    } catch (_) {}
+    final preferencesPlan = await _stateRepository
+        .loadCaptureBlocks()
+        .onError<StorageFailure>((_, _) => null);
     _blocks = List.of(preferencesPlan ?? const []);
     _isExample = _blocks.isEmpty;
     if (_blocks.isEmpty) _blocks = ExampleCapturePlan.blocks();
@@ -290,6 +293,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _site.removeListener(_onSiteChanged);
+    _current?.onWriteFailureChanged = null;
     super.dispose();
   }
 }

@@ -10,6 +10,7 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/spec_confidence.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/equipment_form_input.dart';
+import '../../shared/failure_feedback.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
 
@@ -25,6 +26,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
   // In-memory list — avoids FutureBuilder flicker on every add/edit/delete.
   List<EquipmentProfile> _equipment = [];
   bool _initialLoading = true;
+  Object? _loadError;
 
   @override
   void initState() {
@@ -34,12 +36,23 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
 
   Future<void> _loadEquipment() async {
     final gear = context.read<GearViewModel>();
-    final results = await gear.all();
-    if (mounted) {
-      setState(() {
-        _equipment = results;
-        _initialLoading = false;
-      });
+    try {
+      final results = await gear.all();
+      if (mounted) {
+        setState(() {
+          _equipment = results;
+          _loadError = null;
+          _initialLoading = false;
+        });
+      }
+    } catch (e) {
+      // TASK 15.1: an unreadable list says so instead of looking empty.
+      if (mounted) {
+        setState(() {
+          _loadError = e;
+          _initialLoading = false;
+        });
+      }
     }
   }
 
@@ -580,12 +593,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     );
                     // TASK 8.5: changed specs become the user's own.
                     final recorded = profile.withEditProvenance(existing);
-                    if (isEdit) {
-                      await gear.update(recorded);
-                    } else {
-                      await gear.add(recorded);
-                    }
-                    if (context.mounted) Navigator.of(context).pop();
+                    final saved = await runWithFeedback(
+                      context,
+                      'save the rig',
+                      () => isEdit ? gear.update(recorded) : gear.add(recorded),
+                    );
+                    if (saved && context.mounted) Navigator.of(context).pop();
                   },
                   child: Text(isEdit ? 'Save Changes' : 'Save'),
                 ),
@@ -614,6 +627,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
       appBar: AppBar(title: const Text('Select Equipment')),
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
+          : _loadError != null
+          ? LoadFailureView(
+              action: 'load the rigs',
+              error: _loadError!,
+              onRetry: _loadEquipment,
+            )
           : _equipment.isEmpty
           ? const Center(child: Text('No equipment profiles found.'))
           : ListView.builder(
@@ -700,10 +719,15 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    await gear.delete(eq.id);
                     setState(
                       () => _equipment.removeWhere((e) => e.id == eq.id),
                     );
+                    final deleted = await runWithFeedback(
+                      context,
+                      'delete the rig',
+                      () => gear.delete(eq.id),
+                    );
+                    if (!deleted) return _loadEquipment(); // it is still there
                     // TD-028: clear the planner's selection if this was it,
                     // instead of leaving a reference to a deleted profile.
                     await planVm.refreshSelectedEquipment();

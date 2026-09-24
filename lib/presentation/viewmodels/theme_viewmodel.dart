@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/repositories/display_preferences_repository.dart';
 
 /// Red field mode (F-46): on or off, persisted across restarts since
@@ -17,8 +18,9 @@ class ThemeViewModel extends ChangeNotifier {
   Future<void> load() async {
     try {
       _isFieldMode = await _repository.loadFieldMode();
-    } catch (_) {
+    } catch (e) {
       _isFieldMode = false;
+      AppLog.warning('display', 'Field-mode setting unreadable', error: e);
     }
     notifyListeners();
   }

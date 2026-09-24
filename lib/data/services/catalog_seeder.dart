@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/utils/astro_math.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/repositories/target_repository.dart';
@@ -186,7 +186,7 @@ class CatalogSeeder {
     try {
       prefs = await _preferences();
     } catch (e) {
-      debugPrint('Catalog seeding: preferences unavailable ($e)');
+      AppLog.warning('seeding', 'Preferences unavailable', error: e);
     }
     final applied = prefs?.getInt(versionKey);
     if (applied != null && applied >= catalog.version) return;
@@ -231,7 +231,7 @@ class CatalogSeeder {
     try {
       await _repository.insertTarget(entry.toTarget(source));
     } catch (e) {
-      debugPrint('Catalog seeding: skipped ${entry.id} ($e)');
+      AppLog.warning('seeding', 'Skipped ${entry.id}', error: e);
     }
   }
 }

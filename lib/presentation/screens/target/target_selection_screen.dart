@@ -6,6 +6,7 @@ import '../../../core/utils/astro_math.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/target_types.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/target_form_input.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
@@ -24,6 +25,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
   // In-memory list avoids FutureBuilder flicker on every add/edit/delete.
   List<AstroTarget> _targets = [];
   bool _initialLoading = true;
+  Object? _loadError;
 
   @override
   void initState() {
@@ -39,12 +41,23 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
 
   Future<void> _loadTargets() async {
     final targets = context.read<TargetsViewModel>();
-    final results = await targets.search(_searchQuery);
-    if (mounted) {
-      setState(() {
-        _targets = results;
-        _initialLoading = false;
-      });
+    try {
+      final results = await targets.search(_searchQuery);
+      if (mounted) {
+        setState(() {
+          _targets = results;
+          _loadError = null;
+          _initialLoading = false;
+        });
+      }
+    } catch (e) {
+      // TASK 15.1: an unreadable list says so instead of looking empty.
+      if (mounted) {
+        setState(() {
+          _loadError = e;
+          _initialLoading = false;
+        });
+      }
     }
   }
 
@@ -223,12 +236,13 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       ),
                       magnitude: TargetFormInput.optionalNumber(magCtrl.text),
                     );
-                    if (isEdit) {
-                      await targets.update(target);
-                    } else {
-                      await targets.add(target);
-                    }
-                    if (context.mounted) Navigator.of(context).pop();
+                    final saved = await runWithFeedback(
+                      context,
+                      'save the target',
+                      () =>
+                          isEdit ? targets.update(target) : targets.add(target),
+                    );
+                    if (saved && context.mounted) Navigator.of(context).pop();
                   },
                   child: Text(isEdit ? 'Save Changes' : 'Save'),
                 ),
@@ -281,6 +295,12 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
       ),
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
+          : _loadError != null
+          ? LoadFailureView(
+              action: 'load the targets',
+              error: _loadError!,
+              onRetry: _loadTargets,
+            )
           : _targets.isEmpty
           ? Center(
               child: Text(
@@ -377,11 +397,16 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     );
                   },
                   onDismissed: (direction) async {
-                    await targets.delete(target.id);
                     // Remove instantly from in-memory list — no flicker.
                     setState(
                       () => _targets.removeWhere((t) => t.id == target.id),
                     );
+                    final deleted = await runWithFeedback(
+                      context,
+                      'delete the target',
+                      () => targets.delete(target.id),
+                    );
+                    if (!deleted) return _loadTargets(); // it is still there
                     // TD-028: clear the planner's selection if this was it,
                     // instead of leaving a reference to a deleted target.
                     await planVm.refreshSelectedTarget();

@@ -9,6 +9,7 @@ import '../../../domain/models/location_profile.dart';
 import '../../shared/coordinate_input.dart';
 import '../../shared/site_form_input.dart';
 import '../../viewmodels/site_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 import 'zone_picker_dialog.dart';
 import '../../navigation/app_router.dart';
 
@@ -143,8 +144,17 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
       return;
     }
     setState(() => _saving = true);
-    await siteVm.saveSite(site);
-    if (mounted) context.pop();
+    final saved = await runWithFeedback(
+      context,
+      'save the site',
+      () => siteVm.saveSite(site),
+    );
+    if (!mounted) return;
+    if (saved) {
+      context.pop();
+    } else {
+      setState(() => _saving = false);
+    }
   }
 
   @override

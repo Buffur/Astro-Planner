@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/iana_time_context.dart';
@@ -241,7 +242,7 @@ class SiteViewModel extends ChangeNotifier {
       case ReverseGeocodeFailed(:final reason):
         _locationName = null;
         _locationNameAttribution = null;
-        debugPrint('Reverse geocoding failed: $reason');
+        AppLog.warning('location', 'Reverse geocoding failed: $reason');
     }
     notifyListeners();
   }

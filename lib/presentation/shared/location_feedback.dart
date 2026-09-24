@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/services/location_service.dart';
 import '../viewmodels/site_viewmodel.dart';
+import 'failure_feedback.dart';
 import 'location_failure_text.dart';
 
 /// Shows why the device position is unavailable, with "Open settings" when
@@ -43,9 +45,10 @@ Future<void> useCurrentPositionWithFeedback(
       showLocationFailure(context, viewModel, reason);
     }
   } catch (e) {
+    AppLog.error('location', 'Could not get the position', error: e);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not get your position: $e')),
+        SnackBar(content: Text(FailureText.message('get your position', e))),
       );
     }
   }

@@ -26,6 +26,7 @@ import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
 import '../../widgets/weather_forecast_widget.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../shared/failure_feedback.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -47,7 +48,11 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'New Session',
-            onPressed: () => context.read<SessionPlanViewModel>().newSession(),
+            onPressed: () => runWithFeedback(
+              context,
+              'start a new session',
+              context.read<SessionPlanViewModel>().newSession,
+            ),
           ),
           // TASK 11.4: a copy of the current plan as a new draft for another
           // night; the current session is not changed.
@@ -64,9 +69,13 @@ class HomeScreen extends StatelessWidget {
                 lastDate: DateTime(now.year + 5, now.month, now.day),
                 helpText: 'Duplicate for which night?',
               );
-              if (picked != null) {
-                await planVm.duplicateForNight(
-                  CalendarDate.fromDateTimeFields(picked),
+              if (picked != null && context.mounted) {
+                await runWithFeedback(
+                  context,
+                  'duplicate the session',
+                  () => planVm.duplicateForNight(
+                    CalendarDate.fromDateTimeFields(picked),
+                  ),
                 );
               }
             },
@@ -85,6 +94,8 @@ class HomeScreen extends StatelessWidget {
           : Column(
               children: [
                 if (siteVm.isDefaultLocation) const _DefaultLocationBanner(),
+                if (planVm.autosaveFailure != null)
+                  const _AutosaveFailureBanner(),
                 Expanded(
                   child: target == null || equipment == null
                       ? _EmptyStateView(target: target, equipment: equipment)
@@ -308,8 +319,12 @@ class HomeScreen extends StatelessWidget {
                           onPressed: () async {
                             // TASK 11.3 (ADR-014): saves the plan as a
                             // planned session with a fresh plan snapshot.
-                            await analysisVm.saveSession();
-                            if (context.mounted) {
+                            final saved = await runWithFeedback(
+                              context,
+                              'save the session',
+                              analysisVm.saveSession,
+                            );
+                            if (saved && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Session saved to Logbook!'),
@@ -497,6 +512,26 @@ class _DefaultLocationBanner extends StatelessWidget {
           child: const Text('Set site'),
         ),
       ],
+    );
+  }
+}
+
+/// A plan edit could not be saved (TASK 15.1): the change is still on
+/// screen, and the next edit tries again.
+class _AutosaveFailureBanner extends StatelessWidget {
+  const _AutosaveFailureBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialBanner(
+      key: Key('planner.autosaveFailure'),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      leading: Icon(Icons.sync_problem),
+      content: Text(
+        "Your latest changes couldn't be saved on this device. They stay "
+        'on screen and are saved again with your next change.',
+      ),
+      actions: [SizedBox.shrink()],
     );
   }
 }

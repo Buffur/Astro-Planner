@@ -12,6 +12,7 @@ import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
 import '../library/progress_screen.dart';
 import 'logbook_screen.dart';
@@ -52,6 +53,16 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       future: _detail,
       builder: (context, snapshot) {
         final data = snapshot.data;
+        if (snapshot.error case final error?) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Session')),
+            body: LoadFailureView(
+              action: 'load the session',
+              error: error,
+              onRetry: _load,
+            ),
+          );
+        }
         if (data == null) {
           return Scaffold(
             appBar: AppBar(title: const Text('Session')),
@@ -387,7 +398,11 @@ class _Actions extends StatelessWidget {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             key: const Key('detail.export'),
-            onPressed: () => context.read<SessionsViewModel>().exportOne(s.id),
+            onPressed: () => runWithFeedback(
+              context,
+              'export the session',
+              () => context.read<SessionsViewModel>().exportOne(s.id),
+            ),
             icon: const Icon(Icons.file_download_outlined),
             label: const Text('Export file'),
             style: OutlinedButton.styleFrom(minimumSize: tall),

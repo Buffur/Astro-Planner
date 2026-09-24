@@ -67,6 +67,8 @@ class NominatimReverseGeocoder implements ReverseGeocoder {
     if (cached != null) return Future.value(cached);
 
     final result = _queue.then((_) => _lookup(key, lat, lon));
+    // The queue only orders requests; the caller receives [result] itself,
+    // failures included.
     _queue = result.then((_) {}, onError: (_) {});
     return result;
   }

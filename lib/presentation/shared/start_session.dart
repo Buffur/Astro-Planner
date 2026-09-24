@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/models/session.dart';
+import '../../domain/repositories/storage_failure.dart';
 import '../navigation/app_router.dart';
 import '../viewmodels/capture_analysis_viewmodel.dart';
 import '../viewmodels/execution_viewmodel.dart';
+import 'failure_feedback.dart';
 
 /// Start (ADR-016; TASK 13.3): the current plan starts with its
 /// execution-start snapshot and the tracking screen opens; the planner
@@ -20,6 +22,10 @@ Future<void> startSessionWithFeedback(BuildContext context) async {
         .startSession();
     await execution?.open(started.id);
     if (context.mounted) context.push(AppRouter.run(started.id));
+  } on StorageFailure catch (e) {
+    messenger.showSnackBar(
+      SnackBar(content: Text(FailureText.message('start the session', e))),
+    );
   } on SessionStateError {
     final running = execution?.session;
     messenger.showSnackBar(

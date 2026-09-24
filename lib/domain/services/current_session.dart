@@ -1,3 +1,4 @@
+import '../../core/diagnostics/app_log.dart';
 import '../models/session.dart';
 import '../models/session_snapshot.dart';
 import '../repositories/session_repository.dart';
@@ -13,8 +14,17 @@ class CurrentSession {
   final SessionRepository _repository;
   Session? _session;
   Future<void> _chain = Future.value();
+  Object? _writeFailure;
 
   Session? get session => _session;
+
+  /// Called when [writeFailure] changes.
+  void Function()? onWriteFailureChanged;
+
+  /// Why the last autosave failed, until one succeeds (TASK 15.1). A failed
+  /// write never blocks the later ones; each writes the whole plan, so the
+  /// next edit retries it.
+  Object? get writeFailure => _writeFailure;
 
   /// Completes when every write started so far has finished.
   Future<void> get idle => _chain;
@@ -36,13 +46,23 @@ class CurrentSession {
   }
 
   /// Autosaves [plan] into the current session (a planned one returns to
-  /// draft until the next Save).
+  /// draft until the next Save). Never throws: a failure is kept in
+  /// [writeFailure] and logged.
   Future<void> write(SessionPlan Function() plan) =>
       _chain = _chain.then((_) async {
         final current = _session;
-        _session = current != null && current.planEditable
-            ? await _repository.updatePlan(current.id, plan())
-            : await _repository.create(plan());
+        Object? failure;
+        try {
+          _session = current != null && current.planEditable
+              ? await _repository.updatePlan(current.id, plan())
+              : await _repository.create(plan());
+        } catch (e, s) {
+          failure = e;
+          AppLog.error('session', 'Autosave failed', error: e, stackTrace: s);
+        }
+        if (failure == _writeFailure) return;
+        _writeFailure = failure;
+        onWriteFailureChanged?.call();
       });
 
   /// Start (ADR-016): [plan] is written to the current session (or a new

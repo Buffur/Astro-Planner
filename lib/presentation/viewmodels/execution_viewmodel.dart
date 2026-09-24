@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/altitude_curve.dart';
 import '../../domain/models/capture_block.dart';
@@ -47,8 +48,9 @@ class ExecutionViewModel extends ChangeNotifier {
   Future<void> loadActive() async {
     try {
       _keepScreenOn = await _display.loadKeepScreenOn();
-    } catch (_) {
-      _keepScreenOn = false;
+    } catch (e) {
+      _keepScreenOn = false; // off, the default
+      AppLog.warning('display', 'Keep-screen-on setting unreadable', error: e);
     }
     final s = await _sessions.inProgress();
     if (s == null) {

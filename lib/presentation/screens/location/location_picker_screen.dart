@@ -5,11 +5,13 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/diagnostics/app_log.dart';
 import '../../../core/config/app_identity.dart';
 import '../../../domain/services/location_service.dart';
 import '../../shared/coordinate_input.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/site_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   /// With [pickOnly], confirming returns the point to the caller (the site
@@ -51,9 +53,10 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
           showLocationFailure(context, siteVm, reason);
       }
     } catch (e) {
+      AppLog.error('location', 'Could not get the position', error: e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not get your position: $e')),
+          SnackBar(content: Text(FailureText.message('get your position', e))),
         );
       }
     } finally {

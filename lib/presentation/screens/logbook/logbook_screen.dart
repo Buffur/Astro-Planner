@@ -9,6 +9,7 @@ import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../navigation/app_router.dart';
 import '../../../domain/services/session_reconciliation.dart';
+import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
 
 /// A session's status as the Sessions list and detail show it (TASK 11.3;
@@ -87,7 +88,11 @@ class _LogbookScreenState extends State<LogbookScreen> {
               key: const Key('logbook.exportAll'),
               tooltip: 'Export all sessions',
               icon: const Icon(Icons.file_download_outlined),
-              onPressed: () => context.read<SessionsViewModel>().exportAll(),
+              onPressed: () => runWithFeedback(
+                context,
+                'export the sessions',
+                context.read<SessionsViewModel>().exportAll,
+              ),
             ),
         ],
       ),
@@ -100,6 +105,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.error case final error?) {
+                  return LoadFailureView(
+                    action: 'load the sessions',
+                    error: error,
+                    onRetry: _refresh,
+                  );
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
@@ -163,8 +175,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
         );
       },
       onDismissed: (_) async {
-        await context.read<SessionsViewModel>().delete(session.id);
-        _refresh();
+        final sessions = context.read<SessionsViewModel>();
+        await runWithFeedback(
+          context,
+          'delete the session',
+          () => sessions.delete(session.id),
+        );
+        _refresh(); // a failed delete brings the row back
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 16),

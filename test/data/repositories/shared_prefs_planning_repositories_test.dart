@@ -2,6 +2,7 @@ import 'package:astroplan/data/repositories/shared_prefs_planner_state_repositor
 import 'package:astroplan/data/repositories/shared_prefs_planning_preferences_repository.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/planning_preferences.dart';
+import 'package:astroplan/domain/repositories/storage_failure.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -169,9 +170,19 @@ void main() {
       },
     );
 
-    test('a corrupt saved plan throws (the ViewModel falls back)', () async {
+    test('a corrupt saved plan throws a typed StorageFailure (the ViewModel '
+        'falls back; TASK 15.1)', () async {
       SharedPreferences.setMockInitialValues({'captureBlocks': 'not json'});
-      expect(repo.loadCaptureBlocks(), throwsFormatException);
+      await expectLater(
+        repo.loadCaptureBlocks(),
+        throwsA(
+          isA<StorageFailure>().having(
+            (f) => f.cause,
+            'cause',
+            isA<FormatException>(),
+          ),
+        ),
+      );
     });
   });
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../domain/models/location_profile.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/site_viewmodel.dart';
+import '../../shared/failure_feedback.dart';
 import 'site_editor_screen.dart';
 import '../../navigation/app_router.dart';
 
@@ -45,7 +46,13 @@ class SitesScreen extends StatelessWidget {
         ],
       ),
     );
-    if (confirmed == true) await viewModel.deleteSite(site.id);
+    if (confirmed == true && context.mounted) {
+      await runWithFeedback(
+        context,
+        'delete the site',
+        () => viewModel.deleteSite(site.id),
+      );
+    }
   }
 
   @override
@@ -138,7 +145,11 @@ class SitesScreen extends StatelessWidget {
                 '${site.timeZoneId ?? 'zone unknown'}',
               ),
               selected: site.id == activeId,
-              onTap: () => siteVm.selectSite(site.id),
+              onTap: () => runWithFeedback(
+                context,
+                'select the site',
+                () => siteVm.selectSite(site.id),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

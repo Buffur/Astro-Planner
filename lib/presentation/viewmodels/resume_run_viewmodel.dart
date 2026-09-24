@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/models/execution.dart';
@@ -61,7 +62,7 @@ class ResumeRunViewModel extends ChangeNotifier {
       final session = await _sessions.inProgress();
       if (session != null) _offer = await _offerFor(session);
     } catch (e) {
-      debugPrint('Could not read the run in progress: $e');
+      AppLog.error('execution', 'Could not read the run in progress', error: e);
       _offer = null;
     }
     notifyListeners();

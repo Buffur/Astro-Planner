@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/repositories/first_run_repository.dart';
 import 'site_viewmodel.dart';
 import 'startup_viewmodel.dart';
@@ -33,8 +34,9 @@ class TonightViewModel extends ChangeNotifier {
   Future<void> load() async {
     try {
       _done = await _firstRun.isDone();
-    } catch (_) {
+    } catch (e) {
       _done = true;
+      AppLog.warning('startup', 'First-run state unreadable', error: e);
     }
     notifyListeners();
   }

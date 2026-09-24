@@ -5,6 +5,7 @@ import '../../../domain/services/target_progress.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/library_viewmodels.dart';
+import '../../shared/failure_feedback.dart';
 
 /// Integration so far per target, across nights (TASK 14.2, CALC-38):
 /// completed sessions only, confirmed light frames × exposure, per filter,
@@ -29,6 +30,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
         future: _progress,
         builder: (context, snapshot) {
           final list = snapshot.data;
+          if (snapshot.error case final error?) {
+            return LoadFailureView(action: 'load the progress', error: error);
+          }
           if (list == null) {
             return const Center(child: CircularProgressIndicator());
           }

@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/models/weather_snapshot.dart';
 import '../../domain/repositories/weather_snapshot_store.dart';
+import 'storage_guard.dart';
 
 /// [WeatherSnapshotStore] backed by SharedPreferences (TASK 9.3). Times are
 /// stored as UTC epoch milliseconds; a null value stays null (unknown).
@@ -12,21 +14,28 @@ class SharedPrefsWeatherSnapshotStore implements WeatherSnapshotStore {
 
   @override
   Future<WeatherSnapshot?> read(String key) async {
-    final p = await SharedPreferences.getInstance();
-    final text = p.getString(key);
+    final text = await guardStorage(
+      'read the weather cache',
+      () async => (await SharedPreferences.getInstance()).getString(key),
+    );
     if (text == null) return null;
     try {
       return decode(text);
-    } catch (_) {
-      return null; // an unreadable entry is treated as absent
+    } catch (e) {
+      // An unreadable entry is treated as absent: the forecast is refetched.
+      AppLog.warning('weather', 'Ignoring an unreadable cache entry', error: e);
+      return null;
     }
   }
 
   @override
-  Future<void> write(String key, WeatherSnapshot snapshot) async {
-    final p = await SharedPreferences.getInstance();
-    await p.setString(key, encode(snapshot));
-  }
+  Future<void> write(String key, WeatherSnapshot snapshot) => guardStorage(
+    'save the weather cache',
+    () async => (await SharedPreferences.getInstance()).setString(
+      key,
+      encode(snapshot),
+    ),
+  );
 
   static String encode(WeatherSnapshot s) => jsonEncode({
     'v': _formatVersion,

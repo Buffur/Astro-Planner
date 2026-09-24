@@ -1,10 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/models/capture_block.dart';
+import '../../core/diagnostics/app_log.dart';
 import '../../domain/repositories/planner_state_repository.dart';
+import 'storage_guard.dart';
 
 /// [PlannerStateRepository] backed by SharedPreferences.
 ///
@@ -19,51 +20,59 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
 
   Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
-  @override
-  Future<int?> getActiveLocationId() async =>
-      (await _prefs).getInt(_activeLocationId);
+  static const _read = 'read the planner state';
+  static const _save = 'save the planner state';
 
   @override
-  Future<void> setActiveLocationId(int id) async =>
-      (await _prefs).setInt(_activeLocationId, id);
+  Future<int?> getActiveLocationId() =>
+      guardStorage(_read, () async => (await _prefs).getInt(_activeLocationId));
+
+  @override
+  Future<void> setActiveLocationId(int id) => guardStorage(
+    _save,
+    () async => (await _prefs).setInt(_activeLocationId, id),
+  );
 
   static const _transientLat = 'transientLatitude';
   static const _transientLon = 'transientLongitude';
 
   @override
-  Future<void> clearActiveLocationId() async =>
-      (await _prefs).remove(_activeLocationId);
+  Future<void> clearActiveLocationId() =>
+      guardStorage(_save, () async => (await _prefs).remove(_activeLocationId));
 
   @override
-  Future<({double latitude, double longitude})?> getTransientPosition() async {
-    final p = await _prefs;
-    final lat = p.getDouble(_transientLat);
-    final lon = p.getDouble(_transientLon);
-    if (lat == null || lon == null) return null;
-    return (latitude: lat, longitude: lon);
-  }
+  Future<({double latitude, double longitude})?> getTransientPosition() =>
+      guardStorage(_read, () async {
+        final p = await _prefs;
+        final lat = p.getDouble(_transientLat);
+        final lon = p.getDouble(_transientLon);
+        if (lat == null || lon == null) return null;
+        return (latitude: lat, longitude: lon);
+      });
 
   @override
-  Future<void> setTransientPosition(double latitude, double longitude) async {
-    final p = await _prefs;
-    await p.setDouble(_transientLat, latitude);
-    await p.setDouble(_transientLon, longitude);
-  }
+  Future<void> setTransientPosition(double latitude, double longitude) =>
+      guardStorage(_save, () async {
+        final p = await _prefs;
+        await p.setDouble(_transientLat, latitude);
+        await p.setDouble(_transientLon, longitude);
+      });
 
   @override
-  Future<int?> getSelectedTargetId() async => (await _prefs).getInt(_targetId);
+  Future<int?> getSelectedTargetId() =>
+      guardStorage(_read, () async => (await _prefs).getInt(_targetId));
 
   @override
-  Future<void> setSelectedTargetId(int id) async =>
-      (await _prefs).setInt(_targetId, id);
+  Future<void> setSelectedTargetId(int id) =>
+      guardStorage(_save, () async => (await _prefs).setInt(_targetId, id));
 
   @override
-  Future<int?> getSelectedEquipmentId() async =>
-      (await _prefs).getInt(_equipmentId);
+  Future<int?> getSelectedEquipmentId() =>
+      guardStorage(_read, () async => (await _prefs).getInt(_equipmentId));
 
   @override
-  Future<void> setSelectedEquipmentId(int id) async =>
-      (await _prefs).setInt(_equipmentId, id);
+  Future<void> setSelectedEquipmentId(int id) =>
+      guardStorage(_save, () async => (await _prefs).setInt(_equipmentId, id));
 
   /// Current plan JSON version (TASK 5.3): `{"version": 2, "blocks": [...]}`.
   /// Version 1 (before 5.3) was a bare list with a free-text `gainIso`; it
@@ -71,7 +80,10 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   static const planJsonVersion = 2;
 
   @override
-  Future<List<CaptureBlock>?> loadCaptureBlocks() async {
+  Future<List<CaptureBlock>?> loadCaptureBlocks() =>
+      guardStorage('read the saved plan', _loadCaptureBlocks);
+
+  Future<List<CaptureBlock>?> _loadCaptureBlocks() async {
     final json = (await _prefs).getString(_captureBlocks);
     if (json == null) return null;
     final decoded = jsonDecode(json);
@@ -99,7 +111,10 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   static CaptureBlock? _blockFromJson(Map b, int version) {
     final type = CaptureBlock.tryParseFrameType(b['frameType'] as String?);
     if (type == null) {
-      debugPrint('Skipping saved block: frame type ${b['frameType']}');
+      AppLog.warning(
+        'storage',
+        'Skipping saved block: frame type ${b['frameType']}',
+      );
       return null;
     }
     try {
@@ -130,13 +145,16 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
             : CalibrationPolicy.tryParse(b['calibrationPolicy'] as String?),
       );
     } on ArgumentError catch (e) {
-      debugPrint('Skipping invalid saved block: $e');
+      AppLog.warning('storage', 'Skipping invalid saved block', error: e);
       return null;
     }
   }
 
   @override
-  Future<void> saveCaptureBlocks(List<CaptureBlock> blocks) async {
+  Future<void> saveCaptureBlocks(List<CaptureBlock> blocks) =>
+      guardStorage('save the plan', () => _saveCaptureBlocks(blocks));
+
+  Future<void> _saveCaptureBlocks(List<CaptureBlock> blocks) async {
     final list = blocks
         .map(
           (b) => {
@@ -159,10 +177,10 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
   }
 
   @override
-  Future<void> clearPlan() async {
+  Future<void> clearPlan() => guardStorage(_save, () async {
     final p = await _prefs;
     await p.remove(_captureBlocks);
     await p.remove(_targetId);
     await p.remove(_equipmentId);
-  }
+  });
 }

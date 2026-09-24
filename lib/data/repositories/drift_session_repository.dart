@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/capture_block.dart' as domain;
@@ -571,7 +571,10 @@ class DriftSessionRepository implements SessionRepository {
   static domain.CaptureBlock? _toDomainBlock(CaptureBlock b) {
     final type = domain.CaptureBlock.tryParseFrameType(b.frameType);
     if (type == null) {
-      debugPrint('Skipping capture block ${b.id}: frame type ${b.frameType}');
+      AppLog.warning(
+        'storage',
+        'Skipping capture block ${b.id}: frame type ${b.frameType}',
+      );
       return null;
     }
     try {
@@ -589,7 +592,11 @@ class DriftSessionRepository implements SessionRepository {
             : domain.CalibrationPolicy.tryParse(b.calibrationPolicy),
       );
     } on ArgumentError catch (e) {
-      debugPrint('Skipping invalid capture block ${b.id}: $e');
+      AppLog.warning(
+        'storage',
+        'Skipping invalid capture block ${b.id}',
+        error: e,
+      );
       return null;
     }
   }

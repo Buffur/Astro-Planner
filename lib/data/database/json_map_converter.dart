@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../core/diagnostics/app_log.dart';
+
 /// Stores a JSON object in a TEXT column (ADR-014 §4; TASK 11.2): the
 /// session snapshots. The map is written as-is — its `v` key carries the
 /// snapshot format version, which the snapshot readers (TASK 11.3) check.
@@ -18,8 +20,9 @@ class JsonMapConverter extends TypeConverter<Map<String, Object?>, String> {
     try {
       final decoded = jsonDecode(fromDb);
       if (decoded is Map<String, Object?>) return decoded;
-    } on FormatException {
+    } on FormatException catch (e) {
       // Falls through to the empty map.
+      AppLog.warning('storage', 'Unreadable JSON snapshot', error: e);
     }
     return const {};
   }
