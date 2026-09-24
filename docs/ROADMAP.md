@@ -424,8 +424,10 @@ rewritten to match the code.*
   - Completed 2026-09-24: **TASK 14.1** — Sessions filters (status, target, site, night
     range) and a read-only detail from snapshots, legacy badge (commit `e212f6a`). 808 tests
     green.
-  - **Next: TASK 14.2 — Accumulated integration per target (cut line).** Not started; it
-    begins only on the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 14.2** — integration so far per target (owner: built, not
+    cut) (commit `4274175`). 814 tests green.
+  - **Next: TASK 14.3 — Export manifest v2.** Not started; it begins only on the owner's
+    go-ahead.
 
 ### Phase → group map
 

@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **808 tests: 808 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.1) |
+| `flutter test --no-pub` | **814 tests: 814 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -816,3 +816,10 @@ the ADR-012 variables, and a real out-of-range error):
   snapshot; a session without a snapshot says so; 200 % text on a phone.
 - **Updated:** the Sessions and E2E tests look for the row's "Planned" status inside the
   list (a "Planned" filter chip now exists).
+
+**Added by TASK 14.2** (progress per target), 6 tests (814):
+- **`domain/services/target_progress_test.dart` (4):** CALC-38 across nights and filters
+  (darks excluded); abandoned, legacy and target-less sessions excluded; a completed
+  session with nothing confirmed still counts; targets kept apart, newest label.
+- **`session_detail_test.dart` (+2):** the detail's "This target so far" and Library →
+  Progress; the empty state.
