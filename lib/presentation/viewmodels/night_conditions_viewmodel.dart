@@ -10,6 +10,7 @@ import '../../domain/models/moon_conditions.dart';
 import '../../domain/models/night_timeline.dart';
 import '../../domain/models/night_weather.dart';
 import '../../domain/models/night_weather_summary.dart';
+import '../../domain/models/session_night.dart';
 import '../../domain/models/visibility_window.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/candidate_evaluator.dart';
@@ -111,29 +112,46 @@ class NightConditionsViewModel extends ChangeNotifier {
         notifyListeners();
       }();
 
-  /// The Sun's dusk/dawn timeline, or null without a site (ADR-007 §8-§9).
+  /// The Sun's dusk/dawn timeline, or null without a site (ADR-007 §8-§9);
+  /// cached per night (TASK 15.2).
   NightTimeline? get nightTimeline {
     final night = _plan.sessionNight;
-    return night == null
-        ? null
-        : VisibilityCalculator.calculateNightTimelineForNight(night);
+    if (night == null) return null;
+    if (_timelineNight != night) {
+      _timeline = VisibilityCalculator.calculateNightTimelineForNight(night);
+      _timelineNight = night;
+    }
+    return _timeline;
   }
 
+  SessionNight? _timelineNight;
+  NightTimeline? _timeline;
+
   /// The forecast from sunset to sunrise with the dew heuristic (TASK 9.4);
-  /// null unless a forecast is available.
+  /// null unless a forecast is available. Cached per input (TASK 15.2).
   NightWeatherSummary? get nightWeatherSummary {
     final weather = _nightWeather;
+    if (weather is! NightWeatherAvailable) return null;
     final timeline = nightTimeline;
-    if (weather is! NightWeatherAvailable || timeline == null) return null;
-    final span = NightWeatherSummarizer.spanOf(timeline);
-    return NightWeatherSummarizer.summarize(
-      weather.snapshot,
-      fromUtc: span.fromUtc,
-      toUtc: span.toUtc,
-      span: span.span,
-      dewMarginC: _settings.planningPreferences.dewMarginC,
-    );
+    if (timeline == null) return null;
+    final dewMarginC = _settings.planningPreferences.dewMarginC;
+    final key = (_timelineNight, weather, dewMarginC);
+    if (_summaryKey != key) {
+      final span = NightWeatherSummarizer.spanOf(timeline);
+      _summary = NightWeatherSummarizer.summarize(
+        weather.snapshot,
+        fromUtc: span.fromUtc,
+        toUtc: span.toUtc,
+        span: span.span,
+        dewMarginC: dewMarginC,
+      );
+      _summaryKey = key;
+    }
+    return _summary;
   }
+
+  Object? _summaryKey;
+  NightWeatherSummary? _summary;
 
   /// Moon context for the night and target (TASK 6.4), cached per input.
   MoonConditions? get moonConditions {

@@ -20,6 +20,10 @@ import 'site_viewmodel.dart';
 /// ViewModel in TASK 12.3): the capture budget (ADR-009), the fit (TASK
 /// 5.5), the rig's capability (TASK 8.6) — all computed by domain services
 /// — and Save with its snapshot (ADR-014).
+///
+/// The budget, the fit and the fill count are cached until an input
+/// notifies or the night changes (TASK 15.2): widgets read them several
+/// times per frame and the fit is the costliest planner calculation.
 class CaptureAnalysisViewModel extends ChangeNotifier {
   CaptureAnalysisViewModel({
     required this._site,
@@ -29,7 +33,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
     required this._clock,
   }) {
     for (final source in [_plan, _settings, _conditions]) {
-      source.addListener(notifyListeners);
+      source.addListener(_onInputsChanged);
     }
   }
 
@@ -39,8 +43,37 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   final NightConditionsViewModel _conditions;
   final Clock _clock;
 
+  /// Bumped on every input change; the cache below is valid for one
+  /// generation and one night.
+  int _generation = 0;
+  Object? _cacheKey;
+  CaptureBudget? _budget;
+  FitResult? _fit;
+  (int?,)? _fillCount;
+
+  void _onInputsChanged() {
+    _generation++;
+    notifyListeners();
+  }
+
+  /// Clears the cache when the inputs or the night changed since it was
+  /// filled; the night can roll over with the clock alone.
+  void _validateCache() {
+    final key = (_generation, _plan.sessionNight);
+    if (_cacheKey == key) return;
+    _cacheKey = key;
+    _budget = null;
+    _fit = null;
+    _fillCount = null;
+  }
+
   /// The capture budget of the plan (ADR-009, TASK 5.4).
   CaptureBudget get captureBudget {
+    _validateCache();
+    return _budget ??= _computeBudget();
+  }
+
+  CaptureBudget _computeBudget() {
     final overheads = CaptureOverheads.fromPreferences(
       _settings.planningPreferences,
     );
@@ -57,15 +90,27 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
     );
   }
 
-  /// The target's upper transit tonight, or null (5-minute resolution).
+  /// The target's upper transit tonight, or null (5-minute resolution);
+  /// cached per night and target position.
   DateTime? get _transitUtc {
     final night = _plan.sessionNight;
     final target = _plan.selectedTarget;
     if (night == null || target == null) return null;
-    return CaptureBudgetCalculator.transitInstant(
-      VisibilityCalculator.calculateAltitudeCurve(night: night, target: target),
-    );
+    final key = (night, target.rightAscension, target.declination);
+    if (_transitKey != key) {
+      _transit = CaptureBudgetCalculator.transitInstant(
+        VisibilityCalculator.calculateAltitudeCurve(
+          night: night,
+          target: target,
+        ),
+      );
+      _transitKey = key;
+    }
+    return _transit;
   }
+
+  Object? _transitKey;
+  DateTime? _transit;
 
   /// Light-frame integration, "Xh Ym".
   String get totalIntegrationTime {
@@ -78,6 +123,11 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
 
   /// Whether and how the plan fits tonight's windows (TASK 5.5).
   FitResult get fitAnalysis {
+    _validateCache();
+    return _fit ??= _computeFit();
+  }
+
+  FitResult _computeFit() {
     final budget = captureBudget;
     final prefs = _settings.planningPreferences;
     final String noWindowReason;
@@ -120,6 +170,11 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   /// The frame count for [fillWindowBlockIndex] that fills tonight's windows
   /// (TASK 5.6); null without a light block, 0 when none fits.
   int? get fillWindowFrameCount {
+    _validateCache();
+    return (_fillCount ??= (_computeFillCount(),)).$1;
+  }
+
+  int? _computeFillCount() {
     final index = fillWindowBlockIndex;
     if (index == null) return null;
     final flip = captureBudget.countOf(BudgetEventKind.meridianFlip) > 0;
@@ -212,7 +267,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   @override
   void dispose() {
     for (final source in [_plan, _settings, _conditions]) {
-      source.removeListener(notifyListeners);
+      source.removeListener(_onInputsChanged);
     }
     super.dispose();
   }
