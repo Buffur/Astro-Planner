@@ -43,3 +43,9 @@ app.*.map.json
 /macos/Flutter/ephemeral/
 
 AstroPlan_Development_Plan.md
+
+# TASK 16.2: signing secrets never enter the repository (the upload key and
+# its passwords stay with the owner; see docs/RELEASE.md).
+key.properties
+*.jks
+*.keystore
