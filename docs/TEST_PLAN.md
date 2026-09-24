@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **878 tests: 878 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.5) |
+| `flutter test --no-pub` | **881 tests: 881 pass, 0 fail** (`dart run tool/check.dart`, after TASK 16.1) |
 | `flutter test --no-pub integration_test -d flutter-tester` | **2 end-to-end tests pass** (the gate's "E2E (host)" step, TASK 15.5) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
@@ -968,3 +968,15 @@ SQLite file, the network (forecast), GPS, the device zone and the share sheet ar
 - **Mutation check:** with the resume offer suppressed after a restart, the core-loop test
   fails.
 - **Emulator run:** not done — no Android device or emulator on the development machine.
+
+**Added by TASK 16.1** (app identity), 3 tests (881):
+- **`core/config/app_identity_test.dart` (3):** the owner-decided name and id; Gradle's
+  `applicationId`/`namespace`, the manifest label and `MainActivity`'s package agree with
+  `AppIdentity` and no `com.astroplan` is left in the Android project; the adaptive icon
+  (with a monochrome layer), the legacy PNGs, the 512 px store icon and both splash styles
+  are wired.
+- **Owner checklist (manual, not yet done):** the roadmap's test for 16.1 — build and
+  install. `flutter build apk --debug`, install, and check: the launcher shows "Astro
+  Planner" with the new icon (and a themed icon on Android 13+ with themed icons on); the
+  splash is night navy with the icon on Android 12+ and before; Settings → Apps lists
+  `io.github.chacha12.astroplanner`.

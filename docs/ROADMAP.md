@@ -455,8 +455,13 @@ rewritten to match the code.*
     cases) is green on the host — it runs in the quality gate — and as a native Windows
     app (commit `4ead647`). **Open:** "green on the emulator" (no Android device or
     emulator on the development machine, as for 15.4).
-  - **Next: G16 — Release preparation (TASK 16.1, app identity).** Not started; it begins
-    only on the owner's go-ahead. G15's "done when" also needs 15.4 and 15.5 on a device.
+  - Completed 2026-09-24 (build and install pending a device): **TASK 16.1** — app identity
+    (OD-07: "Astro Planner", `io.github.chacha12.astroplanner`, an original adaptive icon
+    and splash) (commits `92afaa4`, `98045f7`). 881 tests + 2 end-to-end green. The
+    roadmap's test, build and install, needs the Android toolchain.
+  - **Next: TASK 16.2 — Release build and signing (G16).** Not started; it begins only on
+    the owner's go-ahead. It needs a working Android build (Gradle, SDK licenses, a keystore
+    only the owner should hold). G15's "done when" also needs 15.4 and 15.5 on a device.
 
 ### Phase → group map
 
