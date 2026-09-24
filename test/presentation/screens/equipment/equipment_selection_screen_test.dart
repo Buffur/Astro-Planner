@@ -7,8 +7,9 @@ import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
 import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
+import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 
 class MockEquipmentRepository implements EquipmentRepository {
   final List<EquipmentProfile> _profiles = [];
@@ -37,7 +38,8 @@ class MockEquipmentRepository implements EquipmentRepository {
   Future<void> clearAll() async {}
 }
 
-class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
+class MockSessionPlanViewModel extends ChangeNotifier
+    implements SessionPlanViewModel {
   EquipmentProfile? _selectedEquipment;
 
   @override
@@ -57,12 +59,15 @@ class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
 }
 
 void main() {
-  Widget createTestWidget(EquipmentRepository repo, PlannerViewModel planner) {
+  Widget createTestWidget(
+    EquipmentRepository repo,
+    SessionPlanViewModel planner,
+  ) {
     return MultiProvider(
       providers: [
         Provider<EquipmentRepository>.value(value: repo),
         ChangeNotifierProvider(create: (_) => GearViewModel(repo)),
-        ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
+        ChangeNotifierProvider<SessionPlanViewModel>.value(value: planner),
       ],
       child: const MaterialApp(home: EquipmentSelectionScreen()),
     );
@@ -70,7 +75,7 @@ void main() {
 
   testWidgets('empty required field is rejected', (WidgetTester tester) async {
     final repo = MockEquipmentRepository();
-    final planner = MockPlannerViewModel();
+    final planner = MockSessionPlanViewModel();
 
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
@@ -89,7 +94,7 @@ void main() {
 
   testWidgets('non-numeric input is rejected', (WidgetTester tester) async {
     final repo = MockEquipmentRepository();
-    final planner = MockPlannerViewModel();
+    final planner = MockSessionPlanViewModel();
 
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
@@ -115,7 +120,7 @@ void main() {
 
   testWidgets('zero is rejected where invalid', (WidgetTester tester) async {
     final repo = MockEquipmentRepository();
-    final planner = MockPlannerViewModel();
+    final planner = MockSessionPlanViewModel();
 
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
@@ -139,7 +144,7 @@ void main() {
 
   testWidgets('valid values can still be saved', (WidgetTester tester) async {
     final repo = MockEquipmentRepository();
-    final planner = MockPlannerViewModel();
+    final planner = MockSessionPlanViewModel();
 
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
@@ -207,7 +212,9 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+      await tester.pumpWidget(
+        createTestWidget(repo, MockSessionPlanViewModel()),
+      );
       await tester.pumpAndSettle();
 
       // Asserting the correct text is enough; tool/check_encoding.dart is
@@ -259,7 +266,7 @@ void main() {
   ) async {
     await tallView(tester);
     final repo = MockEquipmentRepository();
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -305,7 +312,7 @@ void main() {
   testWidgets('a ratio above f/32 is rejected by the form', (tester) async {
     await tallView(tester);
     final repo = MockEquipmentRepository();
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -338,7 +345,7 @@ void main() {
         focalRatio: 72,
       ),
     );
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     expect(find.textContaining('f/72 — please review'), findsOneWidget);
 
@@ -372,7 +379,7 @@ void main() {
   testWidgets('every equipment number shows its unit', (tester) async {
     await tallView(tester);
     await tester.pumpWidget(
-      createTestWidget(MockEquipmentRepository(), MockPlannerViewModel()),
+      createTestWidget(MockEquipmentRepository(), MockSessionPlanViewModel()),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byType(FloatingActionButton));
@@ -418,7 +425,7 @@ void main() {
         opticsConfidence: seed.opticsConfidence,
       ),
     );
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.edit_outlined));
     await tester.pumpAndSettle();

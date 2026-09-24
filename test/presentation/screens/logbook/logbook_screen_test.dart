@@ -9,14 +9,15 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/presentation/screens/logbook/logbook_screen.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
 
-class _MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
+class _MockSessionPlanViewModel extends ChangeNotifier
+    implements SessionPlanViewModel {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -29,8 +30,8 @@ void main() {
     providers: [
       Provider<SessionRepository>.value(value: repo),
       ChangeNotifierProvider(create: (_) => SessionsViewModel(repo)),
-      ChangeNotifierProvider<PlannerViewModel>(
-        create: (_) => _MockPlannerViewModel(),
+      ChangeNotifierProvider<SessionPlanViewModel>(
+        create: (_) => _MockSessionPlanViewModel(),
       ),
     ],
     child: const MaterialApp(home: LogbookScreen()),

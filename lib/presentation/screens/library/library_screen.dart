@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 
 /// The Library tab (ADR-015): rigs, targets and sites.
 class LibraryScreen extends StatelessWidget {
@@ -11,8 +12,9 @@ class LibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
-    final site = vm.activeSite?.name;
+    final planVm = context.watch<SessionPlanViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final site = siteVm.activeSite?.name;
     return Scaffold(
       appBar: AppBar(title: const Text('Library')),
       body: ListView(
@@ -20,7 +22,7 @@ class LibraryScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.camera_alt_outlined),
             title: const Text('Rigs'),
-            subtitle: Text(vm.selectedEquipment?.name ?? 'None selected'),
+            subtitle: Text(planVm.selectedEquipment?.name ?? 'None selected'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRouter.libraryRigs),
           ),
@@ -28,10 +30,10 @@ class LibraryScreen extends StatelessWidget {
             leading: const Icon(Icons.auto_awesome_outlined),
             title: const Text('Targets'),
             subtitle: Text(
-              vm.selectedTarget == null
+              planVm.selectedTarget == null
                   ? 'None selected'
-                  : vm.selectedTarget!.commonName ??
-                        vm.selectedTarget!.catalogId,
+                  : planVm.selectedTarget!.commonName ??
+                        planVm.selectedTarget!.catalogId,
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRouter.libraryTargets),
@@ -41,8 +43,8 @@ class LibraryScreen extends StatelessWidget {
             title: const Text('Sites'),
             subtitle: Text(
               site == null
-                  ? '${vm.sites.length} saved · no active site'
-                  : '${vm.sites.length} saved · active: $site',
+                  ? '${siteVm.sites.length} saved · no active site'
+                  : '${siteVm.sites.length} saved · active: $site',
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRouter.librarySites),

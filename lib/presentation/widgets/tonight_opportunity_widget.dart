@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../domain/models/imaging_opportunity.dart';
 import '../shared/night_time_formatter.dart';
 import '../shared/opportunity_text.dart';
-import '../viewmodels/planner_viewmodel.dart';
+import '../viewmodels/site_viewmodel.dart';
+import '../viewmodels/night_conditions_viewmodel.dart';
 import 'altitude_chart_widget.dart';
 
 /// "Tonight for this target" (TASK 10.3, ADR-013): the chart and the text
@@ -15,12 +16,13 @@ class TonightOpportunityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
-    final o = vm.imagingOpportunity;
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final o = conditionsVm.imagingOpportunity;
     if (o == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
-    final zoneId = vm.displayZoneId;
-    final moon = vm.moonConditions;
+    final zoneId = siteVm.displayZoneId;
+    final moon = conditionsVm.moonConditions;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -51,7 +53,7 @@ class TonightOpportunityWidget extends StatelessWidget {
                   ? null
                   : [for (final s in moon.samples) s.altitudeDeg],
               zoneId: zoneId,
-              nowUtc: vm.nowUtc,
+              nowUtc: conditionsVm.nowUtc,
             ),
             const SizedBox(height: 12),
             OpportunityList(opportunity: o, zoneId: zoneId),

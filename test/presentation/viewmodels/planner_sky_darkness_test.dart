@@ -13,7 +13,9 @@ import 'package:astroplan/domain/models/astro_target.dart' as model;
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,8 +53,8 @@ void main() {
   tearDown(() => database.close());
 
   // 2026-09-11 is a new Moon, so the Moon cannot trigger the warning.
-  Future<PlannerViewModel> build() async {
-    final vm = PlannerViewModel(
+  Future<PlannerHarness> build() async {
+    final vm = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _NoWeather(),

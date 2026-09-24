@@ -5,7 +5,9 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/planning_preferences.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/screens/settings/settings_screen.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,15 +21,15 @@ class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
   late AppDatabase database;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   Future<void> pump(WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 3000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: vm,
+      MultiProvider(
+        providers: vm.providers,
         child: const MaterialApp(home: SettingsScreen()),
       ),
     );
@@ -41,7 +43,7 @@ void main() {
   Future<void> build(WidgetTester tester) async {
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _NoWeather(),

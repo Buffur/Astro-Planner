@@ -17,7 +17,9 @@ import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/session.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,8 +68,8 @@ void main() {
   tearDown(() => db.close());
 
   /// A fresh ViewModel on the same database and preferences: a restart.
-  Future<PlannerViewModel> start({DateTime? now}) async {
-    final vm = PlannerViewModel(
+  Future<PlannerHarness> start({DateTime? now}) async {
+    final vm = PlannerHarness(
       DriftTargetRepository(db),
       DriftEquipmentRepository(db),
       _NoWeather(),

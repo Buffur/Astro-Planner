@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/services/location_service.dart';
-import '../viewmodels/planner_viewmodel.dart';
+import '../viewmodels/site_viewmodel.dart';
 import 'location_failure_text.dart';
 
 /// Shows why the device position is unavailable, with "Open settings" when
 /// a settings page fixes it (TASK 7.2).
 void showLocationFailure(
   BuildContext context,
-  PlannerViewModel viewModel,
+  SiteViewModel viewModel,
   LocationFailure reason,
 ) {
   final target = LocationFailureText.settingsTarget(reason);
@@ -35,7 +35,7 @@ void showLocationFailure(
 /// "use current position"), explaining a failure.
 Future<void> useCurrentPositionWithFeedback(
   BuildContext context,
-  PlannerViewModel viewModel,
+  SiteViewModel viewModel,
 ) async {
   try {
     final result = await viewModel.useCurrentLocation();

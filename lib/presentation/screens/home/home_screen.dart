@@ -5,7 +5,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/startup_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/night_conditions_viewmodel.dart';
+import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
 import '../../shared/capability_text.dart';
 import '../../shared/light_pollution_map_link.dart';
@@ -26,9 +30,13 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<PlannerViewModel>();
-    final target = viewModel.selectedTarget;
-    final equipment = viewModel.selectedEquipment;
+    final analysisVm = context.watch<CaptureAnalysisViewModel>();
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final startupVm = context.watch<StartupViewModel>();
+    final target = planVm.selectedTarget;
+    final equipment = planVm.selectedEquipment;
 
     return Scaffold(
       appBar: AppBar(
@@ -37,7 +45,7 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'New Session',
-            onPressed: () => context.read<PlannerViewModel>().newSession(),
+            onPressed: () => context.read<SessionPlanViewModel>().newSession(),
           ),
           // TASK 11.4: a copy of the current plan as a new draft for another
           // night; the current session is not changed.
@@ -45,7 +53,7 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.copy_all),
             tooltip: 'Duplicate for another night',
             onPressed: () async {
-              final vm = context.read<PlannerViewModel>();
+              final planVm = context.read<SessionPlanViewModel>();
               final now = DateTime.now();
               final picked = await showDatePicker(
                 context: context,
@@ -55,7 +63,7 @@ class HomeScreen extends StatelessWidget {
                 helpText: 'Duplicate for which night?',
               );
               if (picked != null) {
-                await vm.duplicateForNight(
+                await planVm.duplicateForNight(
                   CalendarDate.fromDateTimeFields(picked),
                 );
               }
@@ -75,15 +83,15 @@ class HomeScreen extends StatelessWidget {
           // metadata import moved to the Tonight, Settings and Sessions tabs.
         ],
       ),
-      body: viewModel.hasBootstrapError
+      body: startupVm.hasBootstrapError
           ? _BootstrapErrorView(
-              onRetry: () => context.read<PlannerViewModel>().retryBootstrap(),
+              onRetry: () => context.read<StartupViewModel>().retryBootstrap(),
             )
-          : viewModel.isLoading
+          : startupVm.isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                if (viewModel.isDefaultLocation) const _DefaultLocationBanner(),
+                if (siteVm.isDefaultLocation) const _DefaultLocationBanner(),
                 Expanded(
                   child: target == null || equipment == null
                       ? _EmptyStateView(target: target, equipment: equipment)
@@ -103,12 +111,13 @@ class HomeScreen extends StatelessWidget {
                                 // stay usable, with a visible warning.
                                 if (TargetTypes.isMoving(target.type))
                                   'Note': TargetTypes.movingWarning,
-                                if (viewModel.currentAltitude != null)
+                                if (conditionsVm.currentAltitude != null)
                                   'Current Altitude':
-                                      '${viewModel.currentAltitude?.toStringAsFixed(1)}°',
+                                      '${conditionsVm.currentAltitude?.toStringAsFixed(1)}°',
                                 // TASK 10.3: inside tonight's windows, not
                                 // at culmination (possibly in daylight).
-                                if (viewModel.imagingOpportunity case final o?)
+                                if (conditionsVm.imagingOpportunity
+                                    case final o?)
                                   'Max altitude in windows':
                                       o.maxAltitudeInWindowsDeg == null
                                       ? 'no window tonight'
@@ -116,7 +125,7 @@ class HomeScreen extends StatelessWidget {
                               },
                               onTap: () => context.push(AppRouter.selectTarget),
                             ),
-                            if (viewModel.sessionNight != null)
+                            if (planVm.sessionNight != null)
                               const TonightOpportunityWidget()
                             else
                               const _NoSiteCard(
@@ -126,20 +135,20 @@ class HomeScreen extends StatelessWidget {
                             PlannerSummaryCard(
                               title: 'Equipment: ${equipment.name}',
                               data: {
-                                'Pixel Scale': viewModel.pixelScale != null
-                                    ? '${viewModel.pixelScale!.toStringAsFixed(2)} arcsec/px'
+                                'Pixel Scale': analysisVm.pixelScale != null
+                                    ? '${analysisVm.pixelScale!.toStringAsFixed(2)} arcsec/px'
                                     : 'Unknown',
                                 // TASK 8.6: capability summary (guidance).
-                                if (viewModel.rigCapability case final cap?)
+                                if (analysisVm.rigCapability case final cap?)
                                   'Field of view': CapabilityText.fov(cap),
-                                if (viewModel.rigCapability case final cap?
+                                if (analysisVm.rigCapability case final cap?
                                     when cap.npf != null)
                                   'NPF (untracked)': CapabilityText.npf(cap)!,
-                                if (viewModel.rigCapability case final cap?
+                                if (analysisVm.rigCapability case final cap?
                                     when cap.recommendedMaxSubS != null)
                                   'Max sub (guide)':
                                       CapabilityText.recommendedMaxSub(cap)!,
-                                if (viewModel.rigCapability case final cap?
+                                if (analysisVm.rigCapability case final cap?
                                     when cap.frameFillFraction != null)
                                   'Target size': CapabilityText.frameFill(cap)!,
                                 'Focal length':
@@ -160,13 +169,13 @@ class HomeScreen extends StatelessWidget {
                                 leading: const Icon(Icons.calendar_month),
                                 title: const Text('Session Date'),
                                 subtitle: Text(
-                                  viewModel.eveningDate != null
-                                      ? 'Night of ${NightTimeFormatter.eveningDate(viewModel.eveningDate!)}'
+                                  planVm.eveningDate != null
+                                      ? 'Night of ${NightTimeFormatter.eveningDate(planVm.eveningDate!)}'
                                       : 'No site set',
                                 ),
                                 trailing: const Icon(Icons.edit, size: 16),
                                 onTap: () async {
-                                  final evening = viewModel.eveningDate;
+                                  final evening = planVm.eveningDate;
                                   final now = DateTime.now();
                                   final picked = await showDatePicker(
                                     context: context,
@@ -189,7 +198,7 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   );
                                   if (picked != null) {
-                                    viewModel.setEveningDate(
+                                    planVm.setEveningDate(
                                       CalendarDate.fromDateTimeFields(picked),
                                     );
                                   }
@@ -198,22 +207,24 @@ class HomeScreen extends StatelessWidget {
                             ),
                             // The night's forecast needs a night (ADR-012);
                             // without a site the location card is shown.
-                            if (viewModel.sessionNight != null)
+                            if (planVm.sessionNight != null)
                               WeatherForecastWidget(
                                 onTap: () => context.push(AppRouter.selectSite),
                               )
                             else
                               PlannerSummaryCard(
                                 title:
-                                    'Location: ${viewModel.locationName ?? "Custom"}',
+                                    'Location: ${siteVm.locationName ?? "Custom"}',
                                 data: {
-                                  'Latitude': viewModel.latitude
-                                      .toStringAsFixed(4),
-                                  'Longitude': viewModel.longitude
-                                      .toStringAsFixed(4),
-                                  if (viewModel.locationNameAttribution != null)
+                                  'Latitude': siteVm.latitude.toStringAsFixed(
+                                    4,
+                                  ),
+                                  'Longitude': siteVm.longitude.toStringAsFixed(
+                                    4,
+                                  ),
+                                  if (siteVm.locationNameAttribution != null)
                                     'Place name':
-                                        viewModel.locationNameAttribution!,
+                                        siteVm.locationNameAttribution!,
                                 },
                                 onTap: () => context.push(AppRouter.selectSite),
                               ),
@@ -226,15 +237,15 @@ class HomeScreen extends StatelessWidget {
                             // without one — the London default is not the
                             // user's sky.
                             if (FeatureScope.lightPollutionContext &&
-                                !viewModel.isDefaultLocation)
+                                !siteVm.isDefaultLocation)
                               Card(
                                 margin: const EdgeInsets.only(bottom: 16),
                                 color: Theme.of(context).cardTheme.color,
                                 child: InkWell(
                                   onTap: () async {
                                     final url = LightPollutionMapLink.at(
-                                      viewModel.latitude,
-                                      viewModel.longitude,
+                                      siteVm.latitude,
+                                      siteVm.longitude,
                                     );
                                     if (await canLaunchUrl(url)) {
                                       await launchUrl(
@@ -286,9 +297,9 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar:
           target == null ||
               equipment == null ||
-              viewModel.isLoading ||
-              viewModel.hasBootstrapError ||
-              viewModel.sessionNight == null
+              startupVm.isLoading ||
+              startupVm.hasBootstrapError ||
+              planVm.sessionNight == null
           ? null
           : BottomAppBar(
               child: SafeArea(
@@ -301,7 +312,7 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () async {
                       // TASK 11.3 (ADR-014): saves the plan as a planned
                       // session with a fresh plan snapshot.
-                      await viewModel.saveSession();
+                      await analysisVm.saveSession();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -347,7 +358,7 @@ class _SectionHeader extends StatelessWidget {
 }
 
 /// Shown instead of the whole screen when the initial load
-/// (`PlannerViewModel.hasBootstrapError`) failed.
+/// (`StartupViewModel.hasBootstrapError`) failed.
 class _BootstrapErrorView extends StatelessWidget {
   final VoidCallback onRetry;
 
@@ -454,7 +465,7 @@ class _DefaultLocationBanner extends StatelessWidget {
         TextButton(
           onPressed: () => useCurrentPositionWithFeedback(
             context,
-            context.read<PlannerViewModel>(),
+            context.read<SiteViewModel>(),
           ),
           child: const Text('Use current position'),
         ),

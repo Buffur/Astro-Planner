@@ -13,7 +13,9 @@ import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/repositories/weather_snapshot_store.dart';
 import 'package:astroplan/domain/services/night_weather_service.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,8 +85,8 @@ void main() {
 
   tearDown(() => database.close());
 
-  Future<PlannerViewModel> build() async {
-    final vm = PlannerViewModel(
+  Future<PlannerHarness> build() async {
+    final vm = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       weather,

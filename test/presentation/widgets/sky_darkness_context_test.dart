@@ -9,7 +9,9 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:astroplan/presentation/widgets/sky_darkness_widget.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,7 @@ class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 void main() {
   Future<void> pumpCard(WidgetTester tester, {int? bortle, double? sqm}) async {
     late AppDatabase database;
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
       final locations = DriftLocationRepository(database);
@@ -47,7 +49,7 @@ void main() {
         ),
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': id});
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _NoWeather(),
@@ -61,8 +63,8 @@ void main() {
     });
     addTearDown(() => tester.runAsync(database.close));
     await tester.pumpWidget(
-      ChangeNotifierProvider<PlannerViewModel>.value(
-        value: vm,
+      MultiProvider(
+        providers: vm.providers,
         child: const MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(child: SkyDarknessWidget()),

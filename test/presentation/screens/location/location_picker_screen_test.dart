@@ -10,7 +10,9 @@ import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/location_service.dart';
 import 'package:astroplan/presentation/screens/location/location_picker_screen.dart';
 import 'package:astroplan/presentation/shared/location_failure_text.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -26,7 +28,7 @@ class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
   late AppDatabase database;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
   late FakeLocationService service;
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -39,7 +41,7 @@ void main() {
     service = FakeLocationService(location: location, failure: failure);
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _NoWeather(),
@@ -51,8 +53,8 @@ void main() {
     });
     addTearDown(() => tester.runAsync(database.close));
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: vm,
+      MultiProvider(
+        providers: vm.providers,
         child: const MaterialApp(home: LocationPickerScreen()),
       ),
     );

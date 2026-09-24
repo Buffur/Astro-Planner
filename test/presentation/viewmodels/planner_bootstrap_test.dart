@@ -1,4 +1,4 @@
-// Tests for PlannerViewModel's deterministic bootstrap (roadmap TASK 1.2).
+// Tests for PlannerHarness's deterministic bootstrap (roadmap TASK 1.2).
 //
 // Covers:
 //   - seeding completes before the ViewModel's first read (the ordering fix
@@ -19,7 +19,8 @@ import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/flaky_target_repository.dart';
@@ -51,7 +52,7 @@ void main() {
       await CatalogSeeder(targetRepo).seedIfNeeded();
       await EquipmentSeeder(equipmentRepo).seedIfNeeded();
 
-      final vm = PlannerViewModel(
+      final vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -74,7 +75,7 @@ void main() {
           DriftTargetRepository(database),
         );
 
-        final vm = PlannerViewModel(
+        final vm = PlannerHarness(
           flakyTargets,
           DriftEquipmentRepository(database),
           _MockWeather(),
@@ -99,7 +100,7 @@ void main() {
         await CatalogSeeder(DriftTargetRepository(database)).seedIfNeeded();
         await EquipmentSeeder(equipmentRepo).seedIfNeeded();
 
-        final vm = PlannerViewModel(
+        final vm = PlannerHarness(
           flakyTargets,
           equipmentRepo,
           _MockWeather(),
@@ -121,7 +122,7 @@ void main() {
 
   group('isDefaultLocation (TASK 1.2)', () {
     test('true on first launch, with no saved location', () async {
-      final vm = PlannerViewModel(
+      final vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _MockWeather(),
@@ -146,7 +147,7 @@ void main() {
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-      final vm = PlannerViewModel(
+      final vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _MockWeather(),

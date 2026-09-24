@@ -17,7 +17,8 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/no_snapshot_weather.dart';
@@ -29,7 +30,7 @@ void main() {
 
   late AppDatabase database;
   late DriftLocationRepository locationRepo;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() async {
     database = AppDatabase(NativeDatabase.memory());
@@ -46,7 +47,7 @@ void main() {
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-    vm = PlannerViewModel(
+    vm = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _MockWeather(),
@@ -61,7 +62,7 @@ void main() {
     await database.close();
   });
 
-  group('PlannerViewModel.minAltitude (Batch 3.2)', () {
+  group('PlannerHarness.minAltitude (Batch 3.2)', () {
     test('default is 20 degrees', () {
       expect(vm.minAltitude, 20.0);
     });

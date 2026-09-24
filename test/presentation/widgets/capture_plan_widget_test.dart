@@ -24,7 +24,9 @@ import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:astroplan/presentation/widgets/capture_plan_widget.dart';
 
 import '../../support/fake_location_service.dart';
@@ -34,7 +36,7 @@ class _MockWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
   late AppDatabase database;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() async {
     database = AppDatabase(NativeDatabase.memory());
@@ -50,7 +52,7 @@ void main() {
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-    vm = PlannerViewModel(
+    vm = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _MockWeather(),
@@ -69,8 +71,8 @@ void main() {
   });
 
   Widget wrap() {
-    return ChangeNotifierProvider<PlannerViewModel>.value(
-      value: vm,
+    return MultiProvider(
+      providers: vm.providers,
       // Home hosts the card inside a scrolling ListView; since TASK 5.6 the
       // card is taller than the 800x600 test surface, so scroll it here too.
       child: const MaterialApp(

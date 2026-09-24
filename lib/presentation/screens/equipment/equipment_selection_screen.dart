@@ -10,7 +10,7 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/spec_confidence.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/equipment_form_input.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 
 class EquipmentSelectionScreen extends StatefulWidget {
   const EquipmentSelectionScreen({super.key});
@@ -600,14 +600,14 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     // leaving the planner showing stale field values. A no-op unless the
     // edited profile is the selected one.
     if (mounted) {
-      await context.read<PlannerViewModel>().refreshSelectedEquipment();
+      await context.read<SessionPlanViewModel>().refreshSelectedEquipment();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final gear = context.read<GearViewModel>();
-    final planner = context.watch<PlannerViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Select Equipment')),
@@ -620,7 +620,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               itemCount: _equipment.length,
               itemBuilder: (context, index) {
                 final eq = _equipment[index];
-                final isSelected = eq.id == planner.selectedEquipment?.id;
+                final isSelected = eq.id == planVm.selectedEquipment?.id;
 
                 final card = Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -652,7 +652,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       ],
                     ),
                     onTap: () {
-                      planner.setEquipment(eq);
+                      planVm.setEquipment(eq);
                       context.pop();
                     },
                   ),
@@ -699,7 +699,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     );
                     // TD-028: clear the planner's selection if this was it,
                     // instead of leaving a reference to a deleted profile.
-                    await planner.refreshSelectedEquipment();
+                    await planVm.refreshSelectedEquipment();
                   },
                   child: card,
                 );

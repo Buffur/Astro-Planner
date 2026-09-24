@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/settings_viewmodel.dart';
 import '../../navigation/app_router.dart';
 
 /// Every assumption behind the capture budget and the fit, visible
 /// (ADR-009 §4; TASK 5.6). An overhead that is off reads "Not included" —
 /// never a hidden zero (SI-008).
 class CaptureAssumptionsPanel extends StatelessWidget {
-  const CaptureAssumptionsPanel({super.key, required this.viewModel});
-
-  final PlannerViewModel viewModel;
+  const CaptureAssumptionsPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final p = viewModel.planningPreferences;
+    final p = context.watch<SettingsViewModel>().planningPreferences;
     String secs(double s) => '${s.round()} s';
     String minutes(double m) => '${m.round()} min';
     final rows = <(String, String)>[

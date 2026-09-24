@@ -7,7 +7,7 @@ import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/target_form_input.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 
 class TargetSelectionScreen extends StatefulWidget {
   const TargetSelectionScreen({super.key});
@@ -243,14 +243,14 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
     // leaving the planner showing stale field values. A no-op unless the
     // edited target is the selected one.
     if (mounted) {
-      await context.read<PlannerViewModel>().refreshSelectedTarget();
+      await context.read<SessionPlanViewModel>().refreshSelectedTarget();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final targets = context.read<TargetsViewModel>();
-    final planner = context.watch<PlannerViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -293,7 +293,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
               itemCount: _targets.length,
               itemBuilder: (context, index) {
                 final target = _targets[index];
-                final isSelected = target.id == planner.selectedTarget?.id;
+                final isSelected = target.id == planVm.selectedTarget?.id;
 
                 final card = Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -329,7 +329,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       ],
                     ),
                     onTap: () {
-                      planner.setTarget(target);
+                      planVm.setTarget(target);
                       context.pop();
                     },
                   ),
@@ -377,7 +377,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     );
                     // TD-028: clear the planner's selection if this was it,
                     // instead of leaving a reference to a deleted target.
-                    await planner.refreshSelectedTarget();
+                    await planVm.refreshSelectedTarget();
                   },
                   child: card,
                 );

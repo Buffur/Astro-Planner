@@ -129,6 +129,28 @@ class SessionNightResolver {
     );
   }
 
+  /// The night of a picked [eveningDate], or the default night for
+  /// [nowUtc] when none is picked (TASK 12.3: moved out of the planner).
+  static SessionNight resolve(
+    CalendarDate? eveningDate,
+    DateTime nowUtc, {
+    required double latitude,
+    required double longitude,
+    required SiteTimeContext timeContext,
+  }) => eveningDate != null
+      ? forEveningDate(
+          eveningDate,
+          latitude: latitude,
+          longitude: longitude,
+          timeContext: timeContext,
+        )
+      : resolveDefault(
+          nowUtc,
+          latitude: latitude,
+          longitude: longitude,
+          timeContext: timeContext,
+        );
+
   /// The civil date of a window start in [timeContext] (ADR-007 §4, `labelOf`).
   static CalendarDate _eveningDateOf(
     DateTime startUtc,

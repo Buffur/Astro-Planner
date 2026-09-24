@@ -12,7 +12,9 @@ import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import 'support/planner_harness.dart';
+
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +38,7 @@ void main() {
   late DriftEquipmentRepository equipmentRepo;
   late DriftSessionRepository sessionRepo;
   late DriftLocationRepository locationRepo;
-  late PlannerViewModel plannerViewModel;
+  late PlannerHarness plannerViewModel;
   late domain.AstroTarget testTarget;
   late domain.EquipmentProfile testEquip;
 
@@ -105,7 +107,7 @@ void main() {
     // The ViewModel's async initialisation (SharedPreferences, in-memory Drift)
     // needs the real event loop, which the fake-async test zone never runs.
     await tester.runAsync(() async {
-      plannerViewModel = PlannerViewModel(
+      plannerViewModel = PlannerHarness(
         targetRepo,
         equipmentRepo,
         MockWeatherRepository(),
@@ -127,7 +129,7 @@ void main() {
           Provider<SessionRepository>.value(value: sessionRepo),
           ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
           Provider<LocationRepository>.value(value: locationRepo),
-          ChangeNotifierProvider.value(value: plannerViewModel),
+          ...plannerViewModel.providers,
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),
@@ -189,7 +191,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.runAsync(() async {
-        plannerViewModel = PlannerViewModel(
+        plannerViewModel = PlannerHarness(
           targetRepo,
           equipmentRepo,
           MockWeatherRepository(),
@@ -213,7 +215,7 @@ void main() {
               create: (_) => SessionsViewModel(sessionRepo),
             ),
             Provider<LocationRepository>.value(value: locationRepo),
-            ChangeNotifierProvider.value(value: plannerViewModel),
+            ...plannerViewModel.providers,
             ChangeNotifierProvider(create: (_) => ThemeViewModel()),
           ],
           child: const AstroPlanApp(),

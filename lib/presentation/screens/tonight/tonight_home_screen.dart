@@ -6,7 +6,10 @@ import '../../../domain/models/session.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/startup_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/night_conditions_viewmodel.dart';
 
 /// The Tonight tab's root (ADR-015). **Interim (TASK 12.2):** the site, the
 /// night, the current session and quick actions only; the full dashboard
@@ -27,27 +30,30 @@ class TonightHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final startupVm = context.watch<StartupViewModel>();
     final theme = Theme.of(context);
-    final evening = vm.eveningDate;
-    final target = vm.selectedTarget;
-    final rig = vm.selectedEquipment;
+    final evening = planVm.eveningDate;
+    final target = planVm.selectedTarget;
+    final rig = planVm.selectedEquipment;
 
     Widget body;
-    if (vm.hasBootstrapError) {
+    if (startupVm.hasBootstrapError) {
       body = Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text("Couldn't load your data."),
             TextButton(
-              onPressed: vm.retryBootstrap,
+              onPressed: startupVm.retryBootstrap,
               child: const Text('Retry'),
             ),
           ],
         ),
       );
-    } else if (vm.isLoading) {
+    } else if (startupVm.isLoading) {
       body = const Center(child: CircularProgressIndicator());
     } else {
       body = ListView(
@@ -58,9 +64,9 @@ class TonightHomeScreen extends StatelessWidget {
               key: const Key('tonight.site'),
               leading: const Icon(Icons.place_outlined),
               title: Text(
-                vm.isDefaultLocation
+                siteVm.isDefaultLocation
                     ? 'No site set'
-                    : vm.locationName ?? 'Current position',
+                    : siteVm.locationName ?? 'Current position',
               ),
               subtitle: Text(
                 evening == null
@@ -78,7 +84,7 @@ class TonightHomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    _status(vm.activeSession),
+                    _status(planVm.activeSession),
                     key: const Key('tonight.sessionStatus'),
                     style: theme.textTheme.labelLarge,
                   ),
@@ -90,7 +96,7 @@ class TonightHomeScreen extends StatelessWidget {
                     style: theme.textTheme.titleMedium,
                   ),
                   Text(rig?.name ?? 'No rig chosen'),
-                  if (vm.imagingOpportunity case final o?)
+                  if (conditionsVm.imagingOpportunity case final o?)
                     Text(
                       'Usable time tonight: '
                       '${OpportunityText.duration(o.usableTime)}',
@@ -123,7 +129,7 @@ class TonightHomeScreen extends StatelessWidget {
           OutlinedButton.icon(
             key: const Key('tonight.newSession'),
             onPressed: () async {
-              await vm.newSession();
+              await planVm.newSession();
               if (context.mounted) context.push(AppRouter.session());
             },
             icon: const Icon(Icons.add),

@@ -1,4 +1,4 @@
-// Tests for PlannerViewModel's selection-staleness fixes (roadmap TASK 4.2,
+// Tests for PlannerHarness's selection-staleness fixes (roadmap TASK 4.2,
 // TD-028).
 //
 // Before this task, deleting or editing the selected target/equipment left
@@ -20,7 +20,8 @@ import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/no_snapshot_weather.dart';
@@ -55,7 +56,7 @@ void main() {
   late DriftTargetRepository targetRepo;
   late DriftEquipmentRepository equipmentRepo;
   late DriftLocationRepository locationRepo;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() async {
     database = AppDatabase(NativeDatabase.memory());
@@ -77,7 +78,7 @@ void main() {
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-    vm = PlannerViewModel(
+    vm = PlannerHarness(
       targetRepo,
       equipmentRepo,
       _MockWeather(),
@@ -182,7 +183,7 @@ void main() {
       // database with none at all to get a genuinely empty selection.
       final emptyDb = AppDatabase(NativeDatabase.memory());
       final emptyEquipmentRepo = DriftEquipmentRepository(emptyDb);
-      final emptyVm = PlannerViewModel(
+      final emptyVm = PlannerHarness(
         targetRepo,
         emptyEquipmentRepo,
         _MockWeather(),
@@ -201,7 +202,7 @@ void main() {
 
   group('a deleted selection also clears after a restart (TD-028)', () {
     test(
-      'a new PlannerViewModel does not resurrect a deleted target/equipment id',
+      'a new PlannerHarness does not resurrect a deleted target/equipment id',
       () async {
         await vm.setTarget(_target);
         await vm.setEquipment(_equipment);
@@ -211,7 +212,7 @@ void main() {
         await targetRepo.deleteTarget(_target.id);
         await equipmentRepo.deleteEquipment(_equipment.id);
 
-        final restarted = PlannerViewModel(
+        final restarted = PlannerHarness(
           targetRepo,
           equipmentRepo,
           _MockWeather(),

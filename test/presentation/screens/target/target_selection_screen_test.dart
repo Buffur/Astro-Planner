@@ -4,8 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:astroplan/presentation/screens/target/target_selection_screen.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
 import 'package:astroplan/presentation/viewmodels/library_viewmodels.dart';
+import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 
 class MockTargetRepository implements TargetRepository {
   final List<AstroTarget> _targets = [];
@@ -36,7 +37,8 @@ class MockTargetRepository implements TargetRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
+class MockSessionPlanViewModel extends ChangeNotifier
+    implements SessionPlanViewModel {
   AstroTarget? _selectedTarget;
 
   @override
@@ -56,12 +58,12 @@ class MockPlannerViewModel extends ChangeNotifier implements PlannerViewModel {
 }
 
 void main() {
-  Widget createTestWidget(TargetRepository repo, PlannerViewModel planner) {
+  Widget createTestWidget(TargetRepository repo, SessionPlanViewModel planner) {
     return MultiProvider(
       providers: [
         Provider<TargetRepository>.value(value: repo),
         ChangeNotifierProvider(create: (_) => TargetsViewModel(repo)),
-        ChangeNotifierProvider<PlannerViewModel>.value(value: planner),
+        ChangeNotifierProvider<SessionPlanViewModel>.value(value: planner),
       ],
       child: const MaterialApp(home: TargetSelectionScreen()),
     );
@@ -71,7 +73,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final repo = MockTargetRepository();
-    final planner = MockPlannerViewModel();
+    final planner = MockSessionPlanViewModel();
 
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
@@ -106,7 +108,7 @@ void main() {
     WidgetTester tester,
     MockTargetRepository repo,
   ) async {
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -196,7 +198,7 @@ void main() {
         source: 'user',
       ),
     );
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     expect(find.textContaining('this object moves'), findsOneWidget);
 
@@ -233,7 +235,7 @@ void main() {
         source: 'seed:catalog@1',
       ),
     );
-    await tester.pumpWidget(createTestWidget(repo, MockPlannerViewModel()));
+    await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Edit'));
     await tester.pumpAndSettle();

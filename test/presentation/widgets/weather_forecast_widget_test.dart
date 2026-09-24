@@ -13,7 +13,9 @@ import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/repositories/weather_snapshot_store.dart';
 import 'package:astroplan/domain/services/night_weather_service.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:astroplan/presentation/widgets/weather_forecast_widget.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +97,7 @@ void main() {
   late AppDatabase database;
   late _Clock clock;
   late _Weather weather;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -119,7 +121,7 @@ void main() {
           elevation: 300,
         ),
       );
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         weather,
@@ -140,8 +142,8 @@ void main() {
     });
     addTearDown(() => tester.runAsync(database.close));
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: vm,
+      MultiProvider(
+        providers: vm.providers,
         child: const MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(child: WeatherForecastWidget()),

@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
 import 'presentation/navigation/app_router.dart';
-import 'presentation/viewmodels/planner_viewmodel.dart';
+import 'core/time/clock.dart';
+import 'presentation/app_view_models.dart';
 import 'data/database/app_database.dart';
 import 'data/repositories/drift_target_repository.dart';
 import 'domain/repositories/target_repository.dart';
@@ -19,9 +20,14 @@ import 'data/repositories/drift_session_repository.dart';
 import 'domain/repositories/session_repository.dart';
 import 'data/repositories/drift_location_repository.dart';
 import 'domain/repositories/location_repository.dart';
+import 'data/repositories/shared_prefs_planner_state_repository.dart';
+import 'data/repositories/shared_prefs_planning_preferences_repository.dart';
+import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
+import 'data/services/flutter_timezone_device_time_zone.dart';
 import 'data/services/geolocator_location_service.dart';
+import 'data/services/nominatim_reverse_geocoder.dart';
+import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
-import 'presentation/viewmodels/library_viewmodels.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +43,6 @@ void main() async {
   final weatherRepo = OpenMeteoWeatherRepository();
   final sessionRepo = DriftSessionRepository(database);
   final locationRepo = DriftLocationRepository(database);
-  final locationService = GeolocatorLocationService();
 
   final targetSeeder = CatalogSeeder(targetRepo);
   final equipmentSeeder = EquipmentSeeder(equipmentRepo);
@@ -53,28 +58,38 @@ void main() async {
     debugPrint('Seeding error: $e');
   }
 
+  // The only place that picks implementations (TASK 12.3): ViewModels see
+  // domain interfaces only.
+  const clock = SystemClock();
+  final vms = AppViewModels(
+    targets: targetRepo,
+    equipment: equipmentRepo,
+    locations: locationRepo,
+    preferences: SharedPrefsPlanningPreferencesRepository(),
+    plannerState: SharedPrefsPlannerStateRepository(),
+    weather: NightWeatherService(
+      repository: weatherRepo,
+      store: SharedPrefsWeatherSnapshotStore(),
+      clock: clock,
+      model: OpenMeteoWeatherRepository.model,
+    ),
+    locationService: GeolocatorLocationService(),
+    reverseGeocoder: NominatimReverseGeocoder(),
+    deviceTimeZone: FlutterTimezoneDeviceTimeZone(),
+    clock: clock,
+    sessions: sessionRepo,
+  );
+
   runApp(
     MultiProvider(
       providers: [
         Provider<AppDatabase>.value(value: database),
         Provider<TargetRepository>.value(value: targetRepo),
-        ChangeNotifierProvider(create: (_) => TargetsViewModel(targetRepo)),
         Provider<EquipmentRepository>.value(value: equipmentRepo),
-        ChangeNotifierProvider(create: (_) => GearViewModel(equipmentRepo)),
         Provider<WeatherRepository>.value(value: weatherRepo),
         Provider<SessionRepository>.value(value: sessionRepo),
-        ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
         Provider<LocationRepository>.value(value: locationRepo),
-        ChangeNotifierProvider(
-          create: (_) => PlannerViewModel(
-            targetRepo,
-            equipmentRepo,
-            weatherRepo,
-            locationRepo,
-            locationService: locationService,
-            sessionRepository: sessionRepo,
-          ),
-        ),
+        ...vms.providers,
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),

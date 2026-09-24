@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import '../../../domain/services/candidate_evaluator.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
+import '../../viewmodels/settings_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/night_conditions_viewmodel.dart';
 
 /// "What can I image tonight?" (TASK 10.4): every target evaluated for the
 /// chosen night with the same rules as Home's opportunity card, sorted by a
@@ -42,13 +45,15 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
   }
 
   void _load() {
-    _rows = context.read<PlannerViewModel>().tonightCandidates();
+    _rows = context.read<NightConditionsViewModel>().tonightCandidates();
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
-    final night = vm.sessionNight;
+    final planVm = context.watch<SessionPlanViewModel>();
+    final settingsVm = context.watch<SettingsViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final night = planVm.sessionNight;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tonight's candidates"),
@@ -83,7 +88,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
                 if (all == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return _buildList(context, vm, all);
+                return _buildList(context, planVm, siteVm, settingsVm, all);
               },
             ),
     );
@@ -91,12 +96,14 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
 
   Widget _buildList(
     BuildContext context,
-    PlannerViewModel vm,
+    SessionPlanViewModel planVm,
+    SiteViewModel siteVm,
+    SettingsViewModel settingsVm,
     List<TonightCandidate> all,
   ) {
     final theme = Theme.of(context);
-    final night = vm.sessionNight!;
-    final zoneId = vm.displayZoneId;
+    final night = planVm.sessionNight!;
+    final zoneId = siteVm.displayZoneId;
     final types = {for (final r in all) r.target.type}.toList()..sort();
     final rows = CandidateList.sort(
       CandidateList.filter(
@@ -113,7 +120,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
       windowStartUtc: night.startUtc,
       zoneId: zoneId,
     );
-    final prefs = vm.planningPreferences;
+    final prefs = settingsVm.planningPreferences;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -122,7 +129,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: Text(
             'Night of ${NightTimeFormatter.eveningDate(night.eveningDate)}'
-            '${vm.locationName == null ? '' : ' at ${vm.locationName}'} · '
+            '${siteVm.locationName == null ? '' : ' at ${siteVm.locationName}'} · '
             '${rows.length} of ${all.length} targets · sorted by '
             '${_sortLabels[_sort]!.toLowerCase()} (no score)',
             key: const Key('tonight.header'),
@@ -210,7 +217,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
                         style: theme.textTheme.titleSmall,
                       ),
                       onTap: () async {
-                        await vm.setTarget(t);
+                        await planVm.setTarget(t);
                         if (context.mounted) context.pop();
                       },
                     );

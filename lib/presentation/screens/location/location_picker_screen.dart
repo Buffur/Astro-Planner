@@ -9,7 +9,7 @@ import '../../../core/config/app_identity.dart';
 import '../../../domain/services/location_service.dart';
 import '../../shared/coordinate_input.dart';
 import '../../shared/location_feedback.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   /// With [pickOnly], confirming returns the point to the caller (the site
@@ -33,22 +33,22 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
   @override
   void initState() {
     super.initState();
-    final viewModel = context.read<PlannerViewModel>();
+    final siteVm = context.read<SiteViewModel>();
     _selectedLocation =
-        widget.initial ?? LatLng(viewModel.latitude, viewModel.longitude);
+        widget.initial ?? LatLng(siteVm.latitude, siteVm.longitude);
   }
 
   Future<void> _getCurrentLocation() async {
-    final viewModel = context.read<PlannerViewModel>();
+    final siteVm = context.read<SiteViewModel>();
     setState(() => _isLoadingLocation = true);
     try {
-      final result = await viewModel.locateDevice();
+      final result = await siteVm.locateDevice();
       if (!mounted) return;
       switch (result) {
         case LocationFound(:final location):
           _moveTo(LatLng(location.latitude, location.longitude), zoom: 10.0);
         case LocationUnavailable(:final reason):
-          showLocationFailure(context, viewModel, reason);
+          showLocationFailure(context, siteVm, reason);
       }
     } catch (e) {
       if (mounted) {
@@ -80,8 +80,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       return;
     }
     if (_selectedLocation != null) {
-      final viewModel = context.read<PlannerViewModel>();
-      viewModel.setLocation(
+      context.read<SiteViewModel>().setLocation(
         _selectedLocation!.latitude,
         _selectedLocation!.longitude,
       );

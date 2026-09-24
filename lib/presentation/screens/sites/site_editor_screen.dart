@@ -8,7 +8,7 @@ import '../../../domain/models/iana_time_context.dart';
 import '../../../domain/models/location_profile.dart';
 import '../../shared/coordinate_input.dart';
 import '../../shared/site_form_input.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
 import 'zone_picker_dialog.dart';
 import '../../navigation/app_router.dart';
 
@@ -79,7 +79,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   /// A new site's zone defaults to the device zone (owner decision, TASK
   /// 7.3) — only as a pre-filled choice the user can change.
   Future<void> _prefillDeviceZone() async {
-    final zone = await context.read<PlannerViewModel>().deviceZoneId();
+    final zone = await context.read<SiteViewModel>().deviceZoneId();
     if (!mounted || _zoneTouched) return;
     if (IanaTimeContext.tryCreate(zone) == null) return;
     setState(() {
@@ -122,7 +122,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final viewModel = context.read<PlannerViewModel>();
+    final siteVm = context.read<SiteViewModel>();
     final LocationProfile site;
     try {
       site = LocationProfile.userEdit(
@@ -135,7 +135,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
         notes: SiteFormInput.optionalText(_notes.text),
         bortleClass: _bortle,
         sqm: CoordinateInput.parse(_sqm.text),
-        today: viewModel.today,
+        today: siteVm.today,
       );
     } on ArgumentError catch (e) {
       ScaffoldMessenger.of(context)
@@ -143,7 +143,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
       return;
     }
     setState(() => _saving = true);
-    await viewModel.saveSite(site);
+    await siteVm.saveSite(site);
     if (mounted) context.pop();
   }
 

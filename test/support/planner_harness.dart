@@ -1,58 +1,58 @@
 import 'package:flutter/foundation.dart';
 
-import '../../core/time/clock.dart';
-import '../../data/repositories/open_meteo_weather_repository.dart';
-import '../../data/repositories/shared_prefs_planner_state_repository.dart';
-import '../../data/repositories/shared_prefs_planning_preferences_repository.dart';
-import '../../data/repositories/shared_prefs_weather_snapshot_store.dart';
-import '../../data/services/flutter_timezone_device_time_zone.dart';
-import '../../data/services/geolocator_location_service.dart';
-import '../../data/services/nominatim_reverse_geocoder.dart';
-import '../../domain/models/astro_target.dart';
-import '../../domain/models/calendar_date.dart';
-import '../../domain/models/capture_block.dart';
-import '../../domain/models/equipment_profile.dart';
-import '../../domain/models/imaging_opportunity.dart';
-import '../../domain/models/location_profile.dart';
-import '../../domain/models/moon_conditions.dart';
-import '../../domain/models/night_timeline.dart';
-import '../../domain/models/night_weather.dart';
-import '../../domain/models/night_weather_summary.dart';
-import '../../domain/models/planning_preferences.dart';
-import '../../domain/models/session.dart';
-import '../../domain/models/session_night.dart';
-import '../../domain/models/sky_darkness.dart';
-import '../../domain/models/visibility_window.dart';
-import '../../domain/repositories/equipment_repository.dart';
-import '../../domain/repositories/location_repository.dart';
-import '../../domain/repositories/planner_state_repository.dart';
-import '../../domain/repositories/planning_preferences_repository.dart';
-import '../../domain/repositories/session_repository.dart';
-import '../../domain/repositories/target_repository.dart';
-import '../../domain/repositories/weather_repository.dart';
-import '../../domain/services/candidate_evaluator.dart';
-import '../../domain/services/capability_calculator.dart';
-import '../../domain/services/capture_budget_calculator.dart';
-import '../../domain/services/device_time_zone.dart';
-import '../../domain/services/fit_analyzer.dart';
-import '../../domain/services/location_service.dart';
-import '../../domain/services/night_weather_service.dart';
-import '../../domain/services/reverse_geocoder.dart';
-import 'capture_analysis_viewmodel.dart';
-import 'night_conditions_viewmodel.dart';
-import 'session_plan_viewmodel.dart';
-import 'settings_viewmodel.dart';
-import 'site_viewmodel.dart';
-import 'startup_viewmodel.dart';
+import 'package:astroplan/core/time/clock.dart';
+import 'package:astroplan/data/repositories/open_meteo_weather_repository.dart';
+import 'package:astroplan/data/repositories/shared_prefs_planner_state_repository.dart';
+import 'package:astroplan/data/repositories/shared_prefs_planning_preferences_repository.dart';
+import 'package:astroplan/data/repositories/shared_prefs_weather_snapshot_store.dart';
+import 'package:astroplan/data/services/flutter_timezone_device_time_zone.dart';
+import 'package:astroplan/data/services/geolocator_location_service.dart';
+import 'package:astroplan/data/services/nominatim_reverse_geocoder.dart';
+import 'package:astroplan/domain/models/astro_target.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
+import 'package:astroplan/domain/models/capture_block.dart';
+import 'package:astroplan/domain/models/equipment_profile.dart';
+import 'package:astroplan/domain/models/imaging_opportunity.dart';
+import 'package:astroplan/domain/models/location_profile.dart';
+import 'package:astroplan/domain/models/moon_conditions.dart';
+import 'package:astroplan/domain/models/night_timeline.dart';
+import 'package:astroplan/domain/models/night_weather.dart';
+import 'package:astroplan/domain/models/night_weather_summary.dart';
+import 'package:astroplan/domain/models/planning_preferences.dart';
+import 'package:astroplan/domain/models/session.dart';
+import 'package:astroplan/domain/models/session_night.dart';
+import 'package:astroplan/domain/models/sky_darkness.dart';
+import 'package:astroplan/domain/models/visibility_window.dart';
+import 'package:astroplan/domain/repositories/equipment_repository.dart';
+import 'package:astroplan/domain/repositories/location_repository.dart';
+import 'package:astroplan/domain/repositories/planner_state_repository.dart';
+import 'package:astroplan/domain/repositories/planning_preferences_repository.dart';
+import 'package:astroplan/domain/repositories/session_repository.dart';
+import 'package:astroplan/domain/repositories/target_repository.dart';
+import 'package:astroplan/domain/repositories/weather_repository.dart';
+import 'package:astroplan/domain/services/candidate_evaluator.dart';
+import 'package:astroplan/domain/services/capability_calculator.dart';
+import 'package:astroplan/domain/services/capture_budget_calculator.dart';
+import 'package:astroplan/domain/services/device_time_zone.dart';
+import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/domain/services/location_service.dart';
+import 'package:astroplan/domain/services/night_weather_service.dart';
+import 'package:astroplan/domain/services/reverse_geocoder.dart';
+import 'package:astroplan/presentation/app_view_models.dart';
+import 'package:astroplan/presentation/viewmodels/capture_analysis_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/night_conditions_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/settings_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
+import 'package:provider/single_child_widget.dart';
 
-/// **Transitional facade (TASK 12.3).** The planner's state now lives in
-/// [SiteViewModel], [SettingsViewModel], [SessionPlanViewModel],
-/// [NightConditionsViewModel], [CaptureAnalysisViewModel] and
-/// [StartupViewModel]; this class only builds them and delegates, so
-/// screens and tests can move to them one at a time. It is removed when
-/// nothing uses it.
-class PlannerViewModel extends ChangeNotifier {
-  PlannerViewModel(
+/// One object over the app's ViewModels, for tests (TASK 12.3). It builds
+/// the same [AppViewModels] graph `main.dart` does and delegates to it, so
+/// tests exercise the real ViewModels; defaults match the app's. Screens
+/// get the ViewModels through [providers].
+class PlannerHarness extends ChangeNotifier {
+  PlannerHarness(
     TargetRepository targetRepository,
     EquipmentRepository equipmentRepository,
     WeatherRepository weatherRepository,
@@ -67,31 +67,14 @@ class PlannerViewModel extends ChangeNotifier {
     SessionRepository? sessionRepository,
   }) {
     final time = clock ?? const SystemClock();
-    final state = stateRepository ?? SharedPrefsPlannerStateRepository();
-    site = SiteViewModel(
-      locationRepository: locationRepository,
-      stateRepository: state,
-      locationService: locationService ?? GeolocatorLocationService(),
-      reverseGeocoder: reverseGeocoder ?? NominatimReverseGeocoder(),
-      deviceTimeZone: deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
-      clock: time,
-    );
-    settings = SettingsViewModel(
-      preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
-    );
-    plan = SessionPlanViewModel(
-      site: site,
-      targetRepository: targetRepository,
-      equipmentRepository: equipmentRepository,
-      stateRepository: state,
-      clock: time,
-      sessionRepository: sessionRepository,
-    );
-    conditions = NightConditionsViewModel(
-      site: site,
-      plan: plan,
-      settings: settings,
-      weatherService:
+    vms = AppViewModels(
+      targets: targetRepository,
+      equipment: equipmentRepository,
+      locations: locationRepository,
+      preferences:
+          preferencesRepository ?? SharedPrefsPlanningPreferencesRepository(),
+      plannerState: stateRepository ?? SharedPrefsPlannerStateRepository(),
+      weather:
           nightWeatherService ??
           NightWeatherService(
             repository: weatherRepository,
@@ -99,33 +82,27 @@ class PlannerViewModel extends ChangeNotifier {
             clock: time,
             model: OpenMeteoWeatherRepository.model,
           ),
-      targetRepository: targetRepository,
+      locationService: locationService ?? GeolocatorLocationService(),
+      reverseGeocoder: reverseGeocoder ?? NominatimReverseGeocoder(),
+      deviceTimeZone: deviceTimeZone ?? FlutterTimezoneDeviceTimeZone(),
       clock: time,
-    );
-    analysis = CaptureAnalysisViewModel(
-      site: site,
-      plan: plan,
-      settings: settings,
-      conditions: conditions,
-      clock: time,
-    );
-    startup = StartupViewModel(
-      site: site,
-      settings: settings,
-      plan: plan,
-      conditions: conditions,
+      sessions: sessionRepository,
     );
     for (final vm in [site, settings, plan, conditions, analysis, startup]) {
       vm.addListener(notifyListeners);
     }
   }
 
-  late final SiteViewModel site;
-  late final SettingsViewModel settings;
-  late final SessionPlanViewModel plan;
-  late final NightConditionsViewModel conditions;
-  late final CaptureAnalysisViewModel analysis;
-  late final StartupViewModel startup;
+  late final AppViewModels vms;
+  SiteViewModel get site => vms.site;
+  SettingsViewModel get settings => vms.settings;
+  SessionPlanViewModel get plan => vms.plan;
+  NightConditionsViewModel get conditions => vms.conditions;
+  CaptureAnalysisViewModel get analysis => vms.analysis;
+  StartupViewModel get startup => vms.startup;
+
+  /// The ViewModels' providers, for a widget tree under test.
+  List<SingleChildWidget> get providers => vms.providers;
 
   // Startup
   Future<void> get ready => startup.ready;

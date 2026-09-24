@@ -1,4 +1,4 @@
-// Tests for PlannerViewModel's capture-block editing (roadmap TASK 4.1).
+// Tests for PlannerHarness's capture-block editing (roadmap TASK 4.1).
 //
 // TD-010: reorderCaptureBlocks() re-applied the classic `newIndex -= 1`
 // adjustment on top of one the widget's onReorderItem callback already makes
@@ -18,7 +18,8 @@ import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/no_snapshot_weather.dart';
@@ -39,7 +40,7 @@ void main() {
 
   late AppDatabase database;
   late DriftLocationRepository locationRepo;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() async {
     database = AppDatabase(NativeDatabase.memory());
@@ -56,7 +57,7 @@ void main() {
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-    vm = PlannerViewModel(
+    vm = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _MockWeather(),
@@ -82,7 +83,7 @@ void main() {
 
   List<String> labels() => vm.captureBlocks.map((b) => b.filterName!).toList();
 
-  group('PlannerViewModel.reorderCaptureBlocks (TASK 4.1, TD-010)', () {
+  group('PlannerHarness.reorderCaptureBlocks (TASK 4.1, TD-010)', () {
     test('starts as A, B, C, D', () {
       expect(labels(), ['A', 'B', 'C', 'D']);
     });
@@ -126,7 +127,7 @@ void main() {
     });
   });
 
-  group('PlannerViewModel.updateCaptureBlock (TASK 4.1, TD-012)', () {
+  group('PlannerHarness.updateCaptureBlock (TASK 4.1, TD-012)', () {
     test('replaces the block at the given index', () async {
       final updated = _block('B-edited', frameCount: 99);
       await vm.updateCaptureBlock(1, updated);

@@ -25,7 +25,9 @@ import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../../support/planner_harness.dart';
+
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/presentation/widgets/sky_darkness_widget.dart';
 import 'package:drift/native.dart';
@@ -87,7 +89,7 @@ void main() {
     await database.close();
   });
 
-  Widget wrap(PlannerViewModel vm) {
+  Widget wrap(PlannerHarness vm) {
     return MultiProvider(
       providers: [
         Provider<AppDatabase>.value(value: database),
@@ -98,7 +100,7 @@ void main() {
         Provider<SessionRepository>.value(value: sessionRepo),
         ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
         Provider<LocationRepository>.value(value: locationRepo),
-        ChangeNotifierProvider.value(value: vm),
+        ...vm.providers,
         ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: const AstroPlanApp(),
@@ -108,9 +110,9 @@ void main() {
   testWidgets('empty state offers actions to choose a target and equipment', (
     tester,
   ) async {
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -135,9 +137,9 @@ void main() {
   testWidgets('a default location shows a banner that offers to set the site', (
     tester,
   ) async {
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -170,9 +172,9 @@ void main() {
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -234,9 +236,9 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
 
       final throwingWeather = _FailingWeather();
-      late PlannerViewModel vm;
+      late PlannerHarness vm;
       await tester.runAsync(() async {
-        vm = PlannerViewModel(
+        vm = PlannerHarness(
           targetRepo,
           equipmentRepo,
           throwingWeather,
@@ -300,9 +302,9 @@ void main() {
       ),
     );
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         flakyTargets,
         equipmentRepo,
         _MockWeather(),
@@ -374,9 +376,9 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -433,9 +435,9 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),
@@ -499,9 +501,9 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async {
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         targetRepo,
         equipmentRepo,
         _MockWeather(),

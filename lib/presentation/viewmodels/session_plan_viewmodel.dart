@@ -78,25 +78,15 @@ class SessionPlanViewModel extends ChangeNotifier {
   Future<void> get idle => _current?.idle ?? Future.value();
 
   /// The chosen night, or null without a site (ADR-007 §9).
-  SessionNight? get sessionNight {
-    if (_site.isDefaultLocation) return null;
-    final picked = _pickedEveningDate;
-    final lat = _site.latitude, lon = _site.longitude;
-    final ctx = _site.timeContext;
-    return picked != null
-        ? SessionNightResolver.forEveningDate(
-            picked,
-            latitude: lat,
-            longitude: lon,
-            timeContext: ctx,
-          )
-        : SessionNightResolver.resolveDefault(
-            _clock.nowUtc(),
-            latitude: lat,
-            longitude: lon,
-            timeContext: ctx,
-          );
-  }
+  SessionNight? get sessionNight => _site.isDefaultLocation
+      ? null
+      : SessionNightResolver.resolve(
+          _pickedEveningDate,
+          _clock.nowUtc(),
+          latitude: _site.latitude,
+          longitude: _site.longitude,
+          timeContext: _site.timeContext,
+        );
 
   CalendarDate? get eveningDate => sessionNight?.eveningDate;
   CalendarDate get today => CalendarDate.fromDateTimeFields(_clock.nowUtc());
@@ -203,33 +193,30 @@ class SessionPlanViewModel extends ChangeNotifier {
     await _edited();
   }
 
-  Future<void> addCaptureBlock(CaptureBlock block) async {
-    _blocks.add(block);
+  /// Any block edit ends the example plan (TASK 4.4).
+  Future<void> _editBlocks(void Function(List<CaptureBlock> blocks) change) {
+    change(_blocks);
     _isExample = false;
-    await _edited();
+    return _edited();
   }
 
+  bool _valid(int index) => index >= 0 && index < _blocks.length;
+
+  Future<void> addCaptureBlock(CaptureBlock block) =>
+      _editBlocks((b) => b.add(block));
+
   Future<void> updateCaptureBlock(int index, CaptureBlock block) async {
-    if (index < 0 || index >= _blocks.length) return;
-    _blocks[index] = block;
-    _isExample = false;
-    await _edited();
+    if (_valid(index)) await _editBlocks((b) => b[index] = block);
   }
 
   Future<void> removeCaptureBlock(int index) async {
-    if (index < 0 || index >= _blocks.length) return;
-    _blocks.removeAt(index);
-    _isExample = false;
-    await _edited();
+    if (_valid(index)) await _editBlocks((b) => b.removeAt(index));
   }
 
   /// [newIndex] is already adjusted for the removal (the `onReorderItem`
   /// contract, TD-010) — do not re-adjust it.
-  Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) async {
-    _blocks.insert(newIndex, _blocks.removeAt(oldIndex));
-    _isExample = false;
-    await _edited();
-  }
+  Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) =>
+      _editBlocks((b) => b.insert(newIndex, b.removeAt(oldIndex)));
 
   /// Re-reads the selection after an edit or delete (TASK 4.2, TD-028).
   Future<void> refreshSelectedTarget() async {
@@ -278,10 +265,12 @@ class SessionPlanViewModel extends ChangeNotifier {
   /// planned with [snapshot]. Needs a repository, a night, target and rig.
   Future<Session> savePlan(SessionSnapshot snapshot) async {
     final current = _current;
-    if (current == null || sessionNight == null || _target == null) {
+    if (current == null ||
+        sessionNight == null ||
+        _target == null ||
+        _rig == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    if (_rig == null) throw StateError('Saving needs a rig.');
     final saved = await current.save(_plan(), snapshot);
     notifyListeners();
     return saved;

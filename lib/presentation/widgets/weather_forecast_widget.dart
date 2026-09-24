@@ -6,7 +6,9 @@ import '../../domain/models/night_weather.dart';
 import '../../domain/models/night_weather_summary.dart';
 import '../../domain/models/weather_snapshot.dart';
 import '../shared/night_time_formatter.dart';
-import '../viewmodels/planner_viewmodel.dart';
+import '../viewmodels/site_viewmodel.dart';
+import '../viewmodels/session_plan_viewmodel.dart';
+import '../viewmodels/night_conditions_viewmodel.dart';
 
 /// The chosen night's weather (ADR-012; TASK 9.4): sunset to sunrise only,
 /// per-hour indicators and per-variable ranges with explicit units, the
@@ -19,9 +21,11 @@ class WeatherForecastWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
     final theme = Theme.of(context);
-    final state = vm.nightWeather;
+    final state = conditionsVm.nightWeather;
     final small = theme.textTheme.bodySmall?.copyWith(
       color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.75),
     );
@@ -49,15 +53,15 @@ class WeatherForecastWidget extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          vm.locationName ?? 'Tap to set location',
+                          siteVm.locationName ?? 'Tap to set location',
                           style: small,
                           overflow: TextOverflow.ellipsis,
                         ),
                         // Required with a place name (TASK 7.2).
-                        if (vm.locationName != null &&
-                            vm.locationNameAttribution != null)
+                        if (siteVm.locationName != null &&
+                            siteVm.locationNameAttribution != null)
                           Text(
-                            'Place name ${vm.locationNameAttribution}',
+                            'Place name ${siteVm.locationNameAttribution}',
                             style: small,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -70,7 +74,7 @@ class WeatherForecastWidget extends StatelessWidget {
                     icon: const Icon(Icons.refresh),
                     onPressed: state is NightWeatherLoading
                         ? null
-                        : () => vm.refreshWeather(),
+                        : () => conditionsVm.refreshWeather(),
                   ),
                 ],
               ),
@@ -110,16 +114,16 @@ class WeatherForecastWidget extends StatelessWidget {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => vm.refreshWeather(),
+                    onPressed: () => conditionsVm.refreshWeather(),
                     child: const Text('Retry'),
                   ),
                 ],
               ),
               NightWeatherAvailable() => _AvailableBody(
                 state: state,
-                summary: vm.nightWeatherSummary,
-                zoneId: vm.displayZoneId,
-                windowStartUtc: vm.sessionNight?.startUtc,
+                summary: conditionsVm.nightWeatherSummary,
+                zoneId: siteVm.displayZoneId,
+                windowStartUtc: planVm.sessionNight?.startUtc,
               ),
             },
           ),

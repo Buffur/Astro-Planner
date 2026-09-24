@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../domain/models/capture_block.dart';
 import '../shared/capability_text.dart';
-import '../viewmodels/planner_viewmodel.dart';
+import '../viewmodels/capture_analysis_viewmodel.dart';
+import '../viewmodels/session_plan_viewmodel.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
 import 'capture_plan/capture_block_dialog.dart';
 import 'capture_plan/capture_budget_summary.dart';
@@ -16,7 +17,6 @@ class CapturePlanWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<PlannerViewModel>();
     final scheme = Theme.of(context).colorScheme;
     final sectionStyle = TextStyle(
       fontWeight: FontWeight.bold,
@@ -35,15 +35,15 @@ class CapturePlanWidget extends StatelessWidget {
           children: [
             Text('Inputs', style: sectionStyle),
             const SizedBox(height: 8),
-            _BlockList(viewModel: viewModel),
+            const _BlockList(),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 16),
             Text('Outputs', style: sectionStyle),
             const SizedBox(height: 8),
-            CaptureBudgetSummary(viewModel: viewModel),
+            const CaptureBudgetSummary(),
             const SizedBox(height: 8),
-            CaptureAssumptionsPanel(viewModel: viewModel),
+            const CaptureAssumptionsPanel(),
           ],
         ),
       ),
@@ -52,9 +52,7 @@ class CapturePlanWidget extends StatelessWidget {
 }
 
 class _BlockList extends StatelessWidget {
-  const _BlockList({required this.viewModel});
-
-  final PlannerViewModel viewModel;
+  const _BlockList();
 
   static String _policyLabel(CalibrationPolicy? p) => switch (p) {
     CalibrationPolicy.inWindow => ' · during the window',
@@ -66,8 +64,9 @@ class _BlockList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final viewModel = context.watch<SessionPlanViewModel>();
     final blocks = viewModel.captureBlocks;
-    final capability = viewModel.rigCapability;
+    final capability = context.watch<CaptureAnalysisViewModel>().rigCapability;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

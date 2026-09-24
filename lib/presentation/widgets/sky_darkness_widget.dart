@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../viewmodels/planner_viewmodel.dart';
+import '../viewmodels/site_viewmodel.dart';
+import '../viewmodels/night_conditions_viewmodel.dart';
 import '../shared/night_time_formatter.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../../domain/models/moon_conditions.dart';
@@ -13,11 +14,12 @@ class SkyDarknessWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<PlannerViewModel>();
-    final timeline = viewModel.nightTimeline;
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final siteVm = context.watch<SiteViewModel>();
+    final timeline = conditionsVm.nightTimeline;
     final theme = Theme.of(context);
 
-    final illum = viewModel.lunarIllumination;
+    final illum = conditionsVm.lunarIllumination;
     final lunarIllum = illum == null ? '--' : '${(illum * 100).round()}';
 
     return Card(
@@ -39,15 +41,15 @@ class SkyDarknessWidget extends StatelessWidget {
                 ),
                 if (FeatureScope.lightPollutionContext)
                   _BortleBadge(
-                    bortleClass: viewModel.bortleClass,
-                    onChanged: viewModel.setBortleClass,
+                    bortleClass: siteVm.bortleClass,
+                    onChanged: siteVm.setBortleClass,
                   ),
               ],
             ),
             if (FeatureScope.lightPollutionContext)
               _SkyDarknessLine(
-                darkness: viewModel.skyDarkness,
-                hasSite: viewModel.activeSite != null,
+                darkness: siteVm.skyDarkness,
+                hasSite: siteVm.activeSite != null,
               ),
             const SizedBox(height: 16),
 
@@ -69,8 +71,8 @@ class SkyDarknessWidget extends StatelessWidget {
               ],
             ),
             _MoonDetails(
-              conditions: viewModel.moonConditions,
-              zoneId: viewModel.displayZoneId,
+              conditions: conditionsVm.moonConditions,
+              zoneId: siteVm.displayZoneId,
             ),
 
             const SizedBox(height: 16),
@@ -78,7 +80,7 @@ class SkyDarknessWidget extends StatelessWidget {
             // Night Timeline
             _NightTimelineVisual(
               timeline: timeline,
-              zoneId: viewModel.displayZoneId,
+              zoneId: siteVm.displayZoneId,
             ),
           ],
         ),

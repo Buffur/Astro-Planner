@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/planning_preferences.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/settings_viewmodel.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
 
@@ -18,9 +18,10 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<PlannerViewModel>();
-    final p = vm.planningPreferences;
-    void update(PlanningPreferences next) => vm.setPlanningPreferences(next);
+    final settingsVm = context.watch<SettingsViewModel>();
+    final p = settingsVm.planningPreferences;
+    void update(PlanningPreferences next) =>
+        settingsVm.setPlanningPreferences(next);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Planning Settings')),

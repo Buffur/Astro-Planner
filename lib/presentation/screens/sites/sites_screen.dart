@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../domain/models/location_profile.dart';
 import '../../shared/location_feedback.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
 import 'site_editor_screen.dart';
 import '../../navigation/app_router.dart';
 
@@ -19,7 +19,7 @@ class SitesScreen extends StatelessWidget {
 
   Future<void> _confirmDelete(
     BuildContext context,
-    PlannerViewModel viewModel,
+    SiteViewModel viewModel,
     LocationProfile site,
   ) async {
     final active = viewModel.activeSite?.id == site.id;
@@ -50,11 +50,10 @@ class SitesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<PlannerViewModel>();
-    final activeId = viewModel.activeSite?.id;
-    final hasTransient =
-        viewModel.activeSite == null && !viewModel.isDefaultLocation;
-    final sites = viewModel.sites;
+    final siteVm = context.watch<SiteViewModel>();
+    final activeId = siteVm.activeSite?.id;
+    final hasTransient = siteVm.activeSite == null && !siteVm.isDefaultLocation;
+    final sites = siteVm.sites;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Sites')),
@@ -66,25 +65,25 @@ class SitesScreen extends StatelessWidget {
               margin: const EdgeInsets.all(12),
               child: ListTile(
                 leading: const Icon(Icons.my_location),
-                title: Text(viewModel.locationName ?? 'Current position'),
+                title: Text(siteVm.locationName ?? 'Current position'),
                 subtitle: Text(
-                  '${_coordinates(viewModel.latitude, viewModel.longitude)}'
+                  '${_coordinates(siteVm.latitude, siteVm.longitude)}'
                   ' · not saved',
                 ),
                 trailing: TextButton(
                   onPressed: () => context.push(
                     AppRouter.siteEdit,
                     extra: SiteEditorArgs(
-                      latitude: viewModel.latitude,
-                      longitude: viewModel.longitude,
-                      name: viewModel.locationName,
+                      latitude: siteVm.latitude,
+                      longitude: siteVm.longitude,
+                      name: siteVm.locationName,
                     ),
                   ),
                   child: const Text('Save as site'),
                 ),
               ),
             )
-          else if (viewModel.isDefaultLocation)
+          else if (siteVm.isDefaultLocation)
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Text(
@@ -100,7 +99,7 @@ class SitesScreen extends StatelessWidget {
               children: [
                 OutlinedButton.icon(
                   onPressed: () =>
-                      useCurrentPositionWithFeedback(context, viewModel),
+                      useCurrentPositionWithFeedback(context, siteVm),
                   icon: const Icon(Icons.my_location),
                   label: const Text('Use current position'),
                 ),
@@ -139,7 +138,7 @@ class SitesScreen extends StatelessWidget {
                 '${site.timeZoneId ?? 'zone unknown'}',
               ),
               selected: site.id == activeId,
-              onTap: () => viewModel.selectSite(site.id),
+              onTap: () => siteVm.selectSite(site.id),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -154,7 +153,7 @@ class SitesScreen extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.delete_outline),
                     tooltip: 'Delete site',
-                    onPressed: () => _confirmDelete(context, viewModel, site),
+                    onPressed: () => _confirmDelete(context, siteVm, site),
                   ),
                 ],
               ),
@@ -164,11 +163,11 @@ class SitesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(
           AppRouter.siteEdit,
-          extra: viewModel.isDefaultLocation
+          extra: siteVm.isDefaultLocation
               ? const SiteEditorArgs()
               : SiteEditorArgs(
-                  latitude: viewModel.latitude,
-                  longitude: viewModel.longitude,
+                  latitude: siteVm.latitude,
+                  longitude: siteVm.longitude,
                 ),
         ),
         icon: const Icon(Icons.add_location_alt_outlined),

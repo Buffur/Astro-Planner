@@ -1,4 +1,4 @@
-// Tests for PlannerViewModel's use of the LocationService seam (TASK 1.1).
+// Tests for PlannerHarness's use of the LocationService seam (TASK 1.1).
 //
 // Covers:
 //   - `ready` completes on first launch without touching GPS
@@ -26,7 +26,8 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/location_service.dart';
 import 'package:astroplan/domain/services/reverse_geocoder.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/fake_reverse_geocoder.dart';
@@ -49,11 +50,11 @@ void main() {
     await database.close();
   });
 
-  PlannerViewModel buildViewModel(
+  PlannerHarness buildViewModel(
     FakeLocationService service, {
     ReverseGeocoder? geocoder,
   }) {
-    return PlannerViewModel(
+    return PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _MockWeather(),
@@ -63,7 +64,7 @@ void main() {
     );
   }
 
-  group('PlannerViewModel location (TASK 1.1)', () {
+  group('PlannerHarness location (TASK 1.1)', () {
     // TASK 7.3 (owner decision): the first run shows a site prompt instead
     // of silently asking for GPS. Before 7.3 this test asserted that startup
     // asked the service once; it now asserts that startup asks nothing, so

@@ -495,4 +495,44 @@ void main() {
       );
     });
   });
+  group('resolve (TASK 12.3)', () {
+    final now = DateTime.utc(2026, 9, 22, 20);
+    final ctx = MeanSolarTimeContext(15);
+
+    test('without a picked date it is the default night', () {
+      expect(
+        SessionNightResolver.resolve(
+          null,
+          now,
+          latitude: 46,
+          longitude: 15,
+          timeContext: ctx,
+        ),
+        SessionNightResolver.resolveDefault(
+          now,
+          latitude: 46,
+          longitude: 15,
+          timeContext: ctx,
+        ),
+      );
+    });
+
+    test('a picked date wins over now', () {
+      expect(
+        SessionNightResolver.resolve(
+          _d(2026, 12, 1),
+          now,
+          latitude: 46,
+          longitude: 15,
+          timeContext: ctx,
+        ),
+        SessionNightResolver.forEveningDate(
+          _d(2026, 12, 1),
+          latitude: 46,
+          longitude: 15,
+          timeContext: ctx,
+        ),
+      );
+    });
+  });
 }

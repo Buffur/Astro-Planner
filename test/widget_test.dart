@@ -13,7 +13,9 @@ import 'package:astroplan/domain/repositories/session_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart'
     as import_location_profile;
 import 'package:astroplan/domain/repositories/location_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import 'support/planner_harness.dart';
+
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
@@ -80,15 +82,13 @@ void main() {
           Provider<SessionRepository>.value(value: sessionRepo),
           ChangeNotifierProvider(create: (_) => SessionsViewModel(sessionRepo)),
           Provider<LocationRepository>.value(value: locationRepo),
-          ChangeNotifierProvider(
-            create: (_) => PlannerViewModel(
-              targetRepo,
-              eqRepo,
-              weatherRepo,
-              locationRepo,
-              locationService: FakeLocationService(),
-            ),
-          ),
+          ...PlannerHarness(
+            targetRepo,
+            eqRepo,
+            weatherRepo,
+            locationRepo,
+            locationService: FakeLocationService(),
+          ).providers,
           ChangeNotifierProvider(create: (_) => ThemeViewModel()),
         ],
         child: const AstroPlanApp(),

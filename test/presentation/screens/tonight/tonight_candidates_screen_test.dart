@@ -12,7 +12,9 @@ import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/candidate_evaluator.dart';
 import 'package:astroplan/presentation/screens/tonight/tonight_candidates_screen.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,7 +32,7 @@ class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 void main() {
   late AppDatabase database;
 
-  Future<PlannerViewModel> build({bool withSite = true}) async {
+  Future<PlannerHarness> build({bool withSite = true}) async {
     database = AppDatabase(NativeDatabase.memory());
     final targets = DriftTargetRepository(database);
     await CatalogSeeder(targets).seedIfNeeded();
@@ -48,7 +50,7 @@ void main() {
       );
     }
     SharedPreferences.setMockInitialValues(prefs);
-    final vm = PlannerViewModel(
+    final vm = PlannerHarness(
       targets,
       DriftEquipmentRepository(database),
       _NoWeather(),
@@ -95,7 +97,7 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
     await tester.runAsync(() async => vm = await build());
     addTearDown(() => tester.runAsync(database.close));
 
@@ -112,8 +114,8 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      ChangeNotifierProvider.value(
-        value: vm,
+      MultiProvider(
+        providers: vm.providers,
         child: MaterialApp.router(routerConfig: router),
       ),
     );

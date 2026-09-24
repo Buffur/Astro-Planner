@@ -8,7 +8,7 @@ import '../../../domain/models/session.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../navigation/app_router.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 
 /// Saved sessions (TASK 11.3, owner decision): every non-draft session —
 /// planned, in progress, completed, abandoned — and the legacy logs, newest
@@ -116,7 +116,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
                     onTap: () async {
                       // TASK 12.2: the planner opens above the tabs; a
                       // frozen session opens as a copy (TASK 11.4).
-                      await context.read<PlannerViewModel>().openSession(
+                      await context.read<SessionPlanViewModel>().openSession(
                         session,
                       );
                       if (context.mounted) {

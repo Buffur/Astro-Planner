@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../domain/services/fit_analyzer.dart';
 import '../../shared/night_time_formatter.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/capture_analysis_viewmodel.dart';
+import '../../viewmodels/night_conditions_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/site_viewmodel.dart';
 
 /// Formats a millisecond duration as "Xh Ym" (or "Z s" under a minute).
 String formatBudgetDuration(int ms) {
@@ -16,21 +20,21 @@ String formatBudgetDuration(int ms) {
 /// relative stacking gain per group and storage. Renders ViewModel/domain
 /// values only — no calculations here.
 class CaptureBudgetSummary extends StatelessWidget {
-  const CaptureBudgetSummary({super.key, required this.viewModel});
-
-  final PlannerViewModel viewModel;
+  const CaptureBudgetSummary({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final budget = viewModel.captureBudget;
-    final fit = viewModel.fitAnalysis;
-    final night = viewModel.sessionNight;
-    final windows = viewModel.visibilityWindows;
+    final analysis = context.watch<CaptureAnalysisViewModel>();
+    final plan = context.watch<SessionPlanViewModel>();
+    final budget = analysis.captureBudget;
+    final fit = analysis.fitAnalysis;
+    final night = plan.sessionNight;
+    final windows = context.watch<NightConditionsViewModel>().visibilityWindows;
     final setupStart = budget.setupStartUtc(windows);
 
-    final zoneId = viewModel.displayZoneId;
+    final zoneId = context.watch<SiteViewModel>().displayZoneId;
     String clock(DateTime utc) => night == null
         ? NightTimeFormatter.clockTime(context, utc, zoneId: zoneId)
         : NightTimeFormatter.instant(
@@ -123,7 +127,7 @@ class CaptureBudgetSummary extends StatelessWidget {
             key: const Key('capturePlan.fitEnd'),
             style: theme.textTheme.bodySmall,
           ),
-        _FillWindowAction(viewModel: viewModel, fit: fit),
+        _FillWindowAction(fit: fit),
         const SizedBox(height: 12),
         const Text(
           'Relative stacking gain (√N vs one frame)',
@@ -189,9 +193,8 @@ class CaptureBudgetSummary extends StatelessWidget {
 /// block to the largest frame count that still places (TASK 5.6
 /// acceptance: see why a plan doesn't fit and fix it with one action).
 class _FillWindowAction extends StatelessWidget {
-  const _FillWindowAction({required this.viewModel, required this.fit});
+  const _FillWindowAction({required this.fit});
 
-  final PlannerViewModel viewModel;
   final FitResult fit;
 
   @override
@@ -199,10 +202,11 @@ class _FillWindowAction extends StatelessWidget {
     if (fit.state == FitState.noWindow || fit.state == FitState.nothingToFit) {
       return const SizedBox.shrink();
     }
+    final viewModel = context.watch<CaptureAnalysisViewModel>();
     final index = viewModel.fillWindowBlockIndex;
     final target = viewModel.fillWindowFrameCount;
     if (index == null || target == null) return const SizedBox.shrink();
-    final block = viewModel.captureBlocks[index];
+    final block = context.watch<SessionPlanViewModel>().captureBlocks[index];
     final label =
         '${block.filterName ?? 'Light'} ${_trim(block.exposureTimeSeconds)} s';
     if (target < 1) {

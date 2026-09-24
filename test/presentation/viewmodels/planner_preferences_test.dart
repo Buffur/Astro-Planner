@@ -13,7 +13,9 @@ import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/planning_preferences.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,14 +25,14 @@ import '../../support/no_snapshot_weather.dart';
 
 class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
-Duration _total(PlannerViewModel vm) =>
+Duration _total(PlannerHarness vm) =>
     vm.visibilityWindows.fold(Duration.zero, (s, w) => s + w.duration);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late AppDatabase database;
-  late PlannerViewModel vm;
+  late PlannerHarness vm;
 
   setUp(() async {
     database = AppDatabase(NativeDatabase.memory());
@@ -47,7 +49,7 @@ void main() {
       ),
     );
     SharedPreferences.setMockInitialValues({'activeLocationId': locId});
-    vm = PlannerViewModel(
+    vm = PlannerHarness(
       targets,
       DriftEquipmentRepository(database),
       _NoWeather(),
@@ -133,7 +135,7 @@ void main() {
         feasibilityMarginPercent: 25,
       ),
     );
-    final again = PlannerViewModel(
+    final again = PlannerHarness(
       DriftTargetRepository(database),
       DriftEquipmentRepository(database),
       _NoWeather(),

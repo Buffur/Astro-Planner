@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/capture_block.dart';
-import '../../viewmodels/planner_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 
 const _filters = ['L', 'R', 'G', 'B', 'Ha', 'OIII', 'SII', 'OSC', 'None'];
 
@@ -10,7 +10,7 @@ const _filters = ['L', 'R', 'G', 'B', 'Ha', 'OIII', 'SII', 'OSC', 'None'];
 /// (TASK 5.3), so an invalid block can never be submitted.
 Future<void> showCaptureBlockDialog(
   BuildContext context,
-  PlannerViewModel viewModel, {
+  SessionPlanViewModel viewModel, {
   int? editIndex,
   CaptureBlock? initial,
 }) {
@@ -31,7 +31,7 @@ class _CaptureBlockDialog extends StatefulWidget {
     required this.initial,
   });
 
-  final PlannerViewModel viewModel;
+  final SessionPlanViewModel viewModel;
   final int? editIndex;
   final CaptureBlock? initial;
 

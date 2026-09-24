@@ -1,4 +1,4 @@
-// Tests for PlannerViewModel's evening-date state (TASK 2.4, ADR-007).
+// Tests for PlannerHarness's evening-date state (TASK 2.4, ADR-007).
 //
 // The old test 'sessionDate defaults to today (UTC)' asserted TD-001 itself
 // (the default matched the **UTC** calendar date) and was kept deliberately
@@ -30,7 +30,8 @@ import 'package:astroplan/domain/models/session_log.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/moon_calculator.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
-import 'package:astroplan/presentation/viewmodels/planner_viewmodel.dart';
+
+import '../../support/planner_harness.dart';
 
 import '../../support/fake_location_service.dart';
 import '../../support/no_snapshot_weather.dart';
@@ -40,16 +41,16 @@ class _MockWeather with NoSnapshotWeather implements WeatherRepository {}
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('PlannerViewModel evening date (TASK 2.4)', () {
+  group('PlannerHarness evening date (TASK 2.4)', () {
     late AppDatabase database;
     late DriftLocationRepository locationRepo;
-    late PlannerViewModel vm;
+    late PlannerHarness vm;
 
     /// San Francisco (ADR-007 T1's site).
     const sfLat = 37.7749;
     const sfLon = -122.4194;
 
-    Future<PlannerViewModel> buildViewModel({
+    Future<PlannerHarness> buildViewModel({
       required Clock clock,
       double latitude = sfLat,
       double longitude = sfLon,
@@ -65,7 +66,7 @@ void main() {
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': locId});
 
-      final built = PlannerViewModel(
+      final built = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _MockWeather(),
@@ -145,7 +146,7 @@ void main() {
     test('there is no SessionNight without a site (ADR-007 §9)', () async {
       // No saved location: first launch, default London coordinates.
       SharedPreferences.setMockInitialValues({});
-      vm = PlannerViewModel(
+      vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
         _MockWeather(),
