@@ -426,7 +426,10 @@ rewritten to match the code.*
     green.
   - Completed 2026-09-24: **TASK 14.2** — integration so far per target (owner: built, not
     cut) (commit `4274175`). 814 tests green.
-  - **Next: TASK 14.3 — Export manifest v2.** Not started; it begins only on the owner's
+  - Completed 2026-09-24: **TASK 14.3** — export manifest v2 (one session or all, with the
+    event log; v1 readable; schema in `docs/EXPORT_MANIFEST.md`) (commit `a234ff6`). 822 tests
+    green.
+  - **Next: TASK 14.4 — Backup and restore.** Not started; it begins only on the owner's
     go-ahead.
 
 ### Phase → group map

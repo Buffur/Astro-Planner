@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **814 tests: 814 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.2) |
+| `flutter test --no-pub` | **822 tests: 822 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.3) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -823,3 +823,11 @@ the ADR-012 variables, and a real out-of-range error):
   session with nothing confirmed still counts; targets kept apart, newest label.
 - **`session_detail_test.dart` (+2):** the detail's "This target so far" and Library →
   Progress; the empty state.
+
+**Added by TASK 14.3** (export manifest v2), 8 tests (822):
+- **`data/export/session_manifest_codec_test.dart` (6):** **acceptance: an exported file
+  re-parses identically**; v2 content (UTC instants, zone, night key, snapshot, counts,
+  events, null for unknown); v1 read as a legacy log at the same instant; unknown and
+  malformed versions refused; the share summary; `AppIdentity.version` = pubspec.
+- **`session_detail_test.dart` (+2):** Export file shares the session with its events;
+  Export all shares every saved session.
