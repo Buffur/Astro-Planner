@@ -421,8 +421,11 @@ rewritten to match the code.*
   - Completed 2026-09-24: **TASK 13.4** — reconciliation (results page, corrections after
     completion, planned vs actual in Sessions) (commit `c1e52ce`). 795 tests green. **Group G13
     is complete.**
-  - **Next: TASK 14.1 — Logbook list and detail.** Not started; it begins only on the
-    owner's go-ahead.
+  - Completed 2026-09-24: **TASK 14.1** — Sessions filters (status, target, site, night
+    range) and a read-only detail from snapshots, legacy badge (commit `e212f6a`). 808 tests
+    green.
+  - **Next: TASK 14.2 — Accumulated integration per target (cut line).** Not started; it
+    begins only on the owner's go-ahead.
 
 ### Phase → group map
 

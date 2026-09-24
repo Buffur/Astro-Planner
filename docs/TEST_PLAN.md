@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **795 tests: 795 pass, 0 fail** (`dart run tool/check.dart`, after TASK 13.4) |
+| `flutter test --no-pub` | **808 tests: 808 pass, 0 fail** (`dart run tool/check.dart`, after TASK 14.1) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -804,3 +804,15 @@ the ADR-012 variables, and a real out-of-range error):
 - **Updated (owner decisions):** the transition table allows confirm/reject after
   `finished`; the tracker's Finish test now expects the results page (the run is completed
   only by Complete).
+
+**Added by TASK 14.1** (Sessions filters and detail), 13 tests (808):
+- **`data/repositories/session_list_filter_test.dart` (5):** the query filters — no
+  filter, status, target and site (never a legacy row), an inclusive night range with a
+  legacy row matched by its stored date, and combined filters.
+- **`screens/logbook/session_detail_test.dart` (8):** the Completed chip and Clear; the
+  target picker; the Legacy badge and tap → detail; **acceptance: a completed run renders
+  from its execution-start snapshot (night with zone, rig, target, plan vs actual, notes,
+  conditions) and a legacy log renders its stored text**; a planned session from its plan
+  snapshot; a session without a snapshot says so; 200 % text on a phone.
+- **Updated:** the Sessions and E2E tests look for the row's "Planned" status inside the
+  list (a "Planned" filter chip now exists).
