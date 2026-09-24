@@ -8,12 +8,14 @@
 //
 // Runs the encoding check (tool/check_encoding.dart), `dart format`,
 // `flutter analyze` and `flutter test` (all --no-pub, scoped to lib/ and
-// test/) and reports a summary. All steps run regardless of earlier
+// test/), then the end-to-end suite in integration_test/ on the host test
+// device (TASK 15.5; on an emulator run `flutter test integration_test -d
+// <device>`), and reports a summary. All steps run regardless of earlier
 // failures, so one pass shows every problem; the process exits non-zero if
 // any step failed.
 //
 // Out of scope (see docs/MASTER_ROADMAP.md TASK 1.3): stricter lints
-// (TD-038) and device tests.
+// (TD-038) and device runs.
 
 import 'dart:io';
 
@@ -26,9 +28,17 @@ Future<void> main() async {
       '--set-exit-if-changed',
       'lib',
       'test',
+      'integration_test',
     ]),
     _Step('Analyze', 'flutter', ['analyze', '--no-pub']),
     _Step('Test', 'flutter', ['test', '--no-pub']),
+    _Step('E2E (host)', 'flutter', [
+      'test',
+      '--no-pub',
+      'integration_test',
+      '-d',
+      'flutter-tester',
+    ]),
   ];
 
   final results = <_Step, bool>{};
