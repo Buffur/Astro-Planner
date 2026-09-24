@@ -255,7 +255,7 @@ void main() {
     addTearDown(() => device.close(tester));
 
     // First run: skipped; the site is set in the Library instead.
-    expect(find.text('Welcome to AstroPlan'), findsOneWidget);
+    expect(find.text('Welcome to Astro Planner'), findsOneWidget);
     await tap(tester, find.byKey(const Key('welcome.skip')));
     expect(find.byKey(const Key('tonight.noSite')), findsOneWidget);
 
