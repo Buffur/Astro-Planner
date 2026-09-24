@@ -437,8 +437,12 @@ rewritten to match the code.*
     debug logger; typed `StorageFailure` from every repository; failures shown as UI
     states; autosave failure no longer jams the write chain; `empty_catches` + scan test)
     (commits `aac1c6a`, `0854d0a`). 857 tests green. TD-029 resolved.
-  - **Next: TASK 15.2 — Performance and caching (G15).** Not started; it begins only on
-    the owner's go-ahead.
+  - Completed 2026-09-24: **TASK 15.2** — performance and caching (measured first; the
+    planner's timeline, weather summary, transit, budget, fit and fill count memoized: a
+    rebuild 2.5 ms → 0.08 ms; candidates ~95 ms for 164 targets) (commit `2e923e6`). 864
+    tests green. Device profile traces are an owner checklist item.
+  - **Next: TASK 15.3 — Accessibility pass (G15).** Not started; it begins only on the
+    owner's go-ahead.
 
 ### Phase → group map
 

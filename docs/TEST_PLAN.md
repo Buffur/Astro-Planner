@@ -116,7 +116,7 @@ pre-existing and confirm no additional test fails (`docs/DECISIONS.md` DEV-P8).
 | Check | Result |
 | --- | --- |
 | `flutter analyze --no-pub` | No issues |
-| `flutter test --no-pub` | **857 tests: 857 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.1) |
+| `flutter test --no-pub` | **864 tests: 864 pass, 0 fail** (`dart run tool/check.dart`, after TASK 15.2) |
 | CI | None configured (TD-046; roadmap TASK 1.3) |
 | Android build / device run | Not verified |
 
@@ -867,3 +867,20 @@ the ADR-012 variables, and a real out-of-range error):
   with retry.
 - `shared_prefs_planning_repositories_test.dart`: the corrupt-plan case now expects a
   `StorageFailure` whose cause is the `FormatException` (the typed failure is the task).
+
+**Added by TASK 15.2** (performance and caching), 7 tests (864):
+- **`presentation/viewmodels/planner_memoization_test.dart` (7):** repeated reads return the
+  same timeline, budget and fit; a plan edit, a preference change, another night, a target
+  change and a night rolling over with the clock alone each recompute them (a mutation check
+  confirmed the clock case fails without the night in the cache key); **tolerant benchmark:**
+  a cached planner frame under 1 ms (measured ~0.08 ms) and tonight's candidates for the
+  bundled catalog through the ViewModel under 1 s (measured ~95 ms).
+- **Measurements before the change** (desktop test VM, JIT, per read): session night
+  12 µs, night timeline 209 µs, weather summary 118 µs, capture budget 255 µs, fit 596 µs,
+  fill count 1 644 µs, moon/opportunity 3–4 µs (already cached); one planner rebuild
+  ≈ 2.5 ms. After: ≈ 0.08 ms per rebuild.
+- **Owner checklist (manual, not yet done):** the roadmap asks for profile traces with no
+  jank on a low-end device. On a low-end Android phone in profile mode
+  (`flutter run --profile`), record a DevTools performance trace while editing the plan,
+  changing the night and scrolling the planner and the candidates list; check for frames
+  over 16 ms.
