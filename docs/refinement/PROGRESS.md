@@ -3,18 +3,18 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.15: every Stage 1 Task is done or deferred; Stage 1
-> awaits its independent validation.
+> **Last updated:** 2026-09-25, after Stage 1 validation (same session, at the owner's request):
+> passed with three low findings; proposed fix Tasks await the owner.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (S1.1–S1.13 and S1.15 done, S1.14 deferred by the owner; validation not yet run) |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (S1.1–S1.13 and S1.15 done, S1.14 deferred; validated 2026-09-25 with three low findings, see "Validation status") |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: **Stage 1 validation** in a fresh, independent session (§9.8) |
+| Next approved Task | None. The owner decides on the proposed fix Tasks S1.16 and S1.17 and on finding V3 ("Validation status") |
 | Code baseline | `main` after S1.15 (see "Completed Tasks"); not pushed (S1.14) |
 | Quality gate at the baseline | **Green**, S1.15, 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed) |
 | Schema | v17 |
@@ -26,7 +26,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | Not yet run (fresh session) |
+| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | 2026-09-25, same session (owner's request, not independent): passed with 3 low findings; fix Tasks proposed |
 | 2 | Metadata Foundation | Not started | — | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
@@ -178,26 +178,62 @@ These block a release, not refinement.
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
 - **Stage 1 Tasks:** S1.1–S1.13 and S1.15 done (gate green); S1.14 deferred by the owner.
-  Stage 1 validation has not run yet. **Stages 2–11:** not started.
+- **Stage 1 validation**, 2026-09-25, at `4e653fb`. **Not independent:** the owner asked for it
+  in the implementing session instead of a fresh one (§9.1 step 11). It tried to disprove
+  completion; no fix was made.
+  - Evidence: a fresh gate on the clean tree (Encoding, Format, Analyze pass; 948 tests; E2E
+    2); every A–F item traced to its Task, commit and tests; no test assertion removed
+    (four were updated to changed wording, with the new wording asserted); `lib/domain` has
+    no `DateTime.now()`; ViewModels within the 300-line cap (300, 297, 271); no colour
+    literals, data imports or hard-coded app name in the new presentation files; every
+    commit hash in this file exists and matches its Task; `CurrentSession`'s ordering
+    re-read (a failed Save or Start keeps changes unsaved; later edits queue behind them).
+  - Owner decisions during the Stage were respected: S1.4's corrected rule, S1.5's
+    no-reset for newer databases (ADR-008 §2), S1.14's deferral.
+  - **Verdict: passed.** Every A–D item is fixed with a regression test, documented, or
+    moved with the owner's approval; the gate is green. Three low findings, none a
+    regression or a failure of a Stage 1 item:
+    - **V1 (docs convention):** the living registers cite no commit for Stage 1 work: 0 of 13
+      `S1.x` stamps in `FEATURE_STATUS.md` (and the same in `ARCHITECTURE.md`), and TD-047's
+      "FULLY RESOLVED (S1.5)" (`CLAUDE.md` asks for date and commit). The hashes are only in
+      this file. **Proposed S1.16** (docs, S): backfill the hashes from "Completed Tasks".
+    - **V2 (test coverage vs S1.6's acceptance):** the "Discard unsaved changes?" dialog is
+      checked for tap targets, labels, contrast and overflow in light and dark only; S1.6
+      named the sweep, which also covers the field theme. **Proposed S1.17** (test, S): add
+      the field theme (without contrast, as in the sweep).
+    - **V3 (behaviour consistency, S1.6):** confirmed by a throwaway probe (deleted). A site
+      change on a saved plan turns the stored session into a draft ("Planned, unsaved
+      changes", still listed, so nothing is lost), but it is not counted as an unsaved change
+      while the app runs, so New does not ask; after a restart the same session counts as
+      unsaved. Whether a site change edits a saved plan is a product question: **proposed:
+      record it under RD-05 (Stage 4)** rather than fix it now.
+  - Observations, no action proposed: `formatBudgetDuration` and `OpportunityText.duration`
+    remain as one-line wrappers over `QuantityText.duration` (one rule, S1.7 met in
+    substance); `WeatherText.ago` ("3 h ago") truncates, a relative-age phrase outside
+    UX-19's scope; S1.2's E3 test covers the unreadable read, not a failed write, like the
+    other preference repositories.
+  - **Found during validation (not a Stage 1 finding):** three untracked files appeared in
+    the working tree while it ran, `test/data/database/stage1_recovery_probe_test.dart`,
+    `test/presentation/shared/stage1_reopen_probe_test.dart` and
+    `test/presentation/viewmodels/stage1_restart_probe_test.dart` (copies of Stage 1 tests,
+    written 19:38–19:39). This session did not create them; another local session
+    ("Stage 0 refinement baseline") is the likely author. They were left untouched and not
+    committed; the owner decides. **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **Stage 1 validation** in a fresh, independent session (`POST_ROADMAP_PLAN.md` §9.8).
-The validator:
-- does not implement fixes;
-- checks each A–F item of Stage 1 and each Task's acceptance criteria against the code at
-  the last commit, and tries to disprove that the Stage is complete: regressions, scope
-  drift, incomplete Tasks, stale assumptions, architecture or scientific-integrity
-  violations, missing evidence;
-- takes into account the owner's changes during the Stage: S1.4's corrected rule
-  (DECISIONS E.1), S1.5's no-reset for newer databases (ADR-008 §2), and S1.14's deferral;
-- reports surviving findings as focused fix Tasks.
+The owner decides on Stage 1 validation's findings ("Validation status"):
+- approve **S1.16** (backfill commit hashes in the registers) and **S1.17** (the field theme
+  in the unsaved-changes dialog's accessibility check), or accept V1/V2 as they are;
+- confirm that **V3** is recorded under RD-05 for Stage 4;
+- decide what to do with the three untracked probe files from another session;
+- optionally, still run an independent validation in a fresh session.
 
-Open items from the Stage that are not Stage 1 fixes: TD-057 and TD-058 (recorded), RD-17
-(push deferred), the S1.5 and S1.11 device checks (Stage 11).
+Then close Stage 1 here (dates, validation result, known blockers) and start Stage 2
+planning. Stage 2 needs RG-01 and the owner's metadata samples.
 
-If validation passes, close Stage 1 here and start Stage 2 planning; Stage 2 needs RG-01 and
-the owner's metadata samples.
+Carried open items that are not Stage 1 failures: TD-057, TD-058, RD-17 (push deferred), the
+S1.5 and S1.11 device checks (Stage 11).
 
 ## Stage 0 notes
 
