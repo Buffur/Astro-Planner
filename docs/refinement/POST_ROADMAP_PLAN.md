@@ -412,6 +412,12 @@ owner's approval.
   2026-09-21; a site still overrides it; the VM stays under its line cap.
 
 ##### S1.5 — Unsupported-database recovery (A6; TASK 3.2, RT-03, TD-047)
+- **Correction (during S1.5, 2026-09-25):** ADR-008 §2 says "newer databases are never
+  reset". So the reset below is offered **only below the floor**; a newer database gets the
+  explanation alone. The acceptance line on a `user_version` 18 file therefore checks that it
+  is left unchanged and cannot be reset. Detection moved to before the graph is built
+  (`main.dart` probes the database first), which also makes "rebuild the graph" a rerun of the
+  bootstrap.
 - **Objective:** a database below the floor or newer than the app shows ADR-008's explanation
   (§2, §9) instead of a generic error, and offers a confirmed reset that keeps the old file.
 - **Scope:** the startup path (`main.dart`, `StartupViewModel`, the bootstrap error view on
@@ -845,6 +851,9 @@ owner's approval.
   - live provider behaviour (Open-Meteo, Nominatim, OSM tiles, the light-pollution map link);
   - metadata formats and equipment import on a device;
   - backup and restore, including the emulator round trip and Auto Backup (TASK 14.4);
+  - the refused-database flow of S1.5 on a device: install an older build over a newer
+    database (the explanation, no reset), and a below-floor file (confirm, `.bak` kept, the
+    app restarts on fresh data). `main.dart`'s wiring is not host-testable;
   - 200 % text; TalkBack (15.3; UX-28); red mode in real darkness (12.4; UX-39);
   - low-end performance (15.2, 10.4);
   - the release build and signing (16.2, the owner's upload key); CI (1.3);

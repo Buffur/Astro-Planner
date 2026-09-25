@@ -9,6 +9,7 @@ import 'tables/equipment_foundation_tables.dart';
 import 'tables/locations_table.dart';
 import 'tables/targets_table.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import 'json_map_converter.dart';
 import 'storage_failure_interceptor.dart';
 import 'schema_versions.dart';
@@ -530,11 +531,49 @@ Future<void> _deleteOrphanForeignKeyRows(GeneratedDatabase db) async {
 }
 
 LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'astroplan.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
+  return LazyDatabase(
+    () async => NativeDatabase.createInBackground(await databaseFile()),
+  );
+}
+
+/// The app's database file.
+Future<File> databaseFile() async {
+  final dbFolder = await getApplicationDocumentsDirectory();
+  return File(p.join(dbFolder.path, 'astroplan.sqlite'));
+}
+
+/// Opens [database] and returns the refusal when its file is at a schema
+/// version this app cannot open (ADR-008 §2), or null when it opens. Any
+/// other error is rethrown. The refused file is left unchanged (S1.5).
+Future<UnsupportedSchemaVersionException?> refusedSchemaVersion(
+  AppDatabase database,
+) async {
+  try {
+    await database.customSelect('SELECT 1').get();
+    return null;
+  } on UnsupportedSchemaVersionException catch (e) {
+    return e;
+  }
+}
+
+/// The confirmed reset of a refused below-floor database (ADR-008 §2,
+/// S1.5): closes [database] — a close that fails after the refused open is
+/// logged, and the file is still renamed — then keeps the file as
+/// `<name>.v<N>.bak`. Never for a database newer than the app.
+Future<File> resetRefusedDatabase(
+  AppDatabase database,
+  File file,
+  UnsupportedSchemaVersionException refused,
+) async {
+  if (refused.isNewerThanApp) {
+    throw ArgumentError.value(refused, 'refused', 'newer databases are kept');
+  }
+  try {
+    await database.close();
+  } catch (e) {
+    AppLog.warning('startup', 'Close after a refused open failed', error: e);
+  }
+  return resetUnsupportedDatabaseFile(file, foundVersion: refused.foundVersion);
 }
 
 /// The reset path for a below-floor database (ADR-008 §2): renames [file] to
@@ -543,10 +582,11 @@ LazyDatabase _openConnection() {
 ///
 /// This performs the file move only. Callers are responsible for asking the
 /// user to confirm first (ADR-008: "on the user's explicit confirmation ...
-/// without confirmation, nothing is touched") and for constructing a new
-/// [AppDatabase] afterwards, which creates a fresh v9 database on first use.
-/// **Not yet wired into app startup** — no caller exists yet; TD-047's
-/// tracking note covers this gap until a bootstrap task wires it in.
+/// without confirmation, nothing is touched"), for closing the database
+/// first, and for constructing a new [AppDatabase] afterwards, which creates
+/// a fresh database at the current schema on first use. Called from the
+/// startup recovery screen (`main.dart`, S1.5); never for a database newer
+/// than the app (ADR-008 §2).
 Future<File> resetUnsupportedDatabaseFile(
   File file, {
   required int foundVersion,

@@ -39,6 +39,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
+import 'presentation/screens/startup/unsupported_database_screen.dart';
 import 'presentation/widgets/night_clock.dart';
 import 'core/config/app_identity.dart';
 
@@ -50,6 +51,12 @@ void main() async {
       'OpenNGC (target catalog)',
     ], await rootBundle.loadString('assets/catalog/OPENNGC_NOTICE.txt'));
   });
+  await _start();
+}
+
+/// Opens the database and starts the app; run again after the recovery
+/// screen resets a refused database (S1.5).
+Future<void> _start() async {
   // TASK 14.4: a restore confirmed last time replaces the database before
   // it opens (the replaced file is kept as a safety copy).
   try {
@@ -66,6 +73,31 @@ void main() async {
     );
   }
   final database = AppDatabase();
+
+  // A database this build cannot open gets the recovery screen instead of
+  // the app, before anything else reads it (ADR-008 §2, S1.5). Other open
+  // errors fall through to the bootstrap error state below.
+  UnsupportedSchemaVersionException? refused;
+  try {
+    refused = await refusedSchemaVersion(database);
+  } catch (e, s) {
+    AppLog.error('startup', 'Database did not open', error: e, stackTrace: s);
+  }
+  if (refused case final refused?) {
+    AppLog.error('startup', 'Database refused', error: refused);
+    runApp(
+      UnsupportedDatabaseApp(
+        newerThanApp: refused.isNewerThanApp,
+        foundVersion: refused.foundVersion,
+        onReset: () async {
+          await resetRefusedDatabase(database, await databaseFile(), refused);
+          await _start();
+        },
+      ),
+    );
+    return;
+  }
+
   final targetRepo = DriftTargetRepository(database);
   final equipmentRepo = DriftEquipmentRepository(database);
   final weatherRepo = OpenMeteoWeatherRepository();
