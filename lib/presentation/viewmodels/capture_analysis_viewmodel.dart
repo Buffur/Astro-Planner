@@ -243,6 +243,8 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   Future<Session> startSession() => _plan.startPlan(_snapshot());
 
   SessionSnapshot _snapshot() {
+    // The forecast's age as of now, not as of its last tick (S1.3).
+    _conditions.checkClock();
     final night = _plan.sessionNight;
     if (night == null) {
       throw StateError('Saving needs a site, a target and a rig.');

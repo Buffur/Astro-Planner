@@ -39,6 +39,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'domain/services/night_weather_service.dart';
 import 'presentation/viewmodels/theme_viewmodel.dart';
+import 'presentation/widgets/night_clock.dart';
 import 'core/config/app_identity.dart';
 
 void main() async {
@@ -162,7 +163,10 @@ class AstroPlanApp extends StatelessWidget {
       // Field mode: every pixel below the app root, dialogs and snackbars
       // included, goes through the red filter (owner decision, TASK 12.4).
       builder: (context, child) {
-        final content = KeyedSubtree(key: _content, child: child!);
+        final content = KeyedSubtree(
+          key: _content,
+          child: NightClock(child: child!),
+        );
         return themeVM.isFieldMode
             ? ColorFiltered(colorFilter: AppTheme.fieldFilter, child: content)
             : content;

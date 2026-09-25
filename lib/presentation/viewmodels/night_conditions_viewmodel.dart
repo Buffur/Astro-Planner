@@ -19,6 +19,7 @@ import '../../domain/services/moon_calculator.dart';
 import '../../domain/services/night_weather_service.dart';
 import '../../domain/services/night_weather_summarizer.dart';
 import '../../domain/services/visibility_calculator.dart';
+import '../shared/night_text.dart';
 import 'session_plan_viewmodel.dart';
 import 'settings_viewmodel.dart';
 import 'site_viewmodel.dart';
@@ -88,6 +89,27 @@ class NightConditionsViewModel extends ChangeNotifier {
 
   Future<void> refreshWeather() => _loadWeather(forceRefresh: true);
 
+  /// Follows a night that has rolled over and re-ages the forecast against
+  /// the clock (ADR-012 §6; S1.3); notifies only when its wording changes.
+  /// Run every minute by `NightClock` and before a snapshot is taken.
+  void checkClock() {
+    if (_active && _currentWeatherKey() != _weatherKey) {
+      return _onInputsChanged();
+    }
+    final was = _nightWeather;
+    if (was is! NightWeatherAvailable) return;
+    final now = was.at(_clock.nowUtc());
+    if (WeatherText.freshness(now) == WeatherText.freshness(was)) return;
+    _nightWeather = now;
+    notifyListeners();
+  }
+
+  /// Back in the foreground: an outdated forecast is loaded again (S1.3).
+  void resumed() {
+    checkClock();
+    if (_active && _nightWeather.isOutdated) unawaited(_loadWeather());
+  }
+
   /// Loads the night's forecast (cache → fetch → typed states, TASK 9.3); a
   /// slow answer for a previous site or night is dropped.
   Future<void> _loadWeather({bool forceRefresh = false}) =>
@@ -135,7 +157,7 @@ class NightConditionsViewModel extends ChangeNotifier {
     final timeline = nightTimeline;
     if (timeline == null) return null;
     final dewMarginC = _settings.planningPreferences.dewMarginC;
-    final key = (_timelineNight, weather, dewMarginC);
+    final key = (_timelineNight, weather.snapshot, dewMarginC);
     if (_summaryKey != key) {
       final span = NightWeatherSummarizer.spanOf(timeline);
       _summary = NightWeatherSummarizer.summarize(
@@ -194,7 +216,10 @@ class NightConditionsViewModel extends ChangeNotifier {
       target.rightAscension,
       target.declination,
       prefs,
-      _nightWeather,
+      switch (_nightWeather) {
+        NightWeatherAvailable(:final snapshot, :final age) => (snapshot, age),
+        final other => other,
+      },
       _site.activeSite,
       _site.bortleClass,
     );

@@ -29,6 +29,14 @@ abstract final class WeatherFreshness {
 /// The weather for the chosen night, as the planner sees it (TASK 9.3).
 sealed class NightWeather {
   const NightWeather();
+
+  /// Worth loading again when the app returns to the foreground (S1.3): a
+  /// forecast that is no longer current, or none because loading failed.
+  bool get isOutdated => switch (this) {
+    NightWeatherAvailable(:final age) => age != WeatherAge.current,
+    NightWeatherUnavailable() => true,
+    _ => false,
+  };
 }
 
 /// No site or night to forecast for, or not loaded yet.
@@ -62,6 +70,16 @@ final class NightWeatherAvailable extends NightWeather {
   /// Set when a refresh was attempted and failed, so the cached data is
   /// shown instead ("offline, cached") — never presented as current.
   final WeatherFailure? refreshFailed;
+
+  /// This forecast as it stands at [nowUtc]: the age recomputed through
+  /// [WeatherFreshness], everything else unchanged (ADR-012 §6; S1.3).
+  NightWeatherAvailable at(DateTime nowUtc) => NightWeatherAvailable(
+    snapshot: snapshot,
+    age: WeatherFreshness.ageOf(snapshot.fetchedAtUtc, nowUtc),
+    ageDuration: nowUtc.difference(snapshot.fetchedAtUtc),
+    fromCache: fromCache,
+    refreshFailed: refreshFailed,
+  );
 }
 
 /// The night lies beyond the provider's horizon ("no forecast yet").

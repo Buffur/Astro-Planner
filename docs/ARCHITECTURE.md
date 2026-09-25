@@ -80,6 +80,7 @@
 > **TASK 16.3 (2026-09-24, commit `2521f42`) — OPEN until the policy URL is live.** PD-12 resolved (owner decisions, DECISIONS E.1): free with no ads or subscriptions (within Open-Meteo's free non-commercial tier); GPL-3.0 confirmed; the privacy policy on GitHub Pages (`docs/privacy/index.md` → https://chacha12.github.io/astro-planner/privacy/); place-name lookups opt-in. Code: `OptInReverseGeocoder` — nothing is sent to Nominatim unless the user switches "Look up place names" on (Settings, off by default, `PrivacyPreferencesRepository`); a saved site and the default position are never looked up; the identifying user agent `Astro Planner/<version> (+<project URL>; <id>)` now goes to the OSM tiles too (the tile policy asks for a contact); the About screen states GPL-3.0 with a source link, a privacy summary and the policy link. Terms re-checked 2026-09-24 and recorded in `docs/COMPLIANCE.md` with draft Play Data Safety answers and the permission review. Remaining gap (TD-031): a user who switches place names on still uses the built-in Nominatim endpoint (no remotely switchable endpoint). Owner steps before upload: publish the policy with the contact email filled in, make the repository public, fill in the Data Safety form. Test baseline 896.
 > **S1.1 (2026-09-25, Stage 1):** Open-Meteo forecast requests now carry `AppIdentity.userAgent`, like Nominatim and the OSM tiles (CLAUDE.md trap 22; audit ENG-03 = RT-07 resolved). Test baseline 897.
 > **S1.2 (2026-09-25, Stage 1):** a catalog seed whose inserts fail is no longer recorded as applied: `CatalogSeeder` skips ids a catalog row already holds (the partial unique index), treats any other insert failure as a failure, logs it and leaves the version unset, so the next launch retries (audit ENG-02 = RT-02 resolved). `EquipmentSeeder` re-checked: it stores no version and lets a failure propagate, so it already retries. `SharedPrefsPrivacyPreferencesRepository` has its failure-path test (01 §G.7). Test baseline 901.
+> **S1.3 (2026-09-25, Stage 1):** the forecast's age follows the clock (ADR-012 §6): `NightWeatherAvailable.at(now)` re-ages it through `WeatherFreshness`; `NightConditionsViewModel.checkClock()` applies it (notifying only when the freshness wording changes) and follows a default night that rolls over; `resumed()` reloads an outdated forecast (`NightWeather.isOutdated`: aging, stale or unavailable). A `NightClock` widget at the app root drives both (a one-minute tick and an `AppLifecycleListener`), so the timer stops with the tree; a snapshot re-ages the forecast before it is built, so it records the age at saving. The summary and opportunity caches now key on the forecast's snapshot (and age) instead of the state object. Audit ENG-01 = SCI-01 = RT-01 resolved. Test baseline 908.
 
 ---
 
@@ -580,15 +581,18 @@ are memoized in the ViewModel (never in a widget):
 | Value | Owner | Cached per |
 | --- | --- | --- |
 | `nightTimeline` | `NightConditionsViewModel` | night (`SessionNight` equality) |
-| `nightWeatherSummary` | `NightConditionsViewModel` | night, forecast state (identity), dew margin |
+| `nightWeatherSummary` | `NightConditionsViewModel` | night, forecast snapshot (identity; S1.3), dew margin |
 | `moonConditions` *(TASK 6.4)* | `NightConditionsViewModel` | night, target RA/Dec |
-| `imagingOpportunity` *(TASK 10.2)* | `NightConditionsViewModel` | night, target RA/Dec, preferences, forecast state, site, Bortle |
+| `imagingOpportunity` *(TASK 10.2)* | `NightConditionsViewModel` | night, target RA/Dec, preferences, forecast state (snapshot and age class when available; S1.3), site, Bortle |
 | target transit (altitude curve) | `CaptureAnalysisViewModel` | night, target RA/Dec |
 | `captureBudget`, `fitAnalysis`, `fillWindowFrameCount` | `CaptureAnalysisViewModel` | an input generation (bumped when the plan, settings or conditions notify) and the night |
 
 The generation cache relies on every input change notifying — the plan's edits, the
 settings and the conditions already do. A night that rolls over with the clock alone is
-caught by the night in the key. `currentAltitude` (clock-dependent, 0.6 µs) is not
+caught by the night in the key; since S1.3 `NightClock` also makes the conditions notify
+at the rollover, and re-ages the forecast every minute (a new state object only when the
+freshness wording changes, which the snapshot-based keys above do not recompute for).
+`currentAltitude` (clock-dependent, 0.6 µs) is not
 cached. Tonight's candidates run on a background isolate (TASK 10.4); nothing else was
 measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
 
