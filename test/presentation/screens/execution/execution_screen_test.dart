@@ -20,6 +20,9 @@ import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+
+import 'dart:ui' show SemanticsAction, Tristate;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -300,6 +303,45 @@ void main() {
         expect(rect.height, greaterThanOrEqualTo(48), reason: key);
         expect(find.bySemanticsLabel(label), findsOneWidget, reason: key);
       }
+    });
+
+    // S1.11 (UX-28): a screen reader can press every control. On Android a
+    // node is clickable only when it has a tap action (TalkBack itself is a
+    // Stage 11 device check).
+    testWidgets('every control exposes a tap action while it can be pressed', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await open(tester);
+      for (final (key, label) in [
+        ('run.plus', 'Confirm one frame'),
+        ('run.minus', 'Remove one confirmed frame'),
+        ('run.reject', 'Reject one frame'),
+        ('run.accept', 'Accept the estimate of 0 frames'),
+        ('run.pauseResume', 'Pause the run'),
+        ('run.block', 'Choose the block you are capturing'),
+        ('run.more', 'Finish, abandon or keep the screen on'),
+      ]) {
+        final enabled =
+            tester.widget<ButtonStyleButton>(find.byKey(Key(key))).onPressed !=
+            null;
+        final data = tester
+            .getSemantics(find.bySemanticsLabel(label))
+            .getSemanticsData();
+        expect(data.hasAction(SemanticsAction.tap), enabled, reason: key);
+        final flags = data.flagsCollection;
+        expect(flags.isButton, isTrue, reason: key);
+        expect(
+          flags.isEnabled,
+          enabled ? Tristate.isTrue : Tristate.isFalse,
+          reason: key,
+        );
+      }
+      // The action does what the button does.
+      tester.semantics.tap(find.semantics.byLabel('Confirm one frame'));
+      await settle(tester);
+      expect(find.text('1 of 100'), findsOneWidget);
+      handle.dispose();
     });
 
     testWidgets('no overflow at 200 % text on a 360 × 640 dp phone', (

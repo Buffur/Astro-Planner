@@ -3,7 +3,7 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.10.
+> **Last updated:** 2026-09-25, after S1.11.
 
 ## Current state
 
@@ -13,9 +13,9 @@
 | Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.11 — Tracker controls expose a tap action** (D3; UX-28). Approved by the frozen sequence |
-| Code baseline | `main` after S1.10 (see "Completed Tasks") |
-| Quality gate at the baseline | **Green**, S1.10, 2026-09-25: Encoding, Format, Analyze pass; Test (944 passed); E2E on the host (2 passed) |
+| Next approved Task | **S1.12 — Save/Start against the autosave chain** (F; ENG-08, RT-04). Approved by the frozen sequence |
+| Code baseline | `main` after S1.11 (see "Completed Tasks") |
+| Quality gate at the baseline | **Green**, S1.11, 2026-09-25: Encoding, Format, Analyze pass; Test (945 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
 ## Stage status
@@ -52,7 +52,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.7 — One format for durations and numbers (A5, C2) | 2026-09-25 | `20eff0e` | `QuantityText` in `lib/core/utils` (the domain's fit reasons use it too): durations rounded to the minute in one form, exposures without .0 (and no longer rounded to whole seconds in four screens), typographic minus, "3 %"; the three duration formatters delegate or are gone; `totalIntegrationTime` removed; RA/Dec in the session detail as h:m:s / d:m:s. 6 unit tests plus assertions in 4 widget tests (3 updated to the new strings). Resolves ENG-06, UX-19 (IA-independent part). Gate green, 935 + 2 E2E |
 | 1 | S1.8 — Visible text defects and labels (C1, C4, B2, B7/SCI-05) | 2026-09-25 | `b03dda9` | Session detail: "f/5.6", "None recorded.", the night key as "Night span"; Settings' overhead note corrected; the candidates footer and frame fill (`CapabilityText.frameFillOf`); the add-block helper wraps; the sky card names both Bortle entry points; "ISO / gain (for your records)". 1 new test plus assertions in 5 widget tests (the candidates test now seeds the default rig so its rows carry a frame fill; the sky-card string updated). Resolves UX-20, UX-18 (IA-independent part), SCI-05, SCI-06. Gate green, 936 + 2 E2E |
 | 1 | S1.9 — Fit status colours and the missing-input state (C3) | 2026-09-25 | `705b764` | `AppPalette.caution` in all three palettes (light #9A5B00, AA; dark orange 300; field the primary red) for "Tight"; `FitState.needsInput` (`FitAnalyzer.analyze(inputMissing:)`, set by the VM when the site or target is missing) drawn neutral; a real no-window night stays red. 7 tests (domain states, the VM with no site / no target / a never-rising target, colours and AA contrast in light and dark); the field red-only check covers the token. Resolves UX-16, UX-15(2). Gate green, 943 + 2 E2E |
-| 1 | S1.10 — Weather strip at 200 % text; a forecast in the sweep (D1, D2) | 2026-09-25 | The S1.10 commit* | The sweep's weather fake serves a full forecast; with it the sweep failed on the old strip (94 px and 222 px overflows, demonstrated), and passes after the fix: no fixed 130 px height (`IntrinsicHeight` in a horizontal scroll), columns widen with the text size, an 8 px label–value gap. A test keeps the forecast on screen and checks the gap (fails before). Resolves UX-31, UX-32. Gate green, 944 + 2 E2E |
+| 1 | S1.10 — Weather strip at 200 % text; a forecast in the sweep (D1, D2) | 2026-09-25 | `642b235` | The sweep's weather fake serves a full forecast; with it the sweep failed on the old strip (94 px and 222 px overflows, demonstrated), and passes after the fix: no fixed 130 px height (`IntrinsicHeight` in a horizontal scroll), columns widen with the text size, an 8 px label–value gap. A test keeps the forecast on screen and checks the gap (fails before). Resolves UX-31, UX-32. Gate green, 944 + 2 E2E |
+| 1 | S1.11 — Tracker controls expose a tap action (D3) | 2026-09-25 | The S1.11 commit* | **Verified first:** a semantics test showed `run.plus` (and the others) had no tap action and no enabled state. Fixed: the relabelling `Semantics` passes `onTap: onPressed` and `enabled`. The test checks all seven controls and that a semantics tap confirms a frame; fails before. Resolves UX-28 on the host; TalkBack remains a Stage 11 device check. Gate green, 945 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -72,7 +73,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `20eff0e`: S1.7.
 - `b03dda9`: S1.8.
 - `705b764`: S1.9.
-- S1.10: see the note under "Completed Tasks".
+- `642b235`: S1.10.
+- S1.11: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -166,20 +168,20 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1–S1.10 done (gate green). **Stages 2–11:** not started.
+- **Stage 1 Tasks:** S1.1–S1.11 done (gate green). **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **S1.11 — Tracker controls expose a tap action** (`POST_ROADMAP_PLAN.md` §5, Stage 1
+Run **S1.12 — Save/Start against the autosave chain** (`POST_ROADMAP_PLAN.md` §5, Stage 1
 frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
 file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
 a Task). That session:
-- reads `CLAUDE.md`, this file and the S1.11 entry, plus the files it names;
+- reads `CLAUDE.md`, this file and the S1.12 entry, plus the files it names;
 - follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
   STOP;
-- records the S1.10 commit hash and its own commit here, then stops. It does not start S1.12.
+- records the S1.11 commit hash and its own commit here, then stops. It does not start S1.13.
 
-Then S1.12 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
+Then S1.13 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
 fresh session (§9.8).
 
 ## Stage 0 notes

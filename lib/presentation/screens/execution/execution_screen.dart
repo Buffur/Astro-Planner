@@ -331,9 +331,14 @@ class _Controls extends StatelessWidget {
       return Expanded(
         child: Padding(
           padding: const EdgeInsets.all(4),
+          // The label replaces the button's own semantics, so the tap action
+          // and enabled state are given here, or a screen reader could not
+          // press it (S1.11; UX-28).
           child: Semantics(
             button: true,
+            enabled: onPressed != null,
             label: semantics,
+            onTap: onPressed,
             excludeSemantics: true,
             child: filled
                 ? FilledButton(

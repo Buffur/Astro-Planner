@@ -88,6 +88,7 @@
 > **S1.8 (2026-09-25, Stage 1):** visible text defects fixed (UX-20): the session detail's focal ratio as "f/5.6" (not the raw double), "None recorded." instead of "Notes: none", and its noon-to-noon night key labelled "Night span" instead of "Window" (UX-18, the IA-independent part); Settings no longer says optional overheads are not applied; the candidates footer no longer names a "Home"; the add-block helper wraps; the sky card's unknown text names both Bortle entry points (the card's picker and the site editor; none removed). SCI-06: the candidates' frame fill uses the planner's wording. SCI-05 (RD-03): "ISO / gain (for your records)". Test baseline 936.
 > **S1.9 (2026-09-25, Stage 1):** fit status colours. "Tight" uses a new `AppPalette.caution` token (light #9A5B00, AA on white and the surface; dark orange.shade300; field mode the primary red, so it is as bright as "Fits") instead of `scheme.tertiary`, which fell back to secondary grey (UX-16). A new `FitState.needsInput` — `FitAnalyzer.analyze(inputMissing: true)`, set by `CaptureAnalysisViewModel` when the site or target is missing — is drawn in the neutral outline colour; a real no-window night stays in the error colour (UX-15(2)). The label stays "No window" (state wording is Stage 5/6). Systematic status tokens remain Stage 5. Test baseline 943.
 > **S1.10 (2026-09-25, Stage 1):** the accessibility sweep now serves a full synthetic forecast (every variable, whole UTC hours), so the weather card, its ranges and the hour strip are swept in every theme at 100 % and 200 % (UX-32; a test keeps the forecast on screen). It caught the 200 % overflow (94 px per hour column, 222 px in the legend), fixed: the hour strip has no fixed 130 px height any more (it takes its text's height, `IntrinsicHeight` in a horizontal scroll) and its columns widen with the text size; a range's value keeps an 8 px gap from its label (UX-31). Test baseline 944.
+> **S1.11 (2026-09-25, Stage 1):** UX-28 confirmed on the host and fixed: the tracker's seven controls wrapped the Material button in `Semantics(button: true, label, excludeSemantics: true)` with no tap action and no enabled state, so on Android a screen reader could not press them. The wrapper now declares `enabled` and passes the button's `onPressed` as `onTap`. A semantics test checks every control (tap action exactly when it can be pressed, button, enabled state) and that a semantics tap confirms a frame; it failed before. TalkBack on a device stays a Stage 11 check. Test baseline 945.
 
 ---
 
@@ -616,7 +617,10 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   card is swept too (before, it rendered no forecast and missed UX-31).
 - **Not covered by it:** dialogs (block, rig and target editors, the zone picker), the map
   picker (`/site/pick`, `/position`; tiles are third-party), the hidden metadata import.
-- **Labels:** icon-only buttons carry a `tooltip` (it is their screen-reader label). The
+- **Labels:** icon-only buttons carry a `tooltip` (it is their screen-reader label). A
+  `Semantics(excludeSemantics: true)` that relabels a button must also give `onTap` and
+  `enabled`, or the node has no tap action (S1.11; the sweep's guidelines only examine
+  nodes that have one, so they cannot catch this). The
   altitude chart has a text alternative (`AltitudeChartWidget.semanticsLabel`: number of
   windows and usable time); the window list under it gives the details, so the chart and
   its text come from the same `ImagingOpportunity`. A `Card` merges its content into one
