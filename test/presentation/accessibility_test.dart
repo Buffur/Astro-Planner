@@ -2,7 +2,7 @@
 // to bottom, in the light, dark and field (red) themes at 100 % and 200 %
 // text: no layout exception (overflow), Android's 48 px tap targets, a label
 // on every tappable element, and WCAG AA text contrast in the light and dark
-// themes. Field mode's secondary red is below AA by design (dark
+// themes (S1.10: with a full forecast on screen, UX-32). Field mode's secondary red is below AA by design (dark
 // adaptation; documented in ARCHITECTURE.md B16), so contrast is not
 // asserted there. Plus the altitude chart's text alternative.
 
@@ -15,6 +15,7 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
+import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
@@ -27,10 +28,61 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../support/fake_device_time_zone.dart';
 import '../support/fake_location_service.dart';
 import '../support/fake_reverse_geocoder.dart';
-import '../support/no_snapshot_weather.dart';
 import '../support/planner_harness.dart';
 
-class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
+/// Every hour of the night with every variable filled, on whole UTC hours
+/// as the provider serves them, so the sweep renders the weather card, its
+/// ranges and the hour strip (S1.10; the blind spot UX-32).
+class _FullForecast implements WeatherRepository {
+  _FullForecast(this.clock);
+
+  final Clock clock;
+
+  @override
+  Future<WeatherFetch> fetchSnapshot({
+    required double latitude,
+    required double longitude,
+    required DateTime startUtc,
+    required DateTime endUtc,
+  }) async {
+    final first = DateTime.utc(
+      startUtc.year,
+      startUtc.month,
+      startUtc.day,
+      startUtc.hour,
+    );
+    return WeatherFetched(
+      WeatherSnapshot(
+        provider: 'open-meteo',
+        model: 'best_match',
+        fetchedAtUtc: clock.nowUtc(),
+        latitude: latitude,
+        longitude: longitude,
+        hours: [
+          for (
+            var t = first;
+            t.isBefore(endUtc);
+            t = t.add(const Duration(hours: 1))
+          )
+            WeatherHour(
+              timeUtc: t,
+              cloudCoverPct: 100,
+              cloudCoverLowPct: 18,
+              cloudCoverMidPct: 45,
+              cloudCoverHighPct: 100,
+              precipitationProbabilityPct: 35,
+              windSpeedKmh: 12.5,
+              windGustsKmh: 28.4,
+              temperatureC: -12.5,
+              dewPointC: -14.2,
+              relativeHumidityPct: 88,
+              visibilityM: 24140,
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 enum _Theme { light, dark, field }
 
@@ -84,7 +136,7 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
     vm = PlannerHarness(
       DriftTargetRepository(db),
       DriftEquipmentRepository(db),
-      _NoWeather(),
+      _FullForecast(clock),
       DriftLocationRepository(db),
       locationService: FakeLocationService(),
       reverseGeocoder: FakeReverseGeocoder(),
@@ -185,6 +237,20 @@ void main() {
       });
     }
   }
+
+  // S1.10 (UX-32): the sweep would miss a weather-card overflow again if the
+  // forecast stopped rendering.
+  testWidgets('the sweep renders a forecast', (tester) async {
+    await _pumpApp(tester, theme: _Theme.light, textScale: 2.0);
+    AppRouter.router.go(AppRouter.session());
+    await _settle(tester);
+    expect(find.byKey(const Key('weather.hours')), findsOneWidget);
+    expect(find.byKey(const Key('weather.ranges')), findsOneWidget);
+    // UX-31: a range label never runs into its value.
+    final label = tester.getRect(find.text('Low cloud (below 3 km)'));
+    final value = tester.getRect(find.text('18 %'));
+    expect(value.left - label.right, greaterThanOrEqualTo(8));
+  });
 
   testWidgets('the altitude chart has a text alternative', (tester) async {
     await _pumpApp(tester, theme: _Theme.light, textScale: 1.0);

@@ -321,8 +321,11 @@ class _Ranges extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 1),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: Text(label, style: style)),
+                // S1.10 (UX-31): never runs into the label at large text.
+                const SizedBox(width: 8),
                 Text(
                   value,
                   style: style?.copyWith(fontWeight: FontWeight.bold),
@@ -382,7 +385,9 @@ class _DewLine extends StatelessWidget {
   }
 }
 
-/// One column per hour; a legend column first gives each row's unit.
+/// One column per hour; a legend column first gives each row's unit. The
+/// strip takes the height of its text and the columns widen with the text
+/// size, so nothing is clipped at 200 % text (S1.10; UX-31, trap 17).
 class _HourStrip extends StatelessWidget {
   const _HourStrip({required this.summary, required this.zoneId});
 
@@ -401,16 +406,16 @@ class _HourStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.bodySmall;
     final slots = summary.slots;
-    return SizedBox(
-      height: 130,
-      child: ListView.builder(
-        key: const Key('weather.hours'),
-        scrollDirection: Axis.horizontal,
-        itemCount: slots.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return SizedBox(
-              width: 84,
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    return SingleChildScrollView(
+      key: const Key('weather.hours'),
+      scrollDirection: Axis.horizontal,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: 84 * scale,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -432,14 +437,16 @@ class _HourStrip extends StatelessWidget {
                     ),
                 ],
               ),
-            );
-          }
-          return _HourColumn(
-            slot: slots[index - 1],
-            zoneId: zoneId,
-            style: style,
-          );
-        },
+            ),
+            for (final slot in slots)
+              _HourColumn(
+                slot: slot,
+                zoneId: zoneId,
+                style: style,
+                width: 56 * scale,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -450,11 +457,13 @@ class _HourColumn extends StatelessWidget {
     required this.slot,
     required this.zoneId,
     required this.style,
+    required this.width,
   });
 
   final NightWeatherSlot slot;
   final String? zoneId;
   final TextStyle? style;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +476,7 @@ class _HourColumn extends StatelessWidget {
       style: style?.copyWith(fontWeight: FontWeight.bold),
     );
     return SizedBox(
-      width: 56,
+      width: width,
       child: h == null
           ? Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
