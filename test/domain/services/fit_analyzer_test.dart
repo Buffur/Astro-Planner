@@ -224,6 +224,20 @@ void main() {
       expect(f.endUtc, isNull);
     });
 
+    // S1.9 (UX-15(2)): a missing site or target is not a verdict.
+    test('no window because an input is missing is needsInput', () {
+      FitResult run(List<CaptureBlock> blocks, {required bool missing}) =>
+          FitAnalyzer.analyze(
+            budget: CaptureBudgetCalculator.calculate(blocks: blocks),
+            windows: const [],
+            noWindowReason: "Choose a target to see tonight's windows.",
+            inputMissing: missing,
+          );
+      expect(run([_light(120, 30)], missing: true).state, FitState.needsInput);
+      expect(run([_light(120, 30)], missing: false).state, FitState.noWindow);
+      expect(run(const [], missing: true).state, FitState.nothingToFit);
+    });
+
     for (final (n, state, end, tails) in [
       (102, FitState.fits, _t(23, 42), <int>[]),
       (103, FitState.tight, _t(23, 43), <int>[]),

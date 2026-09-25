@@ -11,6 +11,7 @@ import 'app_colors.dart';
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
     required this.muted,
+    required this.caution,
     required this.sunEvent,
     required this.twilightEvent,
     required this.moon,
@@ -33,6 +34,10 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Secondary text and icons for empty or unknown states.
   final Color muted;
+
+  /// A caution that is not an error, such as a "Tight" fit (S1.9): at least
+  /// as prominent as body text.
+  final Color caution;
 
   /// Sunset/sunrise and astronomical dusk/dawn icons.
   final Color sunEvent;
@@ -69,6 +74,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   static const light = AppPalette(
     muted: Colors.grey,
+    caution: Color(0xFF9A5B00), // dark amber: 5.4:1 on white (AA)
     sunEvent: Colors.orange,
     twilightEvent: Colors.indigo,
     moon: Colors.blueGrey,
@@ -91,6 +97,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   static const dark = AppPalette(
     muted: Colors.grey,
+    caution: Color(0xFFFFB74D), // orange.shade300
     sunEvent: Colors.orange,
     twilightEvent: Colors.indigo,
     moon: Colors.blueGrey,
@@ -114,6 +121,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Red on black only: brightness, not hue, tells elements apart.
   static const field = AppPalette(
     muted: AppColors.fieldTextSecondary,
+    // As bright as "Fits": in red mode the word carries the caution.
+    caution: AppColors.fieldTextPrimary,
     sunEvent: AppColors.fieldTextPrimary,
     twilightEvent: AppColors.fieldTextSecondary,
     moon: AppColors.fieldTextSecondary,
@@ -185,6 +194,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Every token, for tests.
   List<Color> get all => [
     muted,
+    caution,
     sunEvent,
     twilightEvent,
     moon,

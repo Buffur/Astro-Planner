@@ -3,7 +3,7 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.8.
+> **Last updated:** 2026-09-25, after S1.9.
 
 ## Current state
 
@@ -13,9 +13,9 @@
 | Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.9 — Fit status colours and the missing-input state** (C3; UX-16, UX-15(2)). Approved by the frozen sequence |
-| Code baseline | `main` after S1.8 (see "Completed Tasks") |
-| Quality gate at the baseline | **Green**, S1.8, 2026-09-25: Encoding, Format, Analyze pass; Test (936 passed); E2E on the host (2 passed) |
+| Next approved Task | **S1.10 — Weather strip at 200 % text; a forecast in the sweep** (D1, D2; UX-31, UX-32). Approved by the frozen sequence |
+| Code baseline | `main` after S1.9 (see "Completed Tasks") |
+| Quality gate at the baseline | **Green**, S1.9, 2026-09-25: Encoding, Format, Analyze pass; Test (943 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
 ## Stage status
@@ -50,7 +50,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.5 — Unsupported-database recovery (A6) | 2026-09-25 | `07d55e2` | `main.dart` probes the database before building the graph (`refusedSchemaVersion`) and shows `UnsupportedDatabaseApp`: newer data is explained and **never reset** (ADR-008 §2; plan entry annotated), below-floor data can be reset after confirmation (`resetRefusedDatabase`: close, keep `.v<N>.bak`), then the bootstrap reruns. 10 tests (real files: unchanged until confirmed, `.bak` identical, fresh DB seeds 164; the screen: wording, Cancel, a failed reset, a11y at 200 % in light and dark). **Not host-testable:** the `main.dart` wiring itself (platform plugins) — a device check for Stage 11. Resolves TASK 3.2 UI half, RT-03, TD-047 (fully). Gate green, 919 + 2 E2E |
 | 1 | S1.6 — Confirm before replacing an unsaved draft (A7, interim) | 2026-09-25 | `c0bfcb7` | `CurrentSession.hasUnsavedChanges` (edits since created/opened/saved; a site change is not an edit; a failed Save or Start keeps them; a resumed draft infers it from its content); `confirmLeavingUnsavedPlan` on the planner's "+" and Duplicate, Tonight's "New session" and "Open in planner" (another session only); the last two also through `runWithFeedback`. `SessionPlanViewModel` still 300 lines. 10 tests: the flag, and each button through the real app (Cancel keeps, Discard proceeds, an untouched draft never asks, the dialog accessible at 200 % in light and dark). RT-05/UX-12 mitigated; RD-05 still open for Stage 4. Gate green, 929 + 2 E2E |
 | 1 | S1.7 — One format for durations and numbers (A5, C2) | 2026-09-25 | `20eff0e` | `QuantityText` in `lib/core/utils` (the domain's fit reasons use it too): durations rounded to the minute in one form, exposures without .0 (and no longer rounded to whole seconds in four screens), typographic minus, "3 %"; the three duration formatters delegate or are gone; `totalIntegrationTime` removed; RA/Dec in the session detail as h:m:s / d:m:s. 6 unit tests plus assertions in 4 widget tests (3 updated to the new strings). Resolves ENG-06, UX-19 (IA-independent part). Gate green, 935 + 2 E2E |
-| 1 | S1.8 — Visible text defects and labels (C1, C4, B2, B7/SCI-05) | 2026-09-25 | The S1.8 commit* | Session detail: "f/5.6", "None recorded.", the night key as "Night span"; Settings' overhead note corrected; the candidates footer and frame fill (`CapabilityText.frameFillOf`); the add-block helper wraps; the sky card names both Bortle entry points; "ISO / gain (for your records)". 1 new test plus assertions in 5 widget tests (the candidates test now seeds the default rig so its rows carry a frame fill; the sky-card string updated). Resolves UX-20, UX-18 (IA-independent part), SCI-05, SCI-06. Gate green, 936 + 2 E2E |
+| 1 | S1.8 — Visible text defects and labels (C1, C4, B2, B7/SCI-05) | 2026-09-25 | `b03dda9` | Session detail: "f/5.6", "None recorded.", the night key as "Night span"; Settings' overhead note corrected; the candidates footer and frame fill (`CapabilityText.frameFillOf`); the add-block helper wraps; the sky card names both Bortle entry points; "ISO / gain (for your records)". 1 new test plus assertions in 5 widget tests (the candidates test now seeds the default rig so its rows carry a frame fill; the sky-card string updated). Resolves UX-20, UX-18 (IA-independent part), SCI-05, SCI-06. Gate green, 936 + 2 E2E |
+| 1 | S1.9 — Fit status colours and the missing-input state (C3) | 2026-09-25 | The S1.9 commit* | `AppPalette.caution` in all three palettes (light #9A5B00, AA; dark orange 300; field the primary red) for "Tight"; `FitState.needsInput` (`FitAnalyzer.analyze(inputMissing:)`, set by the VM when the site or target is missing) drawn neutral; a real no-window night stays red. 7 tests (domain states, the VM with no site / no target / a never-rising target, colours and AA contrast in light and dark); the field red-only check covers the token. Resolves UX-16, UX-15(2). Gate green, 943 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -68,7 +69,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `07d55e2`: S1.5.
 - `c0bfcb7`: S1.6.
 - `20eff0e`: S1.7.
-- S1.8: see the note under "Completed Tasks".
+- `b03dda9`: S1.8.
+- S1.9: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -162,20 +164,20 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1–S1.8 done (gate green). **Stages 2–11:** not started.
+- **Stage 1 Tasks:** S1.1–S1.9 done (gate green). **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **S1.9 — Fit status colours and the missing-input state** (`POST_ROADMAP_PLAN.md` §5,
-Stage 1 frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
+Run **S1.10 — Weather strip at 200 % text; a forecast in the sweep** (`POST_ROADMAP_PLAN.md`
+§5, Stage 1 frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
 file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
 a Task). That session:
-- reads `CLAUDE.md`, this file and the S1.9 entry, plus the files it names;
+- reads `CLAUDE.md`, this file and the S1.10 entry, plus the files it names;
 - follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
   STOP;
-- records the S1.8 commit hash and its own commit here, then stops. It does not start S1.10.
+- records the S1.9 commit hash and its own commit here, then stops. It does not start S1.11.
 
-Then S1.10 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
+Then S1.11 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
 fresh session (§9.8).
 
 ## Stage 0 notes

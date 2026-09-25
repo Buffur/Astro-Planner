@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/app_palette.dart';
+
 import '../../../domain/services/fit_analyzer.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
@@ -112,7 +114,11 @@ class CaptureBudgetSummary extends StatelessWidget {
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: FitText.color(fit.state, scheme),
+                  color: FitText.color(
+                    fit.state,
+                    scheme,
+                    AppPalette.of(context),
+                  ),
                 ),
               ),
             ),
@@ -189,7 +195,9 @@ class _FillWindowAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (fit.state == FitState.noWindow || fit.state == FitState.nothingToFit) {
+    if (fit.state == FitState.noWindow ||
+        fit.state == FitState.needsInput ||
+        fit.state == FitState.nothingToFit) {
       return const SizedBox.shrink();
     }
     final viewModel = context.watch<CaptureAnalysisViewModel>();

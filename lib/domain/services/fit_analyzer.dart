@@ -9,6 +9,10 @@ enum FitState {
   /// There is no usable window tonight.
   noWindow,
 
+  /// No window can be computed yet: the site or the target is not chosen
+  /// (S1.9). A missing input, not a verdict on the night.
+  needsInput,
+
   /// The plan has no light frames, so there is nothing to fit.
   nothingToFit,
 
@@ -91,12 +95,15 @@ class FitAnalyzer {
   /// [transitUtc]: the target's upper transit, needed only when the budget
   /// counted a meridian flip.
   /// [noWindowReason]: why [windows] is empty, from the night timeline.
+  /// [inputMissing]: [windows] is empty because the site or target is not
+  /// chosen yet; the result is then [FitState.needsInput] (S1.9).
   static FitResult analyze({
     required CaptureBudget budget,
     required List<VisibilityWindow> windows,
     double marginFraction = 0.15,
     DateTime? transitUtc,
     String noWindowReason = 'No usable window tonight.',
+    bool inputMissing = false,
   }) {
     final margin = marginFraction.clamp(0.0, 0.5);
     final available = windows.fold(
@@ -114,7 +121,12 @@ class FitAnalyzer {
       );
     }
     if (windows.isEmpty) {
-      return _result(FitState.noWindow, noWindowReason, available, load);
+      return _result(
+        inputMissing ? FitState.needsInput : FitState.noWindow,
+        noWindowReason,
+        available,
+        load,
+      );
     }
 
     // The budget appends a counted flip at the end; the fit inserts it at

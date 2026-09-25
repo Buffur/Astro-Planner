@@ -357,7 +357,11 @@ class _SessionCard extends StatelessWidget {
                 FitText.label(fit.state),
                 key: const Key('tonight.fit'),
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: FitText.color(fit.state, theme.colorScheme),
+                  color: FitText.color(
+                    fit.state,
+                    theme.colorScheme,
+                    AppPalette.of(context),
+                  ),
                   fontWeight: FontWeight.bold,
                 ),
               ),

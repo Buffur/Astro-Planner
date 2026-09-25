@@ -149,6 +149,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
           ? _transitUtc
           : null,
       noWindowReason: noWindowReason,
+      inputMissing: _plan.sessionNight == null || _plan.selectedTarget == null,
     );
   }
 

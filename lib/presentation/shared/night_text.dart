@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_palette.dart';
+
 import '../../domain/models/moon_conditions.dart';
 import '../../domain/models/night_weather.dart';
 import '../../domain/models/night_weather_summary.dart';
@@ -61,14 +63,17 @@ abstract final class FitText {
     FitState.fits => 'Fits',
     FitState.tight => 'Tight',
     FitState.doesNotFit => "Doesn't fit",
-    FitState.noWindow => 'No window',
+    FitState.noWindow || FitState.needsInput => 'No window',
     FitState.nothingToFit => 'Nothing to fit',
   };
 
-  static Color color(FitState state, ColorScheme scheme) => switch (state) {
-    FitState.fits => scheme.primary,
-    FitState.tight => scheme.tertiary,
-    FitState.doesNotFit || FitState.noWindow => scheme.error,
-    FitState.nothingToFit => scheme.outline,
-  };
+  /// A real verdict in its colour; a missing input neutral (S1.9; UX-16,
+  /// UX-15(2)): "Tight" is a caution at least as prominent as "Fits".
+  static Color color(FitState state, ColorScheme scheme, AppPalette palette) =>
+      switch (state) {
+        FitState.fits => scheme.primary,
+        FitState.tight => palette.caution,
+        FitState.doesNotFit || FitState.noWindow => scheme.error,
+        FitState.nothingToFit || FitState.needsInput => scheme.outline,
+      };
 }
