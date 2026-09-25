@@ -395,8 +395,15 @@ owner's approval.
   ViewModel is disposed.
 
 ##### S1.4 — Night key without a site (A4; ENG-05, SCI-11, RT-06)
-- **Objective:** without a site, the draft's night key is the evening date in the device's zone
-  under the ADR-007 rules, never the UTC calendar date (trap 2).
+- **Correction (owner, 2026-09-25, during S1.4):** the device-zone rule below conflicts with
+  ADR-007 §6 ("the device zone is never used in computation"; PD-02(a) rejected). The owner
+  chose instead: without a site, the key is the **default night at the default position**,
+  resolved by `SessionNightResolver` like a site's (mean solar time), never from Y/M/D. Users
+  far east of Greenwich can still get a day off in their morning until a site is set, and the
+  key self-corrects then (DECISIONS E.1).
+- **Objective (as planned, superseded by the correction):** without a site, the draft's night
+  key is the evening date in the device's zone under the ADR-007 rules, never the UTC calendar
+  date (trap 2).
 - **Scope:** `SessionPlanViewModel.today` and the `_plan()` fallback, through `SessionNightResolver`
   or `CalendarDate` helpers with the device zone (`DeviceTimeZone` / `IanaTimeContext`); the
   "a past night rolls forward" comparison in `load()` uses the same date.

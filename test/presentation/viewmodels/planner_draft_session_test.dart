@@ -96,6 +96,25 @@ void main() {
     expect(await sessions.list(), hasLength(1));
   });
 
+  // S1.4 (ENG-05 = SCI-11 = RT-06; owner decision): without a site the
+  // draft's night key is the default night at the default position, resolved
+  // per ADR-007 — never the UTC calendar date (CLAUDE.md trap 2).
+  test('without a site, the night key is not the UTC date', () async {
+    SharedPreferences.setMockInitialValues({});
+    // 01:30 UTC on Sep 22 is still the night of Sep 21 at the default
+    // position (its mean solar noon is near 12:00 UTC).
+    final vm = await start(now: DateTime.utc(2026, 9, 22, 1, 30));
+    expect(vm.sessionNight, isNull, reason: 'no astronomy without a site');
+    expect(vm.activeSession!.eveningDate, CalendarDate(2026, 9, 21));
+
+    await vm.setEveningDate(CalendarDate(2026, 9, 25));
+    expect(
+      (await sessions.get(vm.activeSessionId!))!.eveningDate,
+      CalendarDate(2026, 9, 25),
+      reason: 'a picked date is kept',
+    );
+  });
+
   // Acceptance: force-stopping the app never loses edits.
   test('every edit is in the database when the call returns; a restart '
       'rebuilds the same plan', () async {

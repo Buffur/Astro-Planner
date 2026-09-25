@@ -81,18 +81,19 @@ class SessionPlanViewModel extends ChangeNotifier {
   Future<void> get idle => _current?.idle ?? Future.value();
 
   /// The chosen night, or null without a site (ADR-007 §9).
-  SessionNight? get sessionNight => _site.isDefaultLocation
-      ? null
-      : SessionNightResolver.resolve(
-          _pickedEveningDate,
-          _clock.nowUtc(),
-          latitude: _site.latitude,
-          longitude: _site.longitude,
-          timeContext: _site.timeContext,
-        );
+  SessionNight? get sessionNight => _site.isDefaultLocation ? null : _night;
+
+  /// The chosen night per ADR-007, never from a date's Y/M/D; without a site
+  /// the default position's, used only as the draft's night key (S1.4).
+  SessionNight get _night => SessionNightResolver.resolve(
+    _pickedEveningDate,
+    _clock.nowUtc(),
+    latitude: _site.latitude,
+    longitude: _site.longitude,
+    timeContext: _site.timeContext,
+  );
 
   CalendarDate? get eveningDate => sessionNight?.eveningDate;
-  CalendarDate get today => CalendarDate.fromDateTimeFields(_clock.nowUtc());
 
   /// Restores the plan (call after the site has loaded): a plan still kept
   /// in preferences moves once into a new draft (ADR-014 §6); otherwise the
@@ -123,7 +124,7 @@ class SessionPlanViewModel extends ChangeNotifier {
         await _apply(open);
         final stored = open.eveningDate;
         _pickedEveningDate =
-            stored != null && stored.compareTo(eveningDate ?? today) > 0
+            stored != null && stored.compareTo(_night.eveningDate) > 0
             ? stored
             : null;
         // A run in progress is tracked, never edited: plan on a copy
@@ -144,9 +145,9 @@ class SessionPlanViewModel extends ChangeNotifier {
   }
 
   /// The plan as shown now (ADR-014 §2); without a site the night key is
-  /// the picked date, else today's date.
+  /// the picked date, else the default position's default night (S1.4).
   SessionPlan _plan() => SessionPlan(
-    eveningDate: eveningDate ?? _pickedEveningDate ?? today,
+    eveningDate: _night.eveningDate,
     timeZoneId: _site.displayZoneId,
     siteId: _site.activeSite?.id,
     targetId: _target?.id,
