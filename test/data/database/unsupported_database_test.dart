@@ -7,6 +7,7 @@
 import 'dart:io';
 
 import 'package:astroplan/data/database/app_database.dart';
+import 'package:astroplan/data/database/database_reset.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
@@ -101,6 +102,56 @@ void main() {
       final fresh = production();
       expect(await refusedSchemaVersion(fresh), isNull);
       await fresh.close();
+    });
+  });
+
+  // S1.V2 (TD-060): the reset the app runs on confirmation seeds the new
+  // database even when the old file's catalog seed marker is still stored,
+  // and keeps every other preference.
+  group('the confirmed reset', () {
+    AppDatabase production() =>
+        AppDatabase(openDatabaseConnection(() async => file));
+
+    for (final marker in [true, false]) {
+      test('${marker ? 'with' : 'without'} a stored seed marker: the old file '
+          'is kept and the new database is seeded', () async {
+        SharedPreferences.setMockInitialValues({
+          if (marker) CatalogSeeder.versionKey: 2,
+          'fieldMode': true,
+        });
+        await _stamp(file, 7);
+        final before = file.readAsBytesSync();
+        final db = production();
+        final refused = (await refusedSchemaVersion(db))!;
+
+        final backup = await confirmDatabaseReset(db, file, refused);
+        expect(backup.readAsBytesSync(), before);
+
+        final fresh = production();
+        final targets = DriftTargetRepository(fresh);
+        await CatalogSeeder(targets).seedIfNeeded();
+        expect(await targets.getAllTargets(), hasLength(164));
+        await fresh.close();
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('fieldMode'), isTrue, reason: 'kept');
+        expect(prefs.getInt(CatalogSeeder.versionKey), 2, reason: 'reseeded');
+      });
+    }
+
+    test('a newer database is refused before anything changes', () async {
+      SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
+      await _stamp(file, 18);
+      final before = file.readAsBytesSync();
+      final db = production();
+      final refused = (await refusedSchemaVersion(db))!;
+      await expectLater(
+        confirmDatabaseReset(db, file, refused),
+        throwsArgumentError,
+      );
+      await db.close();
+      expect(file.readAsBytesSync(), before);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getInt(CatalogSeeder.versionKey), 2);
     });
   });
 

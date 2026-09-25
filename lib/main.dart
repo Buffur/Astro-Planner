@@ -9,6 +9,7 @@ import 'presentation/navigation/app_router.dart';
 import 'core/time/clock.dart';
 import 'presentation/app_view_models.dart';
 import 'data/database/app_database.dart';
+import 'data/database/database_reset.dart';
 import 'data/repositories/drift_target_repository.dart';
 import 'domain/repositories/target_repository.dart';
 import 'data/services/catalog_seeder.dart';
@@ -90,7 +91,7 @@ Future<void> _start() async {
         newerThanApp: refused.isNewerThanApp,
         foundVersion: refused.foundVersion,
         onReset: () async {
-          await resetRefusedDatabase(database, await databaseFile(), refused);
+          await confirmDatabaseReset(database, await databaseFile(), refused);
           await _start();
         },
       ),

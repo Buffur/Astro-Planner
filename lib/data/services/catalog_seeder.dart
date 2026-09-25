@@ -128,6 +128,17 @@ class CatalogSeeder {
   static const String assetPath = 'assets/catalog/catalog_v2.json';
   static const String versionKey = 'catalogSeedVersion';
 
+  /// Forgets which catalog version was applied, so the next seeding treats
+  /// the database as new. Only for a database that has been replaced (the
+  /// confirmed reset, S1.V2): on an ordinary start the marker is what keeps
+  /// deleted catalog targets from coming back.
+  static Future<void> forgetAppliedVersion({
+    Future<SharedPreferences> Function()? preferences,
+  }) async {
+    final prefs = await (preferences ?? SharedPreferences.getInstance)();
+    await prefs.remove(versionKey);
+  }
+
   final TargetRepository _repository;
   final Future<String> Function() _loadAsset;
   final Future<SharedPreferences> Function() _preferences;
