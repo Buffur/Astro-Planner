@@ -2,7 +2,19 @@
 
 ## Project Purpose
 
-AstroPlan is a mobile application for astrophotographers. It helps users plan, execute, and document sessions by combining equipment profiles, target visibility, weather, moon conditions, and capture planning. It is designed to complement tools like Stellarium, not replace them (e.g., it is a planner/logbook, not a full planetarium).
+AstroPlan is a mobile application for astrophotographers whose **primary product job is user-friendly planning of upcoming astrophotography sessions**.
+
+It helps the user determine:
+
+- what can be imaged;
+- when it can be imaged;
+- which site and equipment apply;
+- how to construct a realistic capture plan;
+- whether that plan fits the available astronomical opportunity.
+
+Execution, actuals, Logbook, export, and backup remain important supporting workflows, but they must not unnecessarily dominate or complicate the planning experience.
+
+AstroPlan complements tools such as Stellarium, Stargazing Hub, N.I.N.A., ASIAIR, and dedicated telescope-control software; it is not intended to replace a planetarium or become a telescope/camera-control suite.
 
 ## Tech Stack
 
@@ -20,7 +32,9 @@ AstroPlan is a mobile application for astrophotographers. It helps users plan, e
 
 ## Source-of-Truth Documents
 
-Read these before architectural or feature changes:
+Read the relevant source-of-truth documents before architectural, scientific, product, or feature changes.
+
+### Implementation and historical design sources
 
 - `docs/PROJECT_HANDOFF.md`: Entry point. Current project state (actual vs intended), traps, build/test baseline, document map.
 - `docs/ARCHITECTURE.md`: Design intent (Part A), current architecture (Part B), implementation deviations (Part C), target direction (Part D).
@@ -29,38 +43,86 @@ Read these before architectural or feature changes:
 - `docs/TECH_DEBT.md`: Debt register (`TD-###`) with evidence and proposed directions.
 - `docs/DECISIONS.md`: Accepted ADRs (verbatim), conformance audit, owner directives, open decisions (`PD-##`).
 - `docs/SCIENTIFIC_INTEGRITY.md`: Scientific issue register (`SI-###`) and calculation register.
-- `docs/EXPORT_MANIFEST.md`: the export manifest v2 schema (TASK 14.3); change it with `SessionManifestCodec`, and bump `manifest_version` for any incompatible change.
-- `docs/PROJECT_AUDIT.md`: Point-in-time audit evidence, documentation discrepancy log, rule-conformance matrix. A snapshot: do not edit it to track later changes.
+- `docs/EXPORT_MANIFEST.md`: export manifest v2 schema; change it with `SessionManifestCodec`, and bump `manifest_version` for any incompatible change.
+- `docs/PROJECT_AUDIT.md`: point-in-time audit evidence and discrepancy log. It is a snapshot; do not edit it to track later changes.
+- `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/MASTER_ROADMAP.md`, `docs/TEST_PLAN.md`, `docs/IA_WIREFRAMES.md`, and `.agents/rules/`: historical product intent, implementation roadmap, test intent, and project rules.
 
-Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/TEST_PLAN.md`, `docs/IA_WIREFRAMES.md` (ADR-015 navigation intent), `.agents/rules/`.
+`docs/archive/` holds superseded documents. They are historical only and are known to be inaccurate; never use them as current source of truth.
 
-`docs/archive/` holds superseded documents. They are historical only and are known to be inaccurate; never use them as a source of truth.
+### Post-roadmap refinement sources
 
-## Important Development Rules for Future Claude Agent
+After **Stage 0 — Refinement Baseline** is committed, the active post-roadmap source of truth is:
+
+- `docs/refinement/PRODUCT_DIRECTION.md` — current product intent and product-level constraints.
+- `docs/refinement/POST_ROADMAP_PLAN.md` — active strategic refinement Stages and dependency order.
+- `docs/refinement/PROGRESS.md` — current Stage, current/next approved Task, completed work, research gates, owner decisions, blockers, validation state, and next allowed action.
+- An explicitly supplied planning/research/implementation/validation prompt file — the active scope for the current agent session.
+
+The original roadmaps and audit reports remain authoritative historical evidence for the work that produced the current baseline. They are **not** the active post-roadmap task queue once Stage 0 is complete.
+
+Until Stage 0 is committed, the existing roadmap governance remains in force.
+
+## Important Development Rules for Future Claude Agents
 
 1. **Inspect before modifying.**
-2. **Never guess about existing code.**
-3. **Read relevant files before making architectural claims.**
-4. **Prefer minimal changes.**
-5. **Avoid unnecessary rewrites.**
-6. **Do not introduce new architecture without justification.**
-7. **Do not add features outside the current task.**
-8. **Do not change working functionality without reason.**
-9. **Run appropriate tests after changes.**
-10. **Run analyzer/formatter after Dart changes where appropriate.**
-11. **Keep business logic testable and separated from UI.**
-12. **Keep astronomical calculations deterministic.**
-13. **Use explicit units for astronomy calculations.**
-14. **Handle UTC/local time carefully.**
-15. **Never hardcode external API secrets.**
-16. **Do not silently change formulas.**
-17. **Scientific assumptions must be documented.**
-18. **Never present relative stacking gain as absolute physical SNR.**
-19. **User-facing thresholds should be configurable where scientifically appropriate.**
-20. **Preserve Git checkpoints.**
 
-## Documentation Conventions (added 2026-09-21)
+2. **Never guess about existing code or current repository state.**
 
+3. **Read the active prompt and relevant source-of-truth documents before making architectural, scientific, or product claims.**
+
+4. **Verify audit findings against the current repository before fixing them.** If later changes already resolved or materially changed a finding, report the discrepancy rather than implementing an obsolete fix.
+
+5. **Prefer the smallest complete change that satisfies the approved Task.**
+
+6. **Avoid unnecessary rewrites.** Do not rewrite working systems without a demonstrated reason.
+
+7. **Do not introduce new architecture without an approved reason or decision.**
+
+8. **Do not add features outside the active Task.**
+
+9. **Do not silently change working product behavior.**
+
+10. **Record adjacent findings; do not fix them on the way** unless the current Task requires the fix to satisfy its acceptance criteria.
+
+11. **If the Task requires a materially larger architecture/product/scope change than approved, stop before the out-of-scope implementation, explain why, and propose a decomposition.**
+
+12. **Ordinary implementation difficulty is not a reason to stop.** If the approved Task is coherent and achievable within scope, carry it through to completion.
+
+13. **For an approved implementation Task use:** `READ → VERIFY → PLAN → IMPLEMENT → TARGETED TESTS → REGRESSION / QUALITY GATE → SELF-REVIEW → DOCS → COMMIT → STOP`.
+
+14. **Do not stop after planning when the implementation Task is already approved.**
+
+15. **Never start the next Task or Stage automatically.**
+
+16. **Run appropriate targeted tests after changes.**
+
+17. **Run analyzer/formatter and the repository quality gate where applicable before calling an implementation Task complete.**
+
+18. **Do not remove or weaken tests merely to make a change pass.**
+
+19. **Keep business logic deterministic, testable, and separated from UI.**
+
+20. **Keep astronomical/domain calculations independent from Flutter UI code.**
+
+21. **Use explicit units for scientific and equipment values.**
+
+22. **Handle UTC, local time, time zones, DST, and SessionNight semantics through the established abstractions.**
+
+23. **Never silently change scientific formulas or assumptions.** Scientific assumptions must remain documented.
+
+24. **Never present relative stacking gain as absolute physical SNR.**
+
+25. **Unknown values remain unknown; never fabricate data merely to simplify the UI.**
+
+26. **User-facing scientific thresholds should remain configurable where scientifically appropriate.**
+
+27. **Never hardcode external API secrets.**
+
+28. **External APIs, datasets, catalogs, or enrichment sources require evidence for reliability, licence/terms, provenance, privacy, and failure behavior before implementation.**
+
+29. **Preserve Git checkpoints and keep completed Tasks independently understandable from their commit and documentation.**
+    
+    ## Documentation Conventions (added 2026-09-21)
 - **The code is the source of truth for the ACTUAL state.** Design intent (`PRODUCT_SPEC.md`, `ROADMAP.md`, ADRs, Part A of `ARCHITECTURE.md` and `DATA_MODEL.md`) is kept separately and is **never rewritten to match the code**. Where the two differ, record an **IMPLEMENTATION DEVIATION** with: intended behavior, actual behavior, consequence.
 - **Status vocabulary:** *Intended / Planned*, *Implemented*, *Partial*, *Prototype*, *Broken*, *Missing*, *Deprecated*, *Unknown*. Do not call a feature Implemented if it does not work, and do not call it Missing if code for it exists. Do not hide identified issues.
 - **Stable IDs** are used across documents: `F-##` (features), `TD-###` (tech debt), `SI-###` (scientific issues), `DEV-A/D/P#` (implementation deviations), `PD-##` (open decisions), `OD-##` (owner directives). Reference them; never renumber.
@@ -68,6 +130,83 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 - **Record, don't fix on the way.** New findings go into `TECH_DEBT.md` / `SCIENTIFIC_INTEGRITY.md`; do not expand the current task to fix them (rule 7).
 - **Source-of-truth documents must be tracked by Git.** Never add `CLAUDE.md` or anything under `docs/` to `.gitignore` (owner directive OD-02).
 - **Prior documents are preserved, not deleted.** Superseded material goes to `docs/archive/` with a banner.
+
+## Post-Roadmap Workflow Governance
+
+### Active Prompt Rule
+
+When the owner explicitly provides a planning, research, implementation, or validation prompt file:
+
+1. Read it completely before making changes.
+2. Treat it as the active scope for that session.
+3. Resolve references through the repository rather than asking the owner to paste source material into chat.
+4. Do not start another Task or Stage after completing it.
+5. If the prompt conflicts with current repository evidence, verify and report the discrepancy instead of silently following stale assumptions.
+6. A supplied **implementation Task prompt constitutes owner approval to execute that Task completely** through implementation, testing, documentation, review, and commit. Do not request a second approval merely because the Task touches multiple files or layers.
+7. Owner approval is still required before materially expanding scope, making a new unresolved architecture/product/scientific/data-model decision, or implementing work explicitly marked as a research/owner-decision gate.
+
+### Context Discipline
+
+Use the repository as persistent project memory. Prefer high-signal, just-in-time context:
+
+- read the active prompt;
+- read the documents, ADRs, and finding IDs it references;
+- inspect the relevant implementation and tests;
+- inspect adjacent code only as necessary to complete the Task correctly.
+
+Do not perform a repository-wide re-audit for every Task.
+
+Do not require old chat transcripts when the necessary state is recorded in Git and project documentation.
+
+A fresh chat is expected at clean boundaries, especially:
+
+- after a completed Task and commit;
+- after a completed research decision;
+- before independent Stage validation;
+- when moving to a new Stage;
+- when the previous conversation context has become unnecessarily large.
+
+### Task Sizing
+
+A good implementation Task normally has:
+
+- one primary behavioral objective;
+- one coherent scope;
+- explicit dependencies;
+- explicit out-of-scope boundaries;
+- objective acceptance criteria;
+- one complete validation loop.
+
+Cross-layer work is acceptable when every change serves the same behavioral objective.
+
+Use the previous roadmap's sizing philosophy as guidance, not a hard line-count quota:
+
+- **S** — focused/local task;
+- **M** — one coherent cross-layer behavior;
+- **L** — usually decompose unless highly cohesive;
+- **XL** — do not use as an implementation Task.
+
+### Research and Decision Rules
+
+Research is required when implementation depends on an external fact or unresolved product/domain decision the repository cannot establish.
+
+Typical examples include metadata format/library capabilities, metadata-to-equipment identification, equipment databases, target catalog sources, elevation/Bortle/SQM sources, calibration-frame workflows, licensing, third-party provider terms, and major product-flow decisions.
+
+Use:
+
+`QUESTION → CURRENT CONSTRAINTS → AUTHORITATIVE EVIDENCE → VERIFIED FACTS → UNKNOWNS → OPTIONS → TRADE-OFFS → RECOMMENDED DIRECTION → OWNER DECISION → ADR / SPEC IF NEEDED → IMPLEMENTATION TASKS`
+
+Research sessions normally do not modify production application code.
+
+Do not convert a research hypothesis into implementation merely because one solution appears practical.
+
+### Validation Rules
+
+Validation exists at two levels.
+
+**Task validation** is part of the implementation Task and must include the applicable targeted tests, relevant regression tests, analyzer/formatter, quality gate, and explicit acceptance-criteria verification. A Task is not complete merely because code was written.
+
+**Stage validation** is performed in a fresh independent session after the Stage's implementation Tasks are complete. The validator should attempt to disprove that the Stage is complete, checking for regressions, scope drift, incomplete work, stale assumptions, architecture/scientific-integrity violations, and missing evidence. Validation-only sessions do not silently implement fixes; surviving findings become focused follow-up Tasks.
 
 ## Current Baseline and Known Traps (as of 2026-09-24, TASKs 15.4 and 15.5 open until a device run; TASK 10.5 cut)
 
@@ -83,16 +222,23 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 
 **Testing rule:** `.agents/rules/03-testing.md` can be satisfied literally again (`DEV-P8` resolved 2026-09-21). Investigate any failure as a regression; do not delete or weaken a test.
 
-**Owner directives currently in force** (`docs/DECISIONS.md` Part C):
+**Owner directives currently in force** (`docs/DECISIONS.md` Part C plus post-roadmap refinement governance):
 
-- **Scope = `docs/MASTER_ROADMAP.md`** (approved 2026-09-21, OD-06). Work one roadmap TASK per cycle, in order: READ → VERIFY → PLAN → IMPLEMENT → TEST → REVIEW → COMMIT → STOP. Never start the next task on your own; do not change the roadmap without owner approval; do not re-audit the whole repository. The current position is the "active task" line in `docs/ROADMAP.md` ("Adopted plan").
-- OD-03 (no new feature, specifically not `SessionNight`, before the docs are reconciled and the roadmap exists) has its condition met; `SessionNight` is roadmap group G2 and starts only when the roadmap reaches it and the owner gives the go-ahead.
-- Do not fix application code or scientific issues as part of documentation tasks; record them (OD-04).
-- Multi-file, architectural, database, or scope-affecting work: inspect, report a plan, wait for approval (`.agents/rules/00-project-governance.md`).
-- **`PD-06` resolved 2026-09-21** (`docs/DECISIONS.md` E.1): the logbook and text sharing stay visible; metadata import is hidden until G17, the light-pollution map card until TASK 7.4, the field-mode toggle until TASK 12.4. **Enforced since TASK 4.3** (`TD-014` resolved): every entry point reads `FeatureScope` — flip the flag there, never gate the same feature a second way at the call site. Do not extend these ahead-of-phase features.
-
-**Traps that will bite (all verified):**
-
+- Historical roadmap directives remain valid for the work they governed and remain evidence of prior owner decisions.
+- **Before Stage 0 is committed:** scope remains `docs/MASTER_ROADMAP.md` under the existing roadmap governance.
+- **After Stage 0 is committed:** active strategic scope is `docs/refinement/POST_ROADMAP_PLAN.md`; current operational state is `docs/refinement/PROGRESS.md`; current session scope is the explicitly approved planning/research/implementation/validation prompt.
+- Work one coherent implementation Task per cycle unless the approved prompt explicitly defines a smaller grouped operation.
+- Never start the next Task or Stage automatically.
+- An implementation prompt explicitly supplied by the owner is authorization to execute that Task completely. Do not require another approval merely because implementation is multi-file, architectural, database-related, or cross-layer **when those changes are already within the approved Task scope**.
+- A **new unresolved** architecture, data-model, scientific, product, external-provider, licensing, or scope decision still requires the appropriate research/decision gate and owner approval.
+- Documentation-only Tasks must not silently fix application code or scientific issues; record them (OD-04).
+- Research-only Tasks must not silently become implementation Tasks.
+- Validation-only Tasks must not silently fix findings.
+- Preserve historical roadmap/audit documents rather than rewriting them to reflect refinement.
+- Keep `docs/refinement/PROGRESS.md` current at Task/Stage boundaries once it exists.
+- OD-03's prerequisite condition has been met historically; do not use it to block already-approved post-roadmap work.
+- **`PD-06` historical gating remains relevant to the baseline:** the logbook and text sharing stay visible; metadata import remains hidden until its approved post-roadmap metadata stage lifts the gate; feature entry points continue to use `FeatureScope` rather than ad-hoc duplicate gating.
+  **Traps that will bite (all verified):**
 1. `EquipmentProfile.id` is an **optical-rig id**; storage is normalized (Device → CameraModule → OpticalRig) but the domain/UI model is flat — kept flat for 1.0 by ADR-011; the dormant catalog repository is gone and the tracking type is visible (TASK 8.4). **RESOLVED (TASK 3.3):** the `equipment_profiles` table is dropped entirely (not just orphaned) and foreign keys are enforced on every connection (`beforeOpen` sets `PRAGMA foreign_keys = ON`); `camera_modules.device_id`/`optical_rigs.camera_module_id` are `ON DELETE RESTRICT`, `capture_blocks.session_log_id` is `ON DELETE CASCADE`; `DriftEquipmentRepository.deleteEquipment` checks for other references before deleting a shared camera module or device. Migrations are guarded and snapshot-tested (TASK 3.2/3.3, ADR-008): the floor is v8, `onUpgrade` refuses anything below it or newer than the app before touching the file, the v8→v9 and v9→v10 steps are staged and run inside one transaction, and the v9→v10 step also runs a one-time orphan cleanup (`PRAGMA foreign_key_check`, delete + log) before rebuilding the three tables above and dropping `equipment_profiles`. Schema is now v10; the legacy `bit_depth`/`optical_multiplier` columns upgraded databases used to carry are gone too.
 2. **RESOLVED (TASK 2.4).** `PlannerViewModel.sessionNight` now resolves a real `SessionNight` — `SessionNightResolver.resolveDefault(_clock.nowUtc(), ...)` by default, `.forEveningDate(...)` for a picked `CalendarDate` — instead of the old `_sessionDate = DateTime.now().toUtc()` (`TD-001`, resolved). `home_screen.dart`, `sky_darkness_widget.dart`, `altitude_chart_widget.dart` and `logbook_screen.dart` all consume it, through one `NightTimeFormatter` (`lib/presentation/shared/`) with no ad-hoc `.toLocal()` elsewhere. `sessionNight`/`eveningDate` are `null` without a site — Home shows a "No site set" state instead of the silent default-London astronomy (ADR-007 §9, SI-008). Since TASK 10.2 imaging windows come from `vm.imagingOpportunity` (`ImagingOpportunityCalculator`, ADR-013: gates, reasons, annotations, no score) — `vm.visibilityWindows` and the fit derive from it; never compute windows or reasons elsewhere, and never let unknown data exclude time. Home renders it through `TonightOpportunityWidget` (chart + list from the same object, wording in `OpportunityText`); there is no sky warning or culmination "max altitude" any more (ADR-013 §6). Many targets go through `CandidateEvaluator` (shared `SunTrack`/`MoonTrack`, same calculator — keep the batch equal to the single-target view; a test enforces it); `vm.tonightCandidates()` runs it with `Isolate.run`, so pass only plain values into the closure, never `this`, and widget tests must wait for it with `tester.runAsync`. Since TASK 6.2 every target altitude goes through `VisibilityCalculator.calculateTargetAltitude` (J2000 → date precession, airless) — never compute a target's altitude from its raw J2000 RA/Dec; since TASK 7.1 a site's IANA zone (`LocationProfile.timeZoneId`, `IanaTimeContext`) drives the night and the display — pass `vm.displayZoneId` to `NightTimeFormatter`; without a zone, times are labelled as the device zone. **A map pick or GPS fix is transient** (remembered in preferences) and must never be written into a saved site; only explicit user edits change sites. Never derive a night from a `DateTime`'s Y/M/D, and never call `DateTime.now()` in `lib/domain` (a test enforces this) — use the injected `Clock` instead.
 3. **RESOLVED (TASK 8.4, ADR-011).** Equipment fields carry units (`focalLengthMm`, `focalRatio`, `pixelPitchUm`, …); the DB column `optical_rigs.aperture` holds the focal ratio N — never reinterpret stored values; N > 32 is flagged for review (`needsApertureReview`). Aperture input goes through `resolveAperture` (N = f / D), bounds through `EquipmentLimits`.
@@ -120,19 +266,49 @@ Product intent and process (also read): `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md
 
 ## Project
 
-Flutter/Dart mobile application for astrophotography session planning.
+Flutter/Dart mobile application for planning upcoming astrophotography sessions.
 
-The product is centered around:
+### Primary Product Job
 
-Site → Target → Astronomical Conditions → Weather → Equipment → Imaging Opportunity → Capture Plan → Execution → Logbook.
+AstroPlan is primarily a **user-friendly astrophotography session planner**.
 
-The application is not intended to replace Stellarium, Stargazing Hub, or dedicated telescope-control software.
+Its main job is to help the user determine:
+
+- what they can image;
+- when they can image it;
+- which site and equipment apply;
+- how to construct a realistic capture plan;
+- whether the plan fits the available astronomical opportunity.
+
+The planning-first conceptual flow is:
+
+`Site / Equipment / Target → Night & Astronomical Conditions → Imaging Opportunity → Capture Plan → Fit / Feasibility → Saved Session`
+
+Execution, actuals, Logbook, export, and backup are important supporting workflows. They must preserve correct data and state when used, but they must not unnecessarily dominate or complicate the planning experience.
+
+The application is not intended to replace Stellarium, Stargazing Hub, N.I.N.A., ASIAIR, or dedicated telescope-control software.
+
+### Product Refinement Principle
+
+Do not remove valid existing domain or scientific functionality merely because its current presentation is complex.
+
+Prefer:
+
+- better information hierarchy;
+- answer-first presentation;
+- progressive disclosure;
+- trustworthy automation of manual inputs;
+- clear state and feedback;
+- reduced duplicated actions;
+- advanced information remaining reachable.
+
+The Notion-inspired visual direction is a design influence, not a constraint that prevents better interaction patterns.
 
 ## Development Philosophy
 
-Inspect first. Plan second. Implement third. Verify fourth.
+Inspect first. Verify second. Plan third. Implement fourth. Validate before completion.
 
-Prefer the smallest correct change.
+Prefer the smallest **complete** correct change.
 
 Do not rewrite working systems without a demonstrated reason.
 
@@ -142,6 +318,8 @@ Do not modify unrelated files.
 
 Do not silently change product behavior.
 
+For an approved implementation Task, finish the full Task rather than stopping after an internal plan.
+
 ## Architecture
 
 Keep astronomical/domain calculations separate from UI.
@@ -150,41 +328,58 @@ Business logic must be deterministic and testable.
 
 Do not place non-trivial astronomy or capture calculations directly inside widgets.
 
-Use explicit units for astronomy calculations.
+Use explicit units for astronomy and equipment calculations.
 
-Be careful with UTC, local time, time zones, and DST.
+Be careful with UTC, local time, time zones, DST, and SessionNight semantics.
+
+Preserve Provider/ViewModel architecture unless an explicitly approved future decision changes it.
 
 ## Product Constraints
 
-The central product concept is the connection between:
+The central product capability is:
 
-available astronomical opportunity
+> **Fit a realistic Capture Plan into the user's real Imaging Opportunity and explain the result transparently.**
 
-and
+Important concepts include:
 
-realistic image-capture execution.
+- SessionNight;
+- Astronomical Darkness;
+- Target Visibility Window;
+- Environmental Conditions;
+- Imaging Opportunity;
+- Integration Time;
+- Acquisition Time;
+- Total Session Budget;
+- Fit / Feasibility;
+- explicit assumptions and reasons.
 
-Important concepts:
-
-- Astronomical Darkness
-
-- Target Visibility Window
-
-- Environmental Conditions
-
-- Imaging Opportunity
-
-- Integration Time
-
-- Acquisition Time
-
-- Total Session Budget
+The UI should translate these concepts into practical planning answers instead of exposing the raw domain model with equal visual weight everywhere.
 
 Do not treat arbitrary thresholds as universal scientific laws.
 
+Do not use a composite black-box Astro Score.
+
+Unknown data must remain unknown.
+
+Automation may reduce user input only when the retrieved or inferred value has adequate evidence and provenance.
+
+Execution and logging must preserve correct session state and data when used, but their final UX prominence is an explicit product decision, not something to change opportunistically.
+
+## Metadata and Equipment Import
+
+Do not assume the new production-ready metadata extraction foundation is already implemented until the refinement plan records it as completed and validated.
+
+Keep these concerns separate:
+
+`safe metadata extraction → typed/provenanced metadata → equipment/device candidate mapping → matching/enrichment → user confirmation → persistence`
+
+Do not silently write extracted metadata into Equipment or related entities before the mapping, confidence, provenance, conflict, and confirmation semantics have been explicitly designed and approved.
+
+Metadata-assisted actuals/reconciliation is a later workflow concern and must not be used to skip the metadata foundation or equipment-import decision stages.
+
 ## SNR
 
-sqrt(N) may be used as a relative statistical stacking-gain approximation.
+`sqrt(N)` may be used as a relative statistical stacking-gain approximation.
 
 Do not represent relative stacking gain as absolute physical SNR.
 
@@ -194,74 +389,59 @@ Document assumptions behind scientific calculations.
 
 ## Scope Control
 
-Do not implement:
+Do not implement unless explicitly approved through the active refinement scope:
 
 - planetarium engines;
-
 - 3D sky simulation;
-
-- telescope hardware control;
-
+- sky-map/FOV imagery or mosaic-planning scope that the project has rejected/deferred;
+- telescope or camera hardware control;
 - ASCOM/INDI integration;
-
 - social features;
-
 - authentication;
-
 - cloud infrastructure;
+- black-box recommendation/scoring engines;
+- web scraping;
+- deferred external datasets/APIs before their research/licence/provenance gate.
 
-unless explicitly requested.
+Do not interpret a manual dogfooding proposal or audit hypothesis as approved implementation automatically.
 
 ## Testing
 
-After modifying business logic:
+After modifying business logic or user-visible behavior:
 
 - run relevant unit tests;
+- run `flutter analyze --no-pub` where applicable;
+- run relevant widget/integration tests;
+- run `dart run tool/check.dart` before calling an implementation Task complete unless the active Task explicitly documents why the full gate cannot run.
 
-- run flutter analyze;
+Do not remove or weaken tests merely to make a Task pass.
 
-- run relevant widget/integration tests when applicable.
-
-Do not remove tests merely to make a task pass.
+A failing previously-green test is a regression until investigated.
 
 ## Git
 
-Keep changes small and reversible.
+Keep changes small, coherent, and reversible.
+
+Prefer one logical Task per commit/checkpoint unless the approved Task explicitly requires an internally staged sequence.
 
 Create meaningful checkpoints.
 
 Never use destructive commands such as:
 
-- git reset --hard
+- `git reset --hard`;
+- force push;
+- deleting unknown user files;
 
-- force push
-
-- deleting unknown user files
-
-without explicit approval.
+without explicit owner approval.
 
 ## Source of Truth
 
-Read these files before making major architectural decisions:
+The repository is the source of truth for implementation state.
 
-- docs/PROJECT_HANDOFF.md
+Before major architectural/scientific/product decisions, read the relevant documents listed under **Source-of-Truth Documents** above.
 
-- docs/ARCHITECTURE.md
+If documentation and implementation disagree, investigate instead of guessing.
 
-- docs/FEATURE_STATUS.md
+The code is the source of truth for the **actual implementation state**; design intent is preserved separately. Never rewrite historical design intent merely to match code. Record an `IMPLEMENTATION DEVIATION` where required.
 
-- docs/DATA_MODEL.md
-
-- docs/TECH_DEBT.md
-
-- docs/DECISIONS.md
-
-- docs/SCIENTIFIC_INTEGRITY.md
-
-- docs/PROJECT_AUDIT.md
-
-The repository is the source of truth for implementation.
-
-If documentation and implementation disagree, investigate and update the documentation rather than guessing.
-
-Design intent is preserved separately from the actual state: never rewrite intent to match the code; record an IMPLEMENTATION DEVIATION instead.
+After Stage 0 is committed, use `docs/refinement/PRODUCT_DIRECTION.md`, `docs/refinement/POST_ROADMAP_PLAN.md`, and `docs/refinement/PROGRESS.md` for post-roadmap product direction, strategic scope, and operational state.
