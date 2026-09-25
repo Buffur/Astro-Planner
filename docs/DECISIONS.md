@@ -88,6 +88,7 @@
 > **TASK 16.2 (2026-09-24, commit `09f16bf`) — OPEN: the signed bundle and the install test wait for the owner's upload key.** Release signing reads the upload key from the gitignored `android/key.properties` (Flutter's deployment guide); without it the release build falls back to the debug key with a Gradle warning (Play rejects debug-signed bundles). Decisions: R8 on for release (the Flutter plugin's default; mapping and native symbols in `BUNDLE-METADATA`); Play App Signing (Google keeps the app signing key, the owner's key is the upload key); `minSdk` 24 / `targetSdk` 36 from Flutter 3.47.4 (Play requires target 36 for new apps and updates from 31 Aug 2026); `versionCode` = pubspec's `+N`, raised for every upload. `tool/check_bundle.dart` checks a bundle before upload (16 KB ELF alignment, no debug sections, not debug-signed); `docs/RELEASE.md` is the procedure. **Verified:** `flutter build appbundle --release` built a 66.5 MB bundle — id `io.github.chacha12.astroplanner`, label Astro Planner, target 36, min 24, versionCode 1; 15 native libraries (arm64-v8a, armeabi-v7a, x86_64) all aligned to 16 KB or 64 KB, symbols stripped into `BUNDLE-METADATA`, R8 mapping present — debug-signed, since no upload key exists yet. Flutter's own symbol check fails only because SDK cmdline-tools are missing. **Correction:** TASKs 15.4/15.5 said the Android build had never run; in fact the owner built a debug APK on 2026-09-24 and the release bundle above now builds — the app has still not been installed or run on an Android device. Found: `flutter build ... --no-pub` after a debug build fails the release compile (the plugin registrant still lists the dev-only `integration_test`); release builds must run without `--no-pub`. Test baseline 889.
 > **TASK 16.3 (2026-09-24, commit `2521f42`) — OPEN until the policy URL is live.** PD-12 resolved (owner decisions, DECISIONS E.1): free with no ads or subscriptions (within Open-Meteo's free non-commercial tier); GPL-3.0 confirmed; the privacy policy on GitHub Pages (`docs/privacy/index.md` → https://chacha12.github.io/astro-planner/privacy/); place-name lookups opt-in. Code: `OptInReverseGeocoder` — nothing is sent to Nominatim unless the user switches "Look up place names" on (Settings, off by default, `PrivacyPreferencesRepository`); a saved site and the default position are never looked up; the identifying user agent `Astro Planner/<version> (+<project URL>; <id>)` now goes to the OSM tiles too (the tile policy asks for a contact); the About screen states GPL-3.0 with a source link, a privacy summary and the policy link. Terms re-checked 2026-09-24 and recorded in `docs/COMPLIANCE.md` with draft Play Data Safety answers and the permission review. Remaining gap (TD-031): a user who switches place names on still uses the built-in Nominatim endpoint (no remotely switchable endpoint). Owner steps before upload: publish the policy with the contact email filled in, make the repository public, fill in the Data Safety form. Test baseline 896.
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
+> **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -685,6 +686,32 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   the map picker stays optional (typed coordinates always work).
 - Terms as checked, the Data Safety draft and the permission review: `docs/COMPLIANCE.md`
   (date-stamped; re-check before each release). Not legal advice.
+
+### Stage 1 planning decisions: RD-03, RD-05 (interim), RD-17 (2026-09-25)
+
+- **Decided by:** the project owner, in chat, on 2026-09-25, during Stage 1 planning
+  (`docs/refinement/POST_ROADMAP_PLAN.md` §5, "Stage 1 — frozen Task sequence").
+- **RD-03 (RESOLVED).**
+  - SCI-05: the capture block's ISO/gain field gets the neutral label "ISO / gain (for your
+    records)" in Stage 1 (S1.8). The value stays descriptive only (SI-004), and
+    `SCIENTIFIC_INTEGRITY.md` Part C rule 6 is met. RG-11 (Stage 7) may still rework capture
+    parameters.
+  - SCI-04: the 5-minute grid's one-directional bias (crossings reported 0–5 min late,
+    within CALC-08's [−2, +7] min tolerance) is **documented as accepted** in SI-009 and
+    CALC-08 (S1.13). There is no UI note and no conservative edge rule. Changing either would
+    be a new scientific decision.
+- **RD-05 (interim only; the RD stays open for Stage 4).** New, Duplicate and opening a
+  session ask for confirmation before switching away from a draft with unsaved changes
+  (S1.6). Drafts are still not listed or cleaned up (TASK 11.3's decision stands), and what
+  New and Duplicate create is unchanged.
+- **RD-17 (included in Stage 1 as S1.14).** The CI workflow is pushed to
+  `github.com/Buffur/Astro-Planner` and its first run recorded. The push itself is confirmed
+  with the owner when S1.14 runs. RD-01 (the account behind the application id) is not
+  decided by this.
+- **`CLAUDE.md` device-use wording:** S1.15 may correct "never installed or run on an
+  Android device". Manual installs have happened, but none is recorded
+  (`POST_ROADMAP_PLAN.md` §1.3 item 2).
+- **Not taken in Stage 1:** RD-02 stays open (Stage 10 for `sqlite3_flutter_libs`).
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

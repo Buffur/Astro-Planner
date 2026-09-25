@@ -3,18 +3,18 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, at the close of Stage 0.
+> **Last updated:** 2026-09-25, at the end of Stage 1 planning (the Task sequence is frozen).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 0 — Refinement Baseline: Complete** (2026-09-25) |
-| Next Stage | **Stage 1 — Verified Fixes & Clean Baseline: Not started** |
-| Current approved Task | None |
-| Next approved Task | None. Stage 1 has no frozen Task sequence yet |
-| Code baseline | `main` @ `becae04` plus the Stage 0 documentation commit; no application code changed in Stage 0 |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
+| Next Stage | Stage 2 — Metadata Foundation: Not started |
+| Current approved Task | None in progress |
+| Next approved Task | **S1.1 — Open-Meteo user agent** (A3; ENG-03, RT-07). Approved by the frozen sequence; run it in a fresh session |
+| Code baseline | `main` @ `652ad80` (Stage 0) plus the Stage 1 planning documentation commit; no application code changed since `becae04` |
 | Quality gate at the baseline | **Green**, re-run 2026-09-25: Encoding pass; Format (307 files, 0 changed); Analyze (no issues); Test (896 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
@@ -25,7 +25,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | Not started | — | — | — |
+| 1 | Verified Fixes & Clean Baseline | In progress (sequence frozen) | 2026-09-25 | — | — |
 | 2 | Metadata Foundation | Not started | — | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
@@ -41,17 +41,19 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 
 | Stage | Task | Date | Commit | Result |
 | --- | --- | --- | --- | --- |
-| 0 | Stage 0 — Refinement Baseline (documentation only) | 2026-09-25 | The commit that added this file* | Created `PRODUCT_DIRECTION.md`, `POST_ROADMAP_PLAN.md` and `PROGRESS.md`; archived the Stage 0 prompt in `docs/refinement/prompts/`; committed the audit reports 01–08 and the owner's post-roadmap `CLAUDE.md` governance with them |
+| 0 | Stage 0 — Refinement Baseline (documentation only) | 2026-09-25 | `652ad80` | Created `PRODUCT_DIRECTION.md`, `POST_ROADMAP_PLAN.md` and `PROGRESS.md`; archived the Stage 0 prompt in `docs/refinement/prompts/`; committed the audit reports 01–08 and the owner's post-roadmap `CLAUDE.md` governance with them |
+| 1 | Stage 1 planning (documentation only): every A–F candidate re-verified at `652ad80` (none stale); RD-03 resolved; RD-05 interim decided; RD-17 included; the Task sequence S1.1–S1.15 frozen | 2026-09-25 | The Stage 1 planning commit* | `POST_ROADMAP_PLAN.md` §5 and §8; DECISIONS E.1 "Stage 1 planning decisions" |
 
 \* A file cannot contain its own commit hash. Find it with
-`git log --diff-filter=A --format="%h %s" -- docs/refinement/PROGRESS.md`. Stage 1's first
-update to this file records it here.
+`git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md` before S1.1's update, which
+records it here.
 
 ## Relevant commits
 
 - `becae04`: the last roadmap commit (TASK 16.3 documentation, 2026-09-24). Audits 01–07 were
   captured against it.
-- The Stage 0 commit: see the note under "Completed Tasks".
+- `652ad80`: Stage 0, the refinement baseline.
+- The Stage 1 planning commit: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -81,9 +83,9 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | --- | --- | --- | --- |
 | RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open |
 | RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
-| RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | Open |
+| RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
 | RD-04 | New-draft defaults and the example plan | 4 | Open |
-| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | Open |
+| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | Open; **interim decided** 2026-09-25: confirm before replacing (S1.6) |
 | RD-06 | The planner's section order; integrity text one tap away | 4 | Open |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | Open |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
@@ -95,7 +97,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open |
-| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open |
+| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **included in Stage 1** as S1.14 (the push is confirmed with the owner when it runs) |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
 `PRODUCT_DIRECTION.md` §2. Modes stay open as RG-06.
@@ -115,7 +117,7 @@ These block a release, not refinement.
 
 ## Known blockers
 
-- **Stage 1:** none. It can start once the owner supplies a Stage 1 planning prompt.
+- **Stage 1:** none for S1.1–S1.13 and S1.15. S1.14 needs the owner's go-ahead at the moment of the push.
 - **Stage 2:** owner-supplied real metadata samples, and RG-01.
 - **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
   rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
@@ -141,22 +143,26 @@ These block a release, not refinement.
       commit).
 
   The quality gate was green on the unchanged code.
-- **Stages 1–11:** not started.
+- **Stage 1 planning**, 2026-09-25: every A–F candidate was re-verified against `652ad80`, and
+  every mechanism still exists (none stale). Seven planning-time findings were placed into
+  Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
+  changed, so the Stage 0 gate result still applies.
+- **Stage 1 Tasks:** none run yet. **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Start **Stage 1 planning** in a fresh session, using a Stage 1 planning prompt from the owner.
-That session:
-- reads `CLAUDE.md`, `PRODUCT_DIRECTION.md`, `POST_ROADMAP_PLAN.md` (§1, §5 Stage 1, §6.1,
-  §8 and §9) and this file;
-- re-verifies each Stage 1 candidate item against the current code (the stale-finding rule,
-  §9.7);
-- raises RD-03 with the owner, and optionally RD-02, the RD-05 interim safeguard (A7) and
-  RD-17;
-- proposes an ordered, frozen Stage 1 Task sequence for the owner's approval.
+Run **S1.1 — Open-Meteo user agent** (`POST_ROADMAP_PLAN.md` §5, Stage 1 frozen sequence),
+preferably in a fresh session. The frozen sequence is the approval: no separate prompt
+file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
+a Task). That session:
+- reads `CLAUDE.md`, this file and the S1.1 entry, plus the files it names;
+- follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
+  STOP;
+- records the Stage 1 planning commit hash and its own commit here, then stops. It does not
+  start S1.2.
 
-No application code changes until the owner supplies an approved Stage 1 implementation Task
-prompt.
+Then S1.2 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
+fresh session (§9.8).
 
 ## Stage 0 notes
 

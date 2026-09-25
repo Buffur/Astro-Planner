@@ -10,6 +10,9 @@
 > **Verified against:** `main` @ `becae04`. The quality gate was re-run for Stage 0 on
 > 2026-09-25 and passed (§1.1).
 > **Read with:** `PRODUCT_DIRECTION.md` (what and why) and `PROGRESS.md` (where things stand).
+> **Updated 2026-09-25 (Stage 1 planning, verified at `652ad80`):** Stage 1's Task sequence is
+> frozen (§5, "Stage 1 — frozen Task sequence"); RD-03 resolved; the RD-05 interim decided;
+> RD-17 included in Stage 1. No other Stage changed.
 
 ## Contents
 
@@ -274,6 +277,290 @@ subject to RD-01 and the repository's visibility.
   resolved or materially changed (and reported), or moved with the owner's approval. The
   quality gate is green. The living registers are updated with the audit ID (§9.9). Stage 1
   validation passes in a fresh session. `PROGRESS.md` is updated.
+
+#### Stage 1 — frozen Task sequence (planning, 2026-09-25)
+
+Frozen by the Stage 1 planning session at `main` @ `652ad80`. Every A–F candidate above was
+re-verified against the code in that session (§9.7), and **each mechanism still exists as the
+audits describe it**; none was stale. Owner decisions taken in planning (DECISIONS E.1,
+"Stage 1 planning decisions"):
+- **RD-03:** SCI-05, the ISO/gain field gets a neutral label now (S1.8); SCI-04, documentation
+  only, with no UI and no formula change (S1.13).
+- **RD-05, interim only:** confirm before an unsaved draft is replaced (S1.6). The draft model
+  itself stays with Stage 4.
+- **RD-17:** included in Stage 1 (S1.14).
+- **`CLAUDE.md` wording** on device use: may be corrected in S1.15.
+- **Not taken:** RD-02 stays open (Stage 10 for the dependency). E4 and E5 (optional test
+  depth) are not Stage 1 Tasks; they stay optional, for Stage 11 or an owner request.
+
+Findings added in planning, and placed in the Tasks below:
+- `ARCHITECTURE.md:495,497` (the Part B external-services table) still gives the old user
+  agent and `com.astroplan.astroplan` (S1.15);
+- the comment on `resetUnsupportedDatabaseFile` still says it "creates a fresh v9 database"
+  (S1.5);
+- Tonight's "New session" button calls `newSession()` without `runWithFeedback`, against
+  CLAUDE.md trap 18 (S1.6);
+- opening a saved session from Sessions also replaces the current draft (`CurrentSession.adopt`),
+  just like New and Duplicate (S1.6);
+- a draft with no site takes the UTC date, and the default night itself moves on with the clock
+  without notifying anything, so nothing reloads at rollover (S1.3, S1.4);
+- in Drift 2.35.0, `LazyDatabase` keeps the opened `NativeDatabase` and the version refusal is
+  thrown from that database's own `ensureOpen`. So every Retry reruns the refused upgrade, and a
+  reset must close the database and rebuild the graph (answers 06 §D.5; S1.5);
+- "No window" with no target or no site is `FitState.noWindow`, the same state as a real
+  no-window night. Only the reason text differs (S1.9).
+
+**Common validation for every Task:**
+- targeted tests for the new behaviour, plus the affected regression tests;
+- `dart run tool/check.dart` green. The baseline is 896 unit and widget tests plus 2 E2E tests
+  on the host; the count only grows;
+- each acceptance criterion checked explicitly;
+- the living registers updated with the audit IDs (§9.9), with verification stamps refreshed;
+- a `PROGRESS.md` row;
+- one commit per Task, then STOP (never start the next Task automatically).
+
+**Constraints across the Stage:**
+- CLAUDE.md traps 2, 11–19 and 22;
+- `SessionPlanViewModel` is at 299 of its 300-line cap (ENG-16). S1.4, S1.6 and S1.12 must
+  stay under the cap, moving logic into the domain or a helper where needed, never raising the
+  cap;
+- no scientific formula changes;
+- no schema change is expected in any Task. If one proves necessary, stop and report (§9.5).
+
+| Task | Title | Items | Size | Depends on |
+| --- | --- | --- | --- | --- |
+| S1.1 | Open-Meteo user agent | A3 | S | — |
+| S1.2 | Seeding and preference failure paths | A2, E1, E3 | S | — |
+| S1.3 | Forecast freshness over time, resume and rollover | A1, E2 | M | — |
+| S1.4 | Night key without a site | A4 | S | — |
+| S1.5 | Unsupported-database recovery | A6 | M | — |
+| S1.6 | Confirm before replacing an unsaved draft (interim) | A7 | M | S1.4 |
+| S1.7 | One format for durations and numbers | A5, C2 | S–M | — |
+| S1.8 | Visible text defects and labels | C1, C4, B2, B7 (SCI-05) | S | S1.7 |
+| S1.9 | Fit status colours and the missing-input state | C3 | S | — |
+| S1.10 | Weather strip at 200 % text; forecast in the sweep | D1, D2 | S | — |
+| S1.11 | Tracker controls expose a tap action | D3 | S | — |
+| S1.12 | Save/Start against the autosave chain | F | S | S1.6 |
+| S1.13 | Scientific labels and documentation | B1, B3, B4, B6, B7 (SCI-04) | S | S1.10 |
+| S1.14 | Push CI and observe a first run | RD-17 | S | S1.1–S1.13 |
+| S1.15 | Documentation drift | B5, the new drift above | S | S1.14 |
+
+The order is the execution order. Tasks without a dependency may be reordered only with the
+owner's approval.
+
+##### S1.1 — Open-Meteo user agent (A3; ENG-03, RT-07)
+- **Objective:** every Open-Meteo request carries `AppIdentity.userAgent` (CLAUDE.md trap 22).
+- **Scope:** `open_meteo_weather_repository.dart` (and its client construction in `main.dart`
+  if needed); a `MockClient` test asserting the header.
+- **Out of scope:** other providers (they already send it); `docs/privacy` (no new data leaves
+  the device; the header is identification only). Re-check `docs/COMPLIANCE.md` and update its
+  Open-Meteo row if it describes the headers.
+- **Acceptance:** a test fails without the header; forecast parsing is unchanged; TD/F entries
+  cite ENG-03.
+
+##### S1.2 — Seeding and preference failure paths (A2, E1, E3; ENG-02, RT-02)
+- **Objective:** a catalog seed whose inserts fail is not recorded as applied and is retried on
+  the next launch; the privacy preferences repository has its failure-path test.
+- **Scope:** `CatalogSeeder`: tell the expected duplicate (the unique index, "already
+  present") apart from a `StorageFailure`, and do not store the version when any insert failed
+  for another reason (or fail the seed as a whole). Check `EquipmentSeeder` for the same
+  pattern and apply the same rule if it is present. Correct the `main.dart` comment if it
+  still over-claims. Add `SharedPrefsPrivacyPreferencesRepository` to `storage_failure_test.dart`.
+- **Out of scope:** wrapping seeding in one transaction (ENG-12 performance, Stage 10);
+  changing the catalog asset.
+- **Acceptance:** a test reproduces 04/P2 (every insert throws `StorageFailure`) and shows the
+  version unset and a second run inserting everything; a duplicate insert still counts as
+  success; an upgrade seed (`since` entries) follows the same rule; the E3 test fails on an
+  unguarded read or write.
+
+##### S1.3 — Forecast freshness over time, resume and rollover (A1, E2; ENG-01, SCI-01, RT-01)
+- **Objective:** the forecast's age class and "Updated N ago" follow the injected clock; the
+  forecast is reloaded on app resume when it is no longer current, and follows the default
+  night when it rolls over; a saved snapshot records the age at the time of saving (ADR-012 §6).
+- **Scope:** the presentation state for the forecast (`NightConditionsViewModel`,
+  `NightWeatherService` or the `NightWeather` model as the design requires); a testable
+  re-evaluation trigger driven by the `Clock` (for example a periodic tick in the presentation
+  layer, never `DateTime.now()` in the domain); an app-lifecycle resume hook; rollover
+  detection for the default night (the planner's night must notify when it changes); the age
+  passed to `SessionSnapshotBuilder` computed at save time.
+- **Out of scope:** new freshness thresholds (still `WeatherFreshness`); changing the cache
+  policy or the provider; the tracker's own tick.
+- **Constraints:** freshness only through `WeatherFreshness` (CLAUDE.md's weather rules; ADR-012
+  §6; no ad-hoc age check); memoization keys (trap 16): every cache that depends on the forecast state must
+  invalidate when the age class changes; an in-flight load for an old night is still dropped.
+- **Acceptance:** the 04/P1 probe steps become tests with a fake clock: 5 h after load the class
+  is `aging` and the text is updated without any input change; after resume past a threshold a
+  reload happens; after the night rolls over, the forecast covers the new night; a snapshot
+  saved 5 h after load records `aging`, not `current`; no periodic work runs once the
+  ViewModel is disposed.
+
+##### S1.4 — Night key without a site (A4; ENG-05, SCI-11, RT-06)
+- **Objective:** without a site, the draft's night key is the evening date in the device's zone
+  under the ADR-007 rules, never the UTC calendar date (trap 2).
+- **Scope:** `SessionPlanViewModel.today` and the `_plan()` fallback, through `SessionNightResolver`
+  or `CalendarDate` helpers with the device zone (`DeviceTimeZone` / `IanaTimeContext`); the
+  "a past night rolls forward" comparison in `load()` uses the same date.
+- **Out of scope:** changing the no-site state (ADR-007 §9: no astronomy without a site).
+- **Acceptance:** the 04/P4 case (01:30 UTC, device in America/Los_Angeles, no site) stores
+  2026-09-21; a site still overrides it; the VM stays under its line cap.
+
+##### S1.5 — Unsupported-database recovery (A6; TASK 3.2, RT-03, TD-047)
+- **Objective:** a database below the floor or newer than the app shows ADR-008's explanation
+  (§2, §9) instead of a generic error, and offers a confirmed reset that keeps the old file.
+- **Scope:** the startup path (`main.dart`, `StartupViewModel`, the bootstrap error view on
+  Tonight and the planner) recognises `UnsupportedSchemaVersionException` and says which case it
+  is (newer: "made by a newer version of the app", with installing that version as the first
+  remedy; older: below the supported floor). A reset after explicit confirmation calls
+  `resetUnsupportedDatabaseFile` (the file is renamed to `.v<N>.bak`, never deleted), closes the
+  open database, and rebuilds the app graph on a fresh file. Correct the function's comment
+  ("fresh v9").
+- **Out of scope:** exporting or migrating the refused file; a downgrade migration.
+- **Constraints:** without confirmation nothing is touched (ADR-008); errors go through
+  `AppLog`; a failed rename is reported, never swallowed (trap 15).
+- **Acceptance:** host tests with a `user_version` 18 file and a below-floor file: the specific
+  message; Cancel leaves the file byte-for-byte unchanged; Confirm leaves a `.bak` with the
+  original bytes and a working empty database, with seeding done; a Retry that cannot succeed
+  is no longer the only action; TD-047 resolved with the commit.
+
+##### S1.6 — Confirm before replacing an unsaved draft (A7, interim; RT-05, UX-12, ENG-09 UX half)
+- **Objective:** an action that switches the planner away from a draft with user changes asks
+  first, so a plan is never silently made unreachable (IA_WIREFRAMES §3).
+- **Scope:** New (the planner's "+" and Tonight's "New session"), Duplicate, and opening a
+  session from Sessions. When the current session is a draft that differs from an untouched
+  new draft (the example plan, never edited), or a saved plan with unsaved edits, show a
+  confirmation ("Discard unsaved changes?" with Cancel, which returns to the planner where Save
+  is, and Discard). The detection lives in the domain or the ViewModel, not the widget. Tonight's
+  "New session" goes through `runWithFeedback` (trap 18).
+- **Out of scope** (RD-05, Stage 4): listing, deleting or cleaning up drafts; changing what New
+  or Duplicate create; schema changes. A discarded draft stays stored as today.
+- **Acceptance:** widget tests: an untouched draft, no prompt; an edited draft, a prompt;
+  Cancel changes nothing; Discard behaves as before; the same for Duplicate and Open; the E2E
+  suite is updated if its flow meets the prompt (trap 19); the accessibility sweep covers the
+  dialog; UX-12/RT-05 are recorded as mitigated (interim), still open for RD-05.
+
+##### S1.7 — One format for durations and numbers (A5, C2; ENG-06, UX-19)
+- **Objective:** a quantity reads the same wherever it appears.
+- **Scope:** one shared duration formatter (one rounding rule, documented), used by the
+  capture budget, the fit reason, the opportunity text and the session detail; remove the dead
+  `totalIntegrationTime` (and its harness getter); exposure as "60 s" everywhere; RA/Dec in the
+  session detail in the same h:m:s / d:m:s form as the target editor; the typographic minus in
+  the session detail and Settings; percentages in one form ("3 % lit" style).
+- **Out of scope:** the chart's 24-hour axis (Stage 6, UX-08); vocabulary (RD-14).
+- **Acceptance:** unit tests for the formatter's boundaries (59 s, 59.5 min, whole hours); no
+  second duration formatter remains in `lib/presentation` (grep); the widget tests assert the
+  new strings; E2E keys unchanged.
+
+##### S1.8 — Visible text defects and labels (C1, C4, B2, B7/SCI-05; UX-20, UX-18 part, SCI-06)
+- **Objective:** remove the trust-eroding text defects.
+- **Scope:**
+  - the session detail's focal ratio formatted like the rig's (no raw double);
+  - "Notes: none" not doubled;
+  - Settings no longer says optional overheads are not applied;
+  - the candidates footer describes what a tap does (sets the plan's target) without naming a
+    "Home";
+  - the add-block helper wraps instead of truncating;
+  - the sky card's text consistent with its two existing Bortle entry points (no entry point
+    removed; Stage 6/7);
+  - the session detail's noon-to-noon night key no longer labelled "Window" (C4);
+  - the candidates list says "% of the frame's short side" through `CapabilityText` (SCI-06);
+  - the ISO/gain field labelled "ISO / gain (for your records)", its helper still "recorded
+    only" (RD-03; SCIENTIFIC_INTEGRITY Part C rule 6; SI-004 note).
+- **Out of scope:** rig/equipment and Sessions/Logbook naming (RD-14); the Bortle entry-point
+  structure.
+- **Acceptance:** a widget test per string; `SCIENTIFIC_INTEGRITY.md` records SCI-05 and SCI-06
+  resolved; no remaining "sensitivity" wording for ISO or gain in `lib/presentation`.
+
+##### S1.9 — Fit status colours and the missing-input state (C3; UX-16, UX-15(2))
+- **Objective:** "Tight" is at least as prominent as "Fits" and reads as a caution; a fit that
+  is missing an input (no site, no target) is neutral, not an error. A real no-window night stays
+  an error.
+- **Scope:** `FitText.color` and the colours it reads (a token in all three palettes if one is
+  needed, trap 12); a way to tell a missing input from a real no-window (a `FitState` value or an
+  equivalent flag from `CaptureAnalysisViewModel`, the smallest correct change), used by Tonight
+  and the planner.
+- **Out of scope:** the systematic status tokens (Stage 5); wording of the states.
+- **Acceptance:** tests on the state for no site, no target and a real no-window; the colours
+  differ as required in light and dark; field tokens stay red or black (tested); the
+  accessibility sweep's contrast checks pass.
+
+##### S1.10 — Weather strip at 200 % text; a forecast in the sweep (D1, D2; UX-31, UX-32)
+- **Objective:** the forecast card has no overflow at 200 % text, and the accessibility sweep
+  renders a forecast so it would catch one.
+- **Scope:** `weather_forecast_widget.dart` (the fixed 130 px strip; the range label running into
+  its value); the sweep's fake weather returns a full synthetic forecast for the planner and
+  Tonight.
+- **Out of scope:** redesigning the weather card (Stage 6, RD-06/UX-06).
+- **Acceptance:** the sweep fails on the current code (demonstrated) and passes after the fix in
+  the light, dark and field themes at 100 % and 200 %; no text in a fixed-height box (trap 17).
+
+##### S1.11 — Tracker controls expose a tap action (D3; UX-28)
+- **Objective:** each tracker control is activatable by accessibility services.
+- **Scope:** a host semantics test asserting a tap action and a label on each of the seven
+  controls; if it confirms the defect, fix the `Semantics` wrappers in `execution_screen.dart`.
+- **Out of scope:** TalkBack on a device (Stage 11).
+- **Acceptance:** the test fails before and passes after (or, if the mechanism does not
+  reproduce, it is kept as a regression test and the finding is reported as not reproduced);
+  existing label tests still pass; E2E keys unchanged.
+
+##### S1.12 — Save/Start against the autosave chain (F; ENG-08, RT-04)
+- **Objective:** decide ENG-08 with a UI-driven test, and fix it only if it reproduces.
+- **Scope:** a widget test that edits the plan and taps Save (and Start) while the edit's
+  autosave is pending, with no injected delay in the repository. If the older plan wins, queue
+  Save and Start on the write chain, capturing the plan when their turn comes
+  (`CurrentSession`, `SessionPlanViewModel`).
+- **Out of scope:** a busy state on the Save button (Stage 5/6), unless the fix requires it.
+- **Acceptance:** either the test shows no reproduction and is kept as a regression test, with
+  ENG-08 recorded as not reproducible through the UI, or it fails before and passes after the
+  fix; the lifecycle matrix and E2E suite still pass.
+
+##### S1.13 — Scientific labels and documentation (B1, B3, B4, B6, B7/SCI-04)
+- **Objective:** the surviving scientific wording and documentation issues are closed.
+- **Scope:**
+  - B1 (SCI-02): precipitation probability labelled as covering the preceding hour, and CALC-32
+    corrected;
+  - B3 (SCI-03): `SCIENTIFIC_INTEGRITY.md` states that the rise/set events (h₀) and the "Moon
+    up" gate (topocentric altitude > 0°) differ by 5–10 min, and why; UI wording only if a
+    displayed text claims they coincide;
+  - B4 (SCI-09): night-level Moon illumination labelled as the value at midnight;
+  - B6: sources cited in the tests of CALC-01, 02, 03 and 06;
+  - SCI-04 (RD-03): the direction of the grid bias documented in SI-009 and CALC-08 as
+    accepted.
+- **Out of scope:** any formula change; a conservative edge rule; a UI resolution note.
+- **Acceptance:** the SI and CALC entries are updated; the widget tests assert the labels; no
+  numeric test changes.
+
+##### S1.14 — Push CI and observe a first run (RD-17; TASK 1.3, F-49)
+- **Objective:** the quality-gate workflow runs on the remote, and its first result is recorded.
+- **Scope:** confirm with the owner at execution time before any push (pushing publishes the
+  history to `github.com/Buffur/Astro-Planner`), then push `main` and observe the workflow run.
+  If the remote environment fails for an environment reason (for example the E2E step on the
+  runner), fix the workflow within `.github/workflows/ci.yml` and `tool/check.dart` only.
+- **Out of scope:** RD-01 (the account behind the app id); repository visibility; branch
+  protection.
+- **Acceptance:** a green run, with its URL and date recorded in F-49, TD-046 and `PROGRESS.md`,
+  or a recorded failure with a follow-up Task proposal.
+
+##### S1.15 — Documentation drift (B5; SCI-10 docs)
+- **Objective:** the living documents match the code at the end of Stage 1.
+- **Scope:**
+  - `optical_calculator.dart` doc comments (NPF "not shown in the UI"; √N "signal
+    improvement");
+  - SI section statuses against the index (SI-001, 002, 003, 008, 009);
+  - CALC-07 (the removed function);
+  - CALC-17 and CALC-28 ("not surfaced / not used");
+  - DEV-P2 ("SNR" appears only in negating comments);
+  - F-49 and TD-046 (a remote exists; the S1.14 result);
+  - the `FEATURE_STATUS.md` summary rows against their sections (F-46, F-49), and F-50's app
+    id;
+  - `TEST_PLAN.md` L3's app id;
+  - `ARCHITECTURE.md:495,497`;
+  - `PROJECT_HANDOFF.md`'s header and §0, with a pointer to `docs/refinement/`;
+  - the `CLAUDE.md` device-use wording ("never installed or run": manual installs have
+    happened but none is recorded; owner-approved in planning).
+- **Out of scope:** `ROADMAP.md`, `MASTER_ROADMAP.md`, `docs/audit/*`, `PROJECT_AUDIT.md` and
+  `docs/archive/` (historical, §9.9).
+- **Acceptance:** each listed item is corrected or recorded as intentionally unchanged; the
+  encoding check passes; no application behaviour changes.
 
 ### Stage 2 — Metadata Foundation
 
@@ -663,9 +950,9 @@ any implementation Task is created.
 | --- | --- | --- | --- | --- |
 | RD-01 | Which GitHub account carries the project identity: `chacha12` (the application id `io.github.chacha12.astroplanner`, the `AppIdentity` source and policy URLs, the user agent, the git user) or `Buffur` (the remote `github.com/Buffur/Astro-Planner`; the owner's links in 08 §23)? | OD-07 asked for confirmation before the first upload; the application id is permanent once published | Before any store upload; before Stage 9's About and links | Upload; privacy-policy URL; About links; the CI remote |
 | RD-02 | The TASK 0.3 holdovers: the Google ADK skill and `skills-lock.json`; retaining `docs/archive/`; `sqlite3_flutter_libs ^0.6.0+eol` | 01 TASK 0.3; `TECH_DEBT.md`'s cleanup list | 1 (hygiene); 10 (the dependency, with a device check) | — |
-| RD-03 | Wording rulings: the ISO/gain "Sensitivity setting" label (SCI-05); a resolution caveat for times on the 5-minute grid (SCI-04) | 07 §6 item 8 | 1 | B7 |
+| RD-03 | **RESOLVED 2026-09-25 (Stage 1 planning; DECISIONS E.1).** SCI-05: neutral label "ISO / gain (for your records)" now (S1.8). SCI-04: documentation only (S1.13). *(Was: wording rulings: the ISO/gain "Sensitivity setting" label (SCI-05); a resolution caveat for times on the 5-minute grid (SCI-04).)* | 07 §6 item 8 | 1 | B7 |
 | RD-04 | New-draft defaults: should a new draft pre-select M42 and the first rig, and how are defaults and the "Example plan" labelled or offered? 08 §14 asks whether the example plan adds value | ENG-15, SCI-12, UX-24; TASK 4.4 | 4 | Stage 6 |
-| RD-05 | Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014 | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
+| RD-05 | Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4 | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
 | RD-06 | May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
 | RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan; Stage 7 |
@@ -677,7 +964,7 @@ any implementation Task is created.
 | RD-14 | Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | When and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3 | PD-06; `FeatureScope` | 2 | — |
-| RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility | 06 §2; 07 §9 | 1 (optional) or 11 | — |
+| RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; the push itself is confirmed with the owner when S1.14 runs | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 
 **Answered in part by Stage 0:** the direction part of 07 §6 item 11 (the primary 1.0 user),
 in `PRODUCT_DIRECTION.md` §2. The focus stays on manual and semi-automated imagers, and less
