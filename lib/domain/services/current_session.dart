@@ -1,6 +1,7 @@
 import '../../core/diagnostics/app_log.dart';
 import '../models/session.dart';
 import '../models/session_snapshot.dart';
+import '../repositories/planner_state_repository.dart';
 import '../repositories/session_repository.dart';
 import 'example_capture_plan.dart';
 
@@ -10,9 +11,13 @@ import 'example_capture_plan.dart';
 /// (completed, abandoned, in progress, legacy) is never written — the plan
 /// then goes into a new draft.
 class CurrentSession {
-  CurrentSession(this._repository);
+  CurrentSession(this._repository, [this._marks]);
 
   final SessionRepository _repository;
+
+  /// Where the id of the session with unsaved edits is remembered across a
+  /// restart (S1.V3); null in tests that do not need it.
+  final PlannerStateRepository? _marks;
   Session? _session;
   Future<void> _chain = Future.value();
   Object? _writeFailure;
@@ -23,7 +28,8 @@ class CurrentSession {
   /// True when the current session holds plan changes the user made since
   /// it was created, opened or saved (S1.6; interim for RD-05): replacing it
   /// would leave them in a draft no screen lists. A resumed draft counts as
-  /// edited when it is not the untouched example plan, or is a saved plan
+  /// edited when it was remembered as edited (S1.V3: any edit — target, rig,
+  /// night or blocks), is not the untouched example plan, or is a saved plan
   /// edited since.
   bool get hasUnsavedChanges => _edited;
 
@@ -41,11 +47,33 @@ class CurrentSession {
   /// The most recent open session, or null when there is none.
   Future<Session?> resume() async {
     final s = _session = await _repository.mostRecentOpen();
+    final marked = await _readMark();
     _edited =
         s != null &&
         s.status == SessionStatus.draft &&
-        (s.plannedAtUtc != null || !ExampleCapturePlan.matches(s.blocks));
+        (marked == s.id ||
+            s.plannedAtUtc != null ||
+            !ExampleCapturePlan.matches(s.blocks));
     return s;
+  }
+
+  Future<int?> _readMark() async {
+    try {
+      return await _marks?.getEditedSessionId();
+    } catch (e) {
+      AppLog.warning('session', 'Unsaved-changes mark unreadable', error: e);
+      return null;
+    }
+  }
+
+  /// Remembers [id] as the session with unsaved edits, or none. A failure
+  /// is logged: the in-memory flag still protects this run.
+  Future<void> _mark(int? id) async {
+    try {
+      await _marks?.setEditedSessionId(id);
+    } catch (e) {
+      AppLog.warning('session', 'Unsaved-changes mark not saved', error: e);
+    }
   }
 
   /// Makes a new draft for [plan] the current session.
@@ -60,7 +88,9 @@ class CurrentSession {
     final was = _edited;
     _edited = false;
     try {
-      return await run();
+      final result = await run();
+      if (!_edited) await _mark(null);
+      return result;
     } catch (_) {
       _edited = was || _edited;
       rethrow;
@@ -90,6 +120,9 @@ class CurrentSession {
       } catch (e, s) {
         failure = e;
         AppLog.error('session', 'Autosave failed', error: e, stackTrace: s);
+      }
+      if (edit && _edited) {
+        if (_session case final written?) await _mark(written.id);
       }
       if (failure == _writeFailure) return;
       _writeFailure = failure;

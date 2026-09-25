@@ -120,6 +120,50 @@ void main() {
       expect(vm.plan.hasUnsavedChanges, isFalse);
     });
 
+    // S1.V3 (TD-061): every kind of plan edit stays protected after a
+    // restart, not only block edits or saved plans.
+    for (final kind in ['target', 'rig', 'night', 'blocks']) {
+      test('a $kind-only edit is still unsaved after a restart', () async {
+        final vm = await start();
+        final original = vm.activeSessionId;
+        switch (kind) {
+          case 'target':
+            final targets = await DriftTargetRepository(db).getAllTargets();
+            await vm.setTarget(
+              targets.firstWhere((t) => t.id != vm.selectedTarget!.id),
+            );
+          case 'rig':
+            final rigs = DriftEquipmentRepository(db);
+            final id = await rigs.insertEquipment(
+              EquipmentSeeder.defaults.first,
+            );
+            await vm.setEquipment((await rigs.getEquipmentById(id))!);
+          case 'night':
+            await vm.setEveningDate(CalendarDate(2026, 11, 12));
+          default:
+            await vm.addCaptureBlock(_light(3));
+        }
+        await vm.plan.idle;
+        expect(vm.plan.hasUnsavedChanges, isTrue);
+
+        final restarted = await start();
+        expect(restarted.activeSessionId, original);
+        expect(restarted.plan.hasUnsavedChanges, isTrue);
+      });
+    }
+
+    test('after Save, a restart has nothing unsaved; an untouched draft '
+        'never has', () async {
+      final vm = await start();
+      await vm.setEveningDate(CalendarDate(2026, 11, 12));
+      await vm.saveSession();
+      expect((await start()).plan.hasUnsavedChanges, isFalse);
+
+      await vm.newSession();
+      await vm.plan.idle;
+      expect((await start()).plan.hasUnsavedChanges, isFalse);
+    });
+
     test('a site change is not an edit of the plan', () async {
       final vm = await start();
       await vm.site.setLocation(40.0, -3.7);
@@ -144,6 +188,7 @@ void main() {
       await vm.addCaptureBlock(_light(3));
       await expectLater(vm.saveSession(), throwsA(isA<StateError>()));
       expect(vm.plan.hasUnsavedChanges, isTrue);
+      expect((await start()).plan.hasUnsavedChanges, isTrue, reason: 'S1.V3');
     });
   });
 

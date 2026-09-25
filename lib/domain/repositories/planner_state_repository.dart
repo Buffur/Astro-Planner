@@ -34,4 +34,10 @@ abstract class PlannerStateRepository {
   /// they moved into a draft session (TASK 11.4, ADR-014 §6). The site
   /// selection and the transient position stay (app-level, TASK 7.1).
   Future<void> clearPlan();
+
+  /// The session holding plan edits that are not saved, or null (S1.V3):
+  /// keeps the confirmation before New, Duplicate or Open (S1.6) across a
+  /// restart. Local only.
+  Future<int?> getEditedSessionId();
+  Future<void> setEditedSessionId(int? id);
 }

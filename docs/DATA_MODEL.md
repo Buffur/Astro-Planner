@@ -280,6 +280,7 @@ allows reuse.
 | `captureBlocks` | JSON string | `SharedPrefsPlannerStateRepository` (from `_saveBlocks`) | The active capture plan. **Versioned since TASK 5.3:** `{"version": 2, "blocks": [...]}` with `gainKind`/`gainValue`/`calibrationPolicy`; the pre-5.3 bare list (v1, free-text `gainIso`) is still read, its gain as kind unknown. Moves to the database in TASK 11.4 |
 | `targetId` | int | `SharedPrefsPlannerStateRepository` (from `setTarget`) | Selected target |
 | `equipmentId` | int | `SharedPrefsPlannerStateRepository` (from `setEquipment`) | Selected rig (`optical_rigs.id`) |
+| `editedSessionId` | int | `SharedPrefsPlannerStateRepository` (from `CurrentSession`, S1.V3) | The session holding plan edits not yet saved, so New/Duplicate/Open still ask after a restart; removed after a successful Save, Start, New or Open. Local only |
 | `minAltitude` | double | `SharedPrefsPlanningPreferencesRepository` | Minimum usable altitude (deg); Settings screen; clamped to [5, 60] on load (TASK 5.2) |
 | `dewPointThreshold` | double | `SharedPrefsPlanningPreferencesRepository` | Dew margin (°C); Settings screen; clamped to [0, 10] |
 | `npfK` | double | `SharedPrefsPlanningPreferencesRepository` | NPF k (star-trail tolerance), Settings screen; clamped to [1, 3], default 1 *(TASK 8.6)* |

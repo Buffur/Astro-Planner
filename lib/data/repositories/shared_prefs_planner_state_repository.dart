@@ -58,6 +58,22 @@ class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
         await p.setDouble(_transientLon, longitude);
       });
 
+  static const _editedSessionId = 'editedSessionId';
+
+  @override
+  Future<int?> getEditedSessionId() =>
+      guardStorage(_read, () async => (await _prefs).getInt(_editedSessionId));
+
+  @override
+  Future<void> setEditedSessionId(int? id) => guardStorage(_save, () async {
+    final p = await _prefs;
+    if (id == null) {
+      await p.remove(_editedSessionId);
+    } else {
+      await p.setInt(_editedSessionId, id);
+    }
+  });
+
   @override
   Future<int?> getSelectedTargetId() =>
       guardStorage(_read, () async => (await _prefs).getInt(_targetId));

@@ -37,7 +37,7 @@ class SessionPlanViewModel extends ChangeNotifier {
        _equipment = equipmentRepository,
        _current = sessionRepository == null
            ? null
-           : CurrentSession(sessionRepository),
+           : CurrentSession(sessionRepository, _stateRepository),
        _resolver = SessionReferenceResolver(
          targetRepository,
          equipmentRepository,
