@@ -553,7 +553,9 @@ owner's approval.
   - the `FEATURE_STATUS.md` summary rows against their sections (F-46, F-49), and F-50's app
     id;
   - `TEST_PLAN.md` L3's app id;
-  - `ARCHITECTURE.md:495,497`;
+  - `ARCHITECTURE.md:494,495,497` (494: the Open-Meteo row still names `icon_seamless` and
+    `timezone=auto`; found in S1.1), and F-29's body (it still describes the removed legacy
+    weather path);
   - `PROJECT_HANDOFF.md`'s header and §0, with a pointer to `docs/refinement/`;
   - the `CLAUDE.md` device-use wording ("never installed or run": manual installs have
     happened but none is recorded; owner-approved in planning).

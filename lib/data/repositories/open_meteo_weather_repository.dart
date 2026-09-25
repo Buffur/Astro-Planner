@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../../core/config/app_identity.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/weather_snapshot.dart';
 import '../../domain/repositories/weather_repository.dart';
@@ -56,8 +57,9 @@ class OpenMeteoWeatherRepository implements WeatherRepository {
       'end_hour': _hour(last),
     });
     try {
+      // Every third-party request identifies the app (TASK 16.3; S1.1).
       final response = await _client
-          .get(uri)
+          .get(uri, headers: {'User-Agent': AppIdentity.userAgent})
           .timeout(const Duration(seconds: 10));
       final Object? body;
       try {

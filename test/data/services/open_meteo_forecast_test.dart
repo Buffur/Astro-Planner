@@ -6,6 +6,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:astroplan/core/config/app_identity.dart';
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/repositories/open_meteo_weather_repository.dart';
 import 'package:astroplan/data/services/open_meteo_forecast_parser.dart';
@@ -170,6 +171,24 @@ void main() {
         containsAll(['cloud_cover_high', 'visibility', 'wind_gusts_10m']),
       );
       expect(_snapshot(f).fetchedAtUtc, clock.nowUtc());
+    });
+
+    test('the request carries the app user agent (S1.1, ENG-03)', () async {
+      late http.BaseRequest request;
+      final repo = OpenMeteoWeatherRepository(
+        clock: clock,
+        client: MockClient((r) async {
+          request = r;
+          return http.Response(fixture, 200);
+        }),
+      );
+      await repo.fetchSnapshot(
+        latitude: 46.05,
+        longitude: 14.51,
+        startUtc: DateTime.utc(2026, 9, 24, 16),
+        endUtc: DateTime.utc(2026, 9, 25, 7),
+      );
+      expect(request.headers['User-Agent'], AppIdentity.userAgent);
     });
 
     test('the end is capped at the 16-day horizon', () async {
