@@ -144,8 +144,7 @@ class SessionPlanViewModel extends ChangeNotifier {
     _isExample = ExampleCapturePlan.matches(_blocks);
   }
 
-  /// The plan as shown now (ADR-014 §2); without a site the night key is
-  /// the picked date, else the default position's default night (S1.4).
+  /// The plan as shown now (ADR-014 §2); its night key is [_night]'s (S1.4).
   SessionPlan _plan() => SessionPlan(
     eveningDate: _night.eveningDate,
     timeZoneId: _site.displayZoneId,
@@ -236,10 +235,11 @@ class SessionPlanViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Opens [session] (TASK 11.4): its site, night, target, rig and blocks.
-  /// A draft or planned session becomes current; a frozen one is copied
-  /// into a new draft on its night, never modified.
+  /// Opens [session] (TASK 11.4): a draft or planned one becomes current, a
+  /// frozen one is copied into a new draft; the current, editable one is left
+  /// as it is live — a caller's copy may be stale (S1.V4, TD-062).
   Future<void> openSession(Session session) async {
+    if (session.id == activeSessionId && session.planEditable) return;
     _loaded = false; // switching the site here is opening, not an edit
     if (session.siteId case final id?) await _site.selectSite(id);
     _pickedEveningDate =

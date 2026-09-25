@@ -11,12 +11,12 @@
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (independent validation failed on S1.5/S1.6 paths; S1.14 deferred) |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (the independent validation's findings TD-059–TD-062 and the same-session review's V1–V3 are fixed or recorded; a repeat independent validation is required before closing) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.V4 — Reopening the current session keeps its live plan** (TD-062). S1.V1–S1.V3 done. The owner approved the remaining fixes (2026-09-25): S1.V1 → S1.V2 → S1.V3 → S1.V4, one commit each, then a repeat independent validation |
+| Next approved Task | None. S1.V1–S1.V4 done. Next: **repeat independent Stage 1 validation** in a fresh session. The owner approved the remaining fixes (2026-09-25): S1.V1 → S1.V2 → S1.V3 → S1.V4, one commit each, then a repeat independent validation |
 | Code baseline | `4e653fb` (S1.15); `723fd44` and this validation change documentation/evidence only; not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S1.V3, 2026-09-25: Encoding, Format, Analyze pass; Test (962 passed); E2E on the host (2 passed). The retained probe for TD-062 still fails until S1.V4 |
+| Quality gate at the baseline | **Green** after S1.V4, 2026-09-25: Encoding, Format, Analyze pass; Test (963 passed); E2E on the host (2 passed). Every probe of the retained patch now has a passing regression test in the suite |
 | Schema | v17 |
 
 ## Stage status
@@ -63,7 +63,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.16 — Commit hashes in the registers (V1) and S1.17 — the field theme in the dialog's accessibility check (V2); V3 recorded under RD-05 | 2026-09-25 | `953c0d1` | Owner: "apply fixes for the remaining items to complete Stage 1". 37 `S1.x` stamps in `ARCHITECTURE.md`, `DATA_MODEL.md`, `FEATURE_STATUS.md` and `SCIENTIFIC_INTEGRITY.md`, TD-047, TD-057 and TD-058 cite their commits; the "Discard unsaved changes?" dialog is checked in the light, dark and field themes (contrast not in field, as in the sweep); V3 added to RD-05 (`POST_ROADMAP_PLAN.md` §8). Gate green, 949 + 2 E2E |
 | 1 | S1.V1 — Recognize refusal through the production database connection (TD-059) | 2026-09-25 | `3067658` | `refusedSchemaVersion` unwraps `DriftRemoteException` (its `remoteCause` is the typed refusal on the same-group background isolate); the connection builder is shared (`openDatabaseConnection`). 5 tests through that connection; the refusal tests failed before the fix (the exception escaped). Gate green, 954 + 2 E2E |
 | 1 | S1.V2 — Seed the replacement database after a confirmed reset (TD-060) | 2026-09-25 | `b34c9ad` | `confirmDatabaseReset` (refuse newer, forget only the catalog seed marker, keep the old file) replaces the bare rename in `main.dart`. 3 tests through the production connection, with and without the marker, other preferences kept; with the S1.5 behaviour the with-marker test gave 0 targets instead of 164. Stale id-holding preferences after a reset left with TD-056/ENG-14. Gate green, 957 + 2 E2E |
-| 1 | S1.V3 — Keep the unsaved-plan safeguard across a restart (TD-061) | 2026-09-25 | The S1.V3 commit* | `CurrentSession` remembers the edited session id through `PlannerStateRepository` (preference `editedSessionId`; no schema change; a site change still not an edit). 5 new tests plus a restart check on the failed-Save test: target-, rig-, night- and block-only edits protected after a restart (target, rig and night failed before), Save clears it, an untouched draft never asks. Cancel's navigation clarified (closes the dialog, stays put). Gate green, 962 + 2 E2E |
+| 1 | S1.V3 — Keep the unsaved-plan safeguard across a restart (TD-061) | 2026-09-25 | `ed628f8` | `CurrentSession` remembers the edited session id through `PlannerStateRepository` (preference `editedSessionId`; no schema change; a site change still not an edit). 5 new tests plus a restart check on the failed-Save test: target-, rig-, night- and block-only edits protected after a restart (target, rig and night failed before), Save clears it, an untouched draft never asks. Cancel's navigation clarified (closes the dialog, stays put). Gate green, 962 + 2 E2E |
+| 1 | S1.V4 — Reopening the current session keeps its live plan (TD-062) | 2026-09-25 | The S1.V4 commit* | `openSession` returns early for the current, editable session. The validation's probe as a UI test through the detail page, a Save and a restart (20 instead of 7 frames before the fix). A first version also skipped frozen sessions; two existing tests caught it and the guard was narrowed to editable sessions. Gate green, 963 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -245,23 +246,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-The owner approved the remaining Stage 1 fixes (2026-09-25: "apply fixes for the remaining
-items to complete Stage 1"). S1.16, S1.17 and the V3 decision are done. Next, in order, one
-commit each, as defined in `STAGE_1_VALIDATION.md`:
-1. **S1.V1** — recognize refusal through the production connection (TD-059);
-2. **S1.V2** — seed the replacement database after a confirmed reset (TD-060);
-3. **S1.V3** — keep the unsaved-plan safeguard across a restart (TD-061), through the
-   existing persistence abstractions; stop and report if it needs a schema or product
-   decision;
-4. **S1.V4** — reopening the current session keeps its live plan (TD-062).
+Repeat **independent** Stage 1 validation in a fresh session (§9.8), at the current `main`.
+It should re-check the fixes S1.16, S1.17 and S1.V1–S1.V4 against `STAGE_1_VALIDATION.md`'s
+acceptance (each of its six probes now has a passing regression test: background v7/v18 in
+`unsupported_database_test.dart`, the retained seed marker there, target/rig/night/block-only
+restarts in `planner_draft_session_test.dart`, the same-session reopen in
+`unsaved_plan_guard_test.dart`), and try again to disprove the rest of the Stage. The retained
+probe patch targets `4e653fb`'s test files and may no longer apply as it is.
 
-Each Task's acceptance includes turning its probe from the retained patch
-(`evidence/STAGE_1_VALIDATION_PROBES.patch`) into a passing regression test. After S1.V4,
-repeat **independent** Stage 1 validation in a fresh session; only then close Stage 1 and
-consider Stage 2 planning (RG-01 and the owner's metadata samples).
+If it passes, close Stage 1 here and start Stage 2 planning (RG-01 and the owner's metadata
+samples). If it finds more, they become focused fix Tasks first.
 
 Carried open items that are not Stage 1 failures: TD-057, TD-058, RD-17 (push deferred), the
-S1.5 and S1.11 device checks (Stage 11).
+S1.5 and S1.11 device checks (Stage 11), the stale id-holding preferences after a reset
+(with TD-056/ENG-14).
 
 ## Stage 0 notes
 

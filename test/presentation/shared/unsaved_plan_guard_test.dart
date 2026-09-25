@@ -155,6 +155,53 @@ void main() {
     });
   }
 
+  // S1.V4 (TD-062): the detail page keeps the Session it loaded; opening the
+  // current session again must not bring that stale copy back.
+  testWidgets('reopening the current session from its detail keeps the live '
+      'plan, through a Save and a restart', (tester) async {
+    await start(tester, AppRouter.session());
+    final saved = await tester.runAsync(() => vm.saveSession());
+    AppRouter.router.go(AppRouter.sessionDetail(saved!.id));
+    await settle(tester);
+    final open = find.byKey(const Key('detail.openInPlanner'));
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await settle(tester);
+    await edit(tester);
+    expect(vm.captureBlocks.last.frameCount, 7);
+
+    AppRouter.router.pop();
+    await settle(tester);
+    await tester.ensureVisible(open);
+    await tester.tap(open);
+    await settle(tester);
+    expect(_discardTitle, findsNothing);
+    expect(vm.activeSessionId, saved.id);
+    expect(vm.captureBlocks.last.frameCount, 7);
+    expect(vm.plan.hasUnsavedChanges, isTrue);
+
+    await tester.runAsync(() => vm.saveSession());
+    final stored = await tester.runAsync(
+      () => DriftSessionRepository(db).get(saved.id),
+    );
+    expect(stored!.blocks.last.frameCount, 7);
+    final restarted = await tester.runAsync(() async {
+      final again = PlannerHarness(
+        DriftTargetRepository(db),
+        DriftEquipmentRepository(db),
+        _NoForecast(),
+        DriftLocationRepository(db),
+        locationService: FakeLocationService(),
+        reverseGeocoder: FakeReverseGeocoder(),
+        deviceTimeZone: FakeDeviceTimeZone(),
+        sessionRepository: DriftSessionRepository(db),
+      );
+      await again.ready;
+      return again;
+    });
+    expect(restarted!.captureBlocks.last.frameCount, 7);
+  });
+
   testWidgets('Duplicate with unsaved changes asks before the date picker', (
     tester,
   ) async {
