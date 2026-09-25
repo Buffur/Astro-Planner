@@ -1,0 +1,115 @@
+diff --git a/test/data/database/unsupported_database_test.dart b/test/data/database/unsupported_database_test.dart
+index afa046a..3f0a83e 100644
+--- a/test/data/database/unsupported_database_test.dart
++++ b/test/data/database/unsupported_database_test.dart
+@@ -49,6 +49,51 @@ void main() {
+
+   tearDown(() => dir.deleteSync(recursive: true));
+
++  for (final version in [7, 18]) {
++    test('validation: background refusal remains typed for v$version', () async {
++      final dir = Directory.systemTemp.createTempSync('astroplan_s1_background_');
++      final file = File(p.join(dir.path, 'astroplan.sqlite'));
++      await _stamp(file, version);
++      final before = file.readAsBytesSync();
++      final db = AppDatabase(LazyDatabase(() async => NativeDatabase.createInBackground(file)));
++      Object? error;
++      UnsupportedSchemaVersionException? refused;
++      try {
++        refused = await refusedSchemaVersion(db);
++      } catch (e) {
++        error = e;
++      } finally {
++        await db.close();
++      }
++      final unchanged = file.readAsBytesSync().toString() == before.toString();
++      dir.deleteSync(recursive: true);
++      expect(unchanged, isTrue);
++      expect(error?.runtimeType.toString(), isNull,
++          reason: 'the production connection must return a typed refusal');
++      expect(refused?.foundVersion, version);
++    });
++  }
++  test('validation: reset reseeds with existing preferences', () async {
++    final dir = Directory.systemTemp.createTempSync('astroplan_s1_reset_');
++    final file = File(p.join(dir.path, 'astroplan.sqlite'));
++    await _stamp(file, 7);
++    final db = AppDatabase(NativeDatabase(file));
++    final refused = (await refusedSchemaVersion(db))!;
++    await resetRefusedDatabase(db, file, refused);
++    SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
++    final fresh = AppDatabase(NativeDatabase(file));
++    var count = -1;
++    try {
++      final targets = DriftTargetRepository(fresh);
++      await CatalogSeeder(targets).seedIfNeeded();
++      count = (await targets.getAllTargets()).length;
++    } finally {
++      await fresh.close();
++      dir.deleteSync(recursive: true);
++    }
++    expect(count, 164);
++  });
++
+   test('a current database opens: nothing is refused', () async {
+     final db = AppDatabase(NativeDatabase(file));
+     expect(await refusedSchemaVersion(db), isNull);
+diff --git a/test/presentation/viewmodels/planner_draft_session_test.dart b/test/presentation/viewmodels/planner_draft_session_test.dart
+index 77a5252..1964827 100644
+--- a/test/presentation/viewmodels/planner_draft_session_test.dart
++++ b/test/presentation/viewmodels/planner_draft_session_test.dart
+@@ -147,6 +147,23 @@ void main() {
+     });
+   });
+
++  for (final kind in ['target', 'night']) {
++    test('validation: a $kind-only edit remains protected after restart', () async {
++      final vm = await start();
++      final original = vm.activeSessionId;
++      if (kind == 'target') {
++        final targets = await DriftTargetRepository(db).getAllTargets();
++        await vm.setTarget(targets.firstWhere((t) => t.id != vm.selectedTarget!.id));
++      } else {
++        await vm.setEveningDate(CalendarDate(2026, 11, 12));
++      }
++      expect(vm.plan.hasUnsavedChanges, isTrue);
++      final restarted = await start();
++      expect(restarted.activeSessionId, original);
++      expect(restarted.plan.hasUnsavedChanges, isTrue,
++          reason: 'New/Duplicate/Open must still ask after a restart');
++    });
++  }
+   // S1.4 (ENG-05 = SCI-11 = RT-06; owner decision): without a site the
+   // draft's night key is the default night at the default position, resolved
+   // per ADR-007 — never the UTC calendar date (CLAUDE.md trap 2).
+diff --git a/test/presentation/shared/unsaved_plan_guard_test.dart b/test/presentation/shared/unsaved_plan_guard_test.dart
+index 97315d7..a79d6f6 100644
+--- a/test/presentation/shared/unsaved_plan_guard_test.dart
++++ b/test/presentation/shared/unsaved_plan_guard_test.dart
+@@ -119,6 +119,26 @@ void main() {
+     expect(vm.isExampleCapturePlan, isTrue);
+   });
+
++  testWidgets('validation: opening the current session keeps its unsaved edits', (tester) async {
++    await start(tester, AppRouter.session());
++    final saved = await tester.runAsync(() => vm.saveSession());
++    AppRouter.router.go(AppRouter.sessionDetail(saved!.id));
++    await settle(tester);
++    final open = find.byKey(const Key('detail.openInPlanner'));
++    await tester.ensureVisible(open);
++    await tester.tap(open);
++    await settle(tester);
++    await edit(tester);
++    expect(vm.captureBlocks.last.frameCount, 7);
++    expect(vm.plan.hasUnsavedChanges, isTrue);
++    AppRouter.router.pop();
++    await settle(tester);
++    await tester.ensureVisible(open);
++    await tester.tap(open);
++    await settle(tester);
++    expect(_discardTitle, findsNothing);
++    expect({'lastCount': vm.captureBlocks.last.frameCount, 'unsaved': vm.plan.hasUnsavedChanges}, {'lastCount': 7, 'unsaved': true});
++  });
+   for (final brightness in Brightness.values) {
+     testWidgets('the dialog is accessible at 200 % text (${brightness.name})', (
+       tester,

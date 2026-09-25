@@ -1,5 +1,11 @@
 # AstroPlan Feature Status
 
+> **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** S1.5 recovery
+> is broken on the production background connection (TD-059), with a conditional
+> reset-seeding gap (TD-060). S1.6's safeguard is partial (TD-061/062).
+> This supersedes their earlier closure claims below; no code changed. See
+> [Stage 1 validation](refinement/STAGE_1_VALIDATION.md).
+
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`),
 > TASK 1.2 (`2e17093`: deterministic bootstrap, Home empty/error states) and TASK 1.3
@@ -197,6 +203,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phases 2–3 (architecture skeleton, design system).
 
 ## F-02 — Local persistence (Drift) and migrations
+- **Independent validation (2026-09-25, `4e653fb`):** S1.5's recovery path is **Broken** with the production background connection (TD-059; TD-047 UI closure reopened). Confirmed reset also needs seed-state handling when the applied-version preference already exists (TD-060). The refusal guards still preserve unsupported files; the earlier UI closure claim below is superseded.
 - **S1.5 (2026-09-25):** the refused-database UI exists: explanation per case, a confirmed reset below the floor only, the old file kept (RT-03, TD-047 resolved; `unsupported_database_test.dart`, `unsupported_database_screen_test.dart`). The "Known issues" line below about the missing reset UI is superseded.
 - **Status:** Partial
 - **Current implementation:** schema v10, 7 tables, repositories with in-memory-DB tests. **TASK 3.2:** the v1–v7 raw-SQL steps are gone; every upgrade is behind a floor guard and a downgrade guard, runs inside a transaction, and is checked against Drift schema snapshots (`drift_schemas/`) with a generated-verification migration test suite (`test/data/database/schema_migration_test.dart`). **TASK 3.3:** foreign keys are enforced on every connection; the v9 → v10 step cleans up pre-existing orphans, rebuilds `camera_modules`/`optical_rigs`/`capture_blocks` with real `ON DELETE` actions, and drops `equipment_profiles`.
@@ -561,6 +568,7 @@ see DATA_MODEL.md B2/B8.)
 # Session and logbook
 
 ## F-40 — Save session (planned)
+- **Independent validation (2026-09-25, `4e653fb`):** the S1.6 replacement safeguard is **Partial**: target/night-only changes lose protection after restart (TD-061); reopening the same session from stale detail data rolls back the displayed plan and clears the flag (TD-062). Save/Start serialization tests still pass. Proposed S1.V3/S1.V4.
 - **S1.6 (2026-09-25):** replacing a plan with unsaved changes (New, Duplicate, opening another session) asks first; an untouched draft is replaced silently as before (`unsaved_plan_guard_test.dart`). Interim safeguard; the draft model is RD-05 (Stage 4).
 - **TASK 11.4 (Implemented):** the plan lives in the current draft session and is autosaved on every edit (a force-stop loses nothing); New, Duplicate for another night and Open manage drafts; Save moves the session to planned with a fresh snapshot.
 - **TASK 11.3:** Save stores a **planned session** through `SessionRepository` with stable references (site, target, rig), the night key and a versioned plan snapshot (site, target, rig, preferences, blocks, budget, windows, weather); saving again updates the same open session; a completed, abandoned or legacy session is never modified (a new one is created). The known issues below (null snapshot fields, direct repository calls) are resolved by this. Still Partial: autosave and drafts are TASK 11.4.
@@ -676,4 +684,3 @@ see DATA_MODEL.md B2/B8.)
 - **Known issues:** the list is not re-evaluated automatically when preferences or the night change (a refresh button re-runs it); 250 targets take about 0.1–0.2 s on the development machine — the mid-range-device figure in the acceptance is **not verified** (no device run, like all Android behaviour); frame fill needs selected equipment and a known target size.
 - **Dependencies:** F-38, F-19 (targets), F-22 (equipment).
 - **Roadmap relevance:** MASTER_ROADMAP TASK 10.4.
-

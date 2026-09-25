@@ -1,5 +1,9 @@
 # AstroPlan Architecture
 
+> **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** the S1.5/S1.6
+> completion claims below are qualified by reproduced TD-059–TD-062. No design
+> decision or implementation changed. See [validation](refinement/STAGE_1_VALIDATION.md).
+
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since by TASK 1.1 (commit `2357755`:
 > `LocationService` seam, `PlannerViewModel.ready`) and TASK 1.2 (commit `2e17093`:
@@ -241,6 +245,14 @@ The largest files are `equipment_selection_screen.dart` (591), `planner_viewmode
 
 ## B3. Composition root and dependency injection (`lib/main.dart`)
 
+**Validation correction (2026-09-25, `4e653fb`; TD-059/060):** startup's new
+refusal branch exists, but the production background Drift connection wraps the
+exception, bypassing `refusedSchemaVersion`'s typed catch. The generic bootstrap
+failure remains reachable instead of recovery. A replacement database can also
+miss its catalog when preferences retain the applied seed version. Intended:
+ADR-008 recovery with a working seeded replacement. Actual: the independent
+probes fail; S1.5 is not complete. See proposed S1.V1/S1.V2 in the validation.
+
 - `main()` constructs `AppDatabase`, five Drift/HTTP repositories, and
   `LightPollutionRepository` **by hand** (no DI container), then `runApp`s a
   `MultiProvider`.
@@ -261,6 +273,13 @@ The largest files are `equipment_selection_screen.dart` (591), `planner_viewmode
   (The previous audit suggested `get_it`; that is **not** recommended.)
 
 ## B4. State management (Provider / ChangeNotifier)
+
+**Validation correction (2026-09-25, `4e653fb`; TD-061/062):** S1.6's dirty flag
+is in memory; restart infers it from saved status/example blocks, missing a
+never-saved draft edited only in target/night. Same-ID Open also bypasses the
+guard while reapplying cached detail data and clearing the flag. Intended:
+preserve unsaved edits on replacement. Actual: these two paths evade the
+interim safeguard. The normal guard and Save/Start ordering remain implemented.
 
 > **Since TASK 12.3** `PlannerViewModel` no longer exists; the table below records what it
 > owned. Where each responsibility went: bootstrap to `StartupViewModel`; location, sites,

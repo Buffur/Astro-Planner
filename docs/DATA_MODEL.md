@@ -1,5 +1,10 @@
 # AstroPlan Data Model
 
+> **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** schema remains
+> v17; no model or migration changed. S1.5's closure is contradicted by TD-059/060
+> (background refusal type and seed state after reset); TD-061 records incomplete
+> reconstruction of unsaved-plan state. See [validation](refinement/STAGE_1_VALIDATION.md).
+
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since by TASKs 1.1–1.3 (no entity
 > changes). **TASK 2.2 (2026-09-22):** three non-persisted domain types were added to
@@ -322,6 +327,14 @@ allows reuse.
   supported path.
 
 ## B8. Schema and migration history (v1 → v10)
+
+**Current validation correction (2026-09-25, `4e653fb`; TD-059/060):** the
+S1.5 helpers and screen exist, but production's background connection delivers
+`DriftRemoteException`, bypassing the typed refusal catch. The direct native
+connection tests pass. Reset also retains the catalog version preference: if
+already current, it suppresses seeding in the replacement database (0 targets
+in the probe). The no-reset rule for newer databases remains in force. These
+findings qualify the S1.5 completion note below; they change no schema policy.
 
 | Version | Commit | What changed | Migration step | Notes |
 | --- | --- | --- | --- | --- |

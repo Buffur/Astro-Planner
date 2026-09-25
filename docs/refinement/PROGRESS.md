@@ -3,20 +3,20 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after Stage 1 validation (same session, at the owner's request):
-> passed with three low findings; proposed fix Tasks await the owner.
+> **Last updated:** 2026-09-25, independent Stage 1 validation of `4e653fb` did not pass:
+> four reproduced findings (TD-059–TD-062). The earlier same-session review is preserved below.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (S1.1–S1.13 and S1.15 done, S1.14 deferred; validated 2026-09-25 with three low findings, see "Validation status") |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (independent validation failed on S1.5/S1.6 paths; S1.14 deferred) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. The owner decides on the proposed fix Tasks S1.16 and S1.17 and on finding V3 ("Validation status") |
-| Code baseline | `main` after S1.15 (see "Completed Tasks"); not pushed (S1.14) |
-| Quality gate at the baseline | **Green**, S1.15, 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed) |
+| Next approved Task | None. Review proposed **S1.V1–S1.V4** in `STAGE_1_VALIDATION.md`, plus the earlier S1.16/S1.17 and V3; choose one fix Task |
+| Code baseline | `4e653fb` (S1.15); `723fd44` and this validation change documentation/evidence only; not pushed (S1.14) |
+| Quality gate at the baseline | **Green**, independently rerun 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed). Six additional probe assertions fail across four findings |
 | Schema | v17 |
 
 ## Stage status
@@ -26,7 +26,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | 2026-09-25, same session (owner's request, not independent): passed with 3 low findings; fix Tasks proposed |
+| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | **Independent validation does not pass** at `4e653fb`: TD-059–TD-062. Earlier same-session review retained below |
 | 2 | Metadata Foundation | Not started | — | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
@@ -58,7 +58,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.12 — Save/Start against the autosave chain (F) | 2026-09-25 | `b6fb6c3` | UI-driven test, no injected delays: Save then an edit **did not reproduce** (kept as a regression test); Start then an edit **reproduced** (the edit landed in the session being started). Fixed: Save and Start run inside the chain (`CurrentSession._inChain`). Found and recorded: TD-058 (New/Duplicate/Open, same pattern). Resolves ENG-08 = RT-04. Gate green, 947 + 2 E2E |
 | 1 | S1.13 — Scientific labels and documentation (B1, B3, B4, B6, B7/SCI-04) | 2026-09-25 | `f179013` | SCI-02: "Chance of precipitation (preceding hour)" plus a note under the hour strip, CALC-32 corrected. SCI-09: night-level Moon illumination "at midnight" (Tonight, sky card, window annotations). SCI-03: documented in CALC-28/29 (no displayed text claimed they coincide). SCI-04: accepted as documented in SI-009 and CALC-08 (RD-03). B6: the CALC-01 to 06 tests cite Meeus or the definition, and CALC-03 gained a direct test. No calculation changed. Gate green, 948 + 2 E2E |
 | 1 | S1.14 — Push CI and observe a first run (RD-17) | 2026-09-25 | `28aaa10` (documentation only) | **Deferred by the owner** when asked before the push. Checked: 155 commits ahead as a fast-forward; the remote is public; no secret file tracked; the workflow pins the local Flutter version. Nothing pushed; RD-17 open again (Stage 11 or on request) |
-| 1 | S1.15 — Documentation drift (B5; SCI-10 docs) | 2026-09-25 | The S1.15 commit* | Corrected, each marked "corrected S1.15" with the old text kept: `optical_calculator.dart` comments (NPF shown; √N is noise, not signal); SI-001/002/003/008/009 statuses (index and sections); CALC-07, CALC-17, CALC-28 and, found here, CALC-13; DEV-P2 ("SNR" appears in four doc comments, none user-facing; DEV-P2 resolved) and the ADR-005 conformance row; F-29 (current state), F-46/F-49 summary rows, F-49 and TD-046 (a public remote exists, never pushed since `a1bcbd9`, S1.14 deferred), F-50's app id; TEST_PLAN L3; `ARCHITECTURE.md` external-services rows (Open-Meteo, Nominatim, OSM tiles) and, found here, the B9 cache note; `PROJECT_HANDOFF.md` header pointer to `docs/refinement/` and §0 marked historical; the `CLAUDE.md` device wording (owner-approved). Historical files untouched. No full re-audit was done. Gate green, 948 + 2 E2E |
+| 1 | S1.15 — Documentation drift (B5; SCI-10 docs) | 2026-09-25 | `4e653fb` | Corrected, each marked "corrected S1.15" with the old text kept: `optical_calculator.dart` comments (NPF shown; √N is noise, not signal); SI-001/002/003/008/009 statuses (index and sections); CALC-07, CALC-17, CALC-28 and, found here, CALC-13; DEV-P2 ("SNR" appears in four doc comments, none user-facing; DEV-P2 resolved) and the ADR-005 conformance row; F-29 (current state), F-46/F-49 summary rows, F-49 and TD-046 (a public remote exists, never pushed since `a1bcbd9`, S1.14 deferred), F-50's app id; TEST_PLAN L3; `ARCHITECTURE.md` external-services rows (Open-Meteo, Nominatim, OSM tiles) and, found here, the B9 cache note; `PROJECT_HANDOFF.md` header pointer to `docs/refinement/` and §0 marked historical; the `CLAUDE.md` device wording (owner-approved). Historical files untouched. No full re-audit was done. Gate green, 948 + 2 E2E |
+| 1 | Independent Stage 1 validation (documentation and probe evidence only) | 2026-09-25 | The validation commit* | Gate green (948 + 2 E2E), but six additional assertions reproduce TD-059–TD-062. Proposed S1.V1–S1.V4; no fixes or Stage 2 work. See `STAGE_1_VALIDATION.md` |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -83,7 +84,9 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `b6fb6c3`: S1.12.
 - `f179013`: S1.13.
 - `28aaa10`: S1.14 (deferred).
-- S1.15: see the note under "Completed Tasks".
+- `4e653fb`: S1.15.
+- `723fd44`: same-session Stage 1 validation (preserved below).
+- Independent Stage 1 validation: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -147,7 +150,9 @@ These block a release, not refinement.
 
 ## Known blockers
 
-- **Stage 1:** none. S1.14's push was deferred by the owner (RD-17 open).
+- **Stage 1:** TD-059–TD-062 survive independent validation. Proposed fix Tasks
+  S1.V1–S1.V4 await review (`STAGE_1_VALIDATION.md`), alongside the earlier
+  S1.16/S1.17 proposals and V3 decision. S1.14's push stays deferred (RD-17 open).
 - **Stage 2:** owner-supplied real metadata samples, and RG-01.
 - **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
   rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
@@ -177,7 +182,21 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1–S1.13 and S1.15 done (gate green); S1.14 deferred by the owner.
+- **Independent Stage 1 validation**, 2026-09-25, against `4e653fb`: **does not pass**.
+  The baseline gate independently passed (948 + 2 E2E); six additional probes
+  fail across TD-059–TD-062. S1.5 misses refusal through the production background
+  connection, and retained preferences can suppress reset seeding. S1.6 loses
+  protection after target/night-only edits followed by restart and on reopening
+  stale detail data for the current session. See `STAGE_1_VALIDATION.md` for the
+  acceptance matrix, reproduction patch, limitations and proposed S1.V1–S1.V4.
+  No application/test source changed. The other session committed `723fd44`
+  during this validation; its result below is preserved as prior evidence, but
+  its passing verdict is superseded by these reproductions. Its three unknown
+  probe files were created by this independent validation, removed by their
+  author, and retained as `evidence/STAGE_1_VALIDATION_PROBES.patch`; no owner
+  cleanup action remains. **Stages 2–11:** not started.
+- **Stage 1 Tasks (prior implementation record):** S1.1–S1.13 and S1.15 reported
+  done (gate green); S1.5/S1.6 now require follow-up. S1.14 deferred by the owner.
 - **Stage 1 validation**, 2026-09-25, at `4e653fb`. **Not independent:** the owner asked for it
   in the implementing session instead of a fresh one (§9.1 step 11). It tried to disprove
   completion; no fix was made.
@@ -222,15 +241,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-The owner decides on Stage 1 validation's findings ("Validation status"):
+Review independent validation's proposed **S1.V1–S1.V4** (TD-059–TD-062) in
+`STAGE_1_VALIDATION.md` and select one approved fix Task. Also preserve the
+earlier review's outstanding decisions:
 - approve **S1.16** (backfill commit hashes in the registers) and **S1.17** (the field theme
   in the unsaved-changes dialog's accessibility check), or accept V1/V2 as they are;
 - confirm that **V3** is recorded under RD-05 for Stage 4;
-- decide what to do with the three untracked probe files from another session;
-- optionally, still run an independent validation in a fresh session.
+- the three temporary probe files are accounted for above; no cleanup is needed.
 
-Then close Stage 1 here (dates, validation result, known blockers) and start Stage 2
-planning. Stage 2 needs RG-01 and the owner's metadata samples.
+Do not close Stage 1 yet. After approved fixes, repeat independent validation;
+only then close Stage 1 and consider Stage 2 planning in a fresh session. Stage 2
+needs RG-01 and the owner's metadata samples. Do not implement the next Task in
+this validation session.
 
 Carried open items that are not Stage 1 failures: TD-057, TD-058, RD-17 (push deferred), the
 S1.5 and S1.11 device checks (Stage 11).
