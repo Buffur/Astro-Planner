@@ -1,6 +1,13 @@
 # Project Handoff: AstroPlan
 
 > **Read this first.** It is the entry point for any new agent or developer.
+> **Current sources (since Stage 0, 2026-09-25; added S1.15):** the master roadmap is
+> closed as a task queue. Current direction, scope and state are in
+> `docs/refinement/PRODUCT_DIRECTION.md`, `docs/refinement/POST_ROADMAP_PLAN.md` and
+> `docs/refinement/PROGRESS.md`; the current baseline, commands and traps are in
+> `CLAUDE.md`. Where this file (the header below and §0 in particular) names
+> `MASTER_ROADMAP.md` or `ROADMAP.md` as the scope, or gives a test count, it is
+> historical.
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited and documented 2026-09-21. Application code changed since by TASK 1.1
 > (commit `2357755`: `LocationService` seam, `PlannerViewModel.ready`, test harness)
@@ -74,6 +81,10 @@
 > **TASK 16.3 (2026-09-24, commit `2521f42`) — OPEN until the policy URL is live.** PD-12 resolved (owner decisions, DECISIONS E.1): free with no ads or subscriptions (within Open-Meteo's free non-commercial tier); GPL-3.0 confirmed; the privacy policy on GitHub Pages (`docs/privacy/index.md` → https://chacha12.github.io/astro-planner/privacy/); place-name lookups opt-in. Code: `OptInReverseGeocoder` — nothing is sent to Nominatim unless the user switches "Look up place names" on (Settings, off by default, `PrivacyPreferencesRepository`); a saved site and the default position are never looked up; the identifying user agent `Astro Planner/<version> (+<project URL>; <id>)` now goes to the OSM tiles too (the tile policy asks for a contact); the About screen states GPL-3.0 with a source link, a privacy summary and the policy link. Terms re-checked 2026-09-24 and recorded in `docs/COMPLIANCE.md` with draft Play Data Safety answers and the permission review. Remaining gap (TD-031): a user who switches place names on still uses the built-in Nominatim endpoint (no remotely switchable endpoint). Owner steps before upload: publish the policy with the contact email filled in, make the repository public, fill in the Data Safety form. Test baseline 896.
 
 ## 0. Start here (10-minute orientation)
+
+> **Historical (as of TASK 2.3, 2026-09-22; marked S1.15).** Start from
+> `docs/refinement/PROGRESS.md` and `CLAUDE.md` instead; the baseline, scope and traps
+> below are superseded.
 
 1. Read this file, then `ARCHITECTURE.md` (Parts B–C), `FEATURE_STATUS.md`
    (summary table) and `TECH_DEBT.md` (Critical and High).

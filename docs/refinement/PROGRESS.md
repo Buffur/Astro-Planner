@@ -3,19 +3,20 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.14 (deferred).
+> **Last updated:** 2026-09-25, after S1.15: every Stage 1 Task is done or deferred; Stage 1
+> awaits its independent validation.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (S1.1–S1.13 and S1.15 done, S1.14 deferred by the owner; validation not yet run) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.15 — Documentation drift** (B5; SCI-10 docs). Approved by the frozen sequence; the last Stage 1 Task |
-| Code baseline | `main` after S1.13 (see "Completed Tasks") |
-| Quality gate at the baseline | **Green**, S1.13, 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed) |
+| Next approved Task | None. Next: **Stage 1 validation** in a fresh, independent session (§9.8) |
+| Code baseline | `main` after S1.15 (see "Completed Tasks"); not pushed (S1.14) |
+| Quality gate at the baseline | **Green**, S1.15, 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
 ## Stage status
@@ -25,7 +26,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | In progress (sequence frozen) | 2026-09-25 | — | — |
+| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | Not yet run (fresh session) |
 | 2 | Metadata Foundation | Not started | — | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
@@ -56,7 +57,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.11 — Tracker controls expose a tap action (D3) | 2026-09-25 | `b0998c6` | **Verified first:** a semantics test showed `run.plus` (and the others) had no tap action and no enabled state. Fixed: the relabelling `Semantics` passes `onTap: onPressed` and `enabled`. The test checks all seven controls and that a semantics tap confirms a frame; fails before. Resolves UX-28 on the host; TalkBack remains a Stage 11 device check. Gate green, 945 + 2 E2E |
 | 1 | S1.12 — Save/Start against the autosave chain (F) | 2026-09-25 | `b6fb6c3` | UI-driven test, no injected delays: Save then an edit **did not reproduce** (kept as a regression test); Start then an edit **reproduced** (the edit landed in the session being started). Fixed: Save and Start run inside the chain (`CurrentSession._inChain`). Found and recorded: TD-058 (New/Duplicate/Open, same pattern). Resolves ENG-08 = RT-04. Gate green, 947 + 2 E2E |
 | 1 | S1.13 — Scientific labels and documentation (B1, B3, B4, B6, B7/SCI-04) | 2026-09-25 | `f179013` | SCI-02: "Chance of precipitation (preceding hour)" plus a note under the hour strip, CALC-32 corrected. SCI-09: night-level Moon illumination "at midnight" (Tonight, sky card, window annotations). SCI-03: documented in CALC-28/29 (no displayed text claimed they coincide). SCI-04: accepted as documented in SI-009 and CALC-08 (RD-03). B6: the CALC-01 to 06 tests cite Meeus or the definition, and CALC-03 gained a direct test. No calculation changed. Gate green, 948 + 2 E2E |
-| 1 | S1.14 — Push CI and observe a first run (RD-17) | 2026-09-25 | The S1.14 commit* (documentation only) | **Deferred by the owner** when asked before the push. Checked: 155 commits ahead as a fast-forward; the remote is public; no secret file tracked; the workflow pins the local Flutter version. Nothing pushed; RD-17 open again (Stage 11 or on request) |
+| 1 | S1.14 — Push CI and observe a first run (RD-17) | 2026-09-25 | `28aaa10` (documentation only) | **Deferred by the owner** when asked before the push. Checked: 155 commits ahead as a fast-forward; the remote is public; no secret file tracked; the workflow pins the local Flutter version. Nothing pushed; RD-17 open again (Stage 11 or on request) |
+| 1 | S1.15 — Documentation drift (B5; SCI-10 docs) | 2026-09-25 | The S1.15 commit* | Corrected, each marked "corrected S1.15" with the old text kept: `optical_calculator.dart` comments (NPF shown; √N is noise, not signal); SI-001/002/003/008/009 statuses (index and sections); CALC-07, CALC-17, CALC-28 and, found here, CALC-13; DEV-P2 ("SNR" appears in four doc comments, none user-facing; DEV-P2 resolved) and the ADR-005 conformance row; F-29 (current state), F-46/F-49 summary rows, F-49 and TD-046 (a public remote exists, never pushed since `a1bcbd9`, S1.14 deferred), F-50's app id; TEST_PLAN L3; `ARCHITECTURE.md` external-services rows (Open-Meteo, Nominatim, OSM tiles) and, found here, the B9 cache note; `PROJECT_HANDOFF.md` header pointer to `docs/refinement/` and §0 marked historical; the `CLAUDE.md` device wording (owner-approved). Historical files untouched. No full re-audit was done. Gate green, 948 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -80,7 +82,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `b0998c6`: S1.11.
 - `b6fb6c3`: S1.12.
 - `f179013`: S1.13.
-- S1.14: see the note under "Completed Tasks".
+- `28aaa10`: S1.14 (deferred).
+- S1.15: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -174,20 +177,27 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1–S1.13 done (gate green); S1.14 deferred by the owner. **Stages 2–11:** not started.
+- **Stage 1 Tasks:** S1.1–S1.13 and S1.15 done (gate green); S1.14 deferred by the owner.
+  Stage 1 validation has not run yet. **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **S1.15 — Documentation drift** (`POST_ROADMAP_PLAN.md` §5, Stage 1 frozen sequence),
-the last Stage 1 Task, preferably in a fresh session. The frozen sequence is the approval: no separate prompt
-file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
-a Task). That session:
-- reads `CLAUDE.md`, this file and the S1.15 entry, plus the files it names;
-- follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
-  STOP;
-- records the S1.14 commit hash and its own commit here, then stops.
+Run **Stage 1 validation** in a fresh, independent session (`POST_ROADMAP_PLAN.md` §9.8).
+The validator:
+- does not implement fixes;
+- checks each A–F item of Stage 1 and each Task's acceptance criteria against the code at
+  the last commit, and tries to disprove that the Stage is complete: regressions, scope
+  drift, incomplete Tasks, stale assumptions, architecture or scientific-integrity
+  violations, missing evidence;
+- takes into account the owner's changes during the Stage: S1.4's corrected rule
+  (DECISIONS E.1), S1.5's no-reset for newer databases (ADR-008 §2), and S1.14's deferral;
+- reports surviving findings as focused fix Tasks.
 
-After S1.15, run Stage 1 validation in a fresh session (§9.8).
+Open items from the Stage that are not Stage 1 fixes: TD-057 and TD-058 (recorded), RD-17
+(push deferred), the S1.5 and S1.11 device checks (Stage 11).
+
+If validation passes, close Stage 1 here and start Stage 2 planning; Stage 2 needs RG-01 and
+the owner's metadata samples.
 
 ## Stage 0 notes
 

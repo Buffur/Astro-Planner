@@ -172,10 +172,10 @@ feature exists although its roadmap phase has not been reached in
 | F-43 | Session execution mode | Implemented *(TASKs 13.2–13.4; device checks pending)* | 13, 15 |
 | F-44 | Export / interoperability manifest | Implemented *(v2 export; import deferred, TASK 14.3)* | 14 (ahead) |
 | F-45 | Metadata import (EXIF / FITS) | Prototype | 12 (ahead) |
-| F-46 | Field mode | Prototype | 15 (ahead) |
+| F-46 | Field mode | Implemented *(TASK 12.4; summary corrected S1.15)* | 15 (ahead) |
 | F-47 | Custom dashboard | Missing by decision *(the fixed Tonight view that replaces it is Implemented, TASK 12.5)* | 12.5 |
 | F-48 | Automated tests | Partial | 1, 16 |
-| F-49 | CI / build automation | Missing | 1, 16 |
+| F-49 | CI / build automation | Partial *(summary corrected S1.15)* | 1, 16 |
 | F-50 | Platform support | Partial | 1, 16 |
 | F-51 | Tonight's candidates (all targets for one night) *(new, TASK 10.4)* | Implemented | 8–10 |
 
@@ -453,7 +453,8 @@ see DATA_MODEL.md B2/B8.)
 # Weather and sky conditions
 
 ## F-29 — Weather fetch and offline cache
-- **S1.1 (2026-09-25):** requests carry the identifying user agent (`AppIdentity.userAgent`; ENG-03/RT-07 resolved, tested with a `MockClient`). The body below still describes the removed legacy path (drift, S1.15).
+- **Current state (S1.15, 2026-09-25): Implemented.** `OpenMeteoWeatherRepository.fetchSnapshot` fetches the night's hours in UTC (`best_match`, the ADR-012 variables, a 16-day horizon) with the app's user agent; `NightWeatherService` caches a snapshot per site, model and night (`SharedPrefsWeatherSnapshotStore`) and returns typed states (current / aging / stale, offline-cached, unavailable, out of range) whose age follows the clock (S1.3). Files: `open_meteo_weather_repository.dart`, `open_meteo_forecast_parser.dart`, `night_weather_service.dart`, `shared_prefs_weather_snapshot_store.dart`. Known limits: no cache eviction (ENG-10, rejected as a current defect); live-service behaviour is fixture-tested only (Stage 11). The **Status**, **Current implementation**, **Relevant files** and **Known issues** lines further down describe the legacy path removed in TASK 9.4 and are kept as history.
+- **S1.1 (2026-09-25):** requests carry the identifying user agent (`AppIdentity.userAgent`; ENG-03/RT-07 resolved, tested with a `MockClient`).
 - **TASK 9.4 (Implemented):** the card displays the night forecast (`vm.nightWeather`); the legacy `getCurrentWeather` path, its non-expiring cache and `WeatherConditions` are removed (owner decision). The known issues below describe the removed legacy path.
 - **TASK 9.3:** the night forecast is cached per site, model and night with its fetch time; freshness states (current / aging after 3 h / stale after 12 h), offline-cached, unavailable and out of range are modelled and tested (`NightWeatherService`, `vm.nightWeather`). Still Partial: not displayed until TASK 9.4 (the card shows the legacy path).
 - **TASK 9.2:** the night-aligned, UTC `fetchSnapshot` exists and is tested (recorded Open-Meteo fixtures; typed failures; horizon cap). Not yet used by the ViewModel or UI, and not cached — TASKs 9.3–9.4.
@@ -656,13 +657,13 @@ see DATA_MODEL.md B2/B8.)
 - **Status:** Partial *(was Missing; TASK 1.3, commit `97924a0`)*
 - **Current implementation:** `tool/check.dart` (`dart run tool/check.dart`) runs `dart format --set-exit-if-changed`, `flutter analyze --no-pub` and `flutter test --no-pub` — all three regardless of an earlier failure, then a pass/fail summary, exiting non-zero on any failure. `.github/workflows/ci.yml` runs it on push to `main` and on pull requests.
 - **Relevant files:** `tool/check.dart`, `.github/workflows/ci.yml`.
-- **Known issues:** no Git remote is configured, so the workflow has never actually run (untested in the real GitHub Actions environment); stricter lints (TD-038) and device runs remain out of scope by design (since TASK 15.5 the gate runs the end-to-end suite on the host test device); since TASK 15.1 `empty_catches` is enabled and the gate's test step includes a no-empty-catch scan.
+- **Known issues:** *(corrected S1.15, 2026-09-25: a remote exists, `github.com/Buffur/Astro-Planner`, public, but `main` has not been pushed since `a1bcbd9`, before TASK 1.3, so the workflow has never run; the owner deferred the push in S1.14, RD-17. The original wording follows.)* No Git remote is configured, so the workflow has never actually run (untested in the real GitHub Actions environment); stricter lints (TD-038) and device runs remain out of scope by design (since TASK 15.5 the gate runs the end-to-end suite on the host test device); since TASK 15.1 `empty_catches` is enabled and the gate's test step includes a no-empty-catch scan.
 - **Dependencies:** —
 - **Roadmap relevance:** Phases 1, 16.
 
 ## F-50 — Platform support
 - **Status:** Partial
-- **Current implementation:** Android is configured (`com.astroplan.astroplan`, location and internet permissions, Java 17); iOS, web, Windows, Linux and macOS folders are Flutter scaffolds.
+- **Current implementation:** Android is configured (`io.github.chacha12.astroplanner` since TASK 16.1; corrected S1.15, it read `com.astroplan.astroplan`; location and internet permissions, Java 17); iOS, web, Windows, Linux and macOS folders are Flutter scaffolds.
 - **Relevant files:** `android/`, `ios/`, `pubspec.yaml`.
 - **Known issues:** *(updated TASK 16.2, 2026-09-24: a debug APK and a release bundle build on the development machine; the release build is signed with the owner's upload key from `android/key.properties` when present — not created yet — and the app has not been installed or run on an Android device.)* no Android build or device run was performed in this audit (Unknown); release signing uses the debug key; iOS `Info.plist` lacks location and photo usage strings; `dart:io` file access makes the web target unsupported; `sdk: ^3.13.3` is a very tight Dart constraint (TD-031).
 - **Dependencies:** —

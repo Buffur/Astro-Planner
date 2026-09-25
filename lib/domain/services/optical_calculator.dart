@@ -39,7 +39,8 @@ class OpticalCalculator {
   /// Formula: gain ∝ sqrt(N)
   /// Note: This is relative gain, not absolute SNR.
   /// Inputs: number of light frames (N).
-  /// Output: multiplier of signal improvement over a single frame.
+  /// Output: the factor by which random noise shrinks relative to one
+  /// frame of the same group (SI-003), not an improvement of the signal.
   static double calculateRelativeStackingGain(int lightFrames) {
     if (lightFrames <= 0) return 0.0;
     return math.sqrt(lightFrames);
@@ -60,7 +61,8 @@ class OpticalCalculator {
   /// The complete NPF rule (F. Michaud): the longest **untracked** exposure,
   /// in seconds, before star trailing becomes visible. A recommendation for
   /// fixed-tripod photography, not a limit — it does not apply to tracked or
-  /// guided exposures (SI-001, PD-11: not shown in the UI).
+  /// guided exposures (SI-001). Shown per PD-11 through the rig capability
+  /// summary (CALC-31, TASK 8.6) for untracked or unknown tracking.
   ///
   /// Source: F. Michaud, "La Règle NPF" and "Les coulisses de la règle NPF",
   /// Société Astronomique du Havre (sahavre.fr/wp/regle-npf-rule/ and

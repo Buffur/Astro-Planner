@@ -182,7 +182,7 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
 | ADR-002 | Provider and explicit ViewModels | **Partial** | Provider + `ChangeNotifier` only, no other framework. But only two ViewModels exist, one of which (`PlannerViewModel`) owns everything, and several screens bypass ViewModels — DEV-P5 → DEV-A1, DEV-A2 *(Updated 2026-09-24, TASK 12.3: screen-scoped ViewModels replace `PlannerViewModel` and reachable screens no longer bypass them; conforms except the gated metadata import screen, G17.)* |
 | ADR-003 | SQLite via Drift ("typed queries, migrations, relationships, and testability") | **Partial** | Drift is used correctly for typed queries. Migrations are untested and one path fails; relationships are declared but not enforced — DEV-P4 → DEV-D1, DEV-D6 |
 | ADR-004 | Out of planetarium scope | **Complies** | No planetarium, AR, embedded Stellarium, camera preview or camera control exists |
-| ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Complies** *(label, TASK 4.4)* | DEV-P2 (partially resolved) |
+| ADR-005 | Scientific calculations are auditable; relative gain not labeled SNR | **Complies** *(label, TASK 4.4; the rest verified S1.15)* | DEV-P2 (resolved) |
 | ADR-006 | Hide implemented future-phase features behind `FeatureScope` until approved | **Complies** *(TASK 4.3)* | DEV-P1 (resolved) |
 
 ## DEV-P1 — ADR-006 gating is only partly implemented
@@ -228,6 +228,15 @@ Unknown** (see `docs/FEATURE_STATUS.md`). "Complies" = verified in code.
   published one and its test is circular; assumptions and references are mostly
   undocumented. Details: `docs/SCIENTIFIC_INTEGRITY.md` SI-001, SI-003, SI-009.
   TD-007, TD-036.
+- **Correction and closure (S1.15, 2026-09-25; audit 01 TASK 4.4, 06 §2):** the
+  sentence above that "SNR" no longer appears in `lib/` is not accurate: it appears in
+  four doc comments, which either say the value is *not* an SNR or cite the SNR rule (`capture_block.dart`,
+  `capture_budget_calculator.dart`, `optical_calculator.dart`,
+  `capture_analysis_viewmodel.dart`); no user-facing text says SNR. The items still
+  open then are resolved: the NPF formula follows Michaud with independent tests
+  (TASK 6.5, SI-001), the √N assumptions are in the help text (TASK 5.6, SI-003), and
+  the astronomy simplifications are documented and reference-tested (TASK 6.2,
+  SI-009). **DEV-P2 is resolved.**
 
 ## DEV-P3 — No active roadmap phase is declared
 - **Intended behavior:** "The active phase is the only approved scope unless the
