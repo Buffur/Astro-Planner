@@ -24,6 +24,8 @@ import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/startup_viewmodel.dart';
 import '../../viewmodels/tonight_viewmodel.dart';
+import '../../shared/unsaved_plan_guard.dart';
+import '../../shared/failure_feedback.dart';
 
 /// The Tonight tab's root (ADR-015, TASK 12.5): "what can I capture
 /// tonight" at a glance — the site and night, the dark window, the Moon,
@@ -419,8 +421,15 @@ class _QuickActions extends StatelessWidget {
         OutlinedButton.icon(
           key: const Key('tonight.newSession'),
           onPressed: () async {
-            await context.read<SessionPlanViewModel>().newSession();
-            if (context.mounted) context.push(AppRouter.session());
+            // S1.6: ask first, and report a failed write (trap 18).
+            if (!await confirmLeavingUnsavedPlan(context)) return;
+            if (!context.mounted) return;
+            final started = await runWithFeedback(
+              context,
+              'start a new session',
+              context.read<SessionPlanViewModel>().newSession,
+            );
+            if (started && context.mounted) context.push(AppRouter.session());
           },
           icon: const Icon(Icons.add),
           label: const Text('New session'),

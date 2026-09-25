@@ -16,6 +16,7 @@ import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/session.dart';
+import 'package:astroplan/domain/models/session_snapshot.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 
 import '../../support/planner_harness.dart';
@@ -94,6 +95,56 @@ void main() {
     expect(again.activeSessionId, vm.activeSessionId);
     expect(again.isExampleCapturePlan, isTrue);
     expect(await sessions.list(), hasLength(1));
+  });
+
+  // S1.6 (RT-05 / UX-12; RD-05 interim): the planner knows when replacing
+  // the current session would leave unsaved plan changes behind.
+  group('unsaved changes', () {
+    test('an untouched draft has none; an edit has; Save clears them; a '
+        'restart keeps them', () async {
+      final vm = await start();
+      expect(vm.plan.hasUnsavedChanges, isFalse);
+      expect((await start()).plan.hasUnsavedChanges, isFalse);
+
+      await vm.addCaptureBlock(_light(3));
+      expect(vm.plan.hasUnsavedChanges, isTrue);
+      expect((await start()).plan.hasUnsavedChanges, isTrue);
+
+      await vm.saveSession();
+      expect(vm.plan.hasUnsavedChanges, isFalse);
+      await vm.setEveningDate(CalendarDate(2026, 11, 12));
+      expect(vm.plan.hasUnsavedChanges, isTrue);
+      expect((await start()).plan.hasUnsavedChanges, isTrue);
+
+      await vm.newSession();
+      expect(vm.plan.hasUnsavedChanges, isFalse);
+    });
+
+    test('a site change is not an edit of the plan', () async {
+      final vm = await start();
+      await vm.site.setLocation(40.0, -3.7);
+      await vm.plan.idle;
+      expect(vm.plan.hasUnsavedChanges, isFalse);
+    });
+
+    test('a failed Save keeps the changes unsaved', () async {
+      final failing = _FailingSave(db, clock: FixedClock(_now));
+      final vm = PlannerHarness(
+        DriftTargetRepository(db),
+        DriftEquipmentRepository(db),
+        _NoWeather(),
+        DriftLocationRepository(db),
+        locationService: FakeLocationService(),
+        reverseGeocoder: FakeReverseGeocoder(),
+        deviceTimeZone: FakeDeviceTimeZone(),
+        clock: FixedClock(_now),
+        sessionRepository: failing,
+      );
+      await vm.ready;
+      await vm.addCaptureBlock(_light(3));
+      await expectLater(vm.saveSession(), throwsA(isA<StateError>()));
+      expect(vm.plan.hasUnsavedChanges, isTrue);
+    });
   });
 
   // S1.4 (ENG-05 = SCI-11 = RT-06; owner decision): without a site the
@@ -219,4 +270,16 @@ void main() {
     expect(vm.captureBlocks.last.frameCount, 5);
     expect((await sessions.get(resaved.id))!.status, SessionStatus.completed);
   });
+}
+
+/// Saving always fails (S1.6).
+class _FailingSave extends DriftSessionRepository {
+  _FailingSave(super.db, {super.clock});
+
+  @override
+  Future<Session> savePlan(
+    int id,
+    SessionPlan plan,
+    SessionSnapshot snapshot,
+  ) => Future.error(StateError('disk full'));
 }

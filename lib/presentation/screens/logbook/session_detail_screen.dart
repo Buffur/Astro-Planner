@@ -16,6 +16,7 @@ import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
 import '../library/progress_screen.dart';
 import 'logbook_screen.dart';
+import '../../shared/unsaved_plan_guard.dart';
 
 /// One saved session (TASK 14.1): read-only, from its snapshot — history
 /// never reads live sites, targets or rigs (ADR-014 §4). A started session
@@ -376,9 +377,20 @@ class _Actions extends StatelessWidget {
         OutlinedButton(
           key: const Key('detail.openInPlanner'),
           onPressed: () async {
-            // A frozen session opens as a copy in a new draft (TASK 11.4).
-            await context.read<SessionPlanViewModel>().openSession(s);
-            if (context.mounted) context.push(AppRouter.session());
+            // A frozen session opens as a copy in a new draft (TASK 11.4);
+            // S1.6: ask before another plan's unsaved changes are left.
+            final plan = context.read<SessionPlanViewModel>();
+            if (s.id != plan.activeSessionId &&
+                !await confirmLeavingUnsavedPlan(context)) {
+              return;
+            }
+            if (!context.mounted) return;
+            final opened = await runWithFeedback(
+              context,
+              'open the session',
+              () => plan.openSession(s),
+            );
+            if (opened && context.mounted) context.push(AppRouter.session());
           },
           style: OutlinedButton.styleFrom(minimumSize: tall),
           child: Text(s.planEditable ? 'Open in planner' : 'Plan again (copy)'),

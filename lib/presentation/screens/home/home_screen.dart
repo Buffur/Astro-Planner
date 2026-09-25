@@ -27,6 +27,7 @@ import '../../widgets/sky_darkness_widget.dart';
 import '../../widgets/weather_forecast_widget.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../shared/failure_feedback.dart';
+import '../../shared/unsaved_plan_guard.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -48,11 +49,16 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'New Session',
-            onPressed: () => runWithFeedback(
-              context,
-              'start a new session',
-              context.read<SessionPlanViewModel>().newSession,
-            ),
+            onPressed: () async {
+              // S1.6: ask before an unsaved plan is left behind.
+              if (!await confirmLeavingUnsavedPlan(context)) return;
+              if (!context.mounted) return;
+              await runWithFeedback(
+                context,
+                'start a new session',
+                context.read<SessionPlanViewModel>().newSession,
+              );
+            },
           ),
           // TASK 11.4: a copy of the current plan as a new draft for another
           // night; the current session is not changed.
@@ -61,6 +67,8 @@ class HomeScreen extends StatelessWidget {
             tooltip: 'Duplicate for another night',
             onPressed: () async {
               final planVm = context.read<SessionPlanViewModel>();
+              if (!await confirmLeavingUnsavedPlan(context)) return;
+              if (!context.mounted) return;
               final now = DateTime.now();
               final picked = await showDatePicker(
                 context: context,

@@ -52,8 +52,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   final PlannerStateRepository _stateRepository;
   final Clock _clock;
 
-  /// Null only in tests without a session repository (the plan then
-  /// persists to preferences, as before TASK 11.4).
+  /// Null only in tests without a session repository (plan in preferences).
   final CurrentSession? _current;
   final SessionReferenceResolver _resolver;
 
@@ -76,6 +75,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   Session? get activeSession => _current?.session;
   int? get activeSessionId => activeSession?.id;
   Object? get autosaveFailure => _current?.writeFailure; // TASK 15.1
+  bool get hasUnsavedChanges => _current?.hasUnsavedChanges ?? false; // S1.6
 
   /// Completes when every autosave started so far has reached the database.
   Future<void> get idle => _current?.idle ?? Future.value();
@@ -173,7 +173,7 @@ class SessionPlanViewModel extends ChangeNotifier {
     final key = _currentSiteKey();
     if (!_loaded || key == _siteKey) return;
     _siteKey = key;
-    unawaited(_current?.write(_plan));
+    unawaited(_current?.write(_plan, edit: false));
   }
 
   Future<void> _edited() async {
