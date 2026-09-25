@@ -153,6 +153,8 @@ void main() {
       );
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
+      // S1.7 (UX-19): "60 s", not "60.0s".
+      expect(find.textContaining('30 × 60 s'), findsOneWidget);
 
       await tester.tap(find.text('LIGHT [L] '));
       await tester.pumpAndSettle();
@@ -255,7 +257,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Integration (light exposure)'), findsOneWidget);
-    expect(find.text('1h 40m'), findsOneWidget); // 20 x 300 s
+    expect(find.text('1 h 40 min'), findsOneWidget); // 20 x 300 s
     expect(find.text('Acquisition (lights + overheads)'), findsOneWidget);
     expect(find.text('Session budget'), findsOneWidget);
     expect(find.text('Ha · 300 s × 20'), findsOneWidget);

@@ -10,6 +10,7 @@ import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/sky_darkness.dart';
 import '../shared/night_text.dart';
+import '../../core/utils/quantity_text.dart';
 
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
@@ -22,7 +23,7 @@ class SkyDarknessWidget extends StatelessWidget {
     final theme = Theme.of(context);
 
     final illum = conditionsVm.lunarIllumination;
-    final lunarIllum = illum == null ? '--' : '${(illum * 100).round()}';
+    final lunarIllum = illum == null ? '--' : QuantityText.percent(illum * 100);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -70,9 +71,7 @@ class SkyDarknessWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    illum == null
-                        ? 'Moon Illumination: $lunarIllum'
-                        : 'Moon Illumination: $lunarIllum%',
+                    'Moon Illumination: $lunarIllum',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),

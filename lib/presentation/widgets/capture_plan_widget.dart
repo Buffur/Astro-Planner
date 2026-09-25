@@ -8,6 +8,7 @@ import '../viewmodels/session_plan_viewmodel.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
 import 'capture_plan/capture_block_dialog.dart';
 import 'capture_plan/capture_budget_summary.dart';
+import '../../core/utils/quantity_text.dart';
 
 /// The capture planner: inputs (the block sequence) -> outputs (budget,
 /// fit, gain, storage) with the assumptions visible (TASK 5.6). Composes
@@ -150,7 +151,7 @@ class _BlockList extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${block.frameCount}x ${block.exposureTimeSeconds}s'
+                      '${block.frameCount} × ${QuantityText.exposure(block.exposureTimeSeconds)}'
                       '${_policyLabel(block.calibrationPolicy)}',
                     ),
                     // TASK 8.6: guidance only — never blocks the plan.

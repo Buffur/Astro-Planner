@@ -2,6 +2,7 @@ import '../models/capture_block.dart';
 import '../models/night_timeline.dart';
 import '../models/visibility_window.dart';
 import 'capture_budget_calculator.dart';
+import '../../core/utils/quantity_text.dart';
 
 /// The answer to "does this plan fit tonight?" (ADR-009 §6).
 enum FitState {
@@ -375,9 +376,6 @@ class FitAnalyzer {
     nightsNeeded: null,
   );
 
-  static String _fmt(int ms) {
-    final minutes = (ms / 60000).round();
-    if (minutes < 60) return '$minutes min';
-    return '${minutes ~/ 60} h ${minutes % 60} min';
-  }
+  static String _fmt(int ms) =>
+      QuantityText.duration(Duration(milliseconds: ms));
 }

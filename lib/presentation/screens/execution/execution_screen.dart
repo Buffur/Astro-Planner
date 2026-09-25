@@ -15,6 +15,7 @@ import '../../shared/field_mode_button.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/execution_viewmodel.dart';
+import '../../../core/utils/quantity_text.dart';
 
 /// The tracking screen (ADR-016; TASK 13.3): large, glanceable, red-safe,
 /// every action in the lower half for one thumb, no typing. Everything is
@@ -180,7 +181,7 @@ class _Summary extends StatelessWidget {
 
 String _blockLabel(CaptureBlock b) =>
     '${b.filterName ?? _typeLabel(b.frameType)} · '
-    '${b.exposureTimeSeconds.round()} s';
+    '${QuantityText.exposure(b.exposureTimeSeconds)}';
 
 String _typeLabel(FrameType t) => switch (t) {
   FrameType.light => 'Light',

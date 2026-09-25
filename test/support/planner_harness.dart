@@ -245,7 +245,6 @@ class PlannerHarness extends ChangeNotifier {
 
   // Capture analysis
   CaptureBudget get captureBudget => analysis.captureBudget;
-  String get totalIntegrationTime => analysis.totalIntegrationTime;
   Duration get estimatedRequiredTime => analysis.estimatedRequiredTime;
   FitResult get fitAnalysis => analysis.fitAnalysis;
   int? get fillWindowBlockIndex => analysis.fillWindowBlockIndex;

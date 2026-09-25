@@ -9,6 +9,7 @@ import '../../viewmodels/execution_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
+import '../../../core/utils/quantity_text.dart';
 
 /// The resume prompt (ADR-016 §5; TASK 13.2): a session was in progress
 /// when the app last stopped. Keep going, pause now, finish or abandon —
@@ -43,7 +44,7 @@ Future<void> showResumeRunDialog(BuildContext context, ResumeRunViewModel vm) {
               if (block != null)
                 Text(
                   '${block.filterName ?? block.frameType.name} · '
-                  '${block.exposureTimeSeconds.round()} s · '
+                  '${QuantityText.exposure(block.exposureTimeSeconds)} · '
                   '${o.state.completedFor(block.id)} of ${block.frameCount} '
                   'frames confirmed',
                 ),

@@ -17,6 +17,8 @@ import '../execution/results_screen.dart';
 import '../library/progress_screen.dart';
 import 'logbook_screen.dart';
 import '../../shared/unsaved_plan_guard.dart';
+import '../../../core/utils/quantity_text.dart';
+import '../../../core/utils/astro_math.dart';
 
 /// One saved session (TASK 14.1): read-only, from its snapshot — history
 /// never reads live sites, targets or rigs (ADR-014 §4). A started session
@@ -168,7 +170,7 @@ class _SnapshotSections extends StatelessWidget {
             zoneId: snap.timeZoneId,
           );
     String deg(double? v, [int digits = 0]) =>
-        v == null ? 'unknown' : '${v.toStringAsFixed(digits)}°';
+        v == null ? 'unknown' : QuantityText.degrees(v, digits: digits);
     String dur(Duration? d) =>
         d == null ? 'unknown' : OpportunityText.duration(d);
     String? known(Object? v, [String unit = '']) =>
@@ -221,8 +223,8 @@ class _SnapshotSections extends StatelessWidget {
             'Name': snap.targetName ?? 'none',
             if (snap.target case final t?) ...{
               'RA / Dec (J2000)':
-                  '${t.rightAscension.toStringAsFixed(3)}°, '
-                  '${t.declination.toStringAsFixed(3)}°',
+                  '${AstroMath.formatRightAscension(t.rightAscension)}, '
+                  '${AstroMath.formatDeclination(t.declination)}',
             },
           },
         ),
@@ -315,7 +317,7 @@ class _PlanVsActual extends StatelessWidget {
             FrameType.dark => 'Darks',
             FrameType.flat => 'Flats',
             FrameType.bias => 'Bias',
-          }} · ${b.exposureTimeSeconds.round()} s';
+          }} · ${QuantityText.exposure(b.exposureTimeSeconds)}';
 }
 
 class _Notes extends StatelessWidget {
@@ -331,7 +333,8 @@ class _Notes extends StatelessWidget {
         'Conditions and events': n,
       if (log.processingNotes case final n? when n.isNotEmpty)
         'Processing notes': n,
-      if (log.temperature case final t?) 'Temperature': '$t °C',
+      if (log.temperature case final t?)
+        'Temperature': '${QuantityText.signed(t, digits: 1)} °C',
       if (log.humidity case final h?) 'Humidity': '$h %',
       if (log.cloudCover case final c?) 'Cloud cover': '$c %',
     };

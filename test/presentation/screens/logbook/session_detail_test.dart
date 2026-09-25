@@ -220,11 +220,20 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.textContaining('Temperature: -3.0 °C', findRichText: true),
+      find.textContaining('Temperature: −3.0 °C', findRichText: true),
       findsOneWidget,
     );
     expect(find.byKey(const Key('detail.editResults')), findsOneWidget);
     expect(find.text('Plan again (copy)'), findsOneWidget);
+    // S1.7 (UX-19): RA/Dec as in the target editor; typographic minus.
+    expect(
+      find.textContaining('05h35m16.8s, −05°23′24″', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Darkness limit: −18°', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a planned session renders from its plan snapshot', (

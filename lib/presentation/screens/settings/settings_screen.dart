@@ -10,6 +10,7 @@ import '../../navigation/app_router.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/failure_feedback.dart';
 import 'backup_section.dart';
+import '../../../core/utils/quantity_text.dart';
 
 /// Planning preferences (TASK 5.2, SI-006, TD-043).
 ///
@@ -48,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
             value: p.minAltitudeDeg,
             range: PlanningPreferences.minAltitudeRange,
             divisions: 55,
-            label: '${p.minAltitudeDeg.round()}°',
+            label: QuantityText.degrees(p.minAltitudeDeg),
             onChanged: (v) => update(p.copyWith(minAltitudeDeg: v)),
           ),
           ListTile(
@@ -63,7 +64,10 @@ class SettingsScreen extends StatelessWidget {
             key: const Key('settings.darknessLimit'),
             segments: [
               for (final l in DarknessLimit.values)
-                ButtonSegment(value: l, label: Text('${l.degrees.round()}°')),
+                ButtonSegment(
+                  value: l,
+                  label: Text(QuantityText.degrees(l.degrees)),
+                ),
             ],
             selected: {p.darknessLimit},
             onSelectionChanged: (s) =>

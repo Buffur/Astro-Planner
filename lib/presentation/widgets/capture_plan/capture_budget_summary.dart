@@ -8,13 +8,11 @@ import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../shared/night_text.dart';
+import '../../../core/utils/quantity_text.dart';
 
-/// Formats a millisecond duration as "Xh Ym" (or "Z s" under a minute).
-String formatBudgetDuration(int ms) {
-  if (ms > 0 && ms < 60000) return '${(ms / 1000).round()} s';
-  final minutes = (ms / 60000).round();
-  return '${minutes ~/ 60}h ${minutes % 60}m';
-}
+/// A millisecond duration in the app's one duration form (S1.7).
+String formatBudgetDuration(int ms) =>
+    QuantityText.duration(Duration(milliseconds: ms));
 
 /// The capture plan's outputs (ADR-009 §2, §6–§7; TASK 5.6): the budget
 /// breakdown, the fit with its reason and end time, "fill the window",
@@ -200,7 +198,7 @@ class _FillWindowAction extends StatelessWidget {
     if (index == null || target == null) return const SizedBox.shrink();
     final block = context.watch<SessionPlanViewModel>().captureBlocks[index];
     final label =
-        '${block.filterName ?? 'Light'} ${_trim(block.exposureTimeSeconds)} s';
+        '${block.filterName ?? 'Light'} ${QuantityText.exposure(block.exposureTimeSeconds)}';
     if (target < 1) {
       return Text(
         'Not even one $label frame fits tonight.',
@@ -224,9 +222,6 @@ class _FillWindowAction extends StatelessWidget {
       ),
     );
   }
-
-  static String _trim(double v) =>
-      v == v.roundToDouble() ? '${v.round()}' : '$v';
 }
 
 class _Line extends StatelessWidget {

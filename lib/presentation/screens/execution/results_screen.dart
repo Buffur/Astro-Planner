@@ -9,6 +9,7 @@ import '../../shared/opportunity_text.dart';
 import '../../viewmodels/execution_viewmodel.dart';
 import '../../viewmodels/results_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
+import '../../../core/utils/quantity_text.dart';
 
 /// Reconciliation (TASK 13.4): turn a run into a log entry. Counts per
 /// block (each change is a stored, timestamped event), notes, optional
@@ -322,7 +323,7 @@ class _BlockCounts extends StatelessWidget {
   Widget build(BuildContext context) {
     final b = block.block;
     final label =
-        '${b.filterName ?? _type(b.frameType)} · ${b.exposureTimeSeconds.round()} s';
+        '${b.filterName ?? _type(b.frameType)} · ${QuantityText.exposure(b.exposureTimeSeconds)}';
     Widget stepper(String name, String key, int value, ValueChanged<int> on) =>
         Row(
           children: [

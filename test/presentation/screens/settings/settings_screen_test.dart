@@ -104,7 +104,7 @@ void main() {
   ) async {
     await build(tester);
     await pump(tester);
-    await tester.tap(find.text('-12°'));
+    await tester.tap(find.text('−12°'));
     await tester.pump();
     expect(vm.planningPreferences.darknessLimit, DarknessLimit.nautical);
 

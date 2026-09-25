@@ -112,12 +112,6 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   Object? _transitKey;
   DateTime? _transit;
 
-  /// Light-frame integration, "Xh Ym".
-  String get totalIntegrationTime {
-    final minutes = captureBudget.integration.inMinutes;
-    return '${minutes ~/ 60}h ${minutes % 60}m';
-  }
-
   /// The window load (ADR-009 §2): acquisition plus in-window calibration.
   Duration get estimatedRequiredTime => captureBudget.windowLoad;
 

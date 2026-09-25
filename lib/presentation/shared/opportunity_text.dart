@@ -1,17 +1,14 @@
 import '../../domain/models/imaging_opportunity.dart';
 import '../../domain/models/night_weather.dart';
+import '../../core/utils/quantity_text.dart';
 
 /// Wording for an [ImagingOpportunity] (ADR-013; TASK 10.3): windows,
 /// annotations and the reasons for excluded time. Facts only — no verdicts,
 /// no score. Times are formatted by the caller (NightTimeFormatter).
 abstract final class OpportunityText {
-  /// "5 h 35 min", "45 min", "0 min".
-  static String duration(Duration d) {
-    final h = d.inHours;
-    final m = d.inMinutes % 60;
-    if (h == 0) return '$m min';
-    return m == 0 ? '$h h' : '$h h $m min';
-  }
+  /// "5 h 35 min", "45 min", "0 min" — the app's one duration form
+  /// ([QuantityText.duration], S1.7).
+  static String duration(Duration d) => QuantityText.duration(d);
 
   static String _deg(double v) => '${v.round()}°';
 
