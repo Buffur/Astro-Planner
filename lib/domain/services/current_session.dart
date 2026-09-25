@@ -102,10 +102,9 @@ class CurrentSession {
   /// fresh draft copy, so it never edits a running session (owner
   /// decision, TASK 13.3). Returns the started session.
   Future<Session> start(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(() => _start(plan, snapshot));
+      _replacing(() => _inChain(() => _start(plan, snapshot)));
 
   Future<Session> _start(SessionPlan plan, SessionSnapshot snapshot) async {
-    await _chain;
     final current = _session;
     final id = current != null && current.planEditable
         ? (await _repository.updatePlan(current.id, plan)).id
@@ -118,12 +117,24 @@ class CurrentSession {
   /// Save: the current open session — or a new one — becomes planned with
   /// [snapshot] (ADR-014 §3–§4).
   Future<Session> save(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(() async {
-        await _chain;
-        final current = _session;
-        final id = current != null && current.planEditable
-            ? current.id
-            : (await _repository.create(plan)).id;
-        return _session = await _repository.savePlan(id, plan, snapshot);
-      });
+      _replacing(
+        () => _inChain(() async {
+          final current = _session;
+          final id = current != null && current.planEditable
+              ? current.id
+              : (await _repository.create(plan)).id;
+          return _session = await _repository.savePlan(id, plan, snapshot);
+        }),
+      );
+
+  /// Runs [op] after every write queued so far and queues later writes
+  /// after it, so an edit made while Save or Start is running can never
+  /// land in the middle of it — before S1.12 it could reach a session that
+  /// was being started (ENG-08, RT-04). A failure of [op] reaches the
+  /// caller through the returned future; the chain itself goes on.
+  Future<T> _inChain<T>(Future<T> Function() op) {
+    final result = _chain.then((_) => op());
+    _chain = result.then<void>((_) {}, onError: (Object _) => null);
+    return result;
+  }
 }
