@@ -14,9 +14,9 @@
 | Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (independent validation failed on S1.5/S1.6 paths; S1.14 deferred) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Review proposed **S1.V1–S1.V4** in `STAGE_1_VALIDATION.md`, plus the earlier S1.16/S1.17 and V3; choose one fix Task |
+| Next approved Task | **S1.V1 — Recognize refusal through the production database connection** (TD-059). The owner approved the remaining fixes (2026-09-25): S1.V1 → S1.V2 → S1.V3 → S1.V4, one commit each, then a repeat independent validation |
 | Code baseline | `4e653fb` (S1.15); `723fd44` and this validation change documentation/evidence only; not pushed (S1.14) |
-| Quality gate at the baseline | **Green**, independently rerun 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed). Six additional probe assertions fail across four findings |
+| Quality gate at the baseline | **Green** after S1.16/S1.17, 2026-09-25: Encoding, Format, Analyze pass; Test (949 passed); E2E on the host (2 passed). The validation's six probe assertions (retained patch) are still expected to fail until S1.V1–S1.V4 |
 | Schema | v17 |
 
 ## Stage status
@@ -59,7 +59,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.13 — Scientific labels and documentation (B1, B3, B4, B6, B7/SCI-04) | 2026-09-25 | `f179013` | SCI-02: "Chance of precipitation (preceding hour)" plus a note under the hour strip, CALC-32 corrected. SCI-09: night-level Moon illumination "at midnight" (Tonight, sky card, window annotations). SCI-03: documented in CALC-28/29 (no displayed text claimed they coincide). SCI-04: accepted as documented in SI-009 and CALC-08 (RD-03). B6: the CALC-01 to 06 tests cite Meeus or the definition, and CALC-03 gained a direct test. No calculation changed. Gate green, 948 + 2 E2E |
 | 1 | S1.14 — Push CI and observe a first run (RD-17) | 2026-09-25 | `28aaa10` (documentation only) | **Deferred by the owner** when asked before the push. Checked: 155 commits ahead as a fast-forward; the remote is public; no secret file tracked; the workflow pins the local Flutter version. Nothing pushed; RD-17 open again (Stage 11 or on request) |
 | 1 | S1.15 — Documentation drift (B5; SCI-10 docs) | 2026-09-25 | `4e653fb` | Corrected, each marked "corrected S1.15" with the old text kept: `optical_calculator.dart` comments (NPF shown; √N is noise, not signal); SI-001/002/003/008/009 statuses (index and sections); CALC-07, CALC-17, CALC-28 and, found here, CALC-13; DEV-P2 ("SNR" appears in four doc comments, none user-facing; DEV-P2 resolved) and the ADR-005 conformance row; F-29 (current state), F-46/F-49 summary rows, F-49 and TD-046 (a public remote exists, never pushed since `a1bcbd9`, S1.14 deferred), F-50's app id; TEST_PLAN L3; `ARCHITECTURE.md` external-services rows (Open-Meteo, Nominatim, OSM tiles) and, found here, the B9 cache note; `PROJECT_HANDOFF.md` header pointer to `docs/refinement/` and §0 marked historical; the `CLAUDE.md` device wording (owner-approved). Historical files untouched. No full re-audit was done. Gate green, 948 + 2 E2E |
-| 1 | Independent Stage 1 validation (documentation and probe evidence only) | 2026-09-25 | The validation commit* | Gate green (948 + 2 E2E), but six additional assertions reproduce TD-059–TD-062. Proposed S1.V1–S1.V4; no fixes or Stage 2 work. See `STAGE_1_VALIDATION.md` |
+| 1 | Independent Stage 1 validation (documentation and probe evidence only) | 2026-09-25 | `db94aaf` | Gate green (948 + 2 E2E), but six additional assertions reproduce TD-059–TD-062. Proposed S1.V1–S1.V4; no fixes or Stage 2 work. See `STAGE_1_VALIDATION.md` |
+| 1 | S1.16 — Commit hashes in the registers (V1) and S1.17 — the field theme in the dialog's accessibility check (V2); V3 recorded under RD-05 | 2026-09-25 | The S1.16 commit* | Owner: "apply fixes for the remaining items to complete Stage 1". 37 `S1.x` stamps in `ARCHITECTURE.md`, `DATA_MODEL.md`, `FEATURE_STATUS.md` and `SCIENTIFIC_INTEGRITY.md`, TD-047, TD-057 and TD-058 cite their commits; the "Discard unsaved changes?" dialog is checked in the light, dark and field themes (contrast not in field, as in the sweep); V3 added to RD-05 (`POST_ROADMAP_PLAN.md` §8). Gate green, 949 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -241,18 +242,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-Review independent validation's proposed **S1.V1–S1.V4** (TD-059–TD-062) in
-`STAGE_1_VALIDATION.md` and select one approved fix Task. Also preserve the
-earlier review's outstanding decisions:
-- approve **S1.16** (backfill commit hashes in the registers) and **S1.17** (the field theme
-  in the unsaved-changes dialog's accessibility check), or accept V1/V2 as they are;
-- confirm that **V3** is recorded under RD-05 for Stage 4;
-- the three temporary probe files are accounted for above; no cleanup is needed.
+The owner approved the remaining Stage 1 fixes (2026-09-25: "apply fixes for the remaining
+items to complete Stage 1"). S1.16, S1.17 and the V3 decision are done. Next, in order, one
+commit each, as defined in `STAGE_1_VALIDATION.md`:
+1. **S1.V1** — recognize refusal through the production connection (TD-059);
+2. **S1.V2** — seed the replacement database after a confirmed reset (TD-060);
+3. **S1.V3** — keep the unsaved-plan safeguard across a restart (TD-061), through the
+   existing persistence abstractions; stop and report if it needs a schema or product
+   decision;
+4. **S1.V4** — reopening the current session keeps its live plan (TD-062).
 
-Do not close Stage 1 yet. After approved fixes, repeat independent validation;
-only then close Stage 1 and consider Stage 2 planning in a fresh session. Stage 2
-needs RG-01 and the owner's metadata samples. Do not implement the next Task in
-this validation session.
+Each Task's acceptance includes turning its probe from the retained patch
+(`evidence/STAGE_1_VALIDATION_PROBES.patch`) into a passing regression test. After S1.V4,
+repeat **independent** Stage 1 validation in a fresh session; only then close Stage 1 and
+consider Stage 2 planning (RG-01 and the owner's metadata samples).
 
 Carried open items that are not Stage 1 failures: TD-057, TD-058, RD-17 (push deferred), the
 S1.5 and S1.11 device checks (Stage 11).

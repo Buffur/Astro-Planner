@@ -119,8 +119,14 @@ void main() {
     expect(vm.isExampleCapturePlan, isTrue);
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('the dialog is accessible at 200 % text (${brightness.name})', (
+  // The accessibility sweep's three themes (S1.17): contrast is not asserted
+  // in field mode, whose secondary red is below AA by design (B16).
+  for (final (theme, brightness, field) in [
+    ('light', Brightness.light, false),
+    ('dark', Brightness.dark, false),
+    ('field', Brightness.dark, true),
+  ]) {
+    testWidgets('the dialog is accessible at 200 % text ($theme)', (
       tester,
     ) async {
       tester.platformDispatcher.platformBrightnessTestValue = brightness;
@@ -129,6 +135,11 @@ void main() {
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       final semantics = tester.ensureSemantics();
       await start(tester, AppRouter.session());
+      if (field) {
+        await tester.runAsync(() => vm.theme.toggleFieldMode());
+        await settle(tester);
+        expect(vm.theme.isFieldMode, isTrue);
+      }
       tester.view.physicalSize = const Size(412, 915);
       await edit(tester);
       await tester.tap(find.byTooltip('New Session'));
@@ -137,7 +148,9 @@ void main() {
       expect(tester.takeException(), isNull, reason: 'no overflow');
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      if (!field) {
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+      }
       semantics.dispose();
     });
   }
