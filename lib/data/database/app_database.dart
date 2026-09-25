@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:drift/isolate.dart' show DriftRemoteException;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
@@ -530,11 +531,12 @@ Future<void> _deleteOrphanForeignKeyRows(GeneratedDatabase db) async {
   }
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(
-    () async => NativeDatabase.createInBackground(await databaseFile()),
-  );
-}
+LazyDatabase _openConnection() => openDatabaseConnection(databaseFile);
+
+/// The app's connection to the file [file] resolves to: opened lazily, on a
+/// background isolate. Tests of the startup path use this same shape (S1.V1).
+LazyDatabase openDatabaseConnection(Future<File> Function() file) =>
+    LazyDatabase(() async => NativeDatabase.createInBackground(await file()));
 
 /// The app's database file.
 Future<File> databaseFile() async {
@@ -545,6 +547,11 @@ Future<File> databaseFile() async {
 /// Opens [database] and returns the refusal when its file is at a schema
 /// version this app cannot open (ADR-008 §2), or null when it opens. Any
 /// other error is rethrown. The refused file is left unchanged (S1.5).
+///
+/// On the app's background connection Drift delivers the refusal wrapped in
+/// a [DriftRemoteException] whose cause is the original, typed exception;
+/// it is unwrapped here (S1.V1, TD-059). A cause that is not that type (for
+/// example only its text, over a serializing channel) stays an error.
 Future<UnsupportedSchemaVersionException?> refusedSchemaVersion(
   AppDatabase database,
 ) async {
@@ -553,6 +560,13 @@ Future<UnsupportedSchemaVersionException?> refusedSchemaVersion(
     return null;
   } on UnsupportedSchemaVersionException catch (e) {
     return e;
+  } on DriftRemoteException catch (e) {
+    Object cause = e;
+    while (cause is DriftRemoteException) {
+      cause = cause.remoteCause;
+    }
+    if (cause is UnsupportedSchemaVersionException) return cause;
+    rethrow;
   }
 }
 

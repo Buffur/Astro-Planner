@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -48,6 +48,61 @@ void main() {
   });
 
   tearDown(() => dir.deleteSync(recursive: true));
+
+  // S1.V1 (TD-059): the app opens its file lazily on a background isolate,
+  // where Drift wraps the refusal in a DriftRemoteException. These use that
+  // same connection (`openDatabaseConnection`), as `main.dart` does.
+  group('through the production connection', () {
+    AppDatabase production() =>
+        AppDatabase(openDatabaseConnection(() async => file));
+
+    for (final (version, newer) in [(7, false), (18, true)]) {
+      test('v$version is refused as ${newer ? 'newer' : 'below the floor'}, '
+          'typed, and the file is unchanged', () async {
+        await _stamp(file, version);
+        final before = file.readAsBytesSync();
+        final db = production();
+        final refused = await refusedSchemaVersion(db);
+        await db.close();
+        expect(refused, isNotNull);
+        expect(refused!.foundVersion, version);
+        expect(refused.isNewerThanApp, newer);
+        expect(file.readAsBytesSync(), before);
+      });
+    }
+
+    test('a current database opens', () async {
+      final db = production();
+      expect(await refusedSchemaVersion(db), isNull);
+      await db.close();
+    });
+
+    test('an unrelated open failure is still a failure', () async {
+      final notAFile = Directory(p.join(dir.path, 'astroplan.sqlite'))
+        ..createSync();
+      final db = AppDatabase(
+        openDatabaseConnection(() async => File(notAFile.path)),
+      );
+      await expectLater(
+        refusedSchemaVersion(db),
+        throwsA(isNot(isA<UnsupportedSchemaVersionException>())),
+      );
+      await db.close().catchError((Object e) => null);
+    });
+
+    test('a below-floor file refused there can be reset', () async {
+      await _stamp(file, 7);
+      final before = file.readAsBytesSync();
+      final db = production();
+      final refused = (await refusedSchemaVersion(db))!;
+      final backup = await resetRefusedDatabase(db, file, refused);
+      expect(backup.readAsBytesSync(), before);
+      expect(file.existsSync(), isFalse);
+      final fresh = production();
+      expect(await refusedSchemaVersion(fresh), isNull);
+      await fresh.close();
+    });
+  });
 
   test('a current database opens: nothing is refused', () async {
     final db = AppDatabase(NativeDatabase(file));
