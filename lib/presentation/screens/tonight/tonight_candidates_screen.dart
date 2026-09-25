@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/services/candidate_evaluator.dart';
+import '../../shared/capability_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
@@ -235,8 +236,8 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
                             r.minMoonSeparationDeg == null
                                 ? 'Moon down in the windows'
                                 : 'Moon ≥ ${r.minMoonSeparationDeg!.round()}° away',
-                            if (r.frameFillFraction != null)
-                              'fills ${(r.frameFillFraction! * 100).round()} % of the frame',
+                            if (r.frameFillFraction case final f?)
+                              CapabilityText.frameFillOf(f),
                           ].join(' · ');
                     return ListTile(
                       key: Key('tonight.row.${t.id}'),
@@ -258,7 +259,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
           padding: const EdgeInsets.all(8),
           child: Text(
             'Times in ${NightTimeFormatter.zoneCaption(night.startUtc, zoneId: zoneId)}. '
-            'Tap a target to open its night on Home.',
+            "Tap a target to make it the plan's target.",
             style: theme.textTheme.bodySmall,
             textAlign: TextAlign.center,
           ),

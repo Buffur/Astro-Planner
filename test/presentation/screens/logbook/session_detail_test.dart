@@ -248,6 +248,19 @@ void main() {
     );
     expect(find.text('Open in planner'), findsOneWidget);
     expect(find.byKey(const Key('detail.editResults')), findsNothing);
+    // S1.8 (UX-20, UX-18): no raw double, no "Notes: none", and the night
+    // key is not called a window.
+    expect(
+      find.textContaining('Focal ratio: f/5.0', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('None recorded.'), findsOneWidget);
+    expect(find.textContaining('Notes: ', findRichText: true), findsNothing);
+    expect(
+      find.textContaining('Night span: ', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Window: ', findRichText: true), findsNothing);
   });
 
   testWidgets('acceptance: a legacy log renders its stored text only', (

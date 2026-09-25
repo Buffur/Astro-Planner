@@ -62,6 +62,7 @@
 > **TASK 13.4 (2026-09-24, commit `c1e52ce`):** end-of-session reconciliation. A results page (`/session/:id/results`) with per-block confirmed and rejected steppers (each change a stored event), notes, optional conditions (temperature, humidity, cloud cover — empty means unknown, range-checked) and planned vs actual light integration (`SessionReconciliation`, CALC-37); Complete or Abandon. Owner decisions: the tracker's Finish opens this page and completes nothing by itself; after completion the counts may be corrected, each correction a timestamped confirm/reject event after `finished` (the only events allowed then; ADR-016 §11); Sessions shows planned vs actual integration and "Edit results" for completed sessions. `complete()` and every correction write the actual/rejected light-frame totals in the same transaction. No schema change (the condition columns existed). **Group G13 is complete.**
 > **TASK 14.2 (2026-09-24, commit `4274175`):** integration so far per target (owner: build it, although it was a roadmap cut line). `TargetProgress` (pure, CALC-38) sums confirmed light frames × exposure of completed, non-legacy sessions with a target, per filter, with the last imaged night and the session count; Library → Progress (`/library/progress`) lists every target, newest first, and a session's detail shows "This target so far". No project goals (out of scope); no schema change.
 > **S1.3 (2026-09-25, Stage 1):** audit SCI-01 (= ENG-01, RT-01) resolved: the forecast's age class is recomputed against the clock through `WeatherFreshness` (thresholds unchanged: aging after 3 h, stale after 12 h, ADR-012 §6), and a snapshot records the age at the time of saving. No calculation changed.
+> **S1.8 (2026-09-25, Stage 1):** audit SCI-05 resolved (the ISO/gain label, RD-03; SI-004 progress) and SCI-06 resolved (Tonight's candidates word the CALC-31 frame fill as "% of the frame's short side", like the planner, through `CapabilityText.frameFillOf`). No calculation changed.
 > **S1.4 (2026-09-25, Stage 1):** audit SCI-11 (= ENG-05, RT-06) resolved: without a site the draft's night key comes from `SessionNightResolver` at the default position, not the UTC date (CALC-21 unchanged; owner decision in DECISIONS E.1).
 
 ## Purpose and authority
@@ -315,6 +316,8 @@ calculation. Legacy free text was migrated as kind "unknown" (never guessed as I
 or gain). Not yet editable or shown in the UI (TASK 5.6).
 
 **Progress 2026-09-22 (TASK 5.6):** the sensitivity setting is editable as ISO / camera gain / not recorded, labelled "for your records" with the helper "Recorded only; it does not change the plan." No text claims ISO or gain collects more light.
+
+**Progress 2026-09-25 (S1.8; audit SCI-05, owner ruling RD-03):** the field is labelled "ISO / gain (for your records)"; the word "sensitivity" no longer appears for ISO or gain in the UI (Part C rule 6). Still descriptive only; RG-11 (Stage 7) may rework capture parameters.
 
 **Status:** Prototype. **Work item:** TD-009 (tracked together with SI-003).
 

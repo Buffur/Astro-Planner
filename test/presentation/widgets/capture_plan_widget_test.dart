@@ -9,6 +9,7 @@
 // planner_capture_blocks_test.dart, where it's deterministic and fast.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:drift/native.dart';
@@ -197,6 +198,30 @@ void main() {
     expect(vm.estimatedStorageMB, isNull);
     expect(find.text('Unknown'), findsOneWidget);
     expect(find.textContaining('0.0 MB'), findsNothing);
+  });
+
+  // S1.8 (RD-03, SCI-05; UX-20): the ISO/gain label, and its helper wraps
+  // instead of being cut off (the audit saw it cut at one line on a 412 dp
+  // phone). The test font draws every glyph a full em wide, so it is more
+  // pessimistic than Roboto; one line overflows here too.
+  testWidgets('the ISO/gain field is labelled neutrally; its helper wraps', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(wrap());
+    await tester.tap(find.byIcon(Icons.add_circle));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('blockDialog.gainKind')));
+    await tester.pumpAndSettle();
+    expect(find.text('ISO / gain (for your records)'), findsOneWidget);
+    expect(find.textContaining('ensitivity'), findsNothing);
+    final helper = find.text('Recorded only; it does not change the plan.');
+    expect(
+      tester.renderObject<RenderParagraph>(helper).didExceedMaxLines,
+      isFalse,
+    );
   });
 
   testWidgets('the dialog saves a calibration policy and a typed gain', (

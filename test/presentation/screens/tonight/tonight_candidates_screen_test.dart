@@ -8,6 +8,7 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
+import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/candidate_evaluator.dart';
@@ -36,6 +37,8 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     final targets = DriftTargetRepository(database);
     await CatalogSeeder(targets).seedIfNeeded();
+    // A rig, so rows carry a frame fill (S1.8).
+    await EquipmentSeeder(DriftEquipmentRepository(database)).seedIfNeeded();
     final locations = DriftLocationRepository(database);
     final prefs = <String, Object>{};
     if (withSite) {
@@ -134,6 +137,13 @@ void main() {
         .widget<Text>(find.byKey(const Key('tonight.header')))
         .data!;
     expect(header, contains('sorted by usable time (no score)'));
+    // S1.8: the planner's frame-fill wording (SCI-06); no "Home" (UX-20).
+    expect(find.textContaining("of the frame's short side"), findsWidgets);
+    expect(find.textContaining('fills '), findsNothing);
+    expect(
+      find.textContaining("Tap a target to make it the plan's target."),
+      findsOneWidget,
+    );
 
     final evaluated = await tester.runAsync(() async {
       return (await vm.tonightCandidates())!;

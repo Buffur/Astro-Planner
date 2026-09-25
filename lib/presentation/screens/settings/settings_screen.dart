@@ -192,8 +192,8 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Values used when an overhead is switched on are assumptions — '
-            'measure your rig. Optional overheads are saved now and will be '
-            'applied to the capture plan in a later update.',
+            'measure your rig. An overhead that is switched on is included '
+            "in the capture plan's budget and fit.",
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const Divider(height: AppSpacing.lg * 2),

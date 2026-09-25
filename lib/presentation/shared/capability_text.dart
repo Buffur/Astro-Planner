@@ -31,9 +31,13 @@ abstract final class CapabilityText {
   /// e.g. "45 % of the frame's short side".
   static String? frameFill(RigCapability c) {
     final f = c.frameFillFraction;
-    if (f == null) return null;
-    return "${(f * 100).round()} % of the frame's short side";
+    return f == null ? null : frameFillOf(f);
   }
+
+  /// A frame-fill fraction (CALC-31: the major axis over the frame's short
+  /// side), worded the same in the planner and the candidates (SCI-06).
+  static String frameFillOf(double fraction) =>
+      "${(fraction * 100).round()} % of the frame's short side";
 
   /// The warning for a light sub longer than the recommendation.
   static String subWarning(RigCapability c) =>

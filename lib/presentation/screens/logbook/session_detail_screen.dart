@@ -190,7 +190,8 @@ class _SnapshotSections extends StatelessWidget {
           title: 'Night',
           rows: {
             if (night != null) ...{
-              'Window': '${at(night.startUtc)} – ${at(night.endUtc)}',
+              // The noon-to-noon night key, not an imaging window (UX-18).
+              'Night span': '${at(night.startUtc)} – ${at(night.endUtc)}',
               'Times in': NightTimeFormatter.zoneCaption(
                 night.startUtc,
                 zoneId: snap.timeZoneId,
@@ -237,7 +238,7 @@ class _SnapshotSections extends StatelessWidget {
                 known(snap.rigFocalLengthMm?.round(), ' mm') ?? 'unknown',
             'Focal ratio': snap.rigFocalRatio == null
                 ? 'unknown'
-                : 'f/${snap.rigFocalRatio}',
+                : 'f/${snap.rigFocalRatio!.toStringAsFixed(1)}',
             'Pixel pitch': known(snap.rigPixelPitchUm, ' µm') ?? 'unknown',
           },
         ),
@@ -341,7 +342,8 @@ class _Notes extends StatelessWidget {
     return _Section(
       key: const Key('detail.notes'),
       title: 'Notes',
-      rows: rows.isEmpty ? const {'Notes': 'none'} : rows,
+      rows: rows,
+      empty: 'None recorded.',
     );
   }
 }
@@ -430,10 +432,18 @@ class _Actions extends StatelessWidget {
 
 /// A titled card of label/value rows.
 class _Section extends StatelessWidget {
-  const _Section({super.key, required this.title, required this.rows});
+  const _Section({
+    super.key,
+    required this.title,
+    required this.rows,
+    this.empty,
+  });
 
   final String title;
   final Map<String, String> rows;
+
+  /// Shown instead of the rows when there are none.
+  final String? empty;
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +457,7 @@ class _Section extends StatelessWidget {
           children: [
             Text(title, style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
+            if (rows.isEmpty && empty != null) Text(empty!),
             for (final MapEntry(:key, :value) in rows.entries)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),

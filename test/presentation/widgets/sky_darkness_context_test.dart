@@ -78,7 +78,11 @@ void main() {
   testWidgets('unknown sky darkness says so and how to add it', (tester) async {
     await pumpCard(tester);
     expect(
-      find.text('Sky darkness unknown — add Bortle or SQM in the site editor.'),
+      // S1.8 (UX-20): names both entry points — the picker and the editor.
+      find.text(
+        'Sky darkness unknown — pick a Bortle class above, or add Bortle '
+        'or SQM in the site editor.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Bortle ?'), findsOneWidget);

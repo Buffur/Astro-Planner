@@ -253,8 +253,10 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
                 key: const Key('blockDialog.gainKind'),
                 initialValue: _gainKind,
                 decoration: const InputDecoration(
-                  labelText: 'Sensitivity setting (for your records)',
+                  // RD-03 (S1.8): never called "sensitivity" (SI-004).
+                  labelText: 'ISO / gain (for your records)',
                   helperText: 'Recorded only; it does not change the plan.',
+                  helperMaxLines: 5,
                 ),
                 items: const [
                   DropdownMenuItem(

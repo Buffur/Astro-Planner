@@ -116,9 +116,10 @@ class _SkyDarknessLine extends StatelessWidget {
     final String text;
     if (darkness.isUnknown) {
       text = hasSite
-          ? 'Sky darkness unknown — add Bortle or SQM in the site editor.'
-          : 'Sky darkness unknown — save this position as a site to record '
-                'Bortle or SQM.';
+          ? 'Sky darkness unknown — pick a Bortle class above, or add Bortle '
+                'or SQM in the site editor.'
+          : 'Sky darkness unknown — pick a Bortle class above; save this '
+                'position as a site to keep it or to record SQM.';
     } else {
       final parts = [
         if (darkness.hasBortle)
