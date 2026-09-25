@@ -712,6 +712,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   Android device". Manual installs have happened, but none is recorded
   (`POST_ROADMAP_PLAN.md` §1.3 item 2).
 - **Not taken in Stage 1:** RD-02 stays open (Stage 10 for `sqlite3_flutter_libs`).
+- **RD-17 deferred (owner, 2026-09-25, asked when S1.14 ran):** no push. The remote is public, so a push would publish 155 commits with the audit and refinement documents and the commit author email. RD-17 is open again (Stage 11 or on request).
 - **S1.4 night key without a site (owner, 2026-09-25, during S1.4).** The planned
   device-zone rule conflicted with ADR-007 §6 and PD-02(a), so it was not built. Without a
   site, the draft's night key is the default night at the app's default position, resolved

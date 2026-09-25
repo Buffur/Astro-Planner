@@ -343,7 +343,7 @@ Findings added in planning, and placed in the Tasks below:
 | S1.12 | Save/Start against the autosave chain | F | S | S1.6 |
 | S1.13 | Scientific labels and documentation | B1, B3, B4, B6, B7 (SCI-04) | S | S1.10 |
 | S1.14 | Push CI and observe a first run | RD-17 | S | S1.1–S1.13 |
-| S1.15 | Documentation drift | B5, the new drift above | S | S1.14 |
+| S1.15 | Documentation drift | B5, the new drift above | S | S1.14 (done or deferred) |
 
 The order is the execution order. Tasks without a dependency may be reordered only with the
 owner's approval.
@@ -543,6 +543,13 @@ owner's approval.
   numeric test changes.
 
 ##### S1.14 — Push CI and observe a first run (RD-17; TASK 1.3, F-49)
+- **Deferred by the owner, 2026-09-25 (asked immediately before the push).** Checked then:
+  `origin/main` = `a1bcbd9`, `main` 155 commits ahead as a fast-forward; the repository
+  `github.com/Buffur/Astro-Planner` is **public** (HTTP 200 without credentials), so a push
+  publishes every commit, the audit and refinement documents and the commit author email;
+  no key, keystore or secret file is tracked; the workflow pins Flutter 3.47.4, the local
+  version. Nothing was pushed. RD-17 stays open (Stage 11, or when the owner asks); S1.15
+  records CI as not yet run.
 - **Objective:** the quality-gate workflow runs on the remote, and its first result is recorded.
 - **Scope:** confirm with the owner at execution time before any push (pushing publishes the
   history to `github.com/Buffur/Astro-Planner`), then push `main` and observe the workflow run.
@@ -982,7 +989,7 @@ any implementation Task is created.
 | RD-14 | Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | When and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3 | PD-06; `FeatureScope` | 2 | — |
-| RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; the push itself is confirmed with the owner when S1.14 runs | 06 §2; 07 §9 | 1 (optional) or 11 | — |
+| RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 
 **Answered in part by Stage 0:** the direction part of 07 §6 item 11 (the primary 1.0 user),
 in `PRODUCT_DIRECTION.md` §2. The focus stays on manual and semi-automated imagers, and less
