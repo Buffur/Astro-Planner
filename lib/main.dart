@@ -76,8 +76,9 @@ void main() async {
 
   // Seeding must finish before the ViewModel's first read, or a fresh
   // install sees an empty catalog until the app restarts (TD-002). Seeding
-  // is idempotent (seedIfNeeded checks for existing rows first), so a
-  // failure here is safe to retry on the next launch.
+  // is idempotent (seedIfNeeded checks for existing rows first), and a
+  // catalog seed with failed inserts is not recorded as applied (S1.2), so
+  // a failure here is retried on the next launch.
   try {
     await targetSeeder.seedIfNeeded();
     await equipmentSeeder.seedIfNeeded();

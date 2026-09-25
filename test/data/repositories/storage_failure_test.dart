@@ -15,6 +15,7 @@ import 'package:astroplan/data/repositories/shared_prefs_display_preferences_rep
 import 'package:astroplan/data/repositories/shared_prefs_first_run_repository.dart';
 import 'package:astroplan/data/repositories/shared_prefs_planner_state_repository.dart';
 import 'package:astroplan/data/repositories/shared_prefs_planning_preferences_repository.dart';
+import 'package:astroplan/data/repositories/shared_prefs_privacy_preferences_repository.dart';
 import 'package:astroplan/data/repositories/shared_prefs_weather_snapshot_store.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
@@ -182,6 +183,15 @@ void main() {
         SharedPrefsPlannerStateRepository().getSelectedTargetId(),
         _storageFailure,
       );
+    });
+
+    test('privacy preferences (S1.2, E3)', () async {
+      SharedPreferences.setMockInitialValues({'placeNameLookup': 'yes'});
+      await expectLater(
+        SharedPrefsPrivacyPreferencesRepository().loadPlaceNameLookup(),
+        _storageFailure,
+      );
+      expect(AppLog.recent.single.scope, 'storage');
     });
 
     test('weather cache: an unreadable store fails; an unreadable entry is '

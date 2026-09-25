@@ -11,6 +11,7 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/domain/models/target_types.dart';
+import 'package:astroplan/domain/repositories/storage_failure.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -224,6 +225,74 @@ void main() {
       expect(await storedVersion(), 2);
     });
 
+    // S1.2 (ENG-02, RT-02): failed inserts are not recorded as applied.
+    group('failed inserts', () {
+      test('every insert failing stores no version, and the next launch '
+          'seeds everything', () async {
+        SharedPreferences.setMockInitialValues({});
+        final failing = _FailingTargets(database, (_) => true);
+        await CatalogSeeder(
+          failing,
+          loadAsset: () async => assetJson,
+        ).seedIfNeeded();
+        expect(failing.attempts, 164);
+        expect(await storedVersion(), isNull);
+        expect(await repository.getAllTargets(), isEmpty);
+
+        await seeder().seedIfNeeded();
+        expect(await repository.getAllTargets(), hasLength(164));
+        expect(await storedVersion(), 2);
+      });
+
+      test(
+        'a partial failure is retried without duplicating what went in',
+        () async {
+          SharedPreferences.setMockInitialValues({});
+          final failing = _FailingTargets(database, (id) => id == 'M31');
+          await CatalogSeeder(
+            failing,
+            loadAsset: () async => assetJson,
+          ).seedIfNeeded();
+          expect(await repository.getAllTargets(), hasLength(163));
+          expect(await storedVersion(), isNull);
+
+          final retry = _FailingTargets(database, (_) => false);
+          await CatalogSeeder(
+            retry,
+            loadAsset: () async => assetJson,
+          ).seedIfNeeded();
+          expect(retry.attempts, 1, reason: 'only the missing M31');
+          final all = await repository.getAllTargets();
+          expect(all, hasLength(164));
+          expect(all.where((t) => t.catalogId == 'M31'), hasLength(1));
+          expect(await storedVersion(), 2);
+        },
+      );
+
+      test('a failed upgrade keeps the old version and is retried', () async {
+        SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
+        final data = jsonDecode(assetJson) as Map<String, dynamic>;
+        data['version'] = 3;
+        (data['objects'] as List).add({
+          ...(data['objects'] as List).first as Map<String, dynamic>,
+          'id': 'NEW 1',
+          'since': 3,
+        });
+        final json = jsonEncode(data);
+        await CatalogSeeder(
+          _FailingTargets(database, (_) => true),
+          loadAsset: () async => json,
+        ).seedIfNeeded();
+        expect(await storedVersion(), 2);
+
+        await seeder(json: json).seedIfNeeded();
+        expect((await repository.getAllTargets()).map((t) => t.catalogId), [
+          'NEW 1',
+        ]);
+        expect(await storedVersion(), 3);
+      });
+    });
+
     test('without preferences, a non-empty table is left alone', () async {
       await repository.insertTarget(CatalogSeeder.legacySeeds.first);
       await CatalogSeeder(
@@ -234,4 +303,22 @@ void main() {
       expect(await repository.getAllTargets(), hasLength(1));
     });
   });
+}
+
+/// A real repository whose inserts fail with a [StorageFailure] (as a full
+/// disk would) for the catalog ids [fails] selects.
+class _FailingTargets extends DriftTargetRepository {
+  _FailingTargets(super.db, this.fails);
+
+  final bool Function(String catalogId) fails;
+  int attempts = 0;
+
+  @override
+  Future<int> insertTarget(AstroTarget target) {
+    attempts++;
+    if (fails(target.catalogId)) {
+      throw const StorageFailure('save a target', 'SQLITE_FULL');
+    }
+    return super.insertTarget(target);
+  }
 }

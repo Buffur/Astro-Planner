@@ -198,17 +198,33 @@ class CatalogSeeder {
       return;
     }
 
+    // Catalog ids already held by a catalog row: the partial unique index
+    // would refuse them, so they are skipped rather than attempted (S1.2).
+    final present = {
+      for (final t in existing)
+        if (_isCatalogRow(t)) t.catalogId,
+    };
+    final failures = <Object>[];
+    Future<void> insert(CatalogEntry entry) async {
+      if (present.contains(entry.id)) return;
+      try {
+        await _repository.insertTarget(entry.toTarget(catalog.source));
+      } catch (e) {
+        failures.add(e);
+      }
+    }
+
     if (applied != null) {
       // A newer catalog: add only what it introduced.
       for (final entry in catalog.entries.where((e) => e.since > applied)) {
-        await _insert(entry, catalog.source);
+        await insert(entry);
       }
     } else if (existing.isEmpty) {
       for (final entry in catalog.entries) {
-        await _insert(entry, catalog.source);
+        await insert(entry);
       }
     } else {
-      // First run after a pre-8.2 install.
+      // First run after a pre-8.2 install, or a retry after failed inserts.
       for (final entry in catalog.entries) {
         final legacy = existing
             .where((t) => t.catalogId == entry.id && _isUntouchedLegacySeed(t))
@@ -218,20 +234,24 @@ class CatalogSeeder {
             entry.toTarget(catalog.source, id: legacy.id),
           );
         } else {
-          await _insert(entry, catalog.source);
+          await insert(entry);
         }
       }
+    }
+    if (failures.isNotEmpty) {
+      // Not recorded as applied: the next launch retries, and the rows that
+      // did go in are skipped then (ENG-02, S1.2).
+      AppLog.error(
+        'seeding',
+        '${failures.length} catalog insert(s) failed; will retry next launch',
+        error: failures.first,
+      );
+      return;
     }
     await prefs?.setInt(versionKey, catalog.version);
   }
 
-  /// Inserts [entry]; a catalog entry with the same id already present
-  /// (the unique index) is left as it is.
-  Future<void> _insert(CatalogEntry entry, String source) async {
-    try {
-      await _repository.insertTarget(entry.toTarget(source));
-    } catch (e) {
-      AppLog.warning('seeding', 'Skipped ${entry.id}', error: e);
-    }
-  }
+  static bool _isCatalogRow(AstroTarget t) =>
+      (t.source?.startsWith('seed:') ?? false) ||
+      (t.source?.startsWith('catalog:') ?? false);
 }

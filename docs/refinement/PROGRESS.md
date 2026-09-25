@@ -3,7 +3,7 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.1.
+> **Last updated:** 2026-09-25, after S1.2.
 
 ## Current state
 
@@ -13,9 +13,9 @@
 | Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.2 — Seeding and preference failure paths** (A2, E1, E3; ENG-02, RT-02). Approved by the frozen sequence |
-| Code baseline | `main` after S1.1 (see "Completed Tasks") |
-| Quality gate at the baseline | **Green**, S1.1, 2026-09-25: Encoding, Format, Analyze pass; Test (897 passed); E2E on the host (2 passed) |
+| Next approved Task | **S1.3 — Forecast freshness over time, resume and rollover** (A1, E2; ENG-01, SCI-01, RT-01). Approved by the frozen sequence |
+| Code baseline | `main` after S1.2 (see "Completed Tasks") |
+| Quality gate at the baseline | **Green**, S1.2, 2026-09-25: Encoding, Format, Analyze pass; Test (901 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
 ## Stage status
@@ -43,7 +43,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | --- | --- | --- | --- | --- |
 | 0 | Stage 0 — Refinement Baseline (documentation only) | 2026-09-25 | `652ad80` | Created `PRODUCT_DIRECTION.md`, `POST_ROADMAP_PLAN.md` and `PROGRESS.md`; archived the Stage 0 prompt in `docs/refinement/prompts/`; committed the audit reports 01–08 and the owner's post-roadmap `CLAUDE.md` governance with them |
 | 1 | Stage 1 planning (documentation only): every A–F candidate re-verified at `652ad80` (none stale); RD-03 resolved; RD-05 interim decided; RD-17 included; the Task sequence S1.1–S1.15 frozen | 2026-09-25 | `1ec6e7a` | `POST_ROADMAP_PLAN.md` §5 and §8; DECISIONS E.1 "Stage 1 planning decisions" |
-| 1 | S1.1 — Open-Meteo user agent (A3) | 2026-09-25 | The S1.1 commit* | Open-Meteo requests carry `AppIdentity.userAgent`; a `MockClient` test (fails without the fix). Resolves ENG-03 = RT-07. Gate green, 897 + 2 E2E. Found: `ARCHITECTURE.md:494` and F-29's body are stale, added to S1.15 |
+| 1 | S1.1 — Open-Meteo user agent (A3) | 2026-09-25 | `6a90347` | Open-Meteo requests carry `AppIdentity.userAgent`; a `MockClient` test (fails without the fix). Resolves ENG-03 = RT-07. Gate green, 897 + 2 E2E. Found: `ARCHITECTURE.md:494` and F-29's body are stale, added to S1.15 |
+| 1 | S1.2 — Seeding and preference failure paths (A2, E1, E3) | 2026-09-25 | The S1.2 commit* | `CatalogSeeder` skips ids a catalog row already holds and leaves the version unrecorded when any other insert fails, so the next launch retries (3 tests, failing before the fix); `EquipmentSeeder` re-checked, already retries; the privacy preferences failure-path test. Resolves ENG-02 = RT-02, 01 §G.7. Gate green, 901 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -54,7 +55,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
   captured against it.
 - `652ad80`: Stage 0, the refinement baseline.
 - `1ec6e7a`: Stage 1 planning (the frozen sequence).
-- S1.1: see the note under "Completed Tasks".
+- `6a90347`: S1.1.
+- S1.2: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -148,20 +150,20 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1 done (gate green). **Stages 2–11:** not started.
+- **Stage 1 Tasks:** S1.1 and S1.2 done (gate green). **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **S1.2 — Seeding and preference failure paths** (`POST_ROADMAP_PLAN.md` §5, Stage 1
-frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
+Run **S1.3 — Forecast freshness over time, resume and rollover** (`POST_ROADMAP_PLAN.md` §5,
+Stage 1 frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
 file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
 a Task). That session:
-- reads `CLAUDE.md`, this file and the S1.2 entry, plus the files it names;
+- reads `CLAUDE.md`, this file and the S1.3 entry, plus the files it names;
 - follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
   STOP;
-- records the S1.1 commit hash and its own commit here, then stops. It does not start S1.3.
+- records the S1.2 commit hash and its own commit here, then stops. It does not start S1.4.
 
-Then S1.3 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
+Then S1.4 … S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
 fresh session (§9.8).
 
 ## Stage 0 notes
