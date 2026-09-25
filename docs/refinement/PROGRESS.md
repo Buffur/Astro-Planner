@@ -3,7 +3,7 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, after S1.12.
+> **Last updated:** 2026-09-25, after S1.13.
 
 ## Current state
 
@@ -13,9 +13,9 @@
 | Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In progress** (planning done 2026-09-25; the Task sequence is frozen, S1.1–S1.15, in `POST_ROADMAP_PLAN.md` §5) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S1.13 — Scientific labels and documentation** (B1, B3, B4, B6, B7/SCI-04). Approved by the frozen sequence |
-| Code baseline | `main` after S1.12 (see "Completed Tasks") |
-| Quality gate at the baseline | **Green**, S1.12, 2026-09-25: Encoding, Format, Analyze pass; Test (947 passed); E2E on the host (2 passed) |
+| Next approved Task | **S1.14 — Push CI and observe a first run** (RD-17). Approved by the frozen sequence; **the push itself needs the owner's go-ahead at that moment** |
+| Code baseline | `main` after S1.13 (see "Completed Tasks") |
+| Quality gate at the baseline | **Green**, S1.13, 2026-09-25: Encoding, Format, Analyze pass; Test (948 passed); E2E on the host (2 passed) |
 | Schema | v17 |
 
 ## Stage status
@@ -54,7 +54,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.9 — Fit status colours and the missing-input state (C3) | 2026-09-25 | `705b764` | `AppPalette.caution` in all three palettes (light #9A5B00, AA; dark orange 300; field the primary red) for "Tight"; `FitState.needsInput` (`FitAnalyzer.analyze(inputMissing:)`, set by the VM when the site or target is missing) drawn neutral; a real no-window night stays red. 7 tests (domain states, the VM with no site / no target / a never-rising target, colours and AA contrast in light and dark); the field red-only check covers the token. Resolves UX-16, UX-15(2). Gate green, 943 + 2 E2E |
 | 1 | S1.10 — Weather strip at 200 % text; a forecast in the sweep (D1, D2) | 2026-09-25 | `642b235` | The sweep's weather fake serves a full forecast; with it the sweep failed on the old strip (94 px and 222 px overflows, demonstrated), and passes after the fix: no fixed 130 px height (`IntrinsicHeight` in a horizontal scroll), columns widen with the text size, an 8 px label–value gap. A test keeps the forecast on screen and checks the gap (fails before). Resolves UX-31, UX-32. Gate green, 944 + 2 E2E |
 | 1 | S1.11 — Tracker controls expose a tap action (D3) | 2026-09-25 | `b0998c6` | **Verified first:** a semantics test showed `run.plus` (and the others) had no tap action and no enabled state. Fixed: the relabelling `Semantics` passes `onTap: onPressed` and `enabled`. The test checks all seven controls and that a semantics tap confirms a frame; fails before. Resolves UX-28 on the host; TalkBack remains a Stage 11 device check. Gate green, 945 + 2 E2E |
-| 1 | S1.12 — Save/Start against the autosave chain (F) | 2026-09-25 | The S1.12 commit* | UI-driven test, no injected delays: Save then an edit **did not reproduce** (kept as a regression test); Start then an edit **reproduced** (the edit landed in the session being started). Fixed: Save and Start run inside the chain (`CurrentSession._inChain`). Found and recorded: TD-058 (New/Duplicate/Open, same pattern). Resolves ENG-08 = RT-04. Gate green, 947 + 2 E2E |
+| 1 | S1.12 — Save/Start against the autosave chain (F) | 2026-09-25 | `b6fb6c3` | UI-driven test, no injected delays: Save then an edit **did not reproduce** (kept as a regression test); Start then an edit **reproduced** (the edit landed in the session being started). Fixed: Save and Start run inside the chain (`CurrentSession._inChain`). Found and recorded: TD-058 (New/Duplicate/Open, same pattern). Resolves ENG-08 = RT-04. Gate green, 947 + 2 E2E |
+| 1 | S1.13 — Scientific labels and documentation (B1, B3, B4, B6, B7/SCI-04) | 2026-09-25 | The S1.13 commit* | SCI-02: "Chance of precipitation (preceding hour)" plus a note under the hour strip, CALC-32 corrected. SCI-09: night-level Moon illumination "at midnight" (Tonight, sky card, window annotations). SCI-03: documented in CALC-28/29 (no displayed text claimed they coincide). SCI-04: accepted as documented in SI-009 and CALC-08 (RD-03). B6: the CALC-01 to 06 tests cite Meeus or the definition, and CALC-03 gained a direct test. No calculation changed. Gate green, 948 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -76,7 +77,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `705b764`: S1.9.
 - `642b235`: S1.10.
 - `b0998c6`: S1.11.
-- S1.12: see the note under "Completed Tasks".
+- `b6fb6c3`: S1.12.
+- S1.13: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -170,20 +172,21 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
-- **Stage 1 Tasks:** S1.1–S1.12 done (gate green). **Stages 2–11:** not started.
+- **Stage 1 Tasks:** S1.1–S1.13 done (gate green). **Stages 2–11:** not started.
 
 ## Next allowed action
 
-Run **S1.13 — Scientific labels and documentation** (`POST_ROADMAP_PLAN.md` §5, Stage 1
-frozen sequence), preferably in a fresh session. The frozen sequence is the approval: no separate prompt
+Run **S1.14 — Push CI and observe a first run** (`POST_ROADMAP_PLAN.md` §5, Stage 1 frozen
+sequence). It publishes the history to `github.com/Buffur/Astro-Planner`: ask the owner
+immediately before pushing, preferably in a fresh session. The frozen sequence is the approval: no separate prompt
 file is needed (CLAUDE.md governance; an owner-supplied prompt may still narrow or override
 a Task). That session:
-- reads `CLAUDE.md`, this file and the S1.13 entry, plus the files it names;
+- reads `CLAUDE.md`, this file and the S1.14 entry, plus the files it names;
 - follows READ → VERIFY → PLAN → IMPLEMENT → TESTS → GATE → SELF-REVIEW → DOCS → COMMIT →
   STOP;
-- records the S1.12 commit hash and its own commit here, then stops. It does not start S1.14.
+- records the S1.13 commit hash and its own commit here, then stops. It does not start S1.15.
 
-Then S1.14 and S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
+Then S1.15 in order, one Task per session. After S1.15, run Stage 1 validation in a
 fresh session (§9.8).
 
 ## Stage 0 notes

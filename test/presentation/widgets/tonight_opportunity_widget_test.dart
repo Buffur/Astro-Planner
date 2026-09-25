@@ -115,7 +115,7 @@ void main() {
         ),
       );
       final w = o.windows.single;
-      expect(OpportunityText.moon(w), 'Moon down (85 % lit)');
+      expect(OpportunityText.moon(w), 'Moon down (85 % lit at midnight)');
       expect(
         OpportunityText.weather(w),
         'cloud 10–30 %, 1 h without forecast, stale forecast',

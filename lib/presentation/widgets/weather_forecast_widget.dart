@@ -215,6 +215,11 @@ class _AvailableBody extends StatelessWidget {
           ],
           const SizedBox(height: 8),
           _HourStrip(summary: s, zoneId: zoneId),
+          Text(
+            'Precipitation is the chance in the hour before each time.',
+            key: const Key('weather.precipNote'),
+            style: small,
+          ),
         ],
       ],
     );
@@ -298,7 +303,8 @@ class _Ranges extends StatelessWidget {
       ('Mid cloud (3–8 km)', WeatherText.range(s.cloudCoverMid, '%')),
       ('High cloud (above 8 km)', WeatherText.range(s.cloudCoverHigh, '%')),
       (
-        'Chance of precipitation',
+        // Open-Meteo's value covers the preceding hour (S1.13; SCI-02).
+        'Chance of precipitation (preceding hour)',
         WeatherText.range(s.precipitationProbability, '%'),
       ),
       ('Wind at 10 m', WeatherText.range(s.windSpeed, 'km/h')),

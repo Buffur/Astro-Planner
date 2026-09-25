@@ -8,6 +8,7 @@ import '../../../domain/models/night_weather.dart';
 import '../../../domain/models/session.dart';
 import '../../../domain/services/fit_analyzer.dart';
 import '../../navigation/app_router.dart';
+import '../../../core/utils/quantity_text.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_text.dart';
@@ -246,7 +247,9 @@ class _NightCard extends StatelessWidget {
             icon: Icons.nightlight_round,
             label: 'Moon',
             lines: [
-              '${(moon.illuminationAtMidnight * 100).round()} % lit',
+              // Night-level: the value at mean solar midnight (SCI-09).
+              '${QuantityText.percent(moon.illuminationAtMidnight * 100)} lit '
+                  'at midnight',
               MoonText.up(moon, at),
             ],
             onTap: openPlanner,

@@ -66,7 +66,8 @@ abstract final class OpportunityText {
   static String? moon(OpportunityWindow w) {
     final m = w.moon;
     if (m == null) return null;
-    final lit = '${(m.illumination * 100).round()} % lit';
+    // The night's value, at mean solar midnight (ADR-013 §2; SCI-09).
+    final lit = '${QuantityText.percent(m.illumination * 100)} lit at midnight';
     if (m.moonDown) return 'Moon down ($lit)';
     final sep = m.minSeparationDeg;
     return 'Moon up ${duration(m.upDuration)} of it, $lit'

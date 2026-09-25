@@ -126,7 +126,8 @@ void main() {
     expect(find.textContaining('Sunset to sunrise:'), findsOneWidget);
     expect(find.textContaining('Dark (Sun below −18°):'), findsOneWidget);
     expect(find.byKey(const Key('tonight.moon')), findsOneWidget);
-    expect(find.textContaining('% lit'), findsOneWidget);
+    // S1.13 (SCI-09): the night's value, and when it applies.
+    expect(find.textContaining('% lit at midnight'), findsOneWidget);
   });
 
   testWidgets('no forecast: says so, never a number', (tester) async {

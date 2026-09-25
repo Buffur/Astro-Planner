@@ -250,6 +250,12 @@ void main() {
     final label = tester.getRect(find.text('Low cloud (below 3 km)'));
     final value = tester.getRect(find.text('18 %'));
     expect(value.left - label.right, greaterThanOrEqualTo(8));
+    // S1.13 (SCI-02): precipitation covers the preceding hour.
+    expect(
+      find.text('Chance of precipitation (preceding hour)'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('weather.precipNote')), findsOneWidget);
   });
 
   testWidgets('the altitude chart has a text alternative', (tester) async {

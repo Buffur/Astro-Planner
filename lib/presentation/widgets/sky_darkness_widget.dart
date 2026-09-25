@@ -71,7 +71,7 @@ class SkyDarknessWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Moon Illumination: $lunarIllum',
+                    'Moon Illumination at midnight: $lunarIllum',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ),
