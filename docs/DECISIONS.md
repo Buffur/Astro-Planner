@@ -3076,7 +3076,7 @@ sample and tests. See E.1, "Stage 2 format priorities and metadata layering".
 Status: accepted (owner, 2026-09-26, S3.D). The owner chose the recommended option for each of
 D1–D4 in `refinement/research/RG-02_EQUIPMENT_IDENTITY.md` §12 (E.1, "Stage 3 decisions (S3.D)").
 It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment (§5). ADR-011 is
-unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the rest follows in S3.5–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
+unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the editor's form model and pre-fill done (S3.5, 2026-09-26); the rest follows in S3.6–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
 
 **Implementation note (S3.3, 2026-09-26):** choices made within §6.

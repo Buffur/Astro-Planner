@@ -3,9 +3,8 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.3). Stage 3 is in progress: S3.1–S3.4 are done (image
-> dimensions; the candidate and CALC-40; matching; schema v18). Next: **S3.5** (the editor's form
-> model and pre-fill).
+> **Last updated:** 2026-09-26 (S3.5). Stage 3 is in progress: S3.1–S3.5 are done. Next:
+> **S3.6** (the import review and confirmation flow).
 
 ## Current state
 
@@ -35,9 +34,9 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.5 — A form model for the rig editor, and pre-fill** (frozen) |
-| Code baseline | S3.3 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.6 — The import review and confirmation flow** (frozen) |
+| Code baseline | S3.5 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -131,7 +130,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.4 — Per-field provenance and identity evidence, schema v18 (ADR-018 §5) | 2026-09-26 | `1af68e4` | 14 additive nullable columns: source/confidence pairs for resolution, pixel pitch, sensor size and RAW size, plus `metadata_make` and `metadata_model`, on `camera_modules`; pairs for focal length and focal ratio on `optical_rigs`. Nothing is back-filled. The Drift workflow was followed (v18 snapshot, generated verification and steps; `from17To18` against the step's shapes). Domain: `EquipmentSpec` and `SpecProvenance`; `EquipmentProfile.specProvenance`, `metadataMake/Model` and `provenanceOf` (own pair → group → unknown); `withEditProvenance` per field, which pins the group's old provenance on untouched specs when their group changes (a verified value stays verified), keeps given pairs, and keeps the identity. The repository maps the new columns. The manual editor is unchanged (its tests are not modified). 21 new tests: every version v8–v17 → v18 against the snapshot; v17 → v18 keeps values and group provenance with no own pairs; a legacy rig stays unknown; 8 domain rules; a repository round-trip through a manual edit. **Four existing tests changed** only because they hardcoded the current schema: the backup header now expects 18, and the "newer than the app" example is 19. Session snapshots keep only group provenance. Gate green, 1115 + 1 skip + 2 E2E |
 
-| 3 | S3.3 — Matching saved rigs, with conflicts (ADR-018 §6) | 2026-09-26 | The S3.3 commit* | `EquipmentMatcher` is pure domain code with no write. It gives six outcomes (`MatchKind`) with `MatchReason`s, per-field `FieldConflict`s (both provenances; `savedIsVerified`) and `fillable` unknown specs. The stored import identity wins over the labels; comparison is normalised; the prefix rule uses `/`, space, `-` and `_`; f and N use a 1 % tolerance. The capture mode differs when the pixel count differs, or when the file's f₃₅ is more than 10 % from the one the rig implies (f × 43.27 ÷ the sensor diagonal; recorded as an S3.3 implementation choice in ADR-018's note, with the "Pro Max" prefix limit and the no-model rule). 15 tests, one per scenario: none; same; likely (DNG vs JPEG); normalised labels; the stored identity over renamed labels; makes; two identical bodies (ambiguous); the other phone module; a telescope body; digital zoom; a full-resolution mode; the tolerance; verified vs legacy conflicts; the seeded camera. Gate green, 1130 + 1 skip + 2 E2E |
+| 3 | S3.3 — Matching saved rigs, with conflicts (ADR-018 §6) | 2026-09-26 | `0e5b93e` | `EquipmentMatcher` is pure domain code with no write. It gives six outcomes (`MatchKind`) with `MatchReason`s, per-field `FieldConflict`s (both provenances; `savedIsVerified`) and `fillable` unknown specs. The stored import identity wins over the labels; comparison is normalised; the prefix rule uses `/`, space, `-` and `_`; f and N use a 1 % tolerance. The capture mode differs when the pixel count differs, or when the file's f₃₅ is more than 10 % from the one the rig implies (f × 43.27 ÷ the sensor diagonal; recorded as an S3.3 implementation choice in ADR-018's note, with the "Pro Max" prefix limit and the no-model rule). 15 tests, one per scenario: none; same; likely (DNG vs JPEG); normalised labels; the stored identity over renamed labels; makes; two identical bodies (ambiguous); the other phone module; a telescope body; digital zoom; a full-resolution mode; the tolerance; verified vs legacy conflicts; the seeded camera. Gate green, 1130 + 1 skip + 2 E2E |
+
+| 3 | S3.5 — A form model for the rig editor, and pre-fill | 2026-09-26 | The S3.5 commit* | The editor's value building moved into the pure `EquipmentDraft` (`presentation/shared/equipment_draft.dart`): `fromProfile` (Add/Edit, as before), `fromCandidate` (file values, the CALC-40 estimate, or a saved rig's camera specs as `cameraFrom`), and `build` (the Save logic, moved unchanged, plus per-field provenance: a pre-filled value keeps its origin only while its text is untouched). The dialog moved from the 791-line screen into `showEquipmentEditor` (`equipment_editor.dart`, 578 lines; the screen is now 218). It shows a note under each pre-filled field; D, tracking, rotation and maximum exposure are never pre-filled. The 10 existing editor tests pass unmodified. 13 new tests: 8 form-model tests and 5 widget tests (notes shown and cleared; saved untouched keeps its origin and identity; edited pixel size and derived sensor become the user's; Cancel writes nothing; missing values block Save). `phoneCandidate` in `test/support/metadata_candidates.dart`. No entry point yet (S3.6/S3.7). Gate green, 1143 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -382,18 +383,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.5 — A form model for the rig editor, and pre-fill** (frozen in `POST_ROADMAP_PLAN.md`,
+**S3.6 — The import review and confirmation flow** (frozen in `POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
-- Move the editor's value building out of the widget into a pure form model (a draft) shared by
-  Add/Edit and the import:
-  - parsing;
-  - `resolveAperture`;
-  - the sensor size from resolution × pixel size;
-  - provenance.
-- The editor accepts an initial draft with per-field provenance, and shows each pre-filled value's
-  source and confidence.
-- Editing a field makes it `user`; D is never pre-filled.
-- The existing editor tests pass unchanged.
+- The metadata screen shows the candidate (`EquipmentCandidate.fromReading`) and the match
+  (`EquipmentMatcher`) in plain words.
+- Actions:
+  - open the matching rig;
+  - a new rig pre-filled through `showEquipmentEditor(draft: EquipmentDraft.fromCandidate(...,
+    cameraFrom:))`;
+  - for conflicts, keep or use the imported value per field, with keep as the default.
+- Nothing is written before Save.
+- A ViewModel within the size limits.
+- The accessibility sweep covers the review.
 - One commit, then STOP.
 
 Useful inputs:
