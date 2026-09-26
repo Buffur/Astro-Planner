@@ -1,5 +1,11 @@
 # AstroPlan Technical Debt Register
 
+> **Metadata corrective work, 2026-09-26 (S2.V1–S2.V3):** validation findings
+> S2V-01 (integer offsets), S2V-02 (short EXIF) and S2V-03 (streaming accounting
+> and tests) are corrected; S2V-05 current-state wording is reconciled. Detailed
+> evidence: `refinement/STAGE_2_CORRECTIONS.md`. S2V-04 gates and S2V-06 device
+> limits stay open. TD-066 is unchanged; Stage 2 is not marked accepted.
+
 > **Repeat independent Stage 1 validation, 2026-09-26, code `c99bd7f`:** TD-059–TD-062 hold as
 > resolved; TD-063 recorded (reproduced). The banner below and TD-047's "REOPENED" note predate
 > S1.V1–S1.V4 and are not yet updated (finding X2). See

@@ -2740,6 +2740,16 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 
+**Corrective implementation note (2026-09-26, S2.V1–S2.V3):** the owner authorized
+fixing the validation failures. Single-valued integer fields accept count 1;
+unsupported arrays are unparseable, never interpreted as offsets or guessed.
+An identified Exif APP1 with a short TIFF header is unreadable. Android returns
+consumed-byte accounting (including streamed prefixes) to the serialized Dart
+source; §4's per-file budget and §6's range bound both hold. Unknown consumption
+after I/O failure prevents further reads on that source. This implements the
+existing bounds/unknown rules; it does not approve HEIC, reopen visibility, or
+close RG-14. See `refinement/STAGE_2_CORRECTIONS.md`.
+
 Status: accepted (owner, 2026-09-26, after S2.R1; the constraints are in E.1, "Stage 2
 decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
 - **Done:**

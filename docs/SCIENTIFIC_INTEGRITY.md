@@ -1,5 +1,11 @@
 # AstroPlan — Scientific Integrity Register
 
+> **Metadata verification, 2026-09-26 (S2.V1):** CALC-39's formulas and units
+> are unchanged. Shared EXIF extraction now refuses unsupported integer counts
+> and malformed sensitivity-kind tags as unparseable; no pointer is presented
+> as ISO or focal length. DNG/JPEG regression and external sample tests pass.
+> See `refinement/STAGE_2_CORRECTIONS.md`.
+
 > **Verification stamp:** verified against code at commit `900b82a` (2026-09-20),
 > audited 2026-09-21. Application code changed since only by TASK 1.1 (commit
 > `2357755`); the only spot it touches here is the integration-test RA fixture

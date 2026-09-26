@@ -1,5 +1,9 @@
 # AstroPlan Feature Status
 
+> **Metadata verification update, 2026-09-26 (S2.V1–S2.V3):** integer arrays
+> remain unparseable, short JPEG EXIF is a typed failure, and Android streaming
+> prefixes consume the per-file budget. See `refinement/STAGE_2_CORRECTIONS.md`.
+
 > **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** S1.5 recovery
 > is broken on the production background connection (TD-059), with a conditional
 > reset-seeding gap (TD-060). S1.6's safeguard is partial (TD-061/062).
@@ -673,11 +677,11 @@ see DATA_MODEL.md B2/B8.)
 - **Decided 2026-09-26 (ADR-017; DECISIONS E.1):** Stage 2 rebuilds the foundation (bounded reads, signature recognition, a typed contract, no GPS/serial/observer, Android access without a copy); DNG only, FITS on a sample; the screen stays hidden during Stage 2 (S2.1–S2.6).
 - **S2.R1 (2026-09-26, research; no code changed):** the owner supplied two real phone DNGs, kept outside the repository. On them, the prototype finds none of the capture fields: it reads only `EXIF …` keys, while these files keep the tags in IFD0 (TD-064). The recommended formats, readers and fixture policy are in `refinement/research/RG-01_METADATA_FORMATS.md`, pending the owner's decision (PD-21, proposed ADR-017). The status is still Prototype.
 - **Status:** Partial (hidden). *(Was: Prototype, until S2.5.)*
-- **Current implementation (S2.5):** the document picker (Android, no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG; other formats "not supported") → read-only rows with units, sources and unknowns. Nothing is stored. *(Was: gallery picker → `MetadataExtractor` → read-only cards and a raw tag list.)*
+- **Current implementation (S2.8 plus S2.V1–S2.V3):** the Android document picker (no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG and JPEG) → read-only rows with units, sources and unknowns. Nothing is stored. The Stage 2 gate is false in debug and release; device testing temporarily flipped it and reverted the change.
 - **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
-- **Known issues:** `image_picker` gallery cannot select FITS, so FITS is unreachable on a device; reads whole files into memory; FITS `/` inside string values truncates them; nothing is stored or connected to sessions or equipment; **no real sample files exist**, which the ROADMAP requires before this phase; only synthetic-input unit tests (TD-018).
+- **Historical prototype issues (removed in S2.5):** gallery-only selection, whole-file reads, faulty FITS string splitting and no real-sample coverage. The replacement has local DNG/JPEG samples; FITS is explicitly out of this Stage.
 - **Dependencies:** the app's own `metadata_document` channel; gate `FeatureScope.metadataImport` (false). *(Was: image_picker, exif.)*
-- **Known issues now (S2.5):** FITS is unsupported until a real sample exists (S2.6); device check M1 passed 2026-09-26 (the non-seekable path not run); a provider that does not report the file size cannot be read (typed failure, no guessed length). *(The list below is the pre-Stage 2 state.)*
+- **Known issues now:** HEIC decision and RAW research remain open; FITS/PNG are out of Stage 2. M1 seekable paths passed at `360fd8f`; updated streaming code has JVM tests but no new device run. Unknown provider size remains a typed failure. TD-066 remains presentation debt.
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode

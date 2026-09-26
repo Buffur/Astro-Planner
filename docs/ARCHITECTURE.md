@@ -1,5 +1,8 @@
 # AstroPlan Architecture
 
+> **Metadata verification update, 2026-09-26 (S2.V1–S2.V3):** see
+> `refinement/STAGE_2_CORRECTIONS.md`; historical entries below keep their dates.
+
 > **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** the S1.5/S1.6
 > completion claims below are qualified by reproduced TD-059–TD-062. No design
 > decision or implementation changed. See [validation](refinement/STAGE_1_VALIDATION.md).
@@ -564,6 +567,15 @@ production defaults (the same seam pattern as `LocationService` and `Clock`). De
 `docs/DATA_MODEL.md` Part B.
 
 ## B10. External services and platform plugins
+
+**Metadata document channel (S2.V3):** Dart serializes each source's reads and
+passes its remaining 1 MiB budget. Native replies include bytes and consumed
+cost. Seekable reads charge returned bytes; the pure Kotlin streaming helper
+also consumes and charges the prefix on every reopened stream, refusing before
+opening it if the traversal exceeds the remainder. Budget refusal maps to
+`overBudget`. An I/O failure with unknown consumption exhausts that source's
+budget; another file-open starts a new read operation. No cache or URI persistence.
+The production helper is covered by host JVM tests in addition to Dart channel tests.
 
 **The app's own platform channel (S2.4, ADR-017 §6):** `io.github.chacha12.astroplanner/metadata_document` (`MetadataDocumentChannel.kt`, `android_capture_file_access.dart`). Picking goes through the system document picker, and bytes are read in place; no network, no copy, no persistable grant. Android only; desktop and host have no implementation (S2.5 wires the platform choice).
 

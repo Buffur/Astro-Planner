@@ -20,7 +20,8 @@ import java.util.concurrent.Executors
  * returns the document's URI, name and size; `read` returns one byte range,
  * read in place through the provider's file descriptor. Nothing is written to
  * the app's cache, and no persistable permission is taken: the grant ends with
- * the activity. The byte budget itself is enforced on the Dart side.
+ * the activity. Dart retains the per-source budget; native reads charge both
+ * returned bytes and any prefix consumed by the streaming fallback.
  */
 class MetadataDocumentChannel(
     private val activity: Activity,
@@ -121,11 +122,11 @@ class MetadataDocumentChannel(
         val uri = Uri.parse(call.argument<String>("uri"))
         val offset = call.argument<Number>("offset")!!.toLong()
         val count = call.argument<Number>("count")!!.toInt()
-        val sequentialLimit = call.argument<Number>("sequentialLimit")!!.toLong()
+        val remaining = call.argument<Number>("remainingBudget")!!.toLong()
         io.execute {
             try {
-                val bytes = readRange(uri, offset, count, sequentialLimit)
-                main.post { result.success(bytes) }
+                val range = readRange(uri, offset, count, remaining)
+                main.post { result.success(mapOf("bytes" to range.bytes, "consumed" to range.consumed)) }
             } catch (e: Exception) {
                 main.post { result.error(errorCode(e), e.toString(), null) }
             }
@@ -136,9 +137,11 @@ class MetadataDocumentChannel(
      * [count] bytes at [offset]. A regular file is read in place with a
      * positioned read. A descriptor that cannot seek (a pipe or a streaming
      * provider) is read from the start, and only while the range ends within
-     * [sequentialLimit] bytes (the Dart side's byte budget).
+     * [remaining] bytes (the source's remaining byte budget).
      */
-    private fun readRange(uri: Uri, offset: Long, count: Int, sequentialLimit: Long): ByteArray {
+    private fun readRange(uri: Uri, offset: Long, count: Int, remaining: Long): MetadataRange {
+        require(offset >= 0 && count >= 0 && count <= 65536)
+        if (count.toLong() > remaining) throw MetadataBudgetExceeded()
         val resolver = activity.contentResolver
         val pfd = resolver.openFileDescriptor(uri, "r")
             ?: throw IOException("the provider returned no file descriptor")
@@ -149,43 +152,24 @@ class MetadataDocumentChannel(
                 var position = offset
                 while (buffer.hasRemaining()) {
                     val n = channel.read(buffer, position)
-                    if (n < 0) throw IOException("short read at $position")
+                    if (n <= 0) throw IOException("short or stalled read at $position")
                     position += n
                 }
-                return buffer.array()
+                return MetadataRange(buffer.array(), count.toLong())
             }
         }
         pfd.close()
-        if (offset + count > sequentialLimit) {
-            throw IOException("not seekable: range ends past $sequentialLimit bytes")
-        }
-        val input = resolver.openInputStream(uri)
-            ?: throw IOException("the provider returned no stream")
-        input.use {
-            var skipped = 0L
-            while (skipped < offset) {
-                val n = it.skip(offset - skipped)
-                if (n > 0) {
-                    skipped += n
-                } else if (it.read() >= 0) {
-                    skipped += 1
-                } else {
-                    throw IOException("short read at $skipped")
-                }
-            }
-            val out = ByteArray(count)
-            var filled = 0
-            while (filled < count) {
-                val n = it.read(out, filled, count - filled)
-                if (n < 0) throw IOException("short read at ${offset + filled}")
-                filled += n
-            }
-            return out
+        return MetadataSequentialReader.read(offset, count, remaining) {
+            resolver.openInputStream(uri) ?: throw IOException("the provider returned no stream")
         }
     }
 
     private fun errorCode(e: Exception): String =
-        if (e is SecurityException) "revoked" else "io"
+        when (e) {
+            is MetadataBudgetExceeded -> "overBudget"
+            is SecurityException -> "revoked"
+            else -> "io"
+        }
 
     fun dispose() {
         channel.setMethodCallHandler(null)

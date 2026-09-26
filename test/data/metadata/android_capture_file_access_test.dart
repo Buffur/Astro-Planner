@@ -43,11 +43,13 @@ void main() {
           final offset = args!['offset']! as int;
           final count = args['count']! as int;
           // Past the fixture's metadata the "pixels" read as zeros.
-          return Uint8List(count)..setRange(
-            0,
-            (document.length - offset).clamp(0, count),
-            document.skip(offset),
-          );
+          final bytes = Uint8List(count)
+            ..setRange(
+              0,
+              (document.length - offset).clamp(0, count),
+              document.skip(offset),
+            );
+          return {'bytes': bytes, 'consumed': count};
         }(),
         _ => throw MissingPluginException(),
       };
@@ -71,14 +73,13 @@ void main() {
 
     final reads = calls.where((c) => c.method == 'read').toList();
     expect(reads, isNotEmpty);
+    var remaining = BudgetedMetadataSource.defaultBudgetBytes;
     for (final c in reads) {
       final args = c.arguments as Map<Object?, Object?>;
       expect(args['uri'], 'content://test.documents/document/1');
       expect(args['count'], lessThanOrEqualTo(64 * 1024));
-      expect(
-        args['sequentialLimit'],
-        BudgetedMetadataSource.defaultBudgetBytes,
-      );
+      expect(args['remainingBudget'], remaining);
+      remaining -= args['count']! as int;
     }
     await source.close();
     await expectLater(source.read(0, 1), _fails(MetadataReadError.io));
@@ -110,8 +111,11 @@ void main() {
     () async {
       final file = (await AndroidCaptureFileAccess().pick())!;
       final source = await file.open();
-      override = (_) => Uint8List(3);
-      await expectLater(source.read(0, 8), _fails(MetadataReadError.io));
+      override = (_) => {'bytes': Uint8List(3), 'consumed': 3};
+      await expectLater(
+        (await file.open()).read(0, 8),
+        _fails(MetadataReadError.io),
+      );
       override = (_) => null;
       await expectLater(source.read(0, 8), _fails(MetadataReadError.io));
 
@@ -136,4 +140,60 @@ void main() {
     expect(file.name, isNull);
     await expectLater(file.open(), _fails(MetadataReadError.io));
   });
+
+  test(
+    'streaming prefix costs accumulate across concurrent requests',
+    () async {
+      final source = ContentUriMetadataSource(
+        channel,
+        'content://x/1',
+        25 << 20,
+      );
+      final remaining = <int>[];
+      override = (call) {
+        final args = call.arguments as Map;
+        final budget = args['remainingBudget'] as int;
+        remaining.add(budget);
+        final cost = (args['offset'] as int) + (args['count'] as int);
+        if (cost > budget) throw PlatformException(code: 'overBudget');
+        return {'bytes': Uint8List(args['count'] as int), 'consumed': cost};
+      };
+      final first = source.read(900000, 8);
+      final second = source.read(900000, 8);
+      await expectLater(second, _fails(MetadataReadError.overBudget));
+      expect(await first, hasLength(8));
+      expect(remaining, [1048576, 148568]);
+      expect(
+        await source.read(0, 8),
+        hasLength(8),
+        reason: 'refusal consumed nothing',
+      );
+      await source.close();
+    },
+  );
+
+  test('native budget refusal remains an overBudget reading', () async {
+    override = (_) => throw PlatformException(code: 'overBudget');
+    final source = ContentUriMetadataSource(channel, 'content://x/1', 100);
+    final reading = await CaptureMetadataReader.read(source);
+    expect(
+      (reading as MetadataUnreadable).reason,
+      MetadataUnreadableReason.overBudget,
+    );
+  });
+
+  test(
+    'unknown consumption after I/O failure prevents further native reads',
+    () async {
+      final source = ContentUriMetadataSource(channel, 'content://x/1', 100);
+      override = (_) => throw PlatformException(code: 'io');
+      await expectLater(source.read(0, 8), _fails(MetadataReadError.io));
+      final before = calls.length;
+      await expectLater(
+        source.read(0, 8),
+        _fails(MetadataReadError.overBudget),
+      );
+      expect(calls.length, before);
+    },
+  );
 }

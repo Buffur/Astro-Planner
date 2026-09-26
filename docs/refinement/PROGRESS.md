@@ -3,9 +3,10 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. S2.8 (JPEG) is done, and device checks M1 and M2 passed on the
-> owner's phone, so S2.4 and S2.5 are accepted. Remaining in Stage 2: S2.9 (HEIC, awaiting the
-> owner's decision), S2.R3 (RG-14), then Stage 2 validation.
+> **Last updated:** 2026-09-26. Independent validation at `79f392c` failed.
+> The owner authorized S2.V1–S2.V3 corrections: integer parsing, short JPEG
+> EXIF handling and streaming resource accounting. See `STAGE_2_CORRECTIONS.md`.
+> S2.9's decision and S2.R3 remain open; Stage 2 is not accepted.
 
 ## Current state
 
@@ -16,8 +17,8 @@
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
 | Next approved Task | **Owner decision:** S2.9 (the HEIC reader, S2.R2 §7–§8). **S2.R3 (RG-14)**, documentation only, can run meanwhile. Then Stage 2 validation (fresh session) |
-| Code baseline | S2.8 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S2.8, 2026-09-26: Encoding, Format and Analyze pass; 1042 tests (+1 skipped: local real samples) and 2 host E2E tests pass |
+| Code baseline | S2.V1–S2.V3 corrections on S2.8 (see `STAGE_2_CORRECTIONS.md`). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green** after S2.V1–S2.V3, 2026-09-26: Encoding, Format and Analyze pass; 1052 tests (+1 expected local-sample skip), 2 host E2E tests, 4 native JVM tests; separate real-sample test passes |
 | Schema | v17 |
 
 ## Stage status
@@ -40,6 +41,11 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
 ## Completed Tasks
+
+**2026-09-26 — S2.V1–S2.V3 (this corrective commit):** owner-authorized fixes
+for S2V-01/02/03; current-state documentation debt S2V-05 reconciled. See
+`STAGE_2_CORRECTIONS.md` for implementation and complete verification results.
+No visibility change; S2V-04 gates and device verification limits remain open.
 
 | Stage | Task | Date | Commit | Result |
 | --- | --- | --- | --- | --- |
@@ -173,11 +179,8 @@ These block a release, not refinement.
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
-- Stage 2:
-  - a real FITS sample (for S2.6);
-  - an Android device for S2.4 and S2.5's device checks: USB debugging on the owner's
-    phone, or an emulator image.
-  The phone DNG samples are provided and stay outside the repository.
+- Stage 2: decide S2.9 (HEIC reader or deferral); complete S2.R3/RG-14.
+  FITS and PNG were removed from this Stage. DNG/JPEG samples stay outside Git.
 
 ## Known blockers
 
@@ -186,17 +189,32 @@ These block a release, not refinement.
   S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
   F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
 - **Stage 2:**
-  - **S2.4's acceptance needs an Android device.** This machine has the emulator binary
-    but no system image and no virtual device, and no phone is connected. The options: the
-    owner's phone with USB debugging (`adb` is installed), or an emulator image. S2.1–S2.3
-    are host-only and are not blocked.
-  - **S2.6 needs a real FITS sample** from the owner.
-- **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
-  rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
-  some build, but no build, device or commit is recorded (`POST_ROADMAP_PLAN.md` §1.3 item 2).
+  - S2.9 needs an owner disposition; S2.R3/RG-14 remains incomplete.
+  - Corrections need fresh independent Stage validation after those gates close.
+- **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
+  recorded at `360fd8f`. Native streaming and real-backup preview cancellation
+  remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
+  upgrade device evidence. Stage 11 lifecycle rows remain open.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **S2.V1–S2.V3 implementation verification**, 2026-09-26: full gate green
+  (1052 tests, 1 expected skip, 2 host E2E); 4 native JVM tests pass; all three
+  external samples pass unchanged; the two original failing semantic probes
+  now pass. This supersedes the code failures below, not the independent Stage
+  verdict or its unfinished research/decision gates.
+
+- **Stage 2 independent validation**, 2026-09-26, at `79f392c`: **FAIL**.
+  See `STAGE_2_VALIDATION.md` and `evidence/STAGE_2_VALIDATION_PROBES.md`.
+  The full gate passes (1042 tests, 1 expected skip, 2 host E2E); the external
+  real-sample test also passes (two DNGs and one JPEG). Two additional
+  malformed-input acceptance probes fail (S2V-01 and S2V-02). S2V-03 records
+  the non-seekable accounting/test gap; S2V-04 records the still-open S2.9
+  disposition and S2.R3 gate. S2V-05 through S2V-08 distinguish documentation
+  debt, unverified device paths, existing display debt and rejected concerns.
+  No implementation or existing tests changed. The Stage remains in progress;
+  proposed corrective Tasks in the report do not constitute owner approval.
 
 - **Stage 0**, checked 2026-09-25 against the Stage 0 prompt's §22 review list:
   1. the three refinement documents were re-read;

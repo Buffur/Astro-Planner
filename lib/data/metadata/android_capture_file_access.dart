@@ -67,12 +67,20 @@ class ContentUriMetadataSource implements MetadataSource {
   final MethodChannel _channel;
   final String _uri;
   bool _closed = false;
+  int _remaining = BudgetedMetadataSource.defaultBudgetBytes;
+  Future<void> _queue = Future.value();
 
   @override
   final int length;
 
   @override
-  Future<Uint8List> read(int offset, int count) async {
+  Future<Uint8List> read(int offset, int count) {
+    final result = _queue.then((_) => _read(offset, count));
+    _queue = result.then<void>((_) {}, onError: (Object _) {});
+    return result;
+  }
+
+  Future<Uint8List> _read(int offset, int count) async {
     if (_closed) {
       throw const MetadataReadException(MetadataReadError.io, 'closed');
     }
@@ -80,25 +88,46 @@ class ContentUriMetadataSource implements MetadataSource {
       throw const MetadataReadException(MetadataReadError.outOfRange);
     }
     if (count == 0) return Uint8List(0);
-    final Uint8List? bytes;
+    if (count > BudgetedMetadataSource.defaultMaxReadBytes) {
+      throw const MetadataReadException(MetadataReadError.readTooLarge);
+    }
+    if (count > _remaining) {
+      throw const MetadataReadException(MetadataReadError.overBudget);
+    }
+    final Map<Object?, Object?>? answer;
     try {
-      bytes = await _channel.invokeMethod<Uint8List>('read', {
+      answer = await _channel.invokeMapMethod<Object?, Object?>('read', {
         'uri': _uri,
         'offset': offset,
         'count': count,
-        // A provider that cannot seek is read from the start, never past
-        // the byte budget (ADR-017 §6).
-        'sequentialLimit': BudgetedMetadataSource.defaultBudgetBytes,
+        // Native code charges skipped prefixes as well as returned bytes.
+        'remainingBudget': _remaining,
       });
     } on PlatformException catch (e) {
-      throw MetadataReadException(MetadataReadError.io, e);
-    }
-    if (bytes == null || bytes.length != count) {
+      // On I/O failure the amount consumed is unknown. Refuse further reads
+      // from this source rather than resetting or guessing its budget.
+      if (e.code != 'overBudget') _remaining = 0;
       throw MetadataReadException(
-        MetadataReadError.io,
-        'short read: ${bytes?.length ?? 0} of $count bytes at $offset',
+        e.code == 'overBudget'
+            ? MetadataReadError.overBudget
+            : MetadataReadError.io,
+        e,
       );
     }
+    final bytes = answer?['bytes'];
+    final consumed = answer?['consumed'];
+    if (bytes is! Uint8List ||
+        bytes.length != count ||
+        consumed is! int ||
+        consumed < count ||
+        consumed > _remaining) {
+      _remaining = 0;
+      throw MetadataReadException(
+        MetadataReadError.io,
+        'invalid range response at $offset',
+      );
+    }
+    _remaining -= consumed;
     return bytes;
   }
 

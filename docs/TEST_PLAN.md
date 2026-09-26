@@ -942,6 +942,14 @@ report through `runWithFeedback`/`FailureText`.
 
 ## Metadata device checks (Stage 2, ADR-017 §6)
 
+**Corrective host gate (S2.V3):** from `android/`, run
+`./gradlew.bat :app:testDebugUnitTest --offline`. `MetadataSequentialReaderTest`
+executes the production fallback with consuming short-chunk streams: prefix
+charging, cumulative refusal before opening, exact/overflow budget boundaries,
+truncation and stream closure. Dart channel tests verify serialized remaining
+budget, budget-error mapping and unknown-consumption failure handling.
+These host checks do not replace a new device M1 run after the native change.
+
 The Kotlin side of document access (`MetadataDocumentChannel.kt`) runs only on Android. The host tests cover the Dart side against a stand-in (`android_capture_file_access_test.dart`). No device or emulator is available on the development machine (2026-09-26): the options are the owner's phone with USB debugging, or an emulator image.
 
 | # | Scenario | Host coverage | Device procedure | Device status |

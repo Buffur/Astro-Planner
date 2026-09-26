@@ -286,10 +286,11 @@ class _Ifd {
     return ExifValues.positive(r, origin(tag));
   }
 
-  /// The first SHORT (or LONG) of [tag], or null.
-  int? _firstInteger(int tag) {
+  /// A single inline SHORT (or LONG), never an array's offset. The contract
+  /// holds one value; unsupported counts remain unparseable.
+  int? _singleInteger(int tag) {
     final e = entries[tag];
-    if (e == null || e.count < 1) return null;
+    if (e == null || e.count != 1) return null;
     final data = ByteData.sublistView(e.valueField);
     return switch (e.type) {
       _short => data.getUint16(0, endian),
@@ -304,7 +305,7 @@ class _Ifd {
   ) {
     final e = entries[tag];
     if (e == null) return const AbsentValue();
-    final value = _firstInteger(tag);
+    final value = _singleInteger(tag);
     if (value == null) return _bad(tag, e);
     return convert(value, origin(tag));
   }
@@ -312,9 +313,12 @@ class _Ifd {
   MetadataValue<Sensitivity> sensitivity() {
     final e = entries[34855];
     if (e == null) return const AbsentValue();
-    final value = _firstInteger(34855);
+    final value = _singleInteger(34855);
     if (value == null) return _bad(34855, e);
-    return ExifValues.sensitivity(value, _firstInteger(34864), origin(34855));
+    final kind = entries[34864];
+    final kindValue = _singleInteger(34864);
+    if (kind != null && kindValue == null) return _bad(34864, kind);
+    return ExifValues.sensitivity(value, kindValue, origin(34855));
   }
 
   Future<String?> _asciiText(MetadataSource source, _Entry? e) async {

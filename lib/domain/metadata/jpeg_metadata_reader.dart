@@ -59,7 +59,7 @@ class JpegMetadataReader implements MetadataFormatReader {
       final lengthBytes = await source.read(at + 2, 2);
       final length = ByteData.sublistView(lengthBytes).getUint16(0);
       if (length < 2) throw const ExifStructureCorrupt('JPEG segment length');
-      if (marker == 0xE1 && length >= 8 + 8) {
+      if (marker == 0xE1 && length >= 8) {
         final id = await source.read(at + 4, 6);
         if (_same(id, _exifId)) {
           final exif = await ExifStructure.open(
