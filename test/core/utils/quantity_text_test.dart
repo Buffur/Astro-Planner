@@ -30,7 +30,17 @@ void main() {
   test('exposures keep their value without a trailing .0', () {
     expect(QuantityText.exposure(60), '60 s');
     expect(QuantityText.exposure(2.5), '2.5 s');
-    expect(QuantityText.exposure(0.25), '0.25 s');
+    expect(QuantityText.exposure(0.25), '1/4 s');
+    expect(QuantityText.exposure(0.02), '1/50 s');
+    expect(QuantityText.exposure(0.04), '1/25 s');
+    expect(QuantityText.exposure(0.04005), '≈1/25 s');
+    expect(QuantityText.exposure(0.4), '0.4 s');
+    expect(QuantityText.exposure(0), '0 s');
+    expect(QuantityText.exposure(1), '1 s');
+    expect(QuantityText.exposure(1 / 8000), '1/8000 s');
+    expect(QuantityText.exposure(0.009987236), '≈1/100 s');
+    expect(QuantityText.exposure(0.0099), '≈1/101 s');
+    expect(QuantityText.exposure(0.29), '0.29 s');
   });
 
   test('degrees and signed numbers use the typographic minus, never −0', () {

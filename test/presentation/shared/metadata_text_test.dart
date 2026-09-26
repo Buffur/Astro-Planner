@@ -14,6 +14,27 @@ const _o = MetadataOrigin(
 );
 
 void main() {
+  test('exposure rows use shutter fractions without changing metadata', () {
+    const origin = MetadataOrigin(
+      format: MetadataFormat.jpeg,
+      field: 'ExposureTime (33434)',
+      location: 'APP1 EXIF IFD',
+    );
+    for (final (seconds, raw, text) in [
+      (0.04005, '4005/100000', '≈1/25 s'),
+      (0.02, '1/50', '1/50 s'),
+      (0.4, '2/5', '0.4 s'),
+    ]) {
+      final value = KnownValue(seconds, raw: raw, origin: origin);
+      final row = MetadataText.rows(CaptureMetadata(exposureSeconds: value))
+          .singleWhere((r) => r.label == 'Exposure');
+      expect(row.value, text);
+      expect(row.source, 'JPEG · APP1 EXIF IFD · ExposureTime (33434)');
+      expect(value.value, seconds);
+      expect(value.raw, raw);
+    }
+  });
+
   test('each value state reads differently, with its source', () {
     String valueOf(MetadataValue<double> v) =>
         MetadataText.rows(CaptureMetadata(fNumber: v))

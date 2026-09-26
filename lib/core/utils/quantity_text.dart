@@ -18,8 +18,25 @@ abstract final class QuantityText {
     return m == 0 ? '$h h' : '$h h $m min';
   }
 
-  /// An exposure in seconds, without a trailing ".0": "60 s", "2.5 s".
-  static String exposure(double seconds) => '${number(seconds)} s';
+  /// Exposure: "60 s", "2.5 s", "1/50 s". Sub-second values within 0.5%
+  /// of an integer reciprocal use that fraction; non-exact equivalents
+  /// carry an approximation sign. This is display rounding only: metadata,
+  /// raw rationals and calculations retain the original value. A 1e-12
+  /// relative tolerance ignores floating-point division noise.
+  static String exposure(double seconds) {
+    if (seconds > 0 && seconds < 1) {
+      final reciprocal = 1 / seconds;
+      if (reciprocal.isFinite) {
+        final denominator = reciprocal.round();
+        final relativeDifference = (seconds * denominator - 1).abs();
+        if (denominator >= 2 && relativeDifference <= 0.005) {
+          final approximation = relativeDifference <= 1e-12 ? '' : '≈';
+          return '${approximation}1/$denominator s';
+        }
+      }
+    }
+    return '${number(seconds)} s';
+  }
 
   /// Degrees with the typographic minus (U+2212): "−18°", "46.050°".
   static String degrees(double value, {int digits = 0}) =>

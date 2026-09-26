@@ -1,5 +1,8 @@
 # AstroPlan Feature Status
 
+> **Metadata update, 2026-09-26 (S3.2):** the equipment candidate (pure domain, CALC-40); F-45
+> below. Not visible, and nothing is written.
+
 > **Metadata update, 2026-09-26 (S3.1):** the contract gains image dimensions (ADR-018 §3); F-45
 > below. Still hidden.
 
@@ -678,6 +681,12 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.2 (2026-09-26, Stage 3; ADR-018 §4):** `EquipmentCandidate.fromReading` turns a reading into a proposed rig, in pure domain code with no UI and no write:
+  - labels from Make/Model;
+  - focal length, f-number and resolution (long side as width) as `reported`, source `metadata:<format>`;
+  - sensor size and pixel pitch as the CALC-40 estimate (`estimated`), or unknown with a reason;
+  - never the aperture diameter, rotation, tracking or maximum exposure;
+  - a suggested name, and the identity evidence kept for matching.
 
 - **Current visibility, owner amendment 2026-09-26:** the read-only viewer is
   now available at Settings → Import metadata in debug builds. Profile/release
