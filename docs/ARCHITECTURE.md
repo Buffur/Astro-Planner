@@ -122,6 +122,14 @@
 >   - **Wiring:** `main.dart` passes `AndroidCaptureFileAccess` on Android only. Elsewhere the ViewModel is null and the screen says metadata import is unavailable.
 >   - **Removed:** the prototype `metadata_extractor.dart`, `image_metadata.dart` and their test (2 tests of removed code). `exif` and `image_picker` left `pubspec.yaml` after a `grep` showed no other use; the lockfile only lost those two and their 13 transitive packages, and the desktop registrants lost `file_selector`. The domain purity test now allows no exception.
 >   - **Unchanged:** `FeatureScope.metadataImport` stays false (RD-16). The privacy and Data Safety texts are checked and need no change, since nothing leaves the device.
+> **S2.7 (2026-09-26, Stage 2; its commit is recorded by the next change):** layered recognition and a reusable EXIF extractor (ADR-017 §13; review gaps G1–G5). This is a refactor: the DNG read log is byte-identical to before, and the real samples still read 848 bytes.
+>   - **`ExifStructure`** (`exif_structure.dart`): IFD0 plus the EXIF IFD, with the same bounds, loop, privacy and budget rules. It works on any `MetadataSource`, so an embedded structure is handed over as a `MetadataSourceWindow` (new: offsets stay relative to the structure; the budget's log sees absolute offsets). Origins are labelled by the container (`APP1 IFD0`, say).
+>   - **`DngMetadataReader`:** a thin container (the DNGVersion gate at base 0).
+>   - **`MetadataFormatReader`:** the interface; `CaptureMetadataReader.readers` dispatches by registration.
+>   - **Level 1 (recognition)** is `MetadataReading.format` on every outcome, and **level 2 (extraction)** is the subclass: `MetadataRead` (with `nothingFound`), `MetadataUnsupported` (`recognized` or not) and `MetadataUnreadable` (with what was recognised).
+>   - **Recognition-only formats:** HEIF (ISO-BMFF HEIF/AVIF major brands), PNG, CR2 (TIFF + `CR`, version 2), CR3 (`crx `), RAF, RW2 and ORF; no parser for any of them.
+>   - **`ExifRational`/`ExifValues`** moved to `exif_values.dart`.
+>   - `tiff_metadata_reader.dart` is replaced by the above.
 
 ---
 
@@ -356,7 +364,7 @@ no longer imported by the ViewModel *(updated TASK 1.1)*.
 
 ## B5. Domain layer (`lib/domain/`)
 
-**Metadata (S2.1, ADR-017):** `lib/domain/metadata/` holds the bounded source interface, its byte budget and format recognition, in pure Dart. Its only data-layer implementation so far is `lib/data/metadata/file_metadata_source.dart`; the Android content-URI source comes in S2.4. The prototype `services/metadata_extractor.dart` still does its own I/O until S2.5 removes it (test-enforced allowance).
+**Metadata (S2.1, ADR-017):** `lib/domain/metadata/` holds the bounded source interface, its byte budget and format recognition, in pure Dart. Since S2.7 it has a layered shape: recognition (`metadata_format.dart`) → a `MetadataFormatReader` per container (`dng_metadata_reader.dart`) → the shared `ExifStructure` → the contract (`capture_metadata.dart`). A new EXIF-bearing format is one container reader. Its only data-layer implementation so far is `lib/data/metadata/file_metadata_source.dart`; the Android content-URI source comes in S2.4. The prototype `services/metadata_extractor.dart` still does its own I/O until S2.5 removes it (test-enforced allowance).
 
 **Services (calculation logic; no Flutter imports):**
 `AstronomicalEngine` (JD, GMST, LST), `VisibilityCalculator` (LHA, altitude, Sun

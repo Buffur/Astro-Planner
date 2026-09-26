@@ -3,6 +3,7 @@
 // text and its origin.
 
 import 'package:astroplan/domain/metadata/capture_metadata.dart';
+import 'package:astroplan/domain/metadata/exif_values.dart';
 import 'package:astroplan/domain/metadata/metadata_format.dart';
 import 'package:astroplan/domain/metadata/metadata_source.dart';
 import 'package:astroplan/domain/metadata/metadata_value.dart';

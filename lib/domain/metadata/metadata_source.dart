@@ -112,3 +112,39 @@ class BudgetedMetadataSource implements MetadataSource {
   @override
   Future<void> close() => _inner.close();
 }
+
+/// A window of another source: bytes [start] to [start] + [length], read as
+/// offsets 0 to [length] (ADR-017 §13). Containers use it to hand an
+/// embedded structure (the TIFF structure inside a JPEG's APP1 segment,
+/// say) to a reader that expects it at offset 0. Reads still go through the
+/// underlying source, so its budget and read log see the real offsets.
+class MetadataSourceWindow implements MetadataSource {
+  MetadataSourceWindow(this._inner, this.start, [int? length])
+    : length = length ?? _inner.length - start {
+    if (start < 0 || this.length < 0 || start + this.length > _inner.length) {
+      throw const MetadataReadException(MetadataReadError.outOfRange);
+    }
+  }
+
+  final MetadataSource _inner;
+
+  /// Where the window starts in the underlying source.
+  final int start;
+
+  @override
+  final int length;
+
+  @override
+  Future<Uint8List> read(int offset, int count) {
+    if (offset < 0 || count < 0 || offset + count > length) {
+      return Future.error(
+        const MetadataReadException(MetadataReadError.outOfRange),
+      );
+    }
+    return _inner.read(start + offset, count);
+  }
+
+  /// The underlying source belongs to whoever opened it.
+  @override
+  Future<void> close() async {}
+}

@@ -134,6 +134,14 @@
 >   - **Wiring:** `main.dart` passes `AndroidCaptureFileAccess` on Android only. Elsewhere the ViewModel is null and the screen says metadata import is unavailable.
 >   - **Removed:** the prototype `metadata_extractor.dart`, `image_metadata.dart` and their test (2 tests of removed code). `exif` and `image_picker` left `pubspec.yaml` after a `grep` showed no other use; the lockfile only lost those two and their 13 transitive packages, and the desktop registrants lost `file_selector`. The domain purity test now allows no exception.
 >   - **Unchanged:** `FeatureScope.metadataImport` stays false (RD-16). The privacy and Data Safety texts are checked and need no change, since nothing leaves the device.
+> **S2.7 (2026-09-26, Stage 2; its commit is recorded by the next change):** layered recognition and a reusable EXIF extractor (ADR-017 §13; review gaps G1–G5). This is a refactor: the DNG read log is byte-identical to before, and the real samples still read 848 bytes.
+>   - **`ExifStructure`** (`exif_structure.dart`): IFD0 plus the EXIF IFD, with the same bounds, loop, privacy and budget rules. It works on any `MetadataSource`, so an embedded structure is handed over as a `MetadataSourceWindow` (new: offsets stay relative to the structure; the budget's log sees absolute offsets). Origins are labelled by the container (`APP1 IFD0`, say).
+>   - **`DngMetadataReader`:** a thin container (the DNGVersion gate at base 0).
+>   - **`MetadataFormatReader`:** the interface; `CaptureMetadataReader.readers` dispatches by registration.
+>   - **Level 1 (recognition)** is `MetadataReading.format` on every outcome, and **level 2 (extraction)** is the subclass: `MetadataRead` (with `nothingFound`), `MetadataUnsupported` (`recognized` or not) and `MetadataUnreadable` (with what was recognised).
+>   - **Recognition-only formats:** HEIF (ISO-BMFF HEIF/AVIF major brands), PNG, CR2 (TIFF + `CR`, version 2), CR3 (`crx `), RAF, RW2 and ORF; no parser for any of them.
+>   - **`ExifRational`/`ExifValues`** moved to `exif_values.dart`.
+>   - `tiff_metadata_reader.dart` is replaced by the above.
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 
 ## Status legend
@@ -649,6 +657,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S2.7 (2026-09-26):** one reusable EXIF extractor for every EXIF-bearing container; recognition (level 1) and extraction (level 2) are kept apart; HEIF, PNG, CR2, CR3, RAF, RW2 and ORF are recognised by name, with no reader. DNG behaviour is unchanged. Still hidden.
 - **S2.5 (2026-09-26):** the hidden screen reads the contract through the new foundation; the prototype, `exif` and `image_picker` are gone. Status Partial: DNG is read (real samples, locally), FITS is not supported yet (S2.6 needs a sample), the Android path awaits device check M1, and the screen stays hidden until Stage 3.
 - **S2.4 (2026-09-26, implemented; device check M1 pending):** Android document access without a copy (`MetadataDocumentChannel.kt`, `AndroidCaptureFileAccess`). The backup restore now clears the picker's cache (TD-065). Not yet used by the hidden screen (S2.5).
 - **S2.3 (2026-09-26):** DNG is read by the new bounded reader (`tiff_metadata_reader.dart`). Both of the owner's real phone DNGs give every contract value in a local check, reading 848 bytes of about 25 MB. The hidden screen still uses the prototype until S2.5.

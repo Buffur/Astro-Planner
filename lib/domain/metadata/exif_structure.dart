@@ -1,19 +1,32 @@
 import 'dart:typed_data';
 
 import 'capture_metadata.dart';
+import 'exif_values.dart';
 import 'metadata_format.dart';
 import 'metadata_source.dart';
 import 'metadata_value.dart';
 
-/// Reads the metadata contract from a DNG (ADR-017 §2, §4.3, §8).
+/// One EXIF/TIFF structure (a TIFF header, IFD0 and the EXIF IFD it points
+/// to), read in a bounded way (ADR-017 §2, §4.3, §13). Every EXIF-bearing
+/// container shares it: a DNG is one at offset 0; a JPEG, HEIF or PNG holds
+/// one inside a segment, item or chunk, handed over as a
+/// [MetadataSourceWindow] so the structure's offsets stay relative to its
+/// own header, as EXIF defines them.
 ///
-/// Only IFD0 and the EXIF IFD it points to are read, and only the contract's
-/// tags in them. The GPS IFD, sub-IFDs, MakerNotes and pixel data are never
-/// followed; a serial number or any other tag outside the contract is never
-/// decoded. Every offset and count is checked against the file before it is
-/// read. A TIFF without DNGVersion is not supported: other TIFF-based RAW
-/// files need a real sample first (ADR-017 §8).
-abstract final class TiffMetadataReader {
+/// Only the contract's tags are kept. The GPS IFD, sub-IFDs, MakerNotes and
+/// pixel data are never followed; a serial number or any other tag outside
+/// the contract is never decoded. Every offset and count is checked against
+/// the source before it is read.
+class ExifStructure {
+  ExifStructure._(
+    this._source,
+    this._endian,
+    this._ifd0,
+    this._ifd0Offset,
+    this._format,
+    this._container,
+  );
+
   /// More entries than this in one IFD is treated as corruption (the
   /// owner's DNGs have 60).
   static const maxEntries = 1024;
@@ -22,76 +35,107 @@ abstract final class TiffMetadataReader {
   /// times are short).
   static const maxTextBytes = 256;
 
-  static Future<MetadataReading> read(MetadataSource source) async {
-    try {
-      return await _read(source);
-    } on MetadataReadException catch (e) {
-      return MetadataUnreadable.fromReadFailure(e);
-    } on _Corrupt catch (e) {
-      return MetadataUnreadable(MetadataUnreadableReason.corrupt, e.why);
-    }
-  }
+  final MetadataSource _source;
+  final Endian _endian;
+  final _Ifd _ifd0;
+  final int _ifd0Offset;
+  final MetadataFormat _format;
+  final String? _container;
 
-  static Future<MetadataReading> _read(MetadataSource source) async {
+  /// Reads the header and IFD0 of the structure at offset 0 of [source].
+  /// [format] and [container] label each value's origin: the location reads
+  /// "IFD0", or "`container` IFD0" when the structure is embedded.
+  ///
+  /// Throws [MetadataReadException] or [ExifStructureCorrupt].
+  static Future<ExifStructure> open(
+    MetadataSource source, {
+    required MetadataFormat format,
+    String? container,
+  }) async {
     if (source.length < 8) {
-      return const MetadataUnreadable(MetadataUnreadableReason.truncated);
+      throw const MetadataReadException(MetadataReadError.outOfRange);
     }
     final header = ByteData.sublistView(await source.read(0, 8));
     final Endian endian = switch ((header.getUint8(0), header.getUint8(1))) {
       (0x49, 0x49) => Endian.little,
       (0x4D, 0x4D) => Endian.big,
-      _ => throw const _Corrupt('byte order'),
+      _ => throw const ExifStructureCorrupt('byte order'),
     };
-    if (header.getUint16(2, endian) != 42) throw const _Corrupt('magic');
-    final ifd0Offset = header.getUint32(4, endian);
-
-    final ifd0 = await _Ifd.read(source, ifd0Offset, endian, 'IFD0');
-    if (!ifd0.entries.containsKey(_dngVersion)) {
-      return const MetadataUnsupported(MetadataFormat.tiff);
+    if (header.getUint16(2, endian) != 42) {
+      throw const ExifStructureCorrupt('magic');
     }
+    final ifd0Offset = header.getUint32(4, endian);
+    final ifd0 = await _Ifd.read(
+      source,
+      ifd0Offset,
+      endian,
+      _label(container, 'IFD0'),
+      format,
+      isIfd0: true,
+    );
+    return ExifStructure._(source, endian, ifd0, ifd0Offset, format, container);
+  }
 
+  static String _label(String? container, String ifd) =>
+      container == null ? ifd : '$container $ifd';
+
+  /// Whether IFD0 carries [tag] (only the contract's tags and
+  /// [dngVersionTag] are kept).
+  bool hasIfd0Tag(int tag) => _ifd0.entries.containsKey(tag);
+
+  /// Reads the EXIF IFD, if IFD0 points to one, and the contract's values
+  /// from both. Throws [MetadataReadException] or [ExifStructureCorrupt].
+  Future<CaptureMetadata> extract() async {
+    final source = _source;
     _Ifd? exif;
-    final exifPointer = ifd0.entries[_exifIfd];
+    final exifPointer = _ifd0.entries[_exifIfd];
     if (exifPointer != null) {
       if ((exifPointer.type != _long && exifPointer.type != _ifd) ||
           exifPointer.count != 1) {
-        throw const _Corrupt('EXIF IFD pointer');
+        throw const ExifStructureCorrupt('EXIF IFD pointer');
       }
-      final offset = exifPointer.inlineUint32(endian);
-      if (offset == ifd0Offset) throw const _Corrupt('EXIF IFD loop');
-      exif = await _Ifd.read(source, offset, endian, 'EXIF IFD');
+      final offset = exifPointer.inlineUint32(_endian);
+      if (offset == _ifd0Offset) {
+        throw const ExifStructureCorrupt('EXIF IFD loop');
+      }
+      exif = await _Ifd.read(
+        source,
+        offset,
+        _endian,
+        _label(_container, 'EXIF IFD'),
+        _format,
+        isIfd0: false,
+      );
     }
-    final ifds = [ifd0, ?exif];
+    final ifds = [_ifd0, ?exif];
 
     Future<MetadataValue<T>> field<T>(
       Future<MetadataValue<T>> Function(_Ifd ifd) readIn,
     ) async =>
         MetadataValue.combine<T>([for (final ifd in ifds) await readIn(ifd)]);
 
-    return MetadataRead(
-      MetadataFormat.dng,
-      CaptureMetadata(
-        exposureSeconds: await field((i) => i.rational(source, 33434)),
-        fNumber: await field((i) => i.rational(source, 33437)),
-        focalLengthMm: await field((i) => i.rational(source, 37386)),
-        focalLength35mmEquivalentMm: await field(
-          (i) async => i.short(41989, ExifValues.focalLength35mm),
-        ),
-        sensitivity: await field((i) async => i.sensitivity()),
-        captureTime: await field((i) => i.captureTime(source)),
-        cameraMake: await field((i) => i.text(source, 271, ifd0Only: true)),
-        cameraModel: await field((i) => i.text(source, 272, ifd0Only: true)),
-        uniqueCameraModel: await field(
-          (i) => i.text(source, 50708, ifd0Only: true),
-        ),
-        lensMake: await field((i) => i.text(source, 42035)),
-        lensModel: await field((i) => i.text(source, 42036)),
+    return CaptureMetadata(
+      exposureSeconds: await field((i) => i.rational(source, 33434)),
+      fNumber: await field((i) => i.rational(source, 33437)),
+      focalLengthMm: await field((i) => i.rational(source, 37386)),
+      focalLength35mmEquivalentMm: await field(
+        (i) async => i.short(41989, ExifValues.focalLength35mm),
       ),
+      sensitivity: await field((i) async => i.sensitivity()),
+      captureTime: await field((i) => i.captureTime(source)),
+      cameraMake: await field((i) => i.text(source, 271, ifd0Only: true)),
+      cameraModel: await field((i) => i.text(source, 272, ifd0Only: true)),
+      uniqueCameraModel: await field(
+        (i) => i.text(source, 50708, ifd0Only: true),
+      ),
+      lensMake: await field((i) => i.text(source, 42035)),
+      lensModel: await field((i) => i.text(source, 42036)),
     );
   }
 }
 
-const _dngVersion = 50706;
+/// DNGVersion (50706): kept so a container can tell a DNG (ADR-017 §8).
+const dngVersionTag = 50706;
 const _exifIfd = 34665;
 
 // TIFF field types (TIFF 6.0 §2; type 13 is the IFD type from TIFF
@@ -110,7 +154,7 @@ int _typeSize(int type) => switch (type) {
 /// The contract's tags; nothing else is kept from an IFD, so nothing else can
 /// be read (ADR-017 §2–§3).
 const _contractTags = {
-  271, 272, 50708, _dngVersion, _exifIfd, // IFD0 only (identity, structure)
+  271, 272, 50708, dngVersionTag, _exifIfd, // IFD0 only (identity, structure)
   33434, 33437, 34855, 34864, 36867, 36881, 37386, 41989, 42035, 42036,
 };
 
@@ -129,13 +173,15 @@ const _names = {
   50708: 'UniqueCameraModel',
 };
 
-class _Corrupt implements Exception {
-  const _Corrupt(this.why);
+/// The EXIF/TIFF structure is invalid (a loop, a repeated tag, too many
+/// entries, a bad header or pointer).
+class ExifStructureCorrupt implements Exception {
+  const ExifStructureCorrupt(this.why);
 
   final String why;
 
   @override
-  String toString() => 'corrupt TIFF: $why';
+  String toString() => 'corrupt EXIF/TIFF structure: $why';
 }
 
 class _Entry {
@@ -154,10 +200,12 @@ class _Entry {
 }
 
 class _Ifd {
-  _Ifd(this.location, this.endian, this.entries);
+  _Ifd(this.location, this.endian, this.entries, this.format, this.isIfd0);
 
   final String location;
   final Endian endian;
+  final MetadataFormat format;
+  final bool isIfd0;
 
   /// Contract tags only.
   final Map<int, _Entry> entries;
@@ -167,11 +215,13 @@ class _Ifd {
     int offset,
     Endian endian,
     String location,
-  ) async {
+    MetadataFormat format, {
+    required bool isIfd0,
+  }) async {
     final count = ByteData.sublistView(await source.read(offset, 2))
         .getUint16(0, endian);
-    if (count > TiffMetadataReader.maxEntries) {
-      throw _Corrupt('$location has $count entries');
+    if (count > ExifStructure.maxEntries) {
+      throw ExifStructureCorrupt('$location has $count entries');
     }
     final table = ByteData.sublistView(
       await source.read(offset + 2, 12 * count),
@@ -182,7 +232,7 @@ class _Ifd {
       final tag = table.getUint16(at, endian);
       if (!_contractTags.contains(tag)) continue;
       if (entries.containsKey(tag)) {
-        throw _Corrupt('$location repeats tag $tag');
+        throw ExifStructureCorrupt('$location repeats tag $tag');
       }
       entries[tag] = _Entry(
         table.getUint16(at + 2, endian),
@@ -192,11 +242,11 @@ class _Ifd {
         ),
       );
     }
-    return _Ifd(location, endian, entries);
+    return _Ifd(location, endian, entries, format, isIfd0);
   }
 
   MetadataOrigin origin(int tag) => MetadataOrigin(
-    format: MetadataFormat.dng,
+    format: format,
     field: '${_names[tag] ?? 'Tag'} ($tag)',
     location: location,
   );
@@ -269,7 +319,7 @@ class _Ifd {
 
   Future<String?> _asciiText(MetadataSource source, _Entry? e) async {
     if (e == null || e.type != _ascii) return null;
-    final bytes = await _bytes(source, e, TiffMetadataReader.maxTextBytes);
+    final bytes = await _bytes(source, e, ExifStructure.maxTextBytes);
     if (bytes == null) return null;
     return String.fromCharCodes([for (final b in bytes) b < 0x80 ? b : 0x3F]);
   }
@@ -289,7 +339,7 @@ class _Ifd {
     bool ifd0Only = false,
   }) async {
     final e = entries[tag];
-    if (e == null || (ifd0Only && location != 'IFD0')) {
+    if (e == null || (ifd0Only && !isIfd0)) {
       return const AbsentValue();
     }
     final value = await _asciiText(source, e);

@@ -9,14 +9,23 @@ abstract final class MetadataText {
   static String format(MetadataFormat f) => switch (f) {
     MetadataFormat.dng => 'DNG',
     MetadataFormat.tiff => 'TIFF (not a DNG)',
+    MetadataFormat.jpeg => 'JPEG',
+    MetadataFormat.heif => 'HEIF/HEIC',
+    MetadataFormat.png => 'PNG',
     MetadataFormat.fits => 'FITS',
     MetadataFormat.xisf => 'XISF',
-    MetadataFormat.jpeg => 'JPEG',
+    MetadataFormat.cr2 => 'Canon CR2',
+    MetadataFormat.cr3 => 'Canon CR3',
+    MetadataFormat.raf => 'Fujifilm RAF',
+    MetadataFormat.rw2 => 'Panasonic RW2',
+    MetadataFormat.orf => 'Olympus ORF',
     MetadataFormat.unknown => 'an unrecognised format',
   };
 
-  static String unsupported(MetadataFormat f) =>
-      "This file's format (${format(f)}) is not supported yet.";
+  /// Recognised without a reader, or not recognised at all (ADR-017 §13).
+  static String unsupported(MetadataFormat f) => f == MetadataFormat.unknown
+      ? "This file's format is not recognised."
+      : "This file's format (${format(f)}) is not supported yet.";
 
   static String unreadable(MetadataUnreadableReason r) => switch (r) {
     MetadataUnreadableReason.truncated =>

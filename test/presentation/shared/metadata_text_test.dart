@@ -91,4 +91,18 @@ void main() {
       expect(MetadataText.unreadable(r), isNotEmpty);
     }
   });
+
+  test('S2.7: every recognised format has a name; unrecognised is said so', () {
+    for (final f in MetadataFormat.values) {
+      expect(MetadataText.format(f), isNotEmpty);
+    }
+    expect(
+      MetadataText.unsupported(MetadataFormat.cr3),
+      "This file's format (Canon CR3) is not supported yet.",
+    );
+    expect(
+      MetadataText.unsupported(MetadataFormat.unknown),
+      "This file's format is not recognised.",
+    );
+  });
 }
