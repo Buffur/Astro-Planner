@@ -45,7 +45,7 @@ class MetadataReadException implements Exception {
 }
 
 /// One read made through a [BudgetedMetadataSource].
-typedef MetadataRead = ({int offset, int count});
+typedef MetadataReadRange = ({int offset, int count});
 
 /// Wraps a [MetadataSource] so that no reader can take more than
 /// [budgetBytes] from one file, or more than [maxReadBytes] in one read
@@ -67,13 +67,13 @@ class BudgetedMetadataSource implements MetadataSource {
   final int budgetBytes;
   final int maxReadBytes;
   int _bytesRead = 0;
-  final List<MetadataRead> _reads = [];
+  final List<MetadataReadRange> _reads = [];
 
   /// Bytes read so far, across all reads.
   int get bytesRead => _bytesRead;
 
   /// The reads made so far, in order.
-  List<MetadataRead> get reads => List.unmodifiable(_reads);
+  List<MetadataReadRange> get reads => List.unmodifiable(_reads);
 
   @override
   int get length => _inner.length;

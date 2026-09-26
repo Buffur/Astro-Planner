@@ -11,6 +11,10 @@ enum MetadataFormat {
   /// RAW files. Whether it is a DNG is read from its tags (S2.3).
   tiff,
 
+  /// A TIFF whose IFD0 carries DNGVersion (50706). Only a reader decides
+  /// this; recognition from the first bytes gives [tiff].
+  dng,
+
   /// FITS: the first card is `SIMPLE  = ` (FITS 4.0 §4.4.1.1).
   fits,
 

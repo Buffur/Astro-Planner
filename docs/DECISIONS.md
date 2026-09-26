@@ -2708,9 +2708,12 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
 - **Done:**
   - §4.1, §4.2 and §4.4 (S2.1, 2026-09-26, commit `a25398c`): `lib/domain/metadata/` and
     `lib/data/metadata/file_metadata_source.dart`, as specified;
-  - §2's types and §5 (S2.2, 2026-09-26): `capture_metadata.dart` and
-    `metadata_value.dart`. The conversion rules are recorded as CALC-39.
-- **Open:** §2's extraction and §4.3 (S2.3); §6 (S2.4); §7 (S2.5); FITS (S2.6).
+  - §2's types and §5 (S2.2, 2026-09-26, commit `b8d626a`): `capture_metadata.dart` and
+    `metadata_value.dart`. The conversion rules are recorded as CALC-39;
+  - §2's extraction, §4.3, §8 (DNG only) and §9 (S2.3, 2026-09-26):
+    `tiff_metadata_reader.dart` and `capture_metadata_reader.dart`, with synthetic
+    fixtures and the local real-sample test.
+- **Open:** §6 (S2.4); §7 (S2.5); FITS (S2.6).
 
 ### 1. Context (verified)
 
