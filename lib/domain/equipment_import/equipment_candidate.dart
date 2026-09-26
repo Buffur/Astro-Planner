@@ -130,6 +130,15 @@ class EquipmentCandidate {
   /// The source id of [averageRawFileSizeMB].
   static const rawFileSizeSource = 'metadata:dng:file-size';
 
+  /// The precision estimates are proposed at, which is also what the rig
+  /// editor stores (S3.9, TD-068): far finer than the estimates'
+  /// uncertainty (CALC-40: a few per cent), so the rounding loses nothing,
+  /// and a rig saved from a file compares equal to that file.
+  static const sensorDecimals = 2, pixelPitchDecimals = 3, rawSizeDecimals = 1;
+
+  static double _round(double v, int decimals) =>
+      double.parse(v.toStringAsFixed(decimals));
+
   /// The raw metadata behind the candidate, for matching (S3.3).
   final EquipmentEvidence evidence;
 
@@ -242,12 +251,13 @@ class EquipmentCandidate {
     if (format != MetadataFormat.dng || lengthBytes == null) {
       return const UnknownField(CandidateGap.notInFile);
     }
+    // Checked before rounding: rounding never makes a value plausible.
     final mb = lengthBytes / 1e6;
     if (!EquipmentLimits.rawFileSizeMB.contains(mb)) {
       return const UnknownField(CandidateGap.outOfRange);
     }
     return ProposedField(
-      mb,
+      _round(mb, rawSizeDecimals),
       source: rawFileSizeSource,
       confidence: SpecConfidence.estimated,
       origins: const [
@@ -288,9 +298,9 @@ class EquipmentCandidate {
       origins: [...focal.origins, f35.origin, ...dims.origins],
     );
     return (
-      width: proposed(e.widthMm),
-      height: proposed(e.heightMm),
-      pitch: proposed(e.pixelPitchUm),
+      width: proposed(_round(e.widthMm, sensorDecimals)),
+      height: proposed(_round(e.heightMm, sensorDecimals)),
+      pitch: proposed(_round(e.pixelPitchUm, pixelPitchDecimals)),
     );
   }
 

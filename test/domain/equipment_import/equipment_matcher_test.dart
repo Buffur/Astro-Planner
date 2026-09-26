@@ -101,15 +101,13 @@ void main() {
       MatchReason.sameFocalLength,
       MatchReason.sameFocalRatio,
     ]);
-    // The estimate differs slightly from the saved sensor values: listed,
-    // never applied.
-    expect(r.conflicts.map((c) => c.spec), [
-      EquipmentSpec.sensorSize,
-      EquipmentSpec.pixelPitch,
-    ]);
-    final pitch = r.conflicts.last;
+    // The saved sensor size equals the estimate at its stored precision
+    // (S3.9, TD-068); the saved 2.41 µm differs from the estimate's
+    // 2.414 µm: listed, never applied.
+    expect(r.conflicts.map((c) => c.spec), [EquipmentSpec.pixelPitch]);
+    final pitch = r.conflicts.single;
     expect(pitch.saved, 2.41);
-    expect(pitch.imported as double, closeTo(2.41391, 1e-5));
+    expect(pitch.imported, 2.414);
     expect(pitch.importedProvenance.confidence, SpecConfidence.estimated);
     expect(pitch.savedIsVerified, isFalse);
   });

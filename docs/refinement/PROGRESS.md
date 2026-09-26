@@ -3,10 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.7). **Every frozen Stage 3 Task is done**, and device check M4
-> passed on the owner's phone. M4 found TD-068 (rounding "differences" on re-reading an
-> imported file); S3.9 is proposed to fix it and awaits the owner. Then Stage 3 validation in a
-> fresh session.
+> **Last updated:** 2026-09-26 (S3.9). Every frozen Stage 3 Task is done (M4 passed). The owner
+> approved fixing M4's findings first: S3.9 (TD-068) is done. Next: **S3.10** (TD-069). Then
+> Stage 3 validation in a fresh session.
 
 ## Current state
 
@@ -36,9 +35,9 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None frozen. **Owner decision:** approve S3.9 (TD-068) before the Stage 3 validation, or validate now with TD-068 open |
-| Code baseline | S3.7 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.10 — the editor's sensor-size fields readable on a phone (TD-069)** (owner-approved) |
+| Code baseline | S3.9 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -140,7 +139,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.8 — Average RAW size from a DNG pick (ADR-018 §4, D4; C-13) | 2026-09-26 | `d21a326` | `EquipmentCandidate.fromReading(read, fileLengthBytes:)`; the ViewModel passes `MetadataSource.length` (the file is still never read whole). Only for a DNG: bytes ÷ 10⁶ = MB, `estimated`, source `metadata:dng:file-size`, `EquipmentLimits.rawFileSizeMB` bounds (outside is unknown, out of range). `rigDraft` pre-fills it on a matched rig that lacks one; the review says "Average RAW file size is unknown on this rig; the file suggests …". A saved value is only an ordinary conflict, kept by default. The editor note reads "Estimated from this one file's size (DNG)". 9 tests: DNG / JPEG / HEIC / no length / out of range; matcher fillable vs conflict; draft note; review fill-through-Save, keep-by-default, JPEG never. Gate green, 1159 + 1 skip + 2 E2E |
 
-| 3 | S3.7 — Visibility, TD-066, the device check M4 (ADR-018 §7; RD-16) | 2026-09-26 | The S3.7 commit* | `FeatureScope.metadataImport` = true. `AppRouter.metadata` is the root route `/equipment/import` (was `/settings/metadata`, debug-only), and the Settings entry is removed. "Add from a photo" is a small button above "Add rig" on the equipment screen; the list and the planner's rig reload on return. The screen is retitled "Add from a photo", and its intro says nothing is saved until Save. Privacy policy and Data Safety notes gained a paragraph (nothing leaves the device; still "not collected"). TD-066 verified (host tests, and "≈1/50 s" on the device). Tests: a navigation test; Settings has no entry; the gate/route tests updated to the new route; 7 editor tests now tap "Add rig" by tooltip, since there are two buttons. **Device check M4 passed** on the owner's Xiaomi 14T Pro through a separate `.s2check` package (local build change reverted; uninstalled afterwards; the owner's app untouched, its install times 20:00/20:28 predate the check): a real DNG went through match → pre-filled editor (source notes, RAW size from one file, no D or tracking) → Save → "You already have this rig" → listed; the cache stayed 4 KB. **Found:** TD-068 (rounding conflicts on re-read; S3.9 proposed) and TD-069 (clipped sensor fields; Stage 5/7). Gate green, 1161 + 1 skip + 2 E2E |
+| 3 | S3.7 — Visibility, TD-066, the device check M4 (ADR-018 §7; RD-16) | 2026-09-26 | `2b045eb` | `FeatureScope.metadataImport` = true. `AppRouter.metadata` is the root route `/equipment/import` (was `/settings/metadata`, debug-only), and the Settings entry is removed. "Add from a photo" is a small button above "Add rig" on the equipment screen; the list and the planner's rig reload on return. The screen is retitled "Add from a photo", and its intro says nothing is saved until Save. Privacy policy and Data Safety notes gained a paragraph (nothing leaves the device; still "not collected"). TD-066 verified (host tests, and "≈1/50 s" on the device). Tests: a navigation test; Settings has no entry; the gate/route tests updated to the new route; 7 editor tests now tap "Add rig" by tooltip, since there are two buttons. **Device check M4 passed** on the owner's Xiaomi 14T Pro through a separate `.s2check` package (local build change reverted; uninstalled afterwards; the owner's app untouched, its install times 20:00/20:28 predate the check): a real DNG went through match → pre-filled editor (source notes, RAW size from one file, no D or tracking) → Save → "You already have this rig" → listed; the cache stayed 4 KB. **Found:** TD-068 (rounding conflicts on re-read; S3.9 proposed) and TD-069 (clipped sensor fields; Stage 5/7). Gate green, 1161 + 1 skip + 2 E2E |
+
+| 3 | S3.9 — No rounding conflicts on re-reading an imported file (TD-068) | 2026-09-26 | The S3.9 commit* | Owner: "fix the existing issues…" (E.1, "Stage 3 fixes before validation"). The candidate proposes estimates at the editor's stored precision, with one set of constants for both (`EquipmentCandidate.sensorDecimals`/`pixelPitchDecimals`/`rawSizeDecimals`: 0.01 mm, 0.001 µm, 0.1 MB); plausibility is checked before rounding (a 0.05 MB file stays out of range — caught by the existing test when a first version rounded first). Regression tests (`equipment_import_round_trip_test.dart`): a rig saved from a file through the real form model matches it with no differences (the M4 main DNG, the telephoto, a portrait JPEG), and a user-typed value is still a difference. All four failed before the fix. Five expectations updated to the rounded proposals (the unrounded CALC-40 values stay tested in the estimator's group). CALC-40 row noted; TD-068 resolved. Gate green, 1165 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -391,14 +392,10 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-Every frozen Stage 3 Task is done (S3.1–S3.8), and device check M4 passed. **The owner decides:**
-- **Approve S3.9 (proposed, S; TD-068):** a rig saved from a file must not show rounding
-  "differences" against that same file. Compare an imported estimate at the precision the editor
-  stores it (or round it once in the candidate), and keep real differences listed. Then run the
-  Stage 3 validation in a fresh session.
-- **Or validate now**, with TD-068 open (a validator will likely report it).
-
-TD-069 (clipped sensor fields) is for Stage 5/7.
+**S3.10 — the editor's sensor-size fields readable on a phone (TD-069)**, which the owner approved
+(E.1, "Stage 3 fixes before validation"). Reproduce the clipping in a widget test at the
+phone's size (about 375 dp wide, font scale 1.0), fix the layout, and keep the existing editor
+tests passing. One commit, then STOP. Then Stage 3 validation in a fresh session.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

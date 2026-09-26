@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 3 fixes (2026-09-26):** the owner approved S3.9 (TD-068) and S3.10 (TD-069) before the validation (E.1, "Stage 3 fixes before validation").
 > **S3.7 (2026-09-26):** RD-16 implemented. The import is visible as "Add from a photo" (ADR-018 §7), and the Settings viewer entry is removed.
 > **Stage 3 decisions (2026-09-26, S3.D, documentation only):** ADR-018 (metadata-assisted equipment import) accepted in Part F; RG-02 decided; RD-16 resolved; RG-03 deferred (E.1, "Stage 3 decisions (S3.D)").
 > **Stage 2 closed by the owner (2026-09-26):** a waiver after S2.V4/S2.V5, without a third independent validation; Stage 3 planning starts (E.1, "Stage 2 closed by the owner").
@@ -930,6 +931,18 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - `DefaultCropSize` preferred for DNG;
   - the Settings viewer entry removed when the import becomes visible.
   Each is documented as an assumption, and the owner can change it.
+
+### Stage 3 fixes before validation (2026-09-26)
+
+- **Context:** device check M4 (S3.7) found two issues: TD-068 (a rig imported from a file showed
+  rounding "differences" against that same file) and TD-069 (the editor's read-only sensor-size
+  fields clip their text on a phone).
+- **Decided by:** the project owner, in chat, 2026-09-26: "fix the existing issues. We shouldn't
+  leave any gaps in the execution of the tasks." This approves two small Tasks before the Stage 3
+  validation: **S3.9** (TD-068) and **S3.10** (TD-069).
+- **S3.9's rule:** estimates are proposed at the precision the editor stores (sensor 0.01 mm,
+  pixel 0.001 µm, RAW size 0.1 MB), one set of constants for both. Plausibility is checked before
+  rounding, so rounding never makes a value plausible. CALC-40 itself is unchanged.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

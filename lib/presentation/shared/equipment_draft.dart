@@ -180,21 +180,21 @@ class EquipmentDraft {
       pixelPitch: fill(
         EquipmentSpec.pixelPitch,
         c.pixelPitchUm,
-        (v) => _estimateText(v, 3),
+        (v) => _estimateText(v, EquipmentCandidate.pixelPitchDecimals),
         fallback: rig?.pixelPitchUm,
         fallbackProvenance: from(EquipmentSpec.pixelPitch),
       ),
       sensorWidth: fill(
         EquipmentSpec.sensorSize,
         c.sensorWidthMm,
-        (v) => v.toStringAsFixed(2),
+        (v) => v.toStringAsFixed(EquipmentCandidate.sensorDecimals),
         fallback: rig?.sensorWidthMm,
         fallbackProvenance: from(EquipmentSpec.sensorSize),
       ),
       sensorHeight: fill(
         EquipmentSpec.sensorSize,
         c.sensorHeightMm,
-        (v) => v.toStringAsFixed(2),
+        (v) => v.toStringAsFixed(EquipmentCandidate.sensorDecimals),
         fallback: rig?.sensorHeightMm,
         fallbackProvenance: from(EquipmentSpec.sensorSize),
       ),
@@ -211,7 +211,7 @@ class EquipmentDraft {
       rawFileSize: fill(
         EquipmentSpec.rawFileSize,
         c.averageRawFileSizeMB,
-        (v) => _estimateText(v, 1),
+        (v) => _estimateText(v, EquipmentCandidate.rawSizeDecimals),
         fallback: rig?.averageRawFileSizeMB,
         fallbackProvenance: from(EquipmentSpec.rawFileSize),
       ),
@@ -250,8 +250,12 @@ class EquipmentDraft {
       EquipmentSpec.sensorSize => [
         for (final side in v as List) _sensorText((side as num).toDouble()),
       ],
-      EquipmentSpec.pixelPitch => [_estimateText(v as num, 3)],
-      EquipmentSpec.rawFileSize => [_estimateText(v as num, 1)],
+      EquipmentSpec.pixelPitch => [
+        _estimateText(v as num, EquipmentCandidate.pixelPitchDecimals),
+      ],
+      EquipmentSpec.rawFileSize => [
+        _estimateText(v as num, EquipmentCandidate.rawSizeDecimals),
+      ],
       EquipmentSpec.focalLength => [num1(v)],
       EquipmentSpec.focalRatio => [num1(v), ''],
     };
@@ -288,7 +292,8 @@ class EquipmentDraft {
     );
   }
 
-  static String _sensorText(double mm) => mm.toStringAsFixed(2);
+  static String _sensorText(double mm) =>
+      mm.toStringAsFixed(EquipmentCandidate.sensorDecimals);
 
   static void _add(
     Map<EquipmentSpec, PrefilledSpec> into,

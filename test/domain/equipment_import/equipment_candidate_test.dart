@@ -156,8 +156,10 @@ void main() {
         SpecConfidence.reported,
       );
 
+      // Proposed at the precision the editor stores (S3.9, TD-068); the
+      // unrounded CALC-40 values are checked in the group above.
       final pitch = c.pixelPitchUm as ProposedField<double>;
-      expect(pitch.value, closeTo(2.41391, 1e-5));
+      expect(pitch.value, 2.414);
       expect(pitch.source, 'derived:calc-40/metadata:dng');
       expect(pitch.confidence, SpecConfidence.estimated);
       expect(pitch.origins.map((o) => o.field), [
@@ -165,8 +167,8 @@ void main() {
         'FocalLengthIn35mmFilm',
         'ImageWidth/ImageLength',
       ]);
-      expect(c.sensorWidthMm.valueOrNull, closeTo(9.88736, 1e-5));
-      expect(c.sensorHeightMm.valueOrNull, closeTo(7.41552, 1e-5));
+      expect(c.sensorWidthMm.valueOrNull, 9.89);
+      expect(c.sensorHeightMm.valueOrNull, 7.42);
 
       // Never from metadata (ADR-011 §4, §5).
       for (final f in [c.apertureDiameterMm, c.rotationDeg, c.maxExposureS]) {
@@ -203,7 +205,7 @@ void main() {
       );
       expect(c.resolutionWidthPx.valueOrNull, 4096);
       expect(c.resolutionHeightPx.valueOrNull, 3072);
-      expect(c.sensorWidthMm.valueOrNull, closeTo(9.88736, 1e-5));
+      expect(c.sensorWidthMm.valueOrNull, 9.89);
       expect((c.focalLengthMm as ProposedField).source, 'metadata:jpeg');
       expect(
         (c.pixelPitchUm as ProposedField).source,
@@ -322,7 +324,7 @@ void main() {
       final raw =
           withLength(MetadataFormat.dng, 25074220).averageRawFileSizeMB
               as ProposedField<double>;
-      expect(raw.value, closeTo(25.07422, 1e-9));
+      expect(raw.value, 25.1, reason: '25,074,220 bytes at 0.1 MB (S3.9)');
       expect(raw.source, 'metadata:dng:file-size');
       expect(raw.confidence, SpecConfidence.estimated);
     });

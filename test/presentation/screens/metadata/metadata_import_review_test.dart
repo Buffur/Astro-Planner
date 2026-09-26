@@ -307,7 +307,7 @@ void main() {
         find.byKey(const Key('import.fill.1.rawFileSize')),
         findsOneWidget,
       );
-      expect(find.textContaining('26.214 MB'), findsOneWidget);
+      expect(find.textContaining('26.2 MB'), findsOneWidget);
       await tester.tap(find.byKey(const Key('import.open.1')));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(TextFormField, '26.2'), findsOneWidget);
