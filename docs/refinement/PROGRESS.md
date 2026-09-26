@@ -3,9 +3,10 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. S2.1–S2.5 are done on the host. Stage 2 now waits for the owner:
-> an Android device for checks M1 and M2 (S2.4, S2.5), and a FITS sample for S2.6, or a
-> decision to move them.
+> **Last updated:** 2026-09-26. The owner set format priorities (DNG, JPEG, HEIC/HEIF; FITS on a
+> sample; PNG where meaningful; proprietary RAW via research only) and three layers
+> (recognition, extraction, equipment evidence). S2.1–S2.5 were reviewed: no defect, six
+> extensibility gaps. S2.7 is next.
 
 ## Current state
 
@@ -14,8 +15,8 @@
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
 | Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
-| Current approved Task | None in progress. S2.4 and S2.5 wait for their device checks (TEST_PLAN M1, M2) |
-| Next approved Task | None that can run now. **Waiting for the owner:** an Android device for M1 and M2, and a real FITS sample for S2.6, or a decision on how Stage 2 proceeds without them |
+| Current approved Task | None in progress |
+| Next approved Task | **S2.7 — Layered recognition and a reusable EXIF extractor** (host). Then S2.R2 (HEIC research) and S2.R3 (RG-14, RAW research). S2.8 (JPEG) needs a real JPEG sample, S2.6 (FITS) a FITS sample, S2.9/S2.10 samples too. M1/M2 need a device |
 | Code baseline | S2.5 (see "Completed Tasks"). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green** after S2.5, 2026-09-26: Encoding, Format and Analyze pass; 1024 tests (+1 skipped: local real samples) and 2 host E2E tests pass; the debug APK builds |
 | Schema | v17 |
@@ -76,6 +77,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | S2.3 — DNG/TIFF reader, with synthetic fixtures and local real-sample validation | 2026-09-26 | `59c9f03` | `TiffMetadataReader`: IFD0 and the EXIF IFD, contract tags only; the GPS IFD, sub-IFDs, MakerNotes, serials and pixels are never followed. Bounds, entry, repeat and loop checks; one bad value makes only that field unparseable; no DNGVersion → unsupported. `CaptureMetadataReader` recognises, then dispatches; `MetadataFormat.dng` added. Synthetic fixture builder, including a sanitized layout like the phone files. 13 reader tests: phone-style, big-endian, EXIF-IFD with an offset, agreement and ambiguity, GPS and serials never read (read log), non-DNG, other formats, truncated, corrupt, budget, bad single values, every truncation up to 1,200 bytes plus 500 seeded corruptions. **Real samples (local, `ASTROPLAN_METADATA_SAMPLES`):** both owner DNGs gave every expected contract value, reading 848 bytes in 11 reads of about 25 MB each (values kept outside the repository). Gate green, 1008 + 1 skipped (the real-sample test) + 2 E2E |
 | 2 | S2.4 — Android document access without a copy; picker cache ownership (TD-065) | 2026-09-26 | `26aff9a` | **Implemented, not accepted (device check pending).** `MetadataDocumentChannel.kt` (registered in `MainActivity`): `ACTION_OPEN_DOCUMENT` with no copy; positioned reads on the provider's descriptor; a sequential fallback within 1 MiB for descriptors that cannot seek; a background thread; no persistable grant. Domain `CaptureFileAccess`/`CaptureFile`; data `AndroidCaptureFileAccess` and `ContentUriMetadataSource` with typed failures. TD-065: `FileBackupService.pick` always clears the picker cache (it is injectable; a failed cleanup is logged). 8 tests (5 channel tests against a host stand-in, 3 cleanup tests). The debug APK builds (the Kotlin compiles). TEST_PLAN gains device rows M1 and M2, not run. Gate green, 1016 + 1 skipped + 2 E2E |
 | 2 | S2.5 — The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed | 2026-09-26 | `a2f42a5` | **Implemented; device check M1 pending (with S2.4).** `MetadataImportViewModel` (domain `CaptureFileAccess` only) → `CaptureMetadataReader`; the screen shows every contract row with its unit and source, and unknown, unreadable or conflicting values as such (`metadata_text.dart`). `main.dart` wires Android only; elsewhere "not available". The prototype extractor, `ImageMetadata` and their 2 tests are removed (plus the purity test's allowance test); `exif` and `image_picker` were removed after a `grep` showed no other use (the lock lost 15 packages, nothing else changed; the desktop registrants lost `file_selector`). The gate stays hidden. Privacy and Data Safety were checked: no change (nothing leaves the device). 11 tests (6 screen tests, including a11y at 200 %; 5 wording tests). The debug APK builds. TD-018 and TD-064 resolved. Gate green, 1024 + 1 skipped + 2 E2E |
+| 2 | Review of S2.1–S2.5 against the owner's format priorities (documentation only) | 2026-09-26 | The review commit* | The owner's direction: one common typed, provenance-aware contract for many formats; the priorities DNG, JPEG, HEIC/HEIF, FITS on a sample, PNG where meaningful, proprietary RAW through research only (no ad hoc parsers), XISF sample-driven; three distinct levels (recognition, extraction, equipment evidence); no decoders or RAW framework. Review (`STAGE_2_ARCHITECTURE_REVIEW.md`): the contract, values, provenance, bounds, privacy and no-write rules already fit; no defect. Gaps: G1 EXIF parsing fused with the DNG container (header at byte 0, format hardcoded); G2 closed dispatch; G3 recognition and extraction share one result; G4 HEIF, PNG, CR2, CR3, RAF, RW2 and ORF are not recognised; G5 EXIF conversions in the contract file; G6 no generic optics identity (for FITS). Recorded: DECISIONS E.1 and ADR-017 §13 (supersedes the §8 list); RG-14; S2.7, S2.8, S2.R2, S2.R3 frozen; S2.9 and S2.10 conditional; the Stage 2 exit amended |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -115,7 +117,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
-| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017; DECISIONS E.1). A FITS sample is still needed for S2.6 |
+| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). Samples are still needed for JPEG, HEIC, FITS and PNG |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
@@ -128,6 +130,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | Open |
 | RG-12 | Licence requirements against GPL-3.0 | 9 | Open |
 | RG-13 | Settings: real-world needs and where each setting belongs | 9 | Open |
+| RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | Open; registered 2026-09-26 (owner) |
 
 ## Open owner decisions
 
@@ -288,16 +291,22 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Owner input.** Every host-side Task of Stage 2 is done (S2.1–S2.5). What remains needs the
-owner:
-1. **Device checks M1 and M2** (`TEST_PLAN.md`, Metadata device checks), for the acceptance of
-   S2.4 and S2.5. Options: the owner's phone with USB debugging (`adb` is installed), or an
-   emulator image.
-2. **S2.6 (FITS)** needs a real FITS sample.
-3. **Otherwise, a decision:**
-   - defer M1 and M2 to Stage 11, as S1.5's and S1.11's device checks were;
-   - move S2.6 out of Stage 2 (ADR-017 §8 allows DNG-only);
-   - then run the Stage 2 validation in a fresh session.
+**S2.7 — Layered recognition and a reusable EXIF extractor** (implementation, frozen; host
+only; `POST_ROADMAP_PLAN.md`, "Stage 2 — added Tasks"; ADR-017 §13). It is a refactor with no
+DNG behaviour change: the read log stays the same, and the real-sample check still reads 848
+bytes.
+
+**Then, as far as the inputs allow:**
+- S2.R2 (HEIC research) and S2.R3 (RG-14, RAW research), documentation only;
+- S2.8 (JPEG) once a real JPEG sample exists;
+- S2.6 (FITS), S2.9 (HEIC) and S2.10 (PNG) with their samples;
+- device checks M1 and M2 with a device.
+
+**The owner can supply, outside the repository:**
+- a phone JPEG (ideally the same scene as a DNG);
+- a DSLR or mirrorless JPEG and RAW;
+- a phone HEIC, if the camera app can save one;
+- a FITS file.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

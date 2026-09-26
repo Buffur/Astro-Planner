@@ -973,6 +973,99 @@ unsupported") stays.
   - the fixtures are synthetic, plus a local real-sample test;
   - the TD-018 `/` defect is covered by a test.
 
+#### Stage 2 — added Tasks after the owner's format priorities (2026-09-26)
+
+Decided by the owner on 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities and metadata
+layering"; ADR-017 §13). The review of S2.1–S2.5 is in `STAGE_2_ARCHITECTURE_REVIEW.md`: no
+defect, and six extensibility gaps (G1–G6). S2.1–S2.5 stand as done. S2.6 (FITS) is unchanged
+and still gated on a sample.
+
+| Task | Title | Kind | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S2.7 | Layered recognition and a reusable EXIF extractor | Implementation (refactor, no DNG behaviour change) | M | S2.5 | **Frozen; next** |
+| S2.8 | JPEG reader (the APP1 `Exif` segment) | Implementation | S–M | S2.7, **a real JPEG sample** | Frozen; gated on the sample |
+| S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | Frozen |
+| S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | Conditional |
+| S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | Conditional, low priority |
+| S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | Frozen |
+
+**The Stage 2 exit, amended:** the foundation is validated; DNG is supported. Every other
+format is either supported on a real sample with tests, or recorded as recognised-only with
+its gate. Formats that still wait for samples can move to a later Stage by owner decision.
+
+##### S2.7 — Layered recognition and a reusable EXIF extractor
+- **Objective:** close the review's gaps G1–G5, so a new EXIF-bearing format needs only a
+  container reader, with no change to the contract.
+- **Scope:**
+  - **The reading reports both levels:** the recognised format (recognition), and an
+    extraction outcome — values, "extracted, nothing found", unreadable, or no reader for this
+    format;
+  - **format readers behind one interface,** listed in `CaptureMetadataReader`;
+  - **the EXIF-structure extractor** (IFD0 + the EXIF IFD, with the bounds, loop, privacy and
+    budget rules of S2.3) takes a **base offset** and a container label; the DNG reader
+    becomes a thin container over it (DNGVersion gate, base 0);
+  - **recognition-only signatures:** HEIF (ISO-BMFF `ftyp` with a HEIF brand), PNG, CR2 (TIFF
+    plus `CR`), CR3 (`ftyp crx `), RAF, RW2 and ORF, and their names in `MetadataText`;
+  - **`ExifRational`/`ExifValues`** move beside the extractor.
+- **Out of scope:** any new parser (JPEG is S2.8); any change to the contract; level (c).
+- **Acceptance:**
+  - every existing metadata test passes with its assertions unchanged (only imports and
+    renamed types may change);
+  - the DNG read log is unchanged (the same reads and bytes);
+  - the local real-sample test still passes (848 bytes);
+  - a test reads an EXIF structure at a non-zero base offset;
+  - each new signature is recognised, with near misses rejected;
+  - a recognised format without a reader reads "no reader", not "unrecognised";
+  - the gate is green.
+
+##### S2.8 — JPEG reader (gated on a real JPEG sample)
+- **Objective:** read the contract from a JPEG's APP1 `Exif\0\0` segment through the S2.7
+  extractor, with no decoding.
+- **Scope:**
+  - a bounded marker walk from SOI: segment lengths checked; stops at SOS or EOI; ignores
+    APP1 XMP and every other segment; a segment-count limit;
+  - base offset = the APP1 payload + 6;
+  - "no EXIF" gives "extracted, nothing found";
+  - synthetic fixtures built in code, plus a local real-sample entry in `expected.json`.
+- **Samples:** the owner's phone JPEG (ideally the same scene as a DNG, for cross-checking),
+  and a DSLR or mirrorless JPEG where possible. They stay outside the repository.
+- **Acceptance:**
+  - the real samples give their expected values within the budget;
+  - truncated, looping and oversized segment cases are typed;
+  - the GPS IFD is never read (read log);
+  - the Data Safety and privacy texts are unchanged (nothing leaves the device).
+
+##### S2.R2 — HEIC/HEIF metadata research
+- **Questions:**
+  - the ISO-BMFF structure (`ftyp` brands; `meta` with `hdlr`, `iinf`, `iloc`, `idat`); where
+    the `Exif` item lives, and its 4-byte TIFF-header offset;
+  - whether a bounded read reaches it in real files;
+  - multi-image and burst files;
+  - what Android document providers deliver for HEIC;
+  - licences (reading the container is unencumbered; decoding is out of scope anyway);
+  - the candidate libraries (with S2.R3).
+- **Output:** a research note and an owner decision; S2.9 is defined only with a real HEIC
+  sample.
+
+##### S2.R3 — RG-14: proprietary RAW compatibility and library research
+- **Questions:**
+  - which RAW formats owners actually use;
+  - per format, whether the contract's EXIF values are reachable in a bounded way (TIFF-based
+    CR2, NEF and ARW; ORF and RW2 with their variant headers; RAF's header with an embedded
+    JPEG and TIFF; CR3 as ISO-BMFF);
+  - the **libraries and platform facilities** against ADR-017 (bounded I/O on a content URI,
+    privacy exclusions, licence against GPL-3.0, size, maintenance). For example AndroidX
+    `ExifInterface`, which documents RAW and HEIF support. That is an **unverified
+    candidate**;
+  - what each option means for tests and fixtures.
+- **Out of scope:** writing any RAW parser.
+- **Output:** a research note, a recommendation and an owner decision.
+
+##### S2.9 and S2.10 (conditional)
+- **S2.9, a HEIC reader:** defined after S2.R2's decision, with a real HEIC sample.
+- **S2.10, PNG `eXIf`:** reuses the S2.7 extractor, with a real PNG carrying `eXIf`; low
+  priority.
+
 ### Stage 3 — Metadata → Equipment / Device Import
 
 - **Purpose:** reduce manual equipment setup using verified metadata.
@@ -1328,6 +1421,7 @@ any implementation Task is created.
 | RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented |
 | RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice |
 | RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score |
+| RG-14 | Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
 
 ---
 

@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 2 format priorities (2026-09-26):** ADR-017 amended (§8 superseded by §13; layering); RG-14 registered (E.1, "Stage 2 format priorities and metadata layering").
 > **Stage 2 decisions (2026-09-26):** ADR-017 accepted; PD-21 resolved; RD-16 resolved for Stage 2 (E.1, "Stage 2 decisions: RG-01, PD-21, RD-16").
 >
 > Structure:
@@ -798,6 +799,31 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   virtual device, the cmdline-tools are missing (TASK 16.2's owner action), and no phone is
   connected. S2.4's acceptance needs a device check. The options are the owner's phone with
   USB debugging (`adb` is installed), or an emulator image installed by the owner.
+
+### Stage 2 format priorities and metadata layering (2026-09-26)
+
+- **Decided by:** the project owner, in chat, on 2026-09-26, after S2.1–S2.5. The review is
+  in `docs/refinement/STAGE_2_ARCHITECTURE_REVIEW.md`.
+- **Architecture:** priority goes to one common typed, provenance-aware extraction contract
+  that supports many formats **without changing the domain model for every parser**. Three
+  levels stay distinct:
+  1. format recognition;
+  2. metadata extraction;
+  3. whether the evidence is enough to form an EquipmentCandidate (Stage 3, RG-02).
+- **Format priorities (amends PD-21 and ADR-017 §8):**
+  - **DNG:** primary; real samples exist.
+  - **JPEG/JPG:** high priority.
+  - **HEIC/HEIF:** a high-priority research and support target.
+  - **FITS/FIT:** when a representative real sample exists.
+  - **PNG:** where meaningful metadata exists; never assumed to identify equipment.
+  - **Proprietary RAW** (CR2/CR3, NEF, ARW, RAF, RW2): **no ad hoc parsers.** A dedicated
+    compatibility and library research task (RG-14).
+  - **XISF and other specialised formats:** driven by samples and use cases.
+  - **Primary focus:** RAW, DNG and JPEG; other formats can follow in later development.
+- **Limits:** "support popular formats" is **not** permission to build image decoders or a
+  universal RAW parsing framework. Missing metadata stays Unknown and is never guessed. The
+  earlier rules stand: no support is claimed without a representative real sample and tests;
+  ADR-017's privacy exclusions, bounded reads and Stage 3 boundary are unchanged.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2883,3 +2909,31 @@ Justified by the current repository (`grep` at `565341b`):
 - `exif` and `image_picker` leave `pubspec.yaml`.
 - F-45 stays hidden.
 - TD-018, TD-064 and TD-065 are closed by Stage 2's Tasks.
+
+### 13. Amendment (owner, 2026-09-26): format priorities and layering
+
+Supersedes §8's list. Its rule stands: support is claimed only with a representative real
+sample and tests. See E.1, "Stage 2 format priorities and metadata layering".
+
+1. **Priorities:**
+   - DNG (supported);
+   - JPEG (high; S2.8 once a real sample exists);
+   - HEIC/HEIF (high; research S2.R2 first, and a reader only with a sample and a decision);
+   - FITS (on a sample, S2.6);
+   - PNG (the `eXIf` chunk only, with a sample; never assumed to identify equipment);
+   - proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): **no ad hoc parsers**; RG-14 decides
+     between a library, a platform facility or nothing;
+   - XISF and others: sample and use-case driven.
+2. **Three levels:**
+   - **(a) recognition:** the container named from its signature, including recognition-only
+     formats that have no reader;
+   - **(b) extraction:** the contract's values, or "extracted, nothing found", or
+     unreadable, or no reader for this format;
+   - **(c) equipment evidence:** Stage 3's assessment over (b). Stage 2 never implies it.
+3. **One contract, many containers.** EXIF-bearing containers (DNG/TIFF, JPEG APP1, HEIF
+   `Exif` item, PNG `eXIf`) share **one** bounded EXIF-structure extractor, given a base
+   offset and a container label. Format readers sit behind one interface. The contract
+   (§2) changes only for a new *kind* of fact (for example a generic optics identity for
+   FITS `TELESCOP`), never per parser.
+4. **Not permitted:** image decoding, thumbnails or pixel access; a universal RAW parsing
+   framework.
