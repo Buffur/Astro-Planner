@@ -825,6 +825,17 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   earlier rules stand: no support is claimed without a representative real sample and tests;
   ADR-017's privacy exclusions, bounded reads and Stage 3 boundary are unchanged.
 
+### FITS and PNG skipped for now (2026-09-26)
+
+- **Decided by:** the project owner, in chat, on 2026-09-26: "There won't be any FITS or PNG
+  files for now. We'll skip them."
+- **Consequence:** S2.6 (FITS) and S2.10 (PNG `eXIf`) leave Stage 2. They are carried as
+  sample-driven later work. Both formats stay **recognised only** (ADR-017 §13), and G6 (a
+  generic optics identity) waits with FITS. The Stage 2 exit no longer waits for them.
+- **Samples supplied the same day:** a phone JPEG (`IMG_20260926_084535.jpg`) and a phone
+  HEIC (`IMG_20260926_084557.HEIC`), kept outside the repository. S2.8 (JPEG) is unblocked;
+  S2.R2 used the HEIC.
+
 # Part F — ADRs accepted after the Phase 0 baseline
 
 *Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*

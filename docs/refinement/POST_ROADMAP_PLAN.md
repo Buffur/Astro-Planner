@@ -844,7 +844,7 @@ which are kept for history.
 | S2.3 | DNG/TIFF reader, with synthetic fixtures and local real-sample validation | M | S2.2 | yes | Frozen |
 | S2.4 | Android document access without a copy; picker cache ownership (TD-065) | M | S2.1 | Dart side only | Frozen; **device check needed** |
 | S2.5 | The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed | S–M | S2.3, S2.4 | yes, plus a device check | Frozen |
-| S2.6 | FITS reader | M | S2.2, **a real FITS sample** | yes | **Gated on the sample** |
+| S2.6 | FITS reader | M | S2.2, **a real FITS sample** | yes | **Out of Stage 2** (owner, 2026-09-26: no FITS files for now) |
 
 Then comes Stage 2 validation (fresh session). **The Stage 2 exit is adjusted** by ADR-017 §8:
 "each supported format is parsed from a real sample" means DNG. If no FITS sample exists by
@@ -983,10 +983,10 @@ and still gated on a sample.
 | Task | Title | Kind | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
 | S2.7 | Layered recognition and a reusable EXIF extractor | Implementation (refactor, no DNG behaviour change) | M | S2.5 | **Frozen; next** |
-| S2.8 | JPEG reader (the APP1 `Exif` segment) | Implementation | S–M | S2.7, **a real JPEG sample** | Frozen; gated on the sample |
-| S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | Frozen |
-| S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | Conditional |
-| S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | Conditional, low priority |
+| S2.8 | JPEG reader (the APP1 `Exif` segment) | Implementation | S–M | S2.7, **a real JPEG sample** | Frozen; **unblocked** (the owner's phone JPEG, 2026-09-26) |
+| S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | **Done 2026-09-26** (`research/S2.R2_HEIF_METADATA.md`); owner decision pending |
+| S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | Conditional; the sample exists; defined in S2.R2 §7, awaiting the owner's decision |
+| S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | **Out of Stage 2** (owner, 2026-09-26: no PNG files for now) |
 | S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | Frozen |
 
 **The Stage 2 exit, amended:** the foundation is validated; DNG is supported. Every other
@@ -1086,7 +1086,10 @@ its gate. Formats that still wait for samples can move to a later Stage by owner
     **Evidence (S2.R1, owner's samples, 2026-09-26):** both camera modules of one phone share
     Make, Model and UniqueCameraModel, and only the optical metadata (focal length, 35 mm
     equivalent, f-number) and the image geometry tell them apart. Focal length is not a
-    universally reliable identifier (DECISIONS E.1, "Stage 2 decisions");
+    universally reliable identifier (DECISIONS E.1, "Stage 2 decisions"). **More (S2.R2):** the same
+    phone writes Model `Xiaomi 14T Pro/2407FPN8EG` in DNG but `Xiaomi 14T Pro` in JPEG and HEIC, and
+    records a time offset in JPEG/HEIC but not in DNG. Matching must not rely on exact Model equality
+    across formats;
   - manual lenses and telescopes (no lens data, so the value stays unknown);
   - what cannot be derived (for example pixel pitch, sensor size, tracking), and whether a
     sourced equipment catalog is needed (TASK 8.5's verified-seed policy; "reported"
