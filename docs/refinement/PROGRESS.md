@@ -3,8 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. S2.4 is implemented and host-tested but **not accepted**: its
-> device check (TEST_PLAN M1, M2) needs an Android device. S2.5 is next. S2.6 needs a FITS sample.
+> **Last updated:** 2026-09-26. S2.1–S2.5 are done on the host. Stage 2 now waits for the owner:
+> an Android device for checks M1 and M2 (S2.4, S2.5), and a FITS sample for S2.6, or a
+> decision to move them.
 
 ## Current state
 
@@ -13,10 +14,10 @@
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
 | Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
-| Current approved Task | None in progress. S2.4 waits for its device check |
-| Next approved Task | **S2.5 — The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed**. S2.4's and S2.5's device checks (TEST_PLAN M1, M2) need a device. S2.6 (FITS) is gated on a real FITS sample |
-| Code baseline | S2.4 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S2.4, 2026-09-26: Encoding, Format and Analyze pass; 1016 tests (+1 skipped: local real samples) and 2 host E2E tests pass |
+| Current approved Task | None in progress. S2.4 and S2.5 wait for their device checks (TEST_PLAN M1, M2) |
+| Next approved Task | None that can run now. **Waiting for the owner:** an Android device for M1 and M2, and a real FITS sample for S2.6, or a decision on how Stage 2 proceeds without them |
+| Code baseline | S2.5 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green** after S2.5, 2026-09-26: Encoding, Format and Analyze pass; 1024 tests (+1 skipped: local real samples) and 2 host E2E tests pass; the debug APK builds |
 | Schema | v17 |
 
 ## Stage status
@@ -73,7 +74,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | S2.1 — Bounded metadata source and format recognition | 2026-09-26 | `a25398c` | `lib/domain/metadata/`: `MetadataSource`, `BudgetedMetadataSource` (1 MiB per file, 64 KiB per read, a read log, refused reads cost nothing), typed `MetadataReadException`, and `MetadataFormatRecognizer` (TIFF, FITS, XISF and JPEG by signature, ≤ 16 bytes). `lib/data/metadata/file_metadata_source.dart`: positioned, serialized reads, with short reads typed. 17 tests: the budget, limits and ranges, wrapping and short reads; signatures and near misses; a real 4 GiB file recognised and read at both ends with ≤ 64 KiB read; the domain purity check, which fails on a domain `dart:io` import (demonstrated with a temporary file, removed) and allows only the prototype until S2.5. Gate green, 980 + 2 E2E |
 | 2 | S2.2 — The metadata contract as typed values with provenance | 2026-09-26 | `b8d626a` | Pure Dart. `MetadataValue<T>`: `KnownValue` (value, raw text, origin with format, tag, location and provenance), `AbsentValue`, `UnparseableValue` and `AmbiguousValue`; `combine` keeps agreeing values and marks conflicts ambiguous. `CaptureMetadata` has the 11 contract fields, all absent by default. `MetadataReading`, with its unreadable reasons. `ExifValues`: exact rationals; the 35 mm equivalent kept separate (0 = absent); sensitivity with its kind (SensitivityType 1–3, otherwise unspecified; 0 and 65535 unparseable); capture time as local wall-clock plus an offset only if recorded, otherwise zone unknown with no instant. CALC-39 and an SI-004 note were added. The tests use synthetic timestamps only. 15 tests. Gate green, 995 + 2 E2E |
 | 2 | S2.3 — DNG/TIFF reader, with synthetic fixtures and local real-sample validation | 2026-09-26 | `59c9f03` | `TiffMetadataReader`: IFD0 and the EXIF IFD, contract tags only; the GPS IFD, sub-IFDs, MakerNotes, serials and pixels are never followed. Bounds, entry, repeat and loop checks; one bad value makes only that field unparseable; no DNGVersion → unsupported. `CaptureMetadataReader` recognises, then dispatches; `MetadataFormat.dng` added. Synthetic fixture builder, including a sanitized layout like the phone files. 13 reader tests: phone-style, big-endian, EXIF-IFD with an offset, agreement and ambiguity, GPS and serials never read (read log), non-DNG, other formats, truncated, corrupt, budget, bad single values, every truncation up to 1,200 bytes plus 500 seeded corruptions. **Real samples (local, `ASTROPLAN_METADATA_SAMPLES`):** both owner DNGs gave every expected contract value, reading 848 bytes in 11 reads of about 25 MB each (values kept outside the repository). Gate green, 1008 + 1 skipped (the real-sample test) + 2 E2E |
-| 2 | S2.4 — Android document access without a copy; picker cache ownership (TD-065) | 2026-09-26 | The S2.4 commit* | **Implemented, not accepted (device check pending).** `MetadataDocumentChannel.kt` (registered in `MainActivity`): `ACTION_OPEN_DOCUMENT` with no copy; positioned reads on the provider's descriptor; a sequential fallback within 1 MiB for descriptors that cannot seek; a background thread; no persistable grant. Domain `CaptureFileAccess`/`CaptureFile`; data `AndroidCaptureFileAccess` and `ContentUriMetadataSource` with typed failures. TD-065: `FileBackupService.pick` always clears the picker cache (it is injectable; a failed cleanup is logged). 8 tests (5 channel tests against a host stand-in, 3 cleanup tests). The debug APK builds (the Kotlin compiles). TEST_PLAN gains device rows M1 and M2, not run. Gate green, 1016 + 1 skipped + 2 E2E |
+| 2 | S2.4 — Android document access without a copy; picker cache ownership (TD-065) | 2026-09-26 | `26aff9a` | **Implemented, not accepted (device check pending).** `MetadataDocumentChannel.kt` (registered in `MainActivity`): `ACTION_OPEN_DOCUMENT` with no copy; positioned reads on the provider's descriptor; a sequential fallback within 1 MiB for descriptors that cannot seek; a background thread; no persistable grant. Domain `CaptureFileAccess`/`CaptureFile`; data `AndroidCaptureFileAccess` and `ContentUriMetadataSource` with typed failures. TD-065: `FileBackupService.pick` always clears the picker cache (it is injectable; a failed cleanup is logged). 8 tests (5 channel tests against a host stand-in, 3 cleanup tests). The debug APK builds (the Kotlin compiles). TEST_PLAN gains device rows M1 and M2, not run. Gate green, 1016 + 1 skipped + 2 E2E |
+| 2 | S2.5 — The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed | 2026-09-26 | The S2.5 commit* | **Implemented; device check M1 pending (with S2.4).** `MetadataImportViewModel` (domain `CaptureFileAccess` only) → `CaptureMetadataReader`; the screen shows every contract row with its unit and source, and unknown, unreadable or conflicting values as such (`metadata_text.dart`). `main.dart` wires Android only; elsewhere "not available". The prototype extractor, `ImageMetadata` and their 2 tests are removed (plus the purity test's allowance test); `exif` and `image_picker` were removed after a `grep` showed no other use (the lock lost 15 packages, nothing else changed; the desktop registrants lost `file_selector`). The gate stays hidden. Privacy and Data Safety were checked: no change (nothing leaves the device). 11 tests (6 screen tests, including a11y at 200 %; 5 wording tests). The debug APK builds. TD-018 and TD-064 resolved. Gate green, 1024 + 1 skipped + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -286,14 +288,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S2.5 — The hidden import screen on the foundation; the prototype, `exif` and
-`image_picker` removed** (implementation, frozen and approved; ADR-017 §7, §10). The screen
-stays hidden.
-
-Then, in order:
-- S2.4's and S2.5's device checks (TEST_PLAN M1, M2), when a device is available;
-- S2.6, only once a real FITS sample exists; otherwise the owner moves it out of Stage 2;
-- Stage 2 validation (fresh session).
+**Owner input.** Every host-side Task of Stage 2 is done (S2.1–S2.5). What remains needs the
+owner:
+1. **Device checks M1 and M2** (`TEST_PLAN.md`, Metadata device checks), for the acceptance of
+   S2.4 and S2.5. Options: the owner's phone with USB debugging (`adb` is installed), or an
+   emulator image.
+2. **S2.6 (FITS)** needs a real FITS sample.
+3. **Otherwise, a decision:**
+   - defer M1 and M2 to Stage 11, as S1.5's and S1.11's device checks were;
+   - move S2.6 out of Stage 2 (ADR-017 §8 allows DNG-only);
+   - then run the Stage 2 validation in a fresh session.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

@@ -2713,9 +2713,11 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
   - §2's extraction, §4.3, §8 (DNG only) and §9 (S2.3, 2026-09-26):
     `tiff_metadata_reader.dart` and `capture_metadata_reader.dart`, with synthetic
     fixtures and the local real-sample test (commit `59c9f03`);
-  - §6 (S2.4, 2026-09-26): implemented and host-tested, and the Kotlin compiles. **Not accepted until device
-    check M1 (`TEST_PLAN.md`) passes.**
-- **Open:** §7 (S2.5); FITS (S2.6); the S2.4 device check.
+  - §6 (S2.4, 2026-09-26, commit `26aff9a`): implemented and host-tested, and the Kotlin compiles. **Not accepted until
+    device check M1 (`TEST_PLAN.md`) passes;**
+  - §7 and §10 (S2.5, 2026-09-26): `exif` and `image_picker` removed after a `grep`; the hidden screen reads the
+    contract; `FeatureScope.metadataImport` stays false.
+- **Open:** FITS (S2.6, needs a sample); device checks M1 and M2.
 
 ### 1. Context (verified)
 

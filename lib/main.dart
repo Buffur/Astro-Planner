@@ -35,6 +35,7 @@ import 'data/services/wakelock_screen_wake.dart';
 import 'data/export/share_session_exporter.dart';
 import 'data/backup/backup_staging.dart';
 import 'data/backup/file_backup_service.dart';
+import 'data/metadata/android_capture_file_access.dart';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -146,6 +147,10 @@ Future<void> _start() async {
     exporter: ShareSessionExporter(),
     backup: FileBackupService(database, sessionRepo),
     sessions: sessionRepo,
+    // ADR-017 §6: capture files are read in place, on Android only.
+    captureFiles: !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? AndroidCaptureFileAccess()
+        : null,
   );
   // Field mode is restored before the first frame, so a restart in field
   // mode never flashes the normal theme (TASK 12.4).

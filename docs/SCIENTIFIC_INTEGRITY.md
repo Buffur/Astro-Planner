@@ -284,7 +284,7 @@ documentation still open.)* **Work item:** TD-009 (resolved for the label).
 
 ## SI-004 — ISO / gain limitations
 
-> **S2.2 (2026-09-26):** the new metadata contract keeps a sensitivity value with its kind (`SensitivityKind`; CALC-39). Gain kinds are added only with FITS (S2.6), as separate kinds, and ISO and gain are never converted into each other. The prototype `MetadataExtractor` (below) still reads them as strings until S2.5 removes it.
+> **S2.2 (2026-09-26):** the new metadata contract keeps a sensitivity value with its kind (`SensitivityKind`; CALC-39). Gain kinds are added only with FITS (S2.6), as separate kinds, and ISO and gain are never converted into each other. The prototype `MetadataExtractor` (below) read them as strings; S2.5 (2026-09-26) removed it.
 
 **Scientific Issue**
 ISO/gain must never be presented as increasing photon collection, and the app has

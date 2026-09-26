@@ -2,7 +2,7 @@
 // docs/DECISIONS.md PD-06 E.1), so an accidental flip of one flag is a
 // failing test, not a silent policy violation.
 //
-//   Hidden: metadata import (until G17 / v1.1).
+//   Hidden: metadata import (during Stage 2; RD-16, ADR-017 §10).
 //   Visible since TASK 12.4 (its scheduled phase): red field mode.
 //   Visible since TASK 7.4 (its scheduled phase): the light-pollution
 //   context — manual Bortle/SQM and the external map at the site.
@@ -25,7 +25,7 @@ void main() {
     expect(FeatureScope.lightPollutionContext, isTrue);
   });
 
-  test('metadataImport is hidden (until G17 / v1.1)', () {
+  test('metadataImport is hidden (during Stage 2, RD-16)', () {
     expect(FeatureScope.metadataImport, isFalse);
   });
 

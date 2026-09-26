@@ -112,11 +112,16 @@
 >   - one bad value (past the end, the wrong type or count, `/0`) makes only that field unparseable;
 >   - a TIFF without DNGVersion is `MetadataUnsupported(tiff)`: no support is claimed for other TIFF-based RAWs.
 > `CaptureMetadataReader` recognises the format, then dispatches; everything else is unsupported (FITS waits for S2.6). A new `MetadataFormat.dng` is decided by the reader only. The fixtures are synthetic (`test/support/tiff_fixture.dart`, including a sanitized layout like the owner's phone files). The real samples are checked by a local-only test (`ASTROPLAN_METADATA_SAMPLES`; skipped otherwise): both owner DNGs matched every expected value, with 848 bytes read out of about 25 MB each.
-> **S2.4 (2026-09-26, Stage 2; its commit is recorded by S2.5; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
+> **S2.4 (2026-09-26, Stage 2, commit `26aff9a`; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
 >   - **Kotlin:** `MetadataDocumentChannel.kt` (registered by `MainActivity`) runs `ACTION_OPEN_DOCUMENT` (`*/*`, openable) and returns the URI, name and size. It serves `read(uri, offset, count)` with a positioned read on the provider's file descriptor. A descriptor that cannot seek is read from the start, only within the 1 MiB budget. It works on a background thread, takes no persistable grant, and writes nothing to the cache.
 >   - **Dart:** the domain `CaptureFileAccess`/`CaptureFile`, and the data-layer `AndroidCaptureFileAccess` plus `ContentUriMetadataSource`, with typed failures (cancel = null; a revoked grant, I/O, short answers and an unknown size are `io`).
 >   - **TD-065:** `FileBackupService.pick` always calls `FilePicker.clearTemporaryFiles()` (consumed, cancelled or refused; a failed cleanup is logged, never masking the result). Picking is injectable for tests.
 >   - **Verification:** the debug APK builds (the Kotlin compiles). Device rows M1 and M2 in `TEST_PLAN.md` are not run.
+> **S2.5 (2026-09-26, Stage 2; its commit is recorded by the next change; hidden; device check pending):** the metadata screen on the new foundation (ADR-017 §7, §10).
+>   - **The screen:** `MetadataImportViewModel` (domain `CaptureFileAccess` only) picks and reads through `CaptureMetadataReader`. `MetadataImportScreen` shows every contract row with its unit and source, and "Not in the file", "Unreadable value" or "conflicting values" otherwise. Wording is in `presentation/shared/metadata_text.dart`. A picker failure goes through `runWithFeedback`.
+>   - **Wiring:** `main.dart` passes `AndroidCaptureFileAccess` on Android only. Elsewhere the ViewModel is null and the screen says metadata import is unavailable.
+>   - **Removed:** the prototype `metadata_extractor.dart`, `image_metadata.dart` and their test (2 tests of removed code). `exif` and `image_picker` left `pubspec.yaml` after a `grep` showed no other use; the lockfile only lost those two and their 13 transitive packages, and the desktop registrants lost `file_selector`. The domain purity test now allows no exception.
+>   - **Unchanged:** `FeatureScope.metadataImport` stays false (RD-16). The privacy and Data Safety texts are checked and need no change, since nothing leaves the device.
 
 ---
 

@@ -124,11 +124,16 @@
 >   - one bad value (past the end, the wrong type or count, `/0`) makes only that field unparseable;
 >   - a TIFF without DNGVersion is `MetadataUnsupported(tiff)`: no support is claimed for other TIFF-based RAWs.
 > `CaptureMetadataReader` recognises the format, then dispatches; everything else is unsupported (FITS waits for S2.6). A new `MetadataFormat.dng` is decided by the reader only. The fixtures are synthetic (`test/support/tiff_fixture.dart`, including a sanitized layout like the owner's phone files). The real samples are checked by a local-only test (`ASTROPLAN_METADATA_SAMPLES`; skipped otherwise): both owner DNGs matched every expected value, with 848 bytes read out of about 25 MB each.
-> **S2.4 (2026-09-26, Stage 2; its commit is recorded by S2.5; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
+> **S2.4 (2026-09-26, Stage 2, commit `26aff9a`; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
 >   - **Kotlin:** `MetadataDocumentChannel.kt` (registered by `MainActivity`) runs `ACTION_OPEN_DOCUMENT` (`*/*`, openable) and returns the URI, name and size. It serves `read(uri, offset, count)` with a positioned read on the provider's file descriptor. A descriptor that cannot seek is read from the start, only within the 1 MiB budget. It works on a background thread, takes no persistable grant, and writes nothing to the cache.
 >   - **Dart:** the domain `CaptureFileAccess`/`CaptureFile`, and the data-layer `AndroidCaptureFileAccess` plus `ContentUriMetadataSource`, with typed failures (cancel = null; a revoked grant, I/O, short answers and an unknown size are `io`).
 >   - **TD-065:** `FileBackupService.pick` always calls `FilePicker.clearTemporaryFiles()` (consumed, cancelled or refused; a failed cleanup is logged, never masking the result). Picking is injectable for tests.
 >   - **Verification:** the debug APK builds (the Kotlin compiles). Device rows M1 and M2 in `TEST_PLAN.md` are not run.
+> **S2.5 (2026-09-26, Stage 2; its commit is recorded by the next change; hidden; device check pending):** the metadata screen on the new foundation (ADR-017 §7, §10).
+>   - **The screen:** `MetadataImportViewModel` (domain `CaptureFileAccess` only) picks and reads through `CaptureMetadataReader`. `MetadataImportScreen` shows every contract row with its unit and source, and "Not in the file", "Unreadable value" or "conflicting values" otherwise. Wording is in `presentation/shared/metadata_text.dart`. A picker failure goes through `runWithFeedback`.
+>   - **Wiring:** `main.dart` passes `AndroidCaptureFileAccess` on Android only. Elsewhere the ViewModel is null and the screen says metadata import is unavailable.
+>   - **Removed:** the prototype `metadata_extractor.dart`, `image_metadata.dart` and their test (2 tests of removed code). `exif` and `image_picker` left `pubspec.yaml` after a `grep` showed no other use; the lockfile only lost those two and their 13 transitive packages, and the desktop registrants lost `file_selector`. The domain purity test now allows no exception.
+>   - **Unchanged:** `FeatureScope.metadataImport` stays false (RD-16). The privacy and Data Safety texts are checked and need no change, since nothing leaves the device.
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 
 ## Status legend
@@ -199,7 +204,7 @@ feature exists although its roadmap phase has not been reached in
 | F-42 | Planned-versus-actual logging | Implemented *(TASK 13.4)* | 13 (ahead) |
 | F-43 | Session execution mode | Implemented *(TASKs 13.2–13.4; device checks pending)* | 13, 15 |
 | F-44 | Export / interoperability manifest | Implemented *(v2 export; import deferred, TASK 14.3)* | 14 (ahead) |
-| F-45 | Metadata import (EXIF / FITS) | Prototype | 12 (ahead) |
+| F-45 | Metadata import (EXIF / FITS) | Partial (hidden; Stage 2) | Stage 2–3 |
 | F-46 | Field mode | Implemented *(TASK 12.4; summary corrected S1.15)* | 15 (ahead) |
 | F-47 | Custom dashboard | Missing by decision *(the fixed Tonight view that replaces it is Implemented, TASK 12.5)* | 12.5 |
 | F-48 | Automated tests | Partial | 1, 16 |
@@ -644,17 +649,19 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S2.5 (2026-09-26):** the hidden screen reads the contract through the new foundation; the prototype, `exif` and `image_picker` are gone. Status Partial: DNG is read (real samples, locally), FITS is not supported yet (S2.6 needs a sample), the Android path awaits device check M1, and the screen stays hidden until Stage 3.
 - **S2.4 (2026-09-26, implemented; device check M1 pending):** Android document access without a copy (`MetadataDocumentChannel.kt`, `AndroidCaptureFileAccess`). The backup restore now clears the picker's cache (TD-065). Not yet used by the hidden screen (S2.5).
 - **S2.3 (2026-09-26):** DNG is read by the new bounded reader (`tiff_metadata_reader.dart`). Both of the owner's real phone DNGs give every contract value in a local check, reading 848 bytes of about 25 MB. The hidden screen still uses the prototype until S2.5.
 - **S2.2 (2026-09-26):** the contract's typed values with provenance and explicit unknowns exist (`capture_metadata.dart`, `metadata_value.dart`). No reader yet, and still hidden.
 - **S2.1 (2026-09-26):** the bounded source, byte budget and signature recognition exist (`lib/domain/metadata/`, `lib/data/metadata/`). The screen and the prototype are unchanged, and the feature is still hidden.
 - **Decided 2026-09-26 (ADR-017; DECISIONS E.1):** Stage 2 rebuilds the foundation (bounded reads, signature recognition, a typed contract, no GPS/serial/observer, Android access without a copy); DNG only, FITS on a sample; the screen stays hidden during Stage 2 (S2.1–S2.6).
 - **S2.R1 (2026-09-26, research; no code changed):** the owner supplied two real phone DNGs, kept outside the repository. On them, the prototype finds none of the capture fields: it reads only `EXIF …` keys, while these files keep the tags in IFD0 (TD-064). The recommended formats, readers and fixture policy are in `refinement/research/RG-01_METADATA_FORMATS.md`, pending the owner's decision (PD-21, proposed ADR-017). The status is still Prototype.
-- **Status:** Prototype
-- **Current implementation:** gallery picker → `MetadataExtractor` → read-only cards and a raw tag list.
-- **Relevant files:** `lib/presentation/screens/metadata/metadata_import_screen.dart`, `lib/domain/services/metadata_extractor.dart`.
+- **Status:** Partial (hidden). *(Was: Prototype, until S2.5.)*
+- **Current implementation (S2.5):** the document picker (Android, no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG; other formats "not supported") → read-only rows with units, sources and unknowns. Nothing is stored. *(Was: gallery picker → `MetadataExtractor` → read-only cards and a raw tag list.)*
+- **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
 - **Known issues:** `image_picker` gallery cannot select FITS, so FITS is unreachable on a device; reads whole files into memory; FITS `/` inside string values truncates them; nothing is stored or connected to sessions or equipment; **no real sample files exist**, which the ROADMAP requires before this phase; only synthetic-input unit tests (TD-018).
-- **Dependencies:** image_picker, exif; gate `FeatureScope.metadataImport`.
+- **Dependencies:** the app's own `metadata_document` channel; gate `FeatureScope.metadataImport` (false). *(Was: image_picker, exif.)*
+- **Known issues now (S2.5):** FITS is unsupported until a real sample exists (S2.6); device check M1 has not run; a provider that does not report the file size cannot be read (typed failure, no guessed length). *(The list below is the pre-Stage 2 state.)*
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode

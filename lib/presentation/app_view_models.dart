@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../core/time/clock.dart';
+import '../domain/metadata/capture_file_access.dart';
 import '../domain/repositories/display_preferences_repository.dart';
 import '../domain/repositories/equipment_repository.dart';
 import '../domain/repositories/first_run_repository.dart';
@@ -23,6 +24,7 @@ import 'viewmodels/backup_viewmodel.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
 import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
+import 'viewmodels/metadata_import_viewmodel.dart';
 import 'viewmodels/night_conditions_viewmodel.dart';
 import 'viewmodels/session_plan_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
@@ -56,6 +58,7 @@ class AppViewModels {
     SessionExporter? exporter,
     BackupService? backup,
     SessionRepository? sessions,
+    CaptureFileAccess? captureFiles,
   }) {
     // TASK 16.3: place names only when the user switches them on.
     final placeNames = OptInReverseGeocoder(reverseGeocoder);
@@ -110,6 +113,9 @@ class AppViewModels {
         : ExecutionViewModel(sessions, clock, display, screenWake);
     results = sessions == null ? null : ResultsViewModel(sessions);
     theme = ThemeViewModel(display);
+    metadataImport = captureFiles == null
+        ? null
+        : MetadataImportViewModel(captureFiles);
     tonight = TonightViewModel(
       site: site,
       startup: startup,
@@ -135,6 +141,9 @@ class AppViewModels {
   late final ExecutionViewModel? execution;
   late final ResultsViewModel? results;
   late final ThemeViewModel theme;
+
+  /// Null where capture files cannot be opened (off Android; tests), S2.5.
+  late final MetadataImportViewModel? metadataImport;
   late final TonightViewModel tonight;
 
   /// One provider per ViewModel, for the widget tree.
@@ -154,5 +163,8 @@ class AppViewModels {
     ChangeNotifierProvider<BackupViewModel?>.value(value: backup),
     ChangeNotifierProvider<ExecutionViewModel?>.value(value: execution),
     ChangeNotifierProvider<ResultsViewModel?>.value(value: results),
+    ChangeNotifierProvider<MetadataImportViewModel?>.value(
+      value: metadataImport,
+    ),
   ];
 }

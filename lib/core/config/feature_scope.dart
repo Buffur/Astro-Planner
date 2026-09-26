@@ -14,7 +14,9 @@ class FeatureScope {
   /// and the external map at the site's coordinates. No scraping.
   static bool get lightPollutionContext => true;
 
-  /// Hidden until G17 / v1.1 (PD-06 E.1).
+  /// Hidden during Stage 2 (RD-16, DECISIONS E.1 "Stage 2 decisions"):
+  /// the screen reads the metadata contract (ADR-017) but Stage 3 decides
+  /// when anything becomes visible. Earlier: hidden until G17 (PD-06 E.1).
   static bool get metadataImport => false;
 
   /// Stays visible — on the core path (PD-06 E.1). Text sharing stays

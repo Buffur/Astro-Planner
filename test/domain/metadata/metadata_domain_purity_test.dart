@@ -1,6 +1,5 @@
 // S2.1 (ADR-017 §4): file I/O, platform code and parsing packages stay out of
-// the domain. The prototype extractor is the one known exception until S2.5
-// removes it; the allowance fails once the file is gone, so it cannot linger.
+// the domain. S2.5 removed the prototype extractor, the one exception.
 
 import 'dart:io';
 
@@ -14,9 +13,6 @@ const _forbidden = [
   'package:image_picker/',
   'package:file_picker/',
 ];
-
-/// Removed in S2.5 (ADR-017 §7).
-const _prototype = 'lib/domain/services/metadata_extractor.dart';
 
 /// The forbidden imports in [source].
 List<String> forbiddenImports(String source) => [
@@ -42,16 +38,6 @@ void main() {
         if (f is File && f.path.endsWith('.dart'))
           f.path.replaceAll(r'\', '/'): forbiddenImports(f.readAsStringSync()),
     }..removeWhere((_, found) => found.isEmpty);
-    expect(offenders.keys, [
-      _prototype,
-    ], reason: 'only the prototype, until S2.5 removes it');
-  });
-
-  test('the prototype allowance ends when S2.5 removes the file', () {
-    expect(
-      File(_prototype).existsSync(),
-      isTrue,
-      reason: 'S2.5 removed the prototype: delete this allowance',
-    );
+    expect(offenders, isEmpty);
   });
 }
