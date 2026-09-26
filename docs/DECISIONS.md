@@ -2705,9 +2705,12 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 
 Status: accepted (owner, 2026-09-26, after S2.R1; the constraints are in E.1, "Stage 2
 decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
-- **Done:** §4.1, §4.2 and §4.4 (S2.1, 2026-09-26): `lib/domain/metadata/` and
-  `lib/data/metadata/file_metadata_source.dart`, as specified.
-- **Open:** §2, §5 (S2.2); §4.3 (S2.3); §6 (S2.4); §7 (S2.5); FITS (S2.6).
+- **Done:**
+  - §4.1, §4.2 and §4.4 (S2.1, 2026-09-26, commit `a25398c`): `lib/domain/metadata/` and
+    `lib/data/metadata/file_metadata_source.dart`, as specified;
+  - §2's types and §5 (S2.2, 2026-09-26): `capture_metadata.dart` and
+    `metadata_value.dart`. The conversion rules are recorded as CALC-39.
+- **Open:** §2's extraction and §4.3 (S2.3); §6 (S2.4); §7 (S2.5); FITS (S2.6).
 
 ### 1. Context (verified)
 
