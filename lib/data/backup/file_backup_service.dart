@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/config/app_identity.dart';
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/services/backup_service.dart';
@@ -27,14 +28,32 @@ class FileBackupService implements BackupService {
     this._clock = const SystemClock(),
     Future<Directory> Function()? dataDir,
     Future<Directory> Function()? tempDir,
+    Future<Uint8List?> Function()? pickBytes,
+    Future<void> Function()? clearPicked,
   }) : _dataDir = dataDir ?? getApplicationDocumentsDirectory,
-       _tempDir = tempDir ?? getTemporaryDirectory;
+       _tempDir = tempDir ?? getTemporaryDirectory,
+       _pickBytes = pickBytes ?? _pickWithFilePicker,
+       _clearPicked = clearPicked ?? FilePicker.clearTemporaryFiles;
 
   final AppDatabase _db;
   final SessionRepository _sessions;
   final Clock _clock;
   final Future<Directory> Function() _dataDir;
   final Future<Directory> Function() _tempDir;
+
+  /// The picked backup's bytes, or null when cancelled.
+  final Future<Uint8List?> Function() _pickBytes;
+
+  /// Deletes the picker's copies of picked files (TD-065).
+  final Future<void> Function() _clearPicked;
+
+  static Future<Uint8List?> _pickWithFilePicker() async {
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: '${AppIdentity.appName} backup',
+    );
+    if (picked.isEmpty) return null;
+    return picked.first.xFile.readAsBytes();
+  }
 
   /// The backup file's bytes (the testable part of [backUpAndShare]).
   Future<Uint8List> createBackup() async {
@@ -102,13 +121,21 @@ class FileBackupService implements BackupService {
 
   @override
   Future<({BackupPreview preview, Object file})?> pick() async {
-    final picked = await FilePicker.pickFiles(
-      dialogTitle: '${AppIdentity.appName} backup',
-    );
-    if (picked.isEmpty) return null;
-    final bytes = await picked.first.xFile.readAsBytes();
-    final checked = check(bytes);
-    return (preview: checked.preview, file: checked.database);
+    try {
+      final bytes = await _pickBytes();
+      if (bytes == null) return null;
+      final checked = check(bytes);
+      return (preview: checked.preview, file: checked.database);
+    } finally {
+      // TD-065 (ADR-017 §6): on Android the picker copies the whole file
+      // into the app's cache. This flow owns that copy and deletes it once
+      // the pick is consumed, cancelled or refused.
+      try {
+        await _clearPicked();
+      } catch (e) {
+        AppLog.warning('backup', 'Picked-file copies not cleared', error: e);
+      }
+    }
   }
 
   @override

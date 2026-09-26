@@ -2712,8 +2712,10 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
     `metadata_value.dart`. The conversion rules are recorded as CALC-39;
   - §2's extraction, §4.3, §8 (DNG only) and §9 (S2.3, 2026-09-26):
     `tiff_metadata_reader.dart` and `capture_metadata_reader.dart`, with synthetic
-    fixtures and the local real-sample test.
-- **Open:** §6 (S2.4); §7 (S2.5); FITS (S2.6).
+    fixtures and the local real-sample test (commit `59c9f03`);
+  - §6 (S2.4, 2026-09-26): implemented and host-tested, and the Kotlin compiles. **Not accepted until device
+    check M1 (`TEST_PLAN.md`) passes.**
+- **Open:** §7 (S2.5); FITS (S2.6); the S2.4 device check.
 
 ### 1. Context (verified)
 

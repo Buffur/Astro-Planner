@@ -162,6 +162,65 @@ void main() {
     },
   );
 
+  // TD-065 (ADR-017 §6): the picker's cache copy of a picked backup is
+  // deleted whatever happens to the pick.
+  group('a restore pick always clears the picker cache', () {
+    late AppDatabase db;
+    late DriftSessionRepository repo;
+    late int clears;
+
+    setUp(() {
+      db = AppDatabase(NativeDatabase.memory());
+      repo = DriftSessionRepository(db, clock: _clock);
+      clears = 0;
+    });
+    tearDown(() => db.close());
+
+    FileBackupService service(
+      Future<Uint8List?> Function() pickBytes, {
+      Future<void> Function()? clear,
+    }) => FileBackupService(
+      db,
+      repo,
+      clock: _clock,
+      tempDir: () async => tmp,
+      pickBytes: pickBytes,
+      clearPicked: clear ?? () async => clears++,
+    );
+
+    test('after a good backup is read', () async {
+      await _seed(repo, db);
+      final bytes = await service(() async => null).createBackup();
+      clears = 0;
+      final picked = await service(() async => bytes).pick();
+      expect(picked!.preview.sessionCount, 3);
+      expect(clears, 1);
+    });
+
+    test('after a cancel, a refused file and a failed read', () async {
+      expect(await service(() async => null).pick(), isNull);
+      expect(clears, 1);
+      await expectLater(
+        service(() async => Uint8List.fromList([1, 2, 3])).pick(),
+        throwsA(anything),
+      );
+      expect(clears, 2);
+      await expectLater(
+        service(() => Future.error(const FileSystemException('gone'))).pick(),
+        throwsA(isA<FileSystemException>()),
+      );
+      expect(clears, 3);
+    });
+
+    test('a failed cleanup never hides the pick result', () async {
+      final result = await service(
+        () async => null,
+        clear: () => Future.error(StateError('cache busy')),
+      ).pick();
+      expect(result, isNull);
+    });
+  });
+
   test('the backup also carries the manifest', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final repo = DriftSessionRepository(db, clock: _clock);

@@ -106,12 +106,17 @@
 >   - sensitivity with its kind (EXIF SensitivityType 1–3, otherwise unspecified; 0 and 65535 unparseable; never converted to gain);
 >   - capture time as local wall-clock plus an offset only if one is recorded, otherwise zone unknown with no UTC instant.
 > Nothing reads a file yet (S2.3).
-> **S2.3 (2026-09-26, Stage 2; its commit is recorded by S2.4):** the DNG reader (ADR-017 §2, §4.3, §8, §9). `TiffMetadataReader` reads only IFD0 and the EXIF IFD, and only the contract's tags (plus DNGVersion and the EXIF pointer):
+> **S2.3 (2026-09-26, Stage 2, commit `59c9f03`):** the DNG reader (ADR-017 §2, §4.3, §8, §9). `TiffMetadataReader` reads only IFD0 and the EXIF IFD, and only the contract's tags (plus DNGVersion and the EXIF pointer):
 >   - the GPS IFD, sub-IFDs, MakerNotes, serial numbers and pixel data are never followed or decoded;
 >   - every offset and count is bounds-checked; more than 1,024 entries, a repeated tag or an EXIF loop is corrupt; a structure past the end is truncated;
 >   - one bad value (past the end, the wrong type or count, `/0`) makes only that field unparseable;
 >   - a TIFF without DNGVersion is `MetadataUnsupported(tiff)`: no support is claimed for other TIFF-based RAWs.
 > `CaptureMetadataReader` recognises the format, then dispatches; everything else is unsupported (FITS waits for S2.6). A new `MetadataFormat.dng` is decided by the reader only. The fixtures are synthetic (`test/support/tiff_fixture.dart`, including a sanitized layout like the owner's phone files). The real samples are checked by a local-only test (`ASTROPLAN_METADATA_SAMPLES`; skipped otherwise): both owner DNGs matched every expected value, with 848 bytes read out of about 25 MB each.
+> **S2.4 (2026-09-26, Stage 2; its commit is recorded by S2.5; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
+>   - **Kotlin:** `MetadataDocumentChannel.kt` (registered by `MainActivity`) runs `ACTION_OPEN_DOCUMENT` (`*/*`, openable) and returns the URI, name and size. It serves `read(uri, offset, count)` with a positioned read on the provider's file descriptor. A descriptor that cannot seek is read from the start, only within the 1 MiB budget. It works on a background thread, takes no persistable grant, and writes nothing to the cache.
+>   - **Dart:** the domain `CaptureFileAccess`/`CaptureFile`, and the data-layer `AndroidCaptureFileAccess` plus `ContentUriMetadataSource`, with typed failures (cancel = null; a revoked grant, I/O, short answers and an unknown size are `io`).
+>   - **TD-065:** `FileBackupService.pick` always calls `FilePicker.clearTemporaryFiles()` (consumed, cancelled or refused; a failed cleanup is logged, never masking the result). Picking is injectable for tests.
+>   - **Verification:** the debug APK builds (the Kotlin compiles). Device rows M1 and M2 in `TEST_PLAN.md` are not run.
 
 ---
 
@@ -541,6 +546,8 @@ production defaults (the same seam pattern as `LocationService` and `Clock`). De
 `docs/DATA_MODEL.md` Part B.
 
 ## B10. External services and platform plugins
+
+**The app's own platform channel (S2.4, ADR-017 §6):** `io.github.chacha12.astroplanner/metadata_document` (`MetadataDocumentChannel.kt`, `android_capture_file_access.dart`). Picking goes through the system document picker, and bytes are read in place; no network, no copy, no persistable grant. Android only; desktop and host have no implementation (S2.5 wires the platform choice).
 
 | Service | Purpose | Where | Key | Policy / risk notes | Failure behavior |
 | --- | --- | --- | --- | --- | --- |

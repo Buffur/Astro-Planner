@@ -118,12 +118,17 @@
 >   - sensitivity with its kind (EXIF SensitivityType 1–3, otherwise unspecified; 0 and 65535 unparseable; never converted to gain);
 >   - capture time as local wall-clock plus an offset only if one is recorded, otherwise zone unknown with no UTC instant.
 > Nothing reads a file yet (S2.3).
-> **S2.3 (2026-09-26, Stage 2; its commit is recorded by S2.4):** the DNG reader (ADR-017 §2, §4.3, §8, §9). `TiffMetadataReader` reads only IFD0 and the EXIF IFD, and only the contract's tags (plus DNGVersion and the EXIF pointer):
+> **S2.3 (2026-09-26, Stage 2, commit `59c9f03`):** the DNG reader (ADR-017 §2, §4.3, §8, §9). `TiffMetadataReader` reads only IFD0 and the EXIF IFD, and only the contract's tags (plus DNGVersion and the EXIF pointer):
 >   - the GPS IFD, sub-IFDs, MakerNotes, serial numbers and pixel data are never followed or decoded;
 >   - every offset and count is bounds-checked; more than 1,024 entries, a repeated tag or an EXIF loop is corrupt; a structure past the end is truncated;
 >   - one bad value (past the end, the wrong type or count, `/0`) makes only that field unparseable;
 >   - a TIFF without DNGVersion is `MetadataUnsupported(tiff)`: no support is claimed for other TIFF-based RAWs.
 > `CaptureMetadataReader` recognises the format, then dispatches; everything else is unsupported (FITS waits for S2.6). A new `MetadataFormat.dng` is decided by the reader only. The fixtures are synthetic (`test/support/tiff_fixture.dart`, including a sanitized layout like the owner's phone files). The real samples are checked by a local-only test (`ASTROPLAN_METADATA_SAMPLES`; skipped otherwise): both owner DNGs matched every expected value, with 848 bytes read out of about 25 MB each.
+> **S2.4 (2026-09-26, Stage 2; its commit is recorded by S2.5; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
+>   - **Kotlin:** `MetadataDocumentChannel.kt` (registered by `MainActivity`) runs `ACTION_OPEN_DOCUMENT` (`*/*`, openable) and returns the URI, name and size. It serves `read(uri, offset, count)` with a positioned read on the provider's file descriptor. A descriptor that cannot seek is read from the start, only within the 1 MiB budget. It works on a background thread, takes no persistable grant, and writes nothing to the cache.
+>   - **Dart:** the domain `CaptureFileAccess`/`CaptureFile`, and the data-layer `AndroidCaptureFileAccess` plus `ContentUriMetadataSource`, with typed failures (cancel = null; a revoked grant, I/O, short answers and an unknown size are `io`).
+>   - **TD-065:** `FileBackupService.pick` always calls `FilePicker.clearTemporaryFiles()` (consumed, cancelled or refused; a failed cleanup is logged, never masking the result). Picking is injectable for tests.
+>   - **Verification:** the debug APK builds (the Kotlin compiles). Device rows M1 and M2 in `TEST_PLAN.md` are not run.
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 
 ## Status legend
@@ -639,6 +644,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S2.4 (2026-09-26, implemented; device check M1 pending):** Android document access without a copy (`MetadataDocumentChannel.kt`, `AndroidCaptureFileAccess`). The backup restore now clears the picker's cache (TD-065). Not yet used by the hidden screen (S2.5).
 - **S2.3 (2026-09-26):** DNG is read by the new bounded reader (`tiff_metadata_reader.dart`). Both of the owner's real phone DNGs give every contract value in a local check, reading 848 bytes of about 25 MB. The hidden screen still uses the prototype until S2.5.
 - **S2.2 (2026-09-26):** the contract's typed values with provenance and explicit unknowns exist (`capture_metadata.dart`, `metadata_value.dart`). No reader yet, and still hidden.
 - **S2.1 (2026-09-26):** the bounded source, byte budget and signature recognition exist (`lib/domain/metadata/`, `lib/data/metadata/`). The screen and the prototype are unchanged, and the feature is still hidden.

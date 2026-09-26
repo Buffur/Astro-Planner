@@ -940,6 +940,15 @@ report through `runWithFeedback`/`FailureText`.
 
 *(none yet)*
 
+## Metadata device checks (Stage 2, ADR-017 §6)
+
+The Kotlin side of document access (`MetadataDocumentChannel.kt`) runs only on Android. The host tests cover the Dart side against a stand-in (`android_capture_file_access_test.dart`). No device or emulator is available on the development machine (2026-09-26): the options are the owner's phone with USB debugging, or an emulator image.
+
+| # | Scenario | Host coverage | Device procedure | Device status |
+| --- | --- | --- | --- | --- |
+| M1 | A picked DNG is read in place, bounded, with no cache copy (S2.4) | `android_capture_file_access_test.dart` (range reads, the budget, cancel, a revoked grant, short answers, no size); `file_metadata_source_test.dart` (4 GiB); the local real-sample test | A debug build with `FeatureScope.metadataImport` flipped to true **locally, never committed** (S2.5's screen). Note `adb shell run-as io.github.chacha12.astroplanner du -a cache`. Open Import metadata, pick each owner DNG from Downloads, then from a cloud provider if one is installed (the non-seekable path). Expect the contract values of the local real-sample check. Afterwards `du -a cache` shows no new file and no `file_picker` folder, and nothing larger than a few KB was created. Cancel the picker: nothing happens. | Not run (no device) |
+| M2 | The backup restore leaves no picked copy behind (TD-065) | `backup_restore_test.dart`, "a restore pick always clears the picker cache" | Settings → Restore, pick a backup, then Cancel the preview; pick again and pick a non-backup file. After each, `adb shell run-as io.github.chacha12.astroplanner ls cache/file_picker` is empty or absent. | Not run (no device) |
+
 ## End-to-end suite (TASK 15.5)
 
 `integration_test/core_loop_test.dart` (2 tests) drives the real UI; the database is a real
