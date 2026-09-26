@@ -21,9 +21,18 @@ enum MetadataFormat {
   /// JPEG: `FF D8 FF`.
   jpeg,
 
-  /// HEIF/HEIC (and AVIF, a HEIF image): ISO-BMFF with `ftyp` and a HEIF
-  /// major brand. Recognised only (research S2.R2).
+  /// A HEIF still image: ISO-BMFF with `ftyp` and a HEVC still-image major
+  /// brand, or the generic image brand `mif1` (S2.9 reads it).
   heif,
+
+  /// AVIF, a HEIF image coded with AV1 (major brand `avif` or `avis`).
+  /// Recognised only: no AVIF sample exists (S2.V4, S2R-02).
+  avif,
+
+  /// A HEIF image sequence (major brand `msf1`, `hevc`, `hevx`, `hevm` or
+  /// `hevs`), which may carry no top-level `meta`. Recognised only (S2.V4,
+  /// S2R-02).
+  heifSequence,
 
   /// PNG: the 8-byte PNG signature. Recognised only (S2.10).
   png,
@@ -60,12 +69,15 @@ abstract final class MetadataFormatRecognizer {
   /// The longest signature checked (RAF's `FUJIFILMCCD-RAW`) fits in this.
   static const headerBytes = 16;
 
-  /// Major brands of HEIF images and image sequences (ISO/IEC 23008-12),
-  /// including AVIF's.
-  static const heifBrands = {
-    'heic', 'heix', 'heim', 'heis', 'hevc', 'hevx', 'hevm', 'hevs', //
-    'mif1', 'msf1', 'avif', 'avis',
-  };
+  /// Major brands of HEIF still images (ISO/IEC 23008-12): the HEVC image
+  /// brands and the generic image brand `mif1`.
+  static const heifBrands = {'heic', 'heix', 'heim', 'heis', 'mif1'};
+
+  /// Major brands of AVIF images and sequences (AV1 in HEIF).
+  static const avifBrands = {'avif', 'avis'};
+
+  /// Major brands of HEIF image sequences (ISO/IEC 23008-12).
+  static const heifSequenceBrands = {'msf1', 'hevc', 'hevx', 'hevm', 'hevs'};
 
   static Future<MetadataFormat> recognize(MetadataSource source) async {
     final n = math.min(source.length, headerBytes);
@@ -93,6 +105,10 @@ abstract final class MetadataFormatRecognizer {
       final brand = String.fromCharCodes(header.sublist(8, 12));
       if (brand == 'crx ') return MetadataFormat.cr3;
       if (heifBrands.contains(brand)) return MetadataFormat.heif;
+      if (avifBrands.contains(brand)) return MetadataFormat.avif;
+      if (heifSequenceBrands.contains(brand)) {
+        return MetadataFormat.heifSequence;
+      }
       return MetadataFormat.unknown;
     }
     if (startsWith(const [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])) {

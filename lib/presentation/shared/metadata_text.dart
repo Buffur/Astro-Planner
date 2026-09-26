@@ -11,6 +11,8 @@ abstract final class MetadataText {
     MetadataFormat.tiff => 'TIFF (not a DNG)',
     MetadataFormat.jpeg => 'JPEG',
     MetadataFormat.heif => 'HEIF/HEIC',
+    MetadataFormat.avif => 'AVIF',
+    MetadataFormat.heifSequence => 'HEIF image sequence',
     MetadataFormat.png => 'PNG',
     MetadataFormat.fits => 'FITS',
     MetadataFormat.xisf => 'XISF',

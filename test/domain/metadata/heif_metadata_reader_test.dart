@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:astroplan/domain/metadata/capture_metadata.dart';
 import 'package:astroplan/domain/metadata/capture_metadata_reader.dart';
+import 'package:astroplan/domain/metadata/heif_metadata_reader.dart';
 import 'package:astroplan/domain/metadata/metadata_format.dart';
 import 'package:astroplan/domain/metadata/metadata_source.dart';
 import 'package:astroplan/domain/metadata/metadata_value.dart';
@@ -196,6 +197,102 @@ void main() {
       expect(_reason(reading), MetadataUnreadableReason.overBudget);
       expect(source.bytesRead, lessThan(1024));
     });
+  });
+
+  group('S2.V4: work bounded by the input (TD-067)', () {
+    // An iloc whose field sizes are all 0: every extent occupies no bytes.
+    Uint8List zeroSizeExtents(int items, int extentsPerItem) {
+      List<int> u16(int v) => [(v >> 8) & 0xFF, v & 0xFF];
+      final body = <int>[0, 0, ...u16(items)];
+      for (var i = 0; i < items; i++) {
+        body.addAll([...u16(i + 1), 0, 0, 0, 0, ...u16(extentsPerItem)]);
+      }
+      return Uint8List.fromList([
+        ...HeifFixture.box('ftyp', [...'heic'.codeUnits, 0, 0, 0, 0]),
+        ...HeifFixture.fullBox('meta', 0, HeifFixture.fullBox('iloc', 1, body)),
+      ]);
+    }
+
+    test(
+      'extents that occupy no bytes cannot exhaust memory or time',
+      () async {
+        // Before S2.V4 this 8 KB meta took 9-17 s and about 1.7 GB.
+        final watch = Stopwatch()..start();
+        for (final (items, each) in [(1000, 65535), (1, 65535)]) {
+          final (reading, source) = await _read(zeroSizeExtents(items, each));
+          expect(_reason(reading), MetadataUnreadableReason.corrupt);
+          expect(source.bytesRead, lessThan(16 << 10));
+        }
+        expect(watch.elapsed, lessThan(const Duration(seconds: 2)));
+      },
+    );
+
+    test('up to the limit the iloc still parses', () async {
+      final atLimit = zeroSizeExtents(4, HeifMetadataReader.maxExtents ~/ 4);
+      final reading = (await _read(atLimit)).$1;
+      expect((reading as MetadataRead).nothingFound, isTrue);
+      final over = zeroSizeExtents(4, HeifMetadataReader.maxExtents ~/ 4 + 1);
+      expect(_reason((await _read(over)).$1), MetadataUnreadableReason.corrupt);
+    });
+  });
+
+  group("the shared extractor's guarantees hold through HEIF (S2R-04)", () {
+    test('the GPS IFD in the Exif item is never read', () async {
+      final tiff = phoneStyleJpegExif().build();
+      final heif = (HeifFixture()..addExif(2, tiff.bytes)).build();
+      final (reading, source) = await _read(heif);
+      expect(reading, isA<MetadataRead>());
+      final gps = _indexOf(heif, tiff.bytes) + tiff.ifdOffsets['GPS IFD']!;
+      expect(
+        source.reads.any((r) => r.offset <= gps && gps < r.offset + r.count),
+        isFalse,
+      );
+    });
+
+    test('an integer array is never read as a value (S2V-01)', () async {
+      final tiff =
+          (TiffFixture()
+                ..ifd0.add(
+                  FixtureEntry.short(34855, 100)
+                    ..countOverride = 3
+                    ..offsetOverride = 60000,
+                ))
+              .build()
+              .bytes;
+      final reading = (await _read((HeifFixture()..addExif(2, tiff)).build()))
+          .$1;
+      final iso = (reading as MetadataRead).metadata.sensitivity;
+      expect(iso, isA<UnparseableValue<Sensitivity>>());
+    });
+
+    test('an Exif item with an incomplete TIFF header is truncated '
+        '(S2V-02)', () async {
+      for (var size = 0; size < 8; size++) {
+        final heif = (HeifFixture()..addExif(2, List.filled(size, 0x49)))
+            .build();
+        expect(
+          _reason((await _read(heif)).$1),
+          MetadataUnreadableReason.truncated,
+          reason: '$size header bytes',
+        );
+      }
+    });
+  });
+
+  test('S2.V4 (S2R-02): AVIF and HEIF sequences are recognised only, and '
+      'nothing past the signature is read', () async {
+    for (final (brand, format) in [
+      ('avif', MetadataFormat.avif),
+      ('avis', MetadataFormat.avif),
+      ('msf1', MetadataFormat.heifSequence),
+      ('hevs', MetadataFormat.heifSequence),
+    ]) {
+      final file = (HeifFixture(brand: brand)..addExif(2, _tiff())).build();
+      final (reading, source) = await _read(file);
+      expect(reading, isA<MetadataUnsupported>(), reason: brand);
+      expect(reading.format, format, reason: brand);
+      expect(source.bytesRead, 16, reason: brand);
+    }
   });
 
   test('robustness: every truncation and 500 random corruptions give a '

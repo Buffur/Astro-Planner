@@ -98,6 +98,8 @@ void main() {
   group('recognition-only formats are named, never parsed', () {
     final signatures = <MetadataFormat, List<int>>{
       MetadataFormat.heif: _ftyp('heic'),
+      MetadataFormat.avif: _ftyp('avif'),
+      MetadataFormat.heifSequence: _ftyp('msf1'),
       MetadataFormat.png: [
         0x89,
         0x50,
@@ -138,10 +140,16 @@ void main() {
           reason: key.name,
         );
       }
-      for (final brand in ['mif1', 'heix', 'avif', 'msf1']) {
+      // S2.V4 (S2R-02): AVIF and sequences are no longer HEIF still images.
+      for (final (brand, format) in [
+        ('mif1', MetadataFormat.heif),
+        ('heix', MetadataFormat.heif),
+        ('avis', MetadataFormat.avif),
+        ('hevc', MetadataFormat.heifSequence),
+      ]) {
         expect(
           MetadataFormatRecognizer.fromHeader(Uint8List.fromList(_ftyp(brand))),
-          MetadataFormat.heif,
+          format,
           reason: brand,
         );
       }

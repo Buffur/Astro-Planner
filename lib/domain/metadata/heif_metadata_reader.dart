@@ -24,6 +24,13 @@ class HeifMetadataReader implements MetadataFormatReader {
   /// More top-level boxes than this before `meta` is treated as corruption.
   static const maxTopLevelBoxes = 64;
 
+  /// More `iloc` extents than this, over all items, is treated as
+  /// corruption (S2.V4, TD-067). An extent whose field sizes are all 0
+  /// occupies no bytes, so the `meta` size alone does not bound them. The
+  /// limit is what a 64 KiB `meta` holds with one 4-byte field per extent;
+  /// the owner's HEIC has 50.
+  static const maxExtents = 16384;
+
   @override
   Set<MetadataFormat> get formats => const {MetadataFormat.heif};
 
@@ -211,6 +218,9 @@ class _MetaItems {
   final describes = <int, List<int>>{};
   ({int offset, int length})? idat;
 
+  /// `iloc` extents recorded so far, over every `iloc` box.
+  int _extents = 0;
+
   static _MetaItems parse(Uint8List meta, int metaFileOffset) {
     final items = _MetaItems();
     final data = ByteData.sublistView(meta);
@@ -296,6 +306,10 @@ class _MetaItems {
       final dataReference = r.u16();
       final base = r.sized(baseSize);
       final extentCount = r.u16();
+      _extents += extentCount;
+      if (_extents > HeifMetadataReader.maxExtents) {
+        throw const _HeifFailure.corrupt('too many iloc extents');
+      }
       final extents = <({int offset, int length})>[];
       for (var k = 0; k < extentCount; k++) {
         r.sized(indexSize);
