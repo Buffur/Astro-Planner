@@ -124,12 +124,12 @@
 >   - one bad value (past the end, the wrong type or count, `/0`) makes only that field unparseable;
 >   - a TIFF without DNGVersion is `MetadataUnsupported(tiff)`: no support is claimed for other TIFF-based RAWs.
 > `CaptureMetadataReader` recognises the format, then dispatches; everything else is unsupported (FITS waits for S2.6). A new `MetadataFormat.dng` is decided by the reader only. The fixtures are synthetic (`test/support/tiff_fixture.dart`, including a sanitized layout like the owner's phone files). The real samples are checked by a local-only test (`ASTROPLAN_METADATA_SAMPLES`; skipped otherwise): both owner DNGs matched every expected value, with 848 bytes read out of about 25 MB each.
-> **S2.4 (2026-09-26, Stage 2, commit `26aff9a`; implemented, device check pending):** Android document access without a copy (ADR-017 §6).
+> **S2.4 (2026-09-26, Stage 2, commit `26aff9a`; device checks M1 and M2 passed 2026-09-26):** Android document access without a copy (ADR-017 §6).
 >   - **Kotlin:** `MetadataDocumentChannel.kt` (registered by `MainActivity`) runs `ACTION_OPEN_DOCUMENT` (`*/*`, openable) and returns the URI, name and size. It serves `read(uri, offset, count)` with a positioned read on the provider's file descriptor. A descriptor that cannot seek is read from the start, only within the 1 MiB budget. It works on a background thread, takes no persistable grant, and writes nothing to the cache.
 >   - **Dart:** the domain `CaptureFileAccess`/`CaptureFile`, and the data-layer `AndroidCaptureFileAccess` plus `ContentUriMetadataSource`, with typed failures (cancel = null; a revoked grant, I/O, short answers and an unknown size are `io`).
 >   - **TD-065:** `FileBackupService.pick` always calls `FilePicker.clearTemporaryFiles()` (consumed, cancelled or refused; a failed cleanup is logged, never masking the result). Picking is injectable for tests.
 >   - **Verification:** the debug APK builds (the Kotlin compiles). Device rows M1 and M2 in `TEST_PLAN.md` are not run.
-> **S2.5 (2026-09-26, Stage 2, commit `a2f42a5`; hidden; device check pending):** the metadata screen on the new foundation (ADR-017 §7, §10).
+> **S2.5 (2026-09-26, Stage 2, commit `a2f42a5`; hidden; device check M1 passed 2026-09-26):** the metadata screen on the new foundation (ADR-017 §7, §10).
 >   - **The screen:** `MetadataImportViewModel` (domain `CaptureFileAccess` only) picks and reads through `CaptureMetadataReader`. `MetadataImportScreen` shows every contract row with its unit and source, and "Not in the file", "Unreadable value" or "conflicting values" otherwise. Wording is in `presentation/shared/metadata_text.dart`. A picker failure goes through `runWithFeedback`.
 >   - **Wiring:** `main.dart` passes `AndroidCaptureFileAccess` on Android only. Elsewhere the ViewModel is null and the screen says metadata import is unavailable.
 >   - **Removed:** the prototype `metadata_extractor.dart`, `image_metadata.dart` and their test (2 tests of removed code). `exif` and `image_picker` left `pubspec.yaml` after a `grep` showed no other use; the lockfile only lost those two and their 13 transitive packages, and the desktop registrants lost `file_selector`. The domain purity test now allows no exception.
@@ -142,7 +142,7 @@
 >   - **Recognition-only formats:** HEIF (ISO-BMFF HEIF/AVIF major brands), PNG, CR2 (TIFF + `CR`, version 2), CR3 (`crx `), RAF, RW2 and ORF; no parser for any of them.
 >   - **`ExifRational`/`ExifValues`** moved to `exif_values.dart`.
 >   - `tiff_metadata_reader.dart` is replaced by the above.
-> **S2.8 (2026-09-26, Stage 2; its commit is recorded by the next change):** the JPEG reader (ADR-017 §13). `JpegMetadataReader` walks the marker segments from SOI to the first SOS:
+> **S2.8 (2026-09-26, Stage 2, commit `360fd8f`):** the JPEG reader (ADR-017 §13). `JpegMetadataReader` walks the marker segments from SOI to the first SOS:
 >   - fill bytes are allowed; SOS or EOI ends the walk; a bad marker, a zero length, a second SOI or more than 128 segments is corrupt; a segment past the end is truncated;
 >   - the APP1 `Exif\0\0` segment goes to the shared `ExifStructure` through a `MetadataSourceWindow` (origin "APP1 IFD0" or "APP1 EXIF IFD"); every other segment is skipped by its length;
 >   - the scan data is never read; a JPEG without Exif is "extracted, nothing found".
@@ -662,6 +662,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **Device check, 2026-09-26 (owner's Xiaomi 14T Pro, Android 16):** with a local, uncommitted gate flip in a separate debug package, the document picker read both DNGs and the JPEG in place with every expected value and nothing in the app's cache; HEIC said "not supported yet". M1 and M2 passed (`TEST_PLAN.md`). Found: TD-066 (sub-second exposures print as decimals).
 - **S2.8 (2026-09-26):** JPEG is read (APP1 Exif through the shared extractor), verified locally on the owner's phone JPEG. Supported formats: DNG and JPEG. Still hidden.
 - **S2.7 (2026-09-26):** one reusable EXIF extractor for every EXIF-bearing container; recognition (level 1) and extraction (level 2) are kept apart; HEIF, PNG, CR2, CR3, RAF, RW2 and ORF are recognised by name, with no reader. DNG behaviour is unchanged. Still hidden.
 - **S2.5 (2026-09-26):** the hidden screen reads the contract through the new foundation; the prototype, `exif` and `image_picker` are gone. Status Partial: DNG is read (real samples, locally), FITS is not supported yet (S2.6 needs a sample), the Android path awaits device check M1, and the screen stays hidden until Stage 3.
@@ -676,7 +677,7 @@ see DATA_MODEL.md B2/B8.)
 - **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
 - **Known issues:** `image_picker` gallery cannot select FITS, so FITS is unreachable on a device; reads whole files into memory; FITS `/` inside string values truncates them; nothing is stored or connected to sessions or equipment; **no real sample files exist**, which the ROADMAP requires before this phase; only synthetic-input unit tests (TD-018).
 - **Dependencies:** the app's own `metadata_document` channel; gate `FeatureScope.metadataImport` (false). *(Was: image_picker, exif.)*
-- **Known issues now (S2.5):** FITS is unsupported until a real sample exists (S2.6); device check M1 has not run; a provider that does not report the file size cannot be read (typed failure, no guessed length). *(The list below is the pre-Stage 2 state.)*
+- **Known issues now (S2.5):** FITS is unsupported until a real sample exists (S2.6); device check M1 passed 2026-09-26 (the non-seekable path not run); a provider that does not report the file size cannot be read (typed failure, no guessed length). *(The list below is the pre-Stage 2 state.)*
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode

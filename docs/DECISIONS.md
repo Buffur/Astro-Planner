@@ -2750,15 +2750,14 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
   - §2's extraction, §4.3, §8 (DNG only) and §9 (S2.3, 2026-09-26):
     `tiff_metadata_reader.dart` and `capture_metadata_reader.dart`, with synthetic
     fixtures and the local real-sample test (commit `59c9f03`);
-  - §6 (S2.4, 2026-09-26, commit `26aff9a`): implemented and host-tested, and the Kotlin compiles. **Not accepted until
-    device check M1 (`TEST_PLAN.md`) passes;**
+  - §6 (S2.4, 2026-09-26, commit `26aff9a`): implemented and host-tested. **Accepted 2026-09-26:** device checks M1
+    and M2 passed on the owner's phone (Android 16), with no cache copy. The non-seekable (cloud) path was not run;
   - §7 and §10 (S2.5, 2026-09-26, commit `a2f42a5`): `exif` and `image_picker` removed after a `grep`; the hidden screen reads the
     contract; `FeatureScope.metadataImport` stays false.
   - §13.2 and §13.3 (S2.7, 2026-09-26, commit `9a0432b`): layered readings, `MetadataFormatReader` dispatch, the shared
     `ExifStructure` with `MetadataSourceWindow`, and the recognition-only formats.
-  - JPEG (S2.8, 2026-09-26): `jpeg_metadata_reader.dart`, verified on the owner's phone JPEG.
-- **Open:** HEIF (S2.9, awaiting the owner's decision); RG-14 (S2.R3); device checks M1 and M2. FITS and PNG are out of
-  Stage 2 (owner).
+  - JPEG (S2.8, 2026-09-26, commit `360fd8f`): `jpeg_metadata_reader.dart`, verified on the owner's phone JPEG.
+- **Open:** HEIF (S2.9, awaiting the owner's decision); RG-14 (S2.R3). FITS and PNG are out of Stage 2 (owner).
 
 ### 1. Context (verified)
 
