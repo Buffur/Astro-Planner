@@ -173,7 +173,10 @@ void main() {
 
     test('a recognised format without a reader is "no reader", not '
         '"unrecognised"', () async {
-      for (final MapEntry(:key, :value) in signatures.entries) {
+      // HEIF has a reader since S2.9 (heif_metadata_reader_test.dart).
+      for (final MapEntry(:key, :value) in signatures.entries.where(
+        (e) => e.key != MetadataFormat.heif,
+      )) {
         final reading = await CaptureMetadataReader.read(
           MemoryMetadataSource(value, length: 4096),
         );

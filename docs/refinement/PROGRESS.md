@@ -3,10 +3,10 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. Independent validation at `79f392c` failed.
-> The owner authorized S2.V1–S2.V3 corrections: integer parsing, short JPEG
-> EXIF handling and streaming resource accounting. See `STAGE_2_CORRECTIONS.md`.
-> S2.9's decision and S2.R3 remain open; Stage 2 is not accepted.
+> **Last updated:** 2026-09-26. S2.9 (the HEIC reader) is done: the owner approved it, and the
+> owner's HEIC is verified locally. Remaining in Stage 2: S2.R3 (RG-14, documentation only),
+> then the repeat independent Stage 2 validation. The HEIC device check (M3) waits for the
+> phone.
 
 ## Current state
 
@@ -16,9 +16,9 @@
 | Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **Owner decision:** S2.9 (the HEIC reader, S2.R2 §7–§8). **S2.R3 (RG-14)**, documentation only, can run meanwhile. Then Stage 2 validation (fresh session) |
-| Code baseline | S2.V1–S2.V3 corrections on S2.8 (see `STAGE_2_CORRECTIONS.md`). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S2.V1–S2.V3, 2026-09-26: Encoding, Format and Analyze pass; 1052 tests (+1 expected local-sample skip), 2 host E2E tests, 4 native JVM tests; separate real-sample test passes |
+| Next approved Task | **S2.R3 — RG-14** (proprietary RAW compatibility and library research; documentation only). Then the repeat independent Stage 2 validation (fresh session). Device check M3 (HEIC on the phone) when the phone is connected |
+| Code baseline | S2.9 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green** after S2.9, 2026-09-26: Encoding, Format and Analyze pass; 1062 tests (+1 expected local-sample skip) and 2 host E2E tests; the native JVM tests were unaffected (no Kotlin change) |
 | Schema | v17 |
 
 ## Stage status
@@ -86,7 +86,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 2 | S2.7 — Layered recognition and a reusable EXIF extractor | 2026-09-26 | `9a0432b` | A refactor, closing review gaps G1–G5. `ExifStructure` (IFD0 + the EXIF IFD, the same rules), used on any source; `MetadataSourceWindow` for embedded structures; origins labelled by container; `DngMetadataReader` as a thin container; `MetadataFormatReader` with dispatch by registration; recognition (`reading.format`) kept apart from extraction (the subclass), with `nothingFound`, `recognized` and the format on unreadable readings; recognition-only HEIF, PNG, CR2, CR3, RAF, RW2 and ORF; `ExifValues` moved to `exif_values.dart`. **No DNG behaviour change:** every existing metadata test passes with its assertions unchanged (one import added), the synthetic read log is byte-identical to a baseline captured before the change, and the real samples still read 848 bytes. 10 new tests. Gate green, 1034 + 1 skipped + 2 E2E |
 | 2 | S2.R2 — HEIC/HEIF metadata research (documentation only), and the owner's FITS/PNG skip | 2026-09-26 | `5cc23a8` | The owner supplied a phone HEIC and JPEG (outside the repository) and skipped FITS and PNG (DECISIONS E.1): S2.6 and S2.10 leave Stage 2, and both formats stay recognised only. HEIC findings (`research/S2.R2_HEIF_METADATA.md`): `meta` in the first 3.2 KB; the Exif item (linked to the primary by `iref cdsc`) sits at the **end** of the file (97 %), so random access is needed and a non-seekable provider hits the budget (typed); its payload skips a JPEG APP1 header through `exif_tiff_header_offset` = 10; the same EXIF structure as the JPEG, with `OffsetTimeOriginal` +03:00; no GPS, no serials. JPEG: APP1 Exif at byte 2, the metadata within 1.8 KB, SOS at 1.3 %. Stage 3 evidence: Model differs by format for the same phone (DNG `…/2407FPN8EG`, JPEG/HEIC `Xiaomi 14T Pro`); the offset is recorded in JPEG/HEIC, not DNG. Recommended: option A, an in-house box walker → `ExifStructure` (S2.9 defined in §7). Owner decision pending |
 | 2 | S2.8 — JPEG reader | 2026-09-26 | `360fd8f` | `JpegMetadataReader`: a bounded marker walk (fill bytes; stops at SOS or EOI; a bad marker, a zero length, a second SOI or more than 128 segments is corrupt) → the APP1 `Exif` segment → the shared `ExifStructure` through a window (origins "APP1 …"); no scan data read; no Exif = "nothing found". Registered in `readers`. Synthetic `jpeg_fixture.dart`; 8 tests (phone-style values with the offset, bounded reads, the GPS IFD never followed, segments before Exif, no Exif, truncated and corrupt, a corrupt EXIF inside APP1, every third truncation plus 500 seeded corruptions). One earlier assertion ("JPEG is unsupported") became a HEIF case, since JPEG now has a reader. **Real sample (local):** the owner's phone JPEG gives every expected value, including a UTC time, reading 843 bytes of 4.7 MB; the DNGs are unchanged (848). Gate green, 1042 + 1 skipped + 2 E2E |
-| 2 | Device checks M1 and M2 (S2.4 and S2.5 accepted) | 2026-09-26 | The device-check commit* | On the owner's Xiaomi 14T Pro (Android 16, API 36), over USB, at `360fd8f`. A separate debug package (`…astroplanner.s2check`) was used; the gate flip and application id suffix were local and reverted, so the owner's installed app and data were untouched. **M1:** both DNGs and the phone JPEG, picked through the system picker, gave every expected value; the HEIC said "not supported yet"; the app cache stayed empty (4 KB) after every pick; a cancel changed nothing. **M2:** a 25 MB DNG through Restore was refused with its message, and the cache was empty right after; so was a cancelled restore. Not run: the non-seekable (cloud) path, which would need uploading owner files; a real backup's preview cancel. Found: TD-066 (a 1/100 s exposure prints as "0.009987236 s"). Afterwards the test package, the copied DNGs and the UI dump were removed from the phone. An Android device is now available, including for Stage 11's device rows |
+| 2 | Device checks M1 and M2 (S2.4 and S2.5 accepted) | 2026-09-26 | `79f392c` | On the owner's Xiaomi 14T Pro (Android 16, API 36), over USB, at `360fd8f`. A separate debug package (`…astroplanner.s2check`) was used; the gate flip and application id suffix were local and reverted, so the owner's installed app and data were untouched. **M1:** both DNGs and the phone JPEG, picked through the system picker, gave every expected value; the HEIC said "not supported yet"; the app cache stayed empty (4 KB) after every pick; a cancel changed nothing. **M2:** a 25 MB DNG through Restore was refused with its message, and the cache was empty right after; so was a cancelled restore. Not run: the non-seekable (cloud) path, which would need uploading owner files; a real backup's preview cancel. Found: TD-066 (a 1/100 s exposure prints as "0.009987236 s"). Afterwards the test package, the copied DNGs and the UI dump were removed from the phone. An Android device is now available, including for Stage 11's device rows |
+| 2 | Independent Stage 2 validation (another session) and S2.V1–S2.V3 corrections | 2026-09-26 | `ffaff57` | Validation at `79f392c` **failed** (`STAGE_2_VALIDATION.md`): S2V-01 (a SHORT/LONG pointer reported as a value), S2V-02 (a short JPEG EXIF reported as nothing found), S2V-03 (non-seekable reads not charged cumulatively), S2V-04 (S2.9/S2.R3 open), S2V-05 (stale docs). The owner authorized S2.V1–S2.V3 (`STAGE_2_CORRECTIONS.md`): strict integer counts, the Exif id checked as soon as it fits, and streaming budgets charged natively (`MetadataSequentialReader`, 4 JVM tests). Gate green, 1052 + 1 skipped + 2 E2E (row added by S2.9, which found it recorded only in prose) |
+| 2 | S2.9 — HEIC/HEIF reader | 2026-09-26 | The S2.9 commit* | The owner approved S2.R2 §7 ("You can"). `HeifMetadataReader`: walks the top-level boxes by header only; reads `meta` once (≤ 64 KiB, else overBudget); parses `pitm`, `iinf`/`infe` (v2–3), `iloc` (v0–2; field sizes 0/4/8; construction methods 0 and 1; another file never followed) and `iref cdsc`, each bounded by its box; takes the Exif item linked to the primary item, else the only one, else combines all (conflicts ambiguous); honours `exif_tiff_header_offset` (Xiaomi's APP1 prefix) and hands the rest to the shared `ExifStructure` (origin "Exif item …"); refuses several extents or method 2 as corrupt; an extent or TIFF past its end is truncated, never "nothing found"; no image data is read. Registered in `readers`. Synthetic `heif_fixture.dart`; 10 tests (phone layout with the APP1 prefix, six variants, item choice, no Exif, truncated/corrupt/oversized cases, a truncation sweep proving a cut file never reads complete, 500 seeded corruptions). Two earlier cases that listed HEIF as reader-less now use CR3. **Real sample (local):** the owner's HEIC gives every expected value with its UTC offset, reading 4,051 bytes of 1.9 MB; DNG/JPEG unchanged (848, 848, 843). The device check M3 could not run (the phone disconnected; the local test package changes were reverted unused). Gate green, 1062 + 1 skipped + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -312,11 +314,12 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Owner decision on S2.9** (the HEIC reader, `research/S2.R2_HEIF_METADATA.md` §7–§8).
-   If approved, S2.9 runs next.
-2. **S2.R3 — RG-14** (proprietary RAW compatibility and library research; documentation only).
-   It can run before or after S2.9.
-3. **Stage 2 validation** in a fresh session, once S2.9 (or its deferral) and S2.R3 are done.
+1. **S2.R3 — RG-14** (proprietary RAW compatibility and library research; documentation only;
+   `POST_ROADMAP_PLAN.md`, "Stage 2 — added Tasks"). It ends in an owner decision.
+2. **Repeat independent Stage 2 validation** in a fresh session, after S2.R3. The first one
+   failed at `79f392c` (S2V-01 to S2V-06; fixes `ffaff57`).
+3. **Device check M3** (HEIC on the phone, `TEST_PLAN.md`) whenever the phone is connected. It
+   is not blocking for the validation to start; the validator decides.
 
 S2.6 (FITS) and S2.10 (PNG) are out of Stage 2 (owner).
 
