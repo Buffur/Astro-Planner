@@ -3,11 +3,24 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.10). **Stage 3's implementation is complete**: S3.1–S3.10 are
-> done, M4 passed on the owner's phone, and both M4 findings are fixed (TD-068, TD-069). Next:
-> **the independent Stage 3 validation in a fresh session**.
+> **Last updated:** 2026-09-26 (Stage 3 validation at `387e54b`). **Stage 3 validation FAILED**:
+> S3V-01–S3V-06 block acceptance. The recorded S3.1–S3.10 implementation and M4 results remain
+> historical evidence, not Stage acceptance. Next: focused corrective Tasks, then revalidation.
 
 ## Current state
+
+**Stage 3 validation, 2026-09-26: FAIL.** See [the report](STAGE_3_VALIDATION.md)
+and [reproducible probes](evidence/STAGE_3_VALIDATION_PROBES.md). Baseline gate:
+1,169 tests, one expected skip, 2 host E2E; four real metadata samples and four
+native JVM tests pass. Independent probes reproduce stale-review data loss,
+invented provenance, ineffective sensor conflict replacement, rounding of copied
+saved values, and absurd dimensions accepted as known. Required real-database
+review behavior tests are also missing. No application fixes were made. Stage 4
+has not started. This was a validation-only follow-up in the existing chat;
+the report discloses its earlier debug/exposure contributions and device limits.
+
+Current visibility is **Add from a photo on Equipment in all build modes**;
+the two debug/exposure amendments below are historical and superseded by S3.7.
 
 **Exposure formatting amendment, 2026-09-26 (owner, TD-066):** brought forward
 from S3.7 after enabling the debug viewer. Shared `QuantityText.exposure` uses
@@ -32,10 +45,10 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (FAIL).** S3V-01–S3V-06 require correction; see `STAGE_3_VALIDATION.md`. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: **independent Stage 3 validation** (fresh session, §9.8) |
+| Next approved Task | None. Proposed focused corrective Tasks S3.V1–S3.V5 are in `STAGE_3_VALIDATION.md`; not started or marked approved |
 | Code baseline | S3.10 (see "Completed Tasks"). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -49,7 +62,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
-| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | Pending: an independent session |
+| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **FAIL** at `387e54b`, 2026-09-26: S3V-01–S3V-06. Report: `STAGE_3_VALIDATION.md`; no application fixes in the validation |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
@@ -394,16 +407,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Independent Stage 3 validation, in a fresh session** (§9.8). Stage 3's implementation is
-complete:
-- S3.1–S3.10 are done;
-- device check M4 passed on the owner's phone;
-- M4's findings TD-068 and TD-069 are fixed.
-
-The validator tries to disprove completion against ADR-018, the frozen Task acceptance, the
-gate (1169 + 1 skip + 2 E2E), the local real samples and, if practical, a device re-check
-through a separate `.s2check` package (never the owner's app). Validation does not fix
-findings; surviving findings become Tasks.
+**Define and approve focused Stage 3 corrective Tasks**, then revalidate (§9.8).
+The validation at `387e54b` failed despite the green baseline gate and recorded M4.
+`STAGE_3_VALIDATION.md` proposes S3.V1–S3.V5 for S3V-01–S3V-06, plus documentation
+and device follow-up. No corrective implementation has started; do not start Stage 4.
+Recheck device behavior through a separate `.s2check` package, never the owner's app.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
