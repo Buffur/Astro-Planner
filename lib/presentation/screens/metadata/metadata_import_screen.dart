@@ -24,7 +24,7 @@ class MetadataImportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<MetadataImportViewModel?>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Capture file metadata')),
+      appBar: AppBar(title: const Text('Add from a photo')),
       body: vm == null
           ? const Padding(
               padding: EdgeInsets.all(16),
@@ -37,8 +37,10 @@ class MetadataImportScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               children: [
                 const Text(
-                  "Reads a few kilobytes of a capture file's header, on this "
-                  'device. Nothing is saved, and nothing leaves the phone.',
+                  "Reads a few kilobytes of a photo's or RAW file's header, on "
+                  'this device, and proposes a rig from it. Nothing is saved '
+                  'until you press Save in the rig editor, and nothing leaves '
+                  'the phone.',
                 ),
                 const SizedBox(height: 12),
                 FilledButton.icon(

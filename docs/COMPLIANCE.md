@@ -46,6 +46,10 @@ console's current help texts). Conservative where Play's definitions are unclear
   - Everything else — personal info, financial info, health, messages, photos and videos,
     audio, files, calendar, contacts, app activity, web browsing, app info and performance
     (no crash reporting), device or other IDs: **not collected**.
+  - *(Re-checked S3.7, 2026-09-26.)* "Add from a photo" reads a picked file's header on the
+    device, through the system document picker (no storage permission). Nothing is sent, so
+    photos and files stay **not collected**. The camera make/model and optics a user saves
+    stay on the device, like all equipment. GPS and serial numbers are never read.
   - The IP address reaches every server the app contacts; Play's form does not list it
     as its own data type — the owner should confirm this against the console's current
     guidance.

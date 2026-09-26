@@ -73,6 +73,16 @@ void main() {
     expect(find.textContaining('later update'), findsNothing);
   });
 
+  // S3.7 (ADR-018 §7): the import moved to the equipment screen.
+  testWidgets('Settings no longer has an Import metadata entry', (
+    tester,
+  ) async {
+    await build(tester);
+    await pump(tester);
+    expect(find.text('Import metadata'), findsNothing);
+    expect(find.text('About & data sources'), findsOneWidget);
+  });
+
   // TASK 16.3: place names are opt-in, and the switch says what is sent.
   testWidgets('the place-name switch turns lookups on', (tester) async {
     await build(tester);

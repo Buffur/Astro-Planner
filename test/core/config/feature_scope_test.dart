@@ -25,7 +25,9 @@ void main() {
     expect(FeatureScope.lightPollutionContext, isTrue);
   });
 
-  test('metadata viewer is available in debug builds (owner)', () {
+  // Before S3.7 this was the owner's debug-build viewer (kDebugMode); S3.7
+  // made the import visible in every build (ADR-018 §7).
+  test('metadata import is visible (since S3.7)', () {
     expect(FeatureScope.metadataImport, isTrue);
   });
 

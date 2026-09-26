@@ -81,7 +81,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap FloatingActionButton to add equipment
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     // Tap save without entering anything
@@ -99,7 +99,7 @@ void main() {
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     // Enter valid name
@@ -125,7 +125,7 @@ void main() {
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     await tester.enterText(
@@ -149,7 +149,7 @@ void main() {
     await tester.pumpWidget(createTestWidget(repo, planner));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     // We must enter all required fields because they now validate
@@ -268,7 +268,7 @@ void main() {
     final repo = MockEquipmentRepository();
     await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     await fillSensor(tester);
@@ -314,7 +314,7 @@ void main() {
     final repo = MockEquipmentRepository();
     await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
 
     await fillSensor(tester);
@@ -382,7 +382,7 @@ void main() {
       createTestWidget(MockEquipmentRepository(), MockSessionPlanViewModel()),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
     for (final label in [
       'px',

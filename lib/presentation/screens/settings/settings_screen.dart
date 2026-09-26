@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/planning_preferences.dart';
 import '../../viewmodels/settings_viewmodel.dart';
-import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/failure_feedback.dart';
@@ -225,15 +224,6 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('Attributions, licences and privacy'),
             onTap: () => context.push(AppRouter.about),
           ),
-          // Owner-enabled debug viewer; S3.7 replaces this with the public
-          // Equipment import entry (ADR-018 §7).
-          if (FeatureScope.metadataImport)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Import metadata'),
-              onTap: () => context.push(AppRouter.metadata),
-            ),
         ],
       ),
     );

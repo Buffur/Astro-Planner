@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 /// The single source every entry point (buttons, cards, routes) reads to
 /// decide whether a feature built ahead of its approved roadmap phase is
 /// visible (TASK 4.3, TD-014; policy decided in `docs/DECISIONS.md` PD-06
@@ -16,9 +14,10 @@ class FeatureScope {
   /// and the external map at the site's coordinates. No scraping.
   static bool get lightPollutionContext => true;
 
-  /// Owner-enabled debug viewer while Stage 3 is developed. Public import
-  /// visibility remains S3.7 (ADR-018 §7): Add from a photo in Equipment.
-  static bool get metadataImport => kDebugMode;
+  /// Visible since S3.7 (ADR-018 §7, RD-16): "Add from a photo" on the
+  /// equipment screen. Earlier: a debug-build viewer under Settings
+  /// (owner, `23b962c`), hidden before that (Stage 2).
+  static bool get metadataImport => true;
 
   /// Stays visible — on the core path (PD-06 E.1). Text sharing stays
   /// visible for the same reason; it has no gate of its own because it

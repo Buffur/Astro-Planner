@@ -4,7 +4,8 @@ title: Astro Planner — Privacy policy
 
 # Astro Planner — Privacy policy
 
-*Effective 24 September 2026. Applies to Astro Planner for Android
+*Effective 24 September 2026; updated 26 September 2026 ("Add from a photo"). Applies to
+Astro Planner for Android
 (`io.github.chacha12.astroplanner`).*
 
 Astro Planner is a free, open-source planner and logbook for astrophotography. It has
@@ -23,6 +24,10 @@ developer has no server and receives none of it.
   backup settings.
 - Uninstalling the app, or clearing its data in Android's settings, deletes everything it
   stored.
+- **Add from a photo** reads a few kilobytes of the header of a photo or RAW file you pick,
+  on the device, to suggest a rig. The file is not copied or uploaded. Nothing is saved
+  unless you save the rig, and then only the camera's make and model and the optical
+  values are kept. The file's location data and serial numbers are never read.
 
 ## Location
 

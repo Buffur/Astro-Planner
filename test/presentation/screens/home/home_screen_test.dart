@@ -516,7 +516,8 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    // The debug metadata viewer lives in Settings, not the planner toolbar.
+    // The metadata import is opened from the equipment screen (S3.7), not
+    // the planner toolbar.
     // Field mode remains one tap from the planner's app bar.
     expect(find.byKey(const Key('fieldMode.toggle')), findsOneWidget);
     expect(find.byTooltip('Import Metadata'), findsNothing);

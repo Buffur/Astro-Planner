@@ -237,7 +237,7 @@ feature exists although its roadmap phase has not been reached in
 | F-42 | Planned-versus-actual logging | Implemented *(TASK 13.4)* | 13 (ahead) |
 | F-43 | Session execution mode | Implemented *(TASKs 13.2–13.4; device checks pending)* | 13, 15 |
 | F-44 | Export / interoperability manifest | Implemented *(v2 export; import deferred, TASK 14.3)* | 14 (ahead) |
-| F-45 | Metadata import (EXIF / FITS) | Partial (hidden; Stage 2) | Stage 2–3 |
+| F-45 | Metadata import (EXIF / FITS) | Implemented (Android; DNG, JPEG, HEIC; "Add from a photo", S3.7). FITS and RAW wait for samples | Stage 2–3 |
 | F-46 | Field mode | Implemented *(TASK 12.4; summary corrected S1.15)* | 15 (ahead) |
 | F-47 | Custom dashboard | Missing by decision *(the fixed Tonight view that replaces it is Implemented, TASK 12.5)* | 12.5 |
 | F-48 | Automated tests | Partial | 1, 16 |
@@ -686,6 +686,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.7 (2026-09-26, Stage 3; ADR-018 §7, RD-16):** visible in every build as "Add from a photo" on the equipment screen (Library → Rigs, and the planner's rig picker). It is a small button above "Add rig" and opens `/equipment/import`, a root route. The Settings entry is gone. The screen is titled "Add from a photo" and says nothing is saved until Save in the rig editor. Off Android, the screen says it is not available. **Device check M4 passed** on the owner's phone (a separate `.s2check` package): a real DNG went through match → pre-filled editor → Save → "You already have this rig", with no cache copy. Found there: TD-068 (a rig imported from a file shows rounding "differences" against the same file) and TD-069 (clipped sensor fields in the editor).
 - **S3.8 (2026-09-26, Stage 3; ADR-018 §4, D4; C-13):** a DNG's file size is offered as the rig's average RAW size, as an estimate from one file ("Estimated from this one file's size (DNG)"). It is never taken from a JPEG or HEIC. A rig without a RAW size gets it pre-filled when opened from the review; a saved RAW size is kept unless its switch is turned on. Still debug-only until S3.7.
 - **S3.6 (2026-09-26, Stage 3; ADR-018 §2, §6):** the review and confirmation flow on the metadata screen. After a file is read, an Equipment card shows how it matches the saved rigs, in plain words with the reasons:
   - "You already have this rig", "probably your rig", "Same camera … other optics", "another field of view or pixel count", "Several saved rigs match", or "No saved rig has this camera";
@@ -719,7 +720,7 @@ see DATA_MODEL.md B2/B8.)
 - **S2.1 (2026-09-26):** the bounded source, byte budget and signature recognition exist (`lib/domain/metadata/`, `lib/data/metadata/`). The screen and the prototype are unchanged, and the feature is still hidden.
 - **Decided 2026-09-26 (ADR-017; DECISIONS E.1):** Stage 2 rebuilds the foundation (bounded reads, signature recognition, a typed contract, no GPS/serial/observer, Android access without a copy); DNG only, FITS on a sample; the screen stays hidden during Stage 2 (S2.1–S2.6).
 - **S2.R1 (2026-09-26, research; no code changed):** the owner supplied two real phone DNGs, kept outside the repository. On them, the prototype finds none of the capture fields: it reads only `EXIF …` keys, while these files keep the tags in IFD0 (TD-064). The recommended formats, readers and fixture policy are in `refinement/research/RG-01_METADATA_FORMATS.md`, pending the owner's decision (PD-21, proposed ADR-017). The status is still Prototype.
-- **Status:** Partial (hidden). *(Was: Prototype, until S2.5.)*
+- **Status:** Implemented on Android for DNG, JPEG and HEIC, visible since S3.7. FITS, PNG, AVIF and proprietary RAW are recognised only (they wait for samples). *(Was: Partial (hidden), until S3.7; Prototype until S2.5.)*
 - **Current implementation (S2.9 plus S2.V1–S2.V4; corrected S2.V5, 2026-09-26, which previously read "S2.8 plus S2.V1–S2.V3 … (DNG and JPEG)"):** the Android document picker (no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG, JPEG and HEIF still images; AVIF, HEIF sequences, PNG, FITS, XISF and proprietary RAW are recognised only) → read-only rows with units, sources and unknowns. Nothing is stored. The Stage 2 gate is false in debug and release; device testing temporarily flipped it and reverted the change.
 - **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
 - **Historical prototype issues (removed in S2.5):** gallery-only selection, whole-file reads, faulty FITS string splitting and no real-sample coverage. The replacement has local DNG/JPEG samples; FITS is explicitly out of this Stage.

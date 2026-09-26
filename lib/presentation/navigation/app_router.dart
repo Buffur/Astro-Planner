@@ -48,7 +48,10 @@ class AppRouter {
   static const libraryProgress = '/library/progress';
   static const settings = '/settings';
   static const about = '/settings/about';
-  static const metadata = '/settings/metadata';
+
+  /// The metadata import (S3.7, ADR-018 §7): above the tabs, opened from
+  /// the equipment screen's "Add from a photo".
+  static const metadata = '/equipment/import';
 
   /// The session planner for the current session (`/session/current`) or
   /// a stored session id.
@@ -149,11 +152,6 @@ class AppRouter {
                     path: 'about',
                     builder: (context, state) => const AboutScreen(),
                   ),
-                  if (FeatureScope.metadataImport)
-                    GoRoute(
-                      path: 'metadata',
-                      builder: (context, state) => const MetadataImportScreen(),
-                    ),
                 ],
               ),
             ],
@@ -210,6 +208,12 @@ class AppRouter {
           initial: state.extra as LatLng?,
         ),
       ),
+      if (FeatureScope.metadataImport)
+        GoRoute(
+          path: metadata,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const MetadataImportScreen(),
+        ),
       GoRoute(
         path: welcome,
         parentNavigatorKey: rootNavigatorKey,

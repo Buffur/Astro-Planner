@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/tracking_type.dart';
+import '../../../core/config/feature_scope.dart';
+import '../../navigation/app_router.dart';
 import '../../shared/failure_feedback.dart';
 import 'equipment_editor.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
@@ -77,6 +79,16 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
 
   static String _trim(double value) =>
       value == value.roundToDouble() ? value.toInt().toString() : '$value';
+
+  /// Opens the metadata import; a rig saved there shows up on return.
+  Future<void> _importFromPhoto() async {
+    await context.push(AppRouter.metadata);
+    if (!mounted) return;
+    await _loadEquipment();
+    if (mounted) {
+      await context.read<SessionPlanViewModel>().refreshSelectedEquipment();
+    }
+  }
 
   Future<void> _showEquipmentDialog({EquipmentProfile? existing}) async {
     await showEquipmentEditor(context, existing: existing);
@@ -208,10 +220,29 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add rig',
-        onPressed: () => _showEquipmentDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // S3.7 (ADR-018 §7): a rig proposed from a capture file's
+          // metadata; nothing is saved without the editor's Save.
+          if (FeatureScope.metadataImport) ...[
+            FloatingActionButton.small(
+              key: const Key('rigs.addFromPhoto'),
+              heroTag: 'rigs.addFromPhoto',
+              tooltip: 'Add from a photo',
+              onPressed: _importFromPhoto,
+              child: const Icon(Icons.add_photo_alternate_outlined),
+            ),
+            const SizedBox(height: 12),
+          ],
+          FloatingActionButton(
+            heroTag: 'rigs.add',
+            tooltip: 'Add rig',
+            onPressed: () => _showEquipmentDialog(),
+            child: const Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
