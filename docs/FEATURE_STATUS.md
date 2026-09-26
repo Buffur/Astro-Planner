@@ -685,6 +685,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.3 (2026-09-26, Stage 3; ADR-018 §6):** matching a candidate against saved rigs, in pure domain code with no UI and no write. There are six outcomes with stated reasons. Differing values are listed with both provenances, and the saved value is kept by default. It is tested for the phone's two modules, the DNG-vs-JPEG model strings, digital zoom, a full-resolution mode, two identical bodies, a telescope body, legacy and verified values, and the seeded camera.
 - **S3.2 (2026-09-26, Stage 3; ADR-018 §4):** `EquipmentCandidate.fromReading` turns a reading into a proposed rig, in pure domain code with no UI and no write:
   - labels from Make/Model;
   - focal length, f-number and resolution (long side as width) as `reported`, source `metadata:<format>`;

@@ -3076,8 +3076,25 @@ sample and tests. See E.1, "Stage 2 format priorities and metadata layering".
 Status: accepted (owner, 2026-09-26, S3.D). The owner chose the recommended option for each of
 D1–D4 in `refinement/research/RG-02_EQUIPMENT_IDENTITY.md` §12 (E.1, "Stage 3 decisions (S3.D)").
 It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment (§5). ADR-011 is
-unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); the rest follows in S3.3 and S3.5–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
+unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the rest follows in S3.5–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
+
+**Implementation note (S3.3, 2026-09-26):** choices made within §6.
+- **The field of view has no stored f₃₅.** A file's f₃₅ is compared with the one a saved rig
+  implies: f × 43.27 mm ÷ the rig's sensor diagonal.
+  - They differ when they are more than **10 %** apart (`EquipmentMatcher.fieldOfViewTolerance`).
+  - 10 % is wider than CALC-40's own uncertainty (about 2 % + 4 %), so only a real change of
+    field of view (a 1.2× crop or more) counts as another mode.
+  - A user's wrong sensor entry can wrongly flag a mode. The effect is only a question to the
+    user; nothing is merged.
+- **A saved rig with no model gives no camera match.** RG-02 §6 had suggested "likely" there;
+  §6 above does not list it, so it is not applied.
+- **Missing makes are not a disagreement.** When both makes are known they must be equal; when
+  one is missing, the model decides.
+- **A known limit of the prefix rule:** "Pro Max" against "Pro" is "likely", because a space is a
+  separator. The user sees both strings and decides; nothing is merged.
+- **Values within the 1 % tolerance but not equal** (a saved f/5.56 against a file's f/5.6) are
+  the same optic, and the difference is listed as a conflict.
 
 ### 1. Context (verified at `0c4848b`; RG-02 §1–§5)
 
