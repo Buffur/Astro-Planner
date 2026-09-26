@@ -2743,7 +2743,7 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
     device check M1 (`TEST_PLAN.md`) passes;**
   - §7 and §10 (S2.5, 2026-09-26, commit `a2f42a5`): `exif` and `image_picker` removed after a `grep`; the hidden screen reads the
     contract; `FeatureScope.metadataImport` stays false.
-  - §13.2 and §13.3 (S2.7, 2026-09-26): layered readings, `MetadataFormatReader` dispatch, the shared
+  - §13.2 and §13.3 (S2.7, 2026-09-26, commit `9a0432b`): layered readings, `MetadataFormatReader` dispatch, the shared
     `ExifStructure` with `MetadataSourceWindow`, and the recognition-only formats.
 - **Open:** FITS (S2.6, needs a sample); JPEG (S2.8, needs a sample); HEIF (S2.R2, then S2.9); PNG (S2.10);
   RG-14 (S2.R3); device checks M1 and M2.
