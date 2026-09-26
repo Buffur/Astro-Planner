@@ -231,6 +231,65 @@ class EquipmentDraft {
     );
   }
 
+  /// A saved rig opened for editing with the file's values taken for
+  /// [taken] (ADR-018 §6: only by the user's explicit choice, per field).
+  /// Each taken value carries the file's provenance while untouched. Taking
+  /// the file's focal ratio clears the diameter field, since the ratio is
+  /// derived from a diameter otherwise (ADR-011 §4); D is never back-filled.
+  factory EquipmentDraft.forRig(
+    EquipmentProfile rig,
+    Map<EquipmentSpec, ({Object value, SpecProvenance provenance})> taken,
+  ) {
+    final base = EquipmentDraft.fromProfile(rig);
+    if (taken.isEmpty) return base;
+    final t = base.initial;
+    final prefilled = <EquipmentSpec, PrefilledSpec>{};
+    String num1(Object v) => numberText((v as num).toDouble());
+    List<String> texts(EquipmentSpec spec, Object v) => switch (spec) {
+      EquipmentSpec.resolution => [for (final side in v as List) '$side'],
+      EquipmentSpec.sensorSize => [
+        for (final side in v as List) _sensorText((side as num).toDouble()),
+      ],
+      EquipmentSpec.pixelPitch => [_estimateText(v as num, 3)],
+      EquipmentSpec.rawFileSize => [_estimateText(v as num, 1)],
+      EquipmentSpec.focalLength => [num1(v)],
+      EquipmentSpec.focalRatio => [num1(v), ''],
+    };
+    for (final MapEntry(key: spec, value: choice) in taken.entries) {
+      prefilled[spec] = PrefilledSpec(
+        choice.provenance,
+        texts(spec, choice.value),
+      );
+    }
+    List<String>? of(EquipmentSpec s) => prefilled[s]?.texts;
+    return EquipmentDraft(
+      existing: rig,
+      trackingType: rig.trackingType,
+      prefilled: prefilled,
+      metadataMake: rig.metadataMake,
+      metadataModel: rig.metadataModel,
+      initial: EquipmentFormTexts(
+        name: t.name,
+        manufacturer: t.manufacturer,
+        cameraModel: t.cameraModel,
+        resolutionWidth: of(EquipmentSpec.resolution)?[0] ?? t.resolutionWidth,
+        resolutionHeight:
+            of(EquipmentSpec.resolution)?[1] ?? t.resolutionHeight,
+        pixelPitch: of(EquipmentSpec.pixelPitch)?[0] ?? t.pixelPitch,
+        sensorWidth: of(EquipmentSpec.sensorSize)?[0] ?? t.sensorWidth,
+        sensorHeight: of(EquipmentSpec.sensorSize)?[1] ?? t.sensorHeight,
+        focalLength: of(EquipmentSpec.focalLength)?[0] ?? t.focalLength,
+        focalRatio: of(EquipmentSpec.focalRatio)?[0] ?? t.focalRatio,
+        diameter: of(EquipmentSpec.focalRatio)?[1] ?? t.diameter,
+        rawFileSize: of(EquipmentSpec.rawFileSize)?[0] ?? t.rawFileSize,
+        rotation: t.rotation,
+        maxExposure: t.maxExposure,
+      ),
+    );
+  }
+
+  static String _sensorText(double mm) => mm.toStringAsFixed(2);
+
   static void _add(
     Map<EquipmentSpec, PrefilledSpec> into,
     EquipmentSpec spec,
@@ -334,10 +393,12 @@ class EquipmentDraft {
       pixelPitchUm: EquipmentFormInput.parse(texts.pixelPitch)!,
       // An untouched sensor field keeps the stored value exactly, so opening
       // and saving never alters verified specs (TASK 8.5).
-      sensorWidthMm: e != null && texts.sensorWidth == initial.sensorWidth
+      sensorWidthMm:
+          e != null && texts.sensorWidth == _sensorText(e.sensorWidthMm)
           ? e.sensorWidthMm
           : EquipmentFormInput.parse(texts.sensorWidth)!,
-      sensorHeightMm: e != null && texts.sensorHeight == initial.sensorHeight
+      sensorHeightMm:
+          e != null && texts.sensorHeight == _sensorText(e.sensorHeightMm)
           ? e.sensorHeightMm
           : EquipmentFormInput.parse(texts.sensorHeight)!,
       focalLengthMm: focal,

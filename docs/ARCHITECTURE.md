@@ -146,6 +146,11 @@
 >   - the APP1 `Exif\0\0` segment goes to the shared `ExifStructure` through a `MetadataSourceWindow` (origin "APP1 IFD0" or "APP1 EXIF IFD"); every other segment is skipped by its length;
 >   - the scan data is never read; a JPEG without Exif is "extracted, nothing found".
 > Registered in `CaptureMetadataReader.readers`. The owner's phone JPEG (a local check) gives every contract value, including a UTC capture time from `OffsetTimeOriginal`, reading 843 bytes of 4.7 MB. The synthetic fixture is `test/support/jpeg_fixture.dart`.
+> **S3.6 (2026-09-26, Stage 3; ADR-018 §2, §6):** the import review.
+>   - `MetadataImportViewModel(captureFiles, equipment)` builds the `EquipmentCandidate` after a read, matches it against the saved rigs (`EquipmentMatcher`), keeps the user's per-field "use the file's value" choices (off by default), and hands out drafts: `newRigDraft(cameraFrom:)` and `rigDraft(match)`, which uses `EquipmentDraft.forRig`.
+>   - `MetadataImportScreen` shows an Equipment card (outcome, reasons, conflict switches, Open / New rig actions) above the file's values. Wording is in `equipment_import_text.dart`.
+>   - Every action opens `showEquipmentEditor`, and its Save is the only write. After a save the match is refreshed, and after editing a saved rig the planner rereads the selected rig (TD-028).
+>   - Reachable only through the debug-build Settings entry until S3.7.
 > **S3.5 (2026-09-26, Stage 3):** the rig editor's value building moved out of the widget.
 >   - `EquipmentDraft` (`presentation/shared/equipment_draft.dart`, pure) holds the initial texts, the pre-filled specs (`PrefilledSpec`: provenance, texts, whether copied from a saved rig) and the metadata identity. `build(texts, tracking)` is the one place a profile is made: parsing, `resolveAperture`, an untouched sensor text keeping the exact stored value, and `withEditProvenance`. A pre-filled value keeps its origin only while its text is unchanged.
 >   - The dialog moved to `showEquipmentEditor(context, existing:, draft:)` (`screens/equipment/equipment_editor.dart`), which returns whether it saved. It shows a note under each pre-filled field (`PrefillText`).

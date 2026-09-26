@@ -115,7 +115,7 @@ class AppViewModels {
     theme = ThemeViewModel(display);
     metadataImport = captureFiles == null
         ? null
-        : MetadataImportViewModel(captureFiles);
+        : MetadataImportViewModel(captureFiles, equipment);
     tonight = TonightViewModel(
       site: site,
       startup: startup,

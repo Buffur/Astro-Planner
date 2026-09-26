@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:astroplan/domain/metadata/capture_file_access.dart';
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/repositories/open_meteo_weather_repository.dart';
 import 'package:astroplan/data/repositories/shared_prefs_planner_state_repository.dart';
@@ -86,6 +87,7 @@ class PlannerHarness extends ChangeNotifier {
     ScreenWake? screenWake,
     SessionExporter? exporter,
     BackupService? backup,
+    CaptureFileAccess? captureFiles,
   }) {
     final time = clock ?? const SystemClock();
     vms = AppViewModels(
@@ -118,6 +120,7 @@ class PlannerHarness extends ChangeNotifier {
       exporter: exporter,
       backup: backup,
       sessions: sessionRepository,
+      captureFiles: captureFiles,
     );
     for (final vm in [site, settings, plan, conditions, analysis, startup]) {
       vm.addListener(notifyListeners);

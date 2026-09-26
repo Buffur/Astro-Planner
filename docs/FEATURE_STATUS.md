@@ -686,6 +686,12 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.6 (2026-09-26, Stage 3; ADR-018 §2, §6):** the review and confirmation flow on the metadata screen. After a file is read, an Equipment card shows how it matches the saved rigs, in plain words with the reasons:
+  - "You already have this rig", "probably your rig", "Same camera … other optics", "another field of view or pixel count", "Several saved rigs match", or "No saved rig has this camera";
+  - differing values with both sources, each with a "Use the file's …" switch that is off by default;
+  - Open (a saved rig, with the chosen file values), New rig from this file, and New rig with a saved rig's camera specs.
+
+  Only the editor's Save writes; Cancel writes nothing; a verified value survives unless its switch is turned on. The accessibility sweep includes the page. Still reachable only in debug builds (Settings → Import metadata) until S3.7.
 - **S3.3 (2026-09-26, Stage 3; ADR-018 §6):** matching a candidate against saved rigs, in pure domain code with no UI and no write. There are six outcomes with stated reasons. Differing values are listed with both provenances, and the saved value is kept by default. It is tested for the phone's two modules, the DNG-vs-JPEG model strings, digital zoom, a full-resolution mode, two identical bodies, a telescope body, legacy and verified values, and the seeded camera.
 - **S3.2 (2026-09-26, Stage 3; ADR-018 §4):** `EquipmentCandidate.fromReading` turns a reading into a proposed rig, in pure domain code with no UI and no write:
   - labels from Make/Model;

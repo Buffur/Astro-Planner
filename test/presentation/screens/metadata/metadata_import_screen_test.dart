@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import '../../../support/fake_capture_file_access.dart';
+import '../../../support/in_memory_equipment_repository.dart';
 import '../../../support/tiff_fixture.dart';
 
 void main() {
@@ -24,7 +25,7 @@ void main() {
 
   Future<void> show(WidgetTester tester, {bool withVm = true}) async {
     files = FakeCaptureFileAccess();
-    vm = MetadataImportViewModel(files);
+    vm = MetadataImportViewModel(files, InMemoryEquipmentRepository());
     await tester.pumpWidget(
       ChangeNotifierProvider<MetadataImportViewModel?>.value(
         value: withVm ? vm : null,

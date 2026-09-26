@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/equipment_import/equipment_candidate.dart';
+import '../../../domain/equipment_import/equipment_matcher.dart';
 import '../../../domain/metadata/capture_metadata.dart';
+import '../../../domain/models/spec_provenance.dart';
+import '../../shared/equipment_draft.dart';
+import '../../shared/equipment_import_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/metadata_text.dart';
 import '../../viewmodels/metadata_import_viewmodel.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
+import '../equipment/equipment_editor.dart';
 
-/// Reads the metadata contract from one capture file (F-45; ADR-017). Hidden
-/// behind `FeatureScope.metadataImport` during Stage 2 (RD-16); nothing is
-/// stored, and nothing leaves the device.
+/// Reads the metadata contract from one capture file (F-45; ADR-017) and
+/// proposes equipment from it (S3.6, ADR-018): the match against the saved
+/// rigs comes first, the file's values below. Nothing is stored except
+/// through the rig editor's Save, and nothing leaves the device.
 class MetadataImportScreen extends StatelessWidget {
   const MetadataImportScreen({super.key});
 
@@ -48,6 +56,13 @@ class MetadataImportScreen extends StatelessWidget {
                 if (vm.busy) ...[
                   const SizedBox(height: 12),
                   const LinearProgressIndicator(),
+                ],
+                if ((vm.candidate, vm.match) case (
+                  final candidate?,
+                  final match?,
+                )) ...[
+                  const SizedBox(height: 16),
+                  _EquipmentCard(vm: vm, candidate: candidate, match: match),
                 ],
                 if (vm.reading case final reading?) ...[
                   const SizedBox(height: 16),
@@ -112,6 +127,113 @@ class _Result extends StatelessWidget {
             children: [title, Text(MetadataText.unreadable(reason))],
           ),
         },
+      ),
+    );
+  }
+}
+
+/// The equipment the file proposes and how it matches the saved rigs
+/// (ADR-018 §6). Every action opens the rig editor; only its Save writes.
+class _EquipmentCard extends StatelessWidget {
+  const _EquipmentCard({
+    required this.vm,
+    required this.candidate,
+    required this.match,
+  });
+
+  final MetadataImportViewModel vm;
+  final EquipmentCandidate candidate;
+  final EquipmentMatch match;
+
+  Future<void> _edit(BuildContext context, EquipmentDraft draft) async {
+    final saved = await showEquipmentEditor(context, draft: draft);
+    if (!saved || !context.mounted) return;
+    if (draft.existing != null) {
+      // TD-028: the planner may be showing the rig that was just changed.
+      await context.read<SessionPlanViewModel>().refreshSelectedEquipment();
+    }
+    if (!context.mounted) return;
+    await runWithFeedback(context, 'match the saved rigs', vm.refreshMatch);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final outcome = match.outcome;
+    final opens = {
+      MatchKind.sameRig,
+      MatchKind.likelySameRig,
+      MatchKind.ambiguous,
+      MatchKind.croppedOrBinnedMode,
+    }.contains(outcome);
+    return Card(
+      key: const Key('import.equipment'),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text('Equipment', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              EquipmentImportText.headline(candidate, match),
+              key: const Key('import.headline'),
+            ),
+            if (candidate.hasEnoughEvidence)
+              for (final r in match.rigs) ...[
+                const SizedBox(height: 12),
+                Text(r.rig.name, style: theme.textTheme.labelLarge),
+                Text(
+                  EquipmentImportText.reasons(r.reasons),
+                  style: theme.textTheme.bodySmall,
+                ),
+                for (final c in r.conflicts)
+                  SwitchListTile(
+                    key: Key('import.take.${r.rig.id}.${c.spec.name}'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(EquipmentImportText.useFileValue(c.spec)),
+                    subtitle: Text(
+                      [
+                        EquipmentImportText.conflict(c),
+                        if (c.spec == EquipmentSpec.focalRatio &&
+                            r.rig.apertureDiameterMm != null)
+                          'Taking it clears the saved diameter.',
+                      ].join(' '),
+                    ),
+                    value: vm.takesImported(r.rig, c.spec),
+                    onChanged: (take) =>
+                        vm.setTakesImported(r.rig, c.spec, take),
+                  ),
+                if (opens)
+                  OutlinedButton(
+                    key: Key('import.open.${r.rig.id}'),
+                    onPressed: () => _edit(context, vm.rigDraft(r)),
+                    child: Text('Open "${r.rig.name}"'),
+                  ),
+                if (outcome == MatchKind.sameCameraOtherOptics)
+                  OutlinedButton(
+                    key: Key('import.newFrom.${r.rig.id}'),
+                    onPressed: () =>
+                        _edit(context, vm.newRigDraft(cameraFrom: r.rig)),
+                    child: Text(
+                      'New rig with the camera specs of "${r.rig.name}"',
+                    ),
+                  ),
+              ],
+            if (candidate.hasEnoughEvidence) ...[
+              const SizedBox(height: 12),
+              FilledButton(
+                key: const Key('import.new'),
+                onPressed: () => _edit(context, vm.newRigDraft()),
+                child: Text(
+                  outcome == MatchKind.none
+                      ? 'New rig from this file'
+                      : 'Create a new rig from this file instead',
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

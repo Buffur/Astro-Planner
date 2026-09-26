@@ -6,6 +6,8 @@
 // adaptation; documented in ARCHITECTURE.md B16), so contrast is not
 // asserted there. Plus the altitude chart's text alternative.
 
+import 'dart:typed_data';
+
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart' show AppDatabase;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
@@ -25,10 +27,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../support/fake_capture_file_access.dart';
 import '../support/fake_device_time_zone.dart';
+import '../support/jpeg_fixture.dart';
 import '../support/fake_location_service.dart';
 import '../support/fake_reverse_geocoder.dart';
 import '../support/planner_harness.dart';
+import '../support/tiff_fixture.dart';
 
 /// Every hour of the night with every variable filled, on whole UTC hours
 /// as the provider serves them, so the sweep renders the weather card, its
@@ -143,6 +148,9 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
       deviceTimeZone: FakeDeviceTimeZone(),
       clock: clock,
       sessionRepository: DriftSessionRepository(db, clock: clock),
+      // S3.6: a file matching the seeded rig, so the import review shows a
+      // match, its reasons, a conflict switch and every action.
+      captureFiles: FakeCaptureFileAccess()..file('light.jpg', _seedJpeg()),
     );
     await vm.ready;
     planned = (await vm.analysis.saveSession()).id;
@@ -195,6 +203,23 @@ Future<List<String>> _audit(
   return problems;
 }
 
+/// A camera JPEG naming the seeded rig's camera and optics, with a rounded
+/// f/5.6 (a listed difference from the seed's f/5.56).
+Uint8List _seedJpeg() {
+  final exif = TiffFixture()
+    ..ifd0.addAll([
+      FixtureEntry.ascii(271, 'ZWO'),
+      FixtureEntry.ascii(272, 'ASI2600MC'),
+    ])
+    ..exif = [
+      FixtureEntry.rational(37386, 400, 1),
+      FixtureEntry.rational(33437, 56, 10),
+      FixtureEntry.long(40962, 6248),
+      FixtureEntry.long(40963, 4176),
+    ];
+  return jpegFile([exifApp1(exif.build().bytes)]);
+}
+
 void main() {
   for (final theme in _Theme.values) {
     for (final scale in [1.0, 2.0]) {
@@ -219,11 +244,17 @@ void main() {
           AppRouter.run(app.running),
           AppRouter.results(app.running),
           AppRouter.welcome,
+          AppRouter.metadata,
         ];
         final report = <String>[];
         for (final route in routes) {
           AppRouter.router.go(route);
           await _settle(tester);
+          if (route == AppRouter.metadata) {
+            await tester.runAsync(app.vm.vms.metadataImport!.pickAndRead);
+            await _settle(tester);
+            expect(find.byKey(const Key('import.open.1')), findsOneWidget);
+          }
           final problems = await _audit(
             tester,
             contrast: theme != _Theme.field,
