@@ -96,7 +96,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 2 | Repeat independent Stage 2 validation (documentation and probe evidence only) | 2026-09-26 | `f137409` | A fresh session at `5d8bdbb`: the gate is green on the clean tree; the real samples pass (DNG 848/848, JPEG 843, HEIC 4,051 bytes); the native JVM tests were re-run (4 pass). S2V-01 to S2V-04 are resolved, and HEIF inherits the fixes (probes P2–P4). **Fails on S2R-01 (TD-067):** a crafted `iloc` with zero-size fields makes the HEIF reader allocate about 1.7 GB in 9–17 s from an 8 KB `meta`, on the UI isolate (probe P1). Low: S2R-02 (AVIF and sequence brands go to the HEIF reader without a sample, and a sequence-only file reads as "corrupt"), S2R-03 (stale F-45 and `TEST_PLAN.md` text), S2R-04 (HEIF test gaps). No code or test changed; the probes were deleted, and their code is in `evidence/STAGE_2_REVALIDATION_PROBES.md`. See `STAGE_2_REVALIDATION.md` |
 
 | 2 | S2.V4 — Bound the HEIF `iloc` work; AVIF and HEIF sequences recognised only; HEIF test gaps | 2026-09-26 | `d8e792c` | The owner said "Do fix"; S2R-02 was taken as the recommended option (a) (DECISIONS E.1). **TD-067 resolved:** `maxExtents` = 16,384 over all items → `corrupt`. New `MetadataFormat.avif` and `heifSequence`, both recognised only and named in `MetadataText`. There are 6 new HEIF tests: the bound (fails on the old reader), the limit, GPS never read, S2V-01, S2V-02, and the brands. One assertion in `metadata_layers_test.dart` changed because of the ruling (`avif` and `msf1` were HEIF). The real samples are unchanged. Gate green (Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E). See `STAGE_2_CORRECTIONS.md` |
-| 2 | S2.V5 — Documentation reconciliation (S2R-03) | 2026-09-26 | The S2.V5 docs commit* | F-45's current-implementation and known-issues text, and `TEST_PLAN.md`'s "no device" note, are corrected with the old text quoted. Also updated: `ARCHITECTURE.md` B, ADR-017's note, E.1, TD-067, `POST_ROADMAP_PLAN.md` (the corrective-Task table) and this file |
+| 2 | S2.V5 — Documentation reconciliation (S2R-03) | 2026-09-26 | `435b3ce` | F-45's current-implementation and known-issues text, and `TEST_PLAN.md`'s "no device" note, are corrected with the old text quoted. Also updated: `ARCHITECTURE.md` B, ADR-017's note, E.1, TD-067, `POST_ROADMAP_PLAN.md` (the corrective-Task table) and this file |
+
+| 1 | S1.V6 — Stage 1 registers brought up to date (X2; documentation only) | 2026-09-26 | The S1.V6 commit* | Run at the owner's request ("wrap up the important issues" before Stage 3). The validation banners and notes that called S1.5 broken and S1.6 partial are marked superseded, with the old text kept: `FEATURE_STATUS.md` (banner, F-02, F-40), `ARCHITECTURE.md` (banner, B3, B4), `DATA_MODEL.md` (banner, B8) and `TECH_DEBT.md` (banners). TD-047 is closed again. The S1.V1–S1.V4 stamps (8) and TD-059–TD-062 cite `3067658`, `b34c9ad`, `ed628f8` and `ea65231` (each checked with `git log`). No code changed. TD-063 stays in Stage 8, and W1 stays with RD-05 |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -195,10 +197,8 @@ These block a release, not refinement.
 
 ## Known blockers
 
-- **Stage 1 (closed by waiver):** X2 is open documentation debt: the registers still say
-  S1.5 is broken and S1.6 partial, and the S1.V stamps cite no commit. It is a proposed
-  S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
-  F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
+- **Stage 1 (closed by waiver):** X2 is done (S1.V6, 2026-09-26). TD-063 is in Stage 8. W1 is
+  a proposed input to RD-05.
 - **Stage 2:**
   - the repeat validation's findings are fixed (S2.V4, S2.V5). The Stage closes after
     another independent validation, or an owner waiver.
@@ -358,12 +358,14 @@ If it passes, close Stage 2 here and begin **Stage 3 planning**: research RG-02 
 identity) and RG-03 (specification sources), and an ADR for the owner.
 
 **Carried open items:**
-- X2 (proposed S1.V6, documentation only; owner request or Stage 11);
 - W1 (proposed input to RD-05);
 - TD-063 (Stage 8);
 - TD-057 and TD-058;
 - RD-17 (the push is deferred);
 - the S1.5 and S1.11 device checks (Stage 11);
+- S2V-06's device checks (a non-seekable provider; a real backup's preview cancel): the next
+  time the phone is connected, or Stage 11;
+- TD-066 (sub-second exposures shown as decimals; Stage 5/6, or when the screen becomes visible);
 - the stale id-holding preferences after a reset, `editedSessionId` included (with
   TD-056/ENG-14).
 

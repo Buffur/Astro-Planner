@@ -1,5 +1,7 @@
 # AstroPlan Data Model
 
+> **Superseded 2026-09-26 (S1.V6, finding X2):** S1.V1–S1.V4 (`3067658`, `b34c9ad`, `ed628f8`, `ea65231`) resolved TD-059–TD-062, confirmed by the repeat independent validation at `c99bd7f`. The note below is kept as history.
+>
 > **Independent Stage 1 validation, 2026-09-25, code `4e653fb`:** schema remains
 > v17; no model or migration changed. S1.5's closure is contradicted by TD-059/060
 > (background refusal type and seed state after reset); TD-061 records incomplete
@@ -329,6 +331,7 @@ allows reuse.
 
 ## B8. Schema and migration history (v1 → v10)
 
+*(Superseded 2026-09-26, S1.V6/X2: S1.V1 `3067658` and S1.V2 `b34c9ad` resolved TD-059/060. Kept as history:)*
 **Current validation correction (2026-09-25, `4e653fb`; TD-059/060):** the
 S1.5 helpers and screen exist, but production's background connection delivers
 `DriftRemoteException`, bypassing the typed refusal catch. The direct native
