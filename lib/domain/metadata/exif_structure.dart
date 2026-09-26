@@ -130,6 +130,12 @@ class ExifStructure {
       ),
       lensMake: await field((i) => i.text(source, 42035)),
       lensModel: await field((i) => i.text(source, 42036)),
+      imageDimensions: _format == MetadataFormat.dng
+          ? await _ifd0.dngDimensions(source)
+          : MetadataValue.combine([
+              _ifd0.pixelPair(256, 257),
+              if (exif != null) exif.pixelPair(40962, 40963),
+            ]),
     );
   }
 }
@@ -156,7 +162,12 @@ int _typeSize(int type) => switch (type) {
 const _contractTags = {
   271, 272, 50708, dngVersionTag, _exifIfd, // IFD0 only (identity, structure)
   33434, 33437, 34855, 34864, 36867, 36881, 37386, 41989, 42035, 42036,
+  // Image dimensions (ADR-018 §3): NewSubfileType, ImageWidth, ImageLength
+  // and DefaultCropSize in IFD0; PixelX/YDimension in the EXIF IFD.
+  _newSubfileType, 256, 257, _defaultCropSize, 40962, 40963,
 };
+
+const _newSubfileType = 254, _defaultCropSize = 50720;
 
 const _names = {
   271: 'Make',
@@ -171,6 +182,14 @@ const _names = {
   42035: 'LensMake',
   42036: 'LensModel',
   50708: 'UniqueCameraModel',
+  _newSubfileType: 'NewSubfileType',
+  _defaultCropSize: 'DefaultCropSize',
+};
+
+/// The field label of a width/height tag pair.
+const _pairNames = {
+  256: 'ImageWidth/ImageLength (256/257)',
+  40962: 'PixelXDimension/PixelYDimension (40962/40963)',
 };
 
 /// The EXIF/TIFF structure is invalid (a loop, a repeated tag, too many
@@ -308,6 +327,99 @@ class _Ifd {
     final value = _singleInteger(tag);
     if (value == null) return _bad(tag, e);
     return convert(value, origin(tag));
+  }
+
+  /// The stored form of a single-integer entry, for a raw text.
+  String _rawInteger(int tag) {
+    final e = entries[tag];
+    if (e == null) return 'missing';
+    return '${_singleInteger(tag) ?? 'type ${e.type}, count ${e.count}'}';
+  }
+
+  /// A width/height pair of single SHORT or LONG tags (ADR-018 §3): absent
+  /// when neither is present; unparseable when one is missing or malformed.
+  /// JPEG/HEIC read ImageWidth/ImageLength in IFD0 and
+  /// PixelXDimension/PixelYDimension in the EXIF IFD, never the other way.
+  MetadataValue<ImageDimensions> pixelPair(int widthTag, int heightTag) {
+    final inThisIfd = isIfd0 ? widthTag == 256 : widthTag == 40962;
+    if (!inThisIfd) return const AbsentValue();
+    if (entries[widthTag] == null && entries[heightTag] == null) {
+      return const AbsentValue();
+    }
+    return ExifValues.dimensions(
+      _singleInteger(widthTag),
+      _singleInteger(heightTag),
+      MetadataOrigin(
+        format: format,
+        field: _pairNames[widthTag]!,
+        location: location,
+      ),
+      raw: '${_rawInteger(widthTag)} x ${_rawInteger(heightTag)}',
+    );
+  }
+
+  /// A DNG's image dimensions (ADR-018 §3), from IFD0 only and only when
+  /// IFD0 is the main image (NewSubfileType absent or 0): DefaultCropSize
+  /// when present and integral, else ImageWidth/ImageLength. A DNG whose
+  /// raw image sits in a sub-IFD gives absent dimensions: sub-IFDs are never
+  /// followed (ADR-017 §3).
+  Future<MetadataValue<ImageDimensions>> dngDimensions(
+    MetadataSource source,
+  ) async {
+    final subfile = entries[_newSubfileType];
+    if (subfile != null) {
+      final kind = _singleInteger(_newSubfileType);
+      if (kind == null) return _bad(_newSubfileType, subfile);
+      if (kind != 0) return const AbsentValue();
+    }
+    final crop = entries[_defaultCropSize];
+    if (crop != null) {
+      final fromCrop = await _cropSize(source, crop);
+      if (fromCrop != null) return fromCrop;
+    }
+    return pixelPair(256, 257);
+  }
+
+  /// DefaultCropSize (two SHORT, LONG or RATIONAL values), or null when its
+  /// rationals are not whole numbers, so ImageWidth/ImageLength apply.
+  Future<MetadataValue<ImageDimensions>?> _cropSize(
+    MetadataSource source,
+    _Entry e,
+  ) async {
+    const tag = _defaultCropSize;
+    if (e.count != 2 ||
+        (e.type != _short && e.type != _long && e.type != _rational)) {
+      return _bad(tag, e);
+    }
+    final bytes = await _bytes(source, e, 16);
+    if (bytes == null) return _bad(tag, e);
+    final data = ByteData.sublistView(bytes);
+    final List<int> sides;
+    switch (e.type) {
+      case _short:
+        sides = [data.getUint16(0, endian), data.getUint16(2, endian)];
+      case _long:
+        sides = [data.getUint32(0, endian), data.getUint32(4, endian)];
+      default:
+        final rationals = [
+          for (final at in [0, 8])
+            ExifRational(
+              data.getUint32(at, endian),
+              data.getUint32(at + 4, endian),
+            ),
+        ];
+        if (rationals.any((r) => r.denominator == 0)) return _bad(tag, e);
+        if (rationals.any((r) => r.numerator % r.denominator != 0)) {
+          return null;
+        }
+        sides = [for (final r in rationals) r.numerator ~/ r.denominator];
+    }
+    return ExifValues.dimensions(
+      sides[0],
+      sides[1],
+      origin(tag),
+      raw: '${sides[0]} x ${sides[1]}',
+    );
   }
 
   MetadataValue<Sensitivity> sensitivity() {

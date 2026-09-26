@@ -1362,8 +1362,8 @@ One Task per commit, then STOP (§9.4). Never start the next Task automatically.
 | Task | Title | Size | Depends on | State |
 | --- | --- | --- | --- | --- |
 | S3.D | Owner decisions D1–D4; ADR-018; this table | S | the second pass | **Done 2026-09-26** |
-| S3.1 | Image geometry in the metadata contract (ADR-018 §3) | S–M | S3.D | **Frozen; next** |
-| S3.2 | Equipment evidence and candidate, with CALC-40 (ADR-018 §4) | M | S3.1 | Frozen |
+| S3.1 | Image geometry in the metadata contract (ADR-018 §3) | S–M | S3.D | **Done 2026-09-26** |
+| S3.2 | Equipment evidence and candidate, with CALC-40 (ADR-018 §4) | M | S3.1 | **Frozen; next** |
 | S3.3 | Matching saved rigs, with conflicts (ADR-018 §6) | M | S3.2, S3.4 (for the stored identity) | Frozen |
 | S3.4 | Per-field provenance and identity evidence, schema v18 (ADR-018 §5) | M | S3.D | Frozen |
 | S3.5 | A form model for the rig editor, and pre-fill | M | S3.4 | Frozen |

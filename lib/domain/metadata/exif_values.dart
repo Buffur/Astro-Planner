@@ -158,4 +158,20 @@ abstract final class ExifValues {
     if (cleaned == null) return const AbsentValue();
     return KnownValue(cleaned, raw: cleaned, origin: origin);
   }
+
+  /// Image dimensions from a width and height tag pair (ADR-018 §3). The
+  /// caller passes a pair only when at least one tag is present; a missing,
+  /// malformed, zero or non-integral side makes the pair unparseable, never
+  /// half known. [raw] is the pair as stored, for display.
+  static MetadataValue<ImageDimensions> dimensions(
+    int? width,
+    int? height,
+    MetadataOrigin origin, {
+    required String raw,
+  }) {
+    if (width == null || height == null || width <= 0 || height <= 0) {
+      return UnparseableValue(raw: raw, origin: origin);
+    }
+    return KnownValue(ImageDimensions(width, height), raw: raw, origin: origin);
+  }
 }

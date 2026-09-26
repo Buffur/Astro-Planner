@@ -1,5 +1,8 @@
 # AstroPlan Architecture
 
+> **Metadata update, 2026-09-26 (S3.1):** the contract gains image dimensions (ADR-018 §3; B entry
+> after S2.9).
+
 > **Metadata update, 2026-09-26 (S2.V4, commit `d8e792c`):** HEIF `iloc` work bounded; AVIF and
 > HEIF sequences recognised only (B entry after S2.9).
 
@@ -143,6 +146,7 @@
 >   - the APP1 `Exif\0\0` segment goes to the shared `ExifStructure` through a `MetadataSourceWindow` (origin "APP1 IFD0" or "APP1 EXIF IFD"); every other segment is skipped by its length;
 >   - the scan data is never read; a JPEG without Exif is "extracted, nothing found".
 > Registered in `CaptureMetadataReader.readers`. The owner's phone JPEG (a local check) gives every contract value, including a UTC capture time from `OffsetTimeOriginal`, reading 843 bytes of 4.7 MB. The synthetic fixture is `test/support/jpeg_fixture.dart`.
+> **S3.1 (2026-09-26, Stage 3; ADR-018 §3):** `CaptureMetadata.imageDimensions` (`ImageDimensions`: width and height as stored, plus long/short sides). `ExifStructure` keeps six more tags: NewSubfileType, ImageWidth, ImageLength and DefaultCropSize in IFD0; PixelXDimension/PixelYDimension in the EXIF IFD. The rule depends on the format label: a DNG uses IFD0's main image only (`DefaultCropSize` first); JPEG/HEIC combine IFD0 with the EXIF IFD. Sub-IFDs, the GPS IFD and pixel data are still never followed.
 > **S2.9 (2026-09-26, Stage 2, commit `bb28452`):** the HEIF/HEIC reader (ADR-017 §13; S2.R2 §7, approved by the owner). `HeifMetadataReader` walks the top-level ISO-BMFF boxes by header, reads `meta` once (≤ 64 KiB), parses `pitm`, `iinf`/`infe`, `iloc` (v0–2, construction methods 0 and 1) and `iref cdsc`, picks the Exif item linked to the primary item, honours `exif_tiff_header_offset`, and hands the TIFF structure to the shared `ExifStructure`. No image data is read. The owner's HEIC (a local check) gives every contract value with its offset, reading 4,051 bytes. Device check M3 passed on the owner's phone the same day.
 > **S2.V4 (2026-09-26, Stage 2, commit `d8e792c`), after the repeat independent validation:**
 >   - the HEIF `iloc` parser accepts at most `HeifMetadataReader.maxExtents` (16,384) extents over all items, and beyond that it is `corrupt` (TD-067). Extents with all-zero field sizes occupy no bytes, so the byte budget alone did not bound the work;

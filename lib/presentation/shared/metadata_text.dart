@@ -56,6 +56,11 @@ abstract final class MetadataText {
           '${QuantityText.number(v)} mm (field of view, not the focal length)',
     ),
     _row('Aperture', m.fNumber, (v) => 'f/${QuantityText.number(v)}'),
+    _row(
+      'Image size',
+      m.imageDimensions,
+      (v) => '${v.widthPx} × ${v.heightPx} px',
+    ),
     _row('Captured', m.captureTime, captureTime),
     _row('Camera make', m.cameraMake, (v) => v),
     _row('Camera model', m.cameraModel, (v) => v),

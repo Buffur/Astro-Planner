@@ -65,6 +65,7 @@ void main() {
           'uniqueCameraModel': m.uniqueCameraModel,
           'lensMake': m.lensMake,
           'lensModel': m.lensModel,
+          'imageDimensions': m.imageDimensions,
         };
         for (final MapEntry(:key, :value) in fields.entries) {
           if (!sample.containsKey(key)) continue;

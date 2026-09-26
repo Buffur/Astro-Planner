@@ -18,6 +18,7 @@ class CaptureMetadata {
     this.uniqueCameraModel = const AbsentValue(),
     this.lensMake = const AbsentValue(),
     this.lensModel = const AbsentValue(),
+    this.imageDimensions = const AbsentValue(),
   });
 
   final MetadataValue<double> exposureSeconds;
@@ -43,6 +44,12 @@ class CaptureMetadata {
   final MetadataValue<String> lensMake;
   final MetadataValue<String> lensModel;
 
+  /// The pixel dimensions of the captured image, as the file stores them
+  /// (ADR-018 §3, amending ADR-017 §2). Orientation is not interpreted:
+  /// a portrait capture may report width and height swapped, so equipment
+  /// uses [ImageDimensions.longSidePx] and [ImageDimensions.shortSidePx].
+  final MetadataValue<ImageDimensions> imageDimensions;
+
   /// Every field, in contract order.
   List<MetadataValue<Object>> get values => [
     exposureSeconds,
@@ -56,7 +63,31 @@ class CaptureMetadata {
     uniqueCameraModel,
     lensMake,
     lensModel,
+    imageDimensions,
   ];
+}
+
+/// An image's pixel dimensions, as stored in the file (ADR-018 §3).
+class ImageDimensions {
+  const ImageDimensions(this.widthPx, this.heightPx);
+
+  final int widthPx;
+  final int heightPx;
+
+  int get longSidePx => widthPx >= heightPx ? widthPx : heightPx;
+  int get shortSidePx => widthPx >= heightPx ? heightPx : widthPx;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ImageDimensions &&
+      other.widthPx == widthPx &&
+      other.heightPx == heightPx;
+
+  @override
+  int get hashCode => Object.hash(widthPx, heightPx);
+
+  @override
+  String toString() => '${widthPx}x$heightPx';
 }
 
 /// The result of reading one file (ADR-017 §5, §13). Two of the three levels

@@ -39,7 +39,25 @@ void main() {
   });
 
   test('every contract field has a row', () {
-    expect(MetadataText.rows(const CaptureMetadata()), hasLength(11));
+    // 12 since S3.1 added image dimensions (ADR-018 §3).
+    expect(
+      MetadataText.rows(const CaptureMetadata()),
+      hasLength(const CaptureMetadata().values.length),
+    );
+    expect(const CaptureMetadata().values, hasLength(12));
+  });
+
+  test('image size reads as stored, in pixels', () {
+    final row = MetadataText.rows(
+      const CaptureMetadata(
+        imageDimensions: KnownValue(
+          ImageDimensions(3072, 4096),
+          raw: '3072 x 4096',
+          origin: _o,
+        ),
+      ),
+    ).singleWhere((r) => r.label == 'Image size');
+    expect(row.value, '3072 × 4096 px');
   });
 
   test('sensitivity names its standard, or says it is not stated', () {

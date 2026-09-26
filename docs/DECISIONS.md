@@ -2836,7 +2836,7 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 
-**Amended by ADR-018 §3 (2026-09-26, S3.D):** the contract (§2) gains image width and height (px). Not yet implemented (S3.1).
+**Amended by ADR-018 §3 (2026-09-26, S3.D):** the contract (§2) gains image width and height (px). **Implemented 2026-09-26 (S3.1).**
 
 **Corrective implementation note (2026-09-26, S2.V4, after the repeat validation):** the HEIF
 `iloc` parser accepts at most 16,384 extents over all items (TD-067; an extent with all-zero
@@ -3076,7 +3076,7 @@ sample and tests. See E.1, "Stage 2 format priorities and metadata layering".
 Status: accepted (owner, 2026-09-26, S3.D). The owner chose the recommended option for each of
 D1–D4 in `refinement/research/RG-02_EQUIPMENT_IDENTITY.md` §12 (E.1, "Stage 3 decisions (S3.D)").
 It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment (§5). ADR-011 is
-unchanged. **Implementation:** none yet; the Tasks are S3.1–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
+unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); the rest follows in the Tasks S3.2–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
 
 ### 1. Context (verified at `0c4848b`; RG-02 §1–§5)

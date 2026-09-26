@@ -1,5 +1,8 @@
 # AstroPlan Feature Status
 
+> **Metadata update, 2026-09-26 (S3.1):** the contract gains image dimensions (ADR-018 §3); F-45
+> below. Still hidden.
+
 > **Metadata update, 2026-09-26 (S2.V4/S2.V5, commit `d8e792c`):** the HEIF reader's work is
 > bounded (TD-067); AVIF and HEIF image sequences are recognised only (the S2R-02 ruling); F-45's
 > current-state text is corrected (S2R-03). See `refinement/STAGE_2_CORRECTIONS.md`.
@@ -675,6 +678,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.1 (2026-09-26, Stage 3; ADR-018 §3):** the contract gains the image's pixel dimensions. DNG: IFD0 only, for the main image, `DefaultCropSize` first, else `ImageWidth`/`ImageLength`. JPEG/HEIC: `PixelXDimension`/`PixelYDimension` combined with IFD0 `ImageWidth`/`ImageLength`. Orientation is not interpreted. The hidden screen shows an "Image size" row. The owner's four samples give the expected sizes locally (the DNGs' crop sizes, 856 bytes read each). Still hidden; nothing is written to Equipment.
 - **S2.V4 (2026-09-26, commit `d8e792c`), after the repeat independent validation failed (`f137409`):** a crafted HEIF `iloc` can no longer exhaust memory or time (TD-067, at most 16,384 extents). AVIF and HEIF image sequences are recognised only, with their own names (the owner's S2R-02 ruling). The HEIF tests now cover the GPS read log and the S2V-01/S2V-02 cases. Still hidden.
 - **S2.9 (2026-09-26):** HEIC/HEIF is read (the container structure only, through the shared EXIF extractor), verified locally on the owner's phone HEIC. Supported formats: DNG, JPEG and HEIF. Still hidden. Device check M3 passed on the owner's phone the same day.
 - **Device check, 2026-09-26 (owner's Xiaomi 14T Pro, Android 16):** with a local, uncommitted gate flip in a separate debug package, the document picker read both DNGs and the JPEG in place with every expected value and nothing in the app's cache; HEIC said "not supported yet". M1 and M2 passed (`TEST_PLAN.md`). Found: TD-066 (sub-second exposures print as decimals).

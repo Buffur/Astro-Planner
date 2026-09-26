@@ -3,9 +3,8 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.D). The owner decided D1–D4, each the recommended option.
-> ADR-018 is accepted, and **Stage 3 is frozen**: S3.1–S3.8 (`POST_ROADMAP_PLAN.md`, "Stage 3 —
-> frozen Task sequence"). Next: **S3.1**.
+> **Last updated:** 2026-09-26 (S3.1). Stage 3 is in progress: S3.1 is done (image dimensions
+> in the metadata contract). Next: **S3.2** (the equipment candidate and CALC-40).
 
 ## Current state
 
@@ -15,9 +14,9 @@
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.1 — Image geometry in the metadata contract** (ADR-018 §3; frozen) |
-| Code baseline | S2.V4 (`d8e792c`). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.2 — Equipment evidence and candidate, with CALC-40** (ADR-018 §4; frozen) |
+| Code baseline | S3.1 (this commit; see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | v17 |
 
 ## Stage status
@@ -103,7 +102,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | Stage 3 second planning pass, including S3.R1 (RG-02) (documentation only) | 2026-09-26 | `4c46f8f` | From the owner's Stage 3 planning prompt. Verified the Stage 2 foundation at `0c4848b` (gate green; the local real samples pass; no stale claim, except this file's missing `0c4848b`). `research/RG-02_EQUIPMENT_IDENTITY.md`: field classification, derivability matrix, device classes, matching and conflict outcomes, provenance and confirmation, storage options, decisions D1–D4. A throwaway probe (deleted) found that the pixel dimensions are in all four samples (swapped in the portrait JPEG/HEIC) and that no focal-plane tags exist. Refined sequence S3.1–S3.9, provisional; recommended D1 = A1 (complete before saving, with an estimate offered) |
 
-| 3 | S3.D — owner decisions D1–D4; ADR-018; Stage 3 frozen (documentation only) | 2026-09-26 | The S3.D commit* | The owner chose the recommended option for each decision (asked in this session): **D1 = A1** (the import pre-fills the editor, a rig is saved only when complete, and the CALC-40 sensor/pixel estimate is offered as `estimated`); **D2**: RG-03 deferred (S3.R2 and S3.9 leave Stage 3); **D3**: visible at the end of Stage 3, as "Add from a photo" on the equipment screen (RD-16 resolved); **D4**: a DNG pick's file length as the estimated RAW size. ADR-018 accepted: it amends ADR-017 §2 with image dimensions and applies ADR-008 §6 per field to equipment (schema v18). DECISIONS E.1 "Stage 3 decisions (S3.D)". S3.1–S3.8 frozen |
+| 3 | S3.D — owner decisions D1–D4; ADR-018; Stage 3 frozen (documentation only) | 2026-09-26 | `792b295` | The owner chose the recommended option for each decision (asked in this session): **D1 = A1** (the import pre-fills the editor, a rig is saved only when complete, and the CALC-40 sensor/pixel estimate is offered as `estimated`); **D2**: RG-03 deferred (S3.R2 and S3.9 leave Stage 3); **D3**: visible at the end of Stage 3, as "Add from a photo" on the equipment screen (RD-16 resolved); **D4**: a DNG pick's file length as the estimated RAW size. ADR-018 accepted: it amends ADR-017 §2 with image dimensions and applies ADR-008 §6 per field to equipment (schema v18). DECISIONS E.1 "Stage 3 decisions (S3.D)". S3.1–S3.8 frozen |
+
+| 3 | S3.1 — Image geometry in the metadata contract (ADR-018 §3) | 2026-09-26 | The S3.1 commit* | `CaptureMetadata.imageDimensions` (`ImageDimensions`, with long/short sides; orientation not interpreted). `ExifStructure` reads it: DNG from IFD0's main image only (`NewSubfileType` 0 or absent; `DefaultCropSize` when whole, else `ImageWidth`/`ImageLength`; sub-IFDs never followed); JPEG/HEIC from `PixelX/YDimension` combined with IFD0 (disagreement ambiguous). The hidden screen gains an "Image size" row. 14 new tests (`image_dimensions_test.dart`: the DNG rules, crop types, fallbacks, malformed values, a preview IFD0, the JPEG/HEIC rules, wrong-IFD tags, and GPS never read; `metadata_text_test.dart`: the row, and the row count now follows the contract, 11 → 12). **Local real samples:** the DNG crop sizes (checked against an independent Python walk, deleted), and the JPEG/HEIC portrait sizes, were added to `expected.json` outside Git and pass. Each DNG reads 856 bytes (+8). CALC-39, F-45, ARCHITECTURE B, ADR-017/018 status updated. Gate green, 1082 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -354,12 +355,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.1 — Image geometry in the metadata contract** (ADR-018 §3; frozen in `POST_ROADMAP_PLAN.md`,
-"Stage 3 — frozen Task sequence").
-- It adds image width and height (px) to `CaptureMetadata`:
-  - DNG: IFD0, main image only, with `DefaultCropSize` first;
-  - JPEG/HEIC: `PixelXDimension`/`PixelYDimension` combined with IFD0 `ImageWidth`/`ImageLength`.
-- It uses synthetic fixtures, and extends the local `expected.json` (outside Git).
+**S3.2 — Equipment evidence and candidate, with CALC-40** (ADR-018 §4; frozen in
+`POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence").
+- Pure domain: a `MetadataRead` becomes an `EquipmentCandidate`, with a value, source,
+  confidence and origin per field, or unknown with a reason.
+- CALC-40 (the sensor size and effective pixel pitch from f₃₅, f and the long/short sides) is
+  `estimated`, and registered in `SCIENTIFIC_INTEGRITY.md`.
+- D, rotation, tracking and maximum exposure are never proposed.
 - One commit, then STOP.
 
 Useful inputs:
