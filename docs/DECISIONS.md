@@ -2715,7 +2715,7 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
     fixtures and the local real-sample test (commit `59c9f03`);
   - §6 (S2.4, 2026-09-26, commit `26aff9a`): implemented and host-tested, and the Kotlin compiles. **Not accepted until
     device check M1 (`TEST_PLAN.md`) passes;**
-  - §7 and §10 (S2.5, 2026-09-26): `exif` and `image_picker` removed after a `grep`; the hidden screen reads the
+  - §7 and §10 (S2.5, 2026-09-26, commit `a2f42a5`): `exif` and `image_picker` removed after a `grep`; the hidden screen reads the
     contract; `FeatureScope.metadataImport` stays false.
 - **Open:** FITS (S2.6, needs a sample); device checks M1 and M2.
 
