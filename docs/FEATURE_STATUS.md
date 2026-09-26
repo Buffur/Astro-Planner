@@ -686,6 +686,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.8 (2026-09-26, Stage 3; ADR-018 §4, D4; C-13):** a DNG's file size is offered as the rig's average RAW size, as an estimate from one file ("Estimated from this one file's size (DNG)"). It is never taken from a JPEG or HEIC. A rig without a RAW size gets it pre-filled when opened from the review; a saved RAW size is kept unless its switch is turned on. Still debug-only until S3.7.
 - **S3.6 (2026-09-26, Stage 3; ADR-018 §2, §6):** the review and confirmation flow on the metadata screen. After a file is read, an Equipment card shows how it matches the saved rigs, in plain words with the reasons:
   - "You already have this rig", "probably your rig", "Same camera … other optics", "another field of view or pixel count", "Several saved rigs match", or "No saved rig has this camera";
   - differing values with both sources, each with a "Use the file's …" switch that is off by default;

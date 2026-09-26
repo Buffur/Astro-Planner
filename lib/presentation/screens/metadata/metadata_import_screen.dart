@@ -187,6 +187,14 @@ class _EquipmentCard extends StatelessWidget {
                   EquipmentImportText.reasons(r.reasons),
                   style: theme.textTheme.bodySmall,
                 ),
+                for (final spec in r.fillable)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      EquipmentImportText.fillable(spec, candidate),
+                      key: Key('import.fill.${r.rig.id}.${spec.name}'),
+                    ),
+                  ),
                 for (final c in r.conflicts)
                   SwitchListTile(
                     key: Key('import.take.${r.rig.id}.${c.spec.name}'),

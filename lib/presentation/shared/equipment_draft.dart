@@ -438,6 +438,9 @@ abstract final class PrefillText {
     if (source.startsWith('derived:calc-40')) {
       return 'Estimated from the 35 mm equivalent — check it';
     }
+    if (source == EquipmentCandidate.rawFileSizeSource) {
+      return "Estimated from this one file's size (DNG)";
+    }
     final format = source.startsWith('metadata:')
         ? source.substring('metadata:'.length).split(':').first.toUpperCase()
         : source;

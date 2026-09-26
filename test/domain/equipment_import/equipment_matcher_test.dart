@@ -288,4 +288,55 @@ void main() {
     expect(ratio.savedProvenance?.confidence, SpecConfidence.estimated);
     expect(m.rigs.single.fillable, isEmpty, reason: 'no RAW size proposed');
   });
+
+  group('S3.8: the RAW size of a DNG', () {
+    EquipmentCandidate dng() => EquipmentCandidate.fromReading(
+      MetadataRead(
+        MetadataFormat.dng,
+        CaptureMetadata(
+          cameraMake: _k('TestMake', 'Make'),
+          cameraModel: _k('TestMake TestPhone', 'Model'),
+          focalLengthMm: _k(6.57, 'FocalLength'),
+          fNumber: _k(1.6, 'FNumber'),
+          focalLength35mmEquivalentMm: _k(23.0, 'FocalLengthIn35mmFilm'),
+          imageDimensions: _k(const ImageDimensions(4096, 3072), 'dims'),
+        ),
+      ),
+      fileLengthBytes: 25074220,
+    );
+
+    test('a rig without a RAW size can be filled from the file', () {
+      final r = EquipmentMatcher.match(dng(), [_rig()]).rigs.single;
+      expect(r.fillable, [EquipmentSpec.rawFileSize]);
+      expect(
+        r.conflicts.map((c) => c.spec),
+        isNot(contains(EquipmentSpec.rawFileSize)),
+      );
+    });
+
+    test('a saved RAW size is never filled over; a difference is a conflict, '
+        'kept by default', () {
+      final saved = EquipmentProfile(
+        id: 1,
+        name: 'Phone main',
+        sensorWidthMm: 9.89,
+        sensorHeightMm: 7.42,
+        pixelPitchUm: 2.41,
+        resolutionWidthPx: 4096,
+        resolutionHeightPx: 3072,
+        focalLengthMm: 6.57,
+        focalRatio: 1.6,
+        averageRawFileSizeMB: 30,
+        metadataMake: 'TestMake',
+        metadataModel: 'TestMake TestPhone',
+      );
+      final r = EquipmentMatcher.match(dng(), [saved]).rigs.single;
+      expect(r.fillable, isEmpty);
+      final raw = r.conflicts.singleWhere(
+        (c) => c.spec == EquipmentSpec.rawFileSize,
+      );
+      expect(raw.saved, 30);
+      expect(raw.importedProvenance.source, 'metadata:dng:file-size');
+    });
+  });
 }

@@ -250,4 +250,97 @@ void main() {
     expect(_headline(tester), startsWith('This file names no camera'));
     expect(find.byKey(const Key('import.new')), findsNothing);
   });
+
+  group('S3.8: the RAW size of a DNG (ADR-018 §4, D4)', () {
+    // The phone-style DNG fixture: f 8.8, f/2, f35 60, 4000 x 3000, and a
+    // model with a code suffix. 25 MiB long.
+    Uint8List dng() =>
+        (TiffFixture()..ifd0.addAll(phoneStyleDngIfd0())).build().bytes;
+    EquipmentProfile tele({double? raw}) => EquipmentProfile(
+      id: 1,
+      name: 'Phone tele',
+      sensorWidthMm: 5.08,
+      sensorHeightMm: 3.81,
+      pixelPitchUm: 1.27,
+      resolutionWidthPx: 4000,
+      resolutionHeightPx: 3000,
+      focalLengthMm: 8.8,
+      focalRatio: 2,
+      averageRawFileSizeMB: raw,
+      metadataMake: 'TestMake',
+      metadataModel: 'TestMake TestPhone/TEST0001',
+    );
+
+    Future<_Screen> showDng(WidgetTester tester, EquipmentProfile rig) async {
+      final repo = InMemoryEquipmentRepository([rig]);
+      final files = FakeCaptureFileAccess()
+        ..file('IMG.dng', dng(), length: 25 << 20);
+      final planner = _Planner();
+      tester.view.physicalSize = const Size(800, 4000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => GearViewModel(repo)),
+            ChangeNotifierProvider<SessionPlanViewModel>.value(value: planner),
+            ChangeNotifierProvider<MetadataImportViewModel?>(
+              create: (_) => MetadataImportViewModel(files, repo),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const MetadataImportScreen(),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('metadata.pick')));
+      await tester.pumpAndSettle();
+      return _Screen(repo, files, planner);
+    }
+
+    testWidgets('an unknown RAW size is offered, and saved as an estimate '
+        'from one file only through Save', (tester) async {
+      final s = await showDng(tester, tele());
+      expect(_headline(tester), startsWith('You already have this rig'));
+      expect(
+        find.byKey(const Key('import.fill.1.rawFileSize')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('26.214 MB'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('import.open.1')));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, '26.2'), findsOneWidget);
+      await _save(tester, edit: true);
+
+      final saved = s.repo.updated.single;
+      expect(saved.averageRawFileSizeMB, 26.2);
+      expect(
+        saved.provenanceOf(EquipmentSpec.rawFileSize),
+        const SpecProvenance(
+          'metadata:dng:file-size',
+          SpecConfidence.estimated,
+        ),
+      );
+    });
+
+    testWidgets('a saved RAW size is kept unless its switch is turned on', (
+      tester,
+    ) async {
+      final s = await showDng(tester, tele(raw: 30));
+      expect(find.byKey(const Key('import.fill.1.rawFileSize')), findsNothing);
+      final take = find.byKey(const Key('import.take.1.rawFileSize'));
+      expect(tester.widget<SwitchListTile>(take).value, isFalse);
+      await tester.tap(find.byKey(const Key('import.open.1')));
+      await tester.pumpAndSettle();
+      await _save(tester, edit: true);
+      expect(s.repo.updated.single.averageRawFileSizeMB, 30);
+    });
+
+    testWidgets('a JPEG never offers a RAW size', (tester) async {
+      await _show(tester, rigs: [_savedPhone()]);
+      expect(find.byKey(const Key('import.fill.1.rawFileSize')), findsNothing);
+      expect(find.byKey(const Key('import.take.1.rawFileSize')), findsNothing);
+    });
+  });
 }

@@ -9,6 +9,9 @@ import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/domain/models/spec_provenance.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/presentation/shared/equipment_draft.dart';
+import 'package:astroplan/domain/equipment_import/equipment_candidate.dart';
+import 'package:astroplan/domain/metadata/capture_metadata.dart';
+import 'package:astroplan/domain/metadata/metadata_format.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/metadata_candidates.dart';
@@ -183,5 +186,20 @@ void main() {
     final result = d.build(bad, TrackingType.unknown);
     expect(result.profile, isNull);
     expect(result.apertureProblem, ApertureProblem.diameterOutOfRange);
+  });
+
+  test('S3.8: a DNG pre-fills the RAW size, noted as one file', () {
+    final c = EquipmentCandidate.fromReading(
+      MetadataRead(MetadataFormat.dng, const CaptureMetadata()),
+      fileLengthBytes: 25074220,
+    );
+    final d = EquipmentDraft.fromCandidate(c);
+    expect(d.initial.rawFileSize, '25.1');
+    expect(
+      PrefillText.note(d.prefilled[EquipmentSpec.rawFileSize]!),
+      'Estimated from this one file'
+      "'"
+      's size (DNG)',
+    );
   });
 }

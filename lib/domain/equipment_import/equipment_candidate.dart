@@ -121,8 +121,14 @@ class EquipmentCandidate {
   final CandidateField<double> sensorHeightMm;
   final CandidateField<double> pixelPitchUm;
 
-  /// Not proposed yet (S3.8 proposes it from a DNG's file length).
+  /// A DNG's file length as the average RAW size, MB (10⁶ bytes), only
+  /// ever `estimated` (one file is one sample; compression varies), source
+  /// `metadata:dng:file-size` (ADR-018 §4, D4). A JPEG or HEIC size is not a
+  /// RAW size, so it is never proposed from them.
   final CandidateField<double> averageRawFileSizeMB;
+
+  /// The source id of [averageRawFileSizeMB].
+  static const rawFileSizeSource = 'metadata:dng:file-size';
 
   /// The raw metadata behind the candidate, for matching (S3.3).
   final EquipmentEvidence evidence;
@@ -145,8 +151,12 @@ class EquipmentCandidate {
 
   /// Builds the candidate from a reading (ADR-018 §4). Exposure,
   /// sensitivity and capture time are ignored: they describe one frame,
-  /// not the equipment.
-  factory EquipmentCandidate.fromReading(MetadataRead reading) {
+  /// not the equipment. [fileLengthBytes], the picked file's length, gives
+  /// the average RAW size for a DNG (S3.8).
+  factory EquipmentCandidate.fromReading(
+    MetadataRead reading, {
+    int? fileLengthBytes,
+  }) {
     final m = reading.metadata;
     final source = 'metadata:${reading.format.name}';
 
@@ -212,7 +222,7 @@ class EquipmentCandidate {
       sensorWidthMm: estimate.width,
       sensorHeightMm: estimate.height,
       pixelPitchUm: estimate.pitch,
-      averageRawFileSizeMB: const UnknownField(CandidateGap.notInFile),
+      averageRawFileSizeMB: _rawFileSize(reading.format, fileLengthBytes),
       evidence: EquipmentEvidence(
         cameraMake: m.cameraMake.valueOrNull,
         cameraModel: m.cameraModel.valueOrNull,
@@ -222,6 +232,27 @@ class EquipmentCandidate {
         focalLength35mmEquivalentMm: m.focalLength35mmEquivalentMm.valueOrNull,
         imageDimensions: m.imageDimensions.valueOrNull,
       ),
+    );
+  }
+
+  static CandidateField<double> _rawFileSize(
+    MetadataFormat format,
+    int? lengthBytes,
+  ) {
+    if (format != MetadataFormat.dng || lengthBytes == null) {
+      return const UnknownField(CandidateGap.notInFile);
+    }
+    final mb = lengthBytes / 1e6;
+    if (!EquipmentLimits.rawFileSizeMB.contains(mb)) {
+      return const UnknownField(CandidateGap.outOfRange);
+    }
+    return ProposedField(
+      mb,
+      source: rawFileSizeSource,
+      confidence: SpecConfidence.estimated,
+      origins: const [
+        MetadataOrigin(format: MetadataFormat.dng, field: 'File size'),
+      ],
     );
   }
 

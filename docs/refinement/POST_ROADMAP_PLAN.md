@@ -1368,8 +1368,8 @@ One Task per commit, then STOP (§9.4). Never start the next Task automatically.
 | S3.4 | Per-field provenance and identity evidence, schema v18 (ADR-018 §5) | M | S3.D | **Done 2026-09-26** |
 | S3.5 | A form model for the rig editor, and pre-fill | M | S3.4 | **Done 2026-09-26** |
 | S3.6 | The import review and confirmation flow | M | S3.3, S3.5 | **Done 2026-09-26** |
-| S3.7 | Visibility (ADR-018 §7), TD-066, the device check M4 | S | S3.6 | Frozen |
-| S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | **Frozen; next** |
+| S3.7 | Visibility (ADR-018 §7), TD-066, the device check M4 | S | S3.6 | **Frozen; next** (TD-066 already resolved, `7560df2`) |
+| S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | **Done 2026-09-26** |
 
 Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7. S3.7 goes last because it makes
 the flow visible. Then Stage 3 validation in a fresh session.

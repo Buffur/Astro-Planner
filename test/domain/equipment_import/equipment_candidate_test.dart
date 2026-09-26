@@ -310,4 +310,46 @@ void main() {
       );
     });
   });
+
+  group('S3.8: the average RAW size from a DNG pick (ADR-018 §4, D4)', () {
+    EquipmentCandidate withLength(MetadataFormat f, int? bytes) =>
+        EquipmentCandidate.fromReading(
+          MetadataRead(f, _phone(f: f)),
+          fileLengthBytes: bytes,
+        );
+
+    test('the length of a DNG is the RAW size, estimated, from one file', () {
+      final raw =
+          withLength(MetadataFormat.dng, 25074220).averageRawFileSizeMB
+              as ProposedField<double>;
+      expect(raw.value, closeTo(25.07422, 1e-9));
+      expect(raw.source, 'metadata:dng:file-size');
+      expect(raw.confidence, SpecConfidence.estimated);
+    });
+
+    test('never from a JPEG or HEIC, or without a length', () {
+      for (final f in [MetadataFormat.jpeg, MetadataFormat.heif]) {
+        final c = withLength(f, 4713300);
+        expect(
+          (c.averageRawFileSizeMB as UnknownField).gap,
+          CandidateGap.notInFile,
+        );
+      }
+      expect(
+        withLength(MetadataFormat.dng, null).averageRawFileSizeMB,
+        isA<UnknownField<double>>(),
+      );
+    });
+
+    test('an implausible size is unknown, out of range', () {
+      for (final bytes in [50000, 2000000000]) {
+        expect(
+          (withLength(MetadataFormat.dng, bytes).averageRawFileSizeMB
+                  as UnknownField)
+              .gap,
+          CandidateGap.outOfRange,
+        );
+      }
+    });
+  });
 }

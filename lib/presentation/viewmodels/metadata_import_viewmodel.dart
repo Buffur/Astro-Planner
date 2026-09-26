@@ -55,9 +55,13 @@ class MetadataImportViewModel extends ChangeNotifier {
       final file = await _files.pick();
       if (file == null) return;
       _fileName = file.name;
-      _reading = await _readFile(file);
-      _candidate = switch (_reading) {
-        final MetadataRead read => EquipmentCandidate.fromReading(read),
+      final (reading, length) = await _readFile(file);
+      _reading = reading;
+      _candidate = switch (reading) {
+        final MetadataRead read => EquipmentCandidate.fromReading(
+          read,
+          fileLengthBytes: length,
+        ),
         _ => null,
       };
       _match = null;
@@ -97,22 +101,37 @@ class MetadataImportViewModel extends ChangeNotifier {
   EquipmentDraft newRigDraft({EquipmentProfile? cameraFrom}) =>
       EquipmentDraft.fromCandidate(_candidate!, cameraFrom: cameraFrom);
 
-  /// The matched rig for editing, with the file's values the user chose.
+  /// The matched rig for editing, with the file's values the user chose,
+  /// and the file's value for any spec the rig does not know (the RAW size,
+  /// ADR-018 §6): shown with its origin, never replacing a saved value.
   EquipmentDraft rigDraft(RigMatch m) => EquipmentDraft.forRig(m.rig, {
     for (final c in m.conflicts)
       if (takesImported(m.rig, c.spec))
         c.spec: (value: c.imported, provenance: c.importedProvenance),
+    for (final spec in m.fillable) spec: ?_fillValue(spec),
   });
 
-  static Future<MetadataReading> _readFile(CaptureFile file) async {
+  ({Object value, SpecProvenance provenance})? _fillValue(EquipmentSpec s) =>
+      switch ((s, _candidate?.averageRawFileSizeMB)) {
+        (
+          EquipmentSpec.rawFileSize,
+          ProposedField(:final value, :final source, :final confidence),
+        ) =>
+          (value: value, provenance: SpecProvenance(source, confidence)),
+        _ => null,
+      };
+
+  /// The reading and the file's length (S3.8: a DNG's length is its RAW
+  /// size; the file itself is never read whole).
+  static Future<(MetadataReading, int?)> _readFile(CaptureFile file) async {
     final MetadataSource source;
     try {
       source = await file.open();
     } on MetadataReadException catch (e) {
-      return MetadataUnreadable.fromReadFailure(e);
+      return (MetadataUnreadable.fromReadFailure(e), null);
     }
     try {
-      return await CaptureMetadataReader.read(source);
+      return (await CaptureMetadataReader.read(source), source.length);
     } finally {
       await source.close();
     }

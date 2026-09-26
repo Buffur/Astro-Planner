@@ -94,10 +94,26 @@ abstract final class EquipmentImportText {
     if (source.startsWith('derived:calc-40')) {
       return 'estimated from the 35 mm equivalent';
     }
+    if (source == EquipmentCandidate.rawFileSizeSource) {
+      return "estimated from this one file's size";
+    }
     if (source.startsWith('metadata:')) {
       return 'from the file, $confidence';
     }
     return '$confidence ($source)';
+  }
+
+  /// What the file can fill on a rig that lacks it (ADR-018 §6).
+  static String fillable(EquipmentSpec s, EquipmentCandidate c) {
+    final v = switch (s) {
+      EquipmentSpec.rawFileSize => c.averageRawFileSizeMB.valueOrNull,
+      _ => null,
+    };
+    return v == null
+        ? ''
+        : '${spec(s)} is unknown on this rig; the file suggests '
+              '${value(s, v)} (estimated from one file). Open the rig to '
+              'add it.';
   }
 
   /// One conflict's line: both values and their sources.
