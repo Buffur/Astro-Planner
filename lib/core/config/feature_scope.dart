@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// The single source every entry point (buttons, cards, routes) reads to
 /// decide whether a feature built ahead of its approved roadmap phase is
 /// visible (TASK 4.3, TD-014; policy decided in `docs/DECISIONS.md` PD-06
@@ -14,10 +16,9 @@ class FeatureScope {
   /// and the external map at the site's coordinates. No scraping.
   static bool get lightPollutionContext => true;
 
-  /// Hidden during Stage 2 (RD-16, DECISIONS E.1 "Stage 2 decisions"):
-  /// the screen reads the metadata contract (ADR-017) but Stage 3 decides
-  /// when anything becomes visible. Earlier: hidden until G17 (PD-06 E.1).
-  static bool get metadataImport => false;
+  /// Owner-enabled debug viewer while Stage 3 is developed. Public import
+  /// visibility remains S3.7 (ADR-018 §7): Add from a photo in Equipment.
+  static bool get metadataImport => kDebugMode;
 
   /// Stays visible — on the core path (PD-06 E.1). Text sharing stays
   /// visible for the same reason; it has no gate of its own because it

@@ -678,6 +678,12 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+
+- **Current visibility, owner amendment 2026-09-26:** the read-only viewer is
+  now available at Settings → Import metadata in debug builds. Profile/release
+  remain gated. The public Equipment action "Add from a photo" is S3.7, after
+  review/confirmation; this development access does not implement that flow.
+  Earlier "hidden" entries below describe their historical checkpoints.
 - **S3.1 (2026-09-26, Stage 3; ADR-018 §3):** the contract gains the image's pixel dimensions. DNG: IFD0 only, for the main image, `DefaultCropSize` first, else `ImageWidth`/`ImageLength`. JPEG/HEIC: `PixelXDimension`/`PixelYDimension` combined with IFD0 `ImageWidth`/`ImageLength`. Orientation is not interpreted. The hidden screen shows an "Image size" row. The owner's four samples give the expected sizes locally (the DNGs' crop sizes, 856 bytes read each). Still hidden; nothing is written to Equipment.
 - **S2.V4 (2026-09-26, commit `d8e792c`), after the repeat independent validation failed (`f137409`):** a crafted HEIF `iloc` can no longer exhaust memory or time (TD-067, at most 16,384 extents). AVIF and HEIF image sequences are recognised only, with their own names (the owner's S2R-02 ruling). The HEIF tests now cover the GPS read log and the S2V-01/S2V-02 cases. Still hidden.
 - **S2.9 (2026-09-26):** HEIC/HEIF is read (the container structure only, through the shared EXIF extractor), verified locally on the owner's phone HEIC. Supported formats: DNG, JPEG and HEIF. Still hidden. Device check M3 passed on the owner's phone the same day.

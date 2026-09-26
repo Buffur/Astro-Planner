@@ -225,8 +225,8 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('Attributions, licences and privacy'),
             onTap: () => context.push(AppRouter.about),
           ),
-          // TASK 12.2 (ADR-015): metadata import lives under Settings; still
-          // gated until G17 (FeatureScope, PD-06).
+          // Owner-enabled debug viewer; S3.7 replaces this with the public
+          // Equipment import entry (ADR-018 §7).
           if (FeatureScope.metadataImport)
             ListTile(
               contentPadding: EdgeInsets.zero,

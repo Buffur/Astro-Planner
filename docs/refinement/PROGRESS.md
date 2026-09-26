@@ -8,6 +8,16 @@
 
 ## Current state
 
+**Debug access amendment, 2026-09-26 (owner):** Settings → Import metadata is
+enabled in debug builds for Stage 3 development (`FeatureScope.metadataImport`
+uses `kDebugMode`). Profile/release visibility and the planned Equipment
+"Add from a photo" workflow still wait for S3.7 (ADR-018 §7). This does not
+change the Stage 3 Task order or mark any import/persistence Task complete.
+Verification: `dart run tool/check.dart` passes after updating the existing
+visibility assertions: encoding, format, analysis, 1082 tests (1 expected
+local-sample skip) and 2 host E2E tests. Hot restart/relaunch is required for
+an already-running debug app to register the route.
+
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |

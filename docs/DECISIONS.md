@@ -3195,6 +3195,13 @@ MetadataRead → EquipmentEvidence → EquipmentCandidate → Match → Review �
 
 ### 7. Decision: visibility (D3, RD-16) and privacy
 
+**Owner amendment, 2026-09-26:** enable the existing read-only Settings →
+Import metadata viewer in debug builds now, to inspect Stage 2 output during
+Stage 3 development. `FeatureScope.metadataImport = kDebugMode` gates both
+the entry and route. Profile/release builds remain hidden. This does not
+complete S3.7 or enable Equipment persistence; the public workflow below
+still arrives in S3.7. A hot restart/relaunch is needed to rebuild the router.
+
 - **Visible at the end of Stage 3** (S3.7), once the review and confirmation flow exists and
   TD-066 is fixed, as **"Add from a photo"** next to "Add" on the equipment screen (the one
   screen used by the planner and the Library). The Settings entry to the read-only viewer is

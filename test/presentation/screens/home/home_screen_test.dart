@@ -516,12 +516,11 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    // Metadata import is hidden per PD-06 (FeatureScope.metadataImport
-    // false) — no icon, tooltip or route. Field mode is visible since
-    // TASK 12.4: one tap from the planner's app bar.
+    // The debug metadata viewer lives in Settings, not the planner toolbar.
+    // Field mode remains one tap from the planner's app bar.
     expect(find.byKey(const Key('fieldMode.toggle')), findsOneWidget);
     expect(find.byTooltip('Import Metadata'), findsNothing);
-    expect(allRoutePaths(), isNot(contains(AppRouter.metadata)));
+    expect(allRoutePaths(), contains(AppRouter.metadata));
 
     // Scroll through the whole body to check the light-pollution map card.
     final listFinder = find.byType(Scrollable).first;

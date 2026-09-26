@@ -1,8 +1,8 @@
 // Roadmap TASK 4.3, TD-014: a gated feature has no entry point — checked
 // here at the route level (home_screen_test.dart checks the button/card
 // level). AppRouter.router only ever registers the metadata route when
-// FeatureScope.metadataImport is true, so with it false (PD-06 E.1) the
-// route must not exist at all, not just be unreachable from the UI.
+// FeatureScope.metadataImport is true. The owner enabled the debug viewer
+// while the public Equipment import continues to wait for S3.7.
 // TASK 12.2 (ADR-015): routes are nested in the navigation shell, so the
 // full paths are collected (support/route_paths.dart); metadata import is
 // /settings/metadata and the logbook is the Sessions tab, /sessions.
@@ -14,10 +14,10 @@ import 'package:astroplan/presentation/navigation/app_router.dart';
 import '../../support/route_paths.dart';
 
 void main() {
-  test('the metadata route does not exist while it is gated', () {
-    expect(FeatureScope.metadataImport, isFalse);
+  test('the debug metadata viewer route exists under Settings', () {
+    expect(FeatureScope.metadataImport, isTrue);
 
-    expect(allRoutePaths(), isNot(contains(AppRouter.metadata)));
+    expect(allRoutePaths(), contains(AppRouter.metadata));
     expect(allRoutePaths(), isNot(contains('/metadata')));
   });
 
