@@ -2767,7 +2767,7 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
   - §13.2 and §13.3 (S2.7, 2026-09-26, commit `9a0432b`): layered readings, `MetadataFormatReader` dispatch, the shared
     `ExifStructure` with `MetadataSourceWindow`, and the recognition-only formats.
   - JPEG (S2.8, 2026-09-26, commit `360fd8f`): `jpeg_metadata_reader.dart`, verified on the owner's phone JPEG.
-  - HEIF (S2.9, 2026-09-26; approved by the owner): `heif_metadata_reader.dart`, as S2.R2 §7 recommends, verified locally on the
+  - HEIF (S2.9, 2026-09-26, commit `bb28452`; approved by the owner): `heif_metadata_reader.dart`, as S2.R2 §7 recommends, verified locally on the
     owner's HEIC.
 - **Open:** RG-14 (S2.R3); device check M3 (HEIC on the phone). FITS and PNG are out of Stage 2 (owner).
 
