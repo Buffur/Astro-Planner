@@ -3,19 +3,19 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. The owner closed Stage 1 after the repeat independent
-> validation did not pass (a waiver, DECISIONS E.1); Stage 2 is planned, and its research
-> Task S2.R1 (RG-01) is next.
+> **Last updated:** 2026-09-26. S2.R1 (the RG-01 research) is done, using the owner's two
+> phone DNGs. Stage 2 now waits for five owner decisions and a FITS sample
+> (`research/RG-01_METADATA_FORMATS.md` §9).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 2 — Metadata Foundation: Planning.** Only S2.R1 is frozen; S2.1–S2.6 stay provisional until RG-01 is decided (`POST_ROADMAP_PLAN.md`, "Stage 2 — Task sequence") |
+| Current Stage | **Stage 2 — Metadata Foundation: In progress.** S2.R1 is done. S2.1–S2.6 stay provisional until the owner decides (`POST_ROADMAP_PLAN.md`, "Stage 2 — Task sequence") |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S2.R1 — RG-01: formats, libraries, file selection, fixtures** (research, documentation only; resolves PD-21). It ends at the owner decisions on PD-21/ADR-017, the fixture policy and RD-16 |
+| Next approved Task | None. **Waiting for the owner:** the five questions in `research/RG-01_METADATA_FORMATS.md` §9 (the files the owner uses and their samples; PD-21; ADR-017; the fixture policy; RD-16). Then S2.1–S2.6 are frozen |
 | Code baseline | `ea65231` (S1.V4). Later commits change documentation and evidence only. Not pushed (S1.14) |
 | Quality gate at the baseline | **Green**, re-run independently on 2026-09-26 at `c99bd7f`: Encoding, Format and Analyze pass; 963 tests and 2 host E2E tests pass |
 | Schema | v17 |
@@ -68,7 +68,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.V4 — Reopening the current session keeps its live plan (TD-062) | 2026-09-25 | `ea65231` | `openSession` returns early for the current, editable session. The validation's probe as a UI test through the detail page, a Save and a restart (20 instead of 7 frames before the fix). A first version also skipped frozen sessions; two existing tests caught it and the guard was narrowed to editable sessions. Gate green, 963 + 2 E2E |
 | 1 | Fast re-validation after S1.V1–S1.V4 (same session, owner's request; **not independent**) | 2026-09-26 | `c99bd7f` | At `ea65231`: gate green (963 + 2 E2E), clean tree. Throwaway probes: the reset as `main.dart` runs it with a leftover marker → 164 targets, 1 rig, `.bak` kept; edit → New → restart and edit → Start → restart leave nothing unsaved and the run untouched. One low finding **W1**: a Duplicate of an edited plan counts as saved in-session but unsaved after a restart, so New right after Duplicate replaces the copy without asking (the saved original remains; only the copy's night is lost). Proposed: record under RD-05, like V3. Stage 1 still needs an **independent** validation to close |
 | 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | `39392d9` | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
-| 1–2 | Stage 1 closed by the owner, and Stage 2 planning (documentation only) | 2026-09-26 | The planning commit* | The owner said "lets go to stage 2" after the re-validation failed. Recorded as a waiver (DECISIONS E.1): TD-063 moved to Stage 8, X2 and W1 carried. Stage 2: TD-018's mechanisms were re-verified at `39392d9` (all still present); six planning-time findings were placed; S2.R1 is frozen and S2.1–S2.6 are provisional (`POST_ROADMAP_PLAN.md`) |
+| 1–2 | Stage 1 closed by the owner, and Stage 2 planning (documentation only) | 2026-09-26 | `565341b` | The owner said "lets go to stage 2" after the re-validation failed. Recorded as a waiver (DECISIONS E.1): TD-063 moved to Stage 8, X2 and W1 carried. Stage 2: TD-018's mechanisms were re-verified at `39392d9` (all still present); six planning-time findings were placed; S2.R1 is frozen and S2.1–S2.6 are provisional (`POST_ROADMAP_PLAN.md`) |
+| 2 | S2.R1 — RG-01: formats, libraries, file selection, fixtures (research, documentation only) | 2026-09-26 | The S2.R1 commit* | The owner's two phone DNGs (Xiaomi, DNG 1.4, 25 MB each; kept outside the repository) were inspected. All their metadata sits in IFD0 within the first 6.7 KB. They have no GPS and no time offset, and the same Model for both cameras (input for RG-02). The prototype finds 0 of 5 capture fields in them (TD-064). Sources read: `exif` 3.3.0 (MIT; TIFF, JPEG and HEIC; no byte-budget API); `file_picker` 13.1.0 / `android_file_picker` 2.0.0 (copies every file whole into the cache; the extension filter drops unknown MIME types; TD-065); the FITS 4.0 standard (`CONTINUE` is standard, `''` escapes, `DATE-OBS` is UTC at the start); XISF 1.0 (focal length in metres, gain in e⁻/DN); N.I.N.A.'s documented keywords (FOCALLEN is user-entered). Recommended: DNG/TIFF now, FITS on a sample, in-house bounded readers, the `exif` and `image_picker` dependencies removed, no GPS or serials, header-only fixtures with consent, the feature hidden until Stage 3. Proposed ADR-017 |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -108,7 +109,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
-| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | Open; **S2.R1 is next**. Real samples are still missing |
+| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Researched** 2026-09-26 (S2.R1, `research/RG-01_METADATA_FORMATS.md`). The owner decision is pending, and a FITS sample is still missing |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
@@ -143,7 +144,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
-| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open; asked at the end of S2.R1 |
+| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open; asked in S2.R1 §9. Recommended: hidden until Stage 3 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
@@ -168,7 +169,8 @@ These block a release, not refinement.
   S1.5 is broken and S1.6 partial, and the S1.V stamps cite no commit. It is a proposed
   S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
   F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
-- **Stage 2:** RG-01 (S2.R1) and owner-supplied real metadata samples. Keep the samples
+- **Stage 2:** the owner's answers to S2.R1 §9, and a real FITS sample (and XISF, if used)
+  before S2.3 and S2.5. The phone DNG samples exist outside the repository. Keep the samples
   outside the repository until S2.R1 sets the fixture policy: the remote is public, and headers
   can hold GPS, serial numbers and names. Implementation Tasks S2.1–S2.6 cannot start before
   the RG-01 decision.
@@ -202,6 +204,9 @@ These block a release, not refinement.
   changed, so the Stage 0 gate result still applies.
 - **Stage 1 closure**, 2026-09-26: by owner decision after a failed validation (a waiver,
   not a pass; DECISIONS E.1).
+- **S2.R1**, 2026-09-26: research only. Throwaway probes (scratchpad Python, and
+  `tool/zz_probe_*.dart`) were deleted; no code, test or dependency changed. The gate result
+  at `c99bd7f` still applies.
 - **Stage 2 planning**, 2026-09-26, at `39392d9`: documentation only; TD-018 re-verified. The
   gate result at `c99bd7f` still applies (no code changed since).
 - **Repeat independent Stage 1 validation**, 2026-09-26, against `c99bd7f`: **does not pass**.
@@ -272,17 +277,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S2.R1 — RG-01** (research, documentation only; `POST_ROADMAP_PLAN.md`, "Stage 2 — Task
-sequence"). Use a fresh session where practical.
+**Owner decisions** on S2.R1 (`research/RG-01_METADATA_FORMATS.md` §9):
 
-1. Collect the evidence: formats, bounded reads, libraries and licences, Android file
-   selection, the fixture policy for a public repository, and field semantics.
-2. Ask the owner which files they actually produce, and for samples, kept outside the
-   repository.
-3. Write `docs/refinement/research/RG-01_METADATA_FORMATS.md` and a proposed ADR-017.
-4. Ask the owner once for PD-21/RG-01, the fixture policy and RD-16. Then STOP.
+1. which formats and software the owner uses, with a sample of each (FITS matters most);
+2. PD-21, the format set;
+3. ADR-017 as proposed;
+4. the fixture policy (header-only derivatives in the public repository, with consent);
+5. RD-16.
 
-No production code changes before that decision. S2.1–S2.6 are frozen only after it.
+Then record the decisions:
+- ADR-017 into `DECISIONS.md` Part F;
+- PD-21 and RD-16 resolved;
+- S2.1–S2.6 amended and frozen in `POST_ROADMAP_PLAN.md`.
+
+S2.1 starts after that. No implementation before the decision.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

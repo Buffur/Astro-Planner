@@ -626,6 +626,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S2.R1 (2026-09-26, research; no code changed):** the owner supplied two real phone DNGs, kept outside the repository. On them, the prototype finds none of the capture fields: it reads only `EXIF …` keys, while these files keep the tags in IFD0 (TD-064). The recommended formats, readers and fixture policy are in `refinement/research/RG-01_METADATA_FORMATS.md`, pending the owner's decision (PD-21, proposed ADR-017). The status is still Prototype.
 - **Status:** Prototype
 - **Current implementation:** gallery picker → `MetadataExtractor` → read-only cards and a raw tag list.
 - **Relevant files:** `lib/presentation/screens/metadata/metadata_import_screen.dart`, `lib/domain/services/metadata_extractor.dart`.

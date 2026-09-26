@@ -676,7 +676,7 @@ Found in planning, placed in the Tasks below:
 
 | Task | Title | Kind | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S2.R1 | RG-01: formats, libraries, file selection, fixtures | Research (docs only) | M | — | **Frozen; next** |
+| S2.R1 | RG-01: formats, libraries, file selection, fixtures | Research (docs only) | M | — | **Done 2026-09-26** (research); owner decisions pending |
 | S2.1 | Bounded file access behind a domain interface | Implementation | M | S2.R1 decided | Provisional |
 | S2.2 | Typed metadata with units, provenance and explicit unknowns | Implementation | M | S2.1 | Provisional |
 | S2.3 | FITS header reader | Implementation | M | S2.2, FITS samples | Provisional |
@@ -687,6 +687,14 @@ Found in planning, placed in the Tasks below:
 Then comes Stage 2 validation in a fresh session.
 
 ##### S2.R1 — RG-01: formats, libraries, file selection, fixtures (research; resolves PD-21)
+
+- **Result (2026-09-26):** `docs/refinement/research/RG-01_METADATA_FORMATS.md`, with a proposed
+  ADR-017 and five owner questions (§9 there). It was done with the owner's two phone DNGs
+  (kept outside the repository). The recommendation changes the provisional Tasks:
+  - S2.4 becomes an in-house TIFF/EXIF reader (DNG first) and can run with those samples;
+  - S2.3 (FITS) waits for a real FITS sample;
+  - S2.5 applies only to XISF, and only if the owner uses it.
+  The Tasks stay provisional until the owner decides.
 
 - **Objective:** decide, with evidence, which metadata formats Stage 2 supports, how each is read
   in a bounded way, how the user selects the files, and how real samples become test fixtures.
