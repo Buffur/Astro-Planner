@@ -1,5 +1,6 @@
 import 'equipment_limits.dart';
 import 'spec_confidence.dart';
+import 'spec_provenance.dart';
 import 'tracking_type.dart';
 
 /// A flat equipment profile: one camera behind one optic (ADR-011 §2), stored
@@ -53,6 +54,15 @@ class EquipmentProfile {
   final String? opticsSource;
   final SpecConfidence? opticsConfidence;
 
+  /// Per-field provenance (ADR-018 §5): only the specs with their own pair.
+  /// A spec without one falls back to its group ([provenanceOf]).
+  final Map<EquipmentSpec, SpecProvenance> specProvenance;
+
+  /// The raw Make and Model of the file this rig was imported from, for
+  /// matching later imports (ADR-018 §6); null for rigs entered by hand.
+  final String? metadataMake;
+  final String? metadataModel;
+
   const EquipmentProfile({
     required this.id,
     required this.name,
@@ -74,25 +84,85 @@ class EquipmentProfile {
     this.cameraConfidence,
     this.opticsSource,
     this.opticsConfidence,
+    this.specProvenance = const {},
+    this.metadataMake,
+    this.metadataModel,
   });
 
-  bool _sameCamera(EquipmentProfile o) =>
-      sensorWidthMm == o.sensorWidthMm &&
-      sensorHeightMm == o.sensorHeightMm &&
-      pixelPitchUm == o.pixelPitchUm &&
-      resolutionWidthPx == o.resolutionWidthPx &&
-      resolutionHeightPx == o.resolutionHeightPx &&
-      averageRawFileSizeMB == o.averageRawFileSizeMB;
+  /// Where [spec]'s value came from: its own pair, else its group's, else
+  /// null (unknown; never guessed, ADR-008 §6).
+  SpecProvenance? provenanceOf(EquipmentSpec spec) {
+    final own = specProvenance[spec];
+    if (own != null && !own.isUnknown) return own;
+    final group = _groupProvenance(spec);
+    return group.isUnknown ? null : group;
+  }
 
-  bool _sameOptics(EquipmentProfile o) =>
-      focalLengthMm == o.focalLengthMm &&
-      focalRatio == o.focalRatio &&
-      apertureDiameterMm == o.apertureDiameterMm;
+  SpecProvenance _groupProvenance(EquipmentSpec spec) => spec.isCamera
+      ? SpecProvenance(cameraSource, cameraConfidence)
+      : SpecProvenance(opticsSource, opticsConfidence);
+
+  bool _sameSpec(EquipmentSpec spec, EquipmentProfile o) => switch (spec) {
+    EquipmentSpec.resolution =>
+      resolutionWidthPx == o.resolutionWidthPx &&
+          resolutionHeightPx == o.resolutionHeightPx,
+    EquipmentSpec.pixelPitch => pixelPitchUm == o.pixelPitchUm,
+    EquipmentSpec.sensorSize =>
+      sensorWidthMm == o.sensorWidthMm && sensorHeightMm == o.sensorHeightMm,
+    EquipmentSpec.rawFileSize => averageRawFileSizeMB == o.averageRawFileSizeMB,
+    EquipmentSpec.focalLength => focalLengthMm == o.focalLengthMm,
+    EquipmentSpec.focalRatio =>
+      focalRatio == o.focalRatio && apertureDiameterMm == o.apertureDiameterMm,
+  };
+
+  bool _sameCamera(EquipmentProfile o) => EquipmentSpec.values
+      .where((s) => s.isCamera)
+      .every((s) => _sameSpec(s, o));
+
+  bool _sameOptics(EquipmentProfile o) => EquipmentSpec.values
+      .where((s) => !s.isCamera)
+      .every((s) => _sameSpec(s, o));
+
+  /// Per-field provenance after an edit of [original] (ADR-018 §5):
+  /// - a pair given on this profile (an accepted import value) is kept;
+  /// - a changed spec becomes the user's own;
+  /// - an unchanged spec keeps its pair, and when its group changes it keeps
+  ///   the group's old provenance as its own pair, so a verified value that
+  ///   was not touched stays verified.
+  Map<EquipmentSpec, SpecProvenance> _editedSpecProvenance(
+    EquipmentProfile? original,
+    bool keepCamera,
+    bool keepOptics,
+  ) {
+    final result = <EquipmentSpec, SpecProvenance>{};
+    for (final spec in EquipmentSpec.values) {
+      final given = specProvenance[spec];
+      if (given != null) {
+        result[spec] = given;
+        continue;
+      }
+      if (original == null) continue;
+      if (!_sameSpec(spec, original)) {
+        result[spec] = SpecProvenance.user;
+        continue;
+      }
+      final kept = original.specProvenance[spec];
+      final groupKept = spec.isCamera ? keepCamera : keepOptics;
+      if (kept != null) {
+        result[spec] = kept;
+      } else if (!groupKept) {
+        final group = original._groupProvenance(spec);
+        if (!group.isUnknown) result[spec] = group;
+      }
+    }
+    return result;
+  }
 
   /// This profile as an explicit user edit of [original] (null for a new
   /// profile) records it (TASK 8.5): a new profile, or a changed group of
   /// specs, becomes source `user` with confidence `reported`; an unchanged
-  /// group keeps its source and confidence.
+  /// group keeps its source and confidence. Per field (ADR-018 §5, S3.4):
+  /// see [_editedSpecProvenance]. The metadata identity is kept.
   EquipmentProfile withEditProvenance(EquipmentProfile? original) {
     final keepCamera = original != null && _sameCamera(original);
     final keepOptics = original != null && _sameOptics(original);
@@ -121,6 +191,9 @@ class EquipmentProfile {
       opticsConfidence: keepOptics
           ? original.opticsConfidence
           : SpecConfidence.reported,
+      specProvenance: _editedSpecProvenance(original, keepCamera, keepOptics),
+      metadataMake: metadataMake ?? original?.metadataMake,
+      metadataModel: metadataModel ?? original?.metadataModel,
     );
   }
 

@@ -3,9 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.2). Stage 3 is in progress: S3.1 and S3.2 are done (image
-> dimensions; the equipment candidate and CALC-40, pure domain). Next: **S3.4** (schema v18).
-> The frozen order runs S3.4 before S3.3.
+> **Last updated:** 2026-09-26 (S3.4). Stage 3 is in progress: S3.1, S3.2 and S3.4 are done
+> (image dimensions; the equipment candidate and CALC-40; schema v18 with per-field equipment
+> provenance). Next: **S3.3** (matching saved rigs).
 
 ## Current state
 
@@ -35,10 +35,10 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.4 — Per-field provenance and identity evidence, schema v18** (ADR-018 §5; frozen) |
-| Code baseline | S3.2 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
-| Schema | v17 |
+| Next approved Task | **S3.3 — Matching saved rigs, with conflicts** (ADR-018 §6; frozen) |
+| Code baseline | S3.4 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Schema | **v18** (S3.4) |
 
 ## Stage status
 
@@ -128,6 +128,8 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 3 | S3.1 — Image geometry in the metadata contract (ADR-018 §3) | 2026-09-26 | `60ec4db` | `CaptureMetadata.imageDimensions` (`ImageDimensions`, with long/short sides; orientation not interpreted). `ExifStructure` reads it: DNG from IFD0's main image only (`NewSubfileType` 0 or absent; `DefaultCropSize` when whole, else `ImageWidth`/`ImageLength`; sub-IFDs never followed); JPEG/HEIC from `PixelX/YDimension` combined with IFD0 (disagreement ambiguous). The hidden screen gains an "Image size" row. 14 new tests (`image_dimensions_test.dart`: the DNG rules, crop types, fallbacks, malformed values, a preview IFD0, the JPEG/HEIC rules, wrong-IFD tags, and GPS never read; `metadata_text_test.dart`: the row, and the row count now follows the contract, 11 → 12). **Local real samples:** the DNG crop sizes (checked against an independent Python walk, deleted), and the JPEG/HEIC portrait sizes, were added to `expected.json` outside Git and pass. Each DNG reads 856 bytes (+8). CALC-39, F-45, ARCHITECTURE B, ADR-017/018 status updated. Gate green, 1082 + 1 skip + 2 E2E |
 
 | 3 | S3.2 — Equipment evidence and candidate, with CALC-40 (ADR-018 §4) | 2026-09-26 | **`7560df2`** (the content) and `e9a9d87` (empty) | **Where it landed:** the concurrent TD-066 session committed the shared index while S3.2's files were staged, so S3.2's code, tests and docs are in `7560df2` ("fix: format short exposures as shutter fractions"). `e9a9d87` carries the S3.2 message with no changes. No history was rewritten; the content was checked to be complete in HEAD. Pure domain code in `lib/domain/equipment_import/`, with no UI and no write. `EquipmentCandidate.fromReading`: per field, `ProposedField` (value, source `metadata:<format>` or `derived:calc-40/metadata:<format>`, `reported`/`estimated`, origins) or `UnknownField` (not in file, unreadable, conflicting, out of range, not estimable, never from metadata). Labels come from Make/Model; resolution uses the long side as the width; the aperture diameter, rotation, tracking and maximum exposure are never proposed; the RAW size waits for S3.8. It also carries a suggested name, `EquipmentEvidence` for S3.3, and `hasEnoughEvidence`. `SensorGeometryEstimate` is CALC-40, registered in `SCIENTIFIC_INTEGRITY.md`. As the ADR requires, there is no estimate when f₃₅ ≤ f, so full-frame bodies get none. 11 tests, with expected values computed independently. **Concurrent work noticed:** another session committed `23b962c` (the owner's debug-build metadata viewer) during this Task, and left TD-066 edits uncommitted; S3.2 commits only its own changes. Gate green |
+
+| 3 | S3.4 — Per-field provenance and identity evidence, schema v18 (ADR-018 §5) | 2026-09-26 | The S3.4 commit* | 14 additive nullable columns: source/confidence pairs for resolution, pixel pitch, sensor size and RAW size, plus `metadata_make` and `metadata_model`, on `camera_modules`; pairs for focal length and focal ratio on `optical_rigs`. Nothing is back-filled. The Drift workflow was followed (v18 snapshot, generated verification and steps; `from17To18` against the step's shapes). Domain: `EquipmentSpec` and `SpecProvenance`; `EquipmentProfile.specProvenance`, `metadataMake/Model` and `provenanceOf` (own pair → group → unknown); `withEditProvenance` per field, which pins the group's old provenance on untouched specs when their group changes (a verified value stays verified), keeps given pairs, and keeps the identity. The repository maps the new columns. The manual editor is unchanged (its tests are not modified). 21 new tests: every version v8–v17 → v18 against the snapshot; v17 → v18 keeps values and group provenance with no own pairs; a legacy rig stays unknown; 8 domain rules; a repository round-trip through a manual edit. **Four existing tests changed** only because they hardcoded the current schema: the backup header now expects 18, and the "newer than the app" example is 19. Session snapshots keep only group provenance. Gate green, 1115 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -378,17 +380,19 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.4 — Per-field provenance and identity evidence, schema v18** (ADR-018 §5; frozen in
-`POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence").
-- Additive nullable columns:
-  - source/confidence pairs for resolution, pixel pitch, sensor size and RAW size on
-    `camera_modules`;
-  - source/confidence pairs for focal length and focal ratio on `optical_rigs`;
-  - `metadata_make` and `metadata_model` on `camera_modules`.
-- A field's provenance is its own pair, else its group's pair, else unknown.
-- `withEditProvenance` works per field.
-- The Drift workflow (`CLAUDE.md`), with migration tests.
-- The manual editor's behaviour stays unchanged.
+**S3.3 — Matching saved rigs, with conflicts** (ADR-018 §6; frozen in `POST_ROADMAP_PLAN.md`,
+"Stage 3 — frozen Task sequence").
+- Pure domain: an `EquipmentCandidate` against the saved rigs gives one outcome with reasons,
+  never a score:
+  - same rig;
+  - likely the same rig;
+  - same camera, other optics;
+  - cropped or binned mode;
+  - ambiguous;
+  - none.
+- Per-field conflicts are listed with both provenances.
+- Stored `metadataMake`/`metadataModel` take precedence over the labels.
+- f/N are compared with a 1 % tolerance.
 - One commit, then STOP.
 
 Useful inputs:

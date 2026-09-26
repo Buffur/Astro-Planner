@@ -30,6 +30,24 @@ class CameraModules extends Table {
 
   /// `verified` / `reported` / `estimated`; NULL = unknown.
   TextColumn get confidence => text().nullable()();
+
+  // ADR-018 §5 (schema v18): per-field provenance for the specs an import
+  // can mix with typed values. NULL = no own pair: the field falls back to
+  // the group's [source]/[confidence] above, then unknown. Never back-filled.
+  TextColumn get resolutionSource => text().nullable()();
+  TextColumn get resolutionConfidence => text().nullable()();
+  TextColumn get pixelPitchSource => text().nullable()();
+  TextColumn get pixelPitchConfidence => text().nullable()();
+  TextColumn get sensorSizeSource => text().nullable()();
+  TextColumn get sensorSizeConfidence => text().nullable()();
+  TextColumn get rawFileSizeSource => text().nullable()();
+  TextColumn get rawFileSizeConfidence => text().nullable()();
+
+  /// The raw Make and Model of the file a rig was imported from, kept for
+  /// matching later imports (ADR-018 §5–§6). Never serials; NULL for rigs
+  /// entered by hand.
+  TextColumn get metadataMake => text().nullable()();
+  TextColumn get metadataModel => text().nullable()();
 }
 
 class OpticalRigs extends Table {
@@ -61,4 +79,11 @@ class OpticalRigs extends Table {
 
   /// `verified` / `reported` / `estimated`; NULL = unknown.
   TextColumn get confidence => text().nullable()();
+
+  // ADR-018 §5 (schema v18): per-field provenance; NULL falls back to the
+  // group's [source]/[confidence].
+  TextColumn get focalLengthSource => text().nullable()();
+  TextColumn get focalLengthConfidence => text().nullable()();
+  TextColumn get focalRatioSource => text().nullable()();
+  TextColumn get focalRatioConfidence => text().nullable()();
 }

@@ -2972,6 +2972,456 @@ i1.GeneratedColumn<int> _column_103(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT 0 CHECK (clock_adjusted IN (0, 1))',
       defaultValue: const i1.CustomExpression('0'),
     );
+
+final class Schema18 extends i0.VersionedSchema {
+  Schema18({required super.database}) : super(version: 18);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    devices,
+    cameraModules,
+    opticalRigs,
+    locationProfiles,
+    astroTargets,
+    sessionLogs,
+    captureBlocks,
+    sessionEvents,
+    astroTargetsCatalogIdUnique,
+    sessionLogsStatus,
+    sessionLogsEveningDate,
+    sessionLogsTargetId,
+    sessionEventsSessionSeq,
+  ];
+  late final Shape1 devices = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'devices',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_13, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape17 cameraModules = Shape17(
+    source: i0.VersionedTable(
+      entityName: 'camera_modules',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_60,
+        _column_1,
+        _column_2,
+        _column_13,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_11,
+        _column_75,
+        _column_80,
+        _column_104,
+        _column_105,
+        _column_106,
+        _column_107,
+        _column_108,
+        _column_109,
+        _column_110,
+        _column_111,
+        _column_112,
+        _column_113,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape18 opticalRigs = Shape18(
+    source: i0.VersionedTable(
+      entityName: 'optical_rigs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_61,
+        _column_22,
+        _column_10,
+        _column_23,
+        _column_24,
+        _column_78,
+        _column_79,
+        _column_75,
+        _column_80,
+        _column_114,
+        _column_115,
+        _column_116,
+        _column_117,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 locationProfiles = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'location_profiles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_25,
+        _column_26,
+        _column_27,
+        _column_67,
+        _column_68,
+        _column_69,
+        _column_70,
+        _column_71,
+        _column_72,
+        _column_73,
+        _column_14,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 astroTargets = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'astro_targets',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_29,
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_33,
+        _column_74,
+        _column_75,
+        _column_76,
+        _column_77,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape14 sessionLogs = Shape14(
+    source: i0.VersionedTable(
+      entityName: 'session_logs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_34,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_38,
+        _column_39,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_43,
+        _column_44,
+        _column_45,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+        _column_50,
+        _column_51,
+        _column_52,
+        _column_81,
+        _column_82,
+        _column_83,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_89,
+        _column_90,
+        _column_91,
+        _column_92,
+        _column_93,
+        _column_94,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 captureBlocks = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'capture_blocks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_62,
+        _column_54,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_58,
+        _column_63,
+        _column_64,
+        _column_65,
+        _column_66,
+        _column_95,
+        _column_96,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 sessionEvents = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'session_events',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_62,
+        _column_97,
+        _column_98,
+        _column_99,
+        _column_100,
+        _column_101,
+        _column_102,
+        _column_103,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index astroTargetsCatalogIdUnique = i1.Index(
+    'astro_targets_catalog_id_unique',
+    'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
+  );
+  final i1.Index sessionLogsStatus = i1.Index(
+    'session_logs_status',
+    'CREATE INDEX session_logs_status ON session_logs (status)',
+  );
+  final i1.Index sessionLogsEveningDate = i1.Index(
+    'session_logs_evening_date',
+    'CREATE INDEX session_logs_evening_date ON session_logs (evening_date)',
+  );
+  final i1.Index sessionLogsTargetId = i1.Index(
+    'session_logs_target_id',
+    'CREATE INDEX session_logs_target_id ON session_logs (target_id)',
+  );
+  final i1.Index sessionEventsSessionSeq = i1.Index(
+    'session_events_session_seq',
+    'CREATE UNIQUE INDEX session_events_session_seq ON session_events (session_log_id, seq)',
+  );
+}
+
+class Shape17 extends i0.VersionedTable {
+  Shape17({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get deviceId =>
+      columnsByName['device_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get manufacturer =>
+      columnsByName['manufacturer']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get model =>
+      columnsByName['model']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get sensorWidthMm =>
+      columnsByName['sensor_width_mm']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get sensorHeightMm =>
+      columnsByName['sensor_height_mm']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get resolutionWidthPx =>
+      columnsByName['resolution_width_px']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get resolutionHeightPx =>
+      columnsByName['resolution_height_px']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get pixelPitchUm =>
+      columnsByName['pixel_pitch_um']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get averageRawFileSizeMB =>
+      columnsByName['average_raw_file_size_m_b']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get confidence =>
+      columnsByName['confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get resolutionSource =>
+      columnsByName['resolution_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get resolutionConfidence =>
+      columnsByName['resolution_confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get pixelPitchSource =>
+      columnsByName['pixel_pitch_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get pixelPitchConfidence =>
+      columnsByName['pixel_pitch_confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get sensorSizeSource =>
+      columnsByName['sensor_size_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get sensorSizeConfidence =>
+      columnsByName['sensor_size_confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get rawFileSizeSource =>
+      columnsByName['raw_file_size_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get rawFileSizeConfidence =>
+      columnsByName['raw_file_size_confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get metadataMake =>
+      columnsByName['metadata_make']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get metadataModel =>
+      columnsByName['metadata_model']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_104(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'resolution_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_105(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'resolution_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_106(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'pixel_pitch_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_107(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'pixel_pitch_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_108(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'sensor_size_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_109(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'sensor_size_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_110(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'raw_file_size_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_111(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'raw_file_size_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_112(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'metadata_make',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_113(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'metadata_model',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+
+class Shape18 extends i0.VersionedTable {
+  Shape18({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get cameraModuleId =>
+      columnsByName['camera_module_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get focalLengthMm =>
+      columnsByName['focal_length_mm']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get aperture =>
+      columnsByName['aperture']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get trackingState =>
+      columnsByName['tracking_state']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get rotationDegrees =>
+      columnsByName['rotation_degrees']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get apertureDiameterMm =>
+      columnsByName['aperture_diameter_mm']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get maxExposureS =>
+      columnsByName['max_exposure_s']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<String> get source =>
+      columnsByName['source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get confidence =>
+      columnsByName['confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get focalLengthSource =>
+      columnsByName['focal_length_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get focalLengthConfidence =>
+      columnsByName['focal_length_confidence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get focalRatioSource =>
+      columnsByName['focal_ratio_source']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get focalRatioConfidence =>
+      columnsByName['focal_ratio_confidence']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_114(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'focal_length_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_115(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'focal_length_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_116(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'focal_ratio_source',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_117(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'focal_ratio_confidence',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
@@ -2982,6 +3432,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
   required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
+  required Future<void> Function(i1.Migrator m, Schema18 schema) from17To18,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -3030,6 +3481,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from16To17(migrator, schema);
         return 17;
+      case 17:
+        final schema = Schema18(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from17To18(migrator, schema);
+        return 18;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -3046,6 +3502,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
   required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
+  required Future<void> Function(i1.Migrator m, Schema18 schema) from17To18,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from8To9: from8To9,
@@ -3057,5 +3514,6 @@ i1.OnUpgrade stepByStep({
     from14To15: from14To15,
     from15To16: from15To16,
     from16To17: from16To17,
+    from17To18: from17To18,
   ),
 );

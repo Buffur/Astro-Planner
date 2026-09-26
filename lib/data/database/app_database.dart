@@ -249,7 +249,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration {
@@ -493,6 +493,36 @@ class AppDatabase extends _$AppDatabase {
                 // New table only; no existing row changes.
                 await m.createTable(schema.sessionEvents);
                 await m.create(schema.sessionEventsSessionSeq);
+              },
+              from17To18: (m, schema) async {
+                // S3.4 (ADR-018 §5): per-field provenance and the metadata
+                // identity. Additive only; existing rows keep NULL, so each
+                // field falls back to its group's provenance (nothing is
+                // back-filled, ADR-008 §6).
+                final cams = schema.cameraModules;
+                for (final column in [
+                  cams.resolutionSource,
+                  cams.resolutionConfidence,
+                  cams.pixelPitchSource,
+                  cams.pixelPitchConfidence,
+                  cams.sensorSizeSource,
+                  cams.sensorSizeConfidence,
+                  cams.rawFileSizeSource,
+                  cams.rawFileSizeConfidence,
+                  cams.metadataMake,
+                  cams.metadataModel,
+                ]) {
+                  await m.addColumn(cams, column);
+                }
+                final rigs = schema.opticalRigs;
+                for (final column in [
+                  rigs.focalLengthSource,
+                  rigs.focalLengthConfidence,
+                  rigs.focalRatioSource,
+                  rigs.focalRatioConfidence,
+                ]) {
+                  await m.addColumn(rigs, column);
+                }
               },
             ),
           );

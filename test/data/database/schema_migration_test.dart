@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v17), each with an
+// Later schema versions add their own groups (v11-v18), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -40,6 +40,8 @@ import 'package:astroplan/data/database/json_map_converter.dart';
 import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/models/session.dart' show SessionResults;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/domain/models/spec_confidence.dart';
+import 'package:astroplan/domain/models/spec_provenance.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/data/database/generated_migrations/schema.dart';
 import 'package:astroplan/data/database/generated_migrations/schema_v8.dart'
@@ -122,6 +124,81 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('S3.4: v18 (per-field equipment provenance, ADR-018 §5)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]) {
+      test('v$from -> v18 matches the v18 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 18);
+        await db.close();
+      });
+    }
+
+    test('v17 -> v18: every value and group provenance kept; no own pairs, '
+        'so each field falls back to its group', () async {
+      final schema = await verifier.schemaAt(17);
+      final raw = schema.rawDatabase;
+      raw.execute("INSERT INTO devices (id, name) VALUES (1, 'Rig');");
+      raw.execute(
+        "INSERT INTO camera_modules (id, device_id, name, model, "
+        "sensor_width_mm, sensor_height_mm, resolution_width_px, "
+        "resolution_height_px, pixel_pitch_um, average_raw_file_size_m_b, "
+        "source, confidence) VALUES (1, 1, 'Rig Camera', 'ASI2600MC', 23.5, "
+        "15.7, 6248, 4176, 3.76, 50.0, 'seed:equipment@2', 'verified');",
+      );
+      raw.execute(
+        "INSERT INTO optical_rigs (id, name, camera_module_id, "
+        "focal_length_mm, aperture, tracking_state, source, confidence) "
+        "VALUES (1, 'Rig', 1, 403.2, 5.6, 'guided', 'seed:equipment@2', "
+        "'estimated');",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final p = (await DriftEquipmentRepository(db).getAllEquipment()).single;
+      expect(p.pixelPitchUm, 3.76);
+      expect(p.resolutionWidthPx, 6248);
+      expect(p.averageRawFileSizeMB, 50.0);
+      expect(p.focalLengthMm, 403.2);
+      expect(p.focalRatio, 5.6);
+      expect(p.trackingType, TrackingType.guided);
+      expect(p.cameraConfidence, SpecConfidence.verified);
+      expect(p.opticsConfidence, SpecConfidence.estimated);
+      expect(p.specProvenance, isEmpty, reason: 'nothing is back-filled');
+      expect(p.metadataMake, isNull);
+      expect(p.metadataModel, isNull);
+      expect(
+        p.provenanceOf(EquipmentSpec.pixelPitch),
+        const SpecProvenance('seed:equipment@2', SpecConfidence.verified),
+      );
+      expect(
+        p.provenanceOf(EquipmentSpec.focalRatio),
+        const SpecProvenance('seed:equipment@2', SpecConfidence.estimated),
+      );
+      await db.close();
+    });
+
+    test('v17 -> v18: a legacy rig with no provenance stays unknown', () async {
+      final schema = await verifier.schemaAt(17);
+      final raw = schema.rawDatabase;
+      raw.execute("INSERT INTO devices (id, name) VALUES (1, 'Phone');");
+      raw.execute(
+        "INSERT INTO camera_modules (id, device_id, name, sensor_width_mm, "
+        "sensor_height_mm, resolution_width_px, resolution_height_px, "
+        "pixel_pitch_um) VALUES (1, 1, 'Phone Camera', 9.8, 7.3, 8064, "
+        "6048, 1.22);",
+      );
+      raw.execute(
+        "INSERT INTO optical_rigs (id, name, camera_module_id, "
+        "focal_length_mm, aperture) VALUES (1, 'Phone', 1, 6.86, 1.78);",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final p = (await DriftEquipmentRepository(db).getAllEquipment()).single;
+      for (final spec in EquipmentSpec.values) {
+        expect(p.provenanceOf(spec), isNull, reason: spec.name);
+      }
       await db.close();
     });
   });

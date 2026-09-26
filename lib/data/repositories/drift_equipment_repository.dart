@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/models/equipment_profile.dart' as domain;
 import '../../domain/models/spec_confidence.dart';
+import '../../domain/models/spec_provenance.dart';
 import '../../domain/models/tracking_type.dart';
 import '../database/app_database.dart';
 
@@ -38,8 +39,57 @@ class DriftEquipmentRepository implements EquipmentRepository {
       cameraConfidence: SpecConfidence.fromStorage(cam.confidence),
       opticsSource: rig.source,
       opticsConfidence: SpecConfidence.fromStorage(rig.confidence),
+      specProvenance: {
+        for (final (spec, source, confidence) in [
+          (
+            EquipmentSpec.resolution,
+            cam.resolutionSource,
+            cam.resolutionConfidence,
+          ),
+          (
+            EquipmentSpec.pixelPitch,
+            cam.pixelPitchSource,
+            cam.pixelPitchConfidence,
+          ),
+          (
+            EquipmentSpec.sensorSize,
+            cam.sensorSizeSource,
+            cam.sensorSizeConfidence,
+          ),
+          (
+            EquipmentSpec.rawFileSize,
+            cam.rawFileSizeSource,
+            cam.rawFileSizeConfidence,
+          ),
+          (
+            EquipmentSpec.focalLength,
+            rig.focalLengthSource,
+            rig.focalLengthConfidence,
+          ),
+          (
+            EquipmentSpec.focalRatio,
+            rig.focalRatioSource,
+            rig.focalRatioConfidence,
+          ),
+        ])
+          if (source != null || confidence != null)
+            spec: SpecProvenance(
+              source,
+              SpecConfidence.fromStorage(confidence),
+            ),
+      },
+      metadataMake: cam.metadataMake,
+      metadataModel: cam.metadataModel,
     );
   }
+
+  // ADR-018 §5: the per-field pairs, as stored (NULL = no own pair).
+  static Value<String?> _source(domain.EquipmentProfile p, EquipmentSpec s) =>
+      Value(p.specProvenance[s]?.source);
+  static Value<String?> _confidence(
+    domain.EquipmentProfile p,
+    EquipmentSpec s,
+  ) => Value(p.specProvenance[s]?.confidence?.name);
 
   @override
   Future<List<domain.EquipmentProfile>> getAllEquipment() async {
@@ -102,6 +152,28 @@ class DriftEquipmentRepository implements EquipmentRepository {
               averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
               source: Value(profile.cameraSource),
               confidence: Value(profile.cameraConfidence?.name),
+              resolutionSource: _source(profile, EquipmentSpec.resolution),
+              resolutionConfidence: _confidence(
+                profile,
+                EquipmentSpec.resolution,
+              ),
+              pixelPitchSource: _source(profile, EquipmentSpec.pixelPitch),
+              pixelPitchConfidence: _confidence(
+                profile,
+                EquipmentSpec.pixelPitch,
+              ),
+              sensorSizeSource: _source(profile, EquipmentSpec.sensorSize),
+              sensorSizeConfidence: _confidence(
+                profile,
+                EquipmentSpec.sensorSize,
+              ),
+              rawFileSizeSource: _source(profile, EquipmentSpec.rawFileSize),
+              rawFileSizeConfidence: _confidence(
+                profile,
+                EquipmentSpec.rawFileSize,
+              ),
+              metadataMake: Value(profile.metadataMake),
+              metadataModel: Value(profile.metadataModel),
             ),
           );
 
@@ -119,6 +191,16 @@ class DriftEquipmentRepository implements EquipmentRepository {
               maxExposureS: Value(profile.maxExposureS),
               source: Value(profile.opticsSource),
               confidence: Value(profile.opticsConfidence?.name),
+              focalLengthSource: _source(profile, EquipmentSpec.focalLength),
+              focalLengthConfidence: _confidence(
+                profile,
+                EquipmentSpec.focalLength,
+              ),
+              focalRatioSource: _source(profile, EquipmentSpec.focalRatio),
+              focalRatioConfidence: _confidence(
+                profile,
+                EquipmentSpec.focalRatio,
+              ),
             ),
           );
 
@@ -200,6 +282,13 @@ class DriftEquipmentRepository implements EquipmentRepository {
           maxExposureS: Value(profile.maxExposureS),
           source: Value(profile.opticsSource),
           confidence: Value(profile.opticsConfidence?.name),
+          focalLengthSource: _source(profile, EquipmentSpec.focalLength),
+          focalLengthConfidence: _confidence(
+            profile,
+            EquipmentSpec.focalLength,
+          ),
+          focalRatioSource: _source(profile, EquipmentSpec.focalRatio),
+          focalRatioConfidence: _confidence(profile, EquipmentSpec.focalRatio),
         ),
       );
 
@@ -219,6 +308,28 @@ class DriftEquipmentRepository implements EquipmentRepository {
             averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
             source: Value(profile.cameraSource),
             confidence: Value(profile.cameraConfidence?.name),
+            resolutionSource: _source(profile, EquipmentSpec.resolution),
+            resolutionConfidence: _confidence(
+              profile,
+              EquipmentSpec.resolution,
+            ),
+            pixelPitchSource: _source(profile, EquipmentSpec.pixelPitch),
+            pixelPitchConfidence: _confidence(
+              profile,
+              EquipmentSpec.pixelPitch,
+            ),
+            sensorSizeSource: _source(profile, EquipmentSpec.sensorSize),
+            sensorSizeConfidence: _confidence(
+              profile,
+              EquipmentSpec.sensorSize,
+            ),
+            rawFileSizeSource: _source(profile, EquipmentSpec.rawFileSize),
+            rawFileSizeConfidence: _confidence(
+              profile,
+              EquipmentSpec.rawFileSize,
+            ),
+            metadataMake: Value(profile.metadataMake),
+            metadataModel: Value(profile.metadataModel),
           ),
         );
 

@@ -6,6 +6,7 @@ import 'package:astroplan/domain/models/equipment_profile.dart' as domain;
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/spec_confidence.dart';
+import 'package:astroplan/domain/models/spec_provenance.dart';
 
 void main() {
   late AppDatabase database;
@@ -132,5 +133,63 @@ void main() {
     );
     final same = (await repository.getEquipmentById(id))!;
     expect(same.cameraConfidence, SpecConfidence.verified);
+  });
+
+  // S3.4 (ADR-018 §5): per-field provenance and the metadata identity.
+  test('per-field provenance and the metadata identity round-trip, and a '
+      'manual edit keeps them', () async {
+    const imported = SpecProvenance('metadata:jpeg', SpecConfidence.reported);
+    const estimate = SpecProvenance(
+      'derived:calc-40/metadata:jpeg',
+      SpecConfidence.estimated,
+    );
+    const rig = domain.EquipmentProfile(
+      id: 0,
+      name: 'TestMake TestPhone · 6.57 mm',
+      manufacturer: 'TestMake',
+      cameraModel: 'TestMake TestPhone',
+      sensorWidthMm: 9.89,
+      sensorHeightMm: 7.42,
+      pixelPitchUm: 2.41,
+      resolutionWidthPx: 4096,
+      resolutionHeightPx: 3072,
+      focalLengthMm: 6.57,
+      focalRatio: 1.6,
+      specProvenance: {
+        EquipmentSpec.resolution: imported,
+        EquipmentSpec.sensorSize: estimate,
+        EquipmentSpec.pixelPitch: estimate,
+        EquipmentSpec.focalLength: imported,
+        EquipmentSpec.focalRatio: imported,
+      },
+      metadataMake: 'TestMake',
+      metadataModel: 'TestMake TestPhone',
+    );
+    final id = await repository.insertEquipment(rig.withEditProvenance(null));
+    final back = (await repository.getEquipmentById(id))!;
+    expect(back.specProvenance, rig.specProvenance);
+    expect(back.provenanceOf(EquipmentSpec.rawFileSize), SpecProvenance.user);
+    expect(back.metadataMake, 'TestMake');
+    expect(back.metadataModel, 'TestMake TestPhone');
+
+    // The editor rebuilds the profile without provenance or identity.
+    final edited = domain.EquipmentProfile(
+      id: id,
+      name: back.name,
+      sensorWidthMm: back.sensorWidthMm,
+      sensorHeightMm: back.sensorHeightMm,
+      pixelPitchUm: 2.4,
+      resolutionWidthPx: back.resolutionWidthPx,
+      resolutionHeightPx: back.resolutionHeightPx,
+      focalLengthMm: back.focalLengthMm,
+      focalRatio: back.focalRatio,
+    ).withEditProvenance(back);
+    await repository.updateEquipment(edited);
+    final after = (await repository.getEquipmentById(id))!;
+    expect(after.provenanceOf(EquipmentSpec.pixelPitch), SpecProvenance.user);
+    expect(after.provenanceOf(EquipmentSpec.sensorSize), estimate);
+    expect(after.provenanceOf(EquipmentSpec.resolution), imported);
+    expect(after.provenanceOf(EquipmentSpec.focalLength), imported);
+    expect(after.metadataMake, 'TestMake');
   });
 }

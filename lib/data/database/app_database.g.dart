@@ -497,6 +497,117 @@ class $CameraModulesTable extends CameraModules
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _resolutionSourceMeta = const VerificationMeta(
+    'resolutionSource',
+  );
+  @override
+  late final GeneratedColumn<String> resolutionSource = GeneratedColumn<String>(
+    'resolution_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resolutionConfidenceMeta =
+      const VerificationMeta('resolutionConfidence');
+  @override
+  late final GeneratedColumn<String> resolutionConfidence =
+      GeneratedColumn<String>(
+        'resolution_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _pixelPitchSourceMeta = const VerificationMeta(
+    'pixelPitchSource',
+  );
+  @override
+  late final GeneratedColumn<String> pixelPitchSource = GeneratedColumn<String>(
+    'pixel_pitch_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pixelPitchConfidenceMeta =
+      const VerificationMeta('pixelPitchConfidence');
+  @override
+  late final GeneratedColumn<String> pixelPitchConfidence =
+      GeneratedColumn<String>(
+        'pixel_pitch_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _sensorSizeSourceMeta = const VerificationMeta(
+    'sensorSizeSource',
+  );
+  @override
+  late final GeneratedColumn<String> sensorSizeSource = GeneratedColumn<String>(
+    'sensor_size_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sensorSizeConfidenceMeta =
+      const VerificationMeta('sensorSizeConfidence');
+  @override
+  late final GeneratedColumn<String> sensorSizeConfidence =
+      GeneratedColumn<String>(
+        'sensor_size_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _rawFileSizeSourceMeta = const VerificationMeta(
+    'rawFileSizeSource',
+  );
+  @override
+  late final GeneratedColumn<String> rawFileSizeSource =
+      GeneratedColumn<String>(
+        'raw_file_size_source',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _rawFileSizeConfidenceMeta =
+      const VerificationMeta('rawFileSizeConfidence');
+  @override
+  late final GeneratedColumn<String> rawFileSizeConfidence =
+      GeneratedColumn<String>(
+        'raw_file_size_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _metadataMakeMeta = const VerificationMeta(
+    'metadataMake',
+  );
+  @override
+  late final GeneratedColumn<String> metadataMake = GeneratedColumn<String>(
+    'metadata_make',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _metadataModelMeta = const VerificationMeta(
+    'metadataModel',
+  );
+  @override
+  late final GeneratedColumn<String> metadataModel = GeneratedColumn<String>(
+    'metadata_model',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -512,6 +623,16 @@ class $CameraModulesTable extends CameraModules
     averageRawFileSizeMB,
     source,
     confidence,
+    resolutionSource,
+    resolutionConfidence,
+    pixelPitchSource,
+    pixelPitchConfidence,
+    sensorSizeSource,
+    sensorSizeConfidence,
+    rawFileSizeSource,
+    rawFileSizeConfidence,
+    metadataMake,
+    metadataModel,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -635,6 +756,96 @@ class $CameraModulesTable extends CameraModules
         confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
       );
     }
+    if (data.containsKey('resolution_source')) {
+      context.handle(
+        _resolutionSourceMeta,
+        resolutionSource.isAcceptableOrUnknown(
+          data['resolution_source']!,
+          _resolutionSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('resolution_confidence')) {
+      context.handle(
+        _resolutionConfidenceMeta,
+        resolutionConfidence.isAcceptableOrUnknown(
+          data['resolution_confidence']!,
+          _resolutionConfidenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pixel_pitch_source')) {
+      context.handle(
+        _pixelPitchSourceMeta,
+        pixelPitchSource.isAcceptableOrUnknown(
+          data['pixel_pitch_source']!,
+          _pixelPitchSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pixel_pitch_confidence')) {
+      context.handle(
+        _pixelPitchConfidenceMeta,
+        pixelPitchConfidence.isAcceptableOrUnknown(
+          data['pixel_pitch_confidence']!,
+          _pixelPitchConfidenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sensor_size_source')) {
+      context.handle(
+        _sensorSizeSourceMeta,
+        sensorSizeSource.isAcceptableOrUnknown(
+          data['sensor_size_source']!,
+          _sensorSizeSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sensor_size_confidence')) {
+      context.handle(
+        _sensorSizeConfidenceMeta,
+        sensorSizeConfidence.isAcceptableOrUnknown(
+          data['sensor_size_confidence']!,
+          _sensorSizeConfidenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('raw_file_size_source')) {
+      context.handle(
+        _rawFileSizeSourceMeta,
+        rawFileSizeSource.isAcceptableOrUnknown(
+          data['raw_file_size_source']!,
+          _rawFileSizeSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('raw_file_size_confidence')) {
+      context.handle(
+        _rawFileSizeConfidenceMeta,
+        rawFileSizeConfidence.isAcceptableOrUnknown(
+          data['raw_file_size_confidence']!,
+          _rawFileSizeConfidenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('metadata_make')) {
+      context.handle(
+        _metadataMakeMeta,
+        metadataMake.isAcceptableOrUnknown(
+          data['metadata_make']!,
+          _metadataMakeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('metadata_model')) {
+      context.handle(
+        _metadataModelMeta,
+        metadataModel.isAcceptableOrUnknown(
+          data['metadata_model']!,
+          _metadataModelMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -696,6 +907,46 @@ class $CameraModulesTable extends CameraModules
         DriftSqlType.string,
         data['${effectivePrefix}confidence'],
       ),
+      resolutionSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolution_source'],
+      ),
+      resolutionConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolution_confidence'],
+      ),
+      pixelPitchSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pixel_pitch_source'],
+      ),
+      pixelPitchConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pixel_pitch_confidence'],
+      ),
+      sensorSizeSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sensor_size_source'],
+      ),
+      sensorSizeConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sensor_size_confidence'],
+      ),
+      rawFileSizeSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw_file_size_source'],
+      ),
+      rawFileSizeConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}raw_file_size_confidence'],
+      ),
+      metadataMake: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata_make'],
+      ),
+      metadataModel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metadata_model'],
+      ),
     );
   }
 
@@ -723,6 +974,20 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
 
   /// `verified` / `reported` / `estimated`; NULL = unknown.
   final String? confidence;
+  final String? resolutionSource;
+  final String? resolutionConfidence;
+  final String? pixelPitchSource;
+  final String? pixelPitchConfidence;
+  final String? sensorSizeSource;
+  final String? sensorSizeConfidence;
+  final String? rawFileSizeSource;
+  final String? rawFileSizeConfidence;
+
+  /// The raw Make and Model of the file a rig was imported from, kept for
+  /// matching later imports (ADR-018 §5–§6). Never serials; NULL for rigs
+  /// entered by hand.
+  final String? metadataMake;
+  final String? metadataModel;
   const CameraModule({
     required this.id,
     required this.deviceId,
@@ -737,6 +1002,16 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     this.averageRawFileSizeMB,
     this.source,
     this.confidence,
+    this.resolutionSource,
+    this.resolutionConfidence,
+    this.pixelPitchSource,
+    this.pixelPitchConfidence,
+    this.sensorSizeSource,
+    this.sensorSizeConfidence,
+    this.rawFileSizeSource,
+    this.rawFileSizeConfidence,
+    this.metadataMake,
+    this.metadataModel,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -763,6 +1038,36 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     }
     if (!nullToAbsent || confidence != null) {
       map['confidence'] = Variable<String>(confidence);
+    }
+    if (!nullToAbsent || resolutionSource != null) {
+      map['resolution_source'] = Variable<String>(resolutionSource);
+    }
+    if (!nullToAbsent || resolutionConfidence != null) {
+      map['resolution_confidence'] = Variable<String>(resolutionConfidence);
+    }
+    if (!nullToAbsent || pixelPitchSource != null) {
+      map['pixel_pitch_source'] = Variable<String>(pixelPitchSource);
+    }
+    if (!nullToAbsent || pixelPitchConfidence != null) {
+      map['pixel_pitch_confidence'] = Variable<String>(pixelPitchConfidence);
+    }
+    if (!nullToAbsent || sensorSizeSource != null) {
+      map['sensor_size_source'] = Variable<String>(sensorSizeSource);
+    }
+    if (!nullToAbsent || sensorSizeConfidence != null) {
+      map['sensor_size_confidence'] = Variable<String>(sensorSizeConfidence);
+    }
+    if (!nullToAbsent || rawFileSizeSource != null) {
+      map['raw_file_size_source'] = Variable<String>(rawFileSizeSource);
+    }
+    if (!nullToAbsent || rawFileSizeConfidence != null) {
+      map['raw_file_size_confidence'] = Variable<String>(rawFileSizeConfidence);
+    }
+    if (!nullToAbsent || metadataMake != null) {
+      map['metadata_make'] = Variable<String>(metadataMake);
+    }
+    if (!nullToAbsent || metadataModel != null) {
+      map['metadata_model'] = Variable<String>(metadataModel);
     }
     return map;
   }
@@ -792,6 +1097,36 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       confidence: confidence == null && nullToAbsent
           ? const Value.absent()
           : Value(confidence),
+      resolutionSource: resolutionSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolutionSource),
+      resolutionConfidence: resolutionConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolutionConfidence),
+      pixelPitchSource: pixelPitchSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pixelPitchSource),
+      pixelPitchConfidence: pixelPitchConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pixelPitchConfidence),
+      sensorSizeSource: sensorSizeSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sensorSizeSource),
+      sensorSizeConfidence: sensorSizeConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sensorSizeConfidence),
+      rawFileSizeSource: rawFileSizeSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rawFileSizeSource),
+      rawFileSizeConfidence: rawFileSizeConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rawFileSizeConfidence),
+      metadataMake: metadataMake == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metadataMake),
+      metadataModel: metadataModel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(metadataModel),
     );
   }
 
@@ -816,6 +1151,26 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       ),
       source: serializer.fromJson<String?>(json['source']),
       confidence: serializer.fromJson<String?>(json['confidence']),
+      resolutionSource: serializer.fromJson<String?>(json['resolutionSource']),
+      resolutionConfidence: serializer.fromJson<String?>(
+        json['resolutionConfidence'],
+      ),
+      pixelPitchSource: serializer.fromJson<String?>(json['pixelPitchSource']),
+      pixelPitchConfidence: serializer.fromJson<String?>(
+        json['pixelPitchConfidence'],
+      ),
+      sensorSizeSource: serializer.fromJson<String?>(json['sensorSizeSource']),
+      sensorSizeConfidence: serializer.fromJson<String?>(
+        json['sensorSizeConfidence'],
+      ),
+      rawFileSizeSource: serializer.fromJson<String?>(
+        json['rawFileSizeSource'],
+      ),
+      rawFileSizeConfidence: serializer.fromJson<String?>(
+        json['rawFileSizeConfidence'],
+      ),
+      metadataMake: serializer.fromJson<String?>(json['metadataMake']),
+      metadataModel: serializer.fromJson<String?>(json['metadataModel']),
     );
   }
   @override
@@ -835,6 +1190,18 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       'averageRawFileSizeMB': serializer.toJson<double?>(averageRawFileSizeMB),
       'source': serializer.toJson<String?>(source),
       'confidence': serializer.toJson<String?>(confidence),
+      'resolutionSource': serializer.toJson<String?>(resolutionSource),
+      'resolutionConfidence': serializer.toJson<String?>(resolutionConfidence),
+      'pixelPitchSource': serializer.toJson<String?>(pixelPitchSource),
+      'pixelPitchConfidence': serializer.toJson<String?>(pixelPitchConfidence),
+      'sensorSizeSource': serializer.toJson<String?>(sensorSizeSource),
+      'sensorSizeConfidence': serializer.toJson<String?>(sensorSizeConfidence),
+      'rawFileSizeSource': serializer.toJson<String?>(rawFileSizeSource),
+      'rawFileSizeConfidence': serializer.toJson<String?>(
+        rawFileSizeConfidence,
+      ),
+      'metadataMake': serializer.toJson<String?>(metadataMake),
+      'metadataModel': serializer.toJson<String?>(metadataModel),
     };
   }
 
@@ -852,6 +1219,16 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     Value<double?> averageRawFileSizeMB = const Value.absent(),
     Value<String?> source = const Value.absent(),
     Value<String?> confidence = const Value.absent(),
+    Value<String?> resolutionSource = const Value.absent(),
+    Value<String?> resolutionConfidence = const Value.absent(),
+    Value<String?> pixelPitchSource = const Value.absent(),
+    Value<String?> pixelPitchConfidence = const Value.absent(),
+    Value<String?> sensorSizeSource = const Value.absent(),
+    Value<String?> sensorSizeConfidence = const Value.absent(),
+    Value<String?> rawFileSizeSource = const Value.absent(),
+    Value<String?> rawFileSizeConfidence = const Value.absent(),
+    Value<String?> metadataMake = const Value.absent(),
+    Value<String?> metadataModel = const Value.absent(),
   }) => CameraModule(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -868,6 +1245,34 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
         : this.averageRawFileSizeMB,
     source: source.present ? source.value : this.source,
     confidence: confidence.present ? confidence.value : this.confidence,
+    resolutionSource: resolutionSource.present
+        ? resolutionSource.value
+        : this.resolutionSource,
+    resolutionConfidence: resolutionConfidence.present
+        ? resolutionConfidence.value
+        : this.resolutionConfidence,
+    pixelPitchSource: pixelPitchSource.present
+        ? pixelPitchSource.value
+        : this.pixelPitchSource,
+    pixelPitchConfidence: pixelPitchConfidence.present
+        ? pixelPitchConfidence.value
+        : this.pixelPitchConfidence,
+    sensorSizeSource: sensorSizeSource.present
+        ? sensorSizeSource.value
+        : this.sensorSizeSource,
+    sensorSizeConfidence: sensorSizeConfidence.present
+        ? sensorSizeConfidence.value
+        : this.sensorSizeConfidence,
+    rawFileSizeSource: rawFileSizeSource.present
+        ? rawFileSizeSource.value
+        : this.rawFileSizeSource,
+    rawFileSizeConfidence: rawFileSizeConfidence.present
+        ? rawFileSizeConfidence.value
+        : this.rawFileSizeConfidence,
+    metadataMake: metadataMake.present ? metadataMake.value : this.metadataMake,
+    metadataModel: metadataModel.present
+        ? metadataModel.value
+        : this.metadataModel,
   );
   CameraModule copyWithCompanion(CameraModulesCompanion data) {
     return CameraModule(
@@ -900,6 +1305,36 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       confidence: data.confidence.present
           ? data.confidence.value
           : this.confidence,
+      resolutionSource: data.resolutionSource.present
+          ? data.resolutionSource.value
+          : this.resolutionSource,
+      resolutionConfidence: data.resolutionConfidence.present
+          ? data.resolutionConfidence.value
+          : this.resolutionConfidence,
+      pixelPitchSource: data.pixelPitchSource.present
+          ? data.pixelPitchSource.value
+          : this.pixelPitchSource,
+      pixelPitchConfidence: data.pixelPitchConfidence.present
+          ? data.pixelPitchConfidence.value
+          : this.pixelPitchConfidence,
+      sensorSizeSource: data.sensorSizeSource.present
+          ? data.sensorSizeSource.value
+          : this.sensorSizeSource,
+      sensorSizeConfidence: data.sensorSizeConfidence.present
+          ? data.sensorSizeConfidence.value
+          : this.sensorSizeConfidence,
+      rawFileSizeSource: data.rawFileSizeSource.present
+          ? data.rawFileSizeSource.value
+          : this.rawFileSizeSource,
+      rawFileSizeConfidence: data.rawFileSizeConfidence.present
+          ? data.rawFileSizeConfidence.value
+          : this.rawFileSizeConfidence,
+      metadataMake: data.metadataMake.present
+          ? data.metadataMake.value
+          : this.metadataMake,
+      metadataModel: data.metadataModel.present
+          ? data.metadataModel.value
+          : this.metadataModel,
     );
   }
 
@@ -918,13 +1353,23 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ..write('pixelPitchUm: $pixelPitchUm, ')
           ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
           ..write('source: $source, ')
-          ..write('confidence: $confidence')
+          ..write('confidence: $confidence, ')
+          ..write('resolutionSource: $resolutionSource, ')
+          ..write('resolutionConfidence: $resolutionConfidence, ')
+          ..write('pixelPitchSource: $pixelPitchSource, ')
+          ..write('pixelPitchConfidence: $pixelPitchConfidence, ')
+          ..write('sensorSizeSource: $sensorSizeSource, ')
+          ..write('sensorSizeConfidence: $sensorSizeConfidence, ')
+          ..write('rawFileSizeSource: $rawFileSizeSource, ')
+          ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
+          ..write('metadataMake: $metadataMake, ')
+          ..write('metadataModel: $metadataModel')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     deviceId,
     name,
@@ -938,7 +1383,17 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     averageRawFileSizeMB,
     source,
     confidence,
-  );
+    resolutionSource,
+    resolutionConfidence,
+    pixelPitchSource,
+    pixelPitchConfidence,
+    sensorSizeSource,
+    sensorSizeConfidence,
+    rawFileSizeSource,
+    rawFileSizeConfidence,
+    metadataMake,
+    metadataModel,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -955,7 +1410,17 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           other.pixelPitchUm == this.pixelPitchUm &&
           other.averageRawFileSizeMB == this.averageRawFileSizeMB &&
           other.source == this.source &&
-          other.confidence == this.confidence);
+          other.confidence == this.confidence &&
+          other.resolutionSource == this.resolutionSource &&
+          other.resolutionConfidence == this.resolutionConfidence &&
+          other.pixelPitchSource == this.pixelPitchSource &&
+          other.pixelPitchConfidence == this.pixelPitchConfidence &&
+          other.sensorSizeSource == this.sensorSizeSource &&
+          other.sensorSizeConfidence == this.sensorSizeConfidence &&
+          other.rawFileSizeSource == this.rawFileSizeSource &&
+          other.rawFileSizeConfidence == this.rawFileSizeConfidence &&
+          other.metadataMake == this.metadataMake &&
+          other.metadataModel == this.metadataModel);
 }
 
 class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
@@ -972,6 +1437,16 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
   final Value<double?> averageRawFileSizeMB;
   final Value<String?> source;
   final Value<String?> confidence;
+  final Value<String?> resolutionSource;
+  final Value<String?> resolutionConfidence;
+  final Value<String?> pixelPitchSource;
+  final Value<String?> pixelPitchConfidence;
+  final Value<String?> sensorSizeSource;
+  final Value<String?> sensorSizeConfidence;
+  final Value<String?> rawFileSizeSource;
+  final Value<String?> rawFileSizeConfidence;
+  final Value<String?> metadataMake;
+  final Value<String?> metadataModel;
   const CameraModulesCompanion({
     this.id = const Value.absent(),
     this.deviceId = const Value.absent(),
@@ -986,6 +1461,16 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.averageRawFileSizeMB = const Value.absent(),
     this.source = const Value.absent(),
     this.confidence = const Value.absent(),
+    this.resolutionSource = const Value.absent(),
+    this.resolutionConfidence = const Value.absent(),
+    this.pixelPitchSource = const Value.absent(),
+    this.pixelPitchConfidence = const Value.absent(),
+    this.sensorSizeSource = const Value.absent(),
+    this.sensorSizeConfidence = const Value.absent(),
+    this.rawFileSizeSource = const Value.absent(),
+    this.rawFileSizeConfidence = const Value.absent(),
+    this.metadataMake = const Value.absent(),
+    this.metadataModel = const Value.absent(),
   });
   CameraModulesCompanion.insert({
     this.id = const Value.absent(),
@@ -1001,6 +1486,16 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.averageRawFileSizeMB = const Value.absent(),
     this.source = const Value.absent(),
     this.confidence = const Value.absent(),
+    this.resolutionSource = const Value.absent(),
+    this.resolutionConfidence = const Value.absent(),
+    this.pixelPitchSource = const Value.absent(),
+    this.pixelPitchConfidence = const Value.absent(),
+    this.sensorSizeSource = const Value.absent(),
+    this.sensorSizeConfidence = const Value.absent(),
+    this.rawFileSizeSource = const Value.absent(),
+    this.rawFileSizeConfidence = const Value.absent(),
+    this.metadataMake = const Value.absent(),
+    this.metadataModel = const Value.absent(),
   }) : deviceId = Value(deviceId),
        name = Value(name),
        sensorWidthMm = Value(sensorWidthMm),
@@ -1022,6 +1517,16 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Expression<double>? averageRawFileSizeMB,
     Expression<String>? source,
     Expression<String>? confidence,
+    Expression<String>? resolutionSource,
+    Expression<String>? resolutionConfidence,
+    Expression<String>? pixelPitchSource,
+    Expression<String>? pixelPitchConfidence,
+    Expression<String>? sensorSizeSource,
+    Expression<String>? sensorSizeConfidence,
+    Expression<String>? rawFileSizeSource,
+    Expression<String>? rawFileSizeConfidence,
+    Expression<String>? metadataMake,
+    Expression<String>? metadataModel,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1039,6 +1544,20 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
         'average_raw_file_size_m_b': averageRawFileSizeMB,
       if (source != null) 'source': source,
       if (confidence != null) 'confidence': confidence,
+      if (resolutionSource != null) 'resolution_source': resolutionSource,
+      if (resolutionConfidence != null)
+        'resolution_confidence': resolutionConfidence,
+      if (pixelPitchSource != null) 'pixel_pitch_source': pixelPitchSource,
+      if (pixelPitchConfidence != null)
+        'pixel_pitch_confidence': pixelPitchConfidence,
+      if (sensorSizeSource != null) 'sensor_size_source': sensorSizeSource,
+      if (sensorSizeConfidence != null)
+        'sensor_size_confidence': sensorSizeConfidence,
+      if (rawFileSizeSource != null) 'raw_file_size_source': rawFileSizeSource,
+      if (rawFileSizeConfidence != null)
+        'raw_file_size_confidence': rawFileSizeConfidence,
+      if (metadataMake != null) 'metadata_make': metadataMake,
+      if (metadataModel != null) 'metadata_model': metadataModel,
     });
   }
 
@@ -1056,6 +1575,16 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Value<double?>? averageRawFileSizeMB,
     Value<String?>? source,
     Value<String?>? confidence,
+    Value<String?>? resolutionSource,
+    Value<String?>? resolutionConfidence,
+    Value<String?>? pixelPitchSource,
+    Value<String?>? pixelPitchConfidence,
+    Value<String?>? sensorSizeSource,
+    Value<String?>? sensorSizeConfidence,
+    Value<String?>? rawFileSizeSource,
+    Value<String?>? rawFileSizeConfidence,
+    Value<String?>? metadataMake,
+    Value<String?>? metadataModel,
   }) {
     return CameraModulesCompanion(
       id: id ?? this.id,
@@ -1071,6 +1600,17 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       averageRawFileSizeMB: averageRawFileSizeMB ?? this.averageRawFileSizeMB,
       source: source ?? this.source,
       confidence: confidence ?? this.confidence,
+      resolutionSource: resolutionSource ?? this.resolutionSource,
+      resolutionConfidence: resolutionConfidence ?? this.resolutionConfidence,
+      pixelPitchSource: pixelPitchSource ?? this.pixelPitchSource,
+      pixelPitchConfidence: pixelPitchConfidence ?? this.pixelPitchConfidence,
+      sensorSizeSource: sensorSizeSource ?? this.sensorSizeSource,
+      sensorSizeConfidence: sensorSizeConfidence ?? this.sensorSizeConfidence,
+      rawFileSizeSource: rawFileSizeSource ?? this.rawFileSizeSource,
+      rawFileSizeConfidence:
+          rawFileSizeConfidence ?? this.rawFileSizeConfidence,
+      metadataMake: metadataMake ?? this.metadataMake,
+      metadataModel: metadataModel ?? this.metadataModel,
     );
   }
 
@@ -1118,6 +1658,44 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     if (confidence.present) {
       map['confidence'] = Variable<String>(confidence.value);
     }
+    if (resolutionSource.present) {
+      map['resolution_source'] = Variable<String>(resolutionSource.value);
+    }
+    if (resolutionConfidence.present) {
+      map['resolution_confidence'] = Variable<String>(
+        resolutionConfidence.value,
+      );
+    }
+    if (pixelPitchSource.present) {
+      map['pixel_pitch_source'] = Variable<String>(pixelPitchSource.value);
+    }
+    if (pixelPitchConfidence.present) {
+      map['pixel_pitch_confidence'] = Variable<String>(
+        pixelPitchConfidence.value,
+      );
+    }
+    if (sensorSizeSource.present) {
+      map['sensor_size_source'] = Variable<String>(sensorSizeSource.value);
+    }
+    if (sensorSizeConfidence.present) {
+      map['sensor_size_confidence'] = Variable<String>(
+        sensorSizeConfidence.value,
+      );
+    }
+    if (rawFileSizeSource.present) {
+      map['raw_file_size_source'] = Variable<String>(rawFileSizeSource.value);
+    }
+    if (rawFileSizeConfidence.present) {
+      map['raw_file_size_confidence'] = Variable<String>(
+        rawFileSizeConfidence.value,
+      );
+    }
+    if (metadataMake.present) {
+      map['metadata_make'] = Variable<String>(metadataMake.value);
+    }
+    if (metadataModel.present) {
+      map['metadata_model'] = Variable<String>(metadataModel.value);
+    }
     return map;
   }
 
@@ -1136,7 +1714,17 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           ..write('pixelPitchUm: $pixelPitchUm, ')
           ..write('averageRawFileSizeMB: $averageRawFileSizeMB, ')
           ..write('source: $source, ')
-          ..write('confidence: $confidence')
+          ..write('confidence: $confidence, ')
+          ..write('resolutionSource: $resolutionSource, ')
+          ..write('resolutionConfidence: $resolutionConfidence, ')
+          ..write('pixelPitchSource: $pixelPitchSource, ')
+          ..write('pixelPitchConfidence: $pixelPitchConfidence, ')
+          ..write('sensorSizeSource: $sensorSizeSource, ')
+          ..write('sensorSizeConfidence: $sensorSizeConfidence, ')
+          ..write('rawFileSizeSource: $rawFileSizeSource, ')
+          ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
+          ..write('metadataMake: $metadataMake, ')
+          ..write('metadataModel: $metadataModel')
           ..write(')'))
         .toString();
   }
@@ -1271,6 +1859,51 @@ class $OpticalRigsTable extends OpticalRigs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _focalLengthSourceMeta = const VerificationMeta(
+    'focalLengthSource',
+  );
+  @override
+  late final GeneratedColumn<String> focalLengthSource =
+      GeneratedColumn<String>(
+        'focal_length_source',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _focalLengthConfidenceMeta =
+      const VerificationMeta('focalLengthConfidence');
+  @override
+  late final GeneratedColumn<String> focalLengthConfidence =
+      GeneratedColumn<String>(
+        'focal_length_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _focalRatioSourceMeta = const VerificationMeta(
+    'focalRatioSource',
+  );
+  @override
+  late final GeneratedColumn<String> focalRatioSource = GeneratedColumn<String>(
+    'focal_ratio_source',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _focalRatioConfidenceMeta =
+      const VerificationMeta('focalRatioConfidence');
+  @override
+  late final GeneratedColumn<String> focalRatioConfidence =
+      GeneratedColumn<String>(
+        'focal_ratio_confidence',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1284,6 +1917,10 @@ class $OpticalRigsTable extends OpticalRigs
     maxExposureS,
     source,
     confidence,
+    focalLengthSource,
+    focalLengthConfidence,
+    focalRatioSource,
+    focalRatioConfidence,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1386,6 +2023,42 @@ class $OpticalRigsTable extends OpticalRigs
         confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
       );
     }
+    if (data.containsKey('focal_length_source')) {
+      context.handle(
+        _focalLengthSourceMeta,
+        focalLengthSource.isAcceptableOrUnknown(
+          data['focal_length_source']!,
+          _focalLengthSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('focal_length_confidence')) {
+      context.handle(
+        _focalLengthConfidenceMeta,
+        focalLengthConfidence.isAcceptableOrUnknown(
+          data['focal_length_confidence']!,
+          _focalLengthConfidenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('focal_ratio_source')) {
+      context.handle(
+        _focalRatioSourceMeta,
+        focalRatioSource.isAcceptableOrUnknown(
+          data['focal_ratio_source']!,
+          _focalRatioSourceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('focal_ratio_confidence')) {
+      context.handle(
+        _focalRatioConfidenceMeta,
+        focalRatioConfidence.isAcceptableOrUnknown(
+          data['focal_ratio_confidence']!,
+          _focalRatioConfidenceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1439,6 +2112,22 @@ class $OpticalRigsTable extends OpticalRigs
         DriftSqlType.string,
         data['${effectivePrefix}confidence'],
       ),
+      focalLengthSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}focal_length_source'],
+      ),
+      focalLengthConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}focal_length_confidence'],
+      ),
+      focalRatioSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}focal_ratio_source'],
+      ),
+      focalRatioConfidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}focal_ratio_confidence'],
+      ),
     );
   }
 
@@ -1473,6 +2162,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
 
   /// `verified` / `reported` / `estimated`; NULL = unknown.
   final String? confidence;
+  final String? focalLengthSource;
+  final String? focalLengthConfidence;
+  final String? focalRatioSource;
+  final String? focalRatioConfidence;
   const OpticalRig({
     required this.id,
     required this.name,
@@ -1485,6 +2178,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     this.maxExposureS,
     this.source,
     this.confidence,
+    this.focalLengthSource,
+    this.focalLengthConfidence,
+    this.focalRatioSource,
+    this.focalRatioConfidence,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1509,6 +2206,18 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     }
     if (!nullToAbsent || confidence != null) {
       map['confidence'] = Variable<String>(confidence);
+    }
+    if (!nullToAbsent || focalLengthSource != null) {
+      map['focal_length_source'] = Variable<String>(focalLengthSource);
+    }
+    if (!nullToAbsent || focalLengthConfidence != null) {
+      map['focal_length_confidence'] = Variable<String>(focalLengthConfidence);
+    }
+    if (!nullToAbsent || focalRatioSource != null) {
+      map['focal_ratio_source'] = Variable<String>(focalRatioSource);
+    }
+    if (!nullToAbsent || focalRatioConfidence != null) {
+      map['focal_ratio_confidence'] = Variable<String>(focalRatioConfidence);
     }
     return map;
   }
@@ -1536,6 +2245,18 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       confidence: confidence == null && nullToAbsent
           ? const Value.absent()
           : Value(confidence),
+      focalLengthSource: focalLengthSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(focalLengthSource),
+      focalLengthConfidence: focalLengthConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(focalLengthConfidence),
+      focalRatioSource: focalRatioSource == null && nullToAbsent
+          ? const Value.absent()
+          : Value(focalRatioSource),
+      focalRatioConfidence: focalRatioConfidence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(focalRatioConfidence),
     );
   }
 
@@ -1558,6 +2279,16 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       maxExposureS: serializer.fromJson<double?>(json['maxExposureS']),
       source: serializer.fromJson<String?>(json['source']),
       confidence: serializer.fromJson<String?>(json['confidence']),
+      focalLengthSource: serializer.fromJson<String?>(
+        json['focalLengthSource'],
+      ),
+      focalLengthConfidence: serializer.fromJson<String?>(
+        json['focalLengthConfidence'],
+      ),
+      focalRatioSource: serializer.fromJson<String?>(json['focalRatioSource']),
+      focalRatioConfidence: serializer.fromJson<String?>(
+        json['focalRatioConfidence'],
+      ),
     );
   }
   @override
@@ -1575,6 +2306,12 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       'maxExposureS': serializer.toJson<double?>(maxExposureS),
       'source': serializer.toJson<String?>(source),
       'confidence': serializer.toJson<String?>(confidence),
+      'focalLengthSource': serializer.toJson<String?>(focalLengthSource),
+      'focalLengthConfidence': serializer.toJson<String?>(
+        focalLengthConfidence,
+      ),
+      'focalRatioSource': serializer.toJson<String?>(focalRatioSource),
+      'focalRatioConfidence': serializer.toJson<String?>(focalRatioConfidence),
     };
   }
 
@@ -1590,6 +2327,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     Value<double?> maxExposureS = const Value.absent(),
     Value<String?> source = const Value.absent(),
     Value<String?> confidence = const Value.absent(),
+    Value<String?> focalLengthSource = const Value.absent(),
+    Value<String?> focalLengthConfidence = const Value.absent(),
+    Value<String?> focalRatioSource = const Value.absent(),
+    Value<String?> focalRatioConfidence = const Value.absent(),
   }) => OpticalRig(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1606,6 +2347,18 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     maxExposureS: maxExposureS.present ? maxExposureS.value : this.maxExposureS,
     source: source.present ? source.value : this.source,
     confidence: confidence.present ? confidence.value : this.confidence,
+    focalLengthSource: focalLengthSource.present
+        ? focalLengthSource.value
+        : this.focalLengthSource,
+    focalLengthConfidence: focalLengthConfidence.present
+        ? focalLengthConfidence.value
+        : this.focalLengthConfidence,
+    focalRatioSource: focalRatioSource.present
+        ? focalRatioSource.value
+        : this.focalRatioSource,
+    focalRatioConfidence: focalRatioConfidence.present
+        ? focalRatioConfidence.value
+        : this.focalRatioConfidence,
   );
   OpticalRig copyWithCompanion(OpticalRigsCompanion data) {
     return OpticalRig(
@@ -1634,6 +2387,18 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
       confidence: data.confidence.present
           ? data.confidence.value
           : this.confidence,
+      focalLengthSource: data.focalLengthSource.present
+          ? data.focalLengthSource.value
+          : this.focalLengthSource,
+      focalLengthConfidence: data.focalLengthConfidence.present
+          ? data.focalLengthConfidence.value
+          : this.focalLengthConfidence,
+      focalRatioSource: data.focalRatioSource.present
+          ? data.focalRatioSource.value
+          : this.focalRatioSource,
+      focalRatioConfidence: data.focalRatioConfidence.present
+          ? data.focalRatioConfidence.value
+          : this.focalRatioConfidence,
     );
   }
 
@@ -1650,7 +2415,11 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           ..write('apertureDiameterMm: $apertureDiameterMm, ')
           ..write('maxExposureS: $maxExposureS, ')
           ..write('source: $source, ')
-          ..write('confidence: $confidence')
+          ..write('confidence: $confidence, ')
+          ..write('focalLengthSource: $focalLengthSource, ')
+          ..write('focalLengthConfidence: $focalLengthConfidence, ')
+          ..write('focalRatioSource: $focalRatioSource, ')
+          ..write('focalRatioConfidence: $focalRatioConfidence')
           ..write(')'))
         .toString();
   }
@@ -1668,6 +2437,10 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
     maxExposureS,
     source,
     confidence,
+    focalLengthSource,
+    focalLengthConfidence,
+    focalRatioSource,
+    focalRatioConfidence,
   );
   @override
   bool operator ==(Object other) =>
@@ -1683,7 +2456,11 @@ class OpticalRig extends DataClass implements Insertable<OpticalRig> {
           other.apertureDiameterMm == this.apertureDiameterMm &&
           other.maxExposureS == this.maxExposureS &&
           other.source == this.source &&
-          other.confidence == this.confidence);
+          other.confidence == this.confidence &&
+          other.focalLengthSource == this.focalLengthSource &&
+          other.focalLengthConfidence == this.focalLengthConfidence &&
+          other.focalRatioSource == this.focalRatioSource &&
+          other.focalRatioConfidence == this.focalRatioConfidence);
 }
 
 class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
@@ -1698,6 +2475,10 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
   final Value<double?> maxExposureS;
   final Value<String?> source;
   final Value<String?> confidence;
+  final Value<String?> focalLengthSource;
+  final Value<String?> focalLengthConfidence;
+  final Value<String?> focalRatioSource;
+  final Value<String?> focalRatioConfidence;
   const OpticalRigsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1710,6 +2491,10 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.maxExposureS = const Value.absent(),
     this.source = const Value.absent(),
     this.confidence = const Value.absent(),
+    this.focalLengthSource = const Value.absent(),
+    this.focalLengthConfidence = const Value.absent(),
+    this.focalRatioSource = const Value.absent(),
+    this.focalRatioConfidence = const Value.absent(),
   });
   OpticalRigsCompanion.insert({
     this.id = const Value.absent(),
@@ -1723,6 +2508,10 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     this.maxExposureS = const Value.absent(),
     this.source = const Value.absent(),
     this.confidence = const Value.absent(),
+    this.focalLengthSource = const Value.absent(),
+    this.focalLengthConfidence = const Value.absent(),
+    this.focalRatioSource = const Value.absent(),
+    this.focalRatioConfidence = const Value.absent(),
   }) : name = Value(name),
        cameraModuleId = Value(cameraModuleId),
        focalLengthMm = Value(focalLengthMm),
@@ -1739,6 +2528,10 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Expression<double>? maxExposureS,
     Expression<String>? source,
     Expression<String>? confidence,
+    Expression<String>? focalLengthSource,
+    Expression<String>? focalLengthConfidence,
+    Expression<String>? focalRatioSource,
+    Expression<String>? focalRatioConfidence,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1753,6 +2546,12 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       if (maxExposureS != null) 'max_exposure_s': maxExposureS,
       if (source != null) 'source': source,
       if (confidence != null) 'confidence': confidence,
+      if (focalLengthSource != null) 'focal_length_source': focalLengthSource,
+      if (focalLengthConfidence != null)
+        'focal_length_confidence': focalLengthConfidence,
+      if (focalRatioSource != null) 'focal_ratio_source': focalRatioSource,
+      if (focalRatioConfidence != null)
+        'focal_ratio_confidence': focalRatioConfidence,
     });
   }
 
@@ -1768,6 +2567,10 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     Value<double?>? maxExposureS,
     Value<String?>? source,
     Value<String?>? confidence,
+    Value<String?>? focalLengthSource,
+    Value<String?>? focalLengthConfidence,
+    Value<String?>? focalRatioSource,
+    Value<String?>? focalRatioConfidence,
   }) {
     return OpticalRigsCompanion(
       id: id ?? this.id,
@@ -1781,6 +2584,11 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
       maxExposureS: maxExposureS ?? this.maxExposureS,
       source: source ?? this.source,
       confidence: confidence ?? this.confidence,
+      focalLengthSource: focalLengthSource ?? this.focalLengthSource,
+      focalLengthConfidence:
+          focalLengthConfidence ?? this.focalLengthConfidence,
+      focalRatioSource: focalRatioSource ?? this.focalRatioSource,
+      focalRatioConfidence: focalRatioConfidence ?? this.focalRatioConfidence,
     );
   }
 
@@ -1820,6 +2628,22 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
     if (confidence.present) {
       map['confidence'] = Variable<String>(confidence.value);
     }
+    if (focalLengthSource.present) {
+      map['focal_length_source'] = Variable<String>(focalLengthSource.value);
+    }
+    if (focalLengthConfidence.present) {
+      map['focal_length_confidence'] = Variable<String>(
+        focalLengthConfidence.value,
+      );
+    }
+    if (focalRatioSource.present) {
+      map['focal_ratio_source'] = Variable<String>(focalRatioSource.value);
+    }
+    if (focalRatioConfidence.present) {
+      map['focal_ratio_confidence'] = Variable<String>(
+        focalRatioConfidence.value,
+      );
+    }
     return map;
   }
 
@@ -1836,7 +2660,11 @@ class OpticalRigsCompanion extends UpdateCompanion<OpticalRig> {
           ..write('apertureDiameterMm: $apertureDiameterMm, ')
           ..write('maxExposureS: $maxExposureS, ')
           ..write('source: $source, ')
-          ..write('confidence: $confidence')
+          ..write('confidence: $confidence, ')
+          ..write('focalLengthSource: $focalLengthSource, ')
+          ..write('focalLengthConfidence: $focalLengthConfidence, ')
+          ..write('focalRatioSource: $focalRatioSource, ')
+          ..write('focalRatioConfidence: $focalRatioConfidence')
           ..write(')'))
         .toString();
   }
@@ -6998,6 +7826,16 @@ typedef $$CameraModulesTableCreateCompanionBuilder =
       Value<double?> averageRawFileSizeMB,
       Value<String?> source,
       Value<String?> confidence,
+      Value<String?> resolutionSource,
+      Value<String?> resolutionConfidence,
+      Value<String?> pixelPitchSource,
+      Value<String?> pixelPitchConfidence,
+      Value<String?> sensorSizeSource,
+      Value<String?> sensorSizeConfidence,
+      Value<String?> rawFileSizeSource,
+      Value<String?> rawFileSizeConfidence,
+      Value<String?> metadataMake,
+      Value<String?> metadataModel,
     });
 typedef $$CameraModulesTableUpdateCompanionBuilder =
     CameraModulesCompanion Function({
@@ -7014,6 +7852,16 @@ typedef $$CameraModulesTableUpdateCompanionBuilder =
       Value<double?> averageRawFileSizeMB,
       Value<String?> source,
       Value<String?> confidence,
+      Value<String?> resolutionSource,
+      Value<String?> resolutionConfidence,
+      Value<String?> pixelPitchSource,
+      Value<String?> pixelPitchConfidence,
+      Value<String?> sensorSizeSource,
+      Value<String?> sensorSizeConfidence,
+      Value<String?> rawFileSizeSource,
+      Value<String?> rawFileSizeConfidence,
+      Value<String?> metadataMake,
+      Value<String?> metadataModel,
     });
 
 final class $$CameraModulesTableReferences
@@ -7126,6 +7974,56 @@ class $$CameraModulesTableFilterComposer
 
   ColumnFilters<String> get confidence => $composableBuilder(
     column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resolutionSource => $composableBuilder(
+    column: $table.resolutionSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resolutionConfidence => $composableBuilder(
+    column: $table.resolutionConfidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pixelPitchSource => $composableBuilder(
+    column: $table.pixelPitchSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pixelPitchConfidence => $composableBuilder(
+    column: $table.pixelPitchConfidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sensorSizeSource => $composableBuilder(
+    column: $table.sensorSizeSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sensorSizeConfidence => $composableBuilder(
+    column: $table.sensorSizeConfidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rawFileSizeSource => $composableBuilder(
+    column: $table.rawFileSizeSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rawFileSizeConfidence => $composableBuilder(
+    column: $table.rawFileSizeConfidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metadataMake => $composableBuilder(
+    column: $table.metadataMake,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metadataModel => $composableBuilder(
+    column: $table.metadataModel,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7247,6 +8145,56 @@ class $$CameraModulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get resolutionSource => $composableBuilder(
+    column: $table.resolutionSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resolutionConfidence => $composableBuilder(
+    column: $table.resolutionConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pixelPitchSource => $composableBuilder(
+    column: $table.pixelPitchSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pixelPitchConfidence => $composableBuilder(
+    column: $table.pixelPitchConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sensorSizeSource => $composableBuilder(
+    column: $table.sensorSizeSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sensorSizeConfidence => $composableBuilder(
+    column: $table.sensorSizeConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rawFileSizeSource => $composableBuilder(
+    column: $table.rawFileSizeSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rawFileSizeConfidence => $composableBuilder(
+    column: $table.rawFileSizeConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metadataMake => $composableBuilder(
+    column: $table.metadataMake,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metadataModel => $composableBuilder(
+    column: $table.metadataModel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DevicesTableOrderingComposer get deviceId {
     final $$DevicesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7329,6 +8277,56 @@ class $$CameraModulesTableAnnotationComposer
 
   GeneratedColumn<String> get confidence => $composableBuilder(
     column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get resolutionSource => $composableBuilder(
+    column: $table.resolutionSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get resolutionConfidence => $composableBuilder(
+    column: $table.resolutionConfidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pixelPitchSource => $composableBuilder(
+    column: $table.pixelPitchSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pixelPitchConfidence => $composableBuilder(
+    column: $table.pixelPitchConfidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sensorSizeSource => $composableBuilder(
+    column: $table.sensorSizeSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sensorSizeConfidence => $composableBuilder(
+    column: $table.sensorSizeConfidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rawFileSizeSource => $composableBuilder(
+    column: $table.rawFileSizeSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rawFileSizeConfidence => $composableBuilder(
+    column: $table.rawFileSizeConfidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metadataMake => $composableBuilder(
+    column: $table.metadataMake,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get metadataModel => $composableBuilder(
+    column: $table.metadataModel,
     builder: (column) => column,
   );
 
@@ -7422,6 +8420,16 @@ class $$CameraModulesTableTableManager
                 Value<double?> averageRawFileSizeMB = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> confidence = const Value.absent(),
+                Value<String?> resolutionSource = const Value.absent(),
+                Value<String?> resolutionConfidence = const Value.absent(),
+                Value<String?> pixelPitchSource = const Value.absent(),
+                Value<String?> pixelPitchConfidence = const Value.absent(),
+                Value<String?> sensorSizeSource = const Value.absent(),
+                Value<String?> sensorSizeConfidence = const Value.absent(),
+                Value<String?> rawFileSizeSource = const Value.absent(),
+                Value<String?> rawFileSizeConfidence = const Value.absent(),
+                Value<String?> metadataMake = const Value.absent(),
+                Value<String?> metadataModel = const Value.absent(),
               }) => CameraModulesCompanion(
                 id: id,
                 deviceId: deviceId,
@@ -7436,6 +8444,16 @@ class $$CameraModulesTableTableManager
                 averageRawFileSizeMB: averageRawFileSizeMB,
                 source: source,
                 confidence: confidence,
+                resolutionSource: resolutionSource,
+                resolutionConfidence: resolutionConfidence,
+                pixelPitchSource: pixelPitchSource,
+                pixelPitchConfidence: pixelPitchConfidence,
+                sensorSizeSource: sensorSizeSource,
+                sensorSizeConfidence: sensorSizeConfidence,
+                rawFileSizeSource: rawFileSizeSource,
+                rawFileSizeConfidence: rawFileSizeConfidence,
+                metadataMake: metadataMake,
+                metadataModel: metadataModel,
               ),
           createCompanionCallback:
               ({
@@ -7452,6 +8470,16 @@ class $$CameraModulesTableTableManager
                 Value<double?> averageRawFileSizeMB = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> confidence = const Value.absent(),
+                Value<String?> resolutionSource = const Value.absent(),
+                Value<String?> resolutionConfidence = const Value.absent(),
+                Value<String?> pixelPitchSource = const Value.absent(),
+                Value<String?> pixelPitchConfidence = const Value.absent(),
+                Value<String?> sensorSizeSource = const Value.absent(),
+                Value<String?> sensorSizeConfidence = const Value.absent(),
+                Value<String?> rawFileSizeSource = const Value.absent(),
+                Value<String?> rawFileSizeConfidence = const Value.absent(),
+                Value<String?> metadataMake = const Value.absent(),
+                Value<String?> metadataModel = const Value.absent(),
               }) => CameraModulesCompanion.insert(
                 id: id,
                 deviceId: deviceId,
@@ -7466,6 +8494,16 @@ class $$CameraModulesTableTableManager
                 averageRawFileSizeMB: averageRawFileSizeMB,
                 source: source,
                 confidence: confidence,
+                resolutionSource: resolutionSource,
+                resolutionConfidence: resolutionConfidence,
+                pixelPitchSource: pixelPitchSource,
+                pixelPitchConfidence: pixelPitchConfidence,
+                sensorSizeSource: sensorSizeSource,
+                sensorSizeConfidence: sensorSizeConfidence,
+                rawFileSizeSource: rawFileSizeSource,
+                rawFileSizeConfidence: rawFileSizeConfidence,
+                metadataMake: metadataMake,
+                metadataModel: metadataModel,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -7567,6 +8605,10 @@ typedef $$OpticalRigsTableCreateCompanionBuilder =
       Value<double?> maxExposureS,
       Value<String?> source,
       Value<String?> confidence,
+      Value<String?> focalLengthSource,
+      Value<String?> focalLengthConfidence,
+      Value<String?> focalRatioSource,
+      Value<String?> focalRatioConfidence,
     });
 typedef $$OpticalRigsTableUpdateCompanionBuilder =
     OpticalRigsCompanion Function({
@@ -7581,6 +8623,10 @@ typedef $$OpticalRigsTableUpdateCompanionBuilder =
       Value<double?> maxExposureS,
       Value<String?> source,
       Value<String?> confidence,
+      Value<String?> focalLengthSource,
+      Value<String?> focalLengthConfidence,
+      Value<String?> focalRatioSource,
+      Value<String?> focalRatioConfidence,
     });
 
 final class $$OpticalRigsTableReferences
@@ -7680,6 +8726,26 @@ class $$OpticalRigsTableFilterComposer
 
   ColumnFilters<String> get confidence => $composableBuilder(
     column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get focalLengthSource => $composableBuilder(
+    column: $table.focalLengthSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get focalLengthConfidence => $composableBuilder(
+    column: $table.focalLengthConfidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get focalRatioSource => $composableBuilder(
+    column: $table.focalRatioSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get focalRatioConfidence => $composableBuilder(
+    column: $table.focalRatioConfidence,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7791,6 +8857,26 @@ class $$OpticalRigsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get focalLengthSource => $composableBuilder(
+    column: $table.focalLengthSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get focalLengthConfidence => $composableBuilder(
+    column: $table.focalLengthConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get focalRatioSource => $composableBuilder(
+    column: $table.focalRatioSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get focalRatioConfidence => $composableBuilder(
+    column: $table.focalRatioConfidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CameraModulesTableOrderingComposer get cameraModuleId {
     final $$CameraModulesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7863,6 +8949,26 @@ class $$OpticalRigsTableAnnotationComposer
 
   GeneratedColumn<String> get confidence => $composableBuilder(
     column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get focalLengthSource => $composableBuilder(
+    column: $table.focalLengthSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get focalLengthConfidence => $composableBuilder(
+    column: $table.focalLengthConfidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get focalRatioSource => $composableBuilder(
+    column: $table.focalRatioSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get focalRatioConfidence => $composableBuilder(
+    column: $table.focalRatioConfidence,
     builder: (column) => column,
   );
 
@@ -7954,6 +9060,10 @@ class $$OpticalRigsTableTableManager
                 Value<double?> maxExposureS = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> confidence = const Value.absent(),
+                Value<String?> focalLengthSource = const Value.absent(),
+                Value<String?> focalLengthConfidence = const Value.absent(),
+                Value<String?> focalRatioSource = const Value.absent(),
+                Value<String?> focalRatioConfidence = const Value.absent(),
               }) => OpticalRigsCompanion(
                 id: id,
                 name: name,
@@ -7966,6 +9076,10 @@ class $$OpticalRigsTableTableManager
                 maxExposureS: maxExposureS,
                 source: source,
                 confidence: confidence,
+                focalLengthSource: focalLengthSource,
+                focalLengthConfidence: focalLengthConfidence,
+                focalRatioSource: focalRatioSource,
+                focalRatioConfidence: focalRatioConfidence,
               ),
           createCompanionCallback:
               ({
@@ -7980,6 +9094,10 @@ class $$OpticalRigsTableTableManager
                 Value<double?> maxExposureS = const Value.absent(),
                 Value<String?> source = const Value.absent(),
                 Value<String?> confidence = const Value.absent(),
+                Value<String?> focalLengthSource = const Value.absent(),
+                Value<String?> focalLengthConfidence = const Value.absent(),
+                Value<String?> focalRatioSource = const Value.absent(),
+                Value<String?> focalRatioConfidence = const Value.absent(),
               }) => OpticalRigsCompanion.insert(
                 id: id,
                 name: name,
@@ -7992,6 +9110,10 @@ class $$OpticalRigsTableTableManager
                 maxExposureS: maxExposureS,
                 source: source,
                 confidence: confidence,
+                focalLengthSource: focalLengthSource,
+                focalLengthConfidence: focalLengthConfidence,
+                focalRatioSource: focalRatioSource,
+                focalRatioConfidence: focalRatioConfidence,
               ),
           withReferenceMapper: (p0) => p0
               .map(
