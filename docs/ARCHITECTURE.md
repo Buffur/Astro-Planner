@@ -130,6 +130,11 @@
 >   - **Recognition-only formats:** HEIF (ISO-BMFF HEIF/AVIF major brands), PNG, CR2 (TIFF + `CR`, version 2), CR3 (`crx `), RAF, RW2 and ORF; no parser for any of them.
 >   - **`ExifRational`/`ExifValues`** moved to `exif_values.dart`.
 >   - `tiff_metadata_reader.dart` is replaced by the above.
+> **S2.8 (2026-09-26, Stage 2; its commit is recorded by the next change):** the JPEG reader (ADR-017 §13). `JpegMetadataReader` walks the marker segments from SOI to the first SOS:
+>   - fill bytes are allowed; SOS or EOI ends the walk; a bad marker, a zero length, a second SOI or more than 128 segments is corrupt; a segment past the end is truncated;
+>   - the APP1 `Exif\0\0` segment goes to the shared `ExifStructure` through a `MetadataSourceWindow` (origin "APP1 IFD0" or "APP1 EXIF IFD"); every other segment is skipped by its length;
+>   - the scan data is never read; a JPEG without Exif is "extracted, nothing found".
+> Registered in `CaptureMetadataReader.readers`. The owner's phone JPEG (a local check) gives every contract value, including a UTC capture time from `OffsetTimeOriginal`, reading 843 bytes of 4.7 MB. The synthetic fixture is `test/support/jpeg_fixture.dart`.
 
 ---
 

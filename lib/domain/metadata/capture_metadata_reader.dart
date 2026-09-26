@@ -1,5 +1,6 @@
 import 'capture_metadata.dart';
 import 'dng_metadata_reader.dart';
+import 'jpeg_metadata_reader.dart';
 import 'metadata_format.dart';
 import 'metadata_source.dart';
 
@@ -21,9 +22,12 @@ abstract interface class MetadataFormatReader {
 /// [MetadataUnsupported], never a guess. Every read goes through a byte
 /// budget; nothing reads the whole file.
 abstract final class CaptureMetadataReader {
-  /// The formats with a reader. FITS waits for a real sample (S2.6); JPEG
-  /// for one too (S2.8); HEIF for research and a sample (S2.R2, S2.9).
-  static const List<MetadataFormatReader> readers = [DngMetadataReader()];
+  /// The formats with a reader (ADR-017 §13): DNG and JPEG. HEIF waits for
+  /// the owner's decision (S2.9); FITS and PNG are out of Stage 2.
+  static const List<MetadataFormatReader> readers = [
+    DngMetadataReader(),
+    JpegMetadataReader(),
+  ];
 
   static Future<MetadataReading> read(
     MetadataSource source, {

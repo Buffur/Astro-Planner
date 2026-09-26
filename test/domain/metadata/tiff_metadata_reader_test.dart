@@ -225,7 +225,8 @@ void main() {
     for (final (header, format) in [
       ('SIMPLE  =                    T'.codeUnits, MetadataFormat.fits),
       ('XISF0100'.codeUnits, MetadataFormat.xisf),
-      ([0xFF, 0xD8, 0xFF, 0xE1], MetadataFormat.jpeg),
+      // JPEG has a reader since S2.8; HEIF is recognised, without one.
+      ([0, 0, 0, 24, ...'ftypheic'.codeUnits, 0, 0, 0, 0], MetadataFormat.heif),
       (<int>[], MetadataFormat.unknown),
       ('not an image'.codeUnits, MetadataFormat.unknown),
     ]) {

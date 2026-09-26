@@ -983,7 +983,7 @@ and still gated on a sample.
 | Task | Title | Kind | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
 | S2.7 | Layered recognition and a reusable EXIF extractor | Implementation (refactor, no DNG behaviour change) | M | S2.5 | **Frozen; next** |
-| S2.8 | JPEG reader (the APP1 `Exif` segment) | Implementation | S–M | S2.7, **a real JPEG sample** | Frozen; **unblocked** (the owner's phone JPEG, 2026-09-26) |
+| S2.8 | JPEG reader (the APP1 `Exif` segment) | Implementation | S–M | S2.7, **a real JPEG sample** | **Done 2026-09-26** |
 | S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | **Done 2026-09-26** (`research/S2.R2_HEIF_METADATA.md`); owner decision pending |
 | S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | Conditional; the sample exists; defined in S2.R2 §7, awaiting the owner's decision |
 | S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | **Out of Stage 2** (owner, 2026-09-26: no PNG files for now) |

@@ -2756,8 +2756,9 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
     contract; `FeatureScope.metadataImport` stays false.
   - §13.2 and §13.3 (S2.7, 2026-09-26, commit `9a0432b`): layered readings, `MetadataFormatReader` dispatch, the shared
     `ExifStructure` with `MetadataSourceWindow`, and the recognition-only formats.
-- **Open:** FITS (S2.6, needs a sample); JPEG (S2.8, needs a sample); HEIF (S2.R2, then S2.9); PNG (S2.10);
-  RG-14 (S2.R3); device checks M1 and M2.
+  - JPEG (S2.8, 2026-09-26): `jpeg_metadata_reader.dart`, verified on the owner's phone JPEG.
+- **Open:** HEIF (S2.9, awaiting the owner's decision); RG-14 (S2.R3); device checks M1 and M2. FITS and PNG are out of
+  Stage 2 (owner).
 
 ### 1. Context (verified)
 
