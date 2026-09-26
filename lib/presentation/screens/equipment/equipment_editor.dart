@@ -420,6 +420,9 @@ class _EquipmentEditor {
                         const SizedBox(height: 12),
                         DropdownButtonFormField<TrackingType>(
                           initialValue: trackingType,
+                          // S3.10: the chosen label wraps inside the field
+                          // instead of overflowing on a phone at large text.
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Tracking',
                           ),
@@ -532,7 +535,7 @@ class _EquipmentEditor {
   }
 }
 
-/// A Stellarium-style row: Label   [FieldW] × [FieldH]   Unit
+/// A Stellarium-style row: the label, then [FieldW] × [FieldH] Unit.
 class _StellariumRow extends StatelessWidget {
   const _StellariumRow({
     required this.label,
@@ -548,29 +551,30 @@ class _StellariumRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final theme = Theme.of(context);
+    // S3.10 (TD-069): the label sits above the W × H fields, so the fields
+    // get the dialog's whole width. Beside a fixed 90 dp label they were
+    // too narrow on a phone, and the read-only sensor fields clipped
+    // "9.89" to "9.8".
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 90,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          ),
-        ),
-        Expanded(child: fieldW),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Text('×', style: Theme.of(context).textTheme.titleMedium),
-        ),
-        Expanded(child: fieldH),
-        const SizedBox(width: 6),
-        SizedBox(
-          width: 30,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 14),
-            child: Text(unit, style: Theme.of(context).textTheme.bodySmall),
-          ),
+        Text(label, style: theme.textTheme.bodyMedium),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: fieldW),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text('×', style: theme.textTheme.titleMedium),
+            ),
+            Expanded(child: fieldH),
+            const SizedBox(width: 6),
+            Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: Text(unit, style: theme.textTheme.bodySmall),
+            ),
+          ],
         ),
       ],
     );

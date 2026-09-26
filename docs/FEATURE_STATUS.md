@@ -468,6 +468,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 6. Tests: 4 form-validation widget tests, 1 encoding test, 2 repository tests.
 
 ## F-23 — Equipment composition (Device / Camera module / Optical rig)
+- **S3.10 (2026-09-26):** the rig editor reads on a phone. Each resolution, pixel-size and sensor-size row puts its label above its fields (TD-069: the sensor size showed "9.8" for 9.89 on the owner's phone), and the Tracking dropdown no longer overflows at larger text.
 - **S3.5 (2026-09-26, Stage 3):** the rig editor now works from a form model (`EquipmentDraft`) and can open pre-filled from a metadata candidate (`showEquipmentEditor`). Each pre-filled value shows where it came from ("From the file (JPEG)", "Estimated from the 35 mm equivalent — check it", "From your saved rig with this camera") until it is edited, and then it becomes the user's. The diameter, tracking, rotation and maximum exposure are never pre-filled. Manual Add/Edit is unchanged (its 10 tests pass unmodified). The import entry point arrives with S3.6/S3.7.
 - **S3.4 (2026-09-26, Stage 3; ADR-018 §5; schema v18):** each spec a metadata import can fill (resolution, pixel pitch, sensor size, RAW size, focal length, focal ratio) can record its own source and confidence, falling back to its group's. A manual edit marks only the changed specs as the user's, so untouched verified values stay verified. The file's Make/Model are stored for later matching. The editor looks and behaves as before; composition is still deferred (ADR-011 §2).
 - **Status:** Partial
