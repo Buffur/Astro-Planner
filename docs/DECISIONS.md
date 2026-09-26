@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 2 decisions (2026-09-26):** ADR-017 accepted; PD-21 resolved; RD-16 resolved for Stage 2 (E.1, "Stage 2 decisions: RG-01, PD-21, RD-16").
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -378,7 +379,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-18 **RESOLVED 2026-09-23** | Session aggregate, lifecycle and snapshots | `SessionLog` conflates plan and result; the "current session" is implicit ViewModel state; MASTER_ROADMAP TASK 11.1 | **Resolved — see E.1 and ADR-014.** | — | Session schema migration (11.2) |
 | PD-19 **RESOLVED 2026-09-23** | Information architecture and navigation (also resolves PD-14) | A single scrolling page with icon entry points; MASTER_ROADMAP TASK 12.1 | **Resolved — see E.1 and ADR-015.** | — | Navigation shell (12.2), execution and logbook screens |
 | PD-20 **RESOLVED 2026-09-24** | Execution model under Android constraints | No execution concept exists; timers die in the background; MASTER_ROADMAP TASK 13.1 | **Resolved — see E.1 and ADR-016.** | — | Execution tasks 13.2–13.4 |
-| PD-21 *(placeholder, registered 2026-09-21)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
+| PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
 
@@ -749,6 +750,54 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
     RD-05 (Stage 4). It is not yet recorded there.
 - **Not changed:** every other carried item (TD-057, TD-058, RD-17, the Stage 11 device
   checks, the stale preferences with TD-056).
+
+### Stage 2 decisions: RG-01, PD-21, RD-16 (2026-09-26)
+
+- **Decided by:** the project owner, in chat, on 2026-09-26, after S2.R1
+  (`docs/refinement/research/RG-01_METADATA_FORMATS.md`). The research direction is approved
+  with the owner's constraints, recorded here and in ADR-017 (Part F).
+- **PD-21 (RESOLVED).**
+  - DNG is supported in Stage 2, on the two real samples.
+  - FITS comes only after the owner supplies a real FITS sample.
+  - JPEG, XISF, CR3 and every other format stay sample-driven and deferred.
+  - No format is claimed without a representative real sample and tests.
+- **Architecture (ADR-017, accepted):**
+  - bounded, header-oriented reads; the whole capture file is never loaded;
+  - recognition by signature;
+  - only the approved contract's fields are parsed; missing or ambiguous values stay
+    Unknown, and provenance is kept;
+  - file I/O stays outside the domain.
+  - Removing `exif` and `image_picker` needed to be **justified from the repository**, not
+    assumed. ADR-017 §7 gives that justification.
+- **Privacy:**
+  - GPS, device serial numbers and observer identity are outside the contract and never
+    extracted;
+  - the time zone is never inferred: a capture time without one stays explicitly zone
+    unknown.
+- **Fixtures:** the owner's raw DNG slices are **not** committed; the real files stay outside
+  the repository for local real-sample validation. Committed fixtures are minimal, sanitized
+  and deterministic. A Xiaomi-specific structural fixture, if needed, is sanitized first.
+  (This replaces S2.R1's recommended option C1.)
+- **RD-16 (RESOLVED for Stage 2):** the metadata import UI stays hidden during Stage 2, and
+  Stage 2 delivers and validates the foundation only. Nothing extracted goes into Equipment.
+  Stage 3 defines `Metadata → EquipmentCandidate → Match/Enrich → User Confirmation →
+  Persist`, and when anything becomes visible.
+- **Stage 3 evidence (preserved for RG-02):** the owner's phone exposes its two camera modules
+  (main and telephoto) with the **same** Make, Model and UniqueCameraModel. In the samples
+  they are distinguishable only through optical metadata (focal length, 35 mm equivalent,
+  f-number) and the image geometry. Focal length is **not** a universally reliable camera
+  identifier: zoom lenses, user-entered software values and other devices break it.
+- **Android picker and cache (TD-065 in Stage 2's scope):**
+  - a bounded parser is not enough if the picker first copies the whole file;
+  - metadata files are opened without a copy (ADR-017 §6), and cache ownership and cleanup
+    are defined there;
+  - no general file-management function is added.
+  (This replaces S2.R1's recommended option B1.)
+- **Blocker recorded, not decided:** the Android access path (ADR-017 §6) is native code, and
+  this machine cannot run it. The SDK has the emulator binary but no system image and no
+  virtual device, the cmdline-tools are missing (TASK 16.2's owner action), and no phone is
+  connected. S2.4's acceptance needs a device check. The options are the owner's phone with
+  USB debugging (`adb` is installed), or an emulator image installed by the owner.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2651,3 +2700,174 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
   page and in Sessions (owner); the full session detail is TASK 14.1.
 - **Status:** ADR-016 is implemented (TASKs 13.2–13.4); device checks are listed in
   `docs/TEST_PLAN.md`.
+
+## ADR-017: Image metadata reading (Stage 2 foundation)
+
+Status: accepted (owner, 2026-09-26, after S2.R1; the constraints are in E.1, "Stage 2
+decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** not started (Stage 2,
+S2.1–S2.6).
+
+### 1. Context (verified)
+
+- **The prototype** (`metadata_extractor.dart`, F-45, TD-018):
+  - reads whole files;
+  - does its I/O in `lib/domain`;
+  - returns string-only fields;
+  - misreads FITS strings;
+  - and, on the owner's real phone DNGs, finds none of the capture fields (TD-064).
+- **Both pickers copy the whole file into the app cache before returning:**
+  - `file_picker` 13.1.0 (`android_file_picker` 2.0.0, `FileUtils.kt` `openFileStream`);
+  - `image_picker` 1.2.3 (`image_picker_android` 0.8.13+23, `FileUtils.java:63–90`), which
+    also offers images only (the Photo Picker `ImageOnly`, or `image/*`).
+  - Nothing clears the `file_picker` cache (TD-065).
+- **Evidence:** `docs/refinement/research/RG-01_METADATA_FORMATS.md`.
+
+### 2. Decision: the metadata contract
+
+Stage 2 extracts **only** these fields, each as a typed value with provenance (§5):
+
+| Field | Unit / form | DNG/TIFF source |
+| --- | --- | --- |
+| Exposure time | seconds | ExposureTime (33434) |
+| Sensitivity | a value **and its kind**: ISO speed (kind unspecified unless SensitivityType says so) | ISOSpeedRatings (34855), SensitivityType (34864) |
+| Focal length | mm | FocalLength (37386) |
+| 35 mm-equivalent focal length | mm, **a separate field**, never used as the focal length | FocalLengthIn35mmFilm (41989) |
+| f-number | dimensionless | FNumber (33437) |
+| Capture time | the local wall-clock time as recorded, plus the offset **only if recorded**; otherwise explicitly **zone unknown** | DateTimeOriginal (36867), OffsetTimeOriginal (36881) |
+| Camera identity (raw strings, for Stage 3) | text | Make (271), Model (272), UniqueCameraModel (50708) |
+| Lens identity (raw strings, for Stage 3) | text | LensMake (42035), LensModel (42036) |
+
+- Tags are looked up in IFD0 **and** the EXIF IFD (34665). A value found in both with
+  different contents is **ambiguous**, and stays Unknown with both raw values kept.
+- FITS fields are added to the contract, by amending this ADR, when a real FITS sample exists
+  (§8). No other format is in the contract.
+
+### 3. Decision: privacy exclusions
+
+- **Never extracted:**
+  - GPS or any location (the GPS IFD 34853; FITS `SITELAT`/`SITELONG`/`SITEELEV`; XISF
+    `Observation:Location:*`);
+  - serial numbers and unique ids (BodySerialNumber, CameraSerialNumber, LensSerialNumber,
+    ImageUniqueID, RawDataUniqueID);
+  - observer or owner identity (Artist, Copyright, `OBSERVER`).
+- The reader does not follow the GPS IFD pointer at all.
+- **No time zone is inferred** from anything: not the device, the site or the file name. A
+  capture time without a recorded offset stays zone-unknown; Stage 8 may ask the user.
+
+### 4. Decision: bounded access
+
+1. **The domain interface** `MetadataSource` (pure Dart) offers `length` and
+   `read(offset, count)`. It is wrapped by a **byte budget**: 1 MiB per file by default, with
+   each read at most 64 KiB. A read beyond the end, or over the budget, is a typed failure,
+   never a crash. Nothing ever reads the whole file.
+2. **Recognition by signature**, never by name or picker filter:
+   - TIFF: `II*\0` / `MM\0*`, with DNG identified by DNGVersion (50706);
+   - FITS: `SIMPLE  =` in the first card. It is recognised but unsupported until §8.
+   - Anything else is `unsupported(format)`.
+3. **Readers** are pure Dart and in-house, over `MetadataSource`. The TIFF/EXIF IFD reader:
+   - bounds-checks every offset and count;
+   - guards against loops (visited offsets);
+   - limits the number of IFD entries and chain length;
+   - never reads strip or tile data.
+4. **I/O lives in the data layer only.** A test forbids `dart:io`, the platform and parsing
+   packages in the domain metadata code.
+
+### 5. Decision: typed values and provenance
+
+- **The reading is one of:**
+  - `read(values)`;
+  - `unsupported(format)`;
+  - `unreadable(reason)` (truncated, corrupt, budget exceeded, I/O failure).
+- **Each field is one of:**
+  - `known(value, unit, source)`, where the source is the format, the tag or keyword, and
+    the provenance "file metadata as written by the capture device or software";
+  - `absent`;
+  - `unparseable(raw)`;
+  - `ambiguous(raws)`.
+- Unknown stays Unknown: no default, no 0.
+- Rationals are kept exactly until converted, with a zero denominator unparseable.
+
+### 6. Decision: Android file access and cache ownership
+
+1. **Metadata files are opened without a copy.** An in-app platform channel (Kotlin in
+   `android/app`, no new dependency) handles:
+   - **pick:** starts `ACTION_OPEN_DOCUMENT` (`*/*`, `CATEGORY_OPENABLE`) and returns the
+     content URI, display name and size;
+   - **reads:** serves `read(uri, offset, count)` through
+     `ContentResolver.openFileDescriptor(uri, "r")` with a positioned read;
+   - **non-seekable descriptors** (for example a streaming cloud provider): a sequential
+     read from the start, allowed only while `offset + count` stays within the byte budget,
+     otherwise a typed failure.
+2. **The grant is transient.** No persistable URI permission is taken, and URIs are never
+   stored.
+3. **Cache ownership:**
+   - the metadata path creates **no** cache files;
+   - `file_picker`'s cache belongs to the flow that picked the file. The backup restore
+     (TASK 14.4, which reads its file whole by design) clears it with
+     `FilePicker.clearTemporaryFiles()` once the pick is consumed or abandoned (TD-065).
+   - No other file-management behaviour is added.
+4. **Host tests** exercise the Dart side through a fake channel and a file-backed
+   `MetadataSource`. The Kotlin path needs a device check (see E.1).
+
+### 7. Decision: dependencies
+
+Justified by the current repository (`grep` at `565341b`):
+- **`image_picker`** is used only by `metadata_import_screen.dart`. It copies the whole file
+  and cannot offer FITS or other non-image files, so it cannot meet §4 or §6. It is removed
+  when the screen moves to the new foundation.
+- **`exif`** is used only by `metadata_extractor.dart`. Its public API accepts only a whole
+  byte list or a `dart:io` `File` (with a content URI and no copy there is no `File`). It
+  cannot take a budgeted random-access source, and it decodes far beyond the contract
+  (MakerNotes, thumbnails). So it is removed with the prototype extractor.
+- **`file_picker`** stays, for backup and restore only.
+
+### 8. Decision: formats
+
+- **Supported in Stage 2:** DNG, verified on the owner's two real samples, with an IFD0
+  (TIFF/EP) layout. A claim of support for any other layout or maker needs a representative
+  real sample and tests.
+- **FITS:** only after the owner supplies a real FITS sample. Adding it amends §2 and §8.
+- **Not supported, and sample-driven:** JPEG, XISF, CR3, CR2, NEF, ARW, RAF, ORF, RW2 and
+  HEIC. A recognised but unsupported file gives `unsupported(format)`.
+
+### 9. Decision: fixtures
+
+- **The owner's real files stay outside the repository.** A local-only real-sample test
+  reads them from a directory named by an environment variable, with expected values stored
+  beside the samples (also outside the repository). It is skipped, with a clear message, when
+  the variable is unset.
+- **Committed fixtures are synthetic and deterministic.** They are built in code by a test
+  helper, and **no bytes of the owner's files are committed**. They reproduce the structures
+  the parser needs:
+  - an IFD0-only DNG like the samples, including large rational denominators and no EXIF
+    IFD, no offset and no GPS;
+  - an EXIF-IFD variant;
+  - corrupt, truncated, looping and oversized cases.
+- The values are neutral (for example Make `TestMake`, a fixed synthetic timestamp); no
+  device build string.
+
+### 10. Decision: visibility and the Stage 3 boundary
+
+- The metadata import UI stays hidden during Stage 2 (`FeatureScope.metadataImport` stays
+  false).
+- Nothing extracted is written to Equipment, sessions or any store.
+- Stage 3 defines `Metadata → EquipmentCandidate → Match/Enrich → User Confirmation →
+  Persist`.
+
+### 11. Alternatives considered
+
+- **Keeping `exif`,** reading a prefix of bytes. Rejected: no random access within a budget;
+  it decodes beyond the contract.
+- **`file_picker` for metadata,** reading the cached copy. Rejected by the owner: the whole
+  file is copied before any bounded parsing.
+- **Committing header slices of the owner's files.** Rejected by the owner: the repository is
+  public.
+- **A third-party SAF package.** Not evaluated: an in-app channel of about 100 lines needs no
+  new dependency, licence review or maintenance risk.
+
+### 12. Consequences
+
+- About 100 lines of Kotlin enter `android/app`, and they are verified only on a device.
+- `exif` and `image_picker` leave `pubspec.yaml`.
+- F-45 stays hidden.
+- TD-018, TD-064 and TD-065 are closed by Stage 2's Tasks.

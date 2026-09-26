@@ -3,19 +3,19 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. S2.R1 (the RG-01 research) is done, using the owner's two
-> phone DNGs. Stage 2 now waits for five owner decisions and a FITS sample
-> (`research/RG-01_METADATA_FORMATS.md` §9).
+> **Last updated:** 2026-09-26. The owner decided RG-01: ADR-017 is accepted, and PD-21 and
+> RD-16 are resolved for Stage 2. The Stage 2 Tasks S2.1–S2.6 are frozen, and S2.1 is next.
+> Open blockers: a device for S2.4's acceptance, and a FITS sample for S2.6.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 2 — Metadata Foundation: In progress.** S2.R1 is done. S2.1–S2.6 stay provisional until the owner decides (`POST_ROADMAP_PLAN.md`, "Stage 2 — Task sequence") |
+| Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. **Waiting for the owner:** the five questions in `research/RG-01_METADATA_FORMATS.md` §9 (the files the owner uses and their samples; PD-21; ADR-017; the fixture policy; RD-16). Then S2.1–S2.6 are frozen |
+| Next approved Task | **S2.1 — Bounded metadata source and format recognition** (host-testable). Then S2.2 → S2.3 → S2.4 (needs a device check) → S2.5. S2.6 (FITS) is gated on a real FITS sample |
 | Code baseline | `ea65231` (S1.V4). Later commits change documentation and evidence only. Not pushed (S1.14) |
 | Quality gate at the baseline | **Green**, re-run independently on 2026-09-26 at `c99bd7f`: Encoding, Format and Analyze pass; 963 tests and 2 host E2E tests pass |
 | Schema | v17 |
@@ -28,7 +28,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
-| 2 | Metadata Foundation | Planning | 2026-09-26 | — | — |
+| 2 | Metadata Foundation | In progress | 2026-09-26 | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
@@ -69,7 +69,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | Fast re-validation after S1.V1–S1.V4 (same session, owner's request; **not independent**) | 2026-09-26 | `c99bd7f` | At `ea65231`: gate green (963 + 2 E2E), clean tree. Throwaway probes: the reset as `main.dart` runs it with a leftover marker → 164 targets, 1 rig, `.bak` kept; edit → New → restart and edit → Start → restart leave nothing unsaved and the run untouched. One low finding **W1**: a Duplicate of an edited plan counts as saved in-session but unsaved after a restart, so New right after Duplicate replaces the copy without asking (the saved original remains; only the copy's night is lost). Proposed: record under RD-05, like V3. Stage 1 still needs an **independent** validation to close |
 | 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | `39392d9` | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
 | 1–2 | Stage 1 closed by the owner, and Stage 2 planning (documentation only) | 2026-09-26 | `565341b` | The owner said "lets go to stage 2" after the re-validation failed. Recorded as a waiver (DECISIONS E.1): TD-063 moved to Stage 8, X2 and W1 carried. Stage 2: TD-018's mechanisms were re-verified at `39392d9` (all still present); six planning-time findings were placed; S2.R1 is frozen and S2.1–S2.6 are provisional (`POST_ROADMAP_PLAN.md`) |
-| 2 | S2.R1 — RG-01: formats, libraries, file selection, fixtures (research, documentation only) | 2026-09-26 | The S2.R1 commit* | The owner's two phone DNGs (Xiaomi, DNG 1.4, 25 MB each; kept outside the repository) were inspected. All their metadata sits in IFD0 within the first 6.7 KB. They have no GPS and no time offset, and the same Model for both cameras (input for RG-02). The prototype finds 0 of 5 capture fields in them (TD-064). Sources read: `exif` 3.3.0 (MIT; TIFF, JPEG and HEIC; no byte-budget API); `file_picker` 13.1.0 / `android_file_picker` 2.0.0 (copies every file whole into the cache; the extension filter drops unknown MIME types; TD-065); the FITS 4.0 standard (`CONTINUE` is standard, `''` escapes, `DATE-OBS` is UTC at the start); XISF 1.0 (focal length in metres, gain in e⁻/DN); N.I.N.A.'s documented keywords (FOCALLEN is user-entered). Recommended: DNG/TIFF now, FITS on a sample, in-house bounded readers, the `exif` and `image_picker` dependencies removed, no GPS or serials, header-only fixtures with consent, the feature hidden until Stage 3. Proposed ADR-017 |
+| 2 | S2.R1 — RG-01: formats, libraries, file selection, fixtures (research, documentation only) | 2026-09-26 | `d4b2be4` | The owner's two phone DNGs (Xiaomi, DNG 1.4, 25 MB each; kept outside the repository) were inspected. All their metadata sits in IFD0 within the first 6.7 KB. They have no GPS and no time offset, and the same Model for both cameras (input for RG-02). The prototype finds 0 of 5 capture fields in them (TD-064). Sources read: `exif` 3.3.0 (MIT; TIFF, JPEG and HEIC; no byte-budget API); `file_picker` 13.1.0 / `android_file_picker` 2.0.0 (copies every file whole into the cache; the extension filter drops unknown MIME types; TD-065); the FITS 4.0 standard (`CONTINUE` is standard, `''` escapes, `DATE-OBS` is UTC at the start); XISF 1.0 (focal length in metres, gain in e⁻/DN); N.I.N.A.'s documented keywords (FOCALLEN is user-entered). Recommended: DNG/TIFF now, FITS on a sample, in-house bounded readers, the `exif` and `image_picker` dependencies removed, no GPS or serials, header-only fixtures with consent, the feature hidden until Stage 3. Proposed ADR-017 |
+| 2 | RG-01 decided by the owner; ADR-017; Stage 2 frozen (documentation only) | 2026-09-26 | The decision commit* | The owner approved the direction with constraints. Decided: DNG only, and FITS only with a real sample; bounded reads recognised by signature; the approved contract's fields only; Unknown and provenance kept; no GPS, serials or observer; no inferred zone; the owner's slices never committed (synthetic, sanitized fixtures; the real files stay local); the UI hidden in Stage 2; no Equipment writes; TD-065 is in scope. ADR-017 written (Part F), including the justified removal of `exif` and `image_picker` (both copy or read whole files; each has one use). Verified: `image_picker_android` 0.8.13+23 also copies every pick into the cache, and offers images only. Stage 3 evidence recorded (identical Model across the phone's cameras). S2.1–S2.6 frozen. New blocker: no Android device or emulator can run S2.4's native path |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -109,7 +110,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
-| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Researched** 2026-09-26 (S2.R1, `research/RG-01_METADATA_FORMATS.md`). The owner decision is pending, and a FITS sample is still missing |
+| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017; DECISIONS E.1). A FITS sample is still needed for S2.6 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
@@ -144,7 +145,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
-| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open; asked in S2.R1 §9. Recommended: hidden until Stage 3 |
+| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved for Stage 2** 2026-09-26: hidden throughout Stage 2; Stage 3 decides |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
@@ -161,7 +162,11 @@ These block a release, not refinement.
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
-- Real metadata sample files for Stage 2 (RG-01).
+- Stage 2:
+  - a real FITS sample (for S2.6);
+  - an Android device for S2.4 and S2.5's device checks: USB debugging on the owner's
+    phone, or an emulator image.
+  The phone DNG samples are provided and stay outside the repository.
 
 ## Known blockers
 
@@ -169,11 +174,12 @@ These block a release, not refinement.
   S1.5 is broken and S1.6 partial, and the S1.V stamps cite no commit. It is a proposed
   S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
   F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
-- **Stage 2:** the owner's answers to S2.R1 §9, and a real FITS sample (and XISF, if used)
-  before S2.3 and S2.5. The phone DNG samples exist outside the repository. Keep the samples
-  outside the repository until S2.R1 sets the fixture policy: the remote is public, and headers
-  can hold GPS, serial numbers and names. Implementation Tasks S2.1–S2.6 cannot start before
-  the RG-01 decision.
+- **Stage 2:**
+  - **S2.4's acceptance needs an Android device.** This machine has the emulator binary
+    but no system image and no virtual device, and no phone is connected. The options: the
+    owner's phone with USB debugging (`adb` is installed), or an emulator image. S2.1–S2.3
+    are host-only and are not blocked.
+  - **S2.6 needs a real FITS sample** from the owner.
 - **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
   rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
   some build, but no build, device or commit is recorded (`POST_ROADMAP_PLAN.md` §1.3 item 2).
@@ -277,20 +283,15 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Owner decisions** on S2.R1 (`research/RG-01_METADATA_FORMATS.md` §9):
+**S2.1 — Bounded metadata source and format recognition** (implementation, frozen and
+approved; `POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017 §4). Use a fresh
+session where practical. It is host-only; no blocker applies.
 
-1. which formats and software the owner uses, with a sample of each (FITS matters most);
-2. PD-21, the format set;
-3. ADR-017 as proposed;
-4. the fixture policy (header-only derivatives in the public repository, with consent);
-5. RD-16.
-
-Then record the decisions:
-- ADR-017 into `DECISIONS.md` Part F;
-- PD-21 and RD-16 resolved;
-- S2.1–S2.6 amended and frozen in `POST_ROADMAP_PLAN.md`.
-
-S2.1 starts after that. No implementation before the decision.
+After that, the order is:
+1. S2.2 and S2.3 (host);
+2. S2.4, which is implemented on the host but accepted only after a device check;
+3. S2.5;
+4. S2.6, only once a real FITS sample exists; otherwise the owner moves it out of Stage 2.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

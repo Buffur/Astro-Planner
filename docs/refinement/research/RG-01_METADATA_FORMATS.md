@@ -3,7 +3,12 @@
 > **Task:** S2.R1 (Stage 2, research; documentation only; resolves PD-21 once the owner
 > decides). **Date:** 2026-09-26. **Repository:** `main` @ `565341b`. No application code
 > changed.
-> **Status: evidence complete for what the samples allow. Owner decisions pending** (§9).
+> **Status: decided 2026-09-26.** The owner approved the direction with constraints
+> (DECISIONS E.1, "Stage 2 decisions"; ADR-017). Two recommendations were replaced:
+> - fixtures: option C1 is rejected, and only synthetic, sanitized fixtures are committed;
+> - file access: option B1 is rejected, and metadata files are opened without a picker
+>   copy.
+> The evidence below is unchanged, except that the exact capture times are redacted.
 > The workflow is `POST_ROADMAP_PLAN.md` §9.6. Facts are marked **[verified]** with their
 > evidence, **[unknown]** with what would resolve them, or **[assumption]**.
 
@@ -54,7 +59,7 @@ scripts, deleted afterwards).
 | Which camera | telephoto (60 mm equivalent) | main (23 mm equivalent) |
 | Image size | 4080 × 3072, CFA, 16 bits/sample, uncompressed | 4096 × 3072 |
 | White level | 1023 (10-bit data) | 16383 (14-bit data) |
-| DateTimeOriginal | `2026:09:24 23:38:46` | `2026:09:24 23:39:23` |
+| DateTimeOriginal | a local time on 2026-09-24 *(exact value redacted)* | the same night, 37 s later |
 | OffsetTimeOriginal, SubSecTime | **absent** | absent |
 | EXIF IFD (34665), GPS IFD (34853) | **absent** | absent |
 | Serial numbers, unique image IDs | absent. Copyright is present but empty (1 byte) | same |

@@ -676,7 +676,7 @@ Found in planning, placed in the Tasks below:
 
 | Task | Title | Kind | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S2.R1 | RG-01: formats, libraries, file selection, fixtures | Research (docs only) | M | — | **Done 2026-09-26** (research); owner decisions pending |
+| S2.R1 | RG-01: formats, libraries, file selection, fixtures | Research (docs only) | M | — | **Done 2026-09-26**; decided the same day (ADR-017) |
 | S2.1 | Bounded file access behind a domain interface | Implementation | M | S2.R1 decided | Provisional |
 | S2.2 | Typed metadata with units, provenance and explicit unknowns | Implementation | M | S2.1 | Provisional |
 | S2.3 | FITS header reader | Implementation | M | S2.2, FITS samples | Provisional |
@@ -831,6 +831,148 @@ Then comes Stage 2 validation in a fresh session.
   - if visible: the sweep passes in the three themes at 100 % and 200 %;
   - TD-018, F-45 and PD-21 are updated (Stage 2 exit).
 
+#### Stage 2 — frozen Task sequence (2026-09-26)
+
+**Frozen 2026-09-26** after the owner's RG-01 decisions (DECISIONS E.1, "Stage 2 decisions:
+RG-01, PD-21, RD-16"; ADR-017). These definitions replace the provisional S2.1–S2.6 above,
+which are kept for history.
+
+| Task | Title | Size | Depends on | Host-testable | State |
+| --- | --- | --- | --- | --- | --- |
+| S2.1 | Bounded metadata source and format recognition | S–M | ADR-017 | yes | **Frozen; next** |
+| S2.2 | The metadata contract as typed values with provenance | M | S2.1 | yes (pure) | Frozen |
+| S2.3 | DNG/TIFF reader, with synthetic fixtures and local real-sample validation | M | S2.2 | yes | Frozen |
+| S2.4 | Android document access without a copy; picker cache ownership (TD-065) | M | S2.1 | Dart side only | Frozen; **device check needed** |
+| S2.5 | The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed | S–M | S2.3, S2.4 | yes, plus a device check | Frozen |
+| S2.6 | FITS reader | M | S2.2, **a real FITS sample** | yes | **Gated on the sample** |
+
+Then comes Stage 2 validation (fresh session). **The Stage 2 exit is adjusted** by ADR-017 §8:
+"each supported format is parsed from a real sample" means DNG. If no FITS sample exists by
+then, S2.6 moves to a later Stage by owner decision, and the FITS keyword ("recognised,
+unsupported") stays.
+
+**Common rules for S2.1–S2.6** (in addition to those above):
+- ADR-017 is binding: the contract fields only; no location, serials or observer; no inferred
+  zone; bounded reads; I/O in the data layer;
+- nothing is persisted, and the UI stays hidden;
+- no bytes of the owner's files are committed;
+- each Task updates F-45, TD-018/064/065 as they resolve, and ADR-017's implementation notes.
+
+##### S2.1 — Bounded metadata source and format recognition
+- **Objective:** the domain has a `MetadataSource` (length; `read(offset, count)`) wrapped by
+  a byte budget (1 MiB per file, reads of at most 64 KiB), and a signature recognizer. The data
+  layer has a file-backed source (`RandomAccessFile`; host, tests, desktop).
+- **Scope:**
+  - the interface, the budget wrapper and the typed read failures (past the end, over budget,
+    I/O);
+  - recognition of TIFF (with DNG through DNGVersion, read in S2.3), FITS (recognised,
+    unsupported) and unknown;
+  - the file source;
+  - an architecture test: no `dart:io`, platform or parsing packages in the domain metadata
+    code.
+- **Out of scope:** parsing fields (S2.3); Android (S2.4); the old extractor stays untouched
+  until S2.5.
+- **Acceptance:**
+  - a 4 GiB sparse file is recognised with an asserted number of bytes read (≤ 64 KiB);
+  - every failure is typed;
+  - the budget is enforced across reads;
+  - the architecture test fails on a domain `dart:io` import.
+
+##### S2.2 — The metadata contract as typed values with provenance
+- **Objective:** ADR-017 §2 and §5 in pure Dart:
+  - the readings `read`, `unsupported` and `unreadable`;
+  - the field values `known` (value, unit, source), `absent`, `unparseable` and `ambiguous`;
+  - exposure in seconds from exact rationals;
+  - the sensitivity value with its kind;
+  - focal length and its 35 mm equivalent as separate fields;
+  - the capture time as local wall-clock with an optional recorded offset, or explicitly zone
+    unknown.
+- **Out of scope:** formats (S2.3); conversions between ISO and gain (never).
+- **Acceptance:**
+  - unit tests for each field's parsing and units, zero denominators, the conflict between
+    IFD0 and EXIF (`ambiguous`), and a time without an offset;
+  - no default for any missing value;
+  - `SCIENTIFIC_INTEGRITY.md` records the rational-to-seconds and 35 mm-equivalent rules.
+
+##### S2.3 — DNG/TIFF reader, with synthetic fixtures and local real-sample validation
+- **Objective:** read ADR-017 §2's fields from a DNG through `MetadataSource`: IFD0 and the
+  EXIF IFD, never the GPS IFD, never pixel data.
+- **Scope:**
+  - **The reader:** bounds checks, loop and entry limits, little- and big-endian;
+  - **the fixture builder:** synthetic and deterministic, built in code (no binary files and
+    no owner bytes), with these cases:
+    - an IFD0-only layout like the owner's DNGs (rationals such as 3750000000/125000000; no
+      EXIF IFD, no offset, no GPS);
+    - an EXIF-IFD layout;
+    - a GPS IFD present, to prove it is never read (and never followed);
+    - truncated, looping, out-of-range and oversized cases;
+  - **the real-sample test:** local only, with `ASTROPLAN_METADATA_SAMPLES` naming a directory
+    outside the repository that holds the files and an expected-values JSON. It is skipped
+    with a message when unset. The implementing session sets it up with the owner's two DNGs
+    and records the result in `PROGRESS.md`, never the values.
+- **Out of scope:** other TIFF-based RAWs and JPEG (ADR-017 §8), MakerNotes.
+- **Acceptance:**
+  - both real DNGs give the expected contract values locally;
+  - for the telephoto sample, 30 s, ISO 50 (kind unspecified), 8.8 mm, 60 mm equivalent,
+    f/2.0 and a zone-unknown time;
+  - the bytes read per sample are asserted to be ≤ 64 KiB;
+  - every synthetic case passes;
+  - the GPS pointer is never followed (asserted through the source's read log).
+
+##### S2.4 — Android document access without a copy; picker cache ownership (TD-065)
+- **Objective:** ADR-017 §6. A metadata file is picked and read in bounded ranges straight
+  from its content URI, with no cache copy. `file_picker`'s cache is cleared by its owning
+  flow.
+- **Scope:**
+  - **the channel (Kotlin, `android/app`):**
+    - pick: `ACTION_OPEN_DOCUMENT`, `*/*`, openable; returns the URI, name and size;
+    - read: `openFileDescriptor` with a positioned read;
+    - the sequential fallback for non-seekable descriptors, within the budget;
+    - no persistable grant;
+  - **the Dart side:** a `MetadataSource` over the channel (the data layer), with typed errors
+    for a cancel, a revoked grant or an I/O failure;
+  - **the backup restore:** calls `FilePicker.clearTemporaryFiles()` once its pick is
+    consumed or abandoned (TD-065).
+- **Out of scope:** batch selection (Stage 8); browsing, listing or managing files; a visible
+  entry point.
+- **Acceptance:**
+  - host tests over a fake channel (range reads, budget, a non-seekable fallback, errors) and
+    for the backup cleanup;
+  - **a device check:** on a real Android device, picking each owner DNG reads ≤ 64 KiB and
+    creates nothing under the app's cache.
+  - Until the device check passes, S2.4 is recorded as implemented but **not accepted**. This
+    is the blocker in E.1.
+
+##### S2.5 — The hidden import screen on the foundation; the prototype, `exif` and `image_picker` removed
+- **Objective:** the hidden screen (`FeatureScope.metadataImport` stays false) picks through
+  S2.4 and shows ADR-017's typed values: units, source, and Unknown / ambiguous. It is the
+  harness for S2.4's device check. The prototype extractor and the old `ImageMetadata` go.
+- **Scope:**
+  - rework the screen, with its errors through `LoadFailureView` / `runWithFeedback`;
+  - delete `metadata_extractor.dart` and its test (replaced by the S2.1–S2.3 tests);
+  - remove `exif` and `image_picker` from `pubspec.yaml` after a `grep` shows no other use
+    (ADR-017 §7);
+  - `docs/privacy` and `COMPLIANCE.md`: no change needed, since nothing leaves the device —
+    confirm this.
+- **Out of scope:** making the screen visible; persisting anything.
+- **Acceptance:**
+  - widget tests for success, unsupported, unreadable, cancelled and zone unknown;
+  - the gate test still shows the feature hidden;
+  - the quality gate is green;
+  - the device check (a local, uncommitted flip of the gate in a debug build) reads both
+    owner DNGs.
+
+##### S2.6 — FITS reader (gated on a real FITS sample)
+- Starts only after the owner supplies a real FITS file. Then:
+  - ADR-017 §2 and §8 are amended with the FITS fields, following RG-01 §3.3 and §3.6. The
+    rules stay the same: `EXPTIME`/`EXPOSURE` in seconds; the gain setting as its own kind;
+    `FOCALLEN` with its "software setting" provenance; `DATE-OBS`/`DATE-UTC` as UTC per the
+    sample; no `SITE*` or `OBSERVER`;
+  - the reader follows the FITS 4.0 card rules (2,880-byte blocks to `END` with a block limit;
+    commentary records; `''` escapes; `CONTINUE`);
+  - the fixtures are synthetic, plus a local real-sample test;
+  - the TD-018 `/` defect is covered by a test.
+
 ### Stage 3 — Metadata → Equipment / Device Import
 
 - **Purpose:** reduce manual equipment setup using verified metadata.
@@ -847,7 +989,11 @@ Then comes Stage 2 validation in a fresh session.
   - which metadata identifies the camera, device and optics reliably: EXIF `Make`, `Model`
     and `LensModel`; FITS keywords such as `INSTRUME`, `TELESCOP`, `FOCALLEN` and pixel-size
     keywords, and which capture software writes them;
-  - smartphone behaviour (35 mm-equivalent focal lengths, binned versus full resolution);
+  - smartphone behaviour (35 mm-equivalent focal lengths, binned versus full resolution).
+    **Evidence (S2.R1, owner's samples, 2026-09-26):** both camera modules of one phone share
+    Make, Model and UniqueCameraModel, and only the optical metadata (focal length, 35 mm
+    equivalent, f-number) and the image geometry tell them apart. Focal length is not a
+    universally reliable identifier (DECISIONS E.1, "Stage 2 decisions");
   - manual lenses and telescopes (no lens data, so the value stays unknown);
   - what cannot be derived (for example pixel pitch, sensor size, tracking), and whether a
     sourced equipment catalog is needed (TASK 8.5's verified-seed policy; "reported"
@@ -1169,7 +1315,7 @@ any implementation Task is created.
 
 | ID | Question | Evidence and reason | Stage | Constraints |
 | --- | --- | --- | --- | --- |
-| RG-01 | Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
+| RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
 | RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6 |
 | RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms |
 | RG-04 | What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
@@ -1204,7 +1350,7 @@ any implementation Task is created.
 | RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? | SCI-07 | 8 | — |
 | RD-14 | Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
-| RD-16 | When and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3 | PD-06; `FeatureScope` | 2 | — |
+| RD-16 | **RESOLVED for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
 | RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 
 **Answered in part by Stage 0:** the direction part of 07 §6 item 11 (the primary 1.0 user),
@@ -1465,7 +1611,7 @@ recorded, not approved.
 | 16.5 store listing and runbook | Not started | After Stage 11, only if the owner decides to release |
 | 17.1, 17.2 | Not started | Stage 2 |
 | 17.3 assisted actuals | Not started | Stage 8 |
-| PD-21 metadata formats | Placeholder | RG-01 |
+| PD-21 metadata formats | Resolved 2026-09-26 (ADR-017: DNG now, FITS on a sample) | RG-01 (decided) |
 | M3 dogfooding go/no-go | No record | Stage 11 |
 | AC1–AC7 records; milestone tags | No records | AC7 in Stage 11; others optional |
 | TD-018, TD-020, TD-025, TD-037, TD-038, TD-045, TD-049, TD-051, TD-053, TD-054, TD-056 | Open in `TECH_DEBT.md` | TD-018 in Stage 2; TD-051 and TD-054 in Stage 6; TD-053 via RD-07; TD-056 in Stage 8; the others only alongside related work |
