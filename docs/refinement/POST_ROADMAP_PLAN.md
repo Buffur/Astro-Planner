@@ -987,7 +987,7 @@ and still gated on a sample.
 | S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | **Done 2026-09-26** (`research/S2.R2_HEIF_METADATA.md`); owner decision pending |
 | S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | **Done 2026-09-26** (approved by the owner) |
 | S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | **Out of Stage 2** (owner, 2026-09-26: no PNG files for now) |
-| S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | Frozen |
+| S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | **Done 2026-09-26** (`research/S2.R3_RG14_PROPRIETARY_RAW.md`); owner decision pending |
 
 **The Stage 2 exit, amended:** the foundation is validated; DNG is supported. Every other
 format is either supported on a real sample with tests, or recorded as recognised-only with
