@@ -3,6 +3,9 @@
 > **Metadata update, 2026-09-26 (S3.2):** the equipment candidate (pure domain, CALC-40); F-45
 > below. Not visible, and nothing is written.
 
+> **Exposure presentation verified, 2026-09-26:** TD-066 resolved. The debug metadata
+> viewer uses reciprocal fractions, with ≈ for rounded values; source metadata is unchanged.
+
 > **Metadata update, 2026-09-26 (S3.1):** the contract gains image dimensions (ADR-018 §3); F-45
 > below. Still hidden.
 
@@ -711,7 +714,7 @@ see DATA_MODEL.md B2/B8.)
 - **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
 - **Historical prototype issues (removed in S2.5):** gallery-only selection, whole-file reads, faulty FITS string splitting and no real-sample coverage. The replacement has local DNG/JPEG samples; FITS is explicitly out of this Stage.
 - **Dependencies:** the app's own `metadata_document` channel; gate `FeatureScope.metadataImport` (false). *(Was: image_picker, exif.)*
-- **Known issues now** *(corrected S2.V5, 2026-09-26; the old text said the HEIC decision and the RAW research were open, and they are done: S2.9 `bb28452`, RG-14 `5d8bdbb`)*: FITS, PNG, AVIF and proprietary RAW wait for samples. Device checks M1–M3 passed (seekable providers, the S2.V3 protocol included, in M3). The non-seekable (cloud) path and a real backup's preview cancel are still unverified on a device. Unknown provider size remains a typed failure. TD-066 remains presentation debt.
+- **Known issues now** *(corrected S2.V5, 2026-09-26; the old text said the HEIC decision and the RAW research were open, and they are done: S2.9 `bb28452`, RG-14 `5d8bdbb`)*: FITS, PNG, AVIF and proprietary RAW wait for samples. Device checks M1–M3 passed (seekable providers, the S2.V3 protocol included, in M3). The non-seekable (cloud) path and a real backup's preview cancel are still unverified on a device. Unknown provider size remains a typed failure. TD-066 resolved 2026-09-26: 0.04005 s displays as ≈1/25 s; exact 0.02 s as 1/50 s. Metadata and calculations retain their original values.
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode

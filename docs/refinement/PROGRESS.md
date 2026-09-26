@@ -9,6 +9,16 @@
 
 ## Current state
 
+**Exposure formatting amendment, 2026-09-26 (owner, TD-066):** brought forward
+from S3.7 after enabling the debug viewer. Shared `QuantityText.exposure` uses
+integer reciprocal fractions within 0.5% relative error, with ≈ for approximation
+(1e-12 tolerance for floating-point noise). Thus 0.04005 s → ≈1/25 s and
+0.02 s → 1/50 s. Original metadata, raw rationals and calculations are unchanged.
+The public workflow and M4 still belong to S3.7. Targeted formatter, metadata-row
+and metadata-screen tests: 20 pass. Full quality gate passes: encoding, format,
+analysis, 1,094 unit/widget tests (one expected local-sample skip) and 2 host E2E
+tests. This run also includes the concurrent S3.2 tests present in the workspace.
+
 **Debug access amendment, 2026-09-26 (owner):** Settings → Import metadata is
 enabled in debug builds for Stage 3 development (`FeatureScope.metadataImport`
 uses `kDebugMode`). Profile/release visibility and the planned Equipment
@@ -396,7 +406,7 @@ Useful inputs:
 - the S1.5 and S1.11 device checks (Stage 11);
 - S2V-06's device checks (a non-seekable provider; a real backup's preview cancel): the next
   time the phone is connected, or Stage 11;
-- TD-066 (sub-second exposures shown as decimals; Stage 5/6, or when the screen becomes visible);
+- TD-066 resolved 2026-09-26 (fractional exposure presentation; see amendment above);
 - the stale id-holding preferences after a reset, `editedSessionId` included (with
   TD-056/ENG-14).
 
