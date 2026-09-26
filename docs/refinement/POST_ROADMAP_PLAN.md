@@ -354,6 +354,12 @@ the unsaved-changes dialog's accessibility check, V2) from the same-session revi
 (TD-059–TD-062) from the independent validation, defined with their acceptance in
 `STAGE_1_VALIDATION.md`. V3 goes to RD-05. A repeat independent validation follows S1.V4.
 
+**Stage 1 closed by the owner, 2026-09-26 (DECISIONS E.1, "Stage 1 closed by the owner").** The
+repeat independent validation (`STAGE_1_REVALIDATION.md`, `39392d9`) did not pass: TD-063 and
+X2 survived. The owner waived the exit criterion and moved on. TD-063 goes to Stage 8. X2 (the
+proposed S1.V6, documentation only) stays open for an owner request or Stage 11. W1 stays a
+proposed input to RD-05. The proposed S1.V5 was not run.
+
 ##### S1.1 — Open-Meteo user agent (A3; ENG-03, RT-07)
 - **Objective:** every Open-Meteo request carries `AppIdentity.userAgent` (CLAUDE.md trap 22).
 - **Scope:** `open_meteo_weather_repository.dart` (and its client construction in `main.dart`
@@ -625,6 +631,198 @@ the unsaved-changes dialog's accessibility check, V2) from the same-session revi
   sample; tests show bounded reads; I/O is out of the domain; unknowns are explicit; TD-018,
   F-45 and PD-21 are updated; Stage 2 validation passes.
 
+#### Stage 2 — Task sequence (planning, 2026-09-26)
+
+Planned at `main` @ `39392d9`, just after the owner closed Stage 1. The Stage's entry
+conditions are **not yet met**: RG-01 is undecided, and no owner sample files exist. So only the
+research Task S2.R1 is frozen. S2.1–S2.6 are **provisional**: S2.R1's decision confirms,
+changes or removes them, and the owner freezes them then (§9.1 step 6).
+
+**Verified at planning (§9.7):** every TD-018 mechanism still exists.
+- `metadata_extractor.dart:11` reads the whole file (`readAsBytes`).
+- `:14` and `:63` turn the bytes into a string, and the FITS path does this for the **whole
+  file**.
+- `:72` cuts every value at the first `/`, so quoted strings containing `/` are truncated.
+- The import screen picks with `image_picker`'s `pickImage` (`metadata_import_screen.dart:24`),
+  so FITS and RAW files cannot be chosen.
+- File I/O (`dart:io`) and `package:exif` are imported by `lib/domain`.
+- Every field of `ImageMetadata` is a `String?`.
+- The extractor returns null both for "no metadata" and for "unreadable".
+- F-45 is still Prototype, hidden (`FeatureScope.metadataImport == false`), and has no real
+  sample.
+
+Found in planning, placed in the Tasks below:
+- The FITS parser treats any card containing `=` as a keyword (COMMENT and HISTORY text
+  included), and ignores FITS quote escapes (`''`).
+- The FITS parser maps `GAIN` into the `iso` field, conflating gain with ISO (SI-004's
+  descriptive-only rule).
+- EXIF `DateTimeOriginal` is kept without its offset tags, so the zone is silently unknown.
+- `test/domain/services/metadata_extractor_test.dart` writes `test_dummy.fit` into the working
+  directory, not a temporary one.
+- `image_picker` is used only by the metadata screen, and `exif` only by the extractor. If
+  RG-01 replaces them, both dependencies can go (Stage 10 relevance).
+- `file_picker` 13.1.0 (TASK 14.4) is used by backup, which reads the whole picked file
+  (`xFile.readAsBytes()`; a restore file is read whole on purpose).
+
+**Common rules for every Task:**
+- the workflow and validation of §9.4 and §9.8, one commit per Task, then STOP;
+- nothing is written to Equipment, sessions or any other store (Stage 3 and Stage 8 own that);
+- no metadata leaves the device;
+- unknown stays unknown: no default values;
+- the feature stays hidden unless RD-16 says otherwise;
+- no copyrighted third-party file is committed, and no owner sample is committed without the
+  owner's explicit consent to its contents (the remote is **public**, see S1.14): EXIF and FITS
+  headers can hold GPS positions, serial numbers and names.
+
+| Task | Title | Kind | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S2.R1 | RG-01: formats, libraries, file selection, fixtures | Research (docs only) | M | — | **Frozen; next** |
+| S2.1 | Bounded file access behind a domain interface | Implementation | M | S2.R1 decided | Provisional |
+| S2.2 | Typed metadata with units, provenance and explicit unknowns | Implementation | M | S2.1 | Provisional |
+| S2.3 | FITS header reader | Implementation | M | S2.2, FITS samples | Provisional |
+| S2.4 | EXIF / TIFF-based RAW reader | Implementation | M | S2.2, samples per format | Provisional |
+| S2.5 | Further formats (XISF, CR3, others), only if RG-01 includes them | Implementation | S–M | S2.2, samples | Conditional |
+| S2.6 | File selection and the read-only import screen | Implementation | M | S2.3, S2.4 (S2.5); RD-16 | Provisional |
+
+Then comes Stage 2 validation in a fresh session.
+
+##### S2.R1 — RG-01: formats, libraries, file selection, fixtures (research; resolves PD-21)
+
+- **Objective:** decide, with evidence, which metadata formats Stage 2 supports, how each is read
+  in a bounded way, how the user selects the files, and how real samples become test fixtures.
+  The workflow is §9.6's. No production code changes.
+- **Questions:**
+  1. **Real workflows.** Which files does the owner produce: cameras, phones, and capture
+     software (for example N.I.N.A., ASIAIR, SharpCap, a phone app)? Which formats and
+     keywords do those write? The owner's answers are evidence; audit hypotheses are not.
+  2. **Where the metadata lives, per format, and whether a bounded read reaches it.** Examples:
+     FITS primary header blocks; the XISF XML header and its length field; JPEG APP1; TIFF,
+     DNG, CR2, NEF and ARW IFDs, which sit at offsets anywhere in the file (random access, not
+     just a prefix); CR3's ISO-BMFF boxes; HEIC.
+  3. **Libraries.**
+     - `exif` 3.3.0: formats, licence against GPL-3.0, maintenance, and whether it can read
+       from a random-access source or needs the whole file in memory;
+     - alternatives, or an in-house TIFF/IFD and FITS reader, with its test cost;
+     - whether `image_picker` and `exif` can be removed.
+  4. **File selection on Android.**
+     - Does `file_picker` 13.1.0 copy picked files into the cache: time and storage for a
+       50 MB RAW, and cleanup?
+     - Can `XFile.openRead(start, end)` read a content URI in bounded ranges?
+     - Selecting several files (the later batch use, Stage 8).
+     - Type filters for FITS and XISF, which have no registered MIME type.
+     - Permissions.
+     - Whether Android's photo picker redacts GPS.
+  5. **Fixtures for a public repository.** Options: header-only derivatives (the FITS header
+     blocks; the byte ranges of a RAW that its IFDs need); samples kept outside Git, with
+     tests that skip or fail clearly when they are absent; scrubbing (GPS, serial numbers,
+     `OBSERVER`, `SITELAT`); size limits; the owner's consent.
+  6. **Field semantics and units** for the typed model:
+     - `EXPTIME` or `EXPOSURE` in seconds;
+     - `GAIN` and `ISOSPEED` (a gain unit specific to the vendor, never ISO);
+     - `FOCALLEN` in mm, and what capture software actually writes there;
+     - `DATE-OBS`: UTC, and whether it is the start of the exposure;
+     - EXIF `OffsetTimeOriginal`;
+     - camera and instrument identifiers kept raw for Stage 3.
+     Each field gets provenance and confidence (ADR-008 §6).
+- **Evidence rules:**
+  - primary sources: the FITS 4.0 standard, the EXIF/TIFF/DNG specifications, the XISF
+    specification, and the package sources and changelogs on pub.dev;
+  - verified facts, unknowns and assumptions are kept apart;
+  - every claim about a sample is checked on the file itself.
+- **Samples:**
+  - the owner supplies at least one real file per candidate format they actually use, kept
+    **outside the repository** until S2.R1 decides the fixture policy;
+  - without samples, S2.R1 still completes the evidence and options, and ends at the owner
+    decision with the sample request open;
+  - no format is decided as supported without a real sample (Stage 2 exit).
+- **Output:**
+  - `docs/refinement/research/RG-01_METADATA_FORMATS.md`: the evidence and a recommended
+    format set with the reading method and library for each;
+  - a proposed **ADR-017, "Image metadata reading"**: bounded access behind a domain
+    interface; the typed value model with units, provenance and unknowns; the supported
+    formats; the fixture policy;
+  - the S2.1–S2.6 definitions confirmed or amended.
+- **Owner decisions at the end:** PD-21 / RG-01 (the format set and ADR-017), the fixture
+  policy, and **RD-16** (whether a visible entry point appears at the end of Stage 2 or waits
+  for Stage 3). Then STOP.
+- **Out of scope:**
+  - any change to `lib`, `test` or `pubspec`;
+  - equipment identity and matching (RG-02, Stage 3);
+  - assisted actuals (Stage 8).
+- **Acceptance:** each question is answered or explicitly marked unknown with what would
+  resolve it; each recommendation cites its evidence; the owner decisions are asked in one
+  message.
+
+##### S2.1 — Bounded file access behind a domain interface (provisional)
+- **Objective:** file I/O leaves `lib/domain`. A data-layer reader gives parsers bounded,
+  random-access reads with a byte budget, and never loads a whole file (TD-018).
+- **Scope:**
+  - a domain interface for a readable source (length and range reads, as ADR-017 defines);
+  - a data-layer implementation over a picked file;
+  - the existing extractor moved behind it, with its behaviour unchanged except for the
+    bounded reads;
+  - a test that forbids `dart:io` and parsing packages in the metadata domain.
+- **Acceptance:**
+  - a multi-gigabyte sparse file is inspected with a small, asserted number of bytes read;
+  - a read past the end or over the budget is a typed failure, not a crash;
+  - the domain has no I/O.
+
+##### S2.2 — Typed metadata with units, provenance and explicit unknowns (provisional)
+- **Objective:** replace the string-only `ImageMetadata` with ADR-017's typed values:
+  - exposure in seconds;
+  - ISO **or** gain with its kind (SI-004);
+  - focal length in mm, nullable;
+  - f-number, nullable;
+  - capture time as UTC with its offset, or local with "zone unknown";
+  - raw identifiers with provenance.
+  "Absent", "unparseable" and "unreadable file" are distinct results.
+- **Acceptance:** pure-Dart unit tests for every field's units, for unknowns and for
+  conflicting duplicates; nothing defaults a missing value; `SCIENTIFIC_INTEGRITY.md` records
+  any unit conversion.
+
+##### S2.3 — FITS header reader (provisional)
+- **Objective:** read the primary header in 2,880-byte blocks up to `END`, with a block limit.
+- **Scope:**
+  - FITS 4.0 card rules: keyword columns 1–8 and the value indicator in columns 9–10; quoted
+    strings, including `/` and `''`; logical, integer and real values; comment cards ignored;
+  - HIERARCH and CONTINUE only as RG-01 decides;
+  - the typed mapping (S2.2).
+- **Acceptance:**
+  - real owner samples, per the fixture policy, parse to the expected values;
+  - corrupted, truncated, missing-`END` and oversized-header cases fail typed;
+  - a large file reads only its header blocks;
+  - the TD-018 `/` defect is fixed and tested.
+
+##### S2.4 — EXIF / TIFF-based RAW reader (provisional)
+- **Objective:** a bounded read of the formats RG-01 selects (for example JPEG, DNG and a
+  TIFF-based RAW), through the library or in-house reader it chooses.
+- **Scope:** the typed mapping, the offset tags for time zones, and the maker-independent fields
+  only (MakerNotes only if ADR-017 says so).
+- **Acceptance:**
+  - a real sample per supported format;
+  - corrupt and truncated IFD chains and offset loops are handled;
+  - bounded reads are asserted;
+  - a format that is not supported gives a typed "unsupported" result, never a guess.
+
+##### S2.5 — Further formats (conditional)
+- Only if RG-01 includes them (for example XISF or CR3), with a real sample. The same
+  acceptance applies as in S2.3 and S2.4.
+
+##### S2.6 — File selection and the read-only import screen (provisional)
+- **Objective:** the user picks one supported file with a document picker (RG-01's choice) and
+  sees the typed values with units, provenance and explicit unknowns. Nothing is stored.
+- **Scope:**
+  - the picker, filtered to the supported formats;
+  - the existing screen reworked to use the new model, with its errors shown through
+    `LoadFailureView` / `runWithFeedback`;
+  - `image_picker` (and `exif`, if replaced) removed when no longer used;
+  - the gate as RD-16 decides, and, if the screen becomes visible, the accessibility sweep,
+    `docs/privacy` (nothing leaves the device) and the F-45 status.
+- **Acceptance:**
+  - widget tests for success, unsupported, unreadable and cancelled;
+  - if visible: the sweep passes in the three themes at 100 % and 200 %;
+  - TD-018, F-45 and PD-21 are updated (Stage 2 exit).
+
 ### Stage 3 — Metadata → Equipment / Device Import
 
 - **Purpose:** reduce manual equipment setup using verified metadata.
@@ -795,6 +993,10 @@ the unsaved-changes dialog's accessibility check, V2) from the same-session revi
     in 08 §24);
   - SCI-07 (RD-13);
   - TD-056 and ENG-14 (backup and restore with preferences: verify, then fix);
+  - TD-063 (moved from Stage 1 by the owner, 2026-09-26): a session detail loaded before Start
+    reopens the running session as the planner's plan. The proposed fix (S1.V5 in
+    `STAGE_1_REVALIDATION.md`): opening a session uses its current stored state, with a
+    UI-driven regression test;
   - the old TASK 17.3, metadata-assisted actuals, once the workflow is known (needs Stage 2).
 - **Candidate work:**
   - Execution as optional or primary, per Stage 4; the tracker; what Start means;

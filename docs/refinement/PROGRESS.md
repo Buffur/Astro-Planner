@@ -3,20 +3,20 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26, the repeat independent Stage 1 validation of `c99bd7f` did
-> not pass: S1.V1–S1.V4 hold, but one reproduced defect remains (TD-063), and the registers have
-> not been updated since those fixes (X2). See `STAGE_1_REVALIDATION.md`.
+> **Last updated:** 2026-09-26. The owner closed Stage 1 after the repeat independent
+> validation did not pass (a waiver, DECISIONS E.1); Stage 2 is planned, and its research
+> Task S2.R1 (RG-01) is next.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation.** The repeat independent validation (2026-09-26) confirms TD-059–TD-062 fixed, and finds TD-063 and X2 (`STAGE_1_REVALIDATION.md`) |
-| Next Stage | Stage 2 — Metadata Foundation: Not started |
+| Current Stage | **Stage 2 — Metadata Foundation: Planning.** Only S2.R1 is frozen; S2.1–S2.6 stay provisional until RG-01 is decided (`POST_ROADMAP_PLAN.md`, "Stage 2 — Task sequence") |
+| Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. **Proposed, awaiting the owner:** S1.V5 (TD-063, fix) and S1.V6 (X2, documentation), or TD-063 moved to Stage 8 and S1.V6 alone |
-| Code baseline | `ea65231` (S1.V4); later commits change documentation and evidence only; not pushed (S1.14) |
+| Next approved Task | **S2.R1 — RG-01: formats, libraries, file selection, fixtures** (research, documentation only; resolves PD-21). It ends at the owner decisions on PD-21/ADR-017, the fixture policy and RD-16 |
+| Code baseline | `ea65231` (S1.V4). Later commits change documentation and evidence only. Not pushed (S1.14) |
 | Quality gate at the baseline | **Green**, re-run independently on 2026-09-26 at `c99bd7f`: Encoding, Format and Analyze pass; 963 tests and 2 host E2E tests pass |
 | Schema | v17 |
 
@@ -27,8 +27,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | **Independent validation does not pass**, first at `4e653fb` (TD-059–TD-062, since fixed), then again at `c99bd7f` (TD-063, X2) |
-| 2 | Metadata Foundation | Not started | — | — | — |
+| 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
+| 2 | Metadata Foundation | Planning | 2026-09-26 | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
@@ -67,7 +67,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.V3 — Keep the unsaved-plan safeguard across a restart (TD-061) | 2026-09-25 | `ed628f8` | `CurrentSession` remembers the edited session id through `PlannerStateRepository` (preference `editedSessionId`; no schema change; a site change still not an edit). 5 new tests plus a restart check on the failed-Save test: target-, rig-, night- and block-only edits protected after a restart (target, rig and night failed before), Save clears it, an untouched draft never asks. Cancel's navigation clarified (closes the dialog, stays put). Gate green, 962 + 2 E2E |
 | 1 | S1.V4 — Reopening the current session keeps its live plan (TD-062) | 2026-09-25 | `ea65231` | `openSession` returns early for the current, editable session. The validation's probe as a UI test through the detail page, a Save and a restart (20 instead of 7 frames before the fix). A first version also skipped frozen sessions; two existing tests caught it and the guard was narrowed to editable sessions. Gate green, 963 + 2 E2E |
 | 1 | Fast re-validation after S1.V1–S1.V4 (same session, owner's request; **not independent**) | 2026-09-26 | `c99bd7f` | At `ea65231`: gate green (963 + 2 E2E), clean tree. Throwaway probes: the reset as `main.dart` runs it with a leftover marker → 164 targets, 1 rig, `.bak` kept; edit → New → restart and edit → Start → restart leave nothing unsaved and the run untouched. One low finding **W1**: a Duplicate of an edited plan counts as saved in-session but unsaved after a restart, so New right after Duplicate replaces the copy without asking (the saved original remains; only the copy's night is lost). Proposed: record under RD-05, like V3. Stage 1 still needs an **independent** validation to close |
-| 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | The re-validation commit* | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
+| 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | `39392d9` | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
+| 1–2 | Stage 1 closed by the owner, and Stage 2 planning (documentation only) | 2026-09-26 | The planning commit* | The owner said "lets go to stage 2" after the re-validation failed. Recorded as a waiver (DECISIONS E.1): TD-063 moved to Stage 8, X2 and W1 carried. Stage 2: TD-018's mechanisms were re-verified at `39392d9` (all still present); six planning-time findings were placed; S2.R1 is frozen and S2.1–S2.6 are provisional (`POST_ROADMAP_PLAN.md`) |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -98,7 +99,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `953c0d1`: S1.16 and S1.17.
 - `3067658`, `b34c9ad`, `ed628f8`, `ea65231`: S1.V1–S1.V4.
 - `c99bd7f`: the same-session re-check.
-- Repeat independent validation: see the note under "Completed Tasks".
+- `39392d9`: the repeat independent Stage 1 validation.
+- The Stage 1 closure and Stage 2 planning: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -106,7 +108,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
-| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | Open |
+| RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | Open; **S2.R1 is next**. Real samples are still missing |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
@@ -141,7 +143,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
-| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open |
+| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 | Open; asked at the end of S2.R1 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
@@ -162,9 +164,14 @@ These block a release, not refinement.
 
 ## Known blockers
 
-- **Stage 1:** the repeat independent validation found TD-063 and X2. The proposed S1.V5 and
-  S1.V6 await the owner (`STAGE_1_REVALIDATION.md`). S1.14's push stays deferred (RD-17 open).
-- **Stage 2:** owner-supplied real metadata samples, and RG-01.
+- **Stage 1 (closed by waiver):** X2 is open documentation debt: the registers still say
+  S1.5 is broken and S1.6 partial, and the S1.V stamps cite no commit. It is a proposed
+  S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
+  F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
+- **Stage 2:** RG-01 (S2.R1) and owner-supplied real metadata samples. Keep the samples
+  outside the repository until S2.R1 sets the fixture policy: the remote is public, and headers
+  can hold GPS, serial numbers and names. Implementation Tasks S2.1–S2.6 cannot start before
+  the RG-01 decision.
 - **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
   rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
   some build, but no build, device or commit is recorded (`POST_ROADMAP_PLAN.md` §1.3 item 2).
@@ -193,6 +200,10 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
+- **Stage 1 closure**, 2026-09-26: by owner decision after a failed validation (a waiver,
+  not a pass; DECISIONS E.1).
+- **Stage 2 planning**, 2026-09-26, at `39392d9`: documentation only; TD-018 re-verified. The
+  gate result at `c99bd7f` still applies (no code changed since).
 - **Repeat independent Stage 1 validation**, 2026-09-26, against `c99bd7f`: **does not pass**.
   - The gate is green (963 tests, 2 E2E).
   - The first validation's six probes are regression tests now, and they pass.
@@ -261,23 +272,22 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Owner decision** on the repeat independent validation's findings (`STAGE_1_REVALIDATION.md`).
-Pick one of these options:
+**S2.R1 — RG-01** (research, documentation only; `POST_ROADMAP_PLAN.md`, "Stage 2 — Task
+sequence"). Use a fresh session where practical.
 
-1. **Approve S1.V5 then S1.V6.**
-   - S1.V5 fixes TD-063.
-   - S1.V6 is documentation only (X2): it marks the stale "broken"/"partial" notes as
-     superseded, closes TD-047 again, and adds the commits of S1.V1–S1.V5.
-   - Each is one commit. Then comes another independent validation, which may be limited to
-     these two Tasks and the gate.
-2. **Move TD-063 to Stage 8** (it predates Stage 1), and run S1.V6 alone before Stage 1 closes.
+1. Collect the evidence: formats, bounded reads, libraries and licences, Android file
+   selection, the fixture policy for a public repository, and field semantics.
+2. Ask the owner which files they actually produce, and for samples, kept outside the
+   repository.
+3. Write `docs/refinement/research/RG-01_METADATA_FORMATS.md` and a proposed ADR-017.
+4. Ask the owner once for PD-21/RG-01, the fixture policy and RD-16. Then STOP.
 
-Also decide whether W1 is recorded under RD-05 (Stage 4).
+No production code changes before that decision. S2.1–S2.6 are frozen only after it.
 
-Do not start Stage 2 until Stage 1 closes. Stage 2 then begins with its planning (RG-01 and the
-owner's metadata samples).
-
-Carried open items that are not Stage 1 failures:
+**Carried open items:**
+- X2 (proposed S1.V6, documentation only; owner request or Stage 11);
+- W1 (proposed input to RD-05);
+- TD-063 (Stage 8);
 - TD-057 and TD-058;
 - RD-17 (the push is deferred);
 - the S1.5 and S1.11 device checks (Stage 11);

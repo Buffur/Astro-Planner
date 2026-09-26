@@ -89,6 +89,7 @@
 > **TASK 16.3 (2026-09-24, commit `2521f42`) — OPEN until the policy URL is live.** PD-12 resolved (owner decisions, DECISIONS E.1): free with no ads or subscriptions (within Open-Meteo's free non-commercial tier); GPL-3.0 confirmed; the privacy policy on GitHub Pages (`docs/privacy/index.md` → https://chacha12.github.io/astro-planner/privacy/); place-name lookups opt-in. Code: `OptInReverseGeocoder` — nothing is sent to Nominatim unless the user switches "Look up place names" on (Settings, off by default, `PrivacyPreferencesRepository`); a saved site and the default position are never looked up; the identifying user agent `Astro Planner/<version> (+<project URL>; <id>)` now goes to the OSM tiles too (the tile policy asks for a contact); the About screen states GPL-3.0 with a source link, a privacy summary and the policy link. Terms re-checked 2026-09-24 and recorded in `docs/COMPLIANCE.md` with draft Play Data Safety answers and the permission review. Remaining gap (TD-031): a user who switches place names on still uses the built-in Nominatim endpoint (no remotely switchable endpoint). Owner steps before upload: publish the policy with the contact email filled in, make the repository public, fill in the Data Safety form. Test baseline 896.
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
+> **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
 >
 > Structure:
 > - **Part A** — accepted ADRs and pending decisions, preserved **verbatim** from
@@ -729,6 +730,25 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   There is still no `SessionNight` without a site (ADR-007 §9); the key is only the draft's
   label, and it is corrected by the first autosave after a site is set. Known limit: far east
   of Greenwich, in the morning, it can be a day off until then.
+
+### Stage 1 closed by the owner (2026-09-26)
+
+- **Decided by:** the project owner, in chat, on 2026-09-26 ("okey, lets go to stage 2"),
+  after the repeat independent Stage 1 validation did not pass
+  (`docs/refinement/STAGE_1_REVALIDATION.md`, commit `39392d9`).
+- **Decision:** Stage 1 is closed and Stage 2 starts, without the proposed fix Tasks S1.V5 and
+  S1.V6. Stage 1's exit criterion "validation passes in a fresh session" was **not met**; this
+  is an owner waiver, not a pass.
+- **What happens to the findings:**
+  - **TD-063** (a detail page loaded before Start reopens the running session as the planner's
+    plan) moves to **Stage 8** (Sessions / Execution). It predates Stage 1 (TASK 13.3).
+  - **X2** (the registers still call S1.5 broken and S1.6 partial after S1.V1–S1.V4, and the
+    S1.V stamps cite no commit) stays open as documentation debt. The fix is the proposed
+    S1.V6; it runs when the owner asks, and at the latest in Stage 11's documentation check.
+  - **W1** (a Duplicate counts as unsaved only after a restart) stays a proposed input to
+    RD-05 (Stage 4). It is not yet recorded there.
+- **Not changed:** every other carried item (TD-057, TD-058, RD-17, the Stage 11 device
+  checks, the stale preferences with TD-056).
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
