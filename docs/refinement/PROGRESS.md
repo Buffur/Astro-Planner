@@ -3,20 +3,19 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (Stage 3, second planning pass). Stage 2 was closed by owner
-> waiver (DECISIONS E.1). **S3.R1 is done** (`research/RG-02_EQUIPMENT_IDENTITY.md`). The refined
-> Stage 3 sequence S3.1–S3.9 is provisional. Next: **S3.D**, the owner's decisions D1–D4 and
-> ADR-018. D1 blocks freezing the Tasks.
+> **Last updated:** 2026-09-26 (S3.D). The owner decided D1–D4, each the recommended option.
+> ADR-018 is accepted, and **Stage 3 is frozen**: S3.1–S3.8 (`POST_ROADMAP_PLAN.md`, "Stage 3 —
+> frozen Task sequence"). Next: **S3.1**.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: Planning.** S3.R1 done; S3.D is next (gate); the refined S3.1–S3.9 are provisional until ADR-018 (`POST_ROADMAP_PLAN.md`, "Stage 3 — second planning pass and refined Task sequence") |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In progress.** Planning complete: S3.R1 and S3.D done; S3.1–S3.8 frozen (ADR-018; `POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence"). Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.D — owner decisions D1–D4 and ADR-018** (documentation only). S3.R2 (RG-03) runs only if the owner declines its deferral (D2) |
+| Next approved Task | **S3.1 — Image geometry in the metadata contract** (ADR-018 §3; frozen) |
 | Code baseline | S2.V4 (`d8e792c`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | v17 |
@@ -30,7 +29,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
-| 3 | Metadata → Equipment / Device Import | Planning | 2026-09-26 | — | — |
+| 3 | Metadata → Equipment / Device Import | In progress | 2026-09-26 | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
@@ -102,7 +101,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 2–3 | Stage 2 closed by the owner, and Stage 3 planning (documentation only) | 2026-09-26 | `0c4848b` | Asked to choose between a fresh-session validation and a waiver, the owner chose "Waive and go to Stage 3". Recorded as a waiver (E.1). Stage 3 planning at `3dd2598` verified nine facts (`POST_ROADMAP_PLAN.md`, "Verified at planning"). The key one: `EquipmentProfile` and its columns require sensor size, resolution, pixel pitch, focal length and focal ratio, and the metadata contract has no image dimensions, so an import cannot store a rig without invented values. Frozen: S3.R1 (RG-02), S3.R2 (RG-03), S3.D (decisions, ADR-018). Provisional: S3.1–S3.6 |
 
-| 3 | Stage 3 second planning pass, including S3.R1 (RG-02) (documentation only) | 2026-09-26 | The Stage 3 second-pass commit* | From the owner's Stage 3 planning prompt. Verified the Stage 2 foundation at `0c4848b` (gate green; the local real samples pass; no stale claim, except this file's missing `0c4848b`). `research/RG-02_EQUIPMENT_IDENTITY.md`: field classification, derivability matrix, device classes, matching and conflict outcomes, provenance and confirmation, storage options, decisions D1–D4. A throwaway probe (deleted) found that the pixel dimensions are in all four samples (swapped in the portrait JPEG/HEIC) and that no focal-plane tags exist. Refined sequence S3.1–S3.9, provisional; recommended D1 = A1 (complete before saving, with an estimate offered) |
+| 3 | Stage 3 second planning pass, including S3.R1 (RG-02) (documentation only) | 2026-09-26 | `4c46f8f` | From the owner's Stage 3 planning prompt. Verified the Stage 2 foundation at `0c4848b` (gate green; the local real samples pass; no stale claim, except this file's missing `0c4848b`). `research/RG-02_EQUIPMENT_IDENTITY.md`: field classification, derivability matrix, device classes, matching and conflict outcomes, provenance and confirmation, storage options, decisions D1–D4. A throwaway probe (deleted) found that the pixel dimensions are in all four samples (swapped in the portrait JPEG/HEIC) and that no focal-plane tags exist. Refined sequence S3.1–S3.9, provisional; recommended D1 = A1 (complete before saving, with an estimate offered) |
+
+| 3 | S3.D — owner decisions D1–D4; ADR-018; Stage 3 frozen (documentation only) | 2026-09-26 | The S3.D commit* | The owner chose the recommended option for each decision (asked in this session): **D1 = A1** (the import pre-fills the editor, a rig is saved only when complete, and the CALC-40 sensor/pixel estimate is offered as `estimated`); **D2**: RG-03 deferred (S3.R2 and S3.9 leave Stage 3); **D3**: visible at the end of Stage 3, as "Add from a photo" on the equipment screen (RD-16 resolved); **D4**: a DNG pick's file length as the estimated RAW size. ADR-018 accepted: it amends ADR-017 §2 with image dimensions and applies ADR-008 §6 per field to equipment (schema v18). DECISIONS E.1 "Stage 3 decisions (S3.D)". S3.1–S3.8 frozen |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -143,8 +144,8 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
-| RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Researched** 2026-09-26 (S3.R1, `research/RG-02_EQUIPMENT_IDENTITY.md`); owner decision at S3.D (D1, D4) |
-| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open; S3.R2 frozen; **deferral recommended** (D2) |
+| RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
+| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3; may return through Stage 7 |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | Open |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | Open |
@@ -178,7 +179,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
-| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved for Stage 2** 2026-09-26: hidden throughout Stage 2; Stage 3 decides at S3.D (D3; recommended: visible with S3.7, "Add from a photo" on the equipment screen) |
+| RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
@@ -195,9 +196,9 @@ These block a release, not refinement.
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
-- Stage 3: decide D1–D4 at S3.D (RG-02 §12); say which cameras and optics you use besides the
-  phone (a DSLR/mirrorless JPEG, or a FITS file, would let Stage 3 check those classes on real
-  files).
+- Stage 3: say which cameras and optics you use besides the phone (a DSLR/mirrorless JPEG, or a
+  FITS file, would let Stage 3 check those classes on real files). The phone is needed for S3.7's
+  device check M4.
   Samples for FITS, PNG, AVIF or RAW, when available, enable their readers later. The DNG,
   JPEG and HEIC samples stay outside Git.
 
@@ -207,7 +208,7 @@ These block a release, not refinement.
   a proposed input to RD-05.
 - **Stage 2 (closed by waiver):** nothing blocks. The carried items are listed under "Next
   allowed action".
-- **Stage 3:** implementation waits for S3.D (D1 blocks freezing; ADR-018). Equipment identity for
+- **Stage 3:** nothing blocks S3.1–S3.6 and S3.8. S3.7's device check M4 needs the owner's phone. Equipment identity for
   dedicated astro cameras needs a FITS sample (S2.6).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
@@ -353,18 +354,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.D — owner decisions and ADR-018** (documentation only; `POST_ROADMAP_PLAN.md`, "Stage 3 —
-second planning pass and refined Task sequence"). The owner decides (RG-02 §12):
-- **D1 (blocking):** how an import handles specs the file cannot give. A1 (recommended): complete
-  before saving, with an estimate offered. A2: the same without the estimate. B: nullable specs.
-  C: a candidate store.
-- **D2:** defer a specification source (RG-03/S3.R2, recommended) or research it now.
-- **D3 (RD-16):** visible at the end of Stage 3 through "Add from a photo" (recommended), or
-  hidden.
-- **D4 (C-13):** the RAW size from a DNG pick as an estimate (recommended), or not.
-
-Then ADR-018 is written, and S3.1–S3.9 are confirmed, changed or removed, and frozen. No
-application code changes before that.
+**S3.1 — Image geometry in the metadata contract** (ADR-018 §3; frozen in `POST_ROADMAP_PLAN.md`,
+"Stage 3 — frozen Task sequence").
+- It adds image width and height (px) to `CaptureMetadata`:
+  - DNG: IFD0, main image only, with `DefaultCropSize` first;
+  - JPEG/HEIC: `PixelXDimension`/`PixelYDimension` combined with IFD0 `ImageWidth`/`ImageLength`.
+- It uses synthetic fixtures, and extends the local `expected.json` (outside Git).
+- One commit, then STOP.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

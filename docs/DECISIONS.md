@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 3 decisions (2026-09-26, S3.D, documentation only):** ADR-018 (metadata-assisted equipment import) accepted in Part F; RG-02 decided; RD-16 resolved; RG-03 deferred (E.1, "Stage 3 decisions (S3.D)").
 > **Stage 2 closed by the owner (2026-09-26):** a waiver after S2.V4/S2.V5, without a third independent validation; Stage 3 planning starts (E.1, "Stage 2 closed by the owner").
 > **Stage 2 repeat validation and S2.V4/S2.V5 (2026-09-26):** the repeat validation failed (`f137409`); the owner said "Do fix". HEIF `iloc` work is bounded (TD-067); AVIF and HEIF sequences are recognised only (the S2R-02 ruling, option (a)); ADR-017 note added (E.1, "Stage 2 repeat validation: fixes and the HEIF brand ruling").
 > **RG-14 decided (2026-09-26):** no proprietary RAW in Stage 2; adapters per sample later; `ExifInterface` and LibRaw rejected (E.1).
@@ -903,6 +904,32 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   `3dd2598`).
 - Stage 3's planning starts next. Its implementation waits for RG-02, RG-03 and an ADR.
 
+### Stage 3 decisions (S3.D) (2026-09-26)
+
+- **Context:** the second Stage 3 planning pass (`4c46f8f`) did S3.R1
+  (`refinement/research/RG-02_EQUIPMENT_IDENTITY.md`) and put decisions D1–D4 to the owner. D1
+  blocked freezing the Tasks.
+- **Decided by:** the project owner, in this session on 2026-09-26, choosing from explicit
+  options. Each answer was the recommended option:
+  - **D1 = A1:** an import pre-fills the rig editor, and a rig is saved only when complete. A
+    sensor-size and pixel-pitch estimate from the 35 mm equivalent and the image dimensions
+    (CALC-40, `estimated`) is offered and never applied silently. Nullable specs (B) and a
+    candidate store (C) are rejected for Stage 3.
+  - **D2:** no specification source in Stage 3. RG-03 and S3.R2 are deferred.
+  - **D3 (RD-16):** the import becomes visible at the end of Stage 3 (S3.7), as "Add from a
+    photo" on the equipment screen.
+  - **D4 (C-13):** a DNG pick's file length may fill the average RAW size as an `estimated`
+    value, "from one file". JPEG/HEIC sizes are never used.
+- **Recorded:** ADR-018 (Part F), which amends ADR-017 §2 with image dimensions and applies
+  ADR-008 §6 per field to equipment (schema v18). RG-02 is decided. RD-16 is resolved.
+- **Frozen:** S3.1–S3.8 (`refinement/POST_ROADMAP_PLAN.md`, "Stage 3 — frozen Task sequence").
+- **Implementation choices recorded in ADR-018 without a separate question:**
+  - the 1 % f/N match tolerance;
+  - the diagonal convention for CALC-40;
+  - `DefaultCropSize` preferred for DNG;
+  - the Settings viewer entry removed when the import becomes visible.
+  Each is documented as an assumption, and the owner can change it.
+
 # Part F — ADRs accepted after the Phase 0 baseline
 
 *Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*
@@ -1457,6 +1484,8 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
   weakened test.
 
 ### 6. Decision: provenance (per row, PD-09)
+
+**Applied per field to equipment by ADR-018 §5 (2026-09-26, S3.D):** schema v18 adds per-field pairs for the specs an import can mix. Not yet implemented (S3.4).
 
 - **Columns on tables that hold external or scientific data:**
   - `source`: nullable TEXT, a stable namespaced id. Examples: `user`,
@@ -2807,6 +2836,8 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 
+**Amended by ADR-018 §3 (2026-09-26, S3.D):** the contract (§2) gains image width and height (px). Not yet implemented (S3.1).
+
 **Corrective implementation note (2026-09-26, S2.V4, after the repeat validation):** the HEIF
 `iloc` parser accepts at most 16,384 extents over all items (TD-067; an extent with all-zero
 field sizes occupies no bytes, so the byte budget did not bound the work). The S2R-02 ruling
@@ -3039,3 +3070,178 @@ sample and tests. See E.1, "Stage 2 format priorities and metadata layering".
    FITS `TELESCOP`), never per parser.
 4. **Not permitted:** image decoding, thumbnails or pixel access; a universal RAW parsing
    framework.
+
+## ADR-018: Metadata-assisted equipment import (Stage 3)
+
+Status: accepted (owner, 2026-09-26, S3.D). The owner chose the recommended option for each of
+D1–D4 in `refinement/research/RG-02_EQUIPMENT_IDENTITY.md` §12 (E.1, "Stage 3 decisions (S3.D)").
+It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment (§5). ADR-011 is
+unchanged. **Implementation:** none yet; the Tasks are S3.1–S3.8 (`refinement/POST_ROADMAP_PLAN.md`,
+"Stage 3 — frozen Task sequence").
+
+### 1. Context (verified at `0c4848b`; RG-02 §1–§5)
+
+- The metadata contract (ADR-017 §2) reads DNG, JPEG and HEIC. It has identity strings, focal
+  length, f-number and the 35 mm equivalent. It has no image dimensions and no pixel size.
+- `EquipmentProfile` and its columns require sensor size, pixel pitch, resolution, focal length
+  and focal ratio (`NOT NULL`). Provenance is kept per group (camera, optics).
+- A phone's camera modules share Make, Model and UniqueCameraModel. The Model string differs by
+  format. Serials are never read, so two identical bodies are indistinguishable.
+- All four owner samples carry pixel dimensions (swapped in a portrait JPEG/HEIC). None carries
+  focal-plane resolution.
+
+### 2. Decision: the flow
+
+```text
+MetadataRead → EquipmentEvidence → EquipmentCandidate → Match → Review → pre-filled editor → Save
+```
+
+- Everything before Save is pure domain and in memory. Nothing is persisted for an unconfirmed
+  candidate (no candidate store: option C rejected).
+- **The only write is the user's Save** in the rig editor, through `runWithFeedback`. Cancel at
+  any step writes nothing. There is no background, automatic or batch write.
+- One file at a time. Batch import is out of scope.
+
+### 3. Decision: image geometry in the contract (amends ADR-017 §2)
+
+- `CaptureMetadata` gains **image width and height (px)**, a new kind of fact under ADR-017
+  §13.3, with origin and the usual unknown states:
+  - **DNG:** only from IFD0 when it is the main image (`NewSubfileType` absent or 0). Use
+    `DefaultCropSize` when present and integral, else `ImageWidth`/`ImageLength`. Sub-IFDs stay
+    unfollowed (ADR-017 §3's rule), so a DNG whose raw image sits in a sub-IFD gives absent
+    dimensions;
+  - **JPEG/HEIC:** `PixelXDimension`/`PixelYDimension` (EXIF IFD) and IFD0
+    `ImageWidth`/`ImageLength`, combined; disagreement is ambiguous.
+- **Orientation is not interpreted.** Equipment uses the long side as the width and the short
+  side as the height.
+- **Excluded, unchanged:** GPS, serials, observer identity. The byte budget is unchanged.
+
+### 4. Decision: what an import may propose (D1 = A1)
+
+| `EquipmentProfile` field | Proposed from | Source id | Confidence |
+| --- | --- | --- | --- |
+| `name` | Make + Model (+ lens model or focal length) | — (a label) | — |
+| `manufacturer`, `cameraModel` | Make, Model (trimmed raw text) | — (labels) | — |
+| `resolutionWidthPx/HeightPx` | Image dimensions (long/short) | `metadata:<format>` | `reported` |
+| `focalLengthMm` | FocalLength | `metadata:<format>` | `reported` |
+| `focalRatio` | FNumber | `metadata:<format>` | `reported` |
+| `sensorWidthMm/HeightMm`, `pixelPitchUm` | **CALC-40 estimate** (below), offered, never silent | `derived:calc-40/metadata:<format>` | `estimated` |
+| `averageRawFileSizeMB` | The file length of a **DNG** pick only (D4) | `metadata:dng:file-size` | `estimated` |
+| `apertureDiameterMm` | **Never** (ADR-011 §4: D is never back-filled) | — | — |
+| `rotationDeg`, `trackingType`, `maxExposureS` | **Never** (ADR-011 §5; a frame's exposure is not a limit) | — | — |
+
+- `<format>` is `dng`, `jpeg` or `heif`. **No imported value is ever `verified`.**
+- Exposure, sensitivity and capture time never map to equipment.
+- An absent, unparseable or ambiguous value gives an unknown field with its reason. It is never
+  a default.
+- **CALC-40 (sensor geometry from the 35 mm equivalent):**
+  - crop = f₃₅ / f;
+  - diagonal = 43.27 mm / crop (the diagonal convention);
+  - sides from the long:short pixel ratio;
+  - effective pixel pitch = long side (mm) / long side (px) × 1000 µm.
+  - It is produced only when f₃₅, f and both dimensions are known, f₃₅ > f, and every result is
+    within `EquipmentLimits`.
+  - **Stated uncertainty:** f₃₅ is an integer (±0.5 mm); the EXIF standard does not say whether
+    the equivalent matches the diagonal or the width (about 4 % apart for 4:3).
+  - The pitch is the pitch **of the output mode** (binned or full resolution), which is what the
+    planner's pixel scale needs.
+  - The formula and assumptions go into `SCIENTIFIC_INTEGRITY.md` with S3.2.
+- **A rig is stored only when complete (option A).** Every required spec needs a value from the
+  file, an estimate the user accepted, the user's typing, or a matched rig's camera specs.
+  Nullable specs (option B) are rejected for Stage 3.
+
+### 5. Decision: provenance per field (ADR-008 §6 applied to equipment)
+
+- **Schema v18, additive:**
+  - nullable `source`/`confidence` pairs for resolution, pixel pitch, sensor size and average
+    RAW size (on `camera_modules`), and for focal length and focal ratio (on `optical_rigs`);
+  - nullable `metadata_make` and `metadata_model` on `camera_modules`: the raw identity strings
+    of the file the rig was imported from, kept for later matching. Never serials.
+- **A field's provenance** is its own pair, else its group's existing pair, else unknown. Legacy
+  and seeded rows read exactly as before. Nothing is back-filled.
+- **An edit** marks only the changed fields `user`/`reported`. An untouched pre-filled field
+  keeps its import provenance. A value copied from a saved rig keeps that rig's provenance.
+- The group columns stay (they are not dropped). The manual editor's behaviour is unchanged.
+
+### 6. Decision: matching and conflicts
+
+- **Outcomes, by rules with stated reasons; never a score:**
+  - same rig;
+  - likely the same rig;
+  - same camera, other optics;
+  - cropped or binned mode;
+  - ambiguous;
+  - none.
+- **Comparison:**
+  - Make and Model are trimmed, whitespace-collapsed and case-folded;
+  - "likely" when one Model is the other plus a separator (`/`, space, `-`, `_`) and a suffix;
+  - no maker-specific rules;
+  - stored `metadata_make`/`metadata_model` take precedence over the user-editable labels;
+  - f and N are equal within **1 %**, a documented tolerance, not a physical law;
+  - equal f and N with a different f₃₅ or different dimensions is a cropped or binned mode, never
+    "same".
+- **Ambiguous:** several qualifying rigs → the user chooses; nothing is chosen automatically.
+- **Same rig:** no duplicate is created. The review offers to open it, and to fill its
+  **unknown** optional fields (the RAW size) through the editor.
+- **Same camera, other optics:** the new rig may take the saved rig's camera specs (copied, with
+  their provenance). This is not composition (ADR-011 §2).
+- **Conflicts:**
+  - saved and imported values are shown side by side with their provenance;
+  - keeping the saved value is the default;
+  - the imported value replaces it only by the user's explicit choice for that field;
+  - a `verified` value is never replaced by default;
+  - legacy (NULL-provenance) values are treated like user values;
+  - ambiguous or unparseable metadata is never offered as a replacement.
+
+### 7. Decision: visibility (D3, RD-16) and privacy
+
+- **Visible at the end of Stage 3** (S3.7), once the review and confirmation flow exists and
+  TD-066 is fixed, as **"Add from a photo"** next to "Add" on the equipment screen (the one
+  screen used by the planner and the Library). The Settings entry to the read-only viewer is
+  removed. Stage 4 may move the entry point.
+- **Android only**, as today. Elsewhere the action says the feature is not available.
+- **Nothing leaves the device.** No network, no external dataset. The privacy policy and Data
+  Safety are re-checked in S3.7 and are expected not to change.
+
+### 8. Decision: no specification source in Stage 3 (D2)
+
+RG-03 is deferred: no bundled or remote equipment database, and no scraping. S3.R2 and the old
+S3.9 leave Stage 3. They can return only through RG-03 and an owner decision (Stage 7 lists
+RG-03 too).
+
+### 9. Out of scope
+
+- Equipment composition (ADR-011 §2).
+- Nullable required specs.
+- Batch import.
+- FITS, XISF and proprietary RAW (they wait for samples).
+- Assisted actuals (Stage 8).
+- The Stage 5/7 editor redesign beyond the form model needed for pre-fill.
+- A specification source.
+
+### 10. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| A2: no estimate | Rejected (owner) | Phone users rarely know sensor or pixel size; the import would add little |
+| B: nullable specs | Rejected for Stage 3 (owner) | Touches every consumer; overlaps Stages 6–7; L–XL |
+| C: a candidate store | Rejected (owner) | Persists unconfirmed metadata for little gain |
+| Per-group provenance only | Rejected | An imported rig mixes origins in one group; ADR-008 §6 requires per-field pairs |
+| Make + Model as an identifier | Rejected | Identical across phone modules and identical bodies; format-dependent |
+| Focal length as an identifier | Rejected | Evidence only: zooms, crop modes, user-set lens profiles, telescopes |
+| An external spec database now | Deferred (owner, D2) | Needs RG-03's licence, provenance and coverage research |
+
+### 11. Consequences
+
+- **Tasks** (frozen with this ADR):
+  - S3.1: the contract amendment;
+  - S3.2: the candidate and CALC-40;
+  - S3.3: matching;
+  - S3.4: schema v18;
+  - S3.5: the form model and pre-fill;
+  - S3.6: the review flow;
+  - S3.7: visibility, TD-066 and the device check M4;
+  - S3.8: the RAW size.
+- Only the phone class is validated on real files. DSLR/mirrorless behaviour rests on synthetic
+  fixtures until the owner supplies a sample. Astro cameras wait for a FITS reader.
+- This ADR changes no code.

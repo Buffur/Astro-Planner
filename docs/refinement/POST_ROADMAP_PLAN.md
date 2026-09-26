@@ -16,6 +16,9 @@
 > **Updated 2026-09-26 (Stage 3, second planning pass, verified at `0c4848b`):** S3.R1 done
 > (`research/RG-02_EQUIPMENT_IDENTITY.md`); the refined Stage 3 sequence S3.1–S3.9 is provisional
 > until S3.D (owner decisions D1–D4, ADR-018). No other Stage changed.
+> **Updated 2026-09-26 (S3.D):** the owner decided D1–D4 (each the recommended option); ADR-018
+> accepted; RG-02 decided; RG-03 deferred; RD-16 resolved; S3.1–S3.8 frozen ("Stage 3 — frozen
+> Task sequence").
 
 ## Contents
 
@@ -1343,14 +1346,43 @@ S3.4 becomes a nullable-spec migration touching every consumer (an L Task, to be
 
 Then Stage 3 validation in a fresh session.
 
+*The table above is the provisional state before S3.D, kept as written. The frozen sequence
+follows.*
+
+#### Stage 3 — frozen Task sequence (S3.D, 2026-09-26)
+
+The owner chose the recommended option for each of D1–D4 (DECISIONS E.1, "Stage 3 decisions
+(S3.D)"), and ADR-018 records the design. Changes from the provisional table:
+- S3.9 and S3.R2 leave Stage 3 (D2: RG-03 deferred);
+- S3.8 stays in (D4);
+- the Task definitions below are ADR-018's decisions.
+
+One Task per commit, then STOP (§9.4). Never start the next Task automatically.
+
+| Task | Title | Size | Depends on | State |
+| --- | --- | --- | --- | --- |
+| S3.D | Owner decisions D1–D4; ADR-018; this table | S | the second pass | **Done 2026-09-26** |
+| S3.1 | Image geometry in the metadata contract (ADR-018 §3) | S–M | S3.D | **Frozen; next** |
+| S3.2 | Equipment evidence and candidate, with CALC-40 (ADR-018 §4) | M | S3.1 | Frozen |
+| S3.3 | Matching saved rigs, with conflicts (ADR-018 §6) | M | S3.2, S3.4 (for the stored identity) | Frozen |
+| S3.4 | Per-field provenance and identity evidence, schema v18 (ADR-018 §5) | M | S3.D | Frozen |
+| S3.5 | A form model for the rig editor, and pre-fill | M | S3.4 | Frozen |
+| S3.6 | The import review and confirmation flow | M | S3.3, S3.5 | Frozen |
+| S3.7 | Visibility (ADR-018 §7), TD-066, the device check M4 | S | S3.6 | Frozen |
+| S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | Frozen |
+
+Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7. S3.7 goes last because it makes
+the flow visible. Then Stage 3 validation in a fresh session.
+
 ##### S3.1 — Image geometry in the metadata contract
 - **Objective:** read the pixel dimensions of the captured image as a typed, provenanced
   contract fact.
 - **Scope:**
   - ADR-017 §2/§13.3 amended by ADR-018;
   - `CaptureMetadata` gains image width and height (px) with origin;
-  - DNG: IFD0 `ImageWidth`/`ImageLength` for the main image (`NewSubfileType` 0), with
-    `DefaultCropSize` preferred or not as ADR-018 decides;
+  - DNG: IFD0 only, for the main image (`NewSubfileType` absent or 0): `DefaultCropSize` when
+    present and integral, else `ImageWidth`/`ImageLength`; sub-IFDs are not followed
+    (ADR-018 §3);
   - JPEG/HEIC: `PixelXDimension`/`PixelYDimension` in the EXIF IFD, through the shared
     `ExifStructure`;
   - disagreeing sources are ambiguous (the existing `combine`);
@@ -1414,9 +1446,10 @@ Then Stage 3 validation in a fresh session.
 - **Objective:** store which source gave each spec, as ADR-008 §6 requires for mixed rows,
   plus the metadata identity for later matching.
 - **Scope:**
-  - additive nullable columns per ADR-018 (proposed: source/confidence pairs for resolution,
-    pixel pitch, sensor size and RAW size on `camera_modules`, and for focal length and focal
-    ratio on `optical_rigs`; a normalised identity column on `camera_modules`);
+  - additive nullable columns (ADR-018 §5):
+    - source/confidence pairs for resolution, pixel pitch, sensor size and RAW size on
+      `camera_modules`, and for focal length and focal ratio on `optical_rigs`;
+    - `metadata_make` and `metadata_model` (raw strings) on `camera_modules`;
   - the resolution rule: a field's own pair, else its group's, else unknown;
   - `EquipmentProfile` and `withEditProvenance` per field (an edit marks only the changed field
     `user`);
@@ -1471,8 +1504,8 @@ Then Stage 3 validation in a fresh session.
 ##### S3.7 — Visibility, TD-066, the device check M4
 - **Objective:** make the flow reachable per D3, safely.
 - **Scope:**
-  - `FeatureScope.metadataImport` per D3, with the entry point D3 chooses (the route and
-    Settings entry adjusted);
+  - `FeatureScope.metadataImport` true, with "Add from a photo" next to "Add" on the equipment
+    screen; the Settings entry to the read-only viewer removed (ADR-018 §7);
   - TD-066 (sub-second exposures as a fraction or a documented rounding in `QuantityText`);
   - privacy and Data Safety re-checked (expected: no change, nothing leaves the device);
   - `FEATURE_STATUS.md` F-45/F-23;
@@ -1491,6 +1524,7 @@ Then Stage 3 validation in a fresh session.
 - Only after S3.R2 recommends a source and the owner approves it (CLAUDE.md rule 28, RG-12
   licence, privacy).
 - Not planned further while deferral is recommended.
+- **Removed from Stage 3 by D2 (S3.D, 2026-09-26):** RG-03 is deferred.
 
 ### Stage 4 — Product Flow & Information Architecture
 
@@ -1797,8 +1831,8 @@ any implementation Task is created.
 | ID | Question | Evidence and reason | Stage | Constraints |
 | --- | --- | --- | --- | --- |
 | RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
-| RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Researched 2026-09-26 (S3.R1, `research/RG-02_EQUIPMENT_IDENTITY.md`); owner decision at S3.D** |
-| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **RG-02 §9 recommends deferring it (D2)** |
+| RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Decided 2026-09-26 (S3.D, ADR-018)** after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
+| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)** |
 | RG-04 | What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |
@@ -1832,7 +1866,7 @@ any implementation Task is created.
 | RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? | SCI-07 | 8 | — |
 | RD-14 | Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
-| RD-16 | **RESOLVED for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
+| RD-16 | **RESOLVED (owner, 2026-09-26, S3.D; ADR-018 §7):** visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. Earlier: **resolved for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
 | RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 
 **Answered in part by Stage 0:** the direction part of 07 §6 item 11 (the primary 1.0 user),

@@ -10,6 +10,10 @@
 >
 > **Decisions are not made here.** Section 12 lists what the owner decides at S3.D. ADR-018 is
 > only outlined (section 11).
+>
+> **Decided 2026-09-26 (S3.D):** the owner chose the recommended option for D1–D4: A1, defer
+> RG-03, visible at the end of Stage 3, and the DNG RAW size as an estimate. See ADR-018 and
+> DECISIONS E.1, "Stage 3 decisions (S3.D)". The text below is kept as written.
 
 Evidence labels: **[verified]** read in the repository or the local samples in this session;
 **[documented]** from a committed research note or standard, not re-checked here;
