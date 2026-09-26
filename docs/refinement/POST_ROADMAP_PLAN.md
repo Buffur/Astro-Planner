@@ -1066,6 +1066,19 @@ its gate. Formats that still wait for samples can move to a later Stage by owner
 - **S2.10, PNG `eXIf`:** reuses the S2.7 extractor, with a real PNG carrying `eXIf`; low
   priority.
 
+#### Stage 2 — corrective Tasks after validation (2026-09-26)
+
+These follow the two independent validations. Both reports are kept as written.
+
+| Task | From | Scope | State |
+| --- | --- | --- | --- |
+| S2.V1–S2.V3 | `STAGE_2_VALIDATION.md` (S2V-01 to S2V-03, 05) | Integer counts; short Exif APP1; streaming budgets | Done, `ffaff57` |
+| S2.V4 | `STAGE_2_REVALIDATION.md` (S2R-01, 02, 04) | Bound the HEIF `iloc` work (TD-067); AVIF and HEIF sequences recognised only (the owner's S2R-02 ruling, option (a)); HEIF test gaps | Done 2026-09-26 (`STAGE_2_CORRECTIONS.md`) |
+| S2.V5 | `STAGE_2_REVALIDATION.md` (S2R-03) | F-45 and `TEST_PLAN.md` current-state text | Done 2026-09-26 |
+
+Stage 2 then closes through another independent validation in a fresh session, or an owner
+waiver.
+
 #### After Stage 2: sample-driven metadata format adapters (RG-14, decided 2026-09-26)
 
 These are not a Stage and not frozen Tasks. Each becomes a Task when the owner supplies a
@@ -1079,6 +1092,8 @@ check, and no decoding and no MakerNotes.
    layout is known only from reverse engineering.
 
 FITS (S2.6) and PNG (S2.10) wait for samples in the same way (owner, 2026-09-26).
+So do AVIF and HEIF image sequences (the S2R-02 ruling, 2026-09-26): a reader for either is a
+small change over `HeifMetadataReader`, once a real sample exists.
 
 ### Stage 3 — Metadata → Equipment / Device Import
 

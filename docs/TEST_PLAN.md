@@ -950,7 +950,7 @@ truncation and stream closure. Dart channel tests verify serialized remaining
 budget, budget-error mapping and unknown-consumption failure handling.
 These host checks do not replace a new device M1 run after the native change.
 
-The Kotlin side of document access (`MetadataDocumentChannel.kt`) runs only on Android. The host tests cover the Dart side against a stand-in (`android_capture_file_access_test.dart`). No device or emulator is available on the development machine (2026-09-26): the options are the owner's phone with USB debugging, or an emulator image.
+The Kotlin side of document access (`MetadataDocumentChannel.kt`) runs only on Android. The host tests cover the Dart side against a stand-in (`android_capture_file_access_test.dart`). *(Corrected S2.V5, 2026-09-26: the owner's phone, a Xiaomi 14T Pro on Android 16, is now used over USB with a separate `.s2check` debug package, and M1–M3 passed on it. The note written at S2.4 said: "No device or emulator is available on the development machine (2026-09-26): the options are the owner's phone with USB debugging, or an emulator image.")*
 
 | # | Scenario | Host coverage | Device procedure | Device status |
 | --- | --- | --- | --- | --- |

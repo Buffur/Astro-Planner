@@ -3,22 +3,22 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. The **repeat independent Stage 2 validation failed** at
-> `5d8bdbb` (`STAGE_2_REVALIDATION.md`). S2R-01 (TD-067): the HEIF reader's work is
-> unbounded on a crafted `iloc`. Next: **the owner decides** the proposed S2.V4 and S2.V5, and
-> the S2R-02 brand ruling. Stage 3 does not start yet.
+> **Last updated:** 2026-09-26. The repeat independent Stage 2 validation failed at `5d8bdbb`
+> (`f137409`). The owner said "Do fix", and **S2.V4** (the HEIF `iloc` bound, TD-067; the S2R-02
+> ruling (a); HEIF tests) and **S2.V5** (documentation) are done. Next: **another independent
+> Stage 2 validation** in a fresh session, or an owner waiver. Stage 3 does not start yet.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 2 — Metadata Foundation: the repeat independent validation FAILED** (S2R-01 blocking; S2R-02–S2R-04 low). The Tasks S2.1–S2.5, S2.7–S2.9 and S2.R1–S2.R3 are done; S2.6 and S2.10 are out by the owner; device checks M1–M3 passed |
+| Current Stage | **Stage 2 — Metadata Foundation: in validation.** The repeat validation failed (S2R-01 to S2R-04), and all four were fixed by S2.V4 and S2.V5. The Tasks S2.1–S2.5, S2.7–S2.9, S2.R1–S2.R3 and S2.V1–S2.V5 are done; S2.6 and S2.10 are out by the owner; device checks M1–M3 passed |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **None.** Proposed: S2.V4 (bound the HEIF `iloc` work; the S2R-04 tests; the S2R-02 ruling if made) and S2.V5 (documentation), both awaiting the owner |
-| Code baseline | S2.9 (`bb28452`); HEAD `5d8bdbb` before this validation. Not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S2.9, 2026-09-26: Encoding, Format and Analyze pass; 1062 tests (+1 expected local-sample skip) and 2 host E2E tests; the native JVM tests were unaffected (no Kotlin change) |
+| Next approved Task | **Another independent Stage 2 validation** (a fresh session, §9.8), or an owner waiver. Then Stage 3 planning |
+| Code baseline | S2.V4 (`d8e792c`). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green** after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | v17 |
 
 ## Stage status
@@ -29,7 +29,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
-| 2 | Metadata Foundation | In validation | 2026-09-26 | — | The first independent validation failed at `79f392c` (fixed, `ffaff57`); **the repeat failed at `5d8bdbb`** (S2R-01/TD-067; `STAGE_2_REVALIDATION.md`) |
+| 2 | Metadata Foundation | In validation | 2026-09-26 | — | The first independent validation failed at `79f392c` (fixed, `ffaff57`); **the repeat failed at `5d8bdbb`** (S2R-01/TD-067; `STAGE_2_REVALIDATION.md`); S2.V4 and S2.V5 fixed it. The next independent validation is pending |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
@@ -93,7 +93,10 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 2 | S2.R3 — RG-14: proprietary RAW compatibility and library research (documentation only) | 2026-09-26 | `e444bfa` | `research/S2.R3_RG14_PROPRIETARY_RAW.md`. Verified: AndroidX `ExifInterface` reads DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW and RAF (not CR3), with no documented read bound and its own GPS parsing; LibRaw is a decoder (LGPL-2.1/CDDL-1.0). Documented by reverse engineering: RAF's header points to an embedded JPEG holding the EXIF (libopenraw); CR3 keeps IFD0 and the EXIF IFD as TIFF structures in `moov`/`uuid` CMT1/CMT2, with GPS in CMT4 (lclevy). No proprietary RAW sample exists. Recommended: D (recognised only) to close Stage 2; A (container adapters over the shared extractor, one per format, only with a real sample: RAF, then CR2/NEF/ARW, ORF/RW2, CR3 last) afterwards; reject B (`ExifInterface`: unbounded and unprovable reads, a second path) and C (LibRaw: a decoder). Owner decision pending |
 | 2 | RG-14 decided by the owner; Stage 2 ready for validation (documentation only) | 2026-09-26 | `5d8bdbb` | The owner chose the recommendation, when asked which "second scenario" was meant: no proprietary RAW in Stage 2 (D); afterwards, per-format adapters over the shared extractor, each only with a real sample (A, in the order RAF → CR2/NEF/ARW → ORF/RW2 → CR3); `ExifInterface` (B) and LibRaw (C) rejected. Stage 2 closes by the repeat independent validation, not a waiver (the owner's choice). The owner's RAW formats are still unknown. Recorded in DECISIONS E.1, ADR-017's status and the plan's post-Stage-2 list |
 
-| 2 | Repeat independent Stage 2 validation (documentation and probe evidence only) | 2026-09-26 | The validation commit* | A fresh session at `5d8bdbb`: the gate is green on the clean tree; the real samples pass (DNG 848/848, JPEG 843, HEIC 4,051 bytes); the native JVM tests were re-run (4 pass). S2V-01 to S2V-04 are resolved, and HEIF inherits the fixes (probes P2–P4). **Fails on S2R-01 (TD-067):** a crafted `iloc` with zero-size fields makes the HEIF reader allocate about 1.7 GB in 9–17 s from an 8 KB `meta`, on the UI isolate (probe P1). Low: S2R-02 (AVIF and sequence brands go to the HEIF reader without a sample, and a sequence-only file reads as "corrupt"), S2R-03 (stale F-45 and `TEST_PLAN.md` text), S2R-04 (HEIF test gaps). No code or test changed; the probes were deleted, and their code is in `evidence/STAGE_2_REVALIDATION_PROBES.md`. See `STAGE_2_REVALIDATION.md` |
+| 2 | Repeat independent Stage 2 validation (documentation and probe evidence only) | 2026-09-26 | `f137409` | A fresh session at `5d8bdbb`: the gate is green on the clean tree; the real samples pass (DNG 848/848, JPEG 843, HEIC 4,051 bytes); the native JVM tests were re-run (4 pass). S2V-01 to S2V-04 are resolved, and HEIF inherits the fixes (probes P2–P4). **Fails on S2R-01 (TD-067):** a crafted `iloc` with zero-size fields makes the HEIF reader allocate about 1.7 GB in 9–17 s from an 8 KB `meta`, on the UI isolate (probe P1). Low: S2R-02 (AVIF and sequence brands go to the HEIF reader without a sample, and a sequence-only file reads as "corrupt"), S2R-03 (stale F-45 and `TEST_PLAN.md` text), S2R-04 (HEIF test gaps). No code or test changed; the probes were deleted, and their code is in `evidence/STAGE_2_REVALIDATION_PROBES.md`. See `STAGE_2_REVALIDATION.md` |
+
+| 2 | S2.V4 — Bound the HEIF `iloc` work; AVIF and HEIF sequences recognised only; HEIF test gaps | 2026-09-26 | `d8e792c` | The owner said "Do fix"; S2R-02 was taken as the recommended option (a) (DECISIONS E.1). **TD-067 resolved:** `maxExtents` = 16,384 over all items → `corrupt`. New `MetadataFormat.avif` and `heifSequence`, both recognised only and named in `MetadataText`. There are 6 new HEIF tests: the bound (fails on the old reader), the limit, GPS never read, S2V-01, S2V-02, and the brands. One assertion in `metadata_layers_test.dart` changed because of the ruling (`avif` and `msf1` were HEIF). The real samples are unchanged. Gate green (Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E). See `STAGE_2_CORRECTIONS.md` |
+| 2 | S2.V5 — Documentation reconciliation (S2R-03) | 2026-09-26 | The S2.V5 docs commit* | F-45's current-implementation and known-issues text, and `TEST_PLAN.md`'s "no device" note, are corrected with the old text quoted. Also updated: `ARCHITECTURE.md` B, ADR-017's note, E.1, TD-067, `POST_ROADMAP_PLAN.md` (the corrective-Task table) and this file |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -186,9 +189,9 @@ These block a release, not refinement.
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
-- Stage 2: decide the proposed S2.V4 and S2.V5, and the S2R-02 brand ruling
-  (`STAGE_2_REVALIDATION.md`). S2.9 and RG-14 are done. FITS and PNG are out of this Stage.
-  The DNG, JPEG and HEIC samples stay outside Git.
+- Stage 2: choose another independent validation (recommended) or a waiver. Samples for
+  FITS, PNG, AVIF or RAW, when available, enable their readers later. The DNG, JPEG and HEIC
+  samples stay outside Git.
 
 ## Known blockers
 
@@ -197,9 +200,8 @@ These block a release, not refinement.
   S1.V6, run on owner request or at the latest in Stage 11. It misleads a reader of
   F-02 and F-40 until then. TD-063 is in Stage 8. W1 is a proposed input to RD-05.
 - **Stage 2:**
-  - the repeat independent validation failed on S2R-01 (TD-067). The Stage can close only
-    after a fix and another independent validation, or an owner waiver;
-  - S2.V4 and S2.V5 are proposed, not approved.
+  - the repeat validation's findings are fixed (S2.V4, S2.V5). The Stage closes after
+    another independent validation, or an owner waiver.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -207,6 +209,10 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **S2.V4/S2.V5 implementation verification**, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E. The targeted metadata
+  suites give 98 passed and 1 expected skip; the new bound tests fail on the old reader; the
+  real samples are unchanged. This is self-verification, not independent Stage acceptance.
 
 - **Repeat independent Stage 2 validation**, 2026-09-26, at `5d8bdbb`: **FAIL**
   (`STAGE_2_REVALIDATION.md`).
@@ -332,32 +338,24 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**An owner decision on the repeat validation's findings** (`STAGE_2_REVALIDATION.md`). The
-validation itself fixes nothing, so each item below waits for the owner:
-1. **S2.V4** (implementation, S): bound the HEIF `iloc` work (S2R-01, TD-067): a total extent
-   limit, or refuse extents that occupy no bytes → `corrupt`. Add a regression test with a
-   time or allocation ceiling, and the S2R-04 HEIF tests (the GPS read log, S2V-01 and S2V-02
-   through the Exif item).
-2. **The S2R-02 ruling:**
-   - (a) keep the reader for the still-image brands the evidence backs, and make the others
-     recognised only; or
-   - (b) accept AVIF as the same container, and stop reporting a file without `meta` as
-     "corrupt".
-
-   Either can join S2.V4.
-3. **S2.V5** (documentation, S): F-45's current-implementation and known-issues text, and
-   `TEST_PLAN.md`'s "no device" note (S2R-03).
-
-After the fixes: another independent Stage 2 validation in a fresh session, or an owner
-waiver. Then **Stage 3 planning**: research RG-02 (equipment identity) and RG-03
-(specification sources), and an ADR for the owner. Stage 3 does not start before Stage 2
-closes.
+**Another independent Stage 2 validation**, in a **fresh session** (§9.8), or an owner
+waiver. It should:
+- re-check S2R-01 to S2R-04 against S2.V4/S2.V5 (`STAGE_2_REVALIDATION.md`,
+  `STAGE_2_CORRECTIONS.md`); probe P1 in `evidence/STAGE_2_REVALIDATION_PROBES.md` is a
+  ready-made reproduction;
+- check the amended exit again: the foundation, with DNG, JPEG and HEIF still images on real
+  samples, and everything else recognised only;
+- try to disprove the rest. Resource bounds beyond bytes read (work and memory per input
+  byte) deserve attention in every reader.
 
 Useful inputs:
 - the local real-sample check, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
   (2 DNGs, a JPEG and a HEIC);
-- probe P1 in `evidence/STAGE_2_REVALIDATION_PROBES.md`, as a ready-made reproduction;
-- device rows M1–M3 in `TEST_PLAN.md`.
+- device rows M1–M3 in `TEST_PLAN.md`;
+- the owner's phone can be connected on request.
+
+If it passes, close Stage 2 here and begin **Stage 3 planning**: research RG-02 (equipment
+identity) and RG-03 (specification sources), and an ADR for the owner.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

@@ -1,5 +1,9 @@
 # AstroPlan Feature Status
 
+> **Metadata update, 2026-09-26 (S2.V4/S2.V5, commit `d8e792c`):** the HEIF reader's work is
+> bounded (TD-067); AVIF and HEIF image sequences are recognised only (the S2R-02 ruling); F-45's
+> current-state text is corrected (S2R-03). See `refinement/STAGE_2_CORRECTIONS.md`.
+
 > **Metadata verification update, 2026-09-26 (S2.V1–S2.V3):** integer arrays
 > remain unparseable, short JPEG EXIF is a typed failure, and Android streaming
 > prefixes consume the per-file budget. See `refinement/STAGE_2_CORRECTIONS.md`.
@@ -667,6 +671,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S2.V4 (2026-09-26, commit `d8e792c`), after the repeat independent validation failed (`f137409`):** a crafted HEIF `iloc` can no longer exhaust memory or time (TD-067, at most 16,384 extents). AVIF and HEIF image sequences are recognised only, with their own names (the owner's S2R-02 ruling). The HEIF tests now cover the GPS read log and the S2V-01/S2V-02 cases. Still hidden.
 - **S2.9 (2026-09-26):** HEIC/HEIF is read (the container structure only, through the shared EXIF extractor), verified locally on the owner's phone HEIC. Supported formats: DNG, JPEG and HEIF. Still hidden. Device check M3 passed on the owner's phone the same day.
 - **Device check, 2026-09-26 (owner's Xiaomi 14T Pro, Android 16):** with a local, uncommitted gate flip in a separate debug package, the document picker read both DNGs and the JPEG in place with every expected value and nothing in the app's cache; HEIC said "not supported yet". M1 and M2 passed (`TEST_PLAN.md`). Found: TD-066 (sub-second exposures print as decimals).
 - **S2.8 (2026-09-26):** JPEG is read (APP1 Exif through the shared extractor), verified locally on the owner's phone JPEG. Supported formats: DNG and JPEG. Still hidden.
@@ -679,11 +684,11 @@ see DATA_MODEL.md B2/B8.)
 - **Decided 2026-09-26 (ADR-017; DECISIONS E.1):** Stage 2 rebuilds the foundation (bounded reads, signature recognition, a typed contract, no GPS/serial/observer, Android access without a copy); DNG only, FITS on a sample; the screen stays hidden during Stage 2 (S2.1–S2.6).
 - **S2.R1 (2026-09-26, research; no code changed):** the owner supplied two real phone DNGs, kept outside the repository. On them, the prototype finds none of the capture fields: it reads only `EXIF …` keys, while these files keep the tags in IFD0 (TD-064). The recommended formats, readers and fixture policy are in `refinement/research/RG-01_METADATA_FORMATS.md`, pending the owner's decision (PD-21, proposed ADR-017). The status is still Prototype.
 - **Status:** Partial (hidden). *(Was: Prototype, until S2.5.)*
-- **Current implementation (S2.8 plus S2.V1–S2.V3):** the Android document picker (no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG and JPEG) → read-only rows with units, sources and unknowns. Nothing is stored. The Stage 2 gate is false in debug and release; device testing temporarily flipped it and reverted the change.
+- **Current implementation (S2.9 plus S2.V1–S2.V4; corrected S2.V5, 2026-09-26, which previously read "S2.8 plus S2.V1–S2.V3 … (DNG and JPEG)"):** the Android document picker (no copy) → a budgeted `MetadataSource` → `CaptureMetadataReader` (DNG, JPEG and HEIF still images; AVIF, HEIF sequences, PNG, FITS, XISF and proprietary RAW are recognised only) → read-only rows with units, sources and unknowns. Nothing is stored. The Stage 2 gate is false in debug and release; device testing temporarily flipped it and reverted the change.
 - **Relevant files:** `lib/domain/metadata/`, `lib/data/metadata/`, `MetadataDocumentChannel.kt`, `metadata_import_viewmodel.dart`, `metadata_import_screen.dart`, `presentation/shared/metadata_text.dart`.
 - **Historical prototype issues (removed in S2.5):** gallery-only selection, whole-file reads, faulty FITS string splitting and no real-sample coverage. The replacement has local DNG/JPEG samples; FITS is explicitly out of this Stage.
 - **Dependencies:** the app's own `metadata_document` channel; gate `FeatureScope.metadataImport` (false). *(Was: image_picker, exif.)*
-- **Known issues now:** HEIC decision and RAW research remain open; FITS/PNG are out of Stage 2. M1 seekable paths passed at `360fd8f`; updated streaming code has JVM tests but no new device run. Unknown provider size remains a typed failure. TD-066 remains presentation debt.
+- **Known issues now** *(corrected S2.V5, 2026-09-26; the old text said the HEIC decision and the RAW research were open, and they are done: S2.9 `bb28452`, RG-14 `5d8bdbb`)*: FITS, PNG, AVIF and proprietary RAW wait for samples. Device checks M1–M3 passed (seekable providers, the S2.V3 protocol included, in M3). The non-seekable (cloud) path and a real backup's preview cancel are still unverified on a device. Unknown provider size remains a typed failure. TD-066 remains presentation debt.
 - **Roadmap relevance:** Phase 12 (ahead of phase).
 
 ## F-46 — Field mode

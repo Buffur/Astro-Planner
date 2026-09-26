@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 2 repeat validation and S2.V4/S2.V5 (2026-09-26):** the repeat validation failed (`f137409`); the owner said "Do fix". HEIF `iloc` work is bounded (TD-067); AVIF and HEIF sequences are recognised only (the S2R-02 ruling, option (a)); ADR-017 note added (E.1, "Stage 2 repeat validation: fixes and the HEIF brand ruling").
 > **RG-14 decided (2026-09-26):** no proprietary RAW in Stage 2; adapters per sample later; `ExifInterface` and LibRaw rejected (E.1).
 > **Stage 2 format priorities (2026-09-26):** ADR-017 amended (§8 superseded by §13; layering); RG-14 registered (E.1, "Stage 2 format priorities and metadata layering").
 > **Stage 2 decisions (2026-09-26):** ADR-017 accepted; PD-21 resolved; RD-16 resolved for Stage 2 (E.1, "Stage 2 decisions: RG-01, PD-21, RD-16").
@@ -856,6 +857,32 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   - The owner has not yet said which RAW formats they shoot. Those adapters wait for samples.
 - **Stage 2 closure:** the **repeat independent Stage 2 validation** runs first, in a fresh
   session; Stage 3 starts after it passes. This is not a waiver.
+
+### Stage 2 repeat validation: fixes and the HEIF brand ruling (2026-09-26)
+
+- **Context:** the repeat independent Stage 2 validation failed at `5d8bdbb`
+  (`refinement/STAGE_2_REVALIDATION.md`, committed `f137409`). It proposed S2.V4 and S2.V5, and it
+  asked for a ruling on S2R-02 with two options: (a) read only the HEIF still-image brands the
+  evidence covers, and make the others recognised only; (b) accept AVIF as the same container.
+- **Decided by:** the project owner, in chat, on 2026-09-26: "Do fix". This approves S2.V4 and
+  S2.V5. The owner did not name an S2R-02 option. The implementing session took the reply as
+  accepting the recommended option, **(a)**, which narrows a support claim rather than widening
+  it. The owner can reverse it: the change is a recognition table.
+- **S2R-02 ruling (a):**
+  - **HEIF, read by `HeifMetadataReader`:** the major brands `heic`, `heix`, `heim` and `heis`
+    (HEVC still images) and `mif1` (the generic image brand). The owner's HEIC is `heic`.
+  - **`MetadataFormat.avif` (recognised only):** the major brands `avif` and `avis`. No AVIF
+    sample exists (ADR-017 §13: support only with a real sample).
+  - **`MetadataFormat.heifSequence` (recognised only):** the major brands `msf1`, `hevc`,
+    `hevx`, `hevm` and `hevs`. A sequence may have no top-level `meta`, so reading one as a
+    still image called valid files "corrupt".
+  - The files come back as "not supported yet", with their own names ("AVIF", "HEIF image
+    sequence"). A reader for either needs a sample and a Task, like the RAW adapters.
+- **S2.V4 (TD-067):** the HEIF `iloc` parser accepts at most `maxExtents` = 16,384 extents over
+  all items, which is what a 64 KiB `meta` holds with one 4-byte field per extent. Beyond that
+  the reading is `corrupt`.
+- **Stage 2 closure:** unchanged. Another independent validation in a fresh session, or an
+  owner waiver.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2760,6 +2787,13 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
   `docs/TEST_PLAN.md`.
 
 ## ADR-017: Image metadata reading (Stage 2 foundation)
+
+**Corrective implementation note (2026-09-26, S2.V4, after the repeat validation):** the HEIF
+`iloc` parser accepts at most 16,384 extents over all items (TD-067; an extent with all-zero
+field sizes occupies no bytes, so the byte budget did not bound the work). The S2R-02 ruling
+(E.1, "Stage 2 repeat validation: fixes and the HEIF brand ruling") narrows §13's HEIF entry:
+- HEIF still images (`heic`, `heix`, `heim`, `heis`, `mif1`) are read;
+- AVIF and HEIF image sequences are recognised only, until a sample exists.
 
 **Corrective implementation note (2026-09-26, S2.V1–S2.V3):** the owner authorized
 fixing the validation failures. Single-valued integer fields accept count 1;
