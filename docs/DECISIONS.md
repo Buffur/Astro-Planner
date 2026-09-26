@@ -2704,8 +2704,10 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 
 Status: accepted (owner, 2026-09-26, after S2.R1; the constraints are in E.1, "Stage 2
-decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** not started (Stage 2,
-S2.1–S2.6).
+decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
+- **Done:** §4.1, §4.2 and §4.4 (S2.1, 2026-09-26): `lib/domain/metadata/` and
+  `lib/data/metadata/file_metadata_source.dart`, as specified.
+- **Open:** §2, §5 (S2.2); §4.3 (S2.3); §6 (S2.4); §7 (S2.5); FITS (S2.6).
 
 ### 1. Context (verified)
 

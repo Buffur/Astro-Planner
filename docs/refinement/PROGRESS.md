@@ -3,9 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. The owner decided RG-01: ADR-017 is accepted, and PD-21 and
-> RD-16 are resolved for Stage 2. The Stage 2 Tasks S2.1–S2.6 are frozen, and S2.1 is next.
-> Open blockers: a device for S2.4's acceptance, and a FITS sample for S2.6.
+> **Last updated:** 2026-09-26. S2.1 is done (the bounded metadata source and format
+> recognition). S2.2 is next. Open blockers: a device for S2.4's acceptance, and a FITS sample
+> for S2.6.
 
 ## Current state
 
@@ -15,9 +15,9 @@
 | Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S2.1 — Bounded metadata source and format recognition** (host-testable). Then S2.2 → S2.3 → S2.4 (needs a device check) → S2.5. S2.6 (FITS) is gated on a real FITS sample |
-| Code baseline | `ea65231` (S1.V4). Later commits change documentation and evidence only. Not pushed (S1.14) |
-| Quality gate at the baseline | **Green**, re-run independently on 2026-09-26 at `c99bd7f`: Encoding, Format and Analyze pass; 963 tests and 2 host E2E tests pass |
+| Next approved Task | **S2.2 — The metadata contract as typed values with provenance** (pure Dart). Then S2.3 → S2.4 (needs a device check) → S2.5. S2.6 (FITS) is gated on a real FITS sample |
+| Code baseline | S2.1 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green** after S2.1, 2026-09-26: Encoding, Format and Analyze pass; 980 tests and 2 host E2E tests pass |
 | Schema | v17 |
 
 ## Stage status
@@ -70,7 +70,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | `39392d9` | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
 | 1–2 | Stage 1 closed by the owner, and Stage 2 planning (documentation only) | 2026-09-26 | `565341b` | The owner said "lets go to stage 2" after the re-validation failed. Recorded as a waiver (DECISIONS E.1): TD-063 moved to Stage 8, X2 and W1 carried. Stage 2: TD-018's mechanisms were re-verified at `39392d9` (all still present); six planning-time findings were placed; S2.R1 is frozen and S2.1–S2.6 are provisional (`POST_ROADMAP_PLAN.md`) |
 | 2 | S2.R1 — RG-01: formats, libraries, file selection, fixtures (research, documentation only) | 2026-09-26 | `d4b2be4` | The owner's two phone DNGs (Xiaomi, DNG 1.4, 25 MB each; kept outside the repository) were inspected. All their metadata sits in IFD0 within the first 6.7 KB. They have no GPS and no time offset, and the same Model for both cameras (input for RG-02). The prototype finds 0 of 5 capture fields in them (TD-064). Sources read: `exif` 3.3.0 (MIT; TIFF, JPEG and HEIC; no byte-budget API); `file_picker` 13.1.0 / `android_file_picker` 2.0.0 (copies every file whole into the cache; the extension filter drops unknown MIME types; TD-065); the FITS 4.0 standard (`CONTINUE` is standard, `''` escapes, `DATE-OBS` is UTC at the start); XISF 1.0 (focal length in metres, gain in e⁻/DN); N.I.N.A.'s documented keywords (FOCALLEN is user-entered). Recommended: DNG/TIFF now, FITS on a sample, in-house bounded readers, the `exif` and `image_picker` dependencies removed, no GPS or serials, header-only fixtures with consent, the feature hidden until Stage 3. Proposed ADR-017 |
-| 2 | RG-01 decided by the owner; ADR-017; Stage 2 frozen (documentation only) | 2026-09-26 | The decision commit* | The owner approved the direction with constraints. Decided: DNG only, and FITS only with a real sample; bounded reads recognised by signature; the approved contract's fields only; Unknown and provenance kept; no GPS, serials or observer; no inferred zone; the owner's slices never committed (synthetic, sanitized fixtures; the real files stay local); the UI hidden in Stage 2; no Equipment writes; TD-065 is in scope. ADR-017 written (Part F), including the justified removal of `exif` and `image_picker` (both copy or read whole files; each has one use). Verified: `image_picker_android` 0.8.13+23 also copies every pick into the cache, and offers images only. Stage 3 evidence recorded (identical Model across the phone's cameras). S2.1–S2.6 frozen. New blocker: no Android device or emulator can run S2.4's native path |
+| 2 | RG-01 decided by the owner; ADR-017; Stage 2 frozen (documentation only) | 2026-09-26 | `96454d8` | The owner approved the direction with constraints. Decided: DNG only, and FITS only with a real sample; bounded reads recognised by signature; the approved contract's fields only; Unknown and provenance kept; no GPS, serials or observer; no inferred zone; the owner's slices never committed (synthetic, sanitized fixtures; the real files stay local); the UI hidden in Stage 2; no Equipment writes; TD-065 is in scope. ADR-017 written (Part F), including the justified removal of `exif` and `image_picker` (both copy or read whole files; each has one use). Verified: `image_picker_android` 0.8.13+23 also copies every pick into the cache, and offers images only. Stage 3 evidence recorded (identical Model across the phone's cameras). S2.1–S2.6 frozen. New blocker: no Android device or emulator can run S2.4's native path |
+| 2 | S2.1 — Bounded metadata source and format recognition | 2026-09-26 | The S2.1 commit* | `lib/domain/metadata/`: `MetadataSource`, `BudgetedMetadataSource` (1 MiB per file, 64 KiB per read, a read log, refused reads cost nothing), typed `MetadataReadException`, and `MetadataFormatRecognizer` (TIFF, FITS, XISF and JPEG by signature, ≤ 16 bytes). `lib/data/metadata/file_metadata_source.dart`: positioned, serialized reads, with short reads typed. 17 tests: the budget, limits and ranges, wrapping and short reads; signatures and near misses; a real 4 GiB file recognised and read at both ends with ≤ 64 KiB read; the domain purity check, which fails on a domain `dart:io` import (demonstrated with a temporary file, removed) and allows only the prototype until S2.5. Gate green, 980 + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -283,12 +284,12 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S2.1 — Bounded metadata source and format recognition** (implementation, frozen and
-approved; `POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017 §4). Use a fresh
-session where practical. It is host-only; no blocker applies.
+**S2.2 — The metadata contract as typed values with provenance** (implementation, frozen
+and approved; `POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017 §2, §5).
+It is pure Dart; no blocker applies.
 
 After that, the order is:
-1. S2.2 and S2.3 (host);
+1. S2.3 (host);
 2. S2.4, which is implemented on the host but accepted only after a device check;
 3. S2.5;
 4. S2.6, only once a real FITS sample exists; otherwise the owner moves it out of Stage 2.
