@@ -27,8 +27,10 @@ class MetadataImportViewModel extends ChangeNotifier {
   EquipmentMatch? _match;
 
   /// Conflicts where the user chose the file's value, per rig (ADR-018 §6:
-  /// keeping the saved value is the default).
-  final Map<int, Set<EquipmentSpec>> _taken = {};
+  /// keeping the saved value is the default), each with the saved value the
+  /// choice was made against. A choice whose saved value has changed since
+  /// is withdrawn (S3.V1): it never replaces a newer edit.
+  final Map<int, Map<EquipmentSpec, Object>> _taken = {};
 
   bool get busy => _busy;
 
@@ -73,26 +75,59 @@ class MetadataImportViewModel extends ChangeNotifier {
     }
   }
 
-  /// Matches [candidate] against the saved rigs again, after a rig was
-  /// saved from this screen.
+  /// Matches [candidate] against the saved rigs as they are now (S3.V1):
+  /// whenever the review is shown, before a rig is opened from it, and after
+  /// a save. Choices made against values that have since changed, or on rigs
+  /// that are gone, are withdrawn.
   Future<void> refreshMatch() async {
     final candidate = _candidate;
     if (candidate == null) return;
-    _match = EquipmentMatcher.match(
+    final match = EquipmentMatcher.match(
       candidate,
       await _equipment.getAllEquipment(),
     );
-    _taken.removeWhere((id, _) => !_match!.rigs.any((r) => r.rig.id == id));
+    _match = match;
+    _taken.removeWhere((id, choices) {
+      final rig = match.rigs.where((r) => r.rig.id == id).firstOrNull;
+      if (rig == null) return true;
+      choices.removeWhere((spec, savedThen) {
+        final c = rig.conflicts.where((c) => c.spec == spec).firstOrNull;
+        return c == null || !_sameValue(c.saved, savedThen);
+      });
+      return choices.isEmpty;
+    });
     notifyListeners();
   }
 
+  /// The match for rig [rigId] against the saved rigs as they are now, or
+  /// null when it no longer relates to the file (changed or deleted).
+  Future<RigMatch?> currentMatchFor(int rigId) async {
+    await refreshMatch();
+    return _match?.rigs.where((r) => r.rig.id == rigId).firstOrNull;
+  }
+
+  static bool _sameValue(Object a, Object b) => a is List && b is List
+      ? a.length == b.length &&
+            [for (var i = 0; i < a.length; i++) a[i] == b[i]].every((s) => s)
+      : a == b;
+
   /// Whether the user chose the file's value for [spec] on [rig].
   bool takesImported(EquipmentProfile rig, EquipmentSpec spec) =>
-      _taken[rig.id]?.contains(spec) ?? false;
+      _taken[rig.id]?.containsKey(spec) ?? false;
 
   void setTakesImported(EquipmentProfile rig, EquipmentSpec spec, bool take) {
-    final specs = _taken.putIfAbsent(rig.id, () => {});
-    take ? specs.add(spec) : specs.remove(spec);
+    final conflict = _match?.rigs
+        .where((r) => r.rig.id == rig.id)
+        .firstOrNull
+        ?.conflicts
+        .where((c) => c.spec == spec)
+        .firstOrNull;
+    final choices = _taken.putIfAbsent(rig.id, () => {});
+    if (take && conflict != null) {
+      choices[spec] = conflict.saved;
+    } else {
+      choices.remove(spec);
+    }
     notifyListeners();
   }
 

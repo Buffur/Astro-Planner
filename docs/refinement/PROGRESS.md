@@ -3,9 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (Stage 3 validation at `387e54b`). **Stage 3 validation FAILED**:
-> S3V-01–S3V-06 block acceptance. The recorded S3.1–S3.10 implementation and M4 results remain
-> historical evidence, not Stage acceptance. Next: focused corrective Tasks, then revalidation.
+> **Last updated:** 2026-09-26 (S3.V1). **Stage 3 validation FAILED** at `387e54b` (committed
+> `7f790df`). The owner approved the corrective Tasks S3.V1–S3.V5, one at a time. S3.V1 (S3V-01)
+> is done. Next: **S3.V2**. Then a fresh independent validation; Stage 4 waits.
 
 ## Current state
 
@@ -48,9 +48,9 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (FAIL).** S3V-01–S3V-06 require correction; see `STAGE_3_VALIDATION.md`. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Proposed focused corrective Tasks S3.V1–S3.V5 are in `STAGE_3_VALIDATION.md`; not started or marked approved |
-| Code baseline | S3.10 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.V2 — preserve provenance (S3V-02)**; then S3.V3, S3.V4, S3.V5 (owner-approved, DECISIONS E.1) |
+| Code baseline | S3.V1 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -156,7 +156,10 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.9 — No rounding conflicts on re-reading an imported file (TD-068) | 2026-09-26 | `3f54432` | Owner: "fix the existing issues…" (E.1, "Stage 3 fixes before validation"). The candidate proposes estimates at the editor's stored precision, with one set of constants for both (`EquipmentCandidate.sensorDecimals`/`pixelPitchDecimals`/`rawSizeDecimals`: 0.01 mm, 0.001 µm, 0.1 MB); plausibility is checked before rounding (a 0.05 MB file stays out of range — caught by the existing test when a first version rounded first). Regression tests (`equipment_import_round_trip_test.dart`): a rig saved from a file through the real form model matches it with no differences (the M4 main DNG, the telephoto, a portrait JPEG), and a user-typed value is still a difference. All four failed before the fix. Five expectations updated to the rounded proposals (the unrounded CALC-40 values stay tested in the estimator's group). CALC-40 row noted; TD-068 resolved. Gate green, 1165 + 1 skip + 2 E2E |
 
-| 3 | S3.10 — The editor readable on a phone (TD-069) | 2026-09-26 | The S3.10 commit* | Owner-approved (E.1, "Stage 3 fixes before validation"). `equipment_editor_fit_test.dart` reproduces the device on a 375 dp view with Roboto loaded (the test font draws a full em per character): at 100 %, "9.89" needed 36 dp in an 18 dp box, exactly as on the phone. Fix: each W × H row's label moved above its fields. The same test at 130 % found the Tracking dropdown overflowing (present before Stage 3): now `isExpanded`. 4 tests (two drafts × 100/130 %); all failed before. Existing editor tests unchanged. Gate green, 1169 + 1 skip + 2 E2E |
+| 3 | S3.10 — The editor readable on a phone (TD-069) | 2026-09-26 | `387e54b` | Owner-approved (E.1, "Stage 3 fixes before validation"). `equipment_editor_fit_test.dart` reproduces the device on a 375 dp view with Roboto loaded (the test font draws a full em per character): at 100 %, "9.89" needed 36 dp in an 18 dp box, exactly as on the phone. Fix: each W × H row's label moved above its fields. The same test at 130 % found the Tracking dropdown overflowing (present before Stage 3): now `isExpanded`. 4 tests (two drafts × 100/130 %); all failed before. Existing editor tests unchanged. Gate green, 1169 + 1 skip + 2 E2E |
+
+| 3 | Independent Stage 3 validation (FAIL) | 2026-09-26 | `7f790df` | Committed as written by the owner's validation: S3V-01–S3V-06 blocking, S3V-07 non-blocking, S3V-08 unverified. Before committing, this session re-ran the archived probes at `387e54b`: 7 failures (P1–P5, P7, P8) and P6 passing, as reported |
+| 3 | S3.V1 — A stale review never reverts newer rig edits (S3V-01) | 2026-09-26 | The S3.V1 commit* | Owner-approved (E.1, "Stage 3 validation failed: corrective Tasks"). The review is re-matched against the saved rigs when shown (post-frame) and right before Open or "New rig with the camera specs" (`currentMatchFor`). A "use the file's value" choice stores the saved value it was made against and is withdrawn if that value changed or the rig is gone; a deleted or no-longer-matching rig is not opened (a snackbar says so). 4 regression tests through real routes, real screens and SQLite (`metadata_import_stale_review_test.dart`): the validation's P8 sequence, a change while the review stays open, a withdrawn choice (then a fresh explicit choice does replace), and a deleted rig. All 4 failed before the fix. Gate green, 1173 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -407,11 +410,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Define and approve focused Stage 3 corrective Tasks**, then revalidate (§9.8).
-The validation at `387e54b` failed despite the green baseline gate and recorded M4.
-`STAGE_3_VALIDATION.md` proposes S3.V1–S3.V5 for S3V-01–S3V-06, plus documentation
-and device follow-up. No corrective implementation has started; do not start Stage 4.
-Recheck device behavior through a separate `.s2check` package, never the owner's app.
+**S3.V2 — preserve provenance (S3V-02)**, owner-approved (DECISIONS E.1): untouched legacy values
+must not become attributed to the user merely because another field was edited. First a failing
+regression test (the validation's P1 and P2, through the real repository), then only that fix,
+then the gate, `PROGRESS.md`, one commit, and STOP. S3.V3, S3.V4 and S3.V5 follow, one at a time.
+Then a fresh independent Stage 3 validation; do not start Stage 4.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

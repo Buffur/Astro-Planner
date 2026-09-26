@@ -1371,6 +1371,21 @@ One Task per commit, then STOP (§9.4). Never start the next Task automatically.
 | S3.7 | Visibility (ADR-018 §7), TD-066, the device check M4 | S | S3.6 | **Done 2026-09-26** (M4 passed; TD-066 verified on the device) |
 | S3.9 | No rounding conflicts between a rig and the file it was imported from (TD-068) | S | S3.7 | **Done 2026-09-26** (owner-approved, E.1 "Stage 3 fixes before validation") |
 | S3.10 | The editor's sensor-size fields readable on a phone (TD-069) | S | S3.9 | **Done 2026-09-26** (with the Tracking dropdown overflow its test found) |
+
+#### Stage 3 — corrective Tasks after the failed validation (2026-09-26)
+
+The independent validation at `387e54b` failed (`STAGE_3_VALIDATION.md`, `7f790df`). The owner
+approved these Tasks, one at a time, each ending in a commit and a STOP (DECISIONS E.1, "Stage 3
+validation failed: corrective Tasks"). Then a fresh independent validation; Stage 4 waits.
+
+| Task | Finding | Acceptance (owner) | State |
+| --- | --- | --- | --- |
+| S3.V1 | S3V-01 | A stale review never silently reverts newer Equipment changes, unless the user explicitly chooses to replace them | **Done 2026-09-26** |
+| S3.V2 | S3V-02 | Untouched legacy values are never attributed to the user because another field was edited | **Next** |
+| S3.V3 | S3V-03, S3V-04 | The file's value, when chosen, is the value applied; persisted and verified values stay exact; rounding only for estimated or display-only values | Approved |
+| S3.V4 | S3V-05 | Image dimensions validated; impossible or absurd values rejected (S3.1's acceptance) | Approved |
+| S3.V5 | S3V-06, S3V-07 | The required real-database review coverage; stale documentation and status wording corrected | Approved |
+| (separate) | S3V-08 | A device recheck, as its own validation action with its evidence level, if the Stage 3 acceptance requires it | Not decided; kept apart from S3.V5 |
 | S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | **Done 2026-09-26** |
 
 Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7. S3.7 goes last because it makes

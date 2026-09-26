@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 3 validation failed (2026-09-26):** corrective Tasks S3.V1–S3.V5 approved by the owner (E.1, "Stage 3 validation failed: corrective Tasks").
 > **Stage 3 fixes (2026-09-26):** the owner approved S3.9 (TD-068) and S3.10 (TD-069) before the validation (E.1, "Stage 3 fixes before validation").
 > **S3.7 (2026-09-26):** RD-16 implemented. The import is visible as "Add from a photo" (ADR-018 §7), and the Settings viewer entry is removed.
 > **Stage 3 decisions (2026-09-26, S3.D, documentation only):** ADR-018 (metadata-assisted equipment import) accepted in Part F; RG-02 decided; RD-16 resolved; RG-03 deferred (E.1, "Stage 3 decisions (S3.D)").
@@ -943,6 +944,35 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **S3.9's rule:** estimates are proposed at the precision the editor stores (sensor 0.01 mm,
   pixel 0.001 µm, RAW size 0.1 MB), one set of constants for both. Plausibility is checked before
   rounding, so rounding never makes a value plausible. CALC-40 itself is unchanged.
+
+### Stage 3 validation failed: corrective Tasks (2026-09-26)
+
+- **Context:** the independent Stage 3 validation at `387e54b` failed (`refinement/STAGE_3_VALIDATION.md`,
+  committed `7f790df` as written): S3V-01 to S3V-06 are blocking.
+- **Decided by:** the project owner, in chat, 2026-09-26:
+  - treat Stage 3 as failed, and do not start Stage 4;
+  - commit the validation record alone;
+  - then run S3.V1–S3.V5 one at a time. For each: a failing regression test first where
+    practical, only that fix, the targeted tests and the gate, `PROGRESS.md`, one commit,
+    and STOP.
+- **Acceptance set by the owner:**
+  - **S3.V1:** a stale review never silently reverts newer Equipment changes, unless the user
+    explicitly chooses to replace them;
+  - **S3.V2:** untouched legacy values are never attributed to the user because another field
+    was edited;
+  - **S3.V3:**
+    - choosing the file's value applies the file's actual value;
+    - persisted and verified values stay exact;
+    - rounding only for explicitly estimated or display-only values;
+  - **S3.V4:** image dimensions validated; impossible or absurd values rejected (S3.1's
+    acceptance);
+  - **S3.V5:** the required real-database review coverage, and stale documentation/status
+    wording corrected.
+- **Also decided:**
+  - an Android or device recheck is kept separate from S3.V5, as its own validation action with
+    a clear evidence level, unless the Stage 3 acceptance requires it;
+  - the failed validation is never weakened or rewritten to fit the implementation;
+  - after S3.V1–S3.V5, Stage 3 needs a fresh independent validation before Stage 4.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

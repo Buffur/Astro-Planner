@@ -17,8 +17,25 @@ import '../equipment/equipment_editor.dart';
 /// proposes equipment from it (S3.6, ADR-018): the match against the saved
 /// rigs comes first, the file's values below. Nothing is stored except
 /// through the rig editor's Save, and nothing leaves the device.
-class MetadataImportScreen extends StatelessWidget {
+class MetadataImportScreen extends StatefulWidget {
   const MetadataImportScreen({super.key});
+
+  @override
+  State<MetadataImportScreen> createState() => _MetadataImportScreenState();
+}
+
+class _MetadataImportScreenState extends State<MetadataImportScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // S3.V1: a review kept from an earlier visit is matched again against
+    // the rigs as they are now, so it never shows (or reopens) stale ones.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final vm = context.read<MetadataImportViewModel?>();
+      if (!mounted || vm?.candidate == null) return;
+      runWithFeedback(context, 'match the saved rigs', vm!.refreshMatch);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +164,37 @@ class _EquipmentCard extends StatelessWidget {
   final EquipmentCandidate candidate;
   final EquipmentMatch match;
 
+  /// Opens rig [rigId] as it is now (S3.V1): the saved rigs are read again
+  /// first, so a change made since the review was shown is never reverted,
+  /// and a rig that changed so it no longer matches, or was deleted, is not
+  /// opened (the review then shows the current match).
+  Future<void> _openCurrent(
+    BuildContext context,
+    int rigId,
+    EquipmentDraft Function(RigMatch current) draftFor,
+  ) async {
+    RigMatch? current;
+    final read = await runWithFeedback(
+      context,
+      'check the saved rigs',
+      () async => current = await vm.currentMatchFor(rigId),
+    );
+    if (!read || !context.mounted) return;
+    final rig = current;
+    if (rig == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'That rig has changed or was removed. The review now shows '
+            'the saved rigs as they are.',
+          ),
+        ),
+      );
+      return;
+    }
+    await _edit(context, draftFor(rig));
+  }
+
   Future<void> _edit(BuildContext context, EquipmentDraft draft) async {
     final saved = await showEquipmentEditor(context, draft: draft);
     if (!saved || !context.mounted) return;
@@ -217,14 +265,18 @@ class _EquipmentCard extends StatelessWidget {
                 if (opens)
                   OutlinedButton(
                     key: Key('import.open.${r.rig.id}'),
-                    onPressed: () => _edit(context, vm.rigDraft(r)),
+                    onPressed: () =>
+                        _openCurrent(context, r.rig.id, vm.rigDraft),
                     child: Text('Open "${r.rig.name}"'),
                   ),
                 if (outcome == MatchKind.sameCameraOtherOptics)
                   OutlinedButton(
                     key: Key('import.newFrom.${r.rig.id}'),
-                    onPressed: () =>
-                        _edit(context, vm.newRigDraft(cameraFrom: r.rig)),
+                    onPressed: () => _openCurrent(
+                      context,
+                      r.rig.id,
+                      (current) => vm.newRigDraft(cameraFrom: current.rig),
+                    ),
                     child: Text(
                       'New rig with the camera specs of "${r.rig.name}"',
                     ),
