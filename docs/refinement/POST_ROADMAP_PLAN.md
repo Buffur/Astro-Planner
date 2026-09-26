@@ -987,7 +987,7 @@ and still gated on a sample.
 | S2.R2 | HEIC/HEIF metadata research | Research (docs only) | S–M | S2.7 | **Done 2026-09-26** (`research/S2.R2_HEIF_METADATA.md`); owner decision pending |
 | S2.9 | HEIC/HEIF reader | Implementation | M | S2.R2 decided, **a real HEIC sample** | **Done 2026-09-26** (approved by the owner) |
 | S2.10 | PNG `eXIf` | Implementation | S | S2.7, **a real PNG carrying eXIf** | **Out of Stage 2** (owner, 2026-09-26: no PNG files for now) |
-| S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | **Done 2026-09-26** (`research/S2.R3_RG14_PROPRIETARY_RAW.md`); owner decision pending |
+| S2.R3 | RG-14: proprietary RAW compatibility and library research | Research (docs only) | M | S2.7 | **Done 2026-09-26; decided** (DECISIONS E.1, "RG-14 decided") |
 
 **The Stage 2 exit, amended:** the foundation is validated; DNG is supported. Every other
 format is either supported on a real sample with tests, or recorded as recognised-only with
@@ -1065,6 +1065,20 @@ its gate. Formats that still wait for samples can move to a later Stage by owner
 - **S2.9, a HEIC reader:** defined after S2.R2's decision, with a real HEIC sample.
 - **S2.10, PNG `eXIf`:** reuses the S2.7 extractor, with a real PNG carrying `eXIf`; low
   priority.
+
+#### After Stage 2: sample-driven metadata format adapters (RG-14, decided 2026-09-26)
+
+These are not a Stage and not frozen Tasks. Each becomes a Task when the owner supplies a
+representative real sample of that format. Each follows the S2.8/S2.9 pattern: a container
+reader over the shared extractor, synthetic fixtures, a local real-sample check, a device
+check, and no decoding and no MakerNotes.
+1. RAF: its header gives the embedded JPEG, which `JpegMetadataReader` reads through a window.
+2. CR2, NEF, ARW: TIFF; NEF and ARW are told apart by IFD0 `Make`.
+3. ORF, RW2: TIFF-like, with their magic accepted.
+4. CR3: its `moov`/`uuid` CMT1 and CMT2 boxes (CMT4, the GPS, never read). Last, because its
+   layout is known only from reverse engineering.
+
+FITS (S2.6) and PNG (S2.10) wait for samples in the same way (owner, 2026-09-26).
 
 ### Stage 3 — Metadata → Equipment / Device Import
 
@@ -1424,7 +1438,7 @@ any implementation Task is created.
 | RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented |
 | RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice |
 | RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score |
-| RG-14 | Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
+| RG-14 | **DECIDED 2026-09-26 (DECISIONS E.1):** none in Stage 2; per-format adapters afterwards, only with samples; `ExifInterface` and LibRaw rejected. Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
 
 ---
 

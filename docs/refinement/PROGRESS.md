@@ -3,18 +3,19 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. S2.R3 (RG-14, proprietary RAW research) is done; its owner
-> decision is pending. After that decision, the repeat independent Stage 2 validation.
+> **Last updated:** 2026-09-26. The owner decided RG-14: no proprietary RAW in Stage 2, and
+> per-format adapters later with samples. Every Stage 2 Task is done. Next: the **repeat
+> independent Stage 2 validation** in a fresh session; Stage 3 starts after it passes.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 2 — Metadata Foundation: In progress.** The Task sequence S2.1–S2.6 is frozen (`POST_ROADMAP_PLAN.md`, "Stage 2 — frozen Task sequence"; ADR-017) |
+| Current Stage | **Stage 2 — Metadata Foundation: every Task done; awaiting the repeat independent validation.** (S2.1–S2.5, S2.7–S2.9, S2.R1–S2.R3; S2.6 and S2.10 out by the owner; device checks M1–M3 passed) |
 | Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **Owner decision** on S2.R3 (RG-14, §8). Then the **repeat independent Stage 2 validation** (fresh session) |
+| Next approved Task | **The repeat independent Stage 2 validation** (fresh session, §9.8). Then Stage 3 planning, if it passes |
 | Code baseline | S2.9 (see "Completed Tasks"). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green** after S2.9, 2026-09-26: Encoding, Format and Analyze pass; 1062 tests (+1 expected local-sample skip) and 2 host E2E tests; the native JVM tests were unaffected (no Kotlin change) |
 | Schema | v17 |
@@ -27,7 +28,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
-| 2 | Metadata Foundation | In progress | 2026-09-26 | — | — |
+| 2 | Metadata Foundation | In validation | 2026-09-26 | — | First independent validation failed at `79f392c` (fixed, `ffaff57`); the repeat is pending |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
@@ -88,7 +89,8 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 2 | Independent Stage 2 validation (another session) and S2.V1–S2.V3 corrections | 2026-09-26 | `ffaff57` | Validation at `79f392c` **failed** (`STAGE_2_VALIDATION.md`): S2V-01 (a SHORT/LONG pointer reported as a value), S2V-02 (a short JPEG EXIF reported as nothing found), S2V-03 (non-seekable reads not charged cumulatively), S2V-04 (S2.9/S2.R3 open), S2V-05 (stale docs). The owner authorized S2.V1–S2.V3 (`STAGE_2_CORRECTIONS.md`): strict integer counts, the Exif id checked as soon as it fits, and streaming budgets charged natively (`MetadataSequentialReader`, 4 JVM tests). Gate green, 1052 + 1 skipped + 2 E2E (row added by S2.9, which found it recorded only in prose) |
 | 2 | S2.9 — HEIC/HEIF reader | 2026-09-26 | `bb28452` | The owner approved S2.R2 §7 ("You can"). `HeifMetadataReader`: walks the top-level boxes by header only; reads `meta` once (≤ 64 KiB, else overBudget); parses `pitm`, `iinf`/`infe` (v2–3), `iloc` (v0–2; field sizes 0/4/8; construction methods 0 and 1; another file never followed) and `iref cdsc`, each bounded by its box; takes the Exif item linked to the primary item, else the only one, else combines all (conflicts ambiguous); honours `exif_tiff_header_offset` (Xiaomi's APP1 prefix) and hands the rest to the shared `ExifStructure` (origin "Exif item …"); refuses several extents or method 2 as corrupt; an extent or TIFF past its end is truncated, never "nothing found"; no image data is read. Registered in `readers`. Synthetic `heif_fixture.dart`; 10 tests (phone layout with the APP1 prefix, six variants, item choice, no Exif, truncated/corrupt/oversized cases, a truncation sweep proving a cut file never reads complete, 500 seeded corruptions). Two earlier cases that listed HEIF as reader-less now use CR3. **Real sample (local):** the owner's HEIC gives every expected value with its UTC offset, reading 4,051 bytes of 1.9 MB; DNG/JPEG unchanged (848, 848, 843). The device check M3 could not run (the phone disconnected; the local test package changes were reverted unused). Gate green, 1062 + 1 skipped + 2 E2E |
 | 2 | Device check M3 (HEIC on the phone) | 2026-09-26 | `237c55f` | At `3a23391`, on the owner's Xiaomi 14T Pro (Android 16), through a separate `.s2check` debug package (local changes reverted before install; package removed afterwards): the HEIC gave every expected value with UTC+03:00; the JPEG, re-read under the S2.V3 channel protocol (`ffaff57`), was unchanged; the cache stayed empty. Observed, not caused by this check: the owner's own `io.github.chacha12.astroplanner` shows lastUpdateTime 2026-09-26 09:24:47 (it was 2026-09-25 16:18 earlier the same day); this session installed only `.s2check` |
-| 2 | S2.R3 — RG-14: proprietary RAW compatibility and library research (documentation only) | 2026-09-26 | The S2.R3 commit* | `research/S2.R3_RG14_PROPRIETARY_RAW.md`. Verified: AndroidX `ExifInterface` reads DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW and RAF (not CR3), with no documented read bound and its own GPS parsing; LibRaw is a decoder (LGPL-2.1/CDDL-1.0). Documented by reverse engineering: RAF's header points to an embedded JPEG holding the EXIF (libopenraw); CR3 keeps IFD0 and the EXIF IFD as TIFF structures in `moov`/`uuid` CMT1/CMT2, with GPS in CMT4 (lclevy). No proprietary RAW sample exists. Recommended: D (recognised only) to close Stage 2; A (container adapters over the shared extractor, one per format, only with a real sample: RAF, then CR2/NEF/ARW, ORF/RW2, CR3 last) afterwards; reject B (`ExifInterface`: unbounded and unprovable reads, a second path) and C (LibRaw: a decoder). Owner decision pending |
+| 2 | S2.R3 — RG-14: proprietary RAW compatibility and library research (documentation only) | 2026-09-26 | `e444bfa` | `research/S2.R3_RG14_PROPRIETARY_RAW.md`. Verified: AndroidX `ExifInterface` reads DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW and RAF (not CR3), with no documented read bound and its own GPS parsing; LibRaw is a decoder (LGPL-2.1/CDDL-1.0). Documented by reverse engineering: RAF's header points to an embedded JPEG holding the EXIF (libopenraw); CR3 keeps IFD0 and the EXIF IFD as TIFF structures in `moov`/`uuid` CMT1/CMT2, with GPS in CMT4 (lclevy). No proprietary RAW sample exists. Recommended: D (recognised only) to close Stage 2; A (container adapters over the shared extractor, one per format, only with a real sample: RAF, then CR2/NEF/ARW, ORF/RW2, CR3 last) afterwards; reject B (`ExifInterface`: unbounded and unprovable reads, a second path) and C (LibRaw: a decoder). Owner decision pending |
+| 2 | RG-14 decided by the owner; Stage 2 ready for validation (documentation only) | 2026-09-26 | The RG-14 decision commit* | The owner chose the recommendation, when asked which "second scenario" was meant: no proprietary RAW in Stage 2 (D); afterwards, per-format adapters over the shared extractor, each only with a real sample (A, in the order RAF → CR2/NEF/ARW → ORF/RW2 → CR3); `ExifInterface` (B) and LibRaw (C) rejected. Stage 2 closes by the repeat independent validation, not a waiver (the owner's choice). The owner's RAW formats are still unknown. Recorded in DECISIONS E.1, ADR-017's status and the plan's post-Stage-2 list |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -141,7 +143,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | Open |
 | RG-12 | Licence requirements against GPL-3.0 | 9 | Open |
 | RG-13 | Settings: real-world needs and where each setting belongs | 9 | Open |
-| RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | **Researched** 2026-09-26 (`research/S2.R3_RG14_PROPRIETARY_RAW.md`); owner decision pending |
+| RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | **Decided** 2026-09-26 (DECISIONS E.1): none in Stage 2; per-format adapters later, with samples; `ExifInterface` and LibRaw rejected |
 
 ## Open owner decisions
 
@@ -314,13 +316,24 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Owner decision on S2.R3** (`research/S2.R3_RG14_PROPRIETARY_RAW.md` §8): which RAW formats
-   the owner uses (with samples), the direction (recommended: D to close Stage 2, A
-   afterwards, B and C rejected), and whether Stage 2 closes without proprietary RAW.
-2. Then the **repeat independent Stage 2 validation** in a fresh session. The first failed at
-   `79f392c`, and S2.V1–S2.V3 fixed it (`ffaff57`).
+**The repeat independent Stage 2 validation**, in a **fresh session** (§9.8: the validator is
+not the session that built the Tasks). It should:
+- check Stage 2 against its amended exit (`POST_ROADMAP_PLAN.md`: the foundation validated;
+  DNG, JPEG and HEIF supported on real samples with tests; everything else recognised only,
+  with its gate);
+- re-check the first validation's findings S2V-01 to S2V-06 (`STAGE_2_VALIDATION.md`) against
+  the fixes (`ffaff57`) and against S2.9's new HEIF reader, which that validation never saw;
+- try to disprove the rest: bounded reads, the privacy exclusions, "unknown stays unknown",
+  and the hidden gate.
 
-S2.6 (FITS) and S2.10 (PNG) are out of Stage 2 (owner).
+Useful inputs:
+- the local real-sample check: `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`;
+- device rows M1–M3 in `TEST_PLAN.md`;
+- the owner's phone can be connected on request.
+
+If it passes, close Stage 2 here and begin **Stage 3 planning**. Stage 3 starts with research
+(RG-02 equipment identity, RG-03 specification sources) and an ADR for the owner. If it
+finds more, those findings become focused fix Tasks first.
 
 **Carried open items:**
 - X2 (proposed S1.V6, documentation only; owner request or Stage 11);

@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **RG-14 decided (2026-09-26):** no proprietary RAW in Stage 2; adapters per sample later; `ExifInterface` and LibRaw rejected (E.1).
 > **Stage 2 format priorities (2026-09-26):** ADR-017 amended (§8 superseded by §13; layering); RG-14 registered (E.1, "Stage 2 format priorities and metadata layering").
 > **Stage 2 decisions (2026-09-26):** ADR-017 accepted; PD-21 resolved; RD-16 resolved for Stage 2 (E.1, "Stage 2 decisions: RG-01, PD-21, RD-16").
 >
@@ -835,6 +836,26 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Samples supplied the same day:** a phone JPEG (`IMG_20260926_084535.jpg`) and a phone
   HEIC (`IMG_20260926_084557.HEIC`), kept outside the repository. S2.8 (JPEG) is unblocked;
   S2.R2 used the HEIC.
+
+### RG-14 decided: proprietary RAW, and Stage 2 closes by validation (2026-09-26)
+
+- **Decided by:** the project owner, in chat, on 2026-09-26, after S2.R3
+  (`docs/refinement/research/S2.R3_RG14_PROPRIETARY_RAW.md`). The owner said "proceed with the
+  second scenario and move on to the next stage", and then confirmed both points when asked
+  which scenario was meant.
+- **RG-14 (DECIDED):**
+  - **Stage 2 closes without proprietary RAW support** (option D). CR2, CR3, RAF, RW2 and ORF
+    stay recognised only; NEF and ARW read as TIFF, not supported.
+  - **Afterwards, option A:** one small container adapter per format over the shared
+    `ExifStructure` or `JpegMetadataReader`, **each only with a representative real sample**
+    and the S2.8/S2.9 test pattern. The order is RAF, then CR2/NEF/ARW, then ORF/RW2, with
+    CR3 last. No MakerNotes and no decoding.
+  - **Rejected:** option B (AndroidX `ExifInterface`: its reads cannot be bounded or proven
+    under ADR-017 §4, it parses GPS internally, and it would be a second extraction path)
+    and option C (LibRaw: a decoder).
+  - The owner has not yet said which RAW formats they shoot. Those adapters wait for samples.
+- **Stage 2 closure:** the **repeat independent Stage 2 validation** runs first, in a fresh
+  session; Stage 3 starts after it passes. This is not a waiver.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -2769,7 +2790,9 @@ decisions: RG-01, PD-21, RD-16"). Resolves PD-21. **Implementation:** partial.
   - JPEG (S2.8, 2026-09-26, commit `360fd8f`): `jpeg_metadata_reader.dart`, verified on the owner's phone JPEG.
   - HEIF (S2.9, 2026-09-26, commit `bb28452`; approved by the owner): `heif_metadata_reader.dart`, as S2.R2 §7 recommends, verified locally on the
     owner's HEIC.
-- **Open:** RG-14 (S2.R3 researched 2026-09-26; owner decision pending). Device check M3 (HEIC) passed 2026-09-26. FITS and PNG are out of Stage 2 (owner).
+- **RG-14 decided 2026-09-26 (E.1):** no proprietary RAW in Stage 2; per-format adapters afterwards, only with real
+  samples; `ExifInterface` and LibRaw rejected. Device check M3 (HEIC) passed 2026-09-26.
+- **Open:** nothing within Stage 2. The RAW adapters are later sample-driven work. FITS and PNG are out of Stage 2 (owner).
 
 ### 1. Context (verified)
 
