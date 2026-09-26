@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 2 closed by the owner (2026-09-26):** a waiver after S2.V4/S2.V5, without a third independent validation; Stage 3 planning starts (E.1, "Stage 2 closed by the owner").
 > **Stage 2 repeat validation and S2.V4/S2.V5 (2026-09-26):** the repeat validation failed (`f137409`); the owner said "Do fix". HEIF `iloc` work is bounded (TD-067); AVIF and HEIF sequences are recognised only (the S2R-02 ruling, option (a)); ADR-017 note added (E.1, "Stage 2 repeat validation: fixes and the HEIF brand ruling").
 > **RG-14 decided (2026-09-26):** no proprietary RAW in Stage 2; adapters per sample later; `ExifInterface` and LibRaw rejected (E.1).
 > **Stage 2 format priorities (2026-09-26):** ADR-017 amended (§8 superseded by §13; layering); RG-14 registered (E.1, "Stage 2 format priorities and metadata layering").
@@ -883,6 +884,24 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
   the reading is `corrupt`.
 - **Stage 2 closure:** unchanged. Another independent validation in a fresh session, or an
   owner waiver.
+
+### Stage 2 closed by the owner (2026-09-26)
+
+- **Context:** S2.V4 and S2.V5 (`d8e792c`, `435b3ce`) fixed every finding of the repeat
+  independent validation (S2R-01 to S2R-04). The Stage's exit still asked for another
+  independent validation.
+- **Asked** whether to run that validation in a fresh session or waive it, the owner chose
+  **"Waive and go to Stage 3"**.
+- **Recorded as a waiver, not a pass.** S2.V4 rests on its own tests (the bound test fails on
+  the old reader), the local real-sample check and a green gate (1068 tests, 1 expected skip,
+  2 host E2E). No fresh session has re-examined it.
+- **Carried:**
+  - S2V-06's device checks (a non-seekable provider; a real backup's preview cancel);
+  - TD-066;
+  - FITS, PNG, AVIF, HEIF sequences and proprietary RAW, each waiting for a sample.
+- **Before Stage 3:** the Stage 1 X2 documentation debt was closed at the owner's request (S1.V6,
+  `3dd2598`).
+- Stage 3's planning starts next. Its implementation waits for RG-02, RG-03 and an ADR.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

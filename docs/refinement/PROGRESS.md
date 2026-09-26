@@ -3,20 +3,20 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26. The repeat independent Stage 2 validation failed at `5d8bdbb`
-> (`f137409`). The owner said "Do fix", and **S2.V4** (the HEIF `iloc` bound, TD-067; the S2R-02
-> ruling (a); HEIF tests) and **S2.V5** (documentation) are done. Next: **another independent
-> Stage 2 validation** in a fresh session, or an owner waiver. Stage 3 does not start yet.
+> **Last updated:** 2026-09-26. The owner **closed Stage 2 by waiver** after S2.V4/S2.V5, with
+> no third independent validation (DECISIONS E.1). X2 was closed first (S1.V6). **Stage 3 is
+> planned:** the research Tasks S3.R1 (RG-02) and S3.R2 (RG-03) and the decision step S3.D are
+> frozen, and S3.1–S3.6 are provisional. Next: **S3.R1**.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 2 — Metadata Foundation: in validation.** The repeat validation failed (S2R-01 to S2R-04), and all four were fixed by S2.V4 and S2.V5. The Tasks S2.1–S2.5, S2.7–S2.9, S2.R1–S2.R3 and S2.V1–S2.V5 are done; S2.6 and S2.10 are out by the owner; device checks M1–M3 passed |
-| Next Stage | Stage 3 — Metadata → Equipment / Device Import: Not started |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: Planning.** S3.R1, S3.R2 and S3.D are frozen; S3.1–S3.6 are provisional until ADR-018 (`POST_ROADMAP_PLAN.md`, "Stage 3 — Task sequence") |
+| Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **Another independent Stage 2 validation** (a fresh session, §9.8), or an owner waiver. Then Stage 3 planning |
+| Next approved Task | **S3.R1 — RG-02 research** (documentation only; frozen). Then S3.R2 (RG-03), then S3.D (owner decisions, ADR-018) |
 | Code baseline | S2.V4 (`d8e792c`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green** after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | v17 |
@@ -29,8 +29,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
-| 2 | Metadata Foundation | In validation | 2026-09-26 | — | The first independent validation failed at `79f392c` (fixed, `ffaff57`); **the repeat failed at `5d8bdbb`** (S2R-01/TD-067; `STAGE_2_REVALIDATION.md`); S2.V4 and S2.V5 fixed it. The next independent validation is pending |
-| 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
+| 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
+| 3 | Metadata → Equipment / Device Import | Planning | 2026-09-26 | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
@@ -98,7 +98,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 2 | S2.V4 — Bound the HEIF `iloc` work; AVIF and HEIF sequences recognised only; HEIF test gaps | 2026-09-26 | `d8e792c` | The owner said "Do fix"; S2R-02 was taken as the recommended option (a) (DECISIONS E.1). **TD-067 resolved:** `maxExtents` = 16,384 over all items → `corrupt`. New `MetadataFormat.avif` and `heifSequence`, both recognised only and named in `MetadataText`. There are 6 new HEIF tests: the bound (fails on the old reader), the limit, GPS never read, S2V-01, S2V-02, and the brands. One assertion in `metadata_layers_test.dart` changed because of the ruling (`avif` and `msf1` were HEIF). The real samples are unchanged. Gate green (Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E). See `STAGE_2_CORRECTIONS.md` |
 | 2 | S2.V5 — Documentation reconciliation (S2R-03) | 2026-09-26 | `435b3ce` | F-45's current-implementation and known-issues text, and `TEST_PLAN.md`'s "no device" note, are corrected with the old text quoted. Also updated: `ARCHITECTURE.md` B, ADR-017's note, E.1, TD-067, `POST_ROADMAP_PLAN.md` (the corrective-Task table) and this file |
 
-| 1 | S1.V6 — Stage 1 registers brought up to date (X2; documentation only) | 2026-09-26 | The S1.V6 commit* | Run at the owner's request ("wrap up the important issues" before Stage 3). The validation banners and notes that called S1.5 broken and S1.6 partial are marked superseded, with the old text kept: `FEATURE_STATUS.md` (banner, F-02, F-40), `ARCHITECTURE.md` (banner, B3, B4), `DATA_MODEL.md` (banner, B8) and `TECH_DEBT.md` (banners). TD-047 is closed again. The S1.V1–S1.V4 stamps (8) and TD-059–TD-062 cite `3067658`, `b34c9ad`, `ed628f8` and `ea65231` (each checked with `git log`). No code changed. TD-063 stays in Stage 8, and W1 stays with RD-05 |
+| 1 | S1.V6 — Stage 1 registers brought up to date (X2; documentation only) | 2026-09-26 | `3dd2598` | Run at the owner's request ("wrap up the important issues" before Stage 3). The validation banners and notes that called S1.5 broken and S1.6 partial are marked superseded, with the old text kept: `FEATURE_STATUS.md` (banner, F-02, F-40), `ARCHITECTURE.md` (banner, B3, B4), `DATA_MODEL.md` (banner, B8) and `TECH_DEBT.md` (banners). TD-047 is closed again. The S1.V1–S1.V4 stamps (8) and TD-059–TD-062 cite `3067658`, `b34c9ad`, `ed628f8` and `ea65231` (each checked with `git log`). No code changed. TD-063 stays in Stage 8, and W1 stays with RD-05 |
+
+| 2–3 | Stage 2 closed by the owner, and Stage 3 planning (documentation only) | 2026-09-26 | The Stage 3 planning commit* | Asked to choose between a fresh-session validation and a waiver, the owner chose "Waive and go to Stage 3". Recorded as a waiver (E.1). Stage 3 planning at `3dd2598` verified nine facts (`POST_ROADMAP_PLAN.md`, "Verified at planning"). The key one: `EquipmentProfile` and its columns require sensor size, resolution, pixel pitch, focal length and focal ratio, and the metadata contract has no image dimensions, so an import cannot store a rig without invented values. Frozen: S3.R1 (RG-02), S3.R2 (RG-03), S3.D (decisions, ADR-018). Provisional: S3.1–S3.6 |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -139,8 +141,8 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | ID | Topic | Stage | Status |
 | --- | --- | --- | --- |
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
-| RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open |
-| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open |
+| RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | Open; **S3.R1 frozen, next** |
+| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 | Open; S3.R2 frozen |
 | RG-04 | Execution's role and how actuals are captured | 4 | Open |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | Open |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | Open |
@@ -191,17 +193,18 @@ These block a release, not refinement.
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
-- Stage 2: choose another independent validation (recommended) or a waiver. Samples for
-  FITS, PNG, AVIF or RAW, when available, enable their readers later. The DNG, JPEG and HEIC
-  samples stay outside Git.
+- Stage 3: answer S3.R1's question about which cameras and optics you use; decide at S3.D.
+  Samples for FITS, PNG, AVIF or RAW, when available, enable their readers later. The DNG,
+  JPEG and HEIC samples stay outside Git.
 
 ## Known blockers
 
 - **Stage 1 (closed by waiver):** X2 is done (S1.V6, 2026-09-26). TD-063 is in Stage 8. W1 is
   a proposed input to RD-05.
-- **Stage 2:**
-  - the repeat validation's findings are fixed (S2.V4, S2.V5). The Stage closes after
-    another independent validation, or an owner waiver.
+- **Stage 2 (closed by waiver):** nothing blocks. The carried items are listed under "Next
+  allowed action".
+- **Stage 3:** implementation waits for RG-02, RG-03 and ADR-018 (S3.D). Equipment identity for
+  dedicated astro cameras needs a FITS sample (S2.6).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -209,6 +212,10 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **Stage 2 closure**, 2026-09-26: by owner waiver after S2.V4/S2.V5, not by an independent
+  pass (E.1). **Stage 3 planning**: documentation only, and the gate result at `d8e792c` still
+  applies (no code changed since).
 
 - **S2.V4/S2.V5 implementation verification**, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E. The targeted metadata
   suites give 98 passed and 1 expected skip; the new bound tests fail on the old reader; the
@@ -338,24 +345,26 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Another independent Stage 2 validation**, in a **fresh session** (§9.8), or an owner
-waiver. It should:
-- re-check S2R-01 to S2R-04 against S2.V4/S2.V5 (`STAGE_2_REVALIDATION.md`,
-  `STAGE_2_CORRECTIONS.md`); probe P1 in `evidence/STAGE_2_REVALIDATION_PROBES.md` is a
-  ready-made reproduction;
-- check the amended exit again: the foundation, with DNG, JPEG and HEIF still images on real
-  samples, and everything else recognised only;
-- try to disprove the rest. Resource bounds beyond bytes read (work and memory per input
-  byte) deserve attention in every reader.
+**S3.R1 — RG-02: metadata → equipment identity** (research, documentation only; frozen in
+`POST_ROADMAP_PLAN.md`, "Stage 3 — Task sequence"). It answers the seven questions there:
+- identity;
+- a derivability matrix over every `EquipmentProfile` field;
+- how unknown specifications are stored (the planning finding: every spec is `NOT NULL` today);
+- matching;
+- provenance and conflicts;
+- RD-16 visibility;
+- the average RAW size.
+
+It writes `research/RG-02_EQUIPMENT_IDENTITY.md` and a proposed ADR-018 outline, then stops for
+the owner. S3.R2 (RG-03) follows, then S3.D. No application code changes until S3.D freezes
+S3.1–S3.6.
 
 Useful inputs:
-- the local real-sample check, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
+- the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
   (2 DNGs, a JPEG and a HEIC);
-- device rows M1–M3 in `TEST_PLAN.md`;
-- the owner's phone can be connected on request.
-
-If it passes, close Stage 2 here and begin **Stage 3 planning**: research RG-02 (equipment
-identity) and RG-03 (specification sources), and an ADR for the owner.
+- `research/RG-01_METADATA_FORMATS.md` and `research/S2.R2_HEIF_METADATA.md` (identity
+  evidence);
+- ADR-008 §6, ADR-011 and ADR-017.
 
 **Carried open items:**
 - W1 (proposed input to RD-05);

@@ -1136,6 +1136,155 @@ small change over `HeifMetadataReader`, once a real sample exists.
   the user confirms before anything is stored; tests cover conflicts; the privacy and
   compliance documents are updated if any external source is used; Stage 3 validation passes.
 
+#### Stage 3 — Task sequence (planning, 2026-09-26)
+
+Planned at `main` @ `3dd2598`, just after the owner closed Stage 2 by waiver (DECISIONS E.1,
+"Stage 2 closed by the owner"). **The entry conditions are not met:** RG-02 and RG-03 are
+undecided, and no ADR exists. So only the two research Tasks and their decision step are
+frozen. S3.1–S3.6 are **provisional**; the owner freezes them with the ADR (§9.1 step 6).
+
+**Verified at planning (§9.7):**
+1. **A rig cannot hold unknown specifications.**
+   - `EquipmentProfile` requires `sensorWidthMm`, `sensorHeightMm`, `pixelPitchUm`,
+     `resolutionWidthPx`, `resolutionHeightPx`, `focalLengthMm` and `focalRatio` (non-null).
+   - The columns behind them are `NOT NULL` too: `camera_modules` (sensor, resolution, pixel
+     pitch) and `optical_rigs` (focal length, `aperture` = N), in
+     `equipment_foundation_tables.dart`.
+   - A phone JPEG gives focal length, f-number, the 35 mm equivalent and make/model, but no
+     sensor size, resolution or pixel pitch. **An import cannot create a stored rig without
+     inventing values**, which "unknown stays unknown" forbids.
+   - This is the central data-model question for RG-02 and the ADR.
+2. **The metadata contract (ADR-017 §2) has no image dimensions** (ImageWidth,
+   PixelXDimension) and no focal-plane resolution tags. Deriving resolution or pixel pitch
+   would need a contract amendment for a new kind of fact (ADR-017 §13.3), backed by sample
+   evidence. Phone sensors that bin their output (quad-Bayer) make "resolution" ambiguous.
+3. **Provenance is per group, not per field.** The model has `cameraSource`/`cameraConfidence`
+   and `opticsSource`/`opticsConfidence`, with confidence `verified`/`reported`/`estimated`
+   (`spec_confidence.dart`; ADR-008 §6). `withEditProvenance` marks an edited group as
+   `'user'`/`reported`. A group mixing imported and typed values has no way to say so.
+4. **Only one seed exists:** ZWO ASI2600MC plus an example 72 mm f/5.6 refractor
+   (`seed:equipment@2`; camera verified against the manufacturer's page, optics an example). The
+   verified-seed policy (TASK 8.5) explains 08 §11's "only ZWO".
+5. **The rig editor still has six required inputs:** name, resolution width and height, pixel
+   size, focal length, and focal ratio or diameter (`equipment_selection_screen.dart:223–428`).
+   UX-22's friction is current.
+6. **Identity evidence from Stage 2 (owner samples):**
+   - both camera modules of one phone share Make, Model and UniqueCameraModel;
+   - Model differs by format (DNG `…/2407FPN8EG`, JPEG/HEIC `Xiaomi 14T Pro`);
+   - serials are never extracted (ADR-017 §3), so two identical bodies are indistinguishable.
+7. **The file length is known at read time** (`MetadataSource.length`), a possible input to
+   the average RAW size (C-13). One file is one sample, and size varies with compression.
+8. **The metadata screen is hidden** (`FeatureScope.metadataImport == false`); RD-16 leaves
+   visibility to Stage 3.
+9. **"Extract specifications from links" (08 §11) is product-page scraping**, which is rejected
+   unless the owner reopens it for a verified, licensed, structured source.
+
+**Carried from Stage 2:** TD-066 (sub-second exposure display, before the screen is visible);
+S2V-06's device checks; FITS, PNG, AVIF, HEIF sequences and proprietary RAW wait for samples.
+The dedicated astro cameras the product targets write FITS, so equipment identity for them
+waits on a FITS sample (S2.6).
+
+**Common rules for every Task:**
+- the workflow and validation of §9.4 and §9.8, one commit per Task, then STOP;
+- nothing is written to Equipment before the ADR defines confirmation, and the user confirms
+  every write;
+- unknown stays unknown: no default, no invented specification, and no estimate passed off as
+  a measured value;
+- nothing leaves the device unless an approved source says so, and then privacy and Data
+  Safety are updated in the same change (CLAUDE.md trap 22);
+- no scraping; any external dataset passes CLAUDE.md rule 28 (reliability, licence,
+  provenance, privacy, failure behaviour) before use;
+- owner samples stay outside Git.
+
+| Task | Title | Kind | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S3.R1 | RG-02: metadata → equipment identity, derivability, storage of unknowns, matching, provenance and conflicts | Research (docs only) | M | — | **Frozen; next** |
+| S3.R2 | RG-03: sourcing equipment specifications (none, curated verified seeds, or a licensed dataset) | Research (docs only) | M | S3.R1's derivability matrix | Frozen |
+| S3.D | Owner decisions: RG-02, RG-03, RD-16 (visibility); ADR-018 (candidate → match/enrich → confirm → persist); Stage 3 frozen | Decision (docs only) | S | S3.R1, S3.R2 | Frozen (gate) |
+| S3.1 | Equipment candidate from a metadata reading (pure domain: derivable fields, provenance, confidence, unknowns) | Implementation | M | S3.D | Provisional |
+| S3.2 | Matching candidates to existing rigs, with conflicts detected, never merged silently | Implementation | M | S3.1 | Provisional |
+| S3.3 | Persisting confirmed values: per the ADR, possibly schema v18 (nullable specs or per-field provenance) | Implementation | M | S3.2, S3.D | Provisional |
+| S3.4 | Review-and-confirm flow on the import screen; visibility per RD-16 | Implementation | M | S3.3 | Provisional |
+| S3.5 | A specification source, only if RG-03 approves one | Implementation | M | S3.D | Conditional |
+| S3.6 | Average RAW size from picked files (C-13), only if RG-02 approves it | Implementation | S | S3.3 | Conditional |
+
+Then comes Stage 3 validation in a fresh session.
+
+##### S3.R1 — RG-02: metadata → equipment identity (research)
+- **Objective:** decide, with evidence, what a metadata reading can say about equipment, and
+  how that becomes a confirmed rig without invented values.
+- **Questions:**
+  1. **Identity:** which contract fields identify the body or device, the camera module and the
+     optics, per format (DNG, JPEG, HEIC now; FITS `INSTRUME`/`TELESCOP` only as documented
+     evidence until a sample exists). How Make/Model are normalised across formats (the Xiaomi
+     case), and what cannot be told apart (phone modules, identical bodies without serials).
+  2. **A derivability matrix** for every `EquipmentProfile` field, each with its source,
+     confidence (`verified`/`reported`/`estimated`) and failure cases:
+     - direct values (focal length, f-number);
+     - derived values (aperture diameter = f / N; a sensor diagonal from the 35 mm equivalent);
+     - values that need a contract amendment (image dimensions; focal-plane resolution);
+     - values that are never derivable (tracking, maximum exposure).
+     Binned output (quad-Bayer phones) and cropped modes are explicit cases.
+  3. **Storing unknowns (the planning finding):** compare
+     - (a) a transient candidate that is stored only once the user completes the required
+       fields (the editor pre-filled, with provenance);
+     - (b) nullable specifications (schema v18), with every calculator that uses them
+       (FOV, pixel scale, NPF, storage) showing "unknown";
+     - (c) a separate candidate store.
+     Cost, the migration, and the effect on the planner for each.
+  4. **Matching:** what counts as the same camera or optic as an existing rig (normalised
+     identity, focal length, f-number); the confidence levels; one camera with several optics
+     (ADR-011's flat model over normalised storage); what the user sees on a partial match.
+  5. **Provenance and conflicts:** a source form for imported values (for example
+     `metadata:<format>:<tag>`); whether per-group provenance suffices or per-field is needed
+     (ADR-008 §6 amendment); what happens when an imported value differs from a user-entered
+     or verified one (shown side by side, never overwritten).
+  6. **Visibility (RD-16):** when the import screen becomes visible, and where its entry
+     points sit (with Stage 4's information architecture in mind).
+  7. **The average RAW size (C-13):** whether picked files' sizes may feed it, and with what
+     provenance.
+- **Inputs:** the owner's local samples (DNG, JPEG, HEIC); the S2.R1/S2.R2 notes; ADR-008 §6,
+  ADR-011, ADR-017; the code named in "Verified at planning". It is worth asking the owner which
+  cameras and optics they actually use (still unknown).
+- **Output:** `docs/refinement/research/RG-02_EQUIPMENT_IDENTITY.md` (facts, unknowns,
+  options, trade-offs, a recommendation); a proposed ADR-018 outline; the owner's questions.
+- **Out of scope:** production code (throwaway probes only, deleted); choosing a spec source
+  (S3.R2).
+- **Acceptance:** every question above is answered or explicitly left unknown with a reason;
+  the matrix covers every `EquipmentProfile` field; the claims about samples are reproducible
+  locally without committing sample values.
+
+##### S3.R2 — RG-03: sourcing equipment specifications (research)
+- **Objective:** decide whether a specification source is needed for what S3.R1 finds
+  underivable (sensor size, pixel pitch, resolution), and which source, if any, is acceptable.
+- **Questions:**
+  - Options:
+    - (a) no source, so the user enters what metadata cannot give;
+    - (b) a larger curated set of verified seeds under the TASK 8.5 policy, each citing a
+      primary source (the maintenance cost, and which cameras);
+    - (c) an existing open dataset.
+  - Candidates for (c) are to be evaluated, and **all are unverified today**: for example
+    lensfun's database, or camera lists in raw-processing projects. For each:
+    - licence against GPL-3.0 (with RG-12);
+    - provenance granularity;
+    - coverage of astro cameras, not only consumer cameras;
+    - offline size;
+    - update policy.
+  - What "reported" versus "verified" means for dataset values, and how a dataset value
+    appears next to a user's entry.
+  - Whether anything would leave the device (it should not: bundled data only, unless the
+    owner decides otherwise).
+- **Output:** `docs/refinement/research/RG-03_EQUIPMENT_SPECS.md` with a recommendation and the
+  owner's questions.
+- **Out of scope:** scraping; bundling any data before the decision.
+
+##### S3.D — Decisions and ADR-018 (gate)
+- The owner decides RG-02, RG-03 and RD-16.
+- ADR-018 records the flow `Metadata → Equipment Candidate → Match / Enrich → User
+  Confirmation → Persist`, with provenance, confidence and conflict rules, amending ADR-011
+  and ADR-008 §6 where needed.
+- S3.1–S3.6 are then confirmed, changed or removed, and frozen.
+
 ### Stage 4 — Product Flow & Information Architecture
 
 - **Purpose:** resolve the user-facing relationship between Tonight/Home, the Planner, New Plan
