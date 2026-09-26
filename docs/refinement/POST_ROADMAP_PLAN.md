@@ -13,6 +13,9 @@
 > **Updated 2026-09-25 (Stage 1 planning, verified at `652ad80`):** Stage 1's Task sequence is
 > frozen (§5, "Stage 1 — frozen Task sequence"); RD-03 resolved; the RD-05 interim decided;
 > RD-17 included in Stage 1. No other Stage changed.
+> **Updated 2026-09-26 (Stage 3, second planning pass, verified at `0c4848b`):** S3.R1 done
+> (`research/RG-02_EQUIPMENT_IDENTITY.md`); the refined Stage 3 sequence S3.1–S3.9 is provisional
+> until S3.D (owner decisions D1–D4, ADR-018). No other Stage changed.
 
 ## Contents
 
@@ -1198,9 +1201,15 @@ waits on a FITS sample (S2.6).
 
 | Task | Title | Kind | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S3.R1 | RG-02: metadata → equipment identity, derivability, storage of unknowns, matching, provenance and conflicts | Research (docs only) | M | — | **Frozen; next** |
-| S3.R2 | RG-03: sourcing equipment specifications (none, curated verified seeds, or a licensed dataset) | Research (docs only) | M | S3.R1's derivability matrix | Frozen |
-| S3.D | Owner decisions: RG-02, RG-03, RD-16 (visibility); ADR-018 (candidate → match/enrich → confirm → persist); Stage 3 frozen | Decision (docs only) | S | S3.R1, S3.R2 | Frozen (gate) |
+| S3.R1 | RG-02: metadata → equipment identity, derivability, storage of unknowns, matching, provenance and conflicts | Research (docs only) | M | — | **Done 2026-09-26** inside the second planning pass (below); `research/RG-02_EQUIPMENT_IDENTITY.md` |
+| S3.R2 | RG-03: sourcing equipment specifications (none, curated verified seeds, or a licensed dataset) | Research (docs only) | M | S3.R1's derivability matrix | Frozen; **deferral recommended** (RG-02 §9, decision D2) |
+| S3.D | Owner decisions: RG-02, RG-03, RD-16 (visibility); ADR-018 (candidate → match/enrich → confirm → persist); Stage 3 frozen | Decision (docs only) | S | S3.R1, S3.R2 (or D2's deferral) | Frozen (gate); **next** |
+
+*The six provisional rows below are superseded by the refined sequence of the second planning
+pass (below), which reuses the IDs S3.1–S3.9 with new meanings. They are kept as written.*
+
+| Task | Title | Kind | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
 | S3.1 | Equipment candidate from a metadata reading (pure domain: derivable fields, provenance, confidence, unknowns) | Implementation | M | S3.D | Provisional |
 | S3.2 | Matching candidates to existing rigs, with conflicts detected, never merged silently | Implementation | M | S3.1 | Provisional |
 | S3.3 | Persisting confirmed values: per the ADR, possibly schema v18 (nullable specs or per-field provenance) | Implementation | M | S3.2, S3.D | Provisional |
@@ -1284,6 +1293,204 @@ Then comes Stage 3 validation in a fresh session.
   Confirmation → Persist`, with provenance, confidence and conflict rules, amending ADR-011
   and ADR-008 §6 where needed.
 - S3.1–S3.6 are then confirmed, changed or removed, and frozen.
+
+#### Stage 3 — second planning pass and refined Task sequence (2026-09-26)
+
+Run at `0c4848b` from the owner's Stage 3 planning prompt, which asked the S3.R1 questions
+itself. So S3.R1 was done inside this pass: `research/RG-02_EQUIPMENT_IDENTITY.md`, with the
+Stage 2 foundation re-verified (§1; gate green, 1068 + 1 skip + 2 E2E; local real samples pass),
+the field classification (§3), the derivability matrix (§4), device classes (§5), matching and
+conflicts (§6), provenance and confirmation (§7), the storage options (§8), and the decisions
+D1–D4 (§12). Documentation only.
+
+**Findings that shape the sequence:**
+- Image dimensions are in all three sample formats but outside the contract, and orientation
+  swaps them (JPEG/HEIC portrait). Pixel pitch is in none (no focal-plane tags).
+- A phone's modules are told apart only by (f, N, f₃₅); each module × capture mode is its own
+  flat rig. Model strings differ by format.
+- ADR-011 §4 forbids back-filling D, so an import never sets the aperture diameter.
+- The editor computes the sensor size and builds the profile and its provenance inside the
+  widget; an import cannot pre-fill it without a small form model.
+- ADR-008 §6 already requires per-field provenance pairs for rows with mixed origins, which an
+  imported rig has.
+- Dedicated astro cameras (FITS) and system-camera RAW cannot be imported in Stage 3 (no
+  readers); DSLR/mirrorless JPEGs are read, but only synthetic fixtures cover them.
+
+**The blocking decision is D1** (how specs the file cannot give are handled). The sequence below
+assumes the recommendation, **A1**: complete before saving, with an estimate offered. It stays
+**provisional until S3.D** records D1–D4 and ADR-018. Under A2, S3.2 loses its estimate. Under B,
+S3.4 becomes a nullable-spec migration touching every consumer (an L Task, to be re-planned).
+
+**Common rules:** those of the first pass (above), plus:
+- the pure domain up to the review;
+- one repository write, on the user's Save;
+- no maker-specific string hacks;
+- new calculations registered in `SCIENTIFIC_INTEGRITY.md`;
+- `SessionPlanViewModel`'s line cap and trap 11's 250-line ViewModel limit respected.
+
+| Task | Title | Kind | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S3.D | Owner decisions D1–D4; ADR-018; freeze this table | Decision (docs) | S | this pass | **Next** |
+| S3.1 | Image geometry in the metadata contract (ADR-017 §13.3 amendment) | Implementation | S–M | S3.D | Provisional |
+| S3.2 | Equipment evidence and candidate (pure domain), with CALC-40 under A1 | Implementation | M | S3.1 | Provisional |
+| S3.3 | Matching saved rigs, with conflicts (pure domain) | Implementation | M | S3.2 | Provisional |
+| S3.4 | Per-field provenance and identity evidence in storage (schema v18) | Implementation | M | S3.D | Provisional (can run before S3.2/S3.3) |
+| S3.5 | A form model for the rig editor, and pre-fill | Implementation | M | S3.4 | Provisional |
+| S3.6 | The import review and confirmation flow | Implementation | M | S3.3, S3.5 | Provisional |
+| S3.7 | Visibility (RD-16), TD-066, the device check M4 | Implementation | S | S3.6 | Provisional |
+| S3.8 | Average RAW size from a DNG pick (C-13) | Implementation | S | S3.6 | Conditional on D4 |
+| S3.9 | A specification source | Implementation | M | S3.R2 | Conditional on D2 (deferral recommended) |
+
+Then Stage 3 validation in a fresh session.
+
+##### S3.1 — Image geometry in the metadata contract
+- **Objective:** read the pixel dimensions of the captured image as a typed, provenanced
+  contract fact.
+- **Scope:**
+  - ADR-017 §2/§13.3 amended by ADR-018;
+  - `CaptureMetadata` gains image width and height (px) with origin;
+  - DNG: IFD0 `ImageWidth`/`ImageLength` for the main image (`NewSubfileType` 0), with
+    `DefaultCropSize` preferred or not as ADR-018 decides;
+  - JPEG/HEIC: `PixelXDimension`/`PixelYDimension` in the EXIF IFD, through the shared
+    `ExifStructure`;
+  - disagreeing sources are ambiguous (the existing `combine`);
+  - `MetadataText` rows on the hidden screen.
+- **Out of scope:** Orientation interpretation (the candidate uses long/short sides); pixel
+  pitch; any new format.
+- **Acceptance:**
+  - synthetic fixtures for each format, including a portrait JPEG, a missing tag, SHORT vs LONG
+    types and a zero or absurd value (unparseable);
+  - the GPS and serial exclusions still hold (read log);
+  - the byte budget is unchanged;
+  - the local samples give the expected dimensions, added to `expected.json` outside Git;
+  - gate green.
+
+##### S3.2 — Equipment evidence and candidate
+- **Objective:** turn a `MetadataRead` into an `EquipmentCandidate`: per `EquipmentProfile`
+  field a proposed value with source, confidence and origin, or unknown with a reason (level 3
+  of ADR-017 §13).
+- **Scope:**
+  - pure Dart in `lib/domain`;
+  - the §3/§4 mapping: Make/Model → labels; f → focal length; N → focal ratio; dimensions →
+    resolution (long side = width);
+  - under A1, CALC-40 (sensor size and effective pixel pitch from f₃₅, f and the dimensions),
+    `estimated`, with its assumptions and uncertainty in `SCIENTIFIC_INTEGRITY.md`, and never
+    produced when an input is unknown, ambiguous or outside `EquipmentLimits`;
+  - D, rotation, tracking and maximum exposure are always unknown;
+  - exposure, sensitivity and time are ignored;
+  - a name suggestion;
+  - "not enough evidence" when neither identity nor optics is known.
+- **Out of scope:** matching; persistence; UI.
+- **Acceptance:** tests for each device class of RG-02 §5 with synthetic readings:
+  - a phone module (with the committed RG-01 values as a worked case);
+  - a body with an electronic lens;
+  - a body on a telescope (f/N absent or 0);
+  - absent, unparseable and ambiguous inputs → unknown with reasons;
+  - no field ever `verified`;
+  - the estimate's formula tested against hand-computed values.
+- **Validation:** the domain purity tests; gate green.
+
+##### S3.3 — Matching saved rigs, with conflicts
+- **Objective:** compare a candidate with the saved rigs and return an outcome with reasons and
+  per-field conflicts, never a score (RG-02 §6).
+- **Scope:**
+  - pure domain;
+  - normalisation (trim, whitespace, case) and the prefix-at-separator "likely" rule;
+  - a documented f/N tolerance constant (proposed 1 %);
+  - outcomes: same, likely, same camera (other optics), cropped or binned mode, ambiguous, none;
+  - conflicts listed with both provenances;
+  - verified values flagged as never replaced by default;
+  - stored identity evidence (S3.4) used when present.
+- **Out of scope:** merging or writing.
+- **Acceptance:** one test per RG-02 §6 scenario, including:
+  - the Xiaomi DNG-vs-JPEG model strings;
+  - two identical saved bodies (ambiguous);
+  - a legacy rig with NULL provenance;
+  - the seeded verified camera;
+  - a phone's two modules (different optics);
+  - a digital-zoom capture (same f/N, other f₃₅).
+
+##### S3.4 — Per-field provenance and identity evidence (schema v18)
+- **Objective:** store which source gave each spec, as ADR-008 §6 requires for mixed rows,
+  plus the metadata identity for later matching.
+- **Scope:**
+  - additive nullable columns per ADR-018 (proposed: source/confidence pairs for resolution,
+    pixel pitch, sensor size and RAW size on `camera_modules`, and for focal length and focal
+    ratio on `optical_rigs`; a normalised identity column on `camera_modules`);
+  - the resolution rule: a field's own pair, else its group's, else unknown;
+  - `EquipmentProfile` and `withEditProvenance` per field (an edit marks only the changed field
+    `user`);
+  - the repository mapping;
+  - the Drift workflow (snapshot, generated steps, `from17To18`, a schema-equality test and a
+    data-preservation test);
+  - backup/restore and the export manifest checked (no manifest change expected; if one is
+    needed, `EXPORT_MANIFEST.md` and `SessionManifestCodec` in the same change).
+- **Out of scope:** nullable required specs (option B); composition.
+- **Acceptance:**
+  - legacy and seeded rows read exactly as before;
+  - the manual editor's behaviour is unchanged (its existing tests pass unmodified);
+  - migration tests pass;
+  - `DATA_MODEL.md` Part B updated.
+
+##### S3.5 — A form model for the rig editor, and pre-fill
+- **Objective:** let the editor start from a candidate without moving logic into widgets.
+- **Scope:**
+  - extract the editor's value building (parsing, `resolveAperture`, sensor-size computation,
+    provenance) into a pure form model (a draft) that both "Add"/"Edit" and the import use;
+  - the editor accepts an initial draft with per-field provenance, and shows each pre-filled
+    value's source and confidence (an "estimated" or "from file" note);
+  - editing a field makes it `user`.
+- **Out of scope:** the Stage 5/7 editor redesign (layout, styling, UX-22's duplicate pixel
+  field), unless needed for a pre-filled field to be correct.
+- **Acceptance:**
+  - existing editor tests pass unchanged;
+  - new tests: a pre-filled draft saves with per-field provenance; an untouched pre-filled
+    field keeps its provenance; an edited one becomes `user`; required unknowns block Save;
+  - D is never pre-filled.
+
+##### S3.6 — The import review and confirmation flow
+- **Objective:** Metadata → candidate → match → review → pre-filled editor → Save, with nothing
+  written before Save.
+- **Scope:**
+  - the metadata screen (or its successor) shows the candidate and the match outcome in plain
+    words;
+  - actions: open the matching rig; new rig (pre-filled, optionally with a matched rig's
+    camera specs); for a conflict, per-field keep/use-imported with keep as the default;
+  - the file's unreadable/unsupported states unchanged;
+  - `runWithFeedback` for the write;
+  - a ViewModel within the size limits, domain interfaces only.
+- **Out of scope:** batch import; FITS/RAW; assisted actuals (Stage 8).
+- **Acceptance:** widget tests with a fake `CaptureFileAccess` and a real in-memory database:
+  - Cancel at every step writes nothing (row counts unchanged);
+  - a duplicate is not created for "same rig";
+  - a conflict never overwrites unless chosen;
+  - a verified value survives;
+  - the accessibility sweep covers the review (light, dark, field; 100/200 %);
+  - no colour literals.
+
+##### S3.7 — Visibility, TD-066, the device check M4
+- **Objective:** make the flow reachable per D3, safely.
+- **Scope:**
+  - `FeatureScope.metadataImport` per D3, with the entry point D3 chooses (the route and
+    Settings entry adjusted);
+  - TD-066 (sub-second exposures as a fraction or a documented rounding in `QuantityText`);
+  - privacy and Data Safety re-checked (expected: no change, nothing leaves the device);
+  - `FEATURE_STATUS.md` F-45/F-23;
+  - `TEST_PLAN.md` row M4: an import on the owner's phone through the separate `.s2check`
+    package, never touching the owner's installed app;
+  - S2V-06's non-seekable check, if the phone is connected.
+- **Acceptance:** the E2E suite is unchanged or updated with the screen; the sweep passes; M4
+  passes, or the Task stays open for it, like 15.4.
+
+##### S3.8 — Average RAW size from a DNG pick (conditional on D4)
+- The file length of a DNG pick is offered as `estimated`, "from one file", in the review.
+- Never from JPEG/HEIC; never overwrites a user value.
+- Tests for each rule.
+
+##### S3.9 — A specification source (conditional on D2)
+- Only after S3.R2 recommends a source and the owner approves it (CLAUDE.md rule 28, RG-12
+  licence, privacy).
+- Not planned further while deferral is recommended.
 
 ### Stage 4 — Product Flow & Information Architecture
 
@@ -1590,8 +1797,8 @@ any implementation Task is created.
 | ID | Question | Evidence and reason | Stage | Constraints |
 | --- | --- | --- | --- | --- |
 | RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
-| RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6 |
-| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms |
+| RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Researched 2026-09-26 (S3.R1, `research/RG-02_EQUIPMENT_IDENTITY.md`); owner decision at S3.D** |
+| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **RG-02 §9 recommends deferring it (D2)** |
 | RG-04 | What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |
