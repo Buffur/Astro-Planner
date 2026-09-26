@@ -3,20 +3,21 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-25, independent Stage 1 validation of `4e653fb` did not pass:
-> four reproduced findings (TD-059–TD-062). The earlier same-session review is preserved below.
+> **Last updated:** 2026-09-26, the repeat independent Stage 1 validation of `c99bd7f` did
+> not pass: S1.V1–S1.V4 hold, but one reproduced defect remains (TD-063), and the registers have
+> not been updated since those fixes (X2). See `STAGE_1_REVALIDATION.md`.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation** (the independent validation's findings TD-059–TD-062 and the same-session review's V1–V3 are fixed or recorded; a repeat independent validation is required before closing) |
+| Current Stage | **Stage 1 — Verified Fixes & Clean Baseline: In validation.** The repeat independent validation (2026-09-26) confirms TD-059–TD-062 fixed, and finds TD-063 and X2 (`STAGE_1_REVALIDATION.md`) |
 | Next Stage | Stage 2 — Metadata Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. S1.V1–S1.V4 done. Next: **repeat independent Stage 1 validation** in a fresh session. The owner approved the remaining fixes (2026-09-25): S1.V1 → S1.V2 → S1.V3 → S1.V4, one commit each, then a repeat independent validation |
-| Code baseline | `4e653fb` (S1.15); `723fd44` and this validation change documentation/evidence only; not pushed (S1.14) |
-| Quality gate at the baseline | **Green** after S1.V4, 2026-09-25: Encoding, Format, Analyze pass; Test (963 passed); E2E on the host (2 passed). Every probe of the retained patch now has a passing regression test in the suite |
+| Next approved Task | None. **Proposed, awaiting the owner:** S1.V5 (TD-063, fix) and S1.V6 (X2, documentation), or TD-063 moved to Stage 8 and S1.V6 alone |
+| Code baseline | `ea65231` (S1.V4); later commits change documentation and evidence only; not pushed (S1.14) |
+| Quality gate at the baseline | **Green**, re-run independently on 2026-09-26 at `c99bd7f`: Encoding, Format and Analyze pass; 963 tests and 2 host E2E tests pass |
 | Schema | v17 |
 
 ## Stage status
@@ -26,7 +27,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | Stage | Name | Status | Opened | Closed | Stage validation |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
-| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | **Independent validation does not pass** at `4e653fb`: TD-059–TD-062. Earlier same-session review retained below |
+| 1 | Verified Fixes & Clean Baseline | In validation | 2026-09-25 | — | **Independent validation does not pass**, first at `4e653fb` (TD-059–TD-062, since fixed), then again at `c99bd7f` (TD-063, X2) |
 | 2 | Metadata Foundation | Not started | — | — | — |
 | 3 | Metadata → Equipment / Device Import | Not started | — | — | — |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
@@ -65,7 +66,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | S1.V2 — Seed the replacement database after a confirmed reset (TD-060) | 2026-09-25 | `b34c9ad` | `confirmDatabaseReset` (refuse newer, forget only the catalog seed marker, keep the old file) replaces the bare rename in `main.dart`. 3 tests through the production connection, with and without the marker, other preferences kept; with the S1.5 behaviour the with-marker test gave 0 targets instead of 164. Stale id-holding preferences after a reset left with TD-056/ENG-14. Gate green, 957 + 2 E2E |
 | 1 | S1.V3 — Keep the unsaved-plan safeguard across a restart (TD-061) | 2026-09-25 | `ed628f8` | `CurrentSession` remembers the edited session id through `PlannerStateRepository` (preference `editedSessionId`; no schema change; a site change still not an edit). 5 new tests plus a restart check on the failed-Save test: target-, rig-, night- and block-only edits protected after a restart (target, rig and night failed before), Save clears it, an untouched draft never asks. Cancel's navigation clarified (closes the dialog, stays put). Gate green, 962 + 2 E2E |
 | 1 | S1.V4 — Reopening the current session keeps its live plan (TD-062) | 2026-09-25 | `ea65231` | `openSession` returns early for the current, editable session. The validation's probe as a UI test through the detail page, a Save and a restart (20 instead of 7 frames before the fix). A first version also skipped frozen sessions; two existing tests caught it and the guard was narrowed to editable sessions. Gate green, 963 + 2 E2E |
-| 1 | Fast re-validation after S1.V1–S1.V4 (same session, owner's request; **not independent**) | 2026-09-26 | The re-validation commit* | At `ea65231`: gate green (963 + 2 E2E), clean tree. Throwaway probes: the reset as `main.dart` runs it with a leftover marker → 164 targets, 1 rig, `.bak` kept; edit → New → restart and edit → Start → restart leave nothing unsaved and the run untouched. One low finding **W1**: a Duplicate of an edited plan counts as saved in-session but unsaved after a restart, so New right after Duplicate replaces the copy without asking (the saved original remains; only the copy's night is lost). Proposed: record under RD-05, like V3. Stage 1 still needs an **independent** validation to close |
+| 1 | Fast re-validation after S1.V1–S1.V4 (same session, owner's request; **not independent**) | 2026-09-26 | `c99bd7f` | At `ea65231`: gate green (963 + 2 E2E), clean tree. Throwaway probes: the reset as `main.dart` runs it with a leftover marker → 164 targets, 1 rig, `.bak` kept; edit → New → restart and edit → Start → restart leave nothing unsaved and the run untouched. One low finding **W1**: a Duplicate of an edited plan counts as saved in-session but unsaved after a restart, so New right after Duplicate replaces the copy without asking (the saved original remains; only the copy's night is lost). Proposed: record under RD-05, like V3. Stage 1 still needs an **independent** validation to close |
+| 1 | Repeat independent Stage 1 validation (documentation and probe evidence only) | 2026-09-26 | The re-validation commit* | Fresh session at `c99bd7f`: gate green (963 + 2 E2E); S1.V1–S1.V4 and S1.16/S1.17 pass their acceptance; no test weakened; no scope drift. **Does not pass:** TD-063 was reproduced through the UI (a detail page loaded before Start reopens the running session as the planner's plan, and every autosave is then refused), and X2 (the registers still say S1.5/S1.6 are broken, and the S1.V stamps cite no commit). W1 confirmed. Proposed S1.V5 and S1.V6. See `STAGE_1_REVALIDATION.md` and `evidence/STAGE_1_REVALIDATION_PROBES.patch` |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -92,7 +94,11 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 - `28aaa10`: S1.14 (deferred).
 - `4e653fb`: S1.15.
 - `723fd44`: same-session Stage 1 validation (preserved below).
-- Independent Stage 1 validation: see the note under "Completed Tasks".
+- `db94aaf`: independent Stage 1 validation.
+- `953c0d1`: S1.16 and S1.17.
+- `3067658`, `b34c9ad`, `ed628f8`, `ea65231`: S1.V1–S1.V4.
+- `c99bd7f`: the same-session re-check.
+- Repeat independent validation: see the note under "Completed Tasks".
 
 ## Open research gates
 
@@ -156,9 +162,8 @@ These block a release, not refinement.
 
 ## Known blockers
 
-- **Stage 1:** TD-059–TD-062 survive independent validation. Proposed fix Tasks
-  S1.V1–S1.V4 await review (`STAGE_1_VALIDATION.md`), alongside the earlier
-  S1.16/S1.17 proposals and V3 decision. S1.14's push stays deferred (RD-17 open).
+- **Stage 1:** the repeat independent validation found TD-063 and X2. The proposed S1.V5 and
+  S1.V6 await the owner (`STAGE_1_REVALIDATION.md`). S1.14's push stays deferred (RD-17 open).
 - **Stage 2:** owner-supplied real metadata samples, and RG-01.
 - **Device evidence:** no Android device or emulator run is recorded (`TEST_PLAN.md` device
   rows), so TASKs 15.4 and 15.5 stay open. The owner's dogfooding (08) shows manual use of
@@ -188,6 +193,15 @@ These block a release, not refinement.
   every mechanism still exists (none stale). Seven planning-time findings were placed into
   Tasks (`POST_ROADMAP_PLAN.md`, Stage 1 frozen sequence). Documentation only; no code
   changed, so the Stage 0 gate result still applies.
+- **Repeat independent Stage 1 validation**, 2026-09-26, against `c99bd7f`: **does not pass**.
+  - The gate is green (963 tests, 2 E2E).
+  - The first validation's six probes are regression tests now, and they pass.
+  - S1.V1–S1.V4, S1.16 and S1.17 meet their acceptance.
+  - Surviving: TD-063 (P2; a reopen from a detail page loaded before Start) and X2 (the
+    registers were not updated after S1.V1–S1.V4). Low: W1, confirmed (for RD-05).
+  - No application or test source was changed. The probes are kept as a patch, which was
+    applied, ran (1 failure, 2 observations) and was reversed.
+  - Details: `STAGE_1_REVALIDATION.md`.
 - **Independent Stage 1 validation**, 2026-09-25, against `4e653fb`: **does not pass**.
   The baseline gate independently passed (948 + 2 E2E); six additional probes
   fail across TD-059–TD-062. S1.5 misses refusal through the production background
@@ -247,22 +261,28 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-Repeat **independent** Stage 1 validation in a fresh session (§9.8), at the current `main`.
-A fast same-session re-check (2026-09-26) found no regression and one low finding, W1 (see
-"Completed Tasks"); it does not replace the independent validation.
-It should re-check the fixes S1.16, S1.17 and S1.V1–S1.V4 against `STAGE_1_VALIDATION.md`'s
-acceptance (each of its six probes now has a passing regression test: background v7/v18 in
-`unsupported_database_test.dart`, the retained seed marker there, target/rig/night/block-only
-restarts in `planner_draft_session_test.dart`, the same-session reopen in
-`unsaved_plan_guard_test.dart`), and try again to disprove the rest of the Stage. The retained
-probe patch targets `4e653fb`'s test files and may no longer apply as it is.
+**Owner decision** on the repeat independent validation's findings (`STAGE_1_REVALIDATION.md`).
+Pick one of these options:
 
-If it passes, close Stage 1 here and start Stage 2 planning (RG-01 and the owner's metadata
-samples). If it finds more, they become focused fix Tasks first.
+1. **Approve S1.V5 then S1.V6.**
+   - S1.V5 fixes TD-063.
+   - S1.V6 is documentation only (X2): it marks the stale "broken"/"partial" notes as
+     superseded, closes TD-047 again, and adds the commits of S1.V1–S1.V5.
+   - Each is one commit. Then comes another independent validation, which may be limited to
+     these two Tasks and the gate.
+2. **Move TD-063 to Stage 8** (it predates Stage 1), and run S1.V6 alone before Stage 1 closes.
 
-Carried open items that are not Stage 1 failures: TD-057, TD-058, RD-17 (push deferred), the
-S1.5 and S1.11 device checks (Stage 11), the stale id-holding preferences after a reset
-(with TD-056/ENG-14).
+Also decide whether W1 is recorded under RD-05 (Stage 4).
+
+Do not start Stage 2 until Stage 1 closes. Stage 2 then begins with its planning (RG-01 and the
+owner's metadata samples).
+
+Carried open items that are not Stage 1 failures:
+- TD-057 and TD-058;
+- RD-17 (the push is deferred);
+- the S1.5 and S1.11 device checks (Stage 11);
+- the stale id-holding preferences after a reset, `editedSessionId` included (with
+  TD-056/ENG-14).
 
 ## Stage 0 notes
 
