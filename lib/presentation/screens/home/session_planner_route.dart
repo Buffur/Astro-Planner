@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/library_viewmodels.dart';
+import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/startup_viewmodel.dart';
 import 'home_screen.dart';
 
 /// `/session/:id` (ADR-015): the session planner. `current` shows the
 /// current session directly; a stored session id is opened first
-/// (`SessionPlanViewModel.openSession`: a frozen session becomes a copy in a
+/// (`PlanLifecycleViewModel.openSession`: a frozen session becomes a copy in a
 /// new draft, TASK 11.4).
 class SessionPlannerRoute extends StatefulWidget {
   const SessionPlannerRoute({super.key, required this.id});
@@ -30,7 +31,7 @@ class _SessionPlannerRouteState extends State<SessionPlannerRoute> {
     if (id != null && id != plan.activeSessionId) {
       _opening = _open(
         context.read<StartupViewModel>(),
-        plan,
+        context.read<PlanLifecycleViewModel>(),
         context.read<SessionsViewModel>(),
         id,
       );
@@ -39,13 +40,13 @@ class _SessionPlannerRouteState extends State<SessionPlannerRoute> {
 
   static Future<void> _open(
     StartupViewModel startup,
-    SessionPlanViewModel plan,
+    PlanLifecycleViewModel lifecycle,
     SessionsViewModel sessions,
     int id,
   ) async {
     await startup.ready;
     final session = await sessions.get(id);
-    if (session != null) await plan.openSession(session);
+    if (session != null) await lifecycle.openSession(session);
   }
 
   @override

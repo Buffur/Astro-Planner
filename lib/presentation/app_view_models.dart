@@ -18,6 +18,7 @@ import '../domain/services/night_weather_service.dart';
 import '../domain/services/opt_in_reverse_geocoder.dart';
 import '../domain/services/reverse_geocoder.dart';
 import '../domain/services/backup_service.dart';
+import '../domain/services/current_session.dart';
 import '../domain/services/screen_wake.dart';
 import '../domain/services/session_exporter.dart';
 import 'viewmodels/backup_viewmodel.dart';
@@ -26,6 +27,7 @@ import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
 import 'viewmodels/metadata_import_viewmodel.dart';
 import 'viewmodels/night_conditions_viewmodel.dart';
+import 'viewmodels/plan_lifecycle_viewmodel.dart';
 import 'viewmodels/session_plan_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
 import 'viewmodels/site_viewmodel.dart';
@@ -73,13 +75,25 @@ class AppViewModels {
     );
     settings = SettingsViewModel(preferences, privacy, placeNames)
       ..onPlaceNameLookupChanged = site.refreshPlaceName;
+    // One current session for the plan's edits and its lifecycle (S6.1).
+    final current = sessions == null
+        ? null
+        : CurrentSession(sessions, plannerState);
     plan = SessionPlanViewModel(
       site: site,
       targetRepository: targets,
       equipmentRepository: equipment,
       stateRepository: plannerState,
       clock: clock,
-      sessionRepository: sessions,
+      currentSession: current,
+    );
+    lifecycle = PlanLifecycleViewModel(
+      plan: plan,
+      site: site,
+      targetRepository: targets,
+      equipmentRepository: equipment,
+      stateRepository: plannerState,
+      currentSession: current,
     );
     conditions = NightConditionsViewModel(
       site: site,
@@ -92,6 +106,7 @@ class AppViewModels {
     analysis = CaptureAnalysisViewModel(
       site: site,
       plan: plan,
+      lifecycle: lifecycle,
       settings: settings,
       conditions: conditions,
       clock: clock,
@@ -99,7 +114,7 @@ class AppViewModels {
     startup = StartupViewModel(
       site: site,
       settings: settings,
-      plan: plan,
+      lifecycle: lifecycle,
       conditions: conditions,
     );
     gear = GearViewModel(equipment);
@@ -128,6 +143,10 @@ class AppViewModels {
   late final SiteViewModel site;
   late final SettingsViewModel settings;
   late final SessionPlanViewModel plan;
+
+  /// Which plan the planner works on: restore, open, new, copy, save,
+  /// start (S6.1).
+  late final PlanLifecycleViewModel lifecycle;
   late final NightConditionsViewModel conditions;
   late final CaptureAnalysisViewModel analysis;
   late final StartupViewModel startup;
@@ -156,6 +175,7 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: site),
     ChangeNotifierProvider.value(value: settings),
     ChangeNotifierProvider.value(value: plan),
+    Provider.value(value: lifecycle),
     ChangeNotifierProvider.value(value: conditions),
     ChangeNotifierProvider.value(value: analysis),
     ChangeNotifierProvider.value(value: startup),

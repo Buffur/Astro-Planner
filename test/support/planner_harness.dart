@@ -45,6 +45,7 @@ import 'package:astroplan/domain/repositories/privacy_preferences_repository.dar
 import 'package:astroplan/presentation/app_view_models.dart';
 import 'package:astroplan/presentation/viewmodels/capture_analysis_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/night_conditions_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/plan_lifecycle_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/settings_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
@@ -132,6 +133,7 @@ class PlannerHarness extends ChangeNotifier {
   SiteViewModel get site => vms.site;
   SettingsViewModel get settings => vms.settings;
   SessionPlanViewModel get plan => vms.plan;
+  PlanLifecycleViewModel get lifecycle => vms.lifecycle;
   NightConditionsViewModel get conditions => vms.conditions;
   CaptureAnalysisViewModel get analysis => vms.analysis;
   StartupViewModel get startup => vms.startup;
@@ -229,9 +231,10 @@ class PlannerHarness extends ChangeNotifier {
       plan.reorderCaptureBlocks(from, to);
   Future<void> refreshSelectedTarget() => plan.refreshSelectedTarget();
   Future<void> refreshSelectedEquipment() => plan.refreshSelectedEquipment();
-  Future<void> openSession(Session s) => plan.openSession(s);
-  Future<void> newSession() => plan.newSession();
-  Future<void> duplicateForNight(CalendarDate d) => plan.duplicateForNight(d);
+  Future<void> openSession(Session s) => lifecycle.openSession(s);
+  Future<void> newSession() => lifecycle.newSession();
+  Future<void> duplicateForNight(CalendarDate d) =>
+      lifecycle.duplicateForNight(d);
 
   // Night conditions
   NightWeather get nightWeather => conditions.nightWeather;

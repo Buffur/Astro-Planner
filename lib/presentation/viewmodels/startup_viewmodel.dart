@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../core/diagnostics/app_log.dart';
 import 'night_conditions_viewmodel.dart';
-import 'session_plan_viewmodel.dart';
+import 'plan_lifecycle_viewmodel.dart';
 import 'settings_viewmodel.dart';
 import 'site_viewmodel.dart';
 
@@ -15,7 +15,7 @@ class StartupViewModel extends ChangeNotifier {
   StartupViewModel({
     required this._site,
     required this._settings,
-    required this._plan,
+    required this._lifecycle,
     required this._conditions,
   }) {
     ready = _load();
@@ -23,7 +23,7 @@ class StartupViewModel extends ChangeNotifier {
 
   final SiteViewModel _site;
   final SettingsViewModel _settings;
-  final SessionPlanViewModel _plan;
+  final PlanLifecycleViewModel _lifecycle;
   final NightConditionsViewModel _conditions;
 
   /// Completes when the initial state has loaded (not the forecast, reverse
@@ -40,7 +40,7 @@ class StartupViewModel extends ChangeNotifier {
     try {
       await _site.load();
       await _settings.load();
-      await _plan.load();
+      await _lifecycle.load();
       _error = null;
     } catch (e, s) {
       _error = e;

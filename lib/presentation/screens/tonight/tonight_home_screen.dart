@@ -22,6 +22,7 @@ import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
 import 'resume_run_dialog.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/startup_viewmodel.dart';
 import '../../viewmodels/tonight_viewmodel.dart';
@@ -434,7 +435,7 @@ class _QuickActions extends StatelessWidget {
             final started = await runWithFeedback(
               context,
               'start a new session',
-              context.read<SessionPlanViewModel>().newSession,
+              context.read<PlanLifecycleViewModel>().newSession,
             );
             if (started && context.mounted) context.push(AppRouter.session());
           },

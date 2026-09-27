@@ -9,22 +9,19 @@ import '../../domain/models/capture_block.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_night.dart';
-import '../../domain/models/session_snapshot.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/planner_state_repository.dart';
-import '../../domain/repositories/session_repository.dart';
-import '../../domain/repositories/storage_failure.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
-import '../../domain/services/example_capture_plan.dart';
 import '../../domain/services/session_night_resolver.dart';
-import '../../domain/services/session_reference_resolver.dart';
 import 'site_viewmodel.dart';
 
-/// The session the planner works on (ADR-014; TASKs 11.3–11.4; split out
-/// of the planner ViewModel in TASK 12.3): its night, target, rig and
-/// capture blocks. Every plan edit — a site change included — is autosaved
-/// into the current session before the edit call returns.
+/// The plan the planner shows (ADR-014; TASKs 11.3–11.4; split out of the
+/// planner ViewModel in TASK 12.3): its night, target, rig and capture
+/// blocks, and their edits. Every plan edit — a site change included — is
+/// autosaved into the current session before the edit call returns.
+/// Restoring, opening, starting a new plan, copying, saving and starting a
+/// run are `PlanLifecycleViewModel`'s (S6.1).
 class SessionPlanViewModel extends ChangeNotifier {
   SessionPlanViewModel({
     required this._site,
@@ -32,16 +29,10 @@ class SessionPlanViewModel extends ChangeNotifier {
     required EquipmentRepository equipmentRepository,
     required this._stateRepository,
     required this._clock,
-    SessionRepository? sessionRepository,
+    CurrentSession? currentSession,
   }) : _targets = targetRepository,
        _equipment = equipmentRepository,
-       _current = sessionRepository == null
-           ? null
-           : CurrentSession(sessionRepository, _stateRepository),
-       _resolver = SessionReferenceResolver(
-         targetRepository,
-         equipmentRepository,
-       ) {
+       _current = currentSession {
     _site.addListener(_onSiteChanged);
     _current?.onWriteFailureChanged = notifyListeners;
   }
@@ -54,7 +45,6 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   /// Null only in tests without a session repository (plan in preferences).
   final CurrentSession? _current;
-  final SessionReferenceResolver _resolver;
 
   AstroTarget? _target;
   EquipmentProfile? _rig;
@@ -95,57 +85,11 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   CalendarDate? get eveningDate => sessionNight?.eveningDate;
 
-  /// Restores the plan (call after the site has loaded): a plan still kept
-  /// in preferences moves once into a new draft (ADR-014 §6); otherwise the
-  /// most recent open session is resumed — a past night rolls forward to
-  /// tonight (owner decision, TASK 11.4) — or a draft is created. An
-  /// unreadable saved plan is logged by the repository and dropped.
-  Future<void> load() async {
-    final preferencesPlan = await _stateRepository
-        .loadCaptureBlocks()
-        .onError<StorageFailure>((_, _) => null);
-    _blocks = List.of(preferencesPlan ?? const []);
-    _isExample = _blocks.isEmpty;
-    if (_blocks.isEmpty) _blocks = ExampleCapturePlan.blocks();
-    final targetId = await _stateRepository.getSelectedTargetId();
-    if (targetId != null) _target = await _targets.getTargetById(targetId);
-    _target ??= (await _targets.searchTargets('M42')).firstOrNull;
-    final rigId = await _stateRepository.getSelectedEquipmentId();
-    if (rigId != null) _rig = await _equipment.getEquipmentById(rigId);
-    _rig ??= (await _equipment.getAllEquipment()).firstOrNull;
-
-    final current = _current;
-    if (current != null) {
-      final open = preferencesPlan == null ? await current.resume() : null;
-      if (open == null) {
-        await current.startNew(_plan());
-        if (preferencesPlan != null) await _stateRepository.clearPlan();
-      } else {
-        await _apply(open);
-        final stored = open.eveningDate;
-        _pickedEveningDate =
-            stored != null && stored.compareTo(_night.eveningDate) > 0
-            ? stored
-            : null;
-        // A run in progress is tracked, never edited: plan on a copy
-        // (owner decision, TASK 13.3; TD-055).
-        if (!open.planEditable) await current.adopt(open, _plan);
-      }
-    }
-    _loaded = true;
-    _siteKey = _currentSiteKey();
-    notifyListeners();
-  }
-
-  Future<void> _apply(Session session) async {
-    _target = await _resolver.target(session) ?? _target;
-    _rig = await _resolver.rig(session) ?? _rig;
-    if (session.blocks.isNotEmpty) _blocks = List.of(session.blocks);
-    _isExample = ExampleCapturePlan.matches(_blocks);
-  }
+  /// The plan's night key, with or without a site (S1.4).
+  CalendarDate get nightKey => _night.eveningDate;
 
   /// The plan as shown now (ADR-014 §2); its night key is [_night]'s (S1.4).
-  SessionPlan _plan() => SessionPlan(
+  SessionPlan currentPlan() => SessionPlan(
     eveningDate: _night.eveningDate,
     timeZoneId: _site.displayZoneId,
     siteId: _site.activeSite?.id,
@@ -158,6 +102,38 @@ class SessionPlanViewModel extends ChangeNotifier {
     rigLabel: _rig?.name ?? '(no rig)',
     siteLabel: _site.locationName,
   );
+
+  /// Sets the plan's contents with no autosave and no notification: the
+  /// lifecycle's restore, open, new plan and copy (S6.1).
+  void replaceContents({
+    required AstroTarget? target,
+    required EquipmentProfile? rig,
+    required List<CaptureBlock> blocks,
+    required bool isExample,
+  }) {
+    _target = target;
+    _rig = rig;
+    _blocks = List.of(blocks);
+    _isExample = isExample;
+  }
+
+  /// Sets the picked night (null = tonight) with no autosave and no
+  /// notification (S6.1).
+  void replaceNight(CalendarDate? date) => _pickedEveningDate = date;
+
+  /// Tells the listeners that the lifecycle changed the plan (S6.1).
+  void markChanged() => notifyListeners();
+
+  /// Runs a restore or an open (S6.1): a site change meanwhile is part of it,
+  /// not a plan edit; afterwards the plan notifies once. A failure leaves the
+  /// plan unloaded, as before the split.
+  Future<void> restoring(Future<void> Function() body) async {
+    _loaded = false;
+    await body();
+    _siteKey = _currentSiteKey();
+    _loaded = true;
+    notifyListeners();
+  }
 
   Object _currentSiteKey() => (
     _site.activeSite?.id,
@@ -172,13 +148,13 @@ class SessionPlanViewModel extends ChangeNotifier {
     final key = _currentSiteKey();
     if (!_loaded || key == _siteKey) return;
     _siteKey = key;
-    unawaited(_current?.write(_plan, edit: false));
+    unawaited(_current?.write(currentPlan, edit: false));
   }
 
   Future<void> _edited() async {
     notifyListeners();
     final current = _current;
-    if (current != null) return current.write(_plan);
+    if (current != null) return current.write(currentPlan);
     await _stateRepository.saveCaptureBlocks(_blocks);
     if (_target case final t?) await _stateRepository.setSelectedTargetId(t.id);
     if (_rig case final r?) await _stateRepository.setSelectedEquipmentId(r.id);
@@ -233,62 +209,6 @@ class SessionPlanViewModel extends ChangeNotifier {
   Future<void> refreshSelectedEquipment() async {
     if (_rig case final r?) _rig = await _equipment.getEquipmentById(r.id);
     notifyListeners();
-  }
-
-  /// Opens [session] (TASK 11.4): a draft or planned one becomes current, a
-  /// frozen one is copied into a new draft; the current, editable one is left
-  /// as it is live — a caller's copy may be stale (S1.V4, TD-062).
-  Future<void> openSession(Session session) async {
-    if (session.id == activeSessionId && session.planEditable) return;
-    _loaded = false; // switching the site here is opening, not an edit
-    if (session.siteId case final id?) await _site.selectSite(id);
-    _pickedEveningDate =
-        session.eveningDate ??
-        CalendarDate.fromDateTimeFields(session.record.sessionDate.toLocal());
-    await _apply(session);
-    await _current?.adopt(session, _plan);
-    _siteKey = _currentSiteKey();
-    _loaded = true;
-    notifyListeners();
-  }
-
-  /// A new draft for tonight with the example plan (owner decision).
-  Future<void> newSession() async {
-    _pickedEveningDate = null;
-    _blocks = ExampleCapturePlan.blocks();
-    _isExample = true;
-    await _current?.startNew(_plan());
-    notifyListeners();
-  }
-
-  /// A new draft with the current plan on [date]; the original stays.
-  Future<void> duplicateForNight(CalendarDate date) async {
-    _pickedEveningDate = date;
-    await _current?.startNew(_plan());
-    notifyListeners();
-  }
-
-  /// Save (ADR-014 §3): the current open session — or a new one — becomes
-  /// planned with [snapshot]. Needs a repository, a night, target and rig.
-  Future<Session> savePlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.save(_plan(), snapshot));
-
-  /// Start (ADR-016; owner: same requirements as Save): the plan starts
-  /// with [snapshot] and the planner continues on a fresh draft copy.
-  Future<Session> startPlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.start(_plan(), snapshot));
-
-  Future<Session> _commit(Future<Session> Function(CurrentSession) f) async {
-    final current = _current;
-    if (current == null ||
-        sessionNight == null ||
-        _target == null ||
-        _rig == null) {
-      throw StateError('Saving needs a site, a target and a rig.');
-    }
-    final result = await f(current);
-    notifyListeners();
-    return result;
   }
 
   @override

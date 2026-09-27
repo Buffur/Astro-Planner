@@ -12,6 +12,7 @@ import '../../domain/services/optical_calculator.dart';
 import '../../domain/services/session_snapshot_builder.dart';
 import '../../domain/services/visibility_calculator.dart';
 import 'night_conditions_viewmodel.dart';
+import 'plan_lifecycle_viewmodel.dart';
 import 'session_plan_viewmodel.dart';
 import 'settings_viewmodel.dart';
 import 'site_viewmodel.dart';
@@ -28,6 +29,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   CaptureAnalysisViewModel({
     required this._site,
     required this._plan,
+    required this._lifecycle,
     required this._settings,
     required this._conditions,
     required this._clock,
@@ -39,6 +41,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
 
   final SiteViewModel _site;
   final SessionPlanViewModel _plan;
+  final PlanLifecycleViewModel _lifecycle;
   final SettingsViewModel _settings;
   final NightConditionsViewModel _conditions;
   final Clock _clock;
@@ -230,12 +233,12 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
 
   /// Save (ADR-014 §3–§4): the plan becomes a planned session with a fresh
   /// snapshot of its whole context.
-  Future<Session> saveSession() => _plan.savePlan(_snapshot());
+  Future<Session> saveSession() => _lifecycle.savePlan(_snapshot());
 
   /// Start (ADR-016; owner: same requirements as Save): the session starts
   /// with its execution-start snapshot; the planner goes on with a copy.
   /// Refused while another session is in progress (SessionStateError).
-  Future<Session> startSession() => _plan.startPlan(_snapshot());
+  Future<Session> startSession() => _lifecycle.startPlan(_snapshot());
 
   SessionSnapshot _snapshot() {
     // The forecast's age as of now, not as of its last tick (S1.3).

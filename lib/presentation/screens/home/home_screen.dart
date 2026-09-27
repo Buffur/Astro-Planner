@@ -8,6 +8,7 @@ import '../../navigation/app_router.dart';
 import '../../viewmodels/startup_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
@@ -56,7 +57,7 @@ class HomeScreen extends StatelessWidget {
               await runWithFeedback(
                 context,
                 'start a new session',
-                context.read<SessionPlanViewModel>().newSession,
+                context.read<PlanLifecycleViewModel>().newSession,
               );
             },
           ),
@@ -66,7 +67,7 @@ class HomeScreen extends StatelessWidget {
             icon: const Icon(Icons.copy_all),
             tooltip: 'Duplicate for another night',
             onPressed: () async {
-              final planVm = context.read<SessionPlanViewModel>();
+              final lifecycle = context.read<PlanLifecycleViewModel>();
               if (!await confirmLeavingUnsavedPlan(context)) return;
               if (!context.mounted) return;
               final now = DateTime.now();
@@ -81,7 +82,7 @@ class HomeScreen extends StatelessWidget {
                 await runWithFeedback(
                   context,
                   'duplicate the session',
-                  () => planVm.duplicateForNight(
+                  () => lifecycle.duplicateForNight(
                     CalendarDate.fromDateTimeFields(picked),
                   ),
                 );

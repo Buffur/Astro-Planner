@@ -4,9 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (**Stage 6 planned:** its Task sequence is frozen and its gates'
-> options are prepared; planning only, verified at `783a723`).
-> **Next:** S6.1 (no gate). The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
+> **Last updated:** 2026-09-27 (**S6.1 done**: the planner's ViewModel split; Stage 6 in progress).
+> **Next:** S6.2 (no gate). The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
 > each before its Task.
 
 ## Current state
@@ -14,11 +13,20 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; no Task started) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1 done) |
 | Current Task | None in progress |
-| Next Task | **S6.1 — Split the planner's ViewModel** (no gate) |
-| Code baseline | S5.V1 (`178acbe`), unchanged by Stage 6 planning. Not pushed (S1.14, RD-17) |
+| Next Task | **S6.2 — The plan's identity and actions** (no gate) |
+| Code baseline | S6.1 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.1 done, 2026-09-27** (P6.0; ENG-16 resolved): `SessionPlanViewModel` is split, with no behaviour
+change. It keeps the plan's contents, edits, autosave and read-only state (220 lines). The new
+`PlanLifecycleViewModel` restores, opens, starts new plans, copies, saves and starts runs (167
+lines; a plain `Provider`, not a notifier). `AppViewModels` builds one `CurrentSession` for both.
+Callers moved mechanically: `StartupViewModel`, `CaptureAnalysisViewModel` (Save and Start), four
+screens and `PlannerHarness`. No test assertion changed. `CLAUDE.md` trap 11 and ARCHITECTURE B1/B4
+updated. Verification: the full gate after the last code change, PASS (below); every acceptance
+criterion checked.
 
 **Stage 6 planned, 2026-09-27** (documentation only; the plan's "Stage 6 — frozen Task sequence"):
 - **On the amended plan:** the owner started Stage 6 planning on the Stages 6–11 amendment
@@ -60,7 +68,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (404 files, 0 changed); Analyze; 1,320 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S5.V1's final inputs (`178acbe`) | No gate input changed since: `git diff --stat 178acbe HEAD -- . ':!docs' ':!CLAUDE.md'` is empty at `783a723` and after Stage 6 planning. Reused as Stage 6's baseline. Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders (S6.1's first code change) |
+| **Full quality gate PASS**: Encoding; Format (405 files, 0 changed); Analyze; 1,320 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.1's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -181,14 +189,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.1 — Split the planner's ViewModel** (the plan's "Stage 6 — frozen Task sequence", S6.1), in a
-fresh chat where practical. It is frozen and has no gate, so the frozen sequence is the approval
-(`READ → VERIFY → PLAN → IMPLEMENT → VERIFY → SELF-REVIEW → DOCS → COMMIT → STOP`).
-- **Read:** S6.1, "Rules for every Stage 6 Task" and the Stage 6 constraints;
-  `test/presentation/viewmodels/viewmodel_rules_test.dart`; `session_plan_viewmodel.dart`,
-  `CurrentSession`, `AppViewModels`, `PlannerHarness`; `CLAUDE.md` trap 11.
-- **Verification:** the full gate after the last code change (the Task's rule).
-- Then commit and STOP. S6.2 follows, also without a gate.
+**S6.2 — The plan's identity and actions** (the plan's "Stage 6 — frozen Task sequence", S6.2). It is
+frozen and has no gate, so the frozen sequence is the approval.
+- **Read:** S6.2, "Rules for every Stage 6 Task"; `home_screen.dart`, `PlanLifecycleViewModel`,
+  `CurrentSession` (TD-058), the Stage 5 parts it adopts (`PlanStateLabel`, `showDone`,
+  `pickNight`, `AppWords`), `save_start_race_test.dart` and the core-loop E2E.
+- **Verification:** the full gate after the last code change.
+- Then commit and STOP.
 
 **Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations
 in the plan's "Stage 6 gates"):

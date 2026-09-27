@@ -2863,7 +2863,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 
 | Task | Title | From | Size | Depends on | Gate | State |
 | --- | --- | --- | --- | --- | --- | --- |
-| S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | Frozen |
+| S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | **Done 2026-09-27** |
 | S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | Frozen |
 | S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 | Frozen, gated |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | Frozen |
@@ -2911,6 +2911,10 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
     passes;
   - the memoization tests, the lifecycle matrix and the E2E pass;
   - the full gate.
+- **Done 2026-09-27:** `SessionPlanViewModel` (the plan's contents, edits, autosave; 220 lines) and
+  `PlanLifecycleViewModel` (restore, open, new, copy, save, start; 167 lines), sharing one
+  `CurrentSession` built in `AppViewModels`. No test assertion changed; the full gate passed (1,320
+  tests, 2 expected skips; 2 host E2E).
 
 ##### S6.2 — The plan's identity and actions (P6.1, first half; TD-058)
 - **Objective:** the planner says which plan it shows and in what state, and its plan actions sit
@@ -4010,7 +4014,7 @@ provisional in the same way.*
 | ENG-13 no retrievable diagnostics | Documented / owner decision | RD-15 (Stage 11) |
 | ENG-14 restore keeps stale preferences | Partially confirmed; requires verification | Stage 8 |
 | ENG-15 default selection (= SCI-12, UX-24) | Owner decision | RD-04 |
-| ENG-16 `SessionPlanViewModel` at its size cap | Documented | A planning note for Stage 6 |
+| ENG-16 `SessionPlanViewModel` at its size cap | Documented | A planning note for Stage 6. **Resolved 2026-09-27 by S6.1** (split into `SessionPlanViewModel` and `PlanLifecycleViewModel`) |
 | SCI-04 grid resolution; SCI-05 ISO label | Documented / owner decision | RD-03 (Stage 1); SCI-05 also RG-11 |
 | SCI-07 accepted estimates stored as confirmations | Documented | RD-13 (Stage 8); **2026-09-27:** RD-13 narrowed (§8) |
 | SCI-08 elevation cannot be unknown | Documented | RG-08 (Stage 7) |
@@ -4400,5 +4404,5 @@ column says so.
 | UX-23 typing in plan editing | Documented (a trade-off) | Stage 7 forms |
 | UX-30 Sessions filter bar | Documented (required by TASK 14.1) | The owner's 08 §24 preference, Stage 8 |
 | UX-39 red-mode limits | Documented (ARCHITECTURE B16) | Stage 11 darkness test |
-| ENG-16 ViewModel at its size cap | Documented | A Stage 6 planning note |
+| ENG-16 ViewModel at its size cap | Documented | A Stage 6 planning note. **Resolved 2026-09-27 by S6.1** |
 | AC5 preferences exception | Documented (the owner's TASK 11.4 decision) | — |

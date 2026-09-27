@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.1, 2026-09-27:** B1 and B4 record the split of `SessionPlanViewModel` into the plan's contents (`SessionPlanViewModel`) and its lifecycle (`PlanLifecycleViewModel`).
 > **S5.9, 2026-09-27:** B17 points to the adoption plan (DESIGN_SYSTEM §9) and the opt-in render test.
 > **S5.8, 2026-09-27:** B17 notes the confirmation, feedback and delete patterns (RD-09 = M + S1).
 > **S5.7, 2026-09-27:** B17 notes the detail-screen template.
@@ -298,9 +299,10 @@ approval.
 
 > **Since TASK 12.3 (commits `6c703f3`, `03c0b34`, `64caa58`)** the diagram below is historical. Screens and widgets watch
 > screen-scoped ViewModels (`lib/presentation/viewmodels/`): `SiteViewModel`, `SettingsViewModel`,
-> `SessionPlanViewModel` (listens to the site), `NightConditionsViewModel` (site + plan + settings),
-> `CaptureAnalysisViewModel` (all four), `StartupViewModel` (load order: site, settings, plan,
-> conditions), plus `GearViewModel`, `TargetsViewModel`, `SessionsViewModel` and `ThemeViewModel`.
+> `SessionPlanViewModel` (listens to the site), `PlanLifecycleViewModel` (S6.1: restore, open,
+> new, copy, save, start; not a notifier), `NightConditionsViewModel` (site + plan + settings),
+> `CaptureAnalysisViewModel` (all four; Save and Start through the lifecycle), `StartupViewModel`
+> (load order: site, settings, plan through the lifecycle, conditions), plus `GearViewModel`, `TargetsViewModel`, `SessionsViewModel` and `ThemeViewModel`.
 > They take domain interfaces only; `AppViewModels` (`lib/presentation/app_view_models.dart`)
 > composes them and `main.dart` passes the concrete repositories and services (the only
 > place that knows SharedPreferences, HTTP, Geolocator and the time-zone plugin). No screen
@@ -392,6 +394,23 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `SessionReferenceResolver`, `ExampleCapturePlan`); weather, timeline, Moon, opportunity and
 > candidates to `NightConditionsViewModel`; budget, fit, capability and the Save snapshot to
 > `CaptureAnalysisViewModel`. Tests build the same graph through `PlannerHarness`.
+
+> **Since S6.1 (2026-09-27)** the plan's responsibilities are split in two (ENG-16: the ViewModel
+> had reached its 300-line cap), with no behaviour change:
+> - **`SessionPlanViewModel`** owns the plan's **contents**: the night, target, rig and blocks, their
+>   edits, the site listener and the autosave (`CurrentSession.write`), and the read-only state the
+>   screens watch (`activeSession`, `hasUnsavedChanges`, `autosaveFailure`, `idle`). It gives the
+>   lifecycle a narrow seam: `currentPlan()`, `nightKey`, `replaceContents`, `replaceNight`,
+>   `restoring` (a restore or open is not a plan edit) and `markChanged`.
+> - **`PlanLifecycleViewModel`** owns **which plan** the planner works on: `load` (restore, the
+>   defaults, resume, adopting a copy of a run), `openSession`, `newSession`, `duplicateForNight`,
+>   `savePlan` and `startPlan`, with `SessionReferenceResolver` and `ExampleCapturePlan`. It holds no
+>   state of its own and does not notify; the plan notifies for it. It is provided with a plain
+>   `Provider`; screens `context.read` it for New, Duplicate and Open.
+> - **`CurrentSession`** is created once in `AppViewModels` and shared by both (it was built inside
+>   the plan ViewModel). `StartupViewModel` loads through the lifecycle, and
+>   `CaptureAnalysisViewModel.saveSession`/`startSession` save and start through it.
+> - Sizes after the split: 220 and 167 physical lines (the cap is 300; S6.1's target was 250).
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

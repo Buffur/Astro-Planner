@@ -11,6 +11,7 @@ import '../../navigation/app_router.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/library_viewmodels.dart';
+import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
@@ -385,6 +386,7 @@ class _Actions extends StatelessWidget {
             // A frozen session opens as a copy in a new draft (TASK 11.4);
             // S1.6: ask before another plan's unsaved changes are left.
             final plan = context.read<SessionPlanViewModel>();
+            final lifecycle = context.read<PlanLifecycleViewModel>();
             if (s.id != plan.activeSessionId &&
                 !await confirmLeavingUnsavedPlan(context)) {
               return;
@@ -393,7 +395,7 @@ class _Actions extends StatelessWidget {
             final opened = await runWithFeedback(
               context,
               'open the session',
-              () => plan.openSession(s),
+              () => lifecycle.openSession(s),
             );
             if (opened && context.mounted) context.push(AppRouter.session());
           },
