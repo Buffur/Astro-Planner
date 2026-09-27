@@ -6,7 +6,8 @@
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
 > icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test), S5.4 (status
-> tokens, the status block, the plan-state label) and S5.5 (the collapsible section).
+> tokens, the status block, the plan-state label), S5.5 (the collapsible section) and S5.6 (the
+> context line and the night picker).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -320,9 +321,33 @@ Detail one tap away (ADR-019 §7; RD-06, RG-06: progressive disclosure, no modes
   - a store that cannot be read or written is logged, and the section still opens and closes;
   - keys are stable names such as `planner.budgetDetails`: never rename one without a reason.
 
+### The context line (S5.6; `lib/presentation/shared/context_line.dart`)
+
+"Ljubljana ▾ · Fri, Nov 13 ▾": the one control that says which site and night a screen describes,
+for Tonight and the planner (ADR-019 §5, §6; addendum §3.1–§3.2).
+- **Two parts:** the site and the night, each its own button (at least 48 dp, `titleSmall` in
+  `textPrimary`, a ▾ in `textSecondary`).
+  - Screen readers hear "Site: Ljubljana" and "Night: Fri, Nov 13", with the hints "Choose a site"
+    and "Choose a night".
+  - The line wraps at 200 % text.
+- **Callbacks only:** each part reports its tap. What choosing does (the site picker, or changing
+  the current plan's night, UX-11) is decided where the line is adopted (P6.3, P6.6).
+- **The zone rule, once** (trap 2), in `textTertiary` below the line:
+  - "Times in site zone Europe/Ljubljana, CET, UTC+01:00";
+  - when the site has no zone: "Times in device zone, UTC…" (`NightTimeFormatter.zoneCaption`).
+- **No site:** the site part reads "No site set". There is no night part and no zone rule (no
+  night without a site, ADR-007 §9).
+- **The night is today's `NightTimeFormatter.eveningDate`** ("Fri, Nov 13"). The glossary's "Fri
+  14 Nov" order is a formatter change for the Stage that adopts the line, not S5.6's.
+
+**The night picker** (`pickNight`, same file): the date picker in the app's theme, from a year ago
+to five years ahead as the planner's picker allows, titled "Choose a night". It returns the chosen
+evening as a `CalendarDate`, or null when cancelled. Tested red or black in field mode **by its
+theme alone**, without the app-wide red filter.
+
 ### Still to come
 
-Added by S5.6–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
+Added by S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
 RD-09 = M + S1).
 
 ## 8. Known gaps, for adoption

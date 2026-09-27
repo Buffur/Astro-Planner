@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.6, 2026-09-27:** B17 notes the context line and `pickNight`.
 > **S5.5, 2026-09-27:** B17 notes the collapsible section and `DisclosureViewModel`.
 > **S5.4, 2026-09-27:** B17 notes the status tokens, `StatusBlock` and `PlanState`.
 > **S5.3, 2026-09-27:** B17 notes the shared words (`AppWords`) and the retired-terms test.
@@ -809,6 +810,11 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   frame). The open state is stored per section key through `DisplayPreferencesRepository`
   (`loadSectionStates`, `saveSectionState`; guarded by `guardStorage`, trap 15). A failed read or
   write is logged and never blocks the section. Not yet on a screen.
+- **Context (S5.6):** `lib/presentation/shared/context_line.dart`:
+  - `ContextLine`: site ▾ · night ▾ and the zone rule; plain values in, taps reported by callbacks;
+  - `pickNight`: the shared, themed date picker returning a `CalendarDate`.
+
+  Not yet on a screen.
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
   styles (DESIGN_SYSTEM §8).
 

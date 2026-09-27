@@ -8,7 +8,9 @@
 import 'package:astroplan/core/theme/app_button_styles.dart';
 import 'package:astroplan/core/theme/app_palette.dart';
 import 'package:astroplan/core/theme/app_spacing.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/presentation/shared/context_line.dart';
 import 'package:astroplan/presentation/shared/collapsible_section.dart';
 import 'package:astroplan/presentation/shared/plan_state.dart';
 import 'package:astroplan/presentation/shared/status_block.dart';
@@ -230,6 +232,25 @@ List<Widget> _sections() => [
   ),
 ];
 
+/// S5.6: the context line with a site and its zone, a site without a zone,
+/// and no site.
+List<Widget> _contextLines() => [
+  const SizedBox(height: AppSpacing.lg),
+  for (final (site, zone) in [
+    ('Ljubljana', 'Europe/Ljubljana'),
+    ('Dark-sky site near the observatory', null),
+  ])
+    ContextLine(
+      siteName: site,
+      night: CalendarDate(2026, 11, 13),
+      zoneId: zone,
+      nightStartUtc: DateTime.utc(2026, 11, 13, 11),
+      onSite: () {},
+      onNight: () {},
+    ),
+  ContextLine(siteName: null, night: null, onSite: () {}, onNight: () {}),
+];
+
 List<Widget> _entries() => [
   ..._surfaces(),
   ..._buttons(),
@@ -237,6 +258,7 @@ List<Widget> _entries() => [
   ..._menus(),
   ..._status(),
   ..._sections(),
+  ..._contextLines(),
 ];
 
 /// S5.2: opens a dialog, a message and a menu over the gallery in turn and
