@@ -11,8 +11,9 @@
    or reread earlier Stages' history.
 3. If the action is a frozen Task, the frozen sequence is the approval: `READ → VERIFY → PLAN →
    IMPLEMENT → VERIFY → SELF-REVIEW → DOCS → COMMIT → STOP`. Verify by change class and reuse
-   valid evidence (Verification Policy V1–V3); a Task that changed shared or high-risk code ends
-   with one full-gate pass after its last code change.
+   valid evidence (Verification Policy V1–V3): a high-risk Task ends with one full-gate pass after
+   its last code change; a shared-behaviour Task ends with its affected regression checks, and
+   escalates to the full gate only as V1 says.
 4. If the action is a research or owner-decision gate, do not implement; prepare the decision.
 5. If the action is a Stage validation, use `INDEPENDENT_STAGE_VALIDATION.md`.
 6. Update `PROGRESS.md` by its "How to update this file" rules, commit once, and STOP. Never start

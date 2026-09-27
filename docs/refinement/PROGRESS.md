@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (governance correction: one canonical Verification Policy; this file
-> reduced to the handoff; history moved verbatim).
+> **Last updated:** 2026-09-27 (governance cleanup after the correction: M1/M2 commit fixed; CI filter
+> made fail-safe; V1's shared-Task rule clarified).
 > **Next:** S5.1 — foundation tokens, the gallery test and `docs/DESIGN_SYSTEM.md`. RD-09 is needed
 > before S5.8 only.
 
@@ -31,6 +31,12 @@
 - CI skips the gate when only documentation changed (same paths as V1's documentation class).
 - This file keeps only the handoff; the earlier entries are in `PROGRESS_HISTORY.md`, unchanged.
 - No application code, test, tool, dependency, Stage scope or product decision changed.
+- **Cleanup, 2026-09-27:** the M1/M2 device-check commit is `79f392c` (was misrecorded as
+  `360fd8f`); the CI filter excludes only `docs/**.md` and `docs/**.patch` (not all of `docs/`), so
+  any unknown file runs the gate; V1 now says a shared-behaviour Task ends with its affected
+  regression checks and escalates to the full gate only when that set cannot be bounded or its
+  Task/Stage gate requires it (high-risk Tasks still always end with the full gate). Verified by a
+  YAML parse and a 22-case path simulation; the app gate was not rerun (no gate input changed).
 
 **Stage 5 planning** (the entry as written at `a354032`):
 
@@ -177,7 +183,7 @@ These block a release, not refinement.
     owner's install.
 - **Stage 5 (in progress):** RD-09 blocks S5.8 only. S5.1–S5.7 can proceed.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
-  recorded at `360fd8f`. Native streaming and real-backup preview cancellation
+  recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
   upgrade device evidence. Stage 11 lifecycle rows remain open.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
