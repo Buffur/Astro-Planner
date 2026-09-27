@@ -8,6 +8,8 @@ import 'package:astroplan/domain/models/astro_target.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
+import 'package:astroplan/domain/models/spec_confidence.dart';
+import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/location_profile.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
 import 'package:astroplan/domain/models/planning_preferences.dart';
@@ -20,7 +22,10 @@ import 'package:astroplan/domain/services/night_weather_summarizer.dart';
 import 'package:astroplan/domain/services/session_night_resolver.dart';
 import 'package:astroplan/domain/services/session_snapshot_builder.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
+import 'package:astroplan/presentation/shared/equipment_draft.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../support/metadata_candidates.dart';
 
 final _night = SessionNightResolver.forEveningDate(
   CalendarDate(2026, 12, 15),
@@ -69,7 +74,7 @@ final _blocks = [
   ),
 ];
 
-SessionSnapshot _build({bool full = true}) {
+SessionSnapshot _build({bool full = true, EquipmentProfile? rig}) {
   final prefs = PlanningPreferences();
   final opportunity = ImagingOpportunityCalculator.calculate(
     night: _night,
@@ -108,7 +113,7 @@ SessionSnapshot _build({bool full = true}) {
     blocks: _blocks,
     site: full ? _site : null,
     target: full ? _target : null,
-    rig: full ? _rig : null,
+    rig: full ? rig ?? _rig : null,
     opportunity: full ? opportunity : null,
     weather: full ? weather : null,
     weatherSummary: full
@@ -174,5 +179,35 @@ void main() {
     expect(SessionSnapshot.tryRead(null), isNull);
     expect(SessionSnapshot.tryRead(const {}), isNull);
     expect(SessionSnapshot.tryRead(const {'v': 2}), isNull);
+  });
+
+  // S3.V7 (S3S-01, TD-070): a snapshot keeps a group provenance only when
+  // every spec of the group has it; it never records a rig-wide `user` for
+  // imported or estimated values. Per-field snapshot provenance is Stage 8's.
+  group('rig provenance', () {
+    Map<Object?, Object?> rigOf(EquipmentProfile rig) =>
+        _build(rig: rig).json['rig']! as Map;
+
+    test('an imported rig: the camera group is omitted, not `user`', () {
+      final d = EquipmentDraft.fromCandidate(phoneCandidate());
+      final rig = rigOf(d.build(d.initial, TrackingType.unknown).profile!);
+      expect(rig['cameraSource'], isNull);
+      expect(rig['cameraConfidence'], isNull);
+      expect(rig['opticsSource'], 'metadata:jpeg');
+      expect(rig['opticsConfidence'], SpecConfidence.reported.name);
+    });
+
+    test("a rig typed by hand is the user's in both groups", () {
+      final rig = rigOf(_rig.withEditProvenance(null));
+      expect(rig['cameraSource'], 'user');
+      expect(rig['cameraConfidence'], SpecConfidence.reported.name);
+      expect(rig['opticsSource'], 'user');
+    });
+
+    test('a legacy rig stays unknown', () {
+      final rig = rigOf(_rig);
+      expect(rig['cameraSource'], isNull);
+      expect(rig['opticsSource'], isNull);
+    });
   });
 }

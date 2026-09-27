@@ -86,28 +86,37 @@ abstract final class SessionSnapshotBuilder {
     'source': t.source,
   };
 
-  static Map<String, Object?> _rig(EquipmentProfile r) => {
-    'id': r.id,
-    'name': r.name,
-    'manufacturer': r.manufacturer,
-    'cameraModel': r.cameraModel,
-    'sensorWidthMm': r.sensorWidthMm,
-    'sensorHeightMm': r.sensorHeightMm,
-    'pixelPitchUm': r.pixelPitchUm,
-    'resolutionWidthPx': r.resolutionWidthPx,
-    'resolutionHeightPx': r.resolutionHeightPx,
-    'focalLengthMm': r.focalLengthMm,
-    'focalRatio': r.focalRatio,
-    'apertureDiameterMm': r.apertureDiameterMm,
-    'averageRawFileSizeMB': r.averageRawFileSizeMB,
-    'rotationDeg': r.rotationDeg,
-    'tracking': r.trackingType.name,
-    'maxExposureS': r.maxExposureS,
-    'cameraSource': r.cameraSource,
-    'cameraConfidence': r.cameraConfidence?.name,
-    'opticsSource': r.opticsSource,
-    'opticsConfidence': r.opticsConfidence?.name,
-  };
+  // A group's provenance is recorded only when every spec of the group
+  // has it (S3.V7, S3S-01): an imported rig's group pair is `user`, but its
+  // estimates and file values are not the user's, so the group is omitted
+  // (null) rather than invented. Per-field provenance in snapshots is left
+  // to Stage 8 (TD-070).
+  static Map<String, Object?> _rig(EquipmentProfile r) {
+    final camera = r.sharedProvenance(camera: true);
+    final optics = r.sharedProvenance(camera: false);
+    return {
+      'id': r.id,
+      'name': r.name,
+      'manufacturer': r.manufacturer,
+      'cameraModel': r.cameraModel,
+      'sensorWidthMm': r.sensorWidthMm,
+      'sensorHeightMm': r.sensorHeightMm,
+      'pixelPitchUm': r.pixelPitchUm,
+      'resolutionWidthPx': r.resolutionWidthPx,
+      'resolutionHeightPx': r.resolutionHeightPx,
+      'focalLengthMm': r.focalLengthMm,
+      'focalRatio': r.focalRatio,
+      'apertureDiameterMm': r.apertureDiameterMm,
+      'averageRawFileSizeMB': r.averageRawFileSizeMB,
+      'rotationDeg': r.rotationDeg,
+      'tracking': r.trackingType.name,
+      'maxExposureS': r.maxExposureS,
+      'cameraSource': camera?.source,
+      'cameraConfidence': camera?.confidence?.name,
+      'opticsSource': optics?.source,
+      'opticsConfidence': optics?.confidence?.name,
+    };
+  }
 
   static Map<String, Object?> _preferences(PlanningPreferences p) => {
     'minAltitudeDeg': p.minAltitudeDeg,

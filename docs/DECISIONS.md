@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 3 sign-off failed (2026-09-27):** corrective Tasks S3.V7 and S3.V8 approved by the owner, with a Stage-boundary adjustment for S3.V7; S3S-03 deferred (E.1, "Stage 3 sign-off failed: corrective Tasks"). **S3.V7 done (2026-09-27):** ADR-018 note below.
 > **Stage 3 validation failed (2026-09-26):** corrective Tasks S3.V1–S3.V5 approved by the owner (E.1, "Stage 3 validation failed: corrective Tasks").
 > **Stage 3 fixes (2026-09-26):** the owner approved S3.9 (TD-068) and S3.10 (TD-069) before the validation (E.1, "Stage 3 fixes before validation").
 > **S3.7 (2026-09-26):** RD-16 implemented. The import is visible as "Add from a photo" (ADR-018 §7), and the Settings viewer entry is removed.
@@ -978,6 +979,42 @@ from a stale match.
     a clear evidence level, unless the Stage 3 acceptance requires it;
   - the failed validation is never weakened or rewritten to fit the implementation;
   - after S3.V1–S3.V5, Stage 3 needs a fresh independent validation before Stage 4.
+
+### Stage 3 sign-off failed: corrective Tasks (2026-09-27)
+
+- **Context:** the fresh-session Stage 3 sign-off at `74026ca` failed
+  (`refinement/STAGE_3_SIGNOFF_VALIDATION.md`, committed `d7dead0`). S3S-01 and S3S-02 are
+  blocking; S3S-03 is low.
+- **Decided by:** the project owner, in chat, 2026-09-27:
+  - the two blocking findings are **not waived**, and Stage 3 stays open until they are corrected;
+  - S3.V7 and S3.V8 run as separate corrective Tasks with separate commits. For each: the
+    regression test first, only the approved behaviour, targeted and regression tests, the
+    documents and `PROGRESS.md`, one commit, then STOP;
+  - after both, a fresh Stage 3 sign-off. It verifies the original Stage 3 acceptance, every
+    previous blocking finding, and regressions around the corrected areas. It does not add
+    product requirements or an Equipment redesign;
+  - Stage 4 stays blocked until Stage 3 receives a PASS.
+- **S3.V7 (S3S-01), approved with a Stage-boundary adjustment:**
+  - the Equipment editor uses the stored provenance of each value. A rig-wide `user` label must
+    never present estimated or imported values as user-reported;
+  - no session-snapshot provenance migration in Stage 3. For saved-session records without
+    per-field provenance, the rig-wide source is never presented as every field's provenance:
+    show only what the record supports, or omit it;
+  - per-field session provenance, and the export or schema changes it needs, are deferred to
+    Stage 8, where session and logbook semantics are redesigned;
+  - **acceptance principle:** missing per-field provenance is never replaced with an invented
+    `user` origin.
+- **S3.V8 (S3S-02), option (a):**
+  - when the photo's pixel dimensions differ from the matched saved rig's, pixel size and
+    physical sensor size are not copied from that rig;
+  - binning, ROI or cropping, resampling, another sensor mode or another configuration could
+    explain the difference, and metadata cannot tell which. The relationship is not inferred;
+  - the matched rig stays as evidence where valid; the affected values stay unknown until the
+    user confirms or provides them.
+- **S3S-03 (TD-072):** not part of S3.V8. It stays non-blocking, because the false transposed
+  conflict never chooses a value silently and the saved value remains the default. It is
+  deferred to a later Equipment or data-entry cleanup, unless new evidence shows it affects
+  correctness.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -3127,6 +3164,19 @@ D1–D4 in `refinement/research/RG-02_EQUIPMENT_IDENTITY.md` §12 (E.1, "Stage 3
 It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment (§5). ADR-011 is
 unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the editor's form model and pre-fill done (S3.5, 2026-09-26); the review and confirmation flow done (S3.6, 2026-09-26; see the note below); the RAW size from a DNG done (S3.8, 2026-09-26: MB = bytes ÷ 10⁶, as ADR-011 §3 defines the unit); §7 done (S3.7, 2026-09-26: visible as "Add from a photo"; device check M4 passed). Every frozen Stage 3 Task is done; TD-068 was found at M4 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
+
+**Implementation note (S3.V7, 2026-09-27; S3S-01, TD-070):** a group's provenance is read per spec.
+- `EquipmentProfile.groupProvenance` lists a group's valued specs with `provenanceOf`; the RAW size
+  takes part only when set. `sharedProvenance` is the provenance all of them have, else null.
+- The rig editor states one provenance for a group whose specs share it (a rig typed by hand reads
+  as before), else one per spec. An imported rig's estimates read as estimated, and unknown as
+  unknown. The group pair alone is never shown.
+- A new session snapshot records a group's source and confidence only when every spec of the group
+  shares them, else null. That keeps the snapshot format (`"v": 1`) and the export unchanged, and
+  a snapshot never records an invented `user`.
+- Per-field snapshot provenance, and snapshots already saved (which hold the group pair, `user`
+  for a rig imported before this change), are Stage 8's (owner, E.1). No screen reads a
+  snapshot's provenance; the export embeds snapshots as stored.
 
 **Implementation note (S3.V4, 2026-09-27; S3V-05):** §3's dimensions have a sanity bound. A side over **65,535 px** is unparseable in every container (DNG IFD0 and DefaultCropSize, JPEG and HEIC EXIF), as S3.1's acceptance required. 65,535 is JPEG's own format limit and several times any camera sensor's long side. It is a metadata bound, deliberately wider than `EquipmentLimits.resolutionPx` (30,000), which the candidate applies later.
 

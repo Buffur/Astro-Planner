@@ -100,6 +100,27 @@ class EquipmentProfile {
     return group.isUnknown ? null : group;
   }
 
+  /// The specs of the camera ([camera] true) or optics group that hold a
+  /// value, each with its provenance ([provenanceOf]; null = unknown). The
+  /// RAW size takes part only when it is set (S3.V7).
+  List<(EquipmentSpec, SpecProvenance?)> groupProvenance({
+    required bool camera,
+  }) => [
+    for (final spec in EquipmentSpec.values)
+      if (spec.isCamera == camera &&
+          (spec != EquipmentSpec.rawFileSize || averageRawFileSizeMB != null))
+        (spec, provenanceOf(spec)),
+  ];
+
+  /// The provenance every valued spec of the group has, or null when they
+  /// differ or it is unknown (S3.V7, S3S-01). Read from each spec, never
+  /// from the group pair alone: an imported rig's group pair is `user`,
+  /// but its estimates and file values are not the user's.
+  SpecProvenance? sharedProvenance({required bool camera}) {
+    final all = {for (final (_, p) in groupProvenance(camera: camera)) p};
+    return all.length == 1 ? all.single : null;
+  }
+
   SpecProvenance _groupProvenance(EquipmentSpec spec) => spec.isCamera
       ? SpecProvenance(cameraSource, cameraConfidence)
       : SpecProvenance(opticsSource, opticsConfidence);

@@ -10,6 +10,7 @@ import '../../../domain/models/spec_provenance.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/equipment_draft.dart';
 import '../../shared/equipment_form_input.dart';
+import '../../shared/equipment_import_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../viewmodels/library_viewmodels.dart';
 
@@ -40,12 +41,28 @@ class _EquipmentEditor {
     null => 'source unknown',
   };
 
-  /// Where the specs came from (ADR-008 §6, TASK 8.5).
+  static String _named(SpecProvenance? p) => p == null
+      ? _confidence(null)
+      : '${_confidence(p.confidence)}'
+            '${p.source == null ? '' : ' (${p.source})'}';
+
+  /// Where the specs came from (ADR-008 §6, TASK 8.5), read per spec
+  /// (ADR-018 §5; S3.V7, S3S-01): one phrase for a group whose specs share
+  /// a provenance, else one per spec. Never the group pair alone, which is
+  /// `user` on an imported rig whose values the user did not type.
   static String _provenance(EquipmentProfile eq) =>
-      'Camera specs: ${_confidence(eq.cameraConfidence)}'
-      '${eq.cameraSource == null ? '' : ' (${eq.cameraSource})'} · '
-      'Optics: ${_confidence(eq.opticsConfidence)}'
-      '${eq.opticsSource == null ? '' : ' (${eq.opticsSource})'}';
+      '${_group(eq, camera: true)} · ${_group(eq, camera: false)}';
+
+  static String _group(EquipmentProfile eq, {required bool camera}) {
+    final specs = eq.groupProvenance(camera: camera);
+    if ({for (final (_, p) in specs) p}.length == 1) {
+      return '${camera ? 'Camera specs' : 'Optics'}: ${_named(specs.first.$2)}';
+    }
+    return [
+      for (final (spec, p) in specs)
+        '${EquipmentImportText.spec(spec)}: ${_named(p)}',
+    ].join(' · ');
+  }
 
   static final _decimal = const TextInputType.numberWithOptions(decimal: true);
 
@@ -345,6 +362,7 @@ class _EquipmentEditor {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Text(
                               _provenance(existing),
+                              key: const Key('editor.provenance'),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),
