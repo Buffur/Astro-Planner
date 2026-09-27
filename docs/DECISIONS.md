@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **RD-09 decided, 2026-09-27 (Stage 5):** M + S1 (E.1, "RD-09 decided"); ADR-015 carries an
+> amendment pointer. Documentation only.
 > **Governance correction, 2026-09-27:** one canonical Verification Policy in `CLAUDE.md`
 > (E.1, "One canonical Verification Policy"). Process only.
 > **S4.V3, 2026-09-27:** ADR-019 §3.1 was reduced to the owner's approved decisions. S4.V2's five
@@ -1433,6 +1435,24 @@ Stage 4 revalidation is still required.
   `.github/workflows/ci.yml` (documentation-only changes skip the gate); `PROGRESS.md`, reduced to
   the handoff, with its history moved verbatim to `PROGRESS_HISTORY.md`.
 - Process only: no product, scientific or architecture decision changed.
+
+### RD-09 decided: undo for edits inside a plan, confirm for stored records (Stage 5, 2026-09-27)
+
+- **Context:** the options prepared in Stage 5 planning (`refinement/POST_ROADMAP_PLAN.md`, "RD-09
+  — confirm or undo", `a354032`).
+- **Decided by:** the project owner, in chat: **M + S1**, the recommended options.
+- **Q1 = M:**
+  - deleting a capture block (an edit inside a plan) happens at once, with an Undo message; the
+    block is restored exactly;
+  - deleting a stored record (a rig, a target, a site, a Logbook entry), Abandon, Restore and
+    leaving unsaved changes keep a confirmation, in one shared style.
+- **Q2 = S1:** every deletable item has a visible Delete; swipe stays as a shortcut to the same
+  pattern, and a cancelled swipe returns the row.
+- **Amends** `IA_WIREFRAMES.md` §3 ("no destructive action without a confirmation") for edits
+  inside a plan only. "No silent loss" stands. ADR-015 carries the pointer.
+- **Built by** S5.8 (the patterns). Adopted by Stage 6 (capture blocks), Stage 8 (the Logbook) and
+  Stage 9 (the Library). Where a visible Delete sits is decided at adoption.
+- No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -3053,6 +3073,7 @@ TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (r
 
 ## ADR-015: Information architecture and navigation
 
+> **Amended by RD-09 (owner, 2026-09-27, Stage 5; E.1, "RD-09 decided"):** the wireframes' field constraint "no destructive action without a confirmation" no longer applies to edits inside a plan (a capture block is deleted with Undo). Stored records, Abandon, Restore and leaving unsaved changes keep a confirmation.
 > **Amended by ADR-019 (owner, 2026-09-27, S4.D):** §2's "same sections and order" is replaced by the answer-first planner (ADR-019 §6). The route map gains a Night & Moon and a Weather detail (§9). §7's Library pages manage and never select (§8). The four tabs stand; the second is labelled Logbook (§10). See `docs/IA_WIREFRAMES_ADDENDUM.md`.
 
 Status: accepted (owner, 2026-09-23, TASK 12.1). Resolves PD-19 and PD-14. Documentation

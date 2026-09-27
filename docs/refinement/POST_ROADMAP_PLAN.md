@@ -2095,7 +2095,7 @@ Planned at `38925dd`. The application code is unchanged since `92ebf2a`. **Basel
 | S5.5 | A collapsible section with a remembered state | P5.2 | S–M | S5.1, S5.2 | Frozen |
 | S5.6 | The context line (site ▾ · night ▾) | P5.3 | S | S5.1, S5.2 | Frozen |
 | S5.7 | The detail-screen template | P5.5 | S | S5.5 | Frozen |
-| S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, **RD-09** | Frozen; **gated on RD-09** |
+| S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, RD-09 (**decided 2026-09-27: M + S1**) | Frozen |
 | S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | Frozen |
 
 **Order:** S5.1 → S5.2 → S5.3 → S5.4 → S5.5 → S5.6 → S5.7 → S5.8 (once RD-09 is decided) → S5.9.
@@ -2384,6 +2384,9 @@ that:
 - RD-09 is recorded and built as decided.
 
 ##### RD-09 — confirm or undo (owner decision; blocks S5.8 only)
+
+**Decided 2026-09-27 by the owner: M + S1** (DECISIONS E.1, "RD-09 decided"). The options below are
+kept as prepared.
 
 **Verified at `38925dd`:**
 
@@ -2773,7 +2776,7 @@ any implementation Task is created.
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
 | RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan; Stage 7 |
-| RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. Open | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
+| RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. **Decided 2026-09-27 (owner): M + S1** (DECISIONS E.1, "RD-09 decided") | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5 | 6 | — |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10 | 6 or 9 | — |
 | RD-12 | Should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish? | RT-10, UX-26; ADR-016 §11 | 8 | — |

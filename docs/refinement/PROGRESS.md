@@ -6,8 +6,8 @@
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-27 (governance cleanup after the correction: M1/M2 commit fixed; CI filter
 > made fail-safe; V1's shared-Task rule clarified).
-> **Next:** S5.1 — foundation tokens, the gallery test and `docs/DESIGN_SYSTEM.md`. RD-09 is needed
-> before S5.8 only.
+> **Next:** S5.1 — foundation tokens, the gallery test and `docs/DESIGN_SYSTEM.md`. RD-09 is decided
+> (M + S1).
 
 ## Current state
 
@@ -58,11 +58,11 @@
   - S5.5: the collapsible section (P5.2);
   - S5.6: the context line (P5.3);
   - S5.7: the detail-screen template (P5.5);
-  - S5.8: confirmation, feedback and destructive patterns (P5.6), **gated on RD-09**;
+  - S5.8: confirmation, feedback and destructive patterns (P5.6), per RD-09 (M + S1);
   - S5.9: the adoption plan and rendered evidence.
 - **The rule:** Stage 5 changes no screen's structure or wording. Theme tokens apply app-wide by
   design, and components are adopted in Stages 6–9.
-- **RD-09 (owner):** the options are prepared (plan §5, "RD-09 — confirm or undo"):
+- **RD-09 (owner): decided 2026-09-27, M + S1.** The options as prepared (plan §5, "RD-09 — confirm or undo"):
   - Q1: C, **M (recommended: undo for edits inside a plan, confirm for stored records)** or U;
   - Q2: **S1 (recommended: a visible Delete, swipe kept as a shortcut)** or S2.
 - **No research gate.** The visual choices are this Stage's implementation decisions, with an
@@ -92,7 +92,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; S5.8 gated on RD-09) |
+| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -135,7 +135,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-06 | The planner's section order; integrity text one tap away | 4 | **Decided** 2026-09-27 (S4.R4; E.1): answer first, decision order; detail one tap away |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
-| RD-09 | Destructive interactions: confirm or undo | 5 | Open; **options prepared** 2026-09-27 (Stage 5 planning; plan §5, "RD-09 — confirm or undo"): Q1 C / M (recommended) / U; Q2 S1 (recommended) / S2. Blocks S5.8 only |
+| RD-09 | Destructive interactions: confirm or undo | 5 | **Decided** 2026-09-27 (owner): **M + S1**, undo for edits inside a plan, confirm for stored records; a visible Delete with swipe as a shortcut (DECISIONS E.1, "RD-09 decided"; `IA_WIREFRAMES.md` §3 amended for plan edits). Built by S5.8 |
 | RD-10 | Ordering Tonight's candidates without a score | 6 | Open |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 | Open |
 | RD-12 | The resume prompt's Finish | 8 | Open |
@@ -181,7 +181,7 @@ These block a release, not refinement.
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
-- **Stage 5 (in progress):** RD-09 blocks S5.8 only. S5.1–S5.7 can proceed.
+- **Stage 5 (in progress):** nothing blocks. RD-09 decided 2026-09-27 (M + S1).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -202,8 +202,7 @@ the approval (§9.4: implement, test, document, commit, then STOP).
   - `test/presentation/accessibility_test.dart` (the guidelines to reuse);
   - ARCHITECTURE B16.
 - **Then** S5.2 to S5.7 in order; S5.3 may run earlier.
-- **Owner decision RD-09** (plan §5, "RD-09 — confirm or undo") is needed before S5.8, and can be
-  given at any time before it.
+- **RD-09 is decided** (M + S1; DECISIONS E.1), so S5.8 is no longer gated.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

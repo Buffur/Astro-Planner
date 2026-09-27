@@ -62,7 +62,9 @@ the tab they were opened from. Deep links are out of scope (TASK 12.2).
 - Dark: red field mode reachable in **one tap** from Tonight and the planner (G12.4),
   dialogs, date pickers and snackbars included; no white flashes.
 - No destructive action without a confirmation (delete, abandon); no silent loss —
-  every plan edit autosaves (TASK 11.4).
+  every plan edit autosaves (TASK 11.4). *(Amended by RD-09, owner, 2026-09-27: edits inside a
+  plan, such as deleting a capture block, use Undo instead of a confirmation; DECISIONS E.1,
+  "RD-09 decided".)*
 - Unknown values say "unknown" or "no forecast", never 0 (SI-008).
 
 ## 4. Wireframes (low fidelity)
