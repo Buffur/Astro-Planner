@@ -153,7 +153,11 @@ void main() {
       expect(p.metadataMake, 'TestMake');
     });
 
-    test('legacy rows (no provenance) are never given one by pinning', () {
+    // Corrected by S3.V2 (S3V-02, validation `7f790df`): this test used to
+    // expect the untouched sensor size to read as the user's, through the
+    // group fallback; the per-field contract (ADR-018 §5, owner acceptance)
+    // is that an untouched value of unknown origin stays unknown.
+    test('editing one legacy field leaves the untouched ones unknown', () {
       final legacy = _copy(seed, name: 'Legacy');
       final bare = EquipmentProfile(
         id: 1,
@@ -168,9 +172,23 @@ void main() {
       );
       final p = _copy(bare, pixelPitchUm: 3.8).withEditProvenance(bare);
       expect(p.provenanceOf(EquipmentSpec.pixelPitch), SpecProvenance.user);
-      expect(p.specProvenance.containsKey(EquipmentSpec.sensorSize), isFalse);
-      // The group is now the user's (TASK 8.5), so the fallback says so.
-      expect(p.provenanceOf(EquipmentSpec.sensorSize), SpecProvenance.user);
+      // The group summary becomes the user's (TASK 8.5), but untouched
+      // fields are pinned as explicitly unknown, so the fallback never
+      // attributes them to the user.
+      expect(p.cameraSource, 'user');
+      expect(
+        p.specProvenance[EquipmentSpec.sensorSize],
+        SpecProvenance.unknown,
+      );
+      for (final untouched in [
+        EquipmentSpec.sensorSize,
+        EquipmentSpec.resolution,
+        EquipmentSpec.rawFileSize,
+        EquipmentSpec.focalLength,
+        EquipmentSpec.focalRatio,
+      ]) {
+        expect(p.provenanceOf(untouched), isNull, reason: untouched.name);
+      }
     });
 
     test('the metadata identity is kept across a manual edit', () {

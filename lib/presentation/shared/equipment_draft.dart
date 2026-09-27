@@ -143,11 +143,12 @@ class EquipmentDraft {
       }
       if (fallback != null) {
         final text = show(fallback);
-        // A legacy rig's value has no provenance; it stays unknown.
+        // A legacy rig's value has no provenance; it stays unknown, never
+        // the new rig's `user` (S3.V2).
         _add(
           prefilled,
           spec,
-          fallbackProvenance ?? const SpecProvenance(null, null),
+          fallbackProvenance ?? SpecProvenance.unknown,
           text,
           fromSavedRig: true,
         );
@@ -417,8 +418,7 @@ class EquipmentDraft {
       // becomes the user's own through [EquipmentProfile.withEditProvenance].
       specProvenance: {
         for (final spec in EquipmentSpec.values)
-          if (unchangedPrefill(spec, texts) case final p?)
-            if (!p.provenance.isUnknown) spec: p.provenance,
+          if (unchangedPrefill(spec, texts) case final p?) spec: p.provenance,
       },
       metadataMake: metadataMake,
       metadataModel: metadataModel,

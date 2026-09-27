@@ -25,6 +25,18 @@ class SpecProvenance {
   /// The user's own entry: `user`, `reported` (TASK 8.5).
   static const user = SpecProvenance('user', SpecConfidence.reported);
 
+  /// A field's origin is known to be unknown (S3.V2): a legacy value kept
+  /// untouched while another field of its group was edited, or a value
+  /// copied from a rig of unknown origin. Stored as its own pair, so the
+  /// group's (newer) provenance never covers it; read as unknown.
+  static const unknown = SpecProvenance(unknownSource, null);
+
+  /// The stored source id of [unknown].
+  static const unknownSource = 'unknown';
+
+  /// Whether this is the explicit [unknown] marker.
+  bool get isExplicitlyUnknown => source == unknownSource && confidence == null;
+
   final String? source;
   final SpecConfidence? confidence;
 

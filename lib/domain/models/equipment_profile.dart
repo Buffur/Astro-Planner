@@ -90,9 +90,11 @@ class EquipmentProfile {
   });
 
   /// Where [spec]'s value came from: its own pair, else its group's, else
-  /// null (unknown; never guessed, ADR-008 §6).
+  /// null (unknown; never guessed, ADR-008 §6). An own pair marked
+  /// [SpecProvenance.unknown] is unknown, whatever the group says (S3.V2).
   SpecProvenance? provenanceOf(EquipmentSpec spec) {
     final own = specProvenance[spec];
+    if (own != null && own.isExplicitlyUnknown) return null;
     if (own != null && !own.isUnknown) return own;
     final group = _groupProvenance(spec);
     return group.isUnknown ? null : group;
@@ -128,7 +130,9 @@ class EquipmentProfile {
   /// - a changed spec becomes the user's own;
   /// - an unchanged spec keeps its pair, and when its group changes it keeps
   ///   the group's old provenance as its own pair, so a verified value that
-  ///   was not touched stays verified.
+  ///   was not touched stays verified, and one of unknown origin stays
+  ///   unknown ([SpecProvenance.unknown], S3.V2) instead of falling back to
+  ///   the group's new `user`.
   Map<EquipmentSpec, SpecProvenance> _editedSpecProvenance(
     EquipmentProfile? original,
     bool keepCamera,
@@ -152,7 +156,7 @@ class EquipmentProfile {
         result[spec] = kept;
       } else if (!groupKept) {
         final group = original._groupProvenance(spec);
-        if (!group.isUnknown) result[spec] = group;
+        result[spec] = group.isUnknown ? SpecProvenance.unknown : group;
       }
     }
     return result;

@@ -3,9 +3,10 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-26 (S3.V1). **Stage 3 validation FAILED** at `387e54b` (committed
+> **Last updated:** 2026-09-27 (S3.V2). **Stage 3 validation FAILED** at `387e54b` (committed
 > `7f790df`). The owner approved the corrective Tasks S3.V1–S3.V5, one at a time. S3.V1 (S3V-01)
-> is done. Next: **S3.V2**. Then a fresh independent validation; Stage 4 waits.
+> and S3.V2 (S3V-02) are done. Next: **S3.V3**. Then a fresh independent validation; Stage 4
+> waits.
 
 ## Current state
 
@@ -48,9 +49,9 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (FAIL).** S3V-01–S3V-06 require correction; see `STAGE_3_VALIDATION.md`. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.V2 — preserve provenance (S3V-02)**; then S3.V3, S3.V4, S3.V5 (owner-approved, DECISIONS E.1) |
-| Code baseline | S3.V1 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.V3 — numeric fidelity (S3V-03, S3V-04)**; then S3.V4, S3.V5 (owner-approved, DECISIONS E.1) |
+| Code baseline | S3.V2 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -159,7 +160,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 | 3 | S3.10 — The editor readable on a phone (TD-069) | 2026-09-26 | `387e54b` | Owner-approved (E.1, "Stage 3 fixes before validation"). `equipment_editor_fit_test.dart` reproduces the device on a 375 dp view with Roboto loaded (the test font draws a full em per character): at 100 %, "9.89" needed 36 dp in an 18 dp box, exactly as on the phone. Fix: each W × H row's label moved above its fields. The same test at 130 % found the Tracking dropdown overflowing (present before Stage 3): now `isExpanded`. 4 tests (two drafts × 100/130 %); all failed before. Existing editor tests unchanged. Gate green, 1169 + 1 skip + 2 E2E |
 
 | 3 | Independent Stage 3 validation (FAIL) | 2026-09-26 | `7f790df` | Committed as written by the owner's validation: S3V-01–S3V-06 blocking, S3V-07 non-blocking, S3V-08 unverified. Before committing, this session re-ran the archived probes at `387e54b`: 7 failures (P1–P5, P7, P8) and P6 passing, as reported |
-| 3 | S3.V1 — A stale review never reverts newer rig edits (S3V-01) | 2026-09-26 | The S3.V1 commit* | Owner-approved (E.1, "Stage 3 validation failed: corrective Tasks"). The review is re-matched against the saved rigs when shown (post-frame) and right before Open or "New rig with the camera specs" (`currentMatchFor`). A "use the file's value" choice stores the saved value it was made against and is withdrawn if that value changed or the rig is gone; a deleted or no-longer-matching rig is not opened (a snackbar says so). 4 regression tests through real routes, real screens and SQLite (`metadata_import_stale_review_test.dart`): the validation's P8 sequence, a change while the review stays open, a withdrawn choice (then a fresh explicit choice does replace), and a deleted rig. All 4 failed before the fix. Gate green, 1173 + 1 skip + 2 E2E |
+| 3 | S3.V1 — A stale review never reverts newer rig edits (S3V-01) | 2026-09-26 | `62a79af` | Owner-approved (E.1, "Stage 3 validation failed: corrective Tasks"). The review is re-matched against the saved rigs when shown (post-frame) and right before Open or "New rig with the camera specs" (`currentMatchFor`). A "use the file's value" choice stores the saved value it was made against and is withdrawn if that value changed or the rig is gone; a deleted or no-longer-matching rig is not opened (a snackbar says so). 4 regression tests through real routes, real screens and SQLite (`metadata_import_stale_review_test.dart`): the validation's P8 sequence, a change while the review stays open, a withdrawn choice (then a fresh explicit choice does replace), and a deleted rig. All 4 failed before the fix. Gate green, 1173 + 1 skip + 2 E2E |
+
+| 3 | S3.V2 — Untouched legacy values keep unknown provenance (S3V-02) | 2026-09-27 | The S3.V2 commit* | `SpecProvenance.unknown` (own pair, source `unknown`, no confidence) reads as unknown before any group fallback. It is pinned on untouched fields of an edited group whose old provenance was unknown, and kept for values copied from a legacy rig (it was dropped before, so the new rig's `user` group covered it). No schema change; ADR-018 implementation note. Regression tests through the real Drift repository with rereads (`equipment_provenance_persistence_test.dart`): the validation's P2 (edit one legacy field) and P1 (copy legacy camera specs) failed before the fix; a copied value then edited becomes the user's; a rig typed by hand stays wholly the user's (control). One existing test, which the validation named as encoding the defect (`equipment_provenance_test.dart`, untouched legacy field read as `user`), was corrected to the contract with a note. Gate green, 1177 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -410,11 +413,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.V2 — preserve provenance (S3V-02)**, owner-approved (DECISIONS E.1): untouched legacy values
-must not become attributed to the user merely because another field was edited. First a failing
-regression test (the validation's P1 and P2, through the real repository), then only that fix,
-then the gate, `PROGRESS.md`, one commit, and STOP. S3.V3, S3.V4 and S3.V5 follow, one at a time.
-Then a fresh independent Stage 3 validation; do not start Stage 4.
+**S3.V3 — numeric fidelity (S3V-03, S3V-04)**, owner-approved (DECISIONS E.1):
+- choosing the file's value applies the file's actual value;
+- persisted and verified values stay exact;
+- rounding is only for explicitly estimated or display-only values.
+
+First failing regression tests (the validation's P3 and P4, through the real repository), then
+only that fix, the gate, `PROGRESS.md`, one commit, and STOP. S3.V4 and S3.V5 follow. Then a fresh
+independent Stage 3 validation; do not start Stage 4.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

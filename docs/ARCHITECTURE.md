@@ -146,6 +146,7 @@
 >   - the APP1 `Exif\0\0` segment goes to the shared `ExifStructure` through a `MetadataSourceWindow` (origin "APP1 IFD0" or "APP1 EXIF IFD"); every other segment is skipped by its length;
 >   - the scan data is never read; a JPEG without Exif is "extracted, nothing found".
 > Registered in `CaptureMetadataReader.readers`. The owner's phone JPEG (a local check) gives every contract value, including a UTC capture time from `OffsetTimeOriginal`, reading 843 bytes of 4.7 MB. The synthetic fixture is `test/support/jpeg_fixture.dart`.
+> **S3.V2 (2026-09-27; S3V-02):** `SpecProvenance.unknown` (source `unknown`, no confidence) marks a field whose origin is known to be unknown. `provenanceOf` returns null for it before any group fallback. `withEditProvenance` pins it on untouched fields of a changed group whose old provenance was unknown. `EquipmentDraft` keeps it for values copied from a legacy rig. So editing one field, or copying legacy specs, never attributes the other values to the user.
 > **S3.10 (2026-09-26):** `_StellariumRow` (`equipment_editor.dart`) is a label above a W × H row (TD-069); the Tracking dropdown is `isExpanded`. A clipped `TextField` raises no layout error, so `equipment_editor_fit_test.dart` measures text against box widths with Roboto loaded.
 > **S3.7 (2026-09-26, Stage 3; ADR-018 §7):**
 >   - `FeatureScope.metadataImport` is true.

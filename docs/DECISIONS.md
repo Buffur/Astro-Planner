@@ -3123,6 +3123,8 @@ It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment
 unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the editor's form model and pre-fill done (S3.5, 2026-09-26); the review and confirmation flow done (S3.6, 2026-09-26; see the note below); the RAW size from a DNG done (S3.8, 2026-09-26: MB = bytes ÷ 10⁶, as ADR-011 §3 defines the unit); §7 done (S3.7, 2026-09-26: visible as "Add from a photo"; device check M4 passed). Every frozen Stage 3 Task is done; TD-068 was found at M4 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
 
+**Implementation note (S3.V2, 2026-09-27; S3V-02):** §5's "else unknown" needs a way to say unknown per field. Otherwise an edit that makes the group `user`, or a new rig whose group is `user`, covers an untouched legacy value through the fallback. An own pair with the source id `unknown` and no confidence (`SpecProvenance.unknown`) records that the field's origin is known to be unknown. It reads as unknown before any fallback, needs no schema change, and follows ADR-008 §6's namespaced ids. It is used when a changed group's untouched field had unknown provenance, and for values copied from a legacy rig.
+
 **Implementation note (S3.3, 2026-09-26):** choices made within §6.
 - **The field of view has no stored f₃₅.** A file's f₃₅ is compared with the one a saved rig
   implies: f × 43.27 mm ÷ the rig's sensor diagonal.

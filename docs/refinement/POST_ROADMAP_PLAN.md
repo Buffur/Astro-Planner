@@ -1381,8 +1381,8 @@ validation failed: corrective Tasks"). Then a fresh independent validation; Stag
 | Task | Finding | Acceptance (owner) | State |
 | --- | --- | --- | --- |
 | S3.V1 | S3V-01 | A stale review never silently reverts newer Equipment changes, unless the user explicitly chooses to replace them | **Done 2026-09-26** |
-| S3.V2 | S3V-02 | Untouched legacy values are never attributed to the user because another field was edited | **Next** |
-| S3.V3 | S3V-03, S3V-04 | The file's value, when chosen, is the value applied; persisted and verified values stay exact; rounding only for estimated or display-only values | Approved |
+| S3.V2 | S3V-02 | Untouched legacy values are never attributed to the user because another field was edited | **Done 2026-09-27** |
+| S3.V3 | S3V-03, S3V-04 | The file's value, when chosen, is the value applied; persisted and verified values stay exact; rounding only for estimated or display-only values | **Next** |
 | S3.V4 | S3V-05 | Image dimensions validated; impossible or absurd values rejected (S3.1's acceptance) | Approved |
 | S3.V5 | S3V-06, S3V-07 | The required real-database review coverage; stale documentation and status wording corrected | Approved |
 | (separate) | S3V-08 | A device recheck, as its own validation action with its evidence level, if the Stage 3 acceptance requires it | Not decided; kept apart from S3.V5 |
