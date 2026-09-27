@@ -3,11 +3,26 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (Stage 3 final sign-off: **PASS** at `92ebf2a`; Stage 3 closed).
-> **Next: Stage 4 planning** (Product Flow & Information Architecture). No Stage 4 Task has
-> started.
+> **Last updated:** 2026-09-27 (Stage 4 planned; its Task sequence frozen). Stage 3 closed by
+> its final sign-off (`126d97f`).
+> **Next: S4.R1** (flow inventory and question matrix; documentation only).
 
 ## Current state
+
+**Stage 4 planning, 2026-09-27 (documentation only), at `126d97f`.** Stage 4 — Product Flow &
+Information Architecture — is **in progress**. Its Task sequence is frozen
+(`POST_ROADMAP_PLAN.md`, "Stage 4 — frozen Task sequence"; DECISIONS E.1, "Stage 3 closed;
+Stage 4 planning decisions"). The owner chose the recommended option on each question:
+- **the sequence:** S4.R1 → S4.R2 (RG-04) → S4.R3 (RD-05, RD-04) → S4.R4 (RG-05, RD-06, RG-06) →
+  S4.R5 (RD-07, RD-14) → S4.D (ADR-019, wireframe addendum) → S4.T (provisional Tasks for
+  Stages 5, 6, 8, 9) → a fresh-session Stage 4 validation;
+- **owner-run quick tests (S4.E):** optional and non-blocking; S4.R1 writes the script;
+- **decisions:** after each research step.
+
+Every Stage 4 input was re-verified against the code (§9.7); none is stale (UX-04, UX-10, UX-11,
+UX-12, UX-13, UX-14/TD-053, UX-25, RD-04, RD-14). Planned in the same chat as the Stage 3
+sign-off, at the owner's request, not a fresh one. No code changed, so the gate result at
+`92ebf2a` still applies.
 
 **Stage 3 final sign-off, 2026-09-27: PASS** at `92ebf2a`, in a fresh session. See
 [the report](STAGE_3_FINAL_SIGNOFF.md) and [probe evidence](evidence/STAGE_3_FINAL_SIGNOFF_PROBES.md).
@@ -123,10 +138,10 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: Complete** (fresh-session final sign-off PASS at `92ebf2a`, `STAGE_3_FINAL_SIGNOFF.md`). Device recheck S3V-08 is separately unverified |
-| Next Stage | Stage 4 — Product Flow & Information Architecture: Not started; **planning is next** |
+| Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
+| Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: **Stage 4 planning** (§9.1), which freezes Stage 4's Task sequence with the owner |
+| Next approved Task | **S4.R1** — flow inventory and question matrix (research, documentation only; `POST_ROADMAP_PLAN.md`, "S4.R1") |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -141,7 +156,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
-| 4 | Product Flow & Information Architecture | Not started (planning next) | — | — | — |
+| 4 | Product Flow & Information Architecture | In progress | 2026-09-27 | — | — (Task sequence frozen 2026-09-27; validation after S4.T) |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
@@ -253,13 +268,16 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.V8 — No camera-spec copy across pixel counts (S3S-02, TD-071, SI-014) | 2026-09-27 | `92ebf2a`* | Owner-approved, option (a) (E.1). `EquipmentDraft.fromCandidate(c, cameraFrom:)` does not copy the saved rig's pixel size or sensor size when the file's pixel dimensions are known and differ from its resolution (`EquipmentMatcher.samePixelCount`, orientation-free, also used by the mode check). It records them in `withheldFromSavedRig`, and the editor shows `PrefillText.withheld` (keyed `editor.withheld`) while the pixel field is empty. Resolution and RAW size fallbacks, the file's own values and estimates, and the equal-count copy are unchanged. Regression tests first (they failed before the fix, the real-database one with the saved 1.25 µm copied): `equipment_camera_copy_mode_test.dart` (5), and one real-database case in `metadata_import_review_db_test.dart` (Save waits for the user's pixel size; then one new chain; the saved rig unchanged). `phoneCandidate` in `test/support` gained `dims` and `focalLengthMm` parameters (defaults unchanged). Existing tests unchanged. Gate green, 1214 + 1 skip + 2 E2E |
 
-| 3 | Stage 3 final sign-off, fresh session (validation and closeout documentation only) | 2026-09-27 | The sign-off commit\*\* | **PASS** at `92ebf2a`; Stage 3 closed. Gate green (1214 + 1 skip + 2 E2E); targeted Stage 3 suites 352 + 1 skip; real samples, 4 native JVM tests; archived probes re-run (F1b and F3 now fail, as their defects are fixed); 13 new probes. S3S-01 and S3S-02 resolved; S3F-01 (TD-072 addendum) and S3F-02 (TD-071 note) non-blocking; S3V-08 unverified. See `STAGE_3_FINAL_SIGNOFF.md` |
+| 3 | Stage 3 final sign-off, fresh session (validation and closeout documentation only) | 2026-09-27 | `126d97f`\*\* | **PASS** at `92ebf2a`; Stage 3 closed. Gate green (1214 + 1 skip + 2 E2E); targeted Stage 3 suites 352 + 1 skip; real samples, 4 native JVM tests; archived probes re-run (F1b and F3 now fail, as their defects are fixed); 13 new probes. S3S-01 and S3S-02 resolved; S3F-01 (TD-072 addendum) and S3F-02 (TD-071 note) non-blocking; S3V-08 unverified. See `STAGE_3_FINAL_SIGNOFF.md` |
 
 \* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
 final sign-off.
-\*\* Likewise for the sign-off. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/STAGE_3_FINAL_SIGNOFF.md`; the next Task records
-it here.
+| 4 | Stage 4 planning (documentation only) | 2026-09-27 | The planning commit\*\*\* | Every Stage 4 input re-verified at `126d97f` (none stale). Frozen: S4.R1–S4.R5, S4.D, S4.T; S4.E optional. Owner: the recommended option on each planning question (E.1, "Stage 3 closed; Stage 4 planning decisions"). `POST_ROADMAP_PLAN.md`, "Stage 4 — frozen Task sequence" |
+
+\*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
+\*\*\* Likewise for the planning. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/POST_ROADMAP_PLAN.md`; the next Task records it
+here.
 
 ## Relevant commits
 
@@ -299,9 +317,9 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3; may return through Stage 7 |
-| RG-04 | Execution's role and how actuals are captured | 4 | Open |
-| RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | Open |
-| RG-06 | Basic/Advanced modes against progressive disclosure | 4 | Open |
+| RG-04 | Execution's role and how actuals are captured | 4 | Open; **S4.R2** (frozen) |
+| RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | Open; **S4.R4** (frozen) |
+| RG-06 | Basic/Advanced modes against progressive disclosure | 4 | Open; **S4.R4** (frozen) |
 | RG-07 | Target catalog expansion, names and search | 7 | Open |
 | RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | Open |
 | RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | Open |
@@ -320,17 +338,17 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open |
 | RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
 | RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
-| RD-04 | New-draft defaults and the example plan | 4 | Open |
-| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | Open; **interim decided** 2026-09-25: confirm before replacing (S1.6) |
-| RD-06 | The planner's section order; integrity text one tap away | 4 | Open |
-| RD-07 | The Library's role and pickers; where Progress lives | 4 | Open |
+| RD-04 | New-draft defaults and the example plan | 4 | Open; **S4.R3** (frozen) |
+| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | Open; **interim decided** 2026-09-25: confirm before replacing (S1.6); final decision in **S4.R3** (frozen) |
+| RD-06 | The planner's section order; integrity text one tap away | 4 | Open; **S4.R4** (frozen) |
+| RD-07 | The Library's role and pickers; where Progress lives | 4 | Open; **S4.R5** (frozen) |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
 | RD-09 | Destructive interactions: confirm or undo | 5 | Open |
 | RD-10 | Ordering Tonight's candidates without a score | 6 | Open |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 | Open |
 | RD-12 | The resume prompt's Finish | 8 | Open |
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
-| RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open |
+| RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open; **S4.R5** (frozen) |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
@@ -365,8 +383,8 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** no blocker known before planning; RG-04, RG-05, RG-06 and the Stage 4 RD items are
-  its gates.
+- **Stage 4:** nothing blocks S4.R1. Each later step waits for the owner's decision on the step
+  before it (E.1). S4.E (owner-run tests) is optional and blocks nothing.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -374,6 +392,10 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **Stage 4 planning**, 2026-09-27, at `126d97f`: documentation only; every Stage 4 input
+  re-verified against the code (none stale). No code changed, so the gate result at `92ebf2a`
+  still applies.
 
 - **Stage 3 final sign-off (fresh session)**, 2026-09-27, at `92ebf2a`: **PASS**
   (`STAGE_3_FINAL_SIGNOFF.md`). Stage 3 closed.
@@ -529,11 +551,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Stage 4 planning** (Product Flow & Information Architecture; `POST_ROADMAP_PLAN.md` §5, Stage 4,
-and §9.1). Planning only: re-verify Stage 4's candidate work against the repository, place its
-research gates (RG-04, RG-05, RG-06) and owner decisions (RD-04 to RD-07, RD-14; W1 and V3 as
-inputs to RD-05), and propose a Task sequence for the owner to freeze. No Stage 4 implementation
-starts before that.
+**S4.R1 — Flow inventory and question matrix** (`POST_ROADMAP_PLAN.md`, "S4.R1"). Research,
+documentation only: the routes and screens against `IA_WIREFRAMES.md`; every action that creates,
+opens, replaces, saves, starts, finishes, abandons or deletes a session; how each screen shows the
+session's state; taps per core task; the matrix mapping each 08 flow question and UX-01 to UX-14
+and UX-24 to UX-27 to its current fact and its S4 step; and the S4.E script. Output
+`research/S4.R1_FLOW_INVENTORY.md`; one commit, then STOP. A fresh chat is preferred (§9.1).
+Then S4.R2 (RG-04), after the owner has read S4.R1.
 
 The separate S3V-08 device recheck, if the owner wants it, is its own action through `.s2check`,
 never the owner's installed app.

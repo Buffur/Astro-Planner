@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **Stage 3 closed; Stage 4 planned (2026-09-27, documentation only):** the final sign-off passed (`126d97f`); Stage 4's Task sequence frozen, optional owner-run tests, decisions after each research step (E.1, "Stage 3 closed; Stage 4 planning decisions"). No ADR changed.
 > **Stage 3 sign-off failed (2026-09-27):** corrective Tasks S3.V7 and S3.V8 approved by the owner, with a Stage-boundary adjustment for S3.V7; S3S-03 deferred (E.1, "Stage 3 sign-off failed: corrective Tasks"). **S3.V7 done (2026-09-27):** ADR-018 note below. **S3.V8 done (2026-09-27):** ADR-018 note below.
 > **Stage 3 validation failed (2026-09-26):** corrective Tasks S3.V1–S3.V5 approved by the owner (E.1, "Stage 3 validation failed: corrective Tasks").
 > **Stage 3 fixes (2026-09-26):** the owner approved S3.9 (TD-068) and S3.10 (TD-069) before the validation (E.1, "Stage 3 fixes before validation").
@@ -1015,6 +1016,26 @@ from a stale match.
   conflict never chooses a value silently and the saved value remains the default. It is
   deferred to a later Equipment or data-entry cleanup, unless new evidence shows it affects
   correctness.
+
+### Stage 3 closed; Stage 4 planning decisions (2026-09-27)
+
+- **Stage 3 closed** by its fresh-session final sign-off: PASS at `92ebf2a`, committed `126d97f`
+  (`refinement/STAGE_3_FINAL_SIGNOFF.md`). Not a waiver. S3F-01 and S3F-02 are non-blocking and
+  recorded (TD-072 addendum, TD-071 note); S3V-08 (device) stays unverified.
+- **Stage 4 planning, decided by the owner in chat** (each the recommended option):
+  - **The sequence is frozen as proposed** (`refinement/POST_ROADMAP_PLAN.md`, "Stage 4 — frozen
+    Task sequence"): S4.R1 flow inventory; S4.R2 RG-04; S4.R3 RD-05 and RD-04; S4.R4 RG-05,
+    RD-06 and RG-06; S4.R5 RD-07 and RD-14; S4.D ADR-019 and a wireframe addendum; S4.T the
+    decisions as provisional Tasks for Stages 5, 6, 8 and 9.
+  - **Owner-run quick tests (S4.E) are optional and non-blocking.** S4.R1 writes the script. If
+    they are not run, S4.R4 states the evidence gap. A first-run test uses a separate install,
+    never the owner's own app.
+  - **Each gate is decided right after its research step,** so later steps build on settled
+    answers (Execution's role first).
+- **Unchanged:** Stage 4 writes no application code, and Execution stays as built until Stage 8
+  (`PRODUCT_DIRECTION.md` §4). No ADR changed.
+- **Process note:** the planning ran in the same chat as the Stage 3 sign-off, at the owner's
+  request, not in a fresh one (§9.1 step 1).
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

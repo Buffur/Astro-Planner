@@ -21,6 +21,9 @@
 > Task sequence").
 > **Updated 2026-09-27 (Stage 3 final sign-off, verified at `92ebf2a`):** Stage 3 passed its
 > fresh-session sign-off and is closed; Stage 4 planning is next. No Stage definition changed.
+> **Updated 2026-09-27 (Stage 4 planning, verified at `126d97f`):** Stage 4's Task sequence is
+> frozen ("Stage 4 — frozen Task sequence"): S4.R1–S4.R5, S4.D, S4.T, and the optional S4.E. No
+> other Stage changed.
 
 ## Contents
 
@@ -1587,6 +1590,246 @@ the flow visible. Then Stage 3 validation in a fresh session.
 - **Out of scope:** code; visual design details (Stage 5).
 - **Exit:** the decisions are recorded in `DECISIONS.md`; Stage 4 validation confirms every 08
   flow question has an answer or an owner deferral; `PROGRESS.md` is updated.
+
+#### Stage 4 — frozen Task sequence (planning, 2026-09-27)
+
+Planned at `main` @ `126d97f`, right after Stage 3 closed. **Process note:** planned in the same
+chat as the Stage 3 final sign-off, because the owner asked to move on there, not in a fresh chat
+(§9.1 step 1). The owner chose the recommended option on each planning question (DECISIONS E.1,
+"Stage 4 planning decisions"):
+- the sequence below is frozen as proposed;
+- the owner-run quick tests (S4.E) are optional and non-blocking;
+- each gate is decided right after its research step, not all at the end.
+
+**Verified at planning (§9.7), all still current:**
+1. **UX-10.** Tonight's Night, Moon and Weather rows all call `openPlanner`, which opens the
+   planner at its top (`tonight_home_screen.dart:219–266`).
+2. **UX-11.** Tonight has no night picker; the "Night of …" row opens the site picker
+   (`tonight_home_screen.dart:148–165`).
+3. **UX-13.** The current-session card offers Start whenever a night, target and rig exist, with
+   no check for a session already in progress. The run card sits above it
+   (`tonight_home_screen.dart:110–136, 390–400`). The repository refuses the second start
+   (ADR-016 §2).
+4. **UX-04, ADR-015 §2.**
+   - The planner's title is "Session planner". It names no target, night or status.
+   - Its app bar holds "+" (New Session), Duplicate and the field-mode button
+     (`home_screen.dart:45–93`).
+   - The sections run Target / What → Equipment / How → Conditions & Timeline / When → Capture
+     Plan (`home_screen.dart:113–301`).
+5. **RD-04.** A new draft gets M42 (`searchTargets('M42')`) and the example capture plan
+   (`session_plan_viewmodel.dart:108–112, 255–259`).
+6. **RD-05, UX-12.**
+   - Pure drafts are not listed in Sessions (`library_viewmodels.dart:153`).
+   - S1.6 and S1.V3 confirm before unsaved changes are replaced.
+   - W1 and V3 are recorded inputs to RD-05.
+   - TD-058 (New, Duplicate and Open outside the autosave chain) is open.
+7. **RD-07, UX-14.** Library lists Rigs, Targets, Sites and Progress (`library_screen.dart`). The
+   rig and target pages still select for the current session (TD-053, open). "Add from a photo"
+   sits on the rig list (S3.7).
+8. **After the plan.**
+   - The session detail offers "Open tracker" (in progress), "Edit results" (completed), "Open in
+     planner" or "Plan again (copy)", Share and Export file (`session_detail_screen.dart:364–424`).
+   - The results page corrects counts only by ±1 (`results_screen.dart:335–341`; UX-25).
+   - The resume prompt offers Continue, Pause now, Finish and Abandon (`resume_run_dialog.dart`).
+   - 08 §24's "opening a Logbook entry shows the tracker again" fits "Open tracker" (in progress)
+     or the results page (completed); S4.R1 asks the owner which was meant.
+9. **RD-14.**
+   - The tabs are Tonight · Sessions · Library · Settings (`app_shell.dart`), yet the save
+     confirmation still says "Session saved to Logbook!".
+   - The Library says "Rigs", while the editors and pickers say "Equipment" ("Add Equipment
+     Profile", "Select Equipment").
+
+**Carried in as inputs, not as Tasks:**
+- W1 and V3 (RD-05);
+- TD-057 and TD-058 (context for RD-05; their fixes belong to the implementing Stage);
+- TD-063 (Stage 8);
+- UX-25, UX-26, RD-12 and RD-13 (Execution context). RD-12 and RD-13 are decided in Stage 8, but
+  RG-04 may reshape them;
+- TD-050, TD-051 and TD-054 (presentation context for Stage 6);
+- Stage 3's "Add from a photo" entry point, which is kept or explicitly moved.
+
+**Common rules for every Task:**
+- documentation and research only: no application code, test or dependency change. Throwaway
+  probes or renders are allowed and deleted, as in S2.R1;
+- the research workflow of §9.6. Each document gives options with trade-offs and a recommendation,
+  ends with the owner's questions, and the owner decides before the next step;
+- nothing is removed. Every current value, calculation, assumption and data path stays reachable in
+  every option (`PRODUCT_DIRECTION.md` §5, §7). An option that retires a screen says what happens to
+  its data;
+- the constraints stand:
+  - no score and no good/bad colouring (ADR-012, ADR-013);
+  - no customisable dashboard (PD-14);
+  - the field constraints (`IA_WIREFRAMES.md` §3);
+  - offline-first; unknown stays unknown (SI-008);
+  - ADR-014's session aggregate and ADR-016's events and snapshots, unless the ADR amends them;
+- Execution stays as built until Stage 8 (`PRODUCT_DIRECTION.md` §4);
+- low fidelity only (text or simple diagrams); visual design is Stage 5's;
+- the audit patterns (05 §8 P0–P10), 07 §10's directions and 08's proposals are options, not
+  decisions;
+- `IA_WIREFRAMES.md` is not rewritten; new flows go into an addendum;
+- one commit per Task, then STOP.
+
+| Task | Title | Kind | Size | Depends on | Gates | State |
+| --- | --- | --- | --- | --- | --- | --- |
+| S4.R1 | Flow inventory and question matrix | Research (docs) | M | — | — | Frozen; **next** |
+| S4.R2 | RG-04: Execution's role and how actuals are recorded | Research (docs) | M | S4.R1 | RG-04 | Frozen |
+| S4.R3 | Session lifecycle, state display, defaults and the example plan | Research (docs) | M | S4.R2's decision | RD-05, RD-04 | Frozen |
+| S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | Frozen |
+| S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | Frozen |
+| S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | Frozen |
+| S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen |
+| S4.E | Owner-run quick tests | Owner evidence | S | S4.R1's script | feeds S4.R4 | Optional, non-blocking |
+
+Then a fresh-session Stage 4 validation. It checks the Stage exit: every 08 flow question has an
+answer or an owner deferral.
+
+##### S4.R1 — Flow inventory and question matrix
+- **Objective:** one factual baseline, so the later steps do not re-read the code.
+- **Scope:**
+  1. the routes and screens today, against `IA_WIREFRAMES.md`'s route map, with every deviation;
+  2. every action that creates, opens, replaces, saves, starts, finishes, abandons or deletes a
+     session: its entry points, its confirmation and its feedback;
+  3. the session states, and how each screen shows them;
+  4. taps per core task, re-measured on the current code (05 §5.4);
+  5. **the question matrix:** each flow question of 08 (§2, §3, §5, §8, §14's example plan, §19,
+     §24's naming and "opening an entry", §25, §27's critical list, §28), and UX-01 to UX-14 and
+     UX-24 to UX-27. For each: the current fact and the S4 step that answers it;
+  6. the S4.E script (below).
+- **Output:** `research/S4.R1_FLOW_INVENTORY.md`.
+- **Out of scope:** options and recommendations.
+- **Acceptance:**
+  - every 08 flow question has a home in the matrix;
+  - every entry point is cited to a file and line at `126d97f` or later;
+  - the route deviations are listed;
+  - the script can be run without the agent.
+
+##### S4.R2 — RG-04: Execution's role and how actuals are recorded
+- **Question:** what role Execution plays after a plan is made, and how actual results are
+  recorded without frame-by-frame reporting (08 §3).
+- **Options to evaluate, at least:**
+  - (A) as built: Start opens the tracker;
+  - (B) the tracker optional: planning ends at Save; results are recorded after the night by
+    default, and the tracker stays for those who want it;
+  - (C) after the session only: no live tracker; a result form (completed, partly or not; frames
+    or integration per block, perhaps pre-filled from the plan);
+  - (D) a simplified tracker.
+- **For each option:**
+  - what the user does during and after the night, and where Start lives;
+  - the effect on planned against actual (CALC-37) and progress per target (CALC-38);
+  - ADR-016's events, the one-session-in-progress rule and the resume prompt (RD-12);
+  - the estimate's provenance (RD-13); UX-13, UX-25, UX-26 and TD-063;
+  - the Android constraints;
+  - what happens to existing sessions and events (never deleted; still readable);
+  - what Stage 8 would implement.
+- **Output:** `research/RG-04_EXECUTION_ROLE.md`, with the owner's questions.
+- **Out of scope:** metadata-assisted actuals (Stage 8; mentioned only as a later option); code.
+- **Acceptance:**
+  - every option keeps existing session data readable;
+  - the consequences for each CALC and ADR are stated;
+  - a recommendation with reasons;
+  - the owner's decision recorded in E.1.
+
+##### S4.R3 — Session lifecycle, state display, defaults and the example plan
+- **Questions:**
+  1. Does the user need a visible draft state, or is the planner simply "the current plan"
+     (08 §2)?
+  2. What New Session, "+", Duplicate and Open mean; where each lives (one place per action,
+     principle 6); and the feedback after each (08 §5, §8).
+  3. Are drafts listed, confirmed before replacement, or cleaned up (UX-12)? The S1.6 interim
+     stands until then. Inputs: W1, and V3 (does a site change edit a saved plan?).
+  4. How the planner shows its identity and state (UX-04; the wireframe's "M42 · Fri, Nov 13 ·
+     Draft").
+  5. The copy the planner continues on after Start, and its card on Tonight (UX-13; follows
+     RG-04).
+  6. RD-04: the new draft's defaults (M42, the first rig); whether the example plan adds value
+     and how it is labelled (08 §14); the first run (UX-24; P9 as one option).
+- **Output:** `research/S4.R3_SESSION_LIFECYCLE.md`, with low-fidelity lifecycle flows.
+- **Acceptance:**
+  - each owned 08 question is answered with options;
+  - the effect on ADR-014's lifecycle is stated; a schema or data change is flagged for its own
+    decision;
+  - RD-05 (final) and RD-04 decided and recorded.
+
+##### S4.R4 — Tonight, the planner's structure, and disclosure
+- **RG-05 (Tonight):**
+  - its order (08 §2: the site near the top, the planner near the bottom);
+  - where Night, Moon and Weather lead: a planner section, detail screens (P4) or an "Analytics"
+    destination, weighed against PD-14 and ADR-015's four tabs;
+  - a night picker (UX-11);
+  - the run card and the post-Start card (from S4.R2 and S4.R3).
+- **RD-06 (the planner):**
+  - an order that follows the decision (P2);
+  - an answer-first status (P1);
+  - repeated facts (UX-03);
+  - what may be one tap away (P3); integrity text stays reachable (ADR-009 §4, SI-003);
+  - the rig card on every visit (UX-07);
+  - the weather card's priority without a score (UX-06).
+- **RG-06:** progressive disclosure first; modes (P6) or a density preference (P7) only if the
+  evidence asks for them; experts keep full access.
+- **Inputs:** 05 §3 (measurements) and §8; 07 §10; 08 §2, §8, §10, §12, §13 and §17; S4.E's
+  results, if run.
+- **Output:** `research/RG-05_06_TONIGHT_AND_PLANNER.md`, with low-fidelity wireframes of the
+  options.
+- **Out of scope:**
+  - visual design, typography and colour (Stage 5);
+  - the capture plan's inner redesign and the chart (Stage 6), beyond their placement.
+- **Acceptance:**
+  - every option keeps all current content within two levels;
+  - each drill-down has a named destination;
+  - integrity text complies with ADR-005 and ADR-009 §4, or the document asks the owner to
+    amend them;
+  - RG-05, RD-06 and RG-06 decided.
+
+##### S4.R5 — The Library's role and the vocabulary
+- **RD-07:**
+  - should the Library lists select for the plan (TD-053)?
+  - is target selection kept there?
+  - where does Progress live (08 §19; it depends on RG-04, because Progress is built from actuals)?
+  - where does "Add from a photo" sit?
+- **RD-14:**
+  - one name per concept: rig or equipment; Sessions or Logbook; the dark-window names; the night
+    key;
+  - how optional custom session names are worded (08 §24; the field itself is Stage 8's).
+- **Output:** `research/S4.R5_LIBRARY_AND_VOCABULARY.md`, with a proposed glossary.
+- **Acceptance:**
+  - the glossary covers every term in UX-18 and 08;
+  - RD-07 and RD-14 decided.
+
+##### S4.D — ADR-019 and the wireframe addendum
+- ADR-019, "Product flow and information architecture", records the decisions on RG-04, RG-05,
+  RG-06, RD-04 to RD-07 and RD-14.
+- It amends ADR-015 (§2's section order, the tabs if they change, §7's pickers), and ADR-016 if
+  Execution's role changes.
+- A new low-fidelity document, `docs/IA_WIREFRAMES_ADDENDUM.md`. `IA_WIREFRAMES.md` stays as it
+  is.
+- UX-04 and UX-11 recorded as implementation deviations until they are built.
+- **Acceptance:**
+  - every Stage 4 gate is decided, or deferred by the owner;
+  - S4.R1's question matrix is updated with each answer.
+
+##### S4.T — The decisions as provisional Tasks for Stages 5, 6, 8 and 9
+- Provisional Task lists go into the Stage 5, 6, 8 and 9 sections (and Stage 7's, where a decision
+  touches data entry). Each Task names:
+  - the decision it implements;
+  - its dependencies;
+  - an acceptance sketch.
+- Stage 5 gets what the flows need from the design system: state labels, feedback, confirmations
+  (with RD-09).
+- Those Stages are not frozen here; each Stage's own planning freezes it.
+- **Acceptance:**
+  - every decision maps to at least one provisional Task, or to an explicit "no change";
+  - the §6.2 traceability rows for UX-01 to UX-14 and UX-24 to UX-27 are updated.
+
+##### S4.E — Owner-run quick tests (optional, non-blocking)
+- Run from S4.R1's script, whenever the owner can, and before S4.R4 if possible:
+  - a five-second look at Tonight and at the planner's first screen ("what is the plan's state?");
+  - a first-run try by someone new (a site, a rig, a first plan);
+  - red mode in real darkness, including the chart and the tracker.
+- A first-run test needs a separate install: the `.s2check` debug package, or another phone.
+  Never reset or uninstall the owner's own app.
+- Results go into S4.R1's document, or a short evidence note. No personal data about the people
+  who try it.
+- If they are not run, S4.R4 proceeds on the audit evidence and states the gap (05 §10).
 
 ### Stage 5 — Design System Foundation
 
