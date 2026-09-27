@@ -29,6 +29,7 @@
 > **Updated 2026-09-27 (S4.R4):** RG-05, RD-06 and RG-06 decided (E.1); S4.R4 done.
 > **Updated 2026-09-27 (S4.R5):** RD-07 and RD-14 decided (E.1); S4.R5 done. Every Stage 4 gate
 > is decided.
+> **Updated 2026-09-27 (S4.D):** ADR-019 accepted; `docs/IA_WIREFRAMES_ADDENDUM.md` added; S4.D done.
 
 ## Contents
 
@@ -1681,8 +1682,8 @@ chat as the Stage 3 final sign-off, because the owner asked to move on there, no
 | S4.R3 | Session lifecycle, state display, defaults and the example plan | Research (docs) | M | S4.R2's decision | RD-05, RD-04 | **Done 2026-09-27**; RD-05 and RD-04 decided (L1, Y2, no preselection, U1; E.1) |
 | S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | **Done 2026-09-27**; RG-05, RD-06 and RG-06 decided (T1, D-b, P-1, M0; E.1) |
 | S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | **Done 2026-09-27**; RD-07 and RD-14 decided (LB1 + PR2; Rig, Plan, Logbook; the glossary; E.1) |
-| S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | Frozen; **next** |
-| S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen |
+| S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | **Done 2026-09-27**; ADR-019 accepted; `docs/IA_WIREFRAMES_ADDENDUM.md` |
+| S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen; **next** |
 | S4.E | Owner-run quick tests | Owner evidence | S | S4.R1's script | feeds S4.R4 | Optional, non-blocking |
 
 Then a fresh-session Stage 4 validation. It checks the Stage exit: every 08 flow question has an

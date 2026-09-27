@@ -1,5 +1,8 @@
 # AstroPlan Architecture
 
+> **Direction update, 2026-09-27 (S4.D):** ADR-019 (product flow and information architecture) is
+> approved design intent, not yet built; see D5. Part B still describes the code.
+
 > **Metadata update, 2026-09-26 (S3.1):** the contract gains image dimensions (ADR-018 §3; B entry
 > after S2.9).
 
@@ -924,6 +927,32 @@ listed with its work item.
 - Multi-file, architectural, database or scope-affecting work: inspect, report a
   plan, and wait for approval before implementing.
 - Every schema change adds a migration **and** a migration test.
+
+## D5. Approved product flow and information architecture (ADR-019, Stage 4) — not yet built
+
+Owner-approved on 2026-09-27; implemented by Stages 5, 6, 8 and 9. The architectural effects:
+- **Session lifecycle** (ADR-014 §3 amended):
+  - a recorded result completes or abandons a saved plan without a run;
+  - its counts are written as events, so the counters equal the replay (trap 14);
+  - a planned session whose night has passed is not resumed as current; the planner continues on a
+    copy.
+- **Execution** (ADR-016 amended): optional ("Track live"); the event model is unchanged for live
+  runs.
+- **Navigation** (ADR-015 amended):
+  - the four tabs stay (the second labelled Logbook);
+  - the planner's order is answer-first;
+  - a Night & Moon and a Weather detail are added;
+  - the Library lists manage and never select, and choosing happens only through `/select/…`;
+  - Progress moves to the Logbook branch.
+- **Presentation:**
+  - collapsible sections with factual summaries (ADR-009 §2's lines within the budget details);
+  - one shared vocabulary (RD-14), with a test against retired terms.
+- **Unchanged:**
+  - every calculation, and the domain boundaries (D1, D3);
+  - the four-tab shell;
+  - Provider and screen-scoped ViewModels (the 250-line limit, trap 11).
+
+See `docs/IA_WIREFRAMES_ADDENDUM.md` and DECISIONS ADR-019.
 
 ## D4. Work that cannot proceed until the time/site model and capture-budget model are settled
 

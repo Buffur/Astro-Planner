@@ -3,11 +3,32 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S4.R5 done; RD-07 and RD-14 decided; every Stage 4 gate decided).
-> Stage 4 in progress; Stage 3 closed (`126d97f`).
-> **Next: S4.D** (ADR-019 and the wireframe addendum; documentation only).
+> **Last updated:** 2026-09-27 (S4.D done; ADR-019 accepted). Stage 4 in progress; Stage 3 closed
+> (`126d97f`).
+> **Next: S4.T** (the decisions as provisional Tasks for Stages 5, 6, 8 and 9; documentation only),
+> then a fresh-session Stage 4 validation.
 
 ## Current state
+
+**S4.D done, 2026-09-27: ADR-019 accepted** (the owner, in chat).
+- **ADR-019, "Product flow and information architecture"** (DECISIONS Part F), records the eight
+  Stage 4 decisions as one design.
+- **It amends:**
+  - ADR-009 §2 (display only: the budget lines within Budget details);
+  - ADR-014 §3 (results without a run; yesterday's saved plan is not resumed);
+  - ADR-015 §2, the route map and §7 (the answer-first planner; the Night & Moon and Weather
+    details; the Library manages);
+  - ADR-016 (execution optional; post-session counts as events).
+
+  Each amended ADR carries an "Amended by ADR-019" pointer.
+- **`docs/IA_WIREFRAMES_ADDENDUM.md`:** low-fidelity Tonight, the planner, the unsaved-changes
+  prompt, the Night & Moon and Weather details, the Logbook, the result form, the Library and the
+  first run. `IA_WIREFRAMES.md` is unchanged.
+- **DEV-P9** (DECISIONS Part B) records UX-04 and UX-11 until Stage 6 builds them.
+- **ARCHITECTURE D5** points to the direction.
+- **S4.R1 §9** answers every matrix question: Q1–Q22 and the UX findings. Q8, Q14, Q15 and Q21 go
+  to other Stages per the plan.
+- No code changed.
 
 **RD-07 and RD-14 decided, 2026-09-27 (S4.R5 done). Every Stage 4 gate is now decided.** Research:
 [`research/S4.R5_LIBRARY_AND_VOCABULARY.md`](research/S4.R5_LIBRARY_AND_VOCABULARY.md)
@@ -252,7 +273,7 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S4.D** — ADR-019 and the wireframe addendum (`POST_ROADMAP_PLAN.md`, "S4.D"). S4.R1–S4.R5 are done; every Stage 4 gate (RG-04, RG-05, RG-06, RD-04, RD-05, RD-06, RD-07, RD-14) is decided |
+| Next approved Task | **S4.T** — the decisions as provisional Tasks for Stages 5, 6, 8 and 9 (`POST_ROADMAP_PLAN.md`, "S4.T"). S4.R1–S4.R5 and S4.D are done; ADR-019 is accepted |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -399,14 +420,15 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 4 | S4.R5 — Library and vocabulary research (documentation only) | 2026-09-27 | `160ee37` | `research/S4.R5_LIBRARY_AND_VOCABULARY.md`: the Library's current behaviour (TD-053), a string inventory, options LB1–LB3 and PR1–PR2, naming principles, a glossary |
 
-| 4 | RD-07 and RD-14 decided (the owner's H1–H4; documentation only) | 2026-09-27 | The RD-07/RD-14 decision commit\*\*\* | LB1 + PR2; Rig; Plan + Logbook; the glossary as proposed (E.1). Recorded in the research's §9, `PRODUCT_DIRECTION.md` §10 and the RD register. Every Stage 4 gate is decided |
+| 4 | RD-07 and RD-14 decided (the owner's H1–H4; documentation only) | 2026-09-27 | `28857d8` | LB1 + PR2; Rig; Plan + Logbook; the glossary as proposed (E.1). Recorded in the research's §9, `PRODUCT_DIRECTION.md` §10 and the RD register. Every Stage 4 gate is decided |
+
+| 4 | S4.D — ADR-019 and the wireframe addendum (decision record, documentation only) | 2026-09-27 | The S4.D commit\*\*\* | ADR-019 accepted by the owner; it amends ADR-009 §2 (display), ADR-014 §3, ADR-015 §2/route map/§7, ADR-016. `docs/IA_WIREFRAMES_ADDENDUM.md`; DEV-P9 (UX-04, UX-11); ARCHITECTURE D5; S4.R1 §9 answers |
 
 \* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
 final sign-off.
 \*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
-\*\*\* Likewise for the RD-07/RD-14 decision. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/research/S4.R5_LIBRARY_AND_VOCABULARY.md`; the next
-Task records it here.
+\*\*\* Likewise for S4.D. Find it with
+`git log --format="%h %s" -1 -- docs/IA_WIREFRAMES_ADDENDUM.md`; the next Task records it here.
 
 ## Relevant commits
 
@@ -512,7 +534,7 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** S4.R1–S4.R5 are done, and every Stage 4 gate is decided; nothing blocks S4.D. Each later step
+- **Stage 4:** S4.R1–S4.R5 and S4.D are done (ADR-019 accepted); nothing blocks S4.T. Each later step
   waits for the owner's decision on the step before (E.1). S4.E (owner-run tests) is optional and
   blocks nothing.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
@@ -681,24 +703,19 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S4.D — ADR-019 and the wireframe addendum** (`POST_ROADMAP_PLAN.md`, "S4.D"). Decision
-record, documentation only.
+**S4.T — the decisions as provisional Tasks for Stages 5, 6, 8 and 9** (`POST_ROADMAP_PLAN.md`,
+"S4.T"). Planning, documentation only.
 
-- **ADR-019, "Product flow and information architecture":**
-  - it records the decided gates (RG-04, RG-05, RG-06, RD-04, RD-05, RD-06, RD-07, RD-14) as one
-    design;
-  - it amends:
-    - ADR-014 §3 (results without a run; which session is resumed as current);
-    - ADR-015 §2 (the planner's order), its route map (the Night & Moon and Weather details) and §7
-      (the Library's manage mode);
-    - ADR-016 (the tracker is optional; post-session counts as events);
-    - ADR-009 §2's "own line" (within the budget details).
-- **`docs/IA_WIREFRAMES_ADDENDUM.md`:** low-fidelity Tonight, planner, detail screens, the Logbook,
-  the result form and the Library. `IA_WIREFRAMES.md` stays as it is.
-- **Also:** record UX-04 and UX-11 as implementation deviations until they are built, and update
-  S4.R1's question matrix with each answer.
+- **Provisional Task lists** go into the Stage 5, 6, 8 and 9 sections of the plan (and Stage 7's,
+  where a decision touches data entry). Each Task names:
+  - the ADR-019 section it implements;
+  - its dependencies;
+  - an acceptance sketch.
+- **The §6.2 traceability rows** for UX-01 to UX-14 and UX-24 to UX-27 are updated.
+- **Those Stages are not frozen here;** each Stage's own planning freezes it.
 
-The owner accepts the ADR. A fresh chat is preferred (§9.1).
+Then a **fresh-session Stage 4 validation**. It checks the exit: every 08 flow question has an answer
+or an owner deferral (S4.R1 §9), and the decisions are recorded.
 
 The owner may run S4.E at any time; it blocks nothing.
 

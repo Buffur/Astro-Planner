@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **ADR-019 accepted (2026-09-27, S4.D, documentation only):** product flow and information architecture, recording the eight Stage 4 decisions; it amends ADR-009 §2 (display), ADR-014 §3, ADR-015 §2/route map/§7 and ADR-016 (pointers under each). DEV-P9 recorded (UX-04, UX-11). New `docs/IA_WIREFRAMES_ADDENDUM.md`. No code changed.
 > **RD-07 and RD-14 decided (2026-09-27, S4.R5, documentation only):** the Library manages and never changes the plan; "Plan this target"; Progress moves to the Logbook; Rig, Plan and Logbook, and the glossary as proposed (E.1, "RD-07 and RD-14 decided"). No code changed.
 > **RG-05, RD-06 and RG-06 decided (2026-09-27, S4.R4, documentation only):** Tonight plan-first with a site · night context line (T1); Night & Moon and Weather detail screens, no new tab (D-b); the planner answer-first in decision order (P-1, amends ADR-015 §2); detail one tap away with factual summaries, no modes (M0; ADR-009 §2's "own line" within the budget details) (E.1, "RG-05, RD-06 and RG-06 decided"). ADR text changes are left to ADR-019; no code changed.
 > **RD-05 and RD-04 decided (2026-09-27, S4.R3, documentation only):** L1 (Draft internal; "Not saved / Saved / Saved · changed"; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), no preselection with an empty capture plan and "Start from the example plan", U1 (Save · Discard · Cancel) (E.1, "RD-05 and RD-04 decided"). No ADR changed yet; no code changed.
@@ -322,6 +323,21 @@ import screen (G17).*
   `flutter test` is green (73/73, three consecutive runs), so the rule can be
   satisfied literally again. Any failing test is now a regression; `CLAUDE.md` was
   updated.
+
+## DEV-P9 — ADR-015's wireframes: the planner shows no state, and Tonight has no night picker
+- **Intended behavior:** `IA_WIREFRAMES.md` §4 (ADR-015):
+  - the planner's app bar reads "M42 · Fri, Nov 13 · Draft ⋮";
+  - Tonight's header has a night picker ("Ljubljana ▾ · Fri, Nov 13").
+  ADR-019 §5–§6 keeps both, with the state words of §3 and a shared site ▾ · night ▾ context line.
+- **Actual behavior:**
+  - the planner's title is "Session planner", with no target, night or state
+    (`home_screen.dart:47`; UX-04);
+  - the night is chosen only in the planner's third section, and Tonight's "Night of …" row opens
+    the site picker (`tonight_home_screen.dart:142–166`; UX-11).
+- **Consequence:**
+  - the user cannot see whether the plan being edited is saved, or for which night;
+  - planning another night from Tonight takes about five taps and scrolling (S4.R1 §4).
+- **Status:** open. Recorded 2026-09-27 (S4.D). It is resolved when Stage 6 builds ADR-019 §5–§6.
 
 ---
 
@@ -1243,6 +1259,20 @@ from a stale match.
   - the core-loop E2E test is updated with each renamed label (trap 19).
 - No code changed.
 
+### ADR-019 accepted (S4.D, 2026-09-27)
+
+- The owner accepted ADR-019 in chat. It records RG-04, RD-05, RD-04, RG-05, RD-06, RG-06, RD-07 and
+  RD-14 as one design.
+- It amends:
+  - ADR-009 §2 (display only);
+  - ADR-014 §3;
+  - ADR-015 §2, §3's route map and §7;
+  - ADR-016 §2 and §10.
+- `docs/IA_WIREFRAMES_ADDENDUM.md` holds the low-fidelity screens. `IA_WIREFRAMES.md` stays as it
+  is.
+- DEV-P9 records UX-04 and UX-11 until Stage 6 builds them.
+- Next: S4.T (provisional Tasks for Stages 5, 6, 8 and 9), then a fresh-session Stage 4 validation.
+
 # Part F — ADRs accepted after the Phase 0 baseline
 
 *Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*
@@ -1873,6 +1903,8 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
   until then. This ADR changes no code.
 
 ## ADR-009: Capture-budget semantics
+
+> **Amended by ADR-019 (owner, 2026-09-27, S4.D), display only:** §2's "each shown on its own line" is met **within the budget details**, one tap away (ADR-019 §7). The budget's definitions and calculations are unchanged.
 
 Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Implemented:**
 TASK 5.2, preferences (the margin, the per-frame overhead and the optional
@@ -2678,6 +2710,8 @@ expected value is exact).
 
 ## ADR-014: Session aggregate, lifecycle and snapshots
 
+> **Amended by ADR-019 (owner, 2026-09-27, S4.D):** §3 gains planned → completed and draft/planned → abandoned **by a recorded result, without a run**. A planned session whose night has passed is **not resumed** as the current session; the planner continues on a copy (ADR-019 §3).
+
 Status: accepted (owner, 2026-09-23, TASK 11.1). Resolves PD-18. **Schema implemented in
 TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (repository, snapshot builders) and 11.4
 (planner on a persisted draft). Checked against `app_database.dart` (schema v15),
@@ -2858,6 +2892,8 @@ TASK 11.2 (commit `428f673`, v16).** Implemented by TASKs 11.2 (schema), 11.3 (r
 
 ## ADR-015: Information architecture and navigation
 
+> **Amended by ADR-019 (owner, 2026-09-27, S4.D):** §2's "same sections and order" is replaced by the answer-first planner (ADR-019 §6). The route map gains a Night & Moon and a Weather detail (§9). §7's Library pages manage and never select (§8). The four tabs stand; the second is labelled Logbook (§10). See `docs/IA_WIREFRAMES_ADDENDUM.md`.
+
 Status: accepted (owner, 2026-09-23, TASK 12.1). Resolves PD-19 and PD-14. Documentation
 only; wireframes and the route map are in `docs/IA_WIREFRAMES.md`. Implemented by TASK
 12.2 (navigation shell), 12.3 (screen-scoped ViewModels), 12.5 (Tonight dashboard) and
@@ -2944,6 +2980,8 @@ lower half" is not audited yet — TASK 12.5 designs the Tonight dashboard.)*
   Settings tab (`go`), leaving the autosaved planner.
 
 ## ADR-016: Execution model under Android constraints
+
+> **Amended by ADR-019 (owner, 2026-09-27, S4.D):** execution is **optional**, off the primary path ("Track live"). Results are recorded after the session, and their counts are written as events, so the counters still equal the replay. The tracker's Finish leads to the same result form (ADR-019 §4). §2–§6's model is unchanged for live runs.
 
 Status: accepted (owner, 2026-09-24, TASK 13.1). Resolves PD-20. **§2–§5 implemented in
 TASK 13.2 (commit `14467e7`, schema v17); §6 in TASK 13.3 (commit `c8e2240`).** Documentation only —
@@ -3619,3 +3657,295 @@ RG-03 too).
 - Only the phone class is validated on real files. DSLR/mirrorless behaviour rests on synthetic
   fixtures until the owner supplies a sample. Astro cameras wait for a FITS reader.
 - This ADR changes no code.
+
+## ADR-019: Product flow and information architecture (Stage 4)
+
+Status: accepted (owner, 2026-09-27, S4.D). The owner accepted it in chat after S4.R1–S4.R5.
+
+It records, as one design, the eight Stage 4 decisions the owner took in chat on 2026-09-27 (DECISIONS
+E.1):
+- RG-04 (S4.R2);
+- RD-05 and RD-04 (S4.R3);
+- RG-05, RD-06 and RG-06 (S4.R4);
+- RD-07 and RD-14 (S4.R5).
+
+It amends ADR-009 §2 (display only), ADR-014 §3, ADR-015 §2, §3's route map and §7, and ADR-016
+§2 and §10. Low-fidelity screens are in `docs/IA_WIREFRAMES_ADDENDUM.md`; `docs/IA_WIREFRAMES.md`
+stays as accepted.
+
+Documentation only: **this ADR changes no code.** Stages 5, 6, 8 and 9 implement it, through the
+provisional Tasks S4.T writes. Until each part is built, the application behaves as before, and
+FEATURE_STATUS keeps describing the actual state.
+
+### 1. Context (verified at `92ebf2a`'s code; `refinement/research/S4.R1_FLOW_INVENTORY.md`)
+
+- **The planner.**
+  - Its answer (the fit) is on its last screen (05 §3: y = 3,601 of 3,995; screen 11 at 200 %
+    text).
+  - The night is chosen below the chart and windows it drives.
+  - It shows no target, night or state (UX-04, a wireframe deviation; DEV-P9).
+  - Only the assumptions panel collapses.
+- **Tonight.**
+  - Its Night, Moon and Weather rows open the planner at its top (UX-10).
+  - It has no night picker (UX-11, DEV-P9).
+  - The site sits above the plan (08 §2, O2).
+- **Recording a result.**
+  - **A result can be recorded only through Start**, and nothing can mark an unstarted plan "not
+    done".
+  - The next day, yesterday's saved plan becomes the planner's current plan and rolls forward to
+    tonight (TASK 11.4).
+- **Drafts.** "Draft" is shown to users. Discard and a replaced untouched draft leave invisible
+  rows. New keeps the old target and rig.
+- **The Library.** Its rig and target lists are the planner's pickers: a tap changes the plan
+  (TD-053).
+- **Names.** One concept has several names (UX-18): rig or Equipment, Sessions or Logbook, five
+  names for the dark period.
+- **The owner's direction (08; O1–O4):**
+  - plan → save → image → Logbook → record;
+  - no reporting while imaging;
+  - Draft may stay internal;
+  - planning must lead the hierarchy.
+
+### 2. Decision: the product flow
+
+```
+Site · Rig · Target ──► PLAN (planner) ──► Save ──► [the night: no app interaction needed] ──►
+Logbook entry ──► Record result (Completed as planned · Partly · Not done) ──► Progress by target
+
+Optional, off the primary path:  saved plan ──► Track live ──► tracker ──► Finish ──► the same result form
+```
+
+- **Planning is the primary job:** Tonight and the planner lead with the plan and its verdict.
+- **Execution is optional** (RG-04). Nothing in the default flow asks the user to operate the app
+  while imaging.
+
+### 3. Decision: a plan's lifecycle and defaults (RD-05, RD-04; amends ADR-014 §3)
+
+**User-facing states** (the stored statuses are unchanged):
+
+| Stored (ADR-014) | Shown |
+| --- | --- |
+| `draft`, never saved | **Not saved** |
+| `planned` | **Saved** |
+| `draft` with `plannedAtUtc` (edited since saved) | **Saved · changed** |
+| `inProgress` | **Tracking** (the optional live mode) |
+| `completed`, as planned | **Completed** |
+| `completed`, partial (the result form's "Partly") | **Partly** |
+| `abandoned` | **Not done** |
+| legacy rows | **Old log** |
+
+**Amendments to ADR-014 §3's lifecycle table:**
+
+| From → to | Allowed | Effect |
+| --- | --- | --- |
+| planned → completed | **Record result:** Completed as planned, or Partly | No run is needed. The plan snapshot is the record's plan (no execution-start snapshot). Counts are written as events (§4) |
+| draft/planned → abandoned | **Record result:** Not done, with an optional reason | Already allowed by ADR-014; now reachable from the UI |
+| inProgress → completed | The tracker's Finish → the same result form | As before, but through the one form |
+
+**Amendment to ADR-014 §3's "Current session" rule.** The planner resumes the most recently updated
+open session, **except** a `planned` session whose night has passed. Such a plan waits in the
+Logbook for its result, and the planner continues on a **copy for tonight** (the same target, rig
+and blocks; not saved). A never-saved draft whose night has passed keeps TASK 11.4's roll-forward.
+
+**Save** stays explicit and means "I plan to image this". Only saved plans are listed (TASK 11.3's
+rule stands).
+
+**New, Copy, Open:**
+- **New plan** keeps the site and rig and asks for the target.
+- **Copy to another night** is today's Duplicate: the same plan on a picked night, not saved.
+- **Open** as before.
+- Each confirms what happened, and the planner's app bar shows the target, the night and the state.
+
+**Replacing unsaved changes.**
+- The prompt asks **Save · Discard · Cancel**.
+- Discard deletes the discarded draft, and a replaced untouched draft is deleted.
+- A site change on a saved plan, and a new copy, count as unsaved (W1, V3).
+- This supersedes the S1.6 interim when built.
+
+**Defaults (RD-04).**
+- Nothing is preselected on the first run: no target, no rig. The seeded rig stays in the list,
+  labelled as an example.
+- The capture plan starts empty, with **"Start from the example plan"**.
+- This supersedes TASK 11.4's "New = tonight + the example plan". TASK 4.4's rule that the example
+  must not look like the user's own stands.
+
+### 4. Decision: execution optional; results after the session (RG-04; amends ADR-016 §2, §10)
+
+- **Start leaves the primary path** (Tonight's card and the planner's bottom bar). A saved plan
+  offers **Track live (optional)**. The tracker, its events, the estimate (CALC-35), the countdowns
+  (CALC-36), keep-screen-on, one run at a time and the resume prompt all stay as ADR-016 defines
+  them, for users who choose the live mode.
+- **When the live mode starts the planner's current plan,** the planner still continues on a copy
+  (ADR-016 §10). No card offers a Start that must fail while a run is in progress (UX-13).
+- **The result form** (RG-04 G2):
+  - **Completed as planned** is one tap. The actual counts equal the plan, and they are labelled as
+    reported by the user;
+  - **Partly** takes numbers per light block, pre-filled with the plan and editable, entered as
+    numbers rather than ±1;
+  - **Not done** takes an optional reason (clouds, wind, dew, equipment, other);
+  - optional notes; temperature, humidity and cloud stay optional;
+  - rejected counts are not asked in the default form, and existing ones stay readable.
+- **Counts through events.**
+  - A result writes its counts as events, so the counters still equal the replayed events (trap 14;
+    ADR-016 §4's invariant).
+  - The event kind, and where "Not done"'s reason is stored, are Stage 8's implementation decisions
+    within this rule.
+  - ADR-016 §11's corrections after completion are unchanged.
+- **Honesty.**
+  - "Reported as planned" is a user statement, like every confirmed count today (CALC-37 is "not
+    verified against files").
+  - CALC-37 and CALC-38 gain that note; RD-13 (the estimate's provenance) is decided alongside, in
+    Stage 8.
+- **After the night:** a quiet line on Tonight ("Last night: M42. How did it go?") opens the result
+  form. There are no notifications (ADR-016 §6).
+- **RD-12** (the resume prompt's Finish) is expected to lead to the same result form. It is decided
+  in Stage 8.
+
+### 5. Decision: Tonight (RG-05)
+
+The order, top to bottom:
+1. **The context line**, site ▾ · night ▾: the site switcher and the night picker. It is the same
+   control as the planner's, and the night picker changes the current plan's night (UX-11).
+2. The live-run card, only during a live run.
+3. "Last night: … How did it go?", only when due.
+4. **Your plan:** the target and state; the verdict with its reason and usable time; **Open
+   planner**. Without a target: **Choose a target** / **What can I image tonight?**
+5. The Night, Moon and Weather rows, leading to the **Night & Moon** and **Weather** detail screens
+   (§9).
+6. Secondary actions: **What can I image tonight?** and **New plan**.
+
+Tonight stays a fixed view (PD-14), with four tabs (ADR-015 §2). The detail screens meet 08 §2's
+"Analytics" idea without a fifth tab.
+
+### 6. Decision: the planner (RD-06; amends ADR-015 §2's "same sections and order")
+
+1. **App bar:** target · night · state; ⋮ holds New plan, Copy to another night, and Track live
+   (optional, for a saved plan).
+2. **Status:** the verdict and its reason, time needed against usable time, when capture ends, the
+   total integration, fill or trim.
+3. **Context:** site ▾ · night ▾, the same control as Tonight's.
+4. **Target and tonight's windows:** the target (tap to change), the altitude chart, the windows.
+5. **Capture plan:** blocks; time needed, total time; Budget details ▸; √N per group with its help
+   ⓘ; storage; Assumptions ▸.
+6. **Conditions summary:** Night & Moon ›, Weather ›, Sky ›, leading to the detail screens.
+7. **Rig summary:** name, FOV, pixel scale, frame fill ›, leading to the full rows.
+8. **Bottom bar:** **Save plan**, the primary action, in the lower half.
+
+### 7. Decision: disclosure (RD-06, RG-06; amends ADR-009 §2's display wording)
+
+| Always visible | One tap away, in a collapsed section whose summary states facts, with its state remembered |
+| --- | --- |
+| The verdict and reason; usable time; time needed; when capture ends; integration; fill or trim | The budget breakdown (acquisition, calibration inside and outside the window, setup), **each on its own line within Budget details**. This is ADR-009 §2's "each shown on its own line", now one tap away |
+| The plan's target, night, site and state | The √N help text (the √N values stay visible and relative, SI-003) |
+| The weather summary with its **age** and "stale" label; the attribution | Every weather variable, the hour strip, the model |
+| Unknowns, as unknown (SI-008) | The assumptions panel; the rig's reference rows; sky-darkness detail and the map link |
+
+- Zone captions appear once per section; the rule that every time names its zone stands.
+- **No Basic/Advanced modes and no density preference** (RG-06). Both are possible later, only on
+  new evidence.
+
+### 8. Decision: the Library (RD-07; amends ADR-015 §7)
+
+- **The Library manages:** rigs, targets and sites are opened, edited, added and deleted there. **A
+  tap never changes the plan** (TD-053).
+- **Choosing for the plan** happens only in the planner, Tonight's context line and the first run.
+  The `/select/…` pickers are a picker mode of the same lists.
+- A target offers **Plan this target**: a new plan with it, under §3's guard.
+- **Add from a photo** stays on the rig list, in both modes.
+- **Progress moves to the Logbook** as "Progress by target". It is also shown on an entry and on a
+  target's page.
+
+### 9. Decision: routes (amends ADR-015 §3's route map)
+
+- **Added, above the tabs:** a Night & Moon detail and a Weather detail. Their paths are chosen in
+  Stage 6 as `AppRouter` constants (trap 10).
+- **Moved:** Progress from `/library/progress` to the Logbook branch (Stage 8).
+- **Reused:** `/session/:id/results` becomes the result form (Stage 8).
+- **Unchanged:** the four tabs, the pickers `/select/…`, `/equipment/import`. Paths are internal;
+  only the tab's **label** becomes "Logbook" (§10).
+
+### 10. Decision: vocabulary (RD-14)
+
+- **The glossary** in `refinement/research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5 is normative. The key
+  terms:
+  - **Rig**; **Plan** ("New plan", "Save plan", "Your plan", "Copy to another night");
+  - **Logbook** (the tab);
+  - the states in §3;
+  - **Record result**; **Track live**;
+  - **Dark**, with its limit (the standard twilight names only on the Night & Moon detail);
+  - **Integration · Imaging time · Time needed · Total time**;
+  - the verdict headline ("Fits: 2 h 05 min needed of 4 h 20 min usable");
+  - **Export as file**; **Name (optional)**.
+- **Retired from the UI:** "Equipment profile", "Session planner", "Draft", "Legacy", "True Night
+  Window", "Astro Dusk/Dawn", "Window load", "Acquisition", "Session budget".
+- The words live in one shared place (Stage 5), with a test that keeps retired terms out of
+  `lib/presentation`.
+
+### 11. Unchanged
+
+- PD-14.
+- ADR-012: no weather score or good/bad colouring; age and attribution shown.
+- ADR-013: no score; reasons.
+- SI-003 and SI-008.
+- **Every calculation.**
+- ADR-014's aggregate and immutable snapshots.
+- ADR-016's event model and one-run rule, for live runs.
+- Foreground only; no notifications.
+- Offline-first.
+- **No data is deleted by these decisions,** except a draft the user explicitly discards and an
+  untouched replaced draft. Existing runs, events, results and exports stay readable.
+
+### 12. Implementation deviations until built
+
+- **DEV-P9** (Part B) records UX-04 and UX-11 against ADR-015's wireframes. It is resolved when
+  Stage 6 builds §5 and §6.
+- Every other section of this ADR is design intent until its Stage builds it. FEATURE_STATUS and
+  ARCHITECTURE Part B keep describing the code.
+
+### 13. Alternatives considered
+
+| Question | Rejected | Reason (the research documents give the detail) |
+| --- | --- | --- |
+| Execution's role | A (as built), C (Logbook only, hidden or removed), D (a simplified tracker) | A keeps the burden the owner rejected. C removes working capability while its value (U1) is unknown. D needs a new tracker and still asks for taps |
+| Post-session detail | G1 (outcome only), G3 (full results) | G1 leaves planned vs actual and Progress without data (unknown stays unknown). G3 keeps per-frame effort |
+| The draft model | L2 (autosave = save), L0 (as today) | L2 fills the Logbook with plans never meant, and "how did it go?" would fire for them. L0 keeps the jargon |
+| The next day | Y1 (roll forward), Y3 (a fresh plan) | Y1 detaches a plan from the night awaiting its result. Y3 loses multi-night continuity |
+| Unsaved plans | U2 (list them) | It mixes intended sessions with plans only tried; it needs a cleanup rule |
+| Tonight | T2 (tidied current order) | Planning stays below the conditions (O2) |
+| Drill-downs | D-a (deep-link), D-c (a fifth tab) | D-a lands in a long page. D-c splits the conditions from the plan and changes the four tabs |
+| The planner | P-0 (a status card only), P-2 (internal tabs) | P-0 leaves UX-02. P-2 hides half the planner |
+| Disclosure | Only help texts collapse; Basic/Advanced modes | The first leaves the budget's length. Modes double the design and the tests, without evidence |
+| The Library | LB2 (defaults), LB3 (as today with feedback); Progress kept in the Library | LB2 adds a "default" concept RD-04 made unnecessary. LB3 keeps the duplication. Progress is history |
+| Names | "Equipment"; "Session" / "Sessions" | "Equipment" is uncountable and rarer in the UI. "Session" and "Sessions" do not follow the owner's plan → Logbook wording |
+
+### 14. Consequences
+
+- **S4.T** writes provisional Tasks, frozen by each Stage's own planning:
+  - **Stage 5:**
+    - the collapsible section with a factual summary;
+    - the context line;
+    - the status block;
+    - the state label;
+    - the detail-screen template;
+    - the confirmation and feedback patterns (with RD-09);
+    - the shared vocabulary and its test.
+  - **Stage 6:**
+    - Tonight (§5) and the planner (§6, §7);
+    - the Night & Moon and Weather details (§9);
+    - the lifecycle UI (§3: the app-bar state, New, Copy, the guard, the defaults, "Start from the
+      example plan");
+    - TD-057 and TD-058;
+    - a five-second test of both first screens as acceptance evidence (S4.E was not run).
+  - **Stage 8:**
+    - the result form and its events (§4);
+    - §3's lifecycle amendments and the resume rule;
+    - Track live (optional); RD-12 and RD-13;
+    - the Logbook: its label, Progress by target, the name field, "Export as file";
+    - TD-063.
+  - **Stage 9:** the Library's manage mode and "Plan this target" (§8).
+- **Tests:**
+  - the accessibility sweep gains each new screen (trap 17);
+  - the core-loop E2E test moves to Save → result and follows renamed labels (trap 19);
+  - the live mode is tested on its own path.
+- **Export:** a result recorded without a run adds no new required field. Any incompatible change
+  bumps `manifest_version` (`EXPORT_MANIFEST.md`), decided in Stage 8.
