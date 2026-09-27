@@ -3,9 +3,9 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S3.V3). **Stage 3 validation FAILED** at `387e54b` (committed
-> `7f790df`). The owner approved the corrective Tasks S3.V1–S3.V5, one at a time. S3.V1–S3.V3 are
-> done. Next: **S3.V4**. Then a fresh independent validation; Stage 4 waits.
+> **Last updated:** 2026-09-27 (S3.V4). **Stage 3 validation FAILED** at `387e54b` (committed
+> `7f790df`). The owner approved the corrective Tasks S3.V1–S3.V5, one at a time. S3.V1–S3.V4 are
+> done. Next: **S3.V5**, the last. Then a fresh independent validation; Stage 4 waits.
 
 ## Current state
 
@@ -48,9 +48,9 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (FAIL).** S3V-01–S3V-06 require correction; see `STAGE_3_VALIDATION.md`. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.V4 — image-dimension validation (S3V-05)**; then S3.V5 (owner-approved, DECISIONS E.1) |
-| Code baseline | S3.V3 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | **S3.V5 — real-database review coverage and stale wording (S3V-06, S3V-07)** (owner-approved, DECISIONS E.1) |
+| Code baseline | S3.V4 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -163,7 +163,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.V2 — Untouched legacy values keep unknown provenance (S3V-02) | 2026-09-27 | `edbb2a7` | `SpecProvenance.unknown` (own pair, source `unknown`, no confidence) reads as unknown before any group fallback. It is pinned on untouched fields of an edited group whose old provenance was unknown, and kept for values copied from a legacy rig (it was dropped before, so the new rig's `user` group covered it). No schema change; ADR-018 implementation note. Regression tests through the real Drift repository with rereads (`equipment_provenance_persistence_test.dart`): the validation's P2 (edit one legacy field) and P1 (copy legacy camera specs) failed before the fix; a copied value then edited becomes the user's; a rig typed by hand stays wholly the user's (control). One existing test, which the validation named as encoding the defect (`equipment_provenance_test.dart`, untouched legacy field read as `user`), was corrected to the contract with a note. Gate green, 1177 + 1 skip + 2 E2E |
 
-| 3 | S3.V3 — Numeric fidelity (S3V-03, S3V-04) | 2026-09-27 | The S3.V3 commit* | `PrefilledSpec.values` carries the exact numbers behind pre-filled texts; `EquipmentDraft.build` saves them while the texts are unchanged (before the stored-sensor rule and before parsing). Copied pixel and RAW sizes display unrounded; the sensor display stays at 2 decimals (display-only). Regression tests through the real Drift repository with rereads (`equipment_numeric_fidelity_test.dart`): the validation's P3 (a chosen file sensor size applies the file's value, and the difference disappears) and P4 (copied 9.894 mm, 2.414123 µm and 30.04 MB stay exact and verified) failed before the fix, with a copied-then-retyped case; controls: estimates stay rounded, and an untouched open-and-save of a saved rig stays exact. No existing test changed. Gate green, 1182 + 1 skip + 2 E2E |
+| 3 | S3.V3 — Numeric fidelity (S3V-03, S3V-04) | 2026-09-27 | `18873ad` | `PrefilledSpec.values` carries the exact numbers behind pre-filled texts; `EquipmentDraft.build` saves them while the texts are unchanged (before the stored-sensor rule and before parsing). Copied pixel and RAW sizes display unrounded; the sensor display stays at 2 decimals (display-only). Regression tests through the real Drift repository with rereads (`equipment_numeric_fidelity_test.dart`): the validation's P3 (a chosen file sensor size applies the file's value, and the difference disappears) and P4 (copied 9.894 mm, 2.414123 µm and 30.04 MB stay exact and verified) failed before the fix, with a copied-then-retyped case; controls: estimates stay rounded, and an untouched open-and-save of a saved rig stays exact. No existing test changed. Gate green, 1182 + 1 skip + 2 E2E |
+
+| 3 | S3.V4 — Absurd image dimensions are unparseable (S3V-05) | 2026-09-27 | The S3.V4 commit* | `ExifValues.dimensions` rejects a side over `maxImageSidePx` = 65,535 (JPEG's format limit; a metadata sanity bound, deliberately wider than `EquipmentLimits.resolutionPx`); the shared conversion covers DNG IFD0 and DefaultCropSize, JPEG and HEIC. 4 regression tests in `image_dimensions_test.dart`: the validation's P7 (4,294,967,295 × 4,294,967,295 JPEG EXIF), a DNG width and crop over the bound, a HEIC side over it, and the boundary (65,535 known, 65,536 not); all failed before the fix. CALC-39 and an ADR-018 note updated. The local real samples still give their expected dimensions. Gate green, 1186 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -414,11 +416,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.V4 — image-dimension validation (S3V-05)**, owner-approved (DECISIONS E.1): impossible or
-absurd image dimensions are rejected (unparseable) at the shared metadata extraction path, as
-S3.1's acceptance requires. First a failing regression test (the validation's P7), then only that
-fix, the gate, `PROGRESS.md`, one commit, and STOP. S3.V5 follows. Then a fresh independent
-Stage 3 validation; do not start Stage 4.
+**S3.V5 — real-database review coverage and stale wording (S3V-06, S3V-07)**, owner-approved
+(DECISIONS E.1):
+- the S3.6 acceptance matrix through widget tests with fake file access and a real in-memory
+  database: Cancel at every step, row counts, no duplicate, conflict choices, verified values
+  kept, navigation and re-entry;
+- the current-state wording that still describes the debug-only viewer corrected, keeping the
+  historical record.
+
+The device recheck (S3V-08) is kept separate, as its own validation action. One commit, then STOP.
+Then a fresh independent Stage 3 validation; do not start Stage 4.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

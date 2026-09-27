@@ -272,4 +272,67 @@ void main() {
     }
     expect(landscape == portrait, isFalse, reason: 'stored order is kept');
   });
+
+  // S3.V4 (S3V-05): S3.1's acceptance asks for zero or absurd dimensions to
+  // be unparseable. The bound is 65,535 px per side (ExifValues), JPEG's own
+  // format limit and far beyond any camera sensor; it is not the equipment
+  // limit (EquipmentLimits.resolutionPx), which the candidate applies later.
+  group('absurd dimensions are unparseable in every container', () {
+    test(
+      'JPEG EXIF 4,294,967,295 x 4,294,967,295 (the validation\'s P7)',
+      () async {
+        final fixture = _jpegExif(
+          exif: [
+            FixtureEntry.long(40962, 4294967295),
+            FixtureEntry.long(40963, 4294967295),
+          ],
+        );
+        final (value, _) = await _read(
+          jpegFile([exifApp1(fixture.build().bytes)]),
+        );
+        expect(value, isA<UnparseableValue<ImageDimensions>>());
+        expect(value.valueOrNull, isNull);
+      },
+    );
+
+    test('a DNG ImageWidth and a DefaultCropSize beyond the bound', () async {
+      final (width, _) = await _read(
+        _dng([FixtureEntry.long(256, 70000), FixtureEntry.long(257, 3000)]),
+      );
+      expect(width, isA<UnparseableValue<ImageDimensions>>());
+      final (crop, _) = await _read(
+        _dng([
+          FixtureEntry.long(256, 4000),
+          FixtureEntry.long(257, 3000),
+          _pair(50720, 4, [4000, 100000]),
+        ]),
+      );
+      expect(crop, isA<UnparseableValue<ImageDimensions>>());
+    });
+
+    test('a HEIC Exif item with one absurd side', () async {
+      final fixture = _jpegExif(
+        exif: [FixtureEntry.long(40962, 3000), FixtureEntry.long(40963, 70000)],
+      );
+      final (value, _) = await _read(
+        (HeifFixture()..addExif(2, fixture.build().bytes)).build(),
+      );
+      expect(value, isA<UnparseableValue<ImageDimensions>>());
+    });
+
+    test('the bound itself: 65,535 is known, 65,536 is not', () async {
+      Future<MetadataValue<ImageDimensions>> sides(int w) async {
+        final fixture = _jpegExif(
+          exif: [FixtureEntry.long(40962, w), FixtureEntry.long(40963, 1000)],
+        );
+        return (await _read(jpegFile([exifApp1(fixture.build().bytes)]))).$1;
+      }
+
+      expect(
+        (await sides(65535)).valueOrNull,
+        const ImageDimensions(65535, 1000),
+      );
+      expect(await sides(65536), isA<UnparseableValue<ImageDimensions>>());
+    });
+  });
 }

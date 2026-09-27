@@ -3123,6 +3123,8 @@ It amends ADR-017 §2 (§3 below) and applies ADR-008 §6 per field to equipment
 unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure domain code (S3.2, 2026-09-26: `EquipmentCandidate`, CALC-40); §5 done (S3.4, 2026-09-26: schema v18); §6 done (S3.3, 2026-09-26: `EquipmentMatcher`, see the note below); the editor's form model and pre-fill done (S3.5, 2026-09-26); the review and confirmation flow done (S3.6, 2026-09-26; see the note below); the RAW size from a DNG done (S3.8, 2026-09-26: MB = bytes ÷ 10⁶, as ADR-011 §3 defines the unit); §7 done (S3.7, 2026-09-26: visible as "Add from a photo"; device check M4 passed). Every frozen Stage 3 Task is done; TD-068 was found at M4 (`refinement/POST_ROADMAP_PLAN.md`,
 "Stage 3 — frozen Task sequence").
 
+**Implementation note (S3.V4, 2026-09-27; S3V-05):** §3's dimensions have a sanity bound. A side over **65,535 px** is unparseable in every container (DNG IFD0 and DefaultCropSize, JPEG and HEIC EXIF), as S3.1's acceptance required. 65,535 is JPEG's own format limit and several times any camera sensor's long side. It is a metadata bound, deliberately wider than `EquipmentLimits.resolutionPx` (30,000), which the candidate applies later.
+
 **Implementation note (S3.V3, 2026-09-27; S3V-03, S3V-04):**
 - A pre-filled value is saved at its exact number while untouched; the editor's text is only its display.
 - Choosing the file's value applies the file's value, even when it displays like the saved one.

@@ -688,6 +688,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.V4 (2026-09-27; S3V-05):** an image size over 65,535 px per side is now "Unreadable value" instead of a known size, in DNG, JPEG and HEIC.
 - **S3.V3 (2026-09-27; S3V-03, S3V-04):** numbers stay exact. "Use the file's sensor size" now saves the file's value even when it displays like the saved one. A new rig that takes a saved rig's camera specs keeps them exactly (9.894 mm stays 9.894, still verified). Only estimates are rounded.
 - **S3.V1 (2026-09-26, after the failed Stage 3 validation, S3V-01):** the review is matched again against the saved rigs whenever it is shown, and right before a rig is opened from it. A change made elsewhere since is therefore never reverted. A "use the file's value" choice made before that change is withdrawn, and a deleted or no-longer-matching rig is not opened. Tested through the real routes and SQLite.
 - **S3.9 (2026-09-26):** TD-068 resolved. A rig saved from a file no longer shows rounding "differences" when that file is read again, because estimates are proposed at the precision the editor stores. Real differences are still listed.

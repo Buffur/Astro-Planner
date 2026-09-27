@@ -159,17 +159,29 @@ abstract final class ExifValues {
     return KnownValue(cleaned, raw: cleaned, origin: origin);
   }
 
+  /// The largest image side, px, a capture file's metadata may report
+  /// (S3.V4, S3V-05). JPEG's own format limit, and several times the long
+  /// side of any camera sensor; beyond it the value is not one captured
+  /// frame, so it is unparseable, never known. A metadata sanity bound, not
+  /// an equipment limit (the candidate applies `EquipmentLimits` later).
+  static const maxImageSidePx = 65535;
+
   /// Image dimensions from a width and height tag pair (ADR-018 §3). The
   /// caller passes a pair only when at least one tag is present; a missing,
-  /// malformed, zero or non-integral side makes the pair unparseable, never
-  /// half known. [raw] is the pair as stored, for display.
+  /// malformed, zero, non-integral or absurd (over [maxImageSidePx]) side
+  /// makes the pair unparseable, never half known. [raw] is the pair as stored, for display.
   static MetadataValue<ImageDimensions> dimensions(
     int? width,
     int? height,
     MetadataOrigin origin, {
     required String raw,
   }) {
-    if (width == null || height == null || width <= 0 || height <= 0) {
+    if (width == null ||
+        height == null ||
+        width <= 0 ||
+        height <= 0 ||
+        width > maxImageSidePx ||
+        height > maxImageSidePx) {
       return UnparseableValue(raw: raw, origin: origin);
     }
     return KnownValue(ImageDimensions(width, height), raw: raw, origin: origin);
