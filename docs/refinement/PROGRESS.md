@@ -3,12 +3,27 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S3.V6). **Stage 3 validation FAILED** at `387e54b` (committed
-> `7f790df`). The corrective Tasks S3.V1–S3.V6 are done, and **all ten archived probes P1–P10
-> now pass** (P5 restated against the S3.V6 API). Next: **a fresh independent Stage 3
-> validation**. The device recheck (S3V-08) is separate. Stage 4 waits.
+> **Last updated:** 2026-09-27 (repeat Stage 3 validation at `d5e2b60`): **PASS**.
+> Original Tasks S3.1–S3.10 and corrective Tasks S3.V1–S3.V6 pass on the recorded evidence.
+> S3V-01–S3V-07 are resolved; S3V-08 remains a separate device recheck.
+> This was a repeat in the existing chat, not a fresh-chat validator session. Stage 4 has not started.
 
 ## Current state
+
+**Repeat Stage 3 validation, 2026-09-27: PASS** at `d5e2b60`.
+See [the repeat report](STAGE_3_REVALIDATION.md) and
+[probe evidence](evidence/STAGE_3_REVALIDATION_PROBES.md). Freshly executed:
+the full gate (1,195 tests, one expected skip, 2 host E2E), all ten archived
+probes plus one additional camera-copy probe (11 pass), all four real metadata
+samples, and all four native JVM tests. All prior blockers are resolved.
+No application code changed in this validation. Fresh phone testing is not
+claimed; S3V-08 and the previously carried device checks remain unverified.
+The fresh-session validation requirement in §9.8 is not fulfilled by this
+same-chat repeat. Formal Stage closure remains pending that check or an explicit
+owner waiver; no waiver is inferred from the request to revalidate.
+
+The failed validation below remains historical evidence; its findings were
+corrected by S3.V1–S3.V6 and rechecked by the repeat report.
 
 **Stage 3 validation, 2026-09-26: FAIL.** See [the report](STAGE_3_VALIDATION.md)
 and [reproducible probes](evidence/STAGE_3_VALIDATION_PROBES.md). Baseline gate:
@@ -48,10 +63,10 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation.** The validation at `387e54b` failed (S3V-01–S3V-06, `STAGE_3_VALIDATION.md`); corrective Tasks S3.V1–S3.V6 are done and the archived probes all pass; a fresh independent validation is next. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (technical repeat PASS at `d5e2b60`).** Original and corrective Tasks pass; prior failure preserved in `STAGE_3_VALIDATION.md`, current result in `STAGE_3_REVALIDATION.md`. Fresh-session sign-off remains pending; device recheck S3V-08 is separately unverified |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: **a fresh independent Stage 3 validation** (§9.8). The device recheck (S3V-08) is a separate validation action if the owner wants it |
+| Next approved Task | None. Repository revalidation passes; the required fresh-session Stage 3 sign-off remains pending (or an explicit owner waiver). Device recheck S3V-08 is separate. Stage 4 has not started |
 | Code baseline | S3.V6 (see "Completed Tasks"). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -65,7 +80,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
-| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **FAIL** at `387e54b`, 2026-09-26: S3V-01–S3V-06. Report: `STAGE_3_VALIDATION.md`; no application fixes in the validation |
+| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **Technical repeat PASS** at `d5e2b60` (`STAGE_3_REVALIDATION.md`). Earlier FAIL at `387e54b` remains preserved. S3V-01–S3V-07 resolved; device recheck S3V-08 unverified. Required fresh-session sign-off remains pending |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
@@ -423,20 +438,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**A fresh independent Stage 3 validation** (§9.8), in a new session.
-- The previous one failed at `387e54b` (`STAGE_3_VALIDATION.md`, `7f790df`). The corrective Tasks
-  are done:
-  - S3.V1 `62a79af` and S3.V6 (S3V-01);
-  - S3.V2 `edbb2a7` (S3V-02);
-  - S3.V3 `18873ad` (S3V-03, S3V-04);
-  - S3.V4 `2447962` (S3V-05);
-  - S3.V5 `51f53cf` (S3V-06, S3V-07).
-- All ten archived probes pass at S3.V6. P5 calls `await vm.rigDraft(rigId)`, since S3.V6 removed
-  the synchronous method it used.
-- The validator should try to disprove completion again, not just re-run the probes.
-- **Separate, if the owner wants it:** the device recheck (S3V-08) through a separate `.s2check`
-  package, never the owner's app.
-- Do not start Stage 4 before the validation passes (or the owner decides otherwise).
+**Fresh-session independent Stage 3 sign-off** (§9.8), or an explicit owner waiver
+of that process requirement. The repeat repository validation at `d5e2b60` passes:
+all Tasks and former blockers were rechecked, all ten archived probes plus R1 pass,
+and the complete gate, real samples and native tests pass (`STAGE_3_REVALIDATION.md`).
+It occurred in the existing chat, so it does not claim the fresh-session requirement.
+No further implementation defect is established by this repeat.
+The separate S3V-08 device recheck must use `.s2check`, never the owner's app.
+Do not start Stage 4 without completing the remaining sign-off or the owner's direction.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
