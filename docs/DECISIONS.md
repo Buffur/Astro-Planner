@@ -1,5 +1,9 @@
 # AstroPlan Decisions
 
+> **Stages 6–11 amended after Stage 5, 2026-09-27 (the owner's planning brief):** the dedicated
+> tracker leaves the target product; Stage 8 retires it after a dependency audit, keeping the data
+> (E.1, "Stages 6–11 amended after Stage 5"). ADR-019 (§2, §4) and ADR-016 carry pointers. RD-12
+> lapses; RD-13 narrows. Documentation only.
 > **RD-09 decided, 2026-09-27 (Stage 5):** M + S1 (E.1, "RD-09 decided"); ADR-015 carries an
 > amendment pointer. Documentation only.
 > **Governance correction, 2026-09-27:** one canonical Verification Policy in `CLAUDE.md`
@@ -1453,6 +1457,80 @@ Stage 4 revalidation is still required.
 - **Built by** S5.8 (the patterns). Adopted by Stage 6 (capture blocks), Stage 8 (the Logbook) and
   Stage 9 (the Library). Where a visible Delete sits is decided at adoption.
 - No code changed.
+
+### Stages 6–11 amended after Stage 5; the dedicated tracker leaves the target product (2026-09-27)
+
+- **Context:** Stage 5 closed (`4a9d5c7`). The owner's planning brief,
+  `refinement/prompts/AMEND_STAGES_6_11_AFTER_STAGE5.md`, amends the remaining Stages 6–11 from the
+  manual dogfooding (08) and a post-Stage-5 UI/UX analysis. That analysis is not in the repository;
+  its conclusions enter only through the brief. The brief amends the plan and does not replace it.
+- **Decided by:** the project owner, through the brief (an owner-supplied planning prompt; `CLAUDE.md`,
+  "Active Prompt Rule").
+- **1. The dedicated tracker leaves the target product.**
+  - The target flow is unchanged (ADR-019 §2): Planner → Save plan → imaging outside the app →
+    Logbook → record the result (Completed as planned · Partly · Not done).
+  - **The dedicated live tracker** (Track live, Start, the tracker screen and the workflow built
+    only for it) **is no longer part of the target product, not even as an optional mode.**
+    RG-04 D1 foresaw this: "The tracker may later be hidden or removed (option C) … that would be a
+    new owner decision." This is that decision, for the UI.
+  - **Supersedes:**
+    - RG-04 D1's "the tracker optional" half;
+    - ADR-019 §2's optional path and §4's "Track live (optional)";
+    - S4.V3's "the optional live tracker stays supported";
+    - P8.4, "The live mode as an option";
+    - the "Track live" items of `IA_WIREFRAMES_ADDENDUM.md` §1–§3.
+  - **Stage 8 retires it safely** (P8.4 in the plan): first a bounded dependency audit that sorts
+    every tracker dependency into:
+    - (A) UI that exists only for live tracking: removed;
+    - (B) domain and data logic that keeps history trustworthy: kept or repurposed;
+    - (C) persisted data: still read, exported and backed up, migrated only under the migration
+      workflow;
+    - (D) tests only of the removed UI: retired deliberately, each with its reason;
+    - (E) tests of still-valid domain and history behaviour: kept.
+
+    Then the result workflow (P8.1–P8.2), then the UI's removal. A run still in progress at the
+    upgrade can still be finished or marked not done. **No data is deleted, and nothing is removed
+    before P8.1–P8.2 exist.**
+  - **Until then** the tracker stays as built. Stage 6 keeps it reachable off the primary path (P6.1's
+    ⋮ entry, Tonight's run card), because Start is today's only way to record a result. Stage 6
+    invests nothing in it: no redesign and no new dependence on it.
+  - **Left to P8.4's audit, within this rule:**
+    - which code, events and tests stay;
+    - whether CALC-35 and CALC-36 are marked retired (never deleted from history);
+    - the ADR-016 amendment text, recorded when P8.4 lands.
+  - **Consequences:**
+    - RD-12 lapses: the resume prompt goes with the tracker, and ADR-019 §4 already expected Finish to
+      lead to the result form;
+    - RD-13 narrows to existing accepted-estimate events and the "reported as planned" label;
+    - UX-13 and UX-26 close when P8.4 lands, and TD-063 is re-verified against it;
+    - the core-loop E2E test moves to Save → result, and the tracker's lifecycle rows (`TEST_PLAN.md`
+      L4–L6, L8) are replaced deliberately.
+- **2. Also recorded from the brief** (owner directions, not research results):
+  - **the hierarchy:** the answer first, then compact context, then technical depth on demand.
+    Disclosure never hides what materially changes the answer (`PRODUCT_DIRECTION.md` §5.2,
+    clarified);
+  - **ownership:** one owner per responsibility for Stages 6–11 (`refinement/POST_ROADMAP_PLAN.md`,
+    "Stages 6–11: shared rules"). Stage 5 stays closed: no S5.10 and no second design system;
+  - **a relative-stacking-gain graph is a Stage 6 deliverable** (P6.10): √N per (filter, exposure)
+    group, never SNR (SI-003);
+  - **optional plan names are kept** (P8.6; 08 §24);
+  - **the author's own links** (https://github.com/Buffur and https://www.reddit.com/user/Buffur/)
+    do not wait for RD-01. RD-01 still governs the project identity and its functional links;
+  - **the logo** is chosen by the owner from alternatives (P9.4). **The licence** changes only after
+    RG-12's research and an owner decision (P9.5).
+- **Unchanged:**
+  - every other Stage 4 and Stage 5 decision;
+  - ADR-019's lifecycle (§3, §3.1), and §4's result form, count events and honesty rules;
+  - RD-08 (open);
+  - every calculation.
+- **Records:**
+  - `refinement/POST_ROADMAP_PLAN.md`: the header, §3, "Stages 6–11: shared rules", Stages 6–11,
+    §6.2, §7, §8 and Appendices A–B;
+  - `refinement/PRODUCT_DIRECTION.md` §3, §4, §5.2, §9 and §10;
+  - ADR-019's status and pointers under §2 and §4, and a pointer under ADR-016;
+  - the banner of `IA_WIREFRAMES_ADDENDUM.md`;
+  - `refinement/PROGRESS.md`.
+- Documentation only. No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -3164,6 +3242,7 @@ lower half" is not audited yet — TASK 12.5 designs the Tonight dashboard.)*
 ## ADR-016: Execution model under Android constraints
 
 > **Amended by ADR-019 (owner, 2026-09-27, S4.D):** execution is **optional**, off the primary path ("Track live"). Results are recorded after the session, and their counts are written as events, so the counters still equal the replay. The tracker's Finish leads to the same result form (ADR-019 §4). §2–§6's model is unchanged for live runs.
+> **Superseded in part by the owner (2026-09-27; E.1, "Stages 6–11 amended after Stage 5"):** the live mode leaves the target product. Stage 8 (P8.4) retires its UI after a dependency audit that decides what stays; existing runs, events and history stay readable, and a run in progress at the upgrade can still be finished or marked not done. This ADR describes the code until P8.4 records its amendment.
 
 Status: accepted (owner, 2026-09-24, TASK 13.1). Resolves PD-20. **§2–§5 implemented in
 TASK 13.2 (commit `14467e7`, schema v17); §6 in TASK 13.3 (commit `c8e2240`).** Documentation only —
@@ -3853,6 +3932,12 @@ Status: accepted (owner, 2026-09-27, S4.D). The owner accepted it in chat after 
 - **S4.V3 reduced §3.1 to the approved decisions** (E.1, "Bounded validation for analysis and
   decision Stages"). S4.V2's inferred rules are withdrawn and are now Stage 6/8 design questions.
 - The final Stage 4 validation is bounded to the scope in that entry.
+- **Superseded in part by the owner, 2026-09-27** (E.1, "Stages 6–11 amended after Stage 5"): §2's
+  optional live path and §4's "Track live (optional)". The dedicated tracker leaves the target
+  product, and Stage 8 retires it after a dependency audit (P8.4). The live-mode items that follow
+  from them go the same way: §5's run card, §6's ⋮ item and §14's "Track live (optional)". §3's
+  Tracking state remains for live runs until P8.4, and afterwards only for runs that already exist.
+  The text below is kept as accepted; pointers mark §2 and §4.
 
 It records, as one design, the eight Stage 4 decisions the owner took in chat on 2026-09-27 (DECISIONS
 E.1):
@@ -3910,6 +3995,10 @@ Optional, off the primary path:  saved plan ──► Track live ──► track
 - **Planning is the primary job:** Tonight and the planner lead with the plan and its verdict.
 - **Execution is optional** (RG-04). Nothing in the default flow asks the user to operate the app
   while imaging.
+
+> **Superseded in part (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"):** the
+> optional path above leaves the target product. The primary flow is the only one; Stage 8 retires
+> the tracker after a dependency audit (P8.4).
 
 ### 3. Decision: a plan's lifecycle and defaults (RD-05, RD-04; amends ADR-014 §3)
 
@@ -4035,6 +4124,12 @@ Existing rules apply meanwhile:
 - the serialized autosave chain (S1.12).
 
 ### 4. Decision: execution optional; results after the session (RG-04; amends ADR-016 §2, §10)
+
+> **Superseded in part (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"):** "Track live
+> (optional)", the tracker and the workflow built only for it leave the target product. Stage 8
+> (P8.4) retires their UI after a dependency audit, keeping the events, counts and history. The
+> result form, its count events and the honesty rules below stand. Until P8.4, the tracker stays as
+> built.
 
 - **Start leaves the primary path** (Tonight's card and the planner's bottom bar). A saved plan
   offers **Track live (optional)**. The tracker, its events, the estimate (CALC-35), the countdowns

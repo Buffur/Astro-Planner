@@ -17,6 +17,9 @@
 > **Updated 2026-09-27 (S4.R3, owner-approved):** §10 notes the RD-05 and RD-04 decisions.
 > **Updated 2026-09-27 (S4.R4, owner-approved):** §10 notes the RG-05, RD-06 and RG-06 decisions.
 > **Updated 2026-09-27 (S4.R5, owner-approved):** §10 notes the RD-07 and RD-14 decisions.
+> **Updated 2026-09-27 (Stages 6–11 amended after Stage 5; the owner's brief
+> `prompts/AMEND_STAGES_6_11_AFTER_STAGE5.md`):** the dedicated tracker leaves the target product
+> (§3, §4, §9, §10); §5.2 says what disclosure never hides. Nothing else changed.
 
 ## 1. Primary product job
 
@@ -66,10 +69,13 @@ Fit / Feasibility
         ↓
 Saved Session
         ↓
-Optional Execution / Tracking      (supporting)
+Imaging, outside the app           (no interaction needed)
         ↓
 Actual Result / Logbook            (supporting)
 ```
+
+*Amended 2026-09-27 (§4):* the step after Saved Session read "Optional Execution / Tracking
+(supporting)". The dedicated tracker has left the target flow, and Stage 8 retires it safely.
 
 Each step maps onto foundations that already exist. This document introduces no new
 domain concept.
@@ -81,7 +87,7 @@ domain concept.
 | Capture Plan | How | Capture blocks with a calibration policy and a descriptive gain (TASK 5.3); the capture budget (ADR-009, CALC-25) |
 | Fit / Feasibility | Does it fit? | `FitAnalyzer` (CALC-26): fits, tight, doesn't fit or no window, with a reason, an end time and a one-tap fill |
 | Saved Session | Keep the plan | The Session aggregate, its lifecycle and snapshots (ADR-014) |
-| Execution / tracking | *(supporting)* | ADR-016; `ExecutionMachine` (CALC-35, CALC-36) |
+| Execution / tracking | *(supporting; leaves the target flow, 2026-09-27, §4)* | ADR-016; `ExecutionMachine` (CALC-35, CALC-36). Existing runs, events and history stay readable; Stage 8 retires the tracker's UI |
 | Actual result / Logbook | *(supporting)* | Reconciliation (CALC-37); progress per target (CALC-38); the Sessions list and detail; export manifest v2; backup and restore |
 
 ## 4. Supporting workflows
@@ -99,10 +105,23 @@ and backup stay in the product. They must:
 **RG-04 decided (owner, 2026-09-27; DECISIONS E.1):**
 - The default flow after planning is **Save → image → Logbook → record the result**, with no
   interaction while imaging.
-- The live tracker stays, but as an **optional** mode, off the primary path.
+- The live tracker stays, but as an **optional** mode, off the primary path. *(Superseded
+  2026-09-27, below.)*
 - A result is **"Completed as planned"** (one tap), **"Partly"** (numbers per light block) or
   **"Not done"** (a reason).
 - Implemented in Stage 8. Execution stays as built until then.
+
+**Superseded in part (owner, 2026-09-27; DECISIONS E.1, "Stages 6–11 amended after Stage 5"):**
+- The dedicated live tracker (Track live, Start and the tracker screen) is **no longer part of the
+  target product**, not even as an optional mode. Save → image → Logbook → record the result is
+  the only flow. AstroPlan records intent and outcome; it does not track a session live.
+- **Stage 8 retires it safely.** A bounded dependency audit comes first. Existing runs, events,
+  counts, snapshots, results, exports and backups stay readable, and a run still in progress at the
+  upgrade can still be finished or marked not done. Nothing is removed before the result form
+  exists.
+- **Until then** the tracker stays as built, off the primary path, because it is today's only way
+  to record a result. Stage 6 keeps that path and does not develop it.
+- The rest of RG-04 stands: the result form, and no interaction while imaging.
 
 ## 5. Product principles
 
@@ -110,7 +129,16 @@ and backup stay in the product. They must:
    action, then supporting detail, then technical detail. On the planner, the answer is
    whether the plan fits; on Tonight, what is possible tonight.
 2. **Progressive disclosure.** Detail is layered, not deleted. Keep it to two levels where
-   possible (05 §7, NN/g).
+   possible (05 §7, NN/g). *Clarified 2026-09-27 (the owner's Stages 6–11 amendment):*
+   - the layers are the decision (the answer, and any missing input that blocks it), compact
+     supporting context, technical detail on demand, and integrity detail (formulas, assumptions,
+     provenance) one interaction away;
+   - **disclosure never hides what materially changes the answer:** an unknown that prevents or
+     weakens a result, stale or unavailable weather, an active constraint, an assumption that
+     changes the result, a provenance conflict or mismatch, a reason the result cannot be
+     evaluated, the unit a value needs, or a warning;
+   - technical depth stays; only its visual weight changes. The operational rules for Stages 6–11
+     are in `POST_ROADMAP_PLAN.md`, "Stages 6–11: shared rules".
 3. **Automate trustworthy inputs.** A value is retrieved or inferred only when its source
    has adequate evidence, licence or terms, provenance, privacy handling and failure
    behaviour (CLAUDE.md rule 28). The UI says where an automated value came from.
@@ -219,12 +247,14 @@ A deferred item comes back only through the research and decision gate
 | "Metadata-assisted logging comes in v1.1 (G17), after Android 1.0" | MASTER_ROADMAP §1, G17, §6 | The metadata foundation (Stage 2) and metadata → equipment import (Stage 3) come before the product-flow work. Metadata-assisted actuals (the old TASK 17.3) move to Stage 8, once the workflow is known |
 | "No visual redesign until the domain and Session are stable" | MASTER_ROADMAP §3.3 | The condition is met. UX refinement is planned through Stages 4–6 and 9, on a design system built first (Stage 5) |
 | `MASTER_ROADMAP.md` is the approved scope, and `ROADMAP.md`'s active-task line is the current position (OD-06) | DECISIONS Part C; ROADMAP "Adopted plan"; PROJECT_HANDOFF header and §0 | After Stage 0, `POST_ROADMAP_PLAN.md` is the strategy and `PROGRESS.md` the state (CLAUDE.md). The roadmap's open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
+| "The live tracker stays, but as an optional mode" (RG-04, B) *(added 2026-09-27)* | §3–§4 before 2026-09-27; DECISIONS E.1, "RG-04 decided"; ADR-019 §2, §4 | The dedicated tracker leaves the target product. Stage 8 retires its UI after a dependency audit, keeping the data (§4) |
 
 **Not superseded.** These stay in force until an explicit owner decision or ADR changes
 them:
 - every accepted ADR, ADR-001 to ADR-016. That includes ADR-015 §2 (the planner keeps its
   sections and order; Stage 4 may propose an amendment, RD-06) and ADR-016 (the execution
-  model);
+  model). *(ADR-015 §2 was amended by ADR-019 §6. ADR-016's live mode leaves the target product,
+  2026-09-27, §4; its event model stays for existing data);*
 - the owner directives OD-01, OD-02, OD-04, OD-05 and OD-07;
 - the PD-06 gate policy: metadata import stays hidden (`FeatureScope.metadataImport =
   false`) until its approved refinement stage lifts the gate (RD-16);
@@ -247,7 +277,8 @@ for owner decisions (RD). The main ones:
   and disclosure (RD-06).
 
 **Decided since (owner, 2026-09-27; DECISIONS E.1):**
-- **RG-04:** Execution is optional; results are recorded after the session (§4).
+- **RG-04:** Execution is optional; results are recorded after the session (§4). *(Its optional
+  tracker is superseded; see the last item.)*
 - **RD-05:**
   - Draft is internal; the plan's state reads "Not saved", "Saved" or "Saved · changed";
   - Save stays explicit;
@@ -273,3 +304,7 @@ for owner decisions (RD). The main ones:
   - Progress lives in the Logbook.
 - **RD-14:** one name per concept, with Rig, Plan and Logbook (the glossary in
   `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5).
+- **The Stages 6–11 amendment** (the owner's brief, after Stage 5; E.1, "Stages 6–11 amended after
+  Stage 5"):
+  - the dedicated tracker leaves the target product, and Stage 8 retires it safely (§4);
+  - disclosure never hides what materially changes the answer (§5.2).

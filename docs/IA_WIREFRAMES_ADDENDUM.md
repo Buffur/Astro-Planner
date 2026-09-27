@@ -1,5 +1,10 @@
 # AstroPlan — Information architecture addendum (Stage 4)
 
+> **Updated 2026-09-27 (the owner's Stages 6–11 amendment; DECISIONS E.1, "Stages 6–11 amended
+> after Stage 5"):** "Track live (optional)" leaves the target product. That covers §1's Execution
+> row, §2's `/session/:id/run` route, §3.1's run card, §3.2's ⋮ item, §3.6's entry action, and the
+> tracker's Finish in §3.7 and §3.10. Stage 8 retires the tracker after a dependency audit, keeping
+> the data. The drawings are kept as accepted; everything else in them stands.
 > **Updated 2026-09-27 (S4.V3):** §3.10 reduced to the owner's approved decisions. The details are
 > Stage 6/8 design questions.
 > **Updated 2026-09-27 (S4.V2):** §3.10 rewritten to ADR-019 §3.1 as revised (the owner's R2 +

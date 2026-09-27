@@ -4,8 +4,9 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (**Stage 5 closed**: the revalidation of S5V-01 passed at `178acbe`).
-> **Next:** Stage 6 — Core Planner Redesign, Stage planning.
+> **Last updated:** 2026-09-27 (**Stages 6–11 amended after Stage 5**, planning only; Stage 5
+> closed at `178acbe`).
+> **Next:** the owner reviews the amendment; then Stage 6 — Core Planner Redesign, Stage planning.
 
 ## Current state
 
@@ -17,6 +18,29 @@
 | Next Task | None: Stage 6 planning comes first |
 | Code baseline | S5.V1 (`178acbe`). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**Stages 6–11 amended after Stage 5, 2026-09-27** (planning and documentation only; the owner's
+brief `prompts/AMEND_STAGES_6_11_AFTER_STAGE5.md`):
+- **Amended, not replaced,** from the manual dogfooding (08) and the owner's post-Stage-5 UI/UX
+  analysis:
+  - new "Stages 6–11: shared rules" in the plan: one owner per responsibility, the answer-first
+    hierarchy with a "never hidden" list, disclosure, visualisation, look, words, exclusions;
+  - **Stage 6** gains P6.8 (the capture plan's blocks), P6.9 (outputs, "what fits", storage
+    verified first), P6.10 (the √N graph) and P6.11 (the night and opportunity timeline). P6.1 and
+    P6.3–P6.6 are clarified;
+  - **Stage 7:** its areas and RG-07 to RG-11 gain their required outputs (the automation order;
+    the calibration and capture-parameter matrices);
+  - **Stage 8:** P8.4 becomes the tracker's safe retirement, P8.5 is split into the list and P8.7
+    (the entry), and P8.6 (optional names) is kept;
+  - **Stage 9** gains P9.3 (Settings), P9.4 (logo and splash) and P9.5 (licence);
+  - **Stages 10 and 11** are clarified: measure first; one bounded final validation.
+- **Superseded (the owner):** the dedicated tracker leaves the target product (DECISIONS E.1,
+  "Stages 6–11 amended after Stage 5"; ADR-019 §2 and §4; RG-04's optional tracker;
+  `PRODUCT_DIRECTION.md` §3–§4). Stage 8 retires it after a dependency audit, and nothing is
+  deleted before that. RD-12 lapses; RD-13 narrows.
+- **Clarified:** `PRODUCT_DIRECTION.md` §5.2 (what disclosure never hides).
+- Stage 5 stays closed. No application code, test, tool or frozen Task changed. Verification: the
+  documentation class (V1).
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
 - `CLAUDE.md` now holds the one canonical **Verification Policy** (V1–V8): verification by change
@@ -219,7 +243,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3; may return through Stage 7 |
-| RG-04 | Execution's role and how actuals are captured | 4 | **Decided** 2026-09-27 (S4.R2; E.1): B, the Logbook first and the tracker optional; G2 post-session results |
+| RG-04 | Execution's role and how actuals are captured | 4 | **Decided** 2026-09-27 (S4.R2; E.1): B, the Logbook first and the tracker optional; G2 post-session results. Its optional tracker is **superseded** 2026-09-27 (the tracker leaves the target product; P8.4) |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | **Decided** 2026-09-27 (S4.R4; E.1): Tonight plan-first with a context line; detail screens; no new tab |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | **Decided** 2026-09-27 (S4.R4; E.1): progressive disclosure; no modes |
 | RG-07 | Target catalog expansion, names and search | 7 | Open |
@@ -237,19 +261,19 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 
 | ID | Decision | Stage | Status |
 | --- | --- | --- | --- |
-| RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open |
+| RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open (the author's own links do not wait for it, 2026-09-27) |
 | RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
 | RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
 | RD-04 | New-draft defaults and the example plan | 4 | **Decided** 2026-09-27 (S4.R3; E.1): nothing preselected on the first run; New keeps the site and rig; an empty plan with "Start from the example plan" |
 | RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | **Decided** 2026-09-27 (S4.R3; E.1): L1 (Draft internal; Save explicit), Y2, U1. The S1.6 interim stands until Stage 6 builds U1. **Clarified** 2026-09-27 (S4.V2; E.1, "S4R-01 and S4R-02 decided"): saved snapshots are immutable per night; results without Save plan; Stage 8 delivers the saved-plan transition at once |
 | RD-06 | The planner's section order; integrity text one tap away | 4 | **Decided** 2026-09-27 (S4.R4; E.1): answer first, decision order; detail one tap away |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
-| RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
+| RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work, P6.8) | Open |
 | RD-09 | Destructive interactions: confirm or undo | 5 | **Decided** 2026-09-27 (owner): **M + S1**, undo for edits inside a plan, confirm for stored records; a visible Delete with swipe as a shortcut (DECISIONS E.1, "RD-09 decided"; `IA_WIREFRAMES.md` §3 amended for plan edits). Built by S5.8 |
 | RD-10 | Ordering Tonight's candidates without a score | 6 | Open |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 | Open |
-| RD-12 | The resume prompt's Finish | 8 | Open |
-| RD-13 | Provenance of an accepted estimate | 8 | Open |
+| RD-12 | The resume prompt's Finish | 8 | **Lapsed** 2026-09-27: the resume prompt goes with the tracker (E.1, "Stages 6–11 amended after Stage 5"); P8.4's audit covers a run still in progress at the upgrade |
+| RD-13 | Provenance of an accepted estimate | 8 | Open; **narrowed** 2026-09-27 to existing accepted-estimate events and "reported as planned" (P8.1) |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
@@ -296,6 +320,8 @@ These block a release, not refinement.
     11 darkness test); `CLAUDE.md`'s stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
+- **The Stages 6–11 amendment (2026-09-27):** nothing blocks Stage 6 planning. RD-08 gates P6.8
+  only. The tracker stays as built until P8.4.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -304,18 +330,26 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Stage 6 — Core Planner Redesign: Stage planning**, in a fresh chat where practical.
+**First, the owner reviews the Stages 6–11 amendment** (committed; any correction is a
+documentation change). Nothing starts automatically.
+
+**Then: Stage 6 — Core Planner Redesign: Stage planning**, on the amended plan, in a fresh chat
+where practical.
 - **Read:**
-  - Stage 6's section and its provisional Tasks P6.0–P6.7 (ADR-019);
+  - "Stages 6–11: shared rules", then Stage 6's section: the provisional Tasks P6.0–P6.11 (P6.8 to
+    P6.11 added 2026-09-27) and their notes;
   - the Stage 5 adoption notes under that table;
-  - `docs/DESIGN_SYSTEM.md` §9 (what each screen adopts, and the retired terms each Task removes).
-- **Re-verify them against the code** (§9.7).
-- **Identify the gates:**
+  - `docs/DESIGN_SYSTEM.md` §9 (what each screen adopts, and the retired terms each Task removes);
+  - DECISIONS E.1, "Stages 6–11 amended after Stage 5": the tracker leaves the target product, and
+    Stage 6 keeps only today's path to results.
+- **Re-verify them against the code** (§9.7). P6.9's storage trace and P6.11's inventory of the
+  current chart start from the code, not from 08.
+- **Identify the gates, and prepare their options:**
+  - RD-08 (tracking per rig or per plan), decided before P6.8;
   - RD-10 (the candidates' order);
   - RD-11 (where the Moon and cloud gate controls live, if Stage 6);
-  - RD-08 (tracking per rig or per plan), which is decided before Stage 6's capture-plan work;
   - S4-DEF-04 (Discard on Saved · changed).
-- **Freeze a Task sequence** with scope, acceptance and validation.
+- **Freeze a Task sequence** with scope, acceptance and validation. P6.0 has no gate.
 - Update the documents, commit, and STOP before implementation.
 
 **Carried:**
