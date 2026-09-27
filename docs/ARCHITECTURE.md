@@ -1,5 +1,8 @@
 # AstroPlan Architecture
 
+> **S4.V2, 2026-09-27:** D5's lifecycle bullets follow ADR-019 §3.1 as revised to the owner's R2 +
+> D1: an immutable saved snapshot per night, results without Save plan, Stage 8 delivering the
+> saved-plan transition at once. Documentation only; Part B unchanged.
 > **S4.V1 clarification, 2026-09-27:** D5 includes saved-and-edited plans at startup and
 > rollover and the explicit-Save result guard (ADR-019 §3.1). Documentation only; Part B unchanged.
 
@@ -935,14 +938,15 @@ listed with its work item.
 
 Owner-approved on 2026-09-27; implemented by Stages 5, 6, 8 and 9. The architectural effects:
 - **Session lifecycle** (ADR-014 §3 amended):
-  - a recorded result completes or abandons a saved plan without a run;
-  - its counts are written as events, so the counters equal the replay (trap 14);
-  - both `planned` and `draft` with `plannedAtUtc` (Saved · changed) are protected when their
-    saved night has passed, at startup and live rollover; only never-saved drafts roll in place;
-  - Stage 6 protects the original in place; Stage 8 adds a recoverable, unsaved continuation
-    from working inputs. The original saved snapshot and unsaved edits remain intact;
-  - results for Saved · changed require review and explicit Save, or Cancel; the result uses
-    that saved version, never mixed working/snapshot data. ADR-019 §3.1 is normative (S4.V1).
+  - a saved plan's snapshot is the immutable intent for its night. Results and working edits never
+    change it, and working edits belong to an independent working copy;
+  - a recorded result completes or abandons a saved plan (Saved or Saved · changed) without a run
+    and without Save plan, and only once its saved night has ended;
+  - its counts are written as events against the snapshot's blocks, so the counters equal the
+    replay (trap 14);
+  - from Stage 8, a saved plan whose night has ended stays on that night, and the planner continues
+    on an independent working copy. Only never-saved drafts roll forward in place. Until Stage 8,
+    saved plans behave as today (D1). ADR-019 §3.1 is normative (S4.V1, revised by S4.V2).
 - **Execution** (ADR-016 amended): optional ("Track live"); the event model is unchanged for live
   runs.
 - **Navigation** (ADR-015 amended):

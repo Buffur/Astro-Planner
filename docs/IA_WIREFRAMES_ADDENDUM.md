@@ -1,5 +1,8 @@
 # AstroPlan — Information architecture addendum (Stage 4)
 
+> **Updated 2026-09-27 (S4.V2):** §3.10 rewritten to ADR-019 §3.1 as revised (the owner's R2 +
+> D1): the result is reported against the saved snapshot, without Save plan; §3.7's pre-fill comes
+> from the snapshot. Not implemented yet.
 > **Updated 2026-09-27 (S4.V1):** §3.10 adds saved-and-edited rollover and result review,
 > following ADR-019 §3.1. Not implemented yet.
 
@@ -195,7 +198,7 @@ result, Open plan or Plan again, Share, Export as file, Track live (optional, on
 ├──────────────────────────────────────┤
 │ ( ) Completed as planned             │  → actual = plan, "reported as planned"
 │ ( ) Partly                           │
-│      L 60 s   [ 45 ] of 100          │  ← numbers, pre-filled, editable
+│      L 60 s   [ 45 ] of 100          │  ← per saved-snapshot block, pre-filled, editable
 │ ( ) Not done   reason [clouds ▾]     │
 ├──────────────────────────────────────┤
 │ Notes (optional)                     │
@@ -231,31 +234,34 @@ Sites:   tap = edit · [Add site] (the active site is chosen from the context li
 [Done]   (nothing is preselected; the seeded rig is listed as an example)
 ```
 
-### 3.10 Saved · changed across a night boundary (S4.V1; ADR-019 §3.1)
+### 3.10 Saved plans across a night boundary, and their result (S4.V2; ADR-019 §3.1)
 
-On startup **and** while the app stays open, both Saved and Saved · changed keep their original
-saved night and snapshot. Only never-saved drafts roll forward in place. Stage 6 supplies this
-protection; Stage 8 adds the unsaved continuation from the latest working inputs for tonight.
-The original's working edits also remain intact. The saved night's snapshot supplies the time
-bounds; missing saved context is unavailable, not a guessed night.
+A saved plan's snapshot is the immutable intent for its night. The result reports what happened
+against that snapshot, and the planner's working copy is independent. **From Stage 8** (delivered
+at once, D1):
 
 ```text
-Saved · changed for night N → next night
-  Logbook: original entry, snapshot for N + working edits retained
-  Planner: unsaved continuation for tonight (Stage 8), no actuals or saved marker
+Save Fri → working planner moved to Sat, blocks changed → Fri ends (next mean solar noon)
+  Logbook: Fri entry, snapshot for Fri, "Record result"      (never re-dated, never changed)
+  Planner: working copy · Sat · Not saved                     (the Sat changes live here)
 
-Logbook / Tonight reminder → Record result on Saved · changed
-  "This plan has unsaved changes. Review and save it before recording a result."
-  [Cancel] → nothing written
-  [Review plan] → guard for leaving current plan → original entry
-     target · working night · state visible; saved night N also shown if different
-     [Save plan] → explicit snapshot refresh → result form uses that saved version
-     Cancel / failed Save → original snapshot and edits preserved; no result written
+Logbook entry / Tonight "Last night: M42. How did it go?"   (only after the saved night ends)
+  Review saved plan: M42 · site · Fri 14 Nov · the saved blocks   (the snapshot, read-only)
+  ( ) Completed as planned   ( ) Partly: numbers per saved block   ( ) Not done: reason
+  [Save result] → result + count events, one write; the snapshot is unchanged
+  [Cancel]      → nothing written
+  No Save plan; no planner opens; no Save · Discard · Cancel about the working copy
 ```
 
-Explicit historical review does not trigger automatic rollover/copying. If the plan changes
-again while the result form is open, require review again before writing results. The same
-guard applies to all three post-session outcomes; it does not change the live tracker flow.
+- **Until Stage 8, saved plans behave as today.** Stage 6 changes only never-saved drafts and
+  working plans.
+- **Opening an entry shows it.** It never replaces the working copy.
+- **Open plan** is offered while the saved night has not ended; **Plan again** (a copy) after.
+- **A Save for another night or site creates a new saved plan** (from Stage 8). Before Stage 8,
+  today's Save still applies.
+- **Discard never deletes a saved entry.** On Saved · changed it reverts only the working changes
+  (Stage 6).
+- **The live tracker's Finish is unchanged.**
 
 ## 4. Field constraints
 

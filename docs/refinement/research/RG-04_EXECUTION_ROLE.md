@@ -346,6 +346,8 @@ stays as built.
 
 ## 13. Saved-and-edited entries (S4.V1, 2026-09-27)
 
+*Superseded by §14 (S4.V2). Kept as written.*
+
 The G2 result path includes saved plans edited back to `draft` with `plannedAtUtc`.
 ADR-019 §3.1 defines the guard: **Review plan** and explicitly Save that entry before recording
 its result, or **Cancel** without changing either its snapshot or working edits. Counts and the
@@ -354,3 +356,17 @@ review. This uses the existing snapshot-refresh-on-Save behavior, never an autom
 a mixture of the previous snapshot and edited blocks. The original entry is protected from
 automatic rollover even if the user has not saved again. Live-run and completed-result
 correction rules are unchanged. P8.1–P8.3 carry this acceptance.
+
+## 14. The result against the saved snapshot (S4.V2, 2026-09-27)
+
+The owner decided S4R-01 = R2 with a clarification (DECISIONS E.1, "S4R-01 and S4R-02 decided").
+The saved snapshot is the immutable intent for its night. G2's result is recorded against it:
+saved plan → Review saved plan → report outcome → Save result.
+- **No Save plan and no planner.** Not done is recorded directly.
+- **Actuals** from Completed as planned or Partly belong to the result record, never to the
+  snapshot.
+- **Only after the saved night ends.** No result is recorded before.
+- **The working copy is left alone:** no guard asks about it.
+- **The live path is unchanged** (ADR-016).
+
+ADR-019 §3.1 is normative; P8.1–P8.3 carry the acceptance.

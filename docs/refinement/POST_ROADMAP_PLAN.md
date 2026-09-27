@@ -34,6 +34,9 @@
 > §6.2 rows updated. Every Stage 4 Task is done; Stage 4 awaits its fresh-session validation.
 > **Updated 2026-09-27 (S4.V1):** the owner-requested documentation correction for S4V-01
 > completes saved-and-edited lifecycle acceptance and P6.7/P8.1–P8.3. Revalidation pending.
+> **Updated 2026-09-27 (S4.V2):** after the revalidation failed (S4R-01 to S4R-04), the owner
+> decided R2 + D1. The S4.V2 matrix supersedes S4.V1's. P6.1, P6.7, P8.1–P8.3 and "Order across
+> Stages" follow ADR-019 §3.1 as revised. Revalidation pending.
 
 ## Contents
 
@@ -1851,10 +1854,12 @@ answer or an owner deferral.
 - **Acceptance:** the state matrix covers never-saved, saved, saved-and-edited and frozen
   sessions at startup/live rollover; preserves snapshots and working edits; defines the result
   path; and agrees across research, ADR/pointer, D5, addendum and P6.7/P8.1–P8.3.
-- **Status:** documentation complete; independent Stage 4 revalidation pending.
+- **Status:** documentation complete. The revalidation at `5ad69c4` **failed** (S4R-01, S4R-02;
+  `STAGE_4_REVALIDATION.md`). S4.V2 supersedes its result guard, its Stage 6/8 split and the
+  matrix below.
 - The failed report remains a historical record. S4V-02 and optional S4.E are separate.
 
-**S4.V1 acceptance matrix for future implementation** (not tests claimed to pass today):
+**S4.V1 acceptance matrix** (*superseded by the S4.V2 matrix; kept as written*):
 
 | Case | Stage 6, P6.7 | Stage 8, P8.1–P8.3 |
 | --- | --- | --- |
@@ -1868,6 +1873,46 @@ answer or an owner deferral.
 | Record result then Cancel/failed Save; current-plan guard cancelled | Not applicable: post-session form is Stage 8 | Original snapshot/edits preserved; no result or count events; no replacement after Cancel |
 | All three result outcomes; edit after form opened | Not applicable | Require explicit Save for Saved · changed; reject stale form; atomic result/events, replay equals counters; no mixed saved/working blocks |
 | In-progress, completed, abandoned, legacy | Existing event/snapshot/frozen behavior remains | Same; live Finish and result corrections remain ADR-016 paths |
+
+##### S4.V2 — Saved plans as immutable references (2026-09-27)
+
+- **Authorization:** the owner's decision on the revalidation's findings: **R2 + D1, with the
+  saved-snapshot invariant** (DECISIONS E.1, "S4R-01 and S4R-02 decided"). The owner said to
+  proceed with S4.V2 as documentation-only corrective work, then stop for a fresh revalidation.
+- **Kind/scope:** documentation only. No Stage 6 or Stage 8 application work, and no other Stage 4
+  decision reopened.
+- **Resolves:**
+  - S4R-01: the result is reported against the saved snapshot, without Save plan;
+  - S4R-02: Stage 8 delivers the saved-plan transition at once;
+  - S4R-03: TD-057 limited to never-saved drafts;
+  - S4R-04: ADR-019's status line records the S4.V1 and S4.V2 amendments.
+- **Normative rule:** ADR-019 §3.1 as revised. Its *derived* rules are listed in the E.1 entry,
+  for the revalidation.
+- **Aligned:**
+  - ADR-019 §3, §3.1 and §4, and the ADR-014 pointer;
+  - D5, addendum §3.7/§3.10, `PRODUCT_DIRECTION.md` §10;
+  - S4.R3 §13, RG-04 §14;
+  - P6.1, P6.7, P8.1–P8.3, "Order across Stages", TD-057.
+- **Status:** documentation complete; a fresh-session Stage 4 revalidation is next.
+
+**S4.V2 acceptance matrix for future implementation** (not tests claimed to pass today; it
+supersedes S4.V1's):
+
+| Case | Stage 6 | Stage 8 |
+| --- | --- | --- |
+| Never-saved past draft; a selected future night | Roll only the past night forward in place; write the key, serialized with autosaves; keep the future night (P6.7) | Same |
+| Saved or Saved · changed after its saved night ends, on a restart and with the app kept open | **As today** (D1): no partial change | The entry stays on its saved night with its snapshot, awaiting its result. Exactly one independent working copy exists, and edits go there |
+| Save Fri → move the working planner to Sat and edit → Fri ends | As today (D1) | Fri's entry and snapshot are unchanged, awaiting Fri's result. The Sat changes are in the working copy (Sat kept), and nothing of Sat enters Fri's result |
+| Explicit Save for another night or site, or after the saved night has ended | As today (D1) | A new saved plan; the original's snapshot and night are unchanged |
+| Explicit Save for the same night before it ends | ADR-014's "Save again" (unchanged) | Same |
+| Missing or unreadable snapshot | As today | Preserved; context shown as unavailable; no rollover, no working copy with a guessed night, no result form |
+| Queued edit, failed write, crash or repeated restart at the transition | P6.7's key write serialized with autosaves | An atomic, idempotent move: no lost edits, no duplicated or overwritten working copy; a retry is safe |
+| Record result (Not done, Completed as planned, Partly) for Saved and for Saved · changed | Not applicable | Review saved plan (the snapshot) → outcome → Save result. No Save plan. Never before the saved night ends. Counts against the snapshot's blocks, written atomically; replay equals counters; the snapshot unchanged; actuals in the result record |
+| Record result while an unsaved working copy is current | Not applicable | No Save · Discard · Cancel; the working copy unchanged |
+| Result Cancel or failed write; the entry changed since the form opened | Not applicable | Nothing written or changed; a stale form refused, with feedback |
+| U1's Discard on Saved · changed | Only the working changes revert to the snapshot. The entry is never deleted; an unreadable snapshot keeps it unchanged, and the user is told | Same |
+| Existing Saved · changed rows at the Stage 8 upgrade | Not applicable | Split into the saved entry and a working copy, with a migration test; nothing lost |
+| In progress, completed, abandoned, legacy | Existing behaviour | Same; the live Finish and result corrections remain ADR-016 paths |
 
 ### Stage 5 — Design System Foundation
 
@@ -1960,13 +2005,13 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
 | --- | --- | --- | --- | --- | --- |
 | P6.0 | **Split `SessionPlanViewModel`** before adding to it (ENG-16; trap 11's cap) | — | — | A behaviour-preserving split; every existing test passes unchanged; each ViewModel within the limit | S–M |
-| P6.1 | **The plan's lifecycle in the planner** | §3 | P6.0, P5.4, P5.6 | The app bar shows target · night · state (UX-04; DEV-P9's first half). ⋮ holds New plan, Copy to another night, and **Track live (optional)**, which moves Start there so results stay reachable until Stage 8. New plan keeps the site and rig and asks for the target. Each action confirms what happened. Save · Discard · Cancel: Discard deletes; an untouched replaced draft is deleted; a site change and a copy count as unsaved (W1, V3). TD-058 fixed (New, Copy and Open inside the autosave chain). UI-driven tests for each guard path | M |
+| P6.1 | **The plan's lifecycle in the planner** | §3, §3.1 | P6.0, P5.4, P5.6 | The app bar shows target · night · state (UX-04; DEV-P9's first half). ⋮ holds New plan, Copy to another night, and **Track live (optional)**, which moves Start there so results stay reachable until Stage 8. New plan keeps the site and rig and asks for the target. Each action confirms what happened. Save · Discard · Cancel: Discard deletes a never-saved draft, and an untouched replaced draft is deleted. On a saved entry, Discard never deletes it and never changes its snapshot: on Saved · changed only the working changes revert to the snapshot (ADR-019 §3.1; the S4.V2 matrix). Saved plans' Save, resume and rollover stay as today (D1); a site change and a copy count as unsaved (W1, V3). TD-058 fixed (New, Copy and Open inside the autosave chain). UI-driven tests for each guard path | M |
 | P6.2 | **Defaults and the first run** (RD-04) | §3 | P6.1 | Nothing preselected on a fresh install. The seeded rig is labelled as an example. The capture plan starts empty, with "Start from the example plan" (TASK 4.4's badge rule kept). The first-run page is honest (UX-24). "Needs a target / a block" is neutral. The tests that relied on the M42 default are updated deliberately, not weakened | S–M |
 | P6.3 | **The planner's structure** | §6 | P5.3, P5.4, P6.1 | Answer-first order: status → context → target and windows → capture plan → conditions summary → rig summary → Save plan (UX-01, UX-02; ADR-015 §2 as amended). Start leaves the bottom bar. Every value that was reachable before still is. The sweep and E2E are updated | M–L |
 | P6.4 | **Disclosure in the planner** | §7 | P5.2, P6.3 | Budget details (each ADR-009 line on its own line), the √N help, the assumptions, the rig's rows and sky-darkness detail sit behind factual summaries. The verdict, key numbers, weather age, attribution and unknowns stay visible. Zone captions once per section (the zone rule kept). No modes | M |
 | P6.5 | **The Night & Moon and Weather detail screens** | §5, §9 | P5.5 | Two root-navigator routes (`AppRouter` constants), opened from Tonight's rows and the planner's summaries (UX-10). The Weather detail keeps ADR-012: age, stale label, attribution, no score or good/bad colour. The standard twilight names appear only there. Both are in the sweep | M |
 | P6.6 | **Tonight, plan first** | §5 | P5.3, P5.4, P6.5 | The context line with a night picker that changes the current plan's night (UX-11; DEV-P9's second half). Then the run card, "Your plan", the rows to the details, and secondary actions. No Start on the card, and no failing Start while a run is in progress (UX-13). A slot for Stage 8's "how did it go?" line | M |
-| P6.7 | **The night key at the rollover** (TD-057; S4.V1) | §3.1 (Y2's preservation rule) | P6.0, P6.1 (serialized lifecycle actions) | Only a never-saved draft (`draft`, `plannedAtUtc == null`) rolls forward in place and writes its night key at mean solar noon. At startup and live rollover, preserve both `planned` and `draft` with `plannedAtUtc`, including the saved snapshot and working edits; no automatic re-dating. Use the saved snapshot's night bounds; missing context is unavailable, never guessed. Explicit historical Open remains reviewable on its working date. An open candidates list re-evaluates on a new night. The continuation is P8.3, not required here. Run the S4.V1 acceptance matrix in Stage 4 for Stage 6 | S–M |
+| P6.7 | **The night key at the rollover** (TD-057; S4.V2, D1) | §3.1 | P6.0, P6.1 | Only a never-saved draft (`draft`, `plannedAtUtc == null`) rolls forward in place. Its night key is written at mean solar noon, serialized with the autosaves; a selected future night is kept. **Saved and Saved · changed plans keep today's resume, rollover and Save behaviour: no partial change before Stage 8 (D1).** An open candidates list re-evaluates on a new night. The S4.V2 matrix's Stage 6 column | S |
 | — | **Acceptance evidence for Stage 6** | §14 | P6.3, P6.6 | A five-second test of Tonight's and the planner's first screens (S4.E's script), recorded as evidence, because S4.E was not run in Stage 4 | — |
 
 These sit alongside, not inside: the chart redesign, the weather timeline and icons, a √N graph,
@@ -2045,9 +2090,9 @@ Task adopts the RD-14 glossary for the screens it touches.*
 
 | P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
 | --- | --- | --- | --- | --- | --- |
-| P8.1 | **Results without a run: domain and data** | §3, §3.1, §4 | — | ADR-014 §3 as amended: planned → completed ("Completed as planned" or "Partly") and draft/planned → abandoned ("Not done", with a reason). A saved-and-edited entry first requires explicit Save under §3.1; all post-session outcomes use the resulting saved version. Detect edits since the form opened before writing; result and count events commit atomically. Counts equal replay (trap 14; ADR-016 §4); the event kind is chosen here. Decide storage of Not done's reason with migration tests if needed. "Reported as planned" provenance (CALC-37/38; RD-13 decided alongside). Check export compatibility (`manifest_version` bumped only if incompatible). Tests: replay equals counters; old sessions unchanged; S4.V1 acceptance matrix in Stage 4 | M–L |
-| P8.2 | **The result form** | §3.1, §4 | P8.1, P5.6, P6.1 | `/session/:id/results` becomes "How did it go?": Completed as planned · Partly (numbers per light block, pre-filled, not ±1; UX-25) · Not done (reason); optional notes and conditions. Saved · changed first offers Review plan or Cancel; review opens the exact entry under the current-plan guard, requires explicit Save with its context visible, then uses that saved snapshot. Cancel/failed Save writes no result; later edits require review again. The tracker's Finish opens the form pre-filled from confirmed counts. RD-12 decided (resume Finish; UX-26). Core-loop E2E moves to Save → result; live path tested separately | M |
-| P8.3 | **The next day: the resume rule and Tonight's line** | §3.1, §4 | P8.1, P8.2, P6.6, P6.7 | At startup and live rollover, both `planned` and `draft` with `plannedAtUtc` whose saved night has passed remain intact; continue on an unsaved copy of working inputs for tonight. Preserve original id, saved night/snapshot and edits. Only never-saved drafts roll forward in place. Copy/adoption is serialized with autosaves, recoverable and idempotent; never replace an active continuation by rescanning history. Explicit historical Open is review, not auto-resume. Missing context does not invent a night. Tonight's reminder opens the same guarded result flow. No notifications. S4.V1 acceptance matrix in Stage 4 | M |
+| P8.1 | **Results without a run: domain and data** | §3, §3.1, §4 | — | ADR-014 §3 as amended: planned, or Saved · changed, → completed ("Completed as planned" or "Partly") or → abandoned ("Not done", with a reason), only once the saved night has ended and without Save plan. The counts are events against the saved snapshot's blocks. Actuals live in the result record and never change the snapshot. Working changes still on the entry are first preserved independently (the storage is chosen here, migration-tested). The result and its events are written atomically, and the counters equal the replay (trap 14; ADR-016 §4). The event kind and where Not done's reason is stored are chosen here. "Reported as planned" provenance (CALC-37/38; RD-13 decided alongside). Export compatibility checked (`manifest_version` bumped only if incompatible). Tests: the S4.V2 matrix's result rows; replay equals counters; old sessions unchanged | M–L |
+| P8.2 | **The result form** | §3.1, §4 | P8.1, P5.6 | `/session/:id/results` becomes "How did it go?": **Review saved plan** (the snapshot: target, site, saved night, blocks) → Completed as planned · Partly (a number per snapshot light block, pre-filled, not ±1; UX-25) · Not done (reason) → **Save result**, with optional notes and conditions. It never shows the planner's state, needs no Save plan, and asks no guard about the current working copy. It is not offered before the saved night ends. A stale form is refused; Cancel writes nothing. The tracker's Finish opens it pre-filled from the confirmed counts (ADR-016). RD-12 decided (resume Finish; UX-26). The core-loop E2E moves to Save → result; the live path is tested separately | M |
+| P8.3 | **The saved-plan transition, delivered at once (D1), and Tonight's line** | §3.1, §4 | P8.1, P8.2, P6.6, P6.7 | At startup and at a live rollover, Saved and Saved · changed whose saved night has ended stay on that night with their snapshot. The planner continues on exactly one independent, unsaved working copy (the latest working inputs; a working night that has not ended is kept). Working changes move to it atomically and idempotently, serialized with the autosaves: never lost, duplicated or overwritten. From here on, a Save for another night or site, or after the end, creates a new saved plan. The Logbook dates a saved entry by its saved night. Existing Saved · changed rows are split (migration-tested). Missing context is preserved, never an invented night. Explicit Open is a review of the snapshot, not a resume. Tonight's line opens the result flow. No notifications. Stage 8 planning may split this into Tasks but ships the saved night and the working copy together. Tests: the S4.V2 matrix's Stage 8 rows | M–L |
 | P8.4 | **The live mode as an option** | §4 | P6.1 | "Track live (optional)" on a saved plan's entry (and the planner's ⋮, from P6.1). No failing Start (UX-13). TD-063 fixed (opening uses the session's current stored state). The resume prompt, one-run rule and keep-screen-on unchanged | S–M |
 | P8.5 | **The Logbook** | §2, §8, §10 | P8.2 | The tab labelled Logbook. Upcoming and Past groups. An entry opens its plan and result. "Export as file". **Progress by target** moved in from the Library (RD-07). The 08 §24 proposals (search, a filter panel, the share output) are scoped by this Stage's planning, not by ADR-019 | M |
 | P8.6 | **An optional plan name** (08 §24), if this Stage's planning keeps it | §10 | P8.5 | "Name (optional)"; the Logbook shows the name, else target · night. A schema change with its migration and tests; the export updated | S–M |
@@ -2086,6 +2131,11 @@ Task adopts the RD-14 glossary for the screens it touches.*
 - **Keep a path to results at every step.** Stage 6 moves Start into ⋮ as "Track live (optional)"
   (P6.1). It never removes Start before Stage 8's result form (P8.1–P8.2) exists.
 - **P6.6 leaves a slot** for Tonight's "how did it go?" line; P8.3 fills it.
+- **The saved-plan transition (D1, S4.V2):**
+  - Stage 6 changes only never-saved drafts and working-plan UX. Saved plans' resume, rollover and
+    Save stay as today;
+  - P8.3 delivers the saved night and the independent working copy together. There is never a state
+    in which a saved plan stops rolling forward while no working copy exists.
 - **The Library's Progress row goes** (P9.1) only after P8.5 has moved Progress into the Logbook.
 - **P5.1's retired-terms baseline** shrinks with each Stage (6, 8, 9) and ends empty at P9.2.
 - **Every Stage updates the core-loop E2E test** with the labels it renames (trap 19), and the

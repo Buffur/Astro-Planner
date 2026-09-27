@@ -252,6 +252,9 @@ for owner decisions (RD). The main ones:
   - Draft is internal; the plan's state reads "Not saved", "Saved" or "Saved · changed";
   - Save stays explicit;
   - yesterday's saved plan waits for its result, and the planner continues on a copy;
+  - a saved plan's snapshot is the immutable intent for its night. Its result is reported against
+    that snapshot without saving the plan again, and later edits belong to an independent working
+    copy (S4.V2; ADR-019 §3.1);
   - replacing unsaved changes asks Save · Discard · Cancel.
 - **RD-04:**
   - nothing is preselected on the first run;
