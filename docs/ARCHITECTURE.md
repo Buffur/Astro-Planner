@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.3, 2026-09-27:** B17 notes the shared words (`AppWords`) and the retired-terms test.
 > **S5.2, 2026-09-27:** B17 extended (component themes for the controls; `AppMotion`).
 > **S5.1, 2026-09-27:** B17 added (the design system's foundation tokens and gallery test).
 > **S4.V3, 2026-09-27:** D5's lifecycle bullets now state only the owner's approved decisions;
@@ -789,6 +790,10 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   scale and turns motion off under the platform's reduced-motion setting. Tested by
   `test/core/theme/controls_theme_test.dart` and the gallery, which also opens a dialog, a message
   and a menu.
+- **Words (S5.3):** `lib/presentation/shared/app_words.dart` (`AppWords`) holds the RD-14
+  glossary's user-facing words. `test/presentation/shared/retired_terms_test.dart` keeps the
+  retired terms out of `lib/presentation`'s string literals, against a baseline that only
+  shrinks (DESIGN_SYSTEM §7).
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
   styles (DESIGN_SYSTEM §8).
 

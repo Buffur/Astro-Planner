@@ -4,8 +4,8 @@
 > "Stage 5 — frozen Task sequence"). It describes the **code as built**. Each Stage 5 Task adds its
 > part; Stages 6–9 adopt it on the screens (see "Adoption", written by S5.9).
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
-> radius; the gallery test) and S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
-> icons; states and motion).
+> radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
+> icons; states and motion) and S5.3 (words: `AppWords` and the retired-terms test).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -211,10 +211,43 @@ still merges over them.
 - The capture plan's current `drag_handle` and red delete icon (08 §14) change when Stage 6 adopts
   this set.
 
-## 7. Words, components and patterns
+## 7. Words (S5.3)
 
-Added by S5.3 (words), S5.4–S5.7 (components) and S5.8 (confirmation, feedback and destructive
-actions, per RD-09 = M + S1).
+- **One name per concept** (RD-14; ADR-019 §10). The owner's glossary
+  (`refinement/research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5) is normative, and
+  `lib/presentation/shared/app_words.dart` (`AppWords`) holds its words once, as `QuantityText`
+  holds number formats:
+  - Rig;
+  - Plan: New plan, Save plan, Your plan, Copy to another night;
+  - Logbook; Night;
+  - Capture plan and block;
+  - the plan states (Not saved · Saved · Saved · changed) and the results (Tracking · Completed ·
+    Partly · Not done · Old log);
+  - Record result, Edit result, Track live (optional), Completed as planned;
+  - the verdict words and the headline ("Fits: … needed of … usable");
+  - Dark, Darkness limit, Imaging window, and the twilight names (the Night & Moon detail only);
+  - Integration, Imaging time, Time needed, Total time, Budget details;
+  - Relative stacking gain (√N vs one frame), never "SNR";
+  - Site, Library, Progress by target;
+  - Export as file, Name (optional).
+- **New strings use `AppWords`**; a screen never spells a glossary term itself.
+  `app_words_test.dart` pins every word to the glossary, so changing one is changing the owner's
+  glossary.
+- **The retired terms**: "Equipment profile", "Session planner", "Draft", "Legacy", "True Night
+  Window", "Astro Dusk/Dawn", "Window load", "Acquisition", "Session budget".
+  - `retired_terms_test.dart` scans `lib/presentation`'s string literals for them (any case,
+    plurals included). Imports, `Key` values, comments and identifiers are exempt.
+  - It compares what it finds with an explicit **baseline**: 16 occurrences in 8 files at
+    `38925dd`, listed in the test. A new occurrence fails. A baseline entry that no longer occurs
+    also fails, so the baseline only shrinks.
+  - Stages 6, 8 and 9 remove entries as they redesign their screens, and P9.2 empties it (S5.9
+    maps each entry to its Stage).
+  - It reads a line at a time, so a term split across two string literals is not seen.
+
+## 7a. Components and patterns
+
+Added by S5.4–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
+RD-09 = M + S1).
 
 ## 8. Known gaps, for adoption
 
