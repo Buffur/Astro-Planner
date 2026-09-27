@@ -1,5 +1,8 @@
 # AstroPlan Architecture
 
+> **S4.V1 clarification, 2026-09-27:** D5 includes saved-and-edited plans at startup and
+> rollover and the explicit-Save result guard (ADR-019 §3.1). Documentation only; Part B unchanged.
+
 > **Direction update, 2026-09-27 (S4.D):** ADR-019 (product flow and information architecture) is
 > approved design intent, not yet built; see D5. Part B still describes the code.
 
@@ -934,8 +937,12 @@ Owner-approved on 2026-09-27; implemented by Stages 5, 6, 8 and 9. The architect
 - **Session lifecycle** (ADR-014 §3 amended):
   - a recorded result completes or abandons a saved plan without a run;
   - its counts are written as events, so the counters equal the replay (trap 14);
-  - a planned session whose night has passed is not resumed as current; the planner continues on a
-    copy.
+  - both `planned` and `draft` with `plannedAtUtc` (Saved · changed) are protected when their
+    saved night has passed, at startup and live rollover; only never-saved drafts roll in place;
+  - Stage 6 protects the original in place; Stage 8 adds a recoverable, unsaved continuation
+    from working inputs. The original saved snapshot and unsaved edits remain intact;
+  - results for Saved · changed require review and explicit Save, or Cancel; the result uses
+    that saved version, never mixed working/snapshot data. ADR-019 §3.1 is normative (S4.V1).
 - **Execution** (ADR-016 amended): optional ("Track live"); the event model is unchanged for live
   runs.
 - **Navigation** (ADR-015 amended):

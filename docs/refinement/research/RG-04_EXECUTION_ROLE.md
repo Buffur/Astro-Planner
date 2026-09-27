@@ -343,3 +343,14 @@ The owner chose the recommended option on each question (DECISIONS E.1, "RG-04 d
 
 ADR-019 (S4.D) records the ADR-014 and ADR-016 amendments; Stage 8 implements. Until then Execution
 stays as built.
+
+## 13. Saved-and-edited entries (S4.V1, 2026-09-27)
+
+The G2 result path includes saved plans edited back to `draft` with `plannedAtUtc`.
+ADR-019 §3.1 defines the guard: **Review plan** and explicitly Save that entry before recording
+its result, or **Cancel** without changing either its snapshot or working edits. Counts and the
+result then refer to the newly saved version; an edit after opening the form requires another
+review. This uses the existing snapshot-refresh-on-Save behavior, never an automatic Save or
+a mixture of the previous snapshot and edited blocks. The original entry is protected from
+automatic rollover even if the user has not saved again. Live-run and completed-result
+correction rules are unchanged. P8.1–P8.3 carry this acceptance.

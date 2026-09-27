@@ -3,18 +3,24 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (Stage 4 validation **FAIL**, S4V-01). Stage 4 remains **in
+> **Last updated:** 2026-09-27 (S4.V1 documentation correction complete). Stage 4 remains **in
 > validation**; Stage 3 closed (`126d97f`).
-> **Next:** a focused Stage 4 documentation follow-up, then independent revalidation.
+> **Next:** independent Stage 4 revalidation.
 
 ## Current state
 
-**Stage 4 validation failed at `adb5d95`, 2026-09-27.** See
-`STAGE_4_VALIDATION.md`. The required artifacts exist, but the lifecycle is incomplete:
-- **S4V-01, blocking:** ADR-019 and P8.3 protect stored `planned` sessions at the next-day
-  transition but omit `draft` + `plannedAtUtc` ("Saved · changed"). P6.7's draft rollover also
-  needs this distinction. Proposed **S4.V1**, documentation only, completes the state matrix
-  and aligns the affected decisions and provisional Tasks; not yet approved or implemented.
+**S4.V1 complete, 2026-09-27 (documentation only; owner requested the fix).**
+- **S4V-01 corrected, pending independent revalidation:** ADR-019 §3.1 protects both `planned`
+  and `draft` + `plannedAtUtc` (Saved · changed) at startup and live rollover. It preserves
+  saved context and working edits, defines the unsaved continuation, and distinguishes
+  explicit historical review from automatic resume.
+- Results for an edited saved entry require review and explicit Save, or Cancel. The result
+  uses the explicitly saved version; a stale form must not mix working and snapshot values.
+- Research, ADR-014's amendment pointer, D5, addendum and P6.7/P8.1–P8.3 are aligned.
+  The plan's S4.V1 section carries a ten-case future acceptance matrix. P6.7 protects saved
+  entries in place before Stage 8 adds continuations and the new result form.
+- The validation **FAIL at `adb5d95`** remains historical (`STAGE_4_VALIDATION.md`); this
+  correction is not an independent Stage PASS.
 - **S4V-02, non-blocking:** the optional darkness script calls Test C read-only even though it
   starts and abandons a run. Correct the setup before running it.
 - **S4V-03, unverified/non-blocking:** owner usability/darkness tests remain unrun, as permitted.
@@ -302,10 +308,10 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 4 — Product Flow & Information Architecture: In validation; FAIL at `adb5d95` (S4V-01).** All artifacts exist; lifecycle completeness needs a documentation follow-up. Stage 3 is complete (final sign-off PASS, `126d97f`) |
+| Current Stage | **Stage 4 — Product Flow & Information Architecture: In validation.** S4.V1 corrects S4V-01; independent revalidation pending. Prior FAIL at `adb5d95` remains historical. Stage 3 is complete (`126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Proposed S4.V1: resolve S4V-01 in the design documents and provisional Tasks, then independently revalidate. Stage 5 stays blocked until Stage 4 passes |
+| Next approved Task | None. Next: independent Stage 4 revalidation after S4.V1. Stage 5 stays blocked until Stage 4 passes |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -320,7 +326,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
-| 4 | Product Flow & Information Architecture | In validation | 2026-09-27 | — | **FAIL** at `adb5d95`, 2026-09-27 (`STAGE_4_VALIDATION.md`): S4V-01 blocking; S4V-02 non-blocking; S4V-03 unverified. Documentation follow-up and revalidation required |
+| 4 | Product Flow & Information Architecture | In validation | 2026-09-27 | — | **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`); S4.V1 corrects S4V-01, pending independent revalidation. S4V-02 non-blocking; S4V-03 unverified |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
@@ -330,6 +336,11 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
 ## Completed Tasks
+
+**S4.V1 — saved-and-edited lifecycle clarification**, 2026-09-27, this correction commit.
+Documentation only, authorized by the owner's request to fix S4V-01. ADR-019 §3.1 is normative;
+research, architecture, wireframe addendum and future Task acceptance are aligned. No application
+or test changes. Independent Stage 4 revalidation remains next.
 
 **2026-09-26 — S2.V1–S2.V3 (this corrective commit):** owner-authorized fixes
 for S2V-01/02/03; current-state documentation debt S2V-05 reconciled. See
@@ -568,10 +579,9 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** S4V-01 blocks closure: the saved-and-edited state lacks the next-day protection
-  specified for saved plans. Proposed S4.V1 is documentation only, followed by independent
+- **Stage 4:** S4.V1 corrects S4V-01 in the design documents; closure still requires independent
   revalidation. S4.E stays optional; Stage 6 carries a five-second test. S4V-02's script correction
-  is non-blocking but must precede Test C.
+  is separate and non-blocking but must precede Test C.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -579,6 +589,13 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **S4.V1 task self-review**, 2026-09-27: the ten-case specification matrix covers saved states,
+  startup/live rollover, snapshot/working-date differences, explicit review, result cancellation,
+  stale edits and storage failure. Only documentation changed. Encoding and `git diff --check`
+  **passed**. The existing-code full gate passed at `adb5d95` (1,214 tests,
+  1 expected skip, 2 host E2E); no code changed since, so it is not rerun for this correction.
+  This is not independent Stage revalidation.
 
 - **Stage 4 independent validation**, 2026-09-27, at `adb5d95`: **FAIL**
   (`STAGE_4_VALIDATION.md`). One blocking specification gap (S4V-01); one optional-script issue
@@ -745,12 +762,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**A focused documentation follow-up for S4V-01**, proposed S4.V1 in
-`STAGE_4_VALIDATION.md`, then a fresh independent Stage 4 revalidation (§9.8).
-The follow-up completes the saved/never-saved/saved-and-edited lifecycle matrix, including
-restart, live rollover, preservation of night/snapshot/edits and result recording. Align the
-research, ADR-019 and pointers, D5, addendum and affected P-Tasks. No application implementation
-belongs in that follow-up. It is proposed, not yet approved or executed.
+**Fresh independent Stage 4 revalidation after S4.V1** (§9.8). Check ADR-019 §3.1 against the
+owner's E2 intent and the full saved-state matrix, including restart/live rollover, changed
+working site/date, snapshot and edit preservation, explicit review/Save and result recording.
+Check consistency across research, the amended ADR pointer, D5, addendum and affected P-Tasks,
+then recheck Stage 4's original exit criteria. No application implementation belongs here.
 
 Stage 5 stays blocked until Stage 4 passes. S4.E remains optional; correct S4V-02 before Test C
 is run, because it changes persisted session state.
