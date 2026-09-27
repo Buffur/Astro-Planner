@@ -3,15 +3,60 @@
 // store costs only the memory, logged.
 
 import 'package:astroplan/core/diagnostics/app_log.dart';
+import 'package:astroplan/data/database/app_database.dart' show AppDatabase;
+import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/data/repositories/drift_location_repository.dart';
+import 'package:astroplan/data/repositories/drift_target_repository.dart';
+import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/data/repositories/shared_prefs_display_preferences_repository.dart';
 import 'package:astroplan/presentation/viewmodels/disclosure_viewmodel.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../support/fake_location_service.dart';
 import '../../support/in_memory_display_preferences.dart';
+import '../../support/no_snapshot_weather.dart';
+import '../../support/planner_harness.dart';
+
+class _NoForecast with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUp(AppLog.clear);
+
+  // S5V-01 (S5.5's acceptance): a restart through the app's composed
+  // ViewModel graph, as main.dart builds and loads it, keeps the state.
+  test('a restart of the whole ViewModel graph on the same store keeps a '
+      'section open', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = InMemoryDisplayPreferences();
+    Future<PlannerHarness> start(AppDatabase db) async {
+      final graph = PlannerHarness(
+        DriftTargetRepository(db),
+        DriftEquipmentRepository(db),
+        _NoForecast(),
+        DriftLocationRepository(db),
+        locationService: FakeLocationService(),
+        displayPreferences: store,
+      );
+      await graph.ready;
+      await graph.disclosure.load(); // as main.dart does before runApp
+      return graph;
+    }
+
+    final db1 = AppDatabase(NativeDatabase.memory());
+    final before = await start(db1);
+    await before.disclosure.setOpen('planner.budgetDetails', true);
+    await db1.close();
+
+    final db2 = AppDatabase(NativeDatabase.memory());
+    final after = await start(db2); // a new app start
+    addTearDown(db2.close);
+    expect(identical(after.disclosure, before.disclosure), isFalse);
+    expect(after.disclosure.isOpen('planner.budgetDetails'), isTrue);
+    expect(after.disclosure.isOpen('planner.assumptions'), isFalse);
+  });
 
   test('closed by default, or as the caller says until the user '
       'chooses', () async {
