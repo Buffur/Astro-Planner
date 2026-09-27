@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 import 'app_palette.dart';
+import 'app_radius.dart';
+import 'app_typography.dart';
 
 /// The app's three themes (TASK 12.4): light, dark and red field mode.
 /// Colours come from [AppColors] and [AppPalette] tokens; text is never
-/// smaller than 12 sp.
+/// smaller than 12 sp. Since S5.1 the text roles drive the colour scheme
+/// (`onSurface` is the primary text, `onSurfaceVariant` and `secondary`
+/// the secondary text), `surfaceContainerHigh` is the raised surface, and
+/// [AppTypography.scale] sets every style's size and weight.
 class AppTheme {
   static final ThemeData light = _withTokens(
     ThemeData(
@@ -27,7 +32,14 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightTextPrimary,
         secondary: AppColors.lightTextSecondary,
+        // Selected segments and the navigation indicator: a light fill
+        // with primary text (Material would derive them from secondary).
+        secondaryContainer: AppColors.lightBorder,
+        onSecondaryContainer: AppColors.lightTextPrimary,
         surface: AppColors.lightSurface,
+        onSurface: AppColors.lightTextPrimary,
+        onSurfaceVariant: AppColors.lightTextSecondary,
+        surfaceContainerHigh: AppColors.lightSurfaceRaised,
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.lightBorder,
@@ -38,7 +50,7 @@ class AppTheme {
         color: AppColors.lightSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppRadius.small),
           side: const BorderSide(color: AppColors.lightBorder),
         ),
         margin: EdgeInsets.zero,
@@ -68,6 +80,9 @@ class AppTheme {
         primary: AppColors.darkTextPrimary,
         secondary: AppColors.darkTextSecondary,
         surface: AppColors.darkSurface,
+        onSurface: AppColors.darkTextPrimary,
+        onSurfaceVariant: AppColors.darkTextSecondary,
+        surfaceContainerHigh: AppColors.darkSurfaceRaised,
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.darkBorder,
@@ -78,7 +93,7 @@ class AppTheme {
         color: AppColors.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppRadius.small),
           side: const BorderSide(color: AppColors.darkBorder),
         ),
         margin: EdgeInsets.zero,
@@ -115,7 +130,7 @@ class AppTheme {
     surfaceContainerLowest: AppColors.fieldBackground,
     surfaceContainerLow: AppColors.fieldSurface,
     surfaceContainer: AppColors.fieldSurface,
-    surfaceContainerHigh: Color(0xFF1A0000),
+    surfaceContainerHigh: AppColors.fieldSurfaceRaised,
     surfaceContainerHighest: Color(0xFF220000),
     outline: Color(0xFF660000),
     outlineVariant: AppColors.fieldBorder,
@@ -136,7 +151,7 @@ class AppTheme {
       cardColor: AppColors.fieldSurface,
       dividerColor: AppColors.fieldBorder,
       hintColor: AppColors.fieldTextSecondary,
-      disabledColor: const Color(0xFF660000),
+      disabledColor: AppColors.fieldTextDisabled,
       unselectedWidgetColor: AppColors.fieldTextSecondary,
       hoverColor: const Color(0x1FFF0000),
       focusColor: const Color(0x1FFF0000),
@@ -165,7 +180,7 @@ class AppTheme {
         color: AppColors.fieldSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(AppRadius.small),
           side: const BorderSide(color: AppColors.fieldBorder),
         ),
         margin: EdgeInsets.zero,
@@ -197,15 +212,15 @@ class AppTheme {
   ];
 
   /// Adds the palette and the shared type scale (no text under 12 sp).
+  /// The scale's sizes and weights override Material's geometry; the
+  /// colours stay the theme's.
   static ThemeData _withTokens(
     ThemeData base,
     AppPalette palette, {
     Color? textColor,
   }) {
     TextTheme readable(TextTheme t) {
-      final scaled = t.copyWith(
-        labelSmall: t.labelSmall?.copyWith(fontSize: 12),
-      );
+      final scaled = t.merge(AppTypography.scale);
       return textColor == null
           ? scaled
           : scaled.apply(bodyColor: textColor, displayColor: textColor);

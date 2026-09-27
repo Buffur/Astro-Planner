@@ -2088,8 +2088,8 @@ Planned at `38925dd`. The application code is unchanged since `92ebf2a`. **Basel
 
 | Task | Title | From | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S5.1 | Foundation tokens: type scale, text roles, surfaces, spacing; the gallery test; `DESIGN_SYSTEM.md` | Stage scope; 08 §7 | M | — | **Next** |
-| S5.2 | Controls: buttons, text fields, dialogs, messages, menus, icons, dividers; states and motion | UX-34; 08 §5, §6, §8, §22; UX-39 | M | S5.1 | Frozen |
+| S5.1 | Foundation tokens: type scale, text roles, surfaces, spacing; the gallery test; `DESIGN_SYSTEM.md` | Stage scope; 08 §7 | M | — | **Done 2026-09-27** |
+| S5.2 | Controls: buttons, text fields, dialogs, messages, menus, icons, dividers; states and motion | UX-34; 08 §5, §6, §8, §22; UX-39 | M | S5.1 | **Next** |
 | S5.3 | The shared vocabulary and the retired-terms test | P5.1 | S | — | Frozen |
 | S5.4 | Status tokens, the status block and the plan-state label | P5.4; UX-16 | S–M | S5.1, S5.3 | Frozen |
 | S5.5 | A collapsible section with a remembered state | P5.2 | S–M | S5.1, S5.2 | Frozen |

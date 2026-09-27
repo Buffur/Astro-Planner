@@ -4,20 +4,19 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (governance cleanup after the correction: M1/M2 commit fixed; CI filter
-> made fail-safe; V1's shared-Task rule clarified).
-> **Next:** S5.1 — foundation tokens, the gallery test and `docs/DESIGN_SYSTEM.md`. RD-09 is decided
-> (M + S1).
+> **Last updated:** 2026-09-27 (S5.1 done; RD-09 decided M + S1).
+> **Next:** S5.2 — controls (buttons, fields, dialogs, messages, menus, icons, dividers; states and
+> motion).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen) |
+| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1 done) |
 | Current Task | None in progress |
-| Next Task | S5.1 (frozen; the frozen sequence is the approval) |
-| Code baseline | S3.V8 (`92ebf2a`). Every commit since changed only documentation (plus this correction's CI path filter). Not pushed (S1.14, RD-17) |
+| Next Task | S5.2 (frozen; the frozen sequence is the approval) |
+| Code baseline | S5.1 (this commit): `lib/core/theme/` and new tests. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -38,38 +37,17 @@
   Task/Stage gate requires it (high-risk Tasks still always end with the full gate). Verified by a
   YAML parse and a 22-case path simulation; the app gate was not rerun (no gate input changed).
 
-**Stage 5 planning** (the entry as written at `a354032`):
-
-**Stage 5 planning done, 2026-09-27 (documentation only).** Stage 5 is in progress.
-- **Verified at `38925dd`** (§9.7), against the code:
-  - the theme has no button, input or dialog theme, and no light or dark snackbar theme;
-  - text roles are a convention, not tokens (08 §7);
-  - fields use Material's default underline (08 §6);
-  - UX-34's mechanism is as reported, and its primary action is already decided by ADR-019 §6;
-  - `FitText.color` has no status tokens (UX-16);
-  - the retired terms occur 16 times in 8 files of `lib/presentation`;
-  - the delete paths are listed under RD-09;
-  - New and Duplicate succeed silently (08 §5, §8).
-- **The frozen sequence:**
-  - S5.1: foundation tokens, the gallery test, `DESIGN_SYSTEM.md`;
-  - S5.2: controls;
-  - S5.3: the vocabulary (P5.1);
-  - S5.4: status tokens, the status block and the state label (P5.4);
-  - S5.5: the collapsible section (P5.2);
-  - S5.6: the context line (P5.3);
-  - S5.7: the detail-screen template (P5.5);
-  - S5.8: confirmation, feedback and destructive patterns (P5.6), per RD-09 (M + S1);
-  - S5.9: the adoption plan and rendered evidence.
-- **The rule:** Stage 5 changes no screen's structure or wording. Theme tokens apply app-wide by
-  design, and components are adopted in Stages 6–9.
-- **RD-09 (owner): decided 2026-09-27, M + S1.** The options as prepared (plan §5, "RD-09 — confirm or undo"):
-  - Q1: C, **M (recommended: undo for edits inside a plan, confirm for stored records)** or U;
-  - Q2: **S1 (recommended: a visible Delete, swipe kept as a shortcut)** or S2.
-- **No research gate.** The visual choices are this Stage's implementation decisions, with an
-  optional owner review of S5.9's rendered sheets.
-- **Baseline gate at `38925dd`: PASS** (Encoding; Format, 376 files, 0 changed; Analyze; 1,214
-  tests, 1 expected skip; 2 host E2E).
-- No application code or test changed.
+**Stage 5** (plan: "Stage 5 — frozen Task sequence"; planned at `a354032`):
+- **RD-09 decided** 2026-09-27 by the owner: M + S1 (`9640915`; DECISIONS E.1, "RD-09 decided").
+- **S5.1 done** 2026-09-27 (this commit): the text roles (`AppPalette.textPrimary`/`Secondary`/
+  `Tertiary`/`Disabled`), the raised surface and border tokens, `AppTypography.scale`, `AppRadius`,
+  the documented `AppSpacing`; the colour scheme follows the roles; the gallery test
+  (`test/presentation/design_system/`); `docs/DESIGN_SYSTEM.md`; ARCHITECTURE B17. The first gate
+  run caught a light-theme regression (black on the darker secondary in a selected segment,
+  2.99:1), fixed with an explicit selected container and a guarding test. Verification: shared
+  behaviour (the theme reaches every screen) and the Task's "gate green": the full gate after the
+  last code change, PASS (below). Every acceptance criterion checked.
+- **Next:** S5.2 (controls). S5.3 may run earlier.
 
 ## Reusable validation evidence
 
@@ -77,7 +55,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (376 files, 0 changed); Analyze; 1,214 tests, 1 expected skip (local real samples); 2 host E2E | `38925dd` (Stage 5 planning); the same result at `5ad69c4` and `92ebf2a` | `git diff --stat 92ebf2a HEAD -- . ':!docs' ':!CLAUDE.md'` shows only this correction's `.agents/rules/03-testing.md` (Markdown) and the `.github/workflows/ci.yml` path filter; neither is an input of the local gate. Invalidated by the first change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (381 files, 0 changed); Analyze; 1,237 tests, 1 expected skip (local real samples); 2 host E2E | S5.1's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -92,7 +70,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1) |
+| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1 done) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -190,19 +168,15 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S5.1 — Foundation tokens: type scale, text roles, surfaces and spacing; the gallery test;
-`docs/DESIGN_SYSTEM.md`**, in a fresh chat where practical. It is frozen, and the frozen sequence is
-the approval (§9.4: implement, test, document, commit, then STOP).
-- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.1, and the rules
+**S5.2 — Controls: buttons, text fields, dialogs, messages, menus, icons, dividers; states and
+motion**. It is frozen, and the frozen sequence is the approval (implement, verify per the policy,
+document, commit, then STOP).
+- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.2, and the rules
   for every Stage 5 Task above it.
-- **Read first:**
-  - `lib/core/theme/` (`app_theme.dart`, `app_palette.dart`, `app_colors.dart`,
-    `app_spacing.dart`);
-  - `test/presentation/theme/`;
-  - `test/presentation/accessibility_test.dart` (the guidelines to reuse);
-  - ARCHITECTURE B16.
-- **Then** S5.2 to S5.7 in order; S5.3 may run earlier.
-- **RD-09 is decided** (M + S1; DECISIONS E.1), so S5.8 is no longer gated.
+- **Read first:** `docs/DESIGN_SYSTEM.md` (S5.1's tokens), `lib/core/theme/app_theme.dart`, the
+  gallery (`test/presentation/design_system/`), `test/presentation/theme/`.
+- **Then** S5.3 to S5.9 in order; S5.3 may run earlier. RD-09 is decided (M + S1), so S5.8 is not
+  gated.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

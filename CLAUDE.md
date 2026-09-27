@@ -43,6 +43,7 @@ Read the relevant source-of-truth documents before architectural, scientific, pr
 - `docs/TECH_DEBT.md`: Debt register (`TD-###`) with evidence and proposed directions.
 - `docs/DECISIONS.md`: Accepted ADRs (verbatim), conformance audit, owner directives, open decisions (`PD-##`).
 - `docs/SCIENTIFIC_INTEGRITY.md`: Scientific issue register (`SI-###`) and calculation register.
+- `docs/DESIGN_SYSTEM.md`: the design system as built (tokens, type scale, text roles, components, patterns, adoption); living since Stage 5.
 - `docs/EXPORT_MANIFEST.md`: export manifest v2 schema; change it with `SessionManifestCodec`, and bump `manifest_version` for any incompatible change.
 - `docs/PROJECT_AUDIT.md`: point-in-time audit evidence and discrepancy log. It is a snapshot; do not edit it to track later changes.
 - `docs/PRODUCT_SPEC.md`, `docs/ROADMAP.md`, `docs/MASTER_ROADMAP.md`, `docs/TEST_PLAN.md`, `docs/IA_WIREFRAMES.md`, and `.agents/rules/`: historical product intent, implementation roadmap, test intent, and project rules.

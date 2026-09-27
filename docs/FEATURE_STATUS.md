@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S5.1, 2026-09-27 (app-wide look; F-46):** the themes gain text roles, one type scale, a raised surface and a radius scale (`docs/DESIGN_SYSTEM.md`). Visible everywhere: default text is the primary role (light `#37352F`, dark `#EBEBEA` instead of black and white), light secondary text is darker (AA), titles are heavier (600), dialogs and date pickers sit on the raised surface, and in light the selected segment and the navigation indicator are light grey with primary text. Field mode stays red or black. No screen's structure or wording changed; no feature's status changed.
+
 > **S3.V8, 2026-09-27 (F-45):** "New rig with the camera specs of" a saved rig no longer copies its pixel size or sensor size into a file with another pixel count. They stay empty for the user, with the reason shown (SI-014). Stage 3 stays open until a fresh-session sign-off passes.
 
 > **S3.V7, 2026-09-27 (F-45, F-23):** the rig editor states where a saved rig's specs came from per spec. An imported rig's estimates read as estimated and its file values as from the file, never as the user's. New session snapshots omit a group provenance its specs do not share. Per-field snapshot provenance is deferred to Stage 8 (TD-070). Stage 3 stays open: S3.V8 (S3S-02) is next.

@@ -10,6 +10,12 @@ import 'app_colors.dart';
 @immutable
 class AppPalette extends ThemeExtension<AppPalette> {
   const AppPalette({
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textTertiary,
+    required this.textDisabled,
+    required this.surfaceRaised,
+    required this.border,
     required this.muted,
     required this.caution,
     required this.sunEvent,
@@ -31,6 +37,22 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.bortle,
     required this.onBortle,
   });
+
+  /// The text roles (S5.1; `docs/DESIGN_SYSTEM.md`): primary for the
+  /// answer and values, secondary for labels and supporting text, tertiary
+  /// for captions and metadata. In light and dark each is WCAG AA on the
+  /// background, the surface and [surfaceRaised]; disabled is exempt (WCAG
+  /// 1.4.3 excludes inactive controls).
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textTertiary;
+  final Color textDisabled;
+
+  /// Dialogs, menus and sheets: one level above the card surface.
+  final Color surfaceRaised;
+
+  /// Card, section and field outlines; dividers.
+  final Color border;
 
   /// Secondary text and icons for empty or unknown states.
   final Color muted;
@@ -73,6 +95,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
       Theme.of(context).extension<AppPalette>() ?? light;
 
   static const light = AppPalette(
+    textPrimary: AppColors.lightTextPrimary,
+    textSecondary: AppColors.lightTextSecondary,
+    textTertiary: AppColors.lightTextTertiary,
+    textDisabled: AppColors.lightTextDisabled,
+    surfaceRaised: AppColors.lightSurfaceRaised,
+    border: AppColors.lightBorder,
     muted: Colors.grey,
     caution: Color(0xFF9A5B00), // dark amber: 5.4:1 on white (AA)
     sunEvent: Colors.orange,
@@ -96,6 +124,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
   );
 
   static const dark = AppPalette(
+    textPrimary: AppColors.darkTextPrimary,
+    textSecondary: AppColors.darkTextSecondary,
+    textTertiary: AppColors.darkTextTertiary,
+    textDisabled: AppColors.darkTextDisabled,
+    surfaceRaised: AppColors.darkSurfaceRaised,
+    border: AppColors.darkBorder,
     muted: Colors.grey,
     caution: Color(0xFFFFB74D), // orange.shade300
     sunEvent: Colors.orange,
@@ -120,6 +154,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Red on black only: brightness, not hue, tells elements apart.
   static const field = AppPalette(
+    textPrimary: AppColors.fieldTextPrimary,
+    textSecondary: AppColors.fieldTextSecondary,
+    textTertiary: AppColors.fieldTextTertiary,
+    textDisabled: AppColors.fieldTextDisabled,
+    surfaceRaised: AppColors.fieldSurfaceRaised,
+    border: AppColors.fieldBorder,
     muted: AppColors.fieldTextSecondary,
     // As bright as "Fits": in red mode the word carries the caution.
     caution: AppColors.fieldTextPrimary,
@@ -193,6 +233,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Every token, for tests.
   List<Color> get all => [
+    textPrimary,
+    textSecondary,
+    textTertiary,
+    textDisabled,
+    surfaceRaised,
+    border,
     muted,
     caution,
     sunEvent,

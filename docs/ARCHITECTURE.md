@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.1, 2026-09-27:** B17 added (the design system's foundation tokens and gallery test).
 > **S4.V3, 2026-09-27:** D5's lifecycle bullets now state only the owner's approved decisions;
 > the detailed rules are Stage 6/8 design questions. Documentation only; Part B unchanged.
 > **S4.V2, 2026-09-27:** D5's lifecycle bullets follow ADR-019 §3.1 as revised to the owner's R2 +
@@ -764,6 +765,24 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   (WCAG AA); secondary text `fieldTextSecondary` #AA0000 is 2.71:1, below AA on purpose —
   field mode is an opt-in for dark-adapted eyes, and AA would need about #EB0000,
   erasing the dim/bright distinction. Contrast is therefore not asserted in field mode.
+
+## B17. Design system (Stage 5; S5.1)
+
+- **Documented in `docs/DESIGN_SYSTEM.md`** (living): tokens, type scale, text roles, surfaces,
+  spacing, radius, and from S5.2 on the controls, components and patterns.
+- **Code:** `lib/core/theme/`. `AppColors` holds the raw values; `AppPalette` (a `ThemeExtension`)
+  the semantic tokens, including the text roles `textPrimary`, `textSecondary`, `textTertiary`,
+  `textDisabled`, `surfaceRaised` and `border` (S5.1); `AppTypography.scale` the one type scale,
+  merged into every theme's text theme; `AppSpacing` and `AppRadius` the spacing and radius
+  scales. The colour scheme follows the roles (`onSurface`, `onSurfaceVariant`, `secondary`,
+  `surfaceContainerHigh`).
+- **Tests:** `test/core/theme/design_tokens_test.dart` (AA contrast of the roles on every surface
+  in light and dark, the 1.3× step, field-mode brightness order, the scheme wiring, the scale, the
+  radius) and the gallery, `test/presentation/design_system/`, which audits shared components in
+  the three themes at 100 % and 200 % text, including ones no route uses yet and dialogs (B16's
+  gap).
+- Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
+  styles (DESIGN_SYSTEM §7).
 
 ---
 
