@@ -1,5 +1,7 @@
 # AstroPlan — Scientific Integrity Register
 
+> **Stage 3 sign-off validation (2026-09-27):** SI-014 recorded (a copied pixel pitch can belong to another output mode; S3S-02, TD-071). No formula changed.
+
 > **S3.V4 (2026-09-27):** CALC-39's image dimensions have a sanity bound: a side over 65,535 px is unparseable (S3V-05). No formula changed.
 
 > **S3.9 (2026-09-26):** CALC-40's proposed values are rounded to the editor's precision (TD-068). The formula is unchanged.
@@ -120,6 +122,7 @@ Correct Interpretation → Required Future Action.**
 | SI-011 | Seed equipment data provenance and internal consistency | **Resolved** for shipped seeds (TASK 8.5) | TD-008 |
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
+| SI-014 | Camera specs copied into another output mode (equipment import) | **Open** (found 2026-09-27, S3S-02) | TD-071 |
 
 ---
 
@@ -767,6 +770,34 @@ a second, theoretical value is wanted (requires bit depth and sensor geometry).
 **Progress 2026-09-22 (TASK 5.4):** storage is computed per block by CALC-25 over every frame taken (library calibration excluded); unknown file size stays unknown (null), never zero. Still an estimate: binning and compression are ignored (ADR-009 L6).
 
 **Status:** Partial. **Work item:** TD-013.
+
+---
+
+## SI-014 — Camera specs copied into another output mode
+
+**Scientific Issue**
+A pixel pitch describes one output mode: binning doubles it, and a crop mode changes the sensor
+area instead (CALC-40, ADR-018 §4). ADR-018 §6 treats a different pixel count as another capture
+mode, never merged silently.
+
+**Current Behavior**
+In "same camera, other optics", `EquipmentDraft.fromCandidate(c, cameraFrom:)` takes the file's
+pixel dimensions and copies the saved rig's pitch and sensor size where the file gives none. It
+does not compare the pixel counts. Probe F3 (`refinement/evidence/STAGE_3_SIGNOFF_PROBES.md`)
+saves 2048 × 1536 px with a 4096 × 3072 rig's 2.414 µm pitch, so resolution × pitch is half the
+stored sensor width. The pixel scale and NPF then use a pitch 2× too small for the images recorded.
+
+**Correct Interpretation**
+A saved rig's pitch and sensor size apply to a file only when the file records the same pixel
+count. Otherwise the file cannot say whether the difference is binning or a crop, so the value
+is unknown until the user supplies it.
+
+**Required Future Action**
+S3.V8 (proposed, owner's choice of rule): do not copy pitch or sensor size when the pixel counts
+differ (recommended), or warn and require an explicit confirmation. Record the rule in ADR-018's
+notes.
+
+**Status:** Open. **Work item:** TD-071.
 
 ---
 

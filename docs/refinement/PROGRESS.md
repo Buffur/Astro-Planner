@@ -3,12 +3,34 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (repeat Stage 3 validation at `d5e2b60`): **PASS**.
-> Original Tasks S3.1–S3.10 and corrective Tasks S3.V1–S3.V6 pass on the recorded evidence.
-> S3V-01–S3V-07 are resolved; S3V-08 remains a separate device recheck.
-> This was a repeat in the existing chat, not a fresh-chat validator session. Stage 4 has not started.
+> **Last updated:** 2026-09-27 (fresh-session Stage 3 sign-off at `74026ca`): **FAIL**.
+> Two blocking findings, S3S-01 (saved provenance shown and snapshotted as the user's) and
+> S3S-02 (camera specs copied across output modes); S3S-03 is non-blocking. S3V-08 is still
+> unverified. Stage 3 is not closed. Stage 4 has not started.
 
 ## Current state
+
+**Fresh-session Stage 3 sign-off, 2026-09-27: FAIL** at `74026ca`. Its code is identical to `d5e2b60`.
+See [the sign-off report](STAGE_3_SIGNOFF_VALIDATION.md) and
+[probe evidence](evidence/STAGE_3_SIGNOFF_PROBES.md).
+
+- **Freshly executed, all pass:**
+  - the full gate (1,195 tests, one expected skip, 2 host E2E);
+  - the four real samples;
+  - the four native JVM tests;
+  - six new synthetic probes over real SQLite.
+- **Blocking:**
+  - **S3S-01 (TD-070):** the rig editor's provenance line and the session snapshot read only the
+    group pairs, which an import saves as `user`/`reported`. An imported rig's CALC-40 estimates
+    are therefore shown as "Camera specs: reported (user)".
+  - **S3S-02 (TD-071, SI-014):** "New rig with the camera specs of …" copies the saved pitch and
+    sensor size into a file of another pixel count. F3 stores half-consistent geometry, and the
+    pixel scale is 2× off.
+- **Non-blocking:** S3S-03 (TD-072), transposed size "conflicts" for a portrait-entered rig.
+- **Unchanged:** everything the earlier reports checked still holds, and no application code
+  changed. S3V-08 (device) stays unverified.
+
+The repeat PASS below remains a record of what it checked. It did not exercise these paths.
 
 **Repeat Stage 3 validation, 2026-09-27: PASS** at `d5e2b60`.
 See [the repeat report](STAGE_3_REVALIDATION.md) and
@@ -80,7 +102,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
-| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **Technical repeat PASS** at `d5e2b60` (`STAGE_3_REVALIDATION.md`). Earlier FAIL at `387e54b` remains preserved. S3V-01–S3V-07 resolved; device recheck S3V-08 unverified. Required fresh-session sign-off remains pending |
+| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **Fresh-session sign-off FAIL** at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`: S3S-01, S3S-02 blocking; S3S-03 low). Before that: FAIL at `387e54b`, then a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Not started | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
@@ -292,8 +314,9 @@ These block a release, not refinement.
   a proposed input to RD-05.
 - **Stage 2 (closed by waiver):** nothing blocks. The carried items are listed under "Next
   allowed action".
-- **Stage 3:** nothing blocks S3.1–S3.6 and S3.8. S3.7's device check M4 needs the owner's phone. Equipment identity for
-  dedicated astro cameras needs a FITS sample (S2.6).
+- **Stage 3:** closure is blocked by S3S-01 and S3S-02 (sign-off, 2026-09-27). The owner must
+  approve the proposed corrective Tasks S3.V7 and S3.V8, or waive. Equipment identity for dedicated
+  astro cameras needs a FITS sample (S2.6).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -301,6 +324,14 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **Fresh-session Stage 3 sign-off**, 2026-09-27, at `74026ca`: **FAIL**
+  (`STAGE_3_SIGNOFF_VALIDATION.md`).
+  - Passed: the gate (Encoding; Format; Analyze; 1,195 tests, 1 expected skip; 2 host E2E); the
+    real samples; the 4 native JVM tests; two positive probes.
+  - Failed: S3S-01 and S3S-02 (blocking).
+  - Low: S3S-03.
+  - Validation only: no application, test or dependency change; the probe file was removed.
 
 - **Stage 3 second planning pass**, 2026-09-26, at `0c4848b`: documentation only; the gate re-run
   green (Encoding; Format; Analyze; 1068 tests, 1 expected skip; 2 host E2E), and the local
@@ -438,14 +469,25 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Fresh-session independent Stage 3 sign-off** (§9.8), or an explicit owner waiver
-of that process requirement. The repeat repository validation at `d5e2b60` passes:
-all Tasks and former blockers were rechecked, all ten archived probes plus R1 pass,
-and the complete gate, real samples and native tests pass (`STAGE_3_REVALIDATION.md`).
-It occurred in the existing chat, so it does not claim the fresh-session requirement.
-No further implementation defect is established by this repeat.
-The separate S3V-08 device recheck must use `.s2check`, never the owner's app.
-Do not start Stage 4 without completing the remaining sign-off or the owner's direction.
+**Owner decision on the Stage 3 sign-off findings** (`STAGE_3_SIGNOFF_VALIDATION.md`). Nothing is
+implemented until the owner approves. The options:
+
+- **Approve S3.V7 (S3S-01, TD-070).** The rig editor states each saved spec's provenance through
+  `provenanceOf`. For the session snapshot, choose:
+  - **(a)** add per-field provenance to new rig snapshots, with the ADR-014 §4 format and the
+    export documents in the same change;
+  - **(b)** defer the snapshot to Stage 8.
+- **Approve S3.V8 (S3S-02, TD-071, SI-014).** Choose the camera-copy rule:
+  - **(a), recommended:** when the file's pixel count is known and differs, do not copy pitch or
+    sensor size;
+  - **(b)** warn and require explicit confirmation.
+
+  Also decide whether S3S-03 (TD-072) joins S3.V8.
+- **Or waive** the findings and close Stage 3.
+
+If approved: one Task per commit, then STOP. Then a fresh-session Stage 3 validation (§9.8), or the
+owner's waiver. The separate S3V-08 device recheck must use `.s2check`, never the owner's app.
+Do not start Stage 4 before Stage 3 is closed.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
