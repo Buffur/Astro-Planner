@@ -43,6 +43,8 @@
 > - P6.1, P6.7 and P8.1–P8.3 state only the approved decisions;
 > - the final Stage 4 validation is bounded;
 > - §9.8 gains the bounded-validation rule for analysis-and-decision Stages.
+> **Updated 2026-09-27 (Stage 4 closed):** the final, bounded validation passed at `09a7f06`
+> (`STAGE_4_FINAL_VALIDATION.md`). Stage 5 planning is next.
 
 ## Contents
 
@@ -1965,6 +1967,9 @@ Stage 4 validation. It answers only whether:
 - The validation creates no new product requirements.
 - **PASS:** Stage 4 closes, and Stage 5 becomes the next allowed action.
 - **FAIL:** the report names only the exact decision or criterion contradicted, with evidence.
+
+**Result (2026-09-27):** **PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`). Stage 4 is
+closed.
 
 ### Stage 5 — Design System Foundation
 
