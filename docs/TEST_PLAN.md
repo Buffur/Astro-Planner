@@ -2,15 +2,11 @@
 
 ## Required Checks
 
-For meaningful implementation changes, run:
-
-```text
-flutter analyze
-flutter test
-```
-
-For release or platform-sensitive changes, also run the relevant Android build
-and device/emulator verification.
+Which checks a change needs, and when a passing run may be reused, is defined
+once in `CLAUDE.md`, "Verification Policy (canonical)" (V1–V3; redirected
+2026-09-27). The full gate is `dart run tool/check.dart`. Release and
+platform-sensitive changes also need the Android build and the device rows that
+their own gate names (`docs/RELEASE.md`, § Lifecycle matrix below).
 
 ## Unit Tests
 

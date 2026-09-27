@@ -48,6 +48,9 @@
 > **Updated 2026-09-27 (Stage 5 planning, verified at `38925dd`):** Stage 5's Task sequence is
 > frozen ("Stage 5 — frozen Task sequence"): S5.1–S5.9, with S5.8 gated on RD-09, whose options are
 > prepared there. §6.2 and §8 rows updated. No other Stage changed.
+> **Updated 2026-09-27 (governance correction, verified at `a354032`):** §9.1, §9.4 and §9.8 now
+> point to `CLAUDE.md`'s Verification Policy instead of restating validation rules; the Stage 5
+> validation names its frozen surface. No Stage scope or decision changed.
 
 ## Contents
 
@@ -2369,8 +2372,10 @@ S5.1, S5.2 and S5.9 come from the Stage definition, not from ADR-019. No P-Task 
   - gate green.
 
 ##### Stage 5 validation
-A fresh-session, independent validation (§9.8, the implementation model: this Stage writes
-application code). It tries to disprove that:
+A fresh-session, independent validation (§9.8; this Stage writes application code). Its frozen
+acceptance surface (CLAUDE.md, Verification Policy V4) is S5.1–S5.9's acceptance criteria, the
+rules for every Stage 5 Task above, RD-09 as decided, and the following. It tries to disprove
+that:
 - the tokens and components exist, are tested (style rules, the gallery's accessibility checks,
   red mode) and are documented;
 - no screen's wording or structure changed, other than through the theme tokens;
@@ -2810,11 +2815,11 @@ differ, `CLAUDE.md` wins.
 6. Freeze the approved Task sequence
 7. Execute the Tasks sequentially
 8. One coherent Task per implementation session or chat, where practical
-9. Validate each Task
+9. Verify each Task (CLAUDE.md, Verification Policy V1–V3)
 10. Commit each completed Task
-11. Fresh, independent Stage validation
-12. Create focused fix Tasks if validation finds issues
-13. Close the Stage
+11. Fresh, independent Stage validation against the frozen criteria (V4, V8)
+12. Focused corrective Tasks for blockers only; revalidate the affected surface (V5)
+13. Close the Stage when every frozen criterion passes (V7)
 14. Update PROGRESS.md
 15. Start the next Stage in a fresh chat
 ```
@@ -2864,8 +2869,7 @@ READ
 → VERIFY CURRENT STATE
 → PLAN
 → IMPLEMENT
-→ TARGETED TESTS
-→ REGRESSION / QUALITY GATE
+→ VERIFY (CLAUDE.md, Verification Policy: by change class, reusing valid evidence)
 → SELF-REVIEW
 → UPDATE REQUIRED DOCS
 → COMMIT
@@ -2915,41 +2919,20 @@ solution looks practical.
 
 ### 9.8 Validation model
 
-**Task validation,** inside the implementation Task: targeted tests; the affected regression
-tests; analyzer and formatting; the quality gate (`dart run tool/check.dart`); and explicit
-verification of each acceptance criterion.
+The validation model is defined once, in `CLAUDE.md`, "Verification Policy (canonical)":
+- V1: the verification each change class needs (Task validation);
+- V2, V3: when a broader check satisfies a narrower one, and when passing evidence is reused;
+- V4: the frozen acceptance surface, and what may block (analysis-and-decision Stages use the
+  bounded list there);
+- V5: what is revalidated after a correction;
+- V6: when a PASS may reopen;
+- V7: when work closes, and when repeated failures go to the owner;
+- V8: what a fresh session reads and reruns.
 
-**Stage validation,** in a fresh session after the Stage's Tasks are complete. The validator
-tries to disprove that the Stage is complete. Default instruction:
-
-```text
-Do not implement fixes during validation.
-Verify the Stage against its defined acceptance criteria.
-Look for regressions, scope drift, incomplete tasks, stale assumptions,
-architecture violations, scientific-integrity issues, and missing evidence.
-```
-
-Findings that survive review become focused fix Tasks.
-
-**Bounded validation for analysis-and-decision Stages** (the owner, 2026-09-27, S4.V3; the full rule
-is in `CLAUDE.md`, "Validation Rules"). A Stage that delivers research, owner decisions, ADRs and
-provisional Tasks, with no application code, is validated only against that scope:
-- its research Tasks were completed;
-- each required gate has an explicit owner decision;
-- the ADR faithfully records the decisions;
-- companion documents are consistent;
-- the decisions are mapped to later Stages;
-- no direct contradiction makes an approved core flow impossible;
-- no acceptance criterion is unmet.
-
-**Blocking and convergence:**
-- Only a direct contradiction with an approved owner decision, or an explicit acceptance
-  criterion, blocks.
-- Open implementation details, edge cases, alternatives and policies that the implementing Stage
-  can decide are recorded as `DEFERRED / IMPLEMENTATION DECISION`.
-- Neither validations nor their corrective Tasks create requirements, or present inferences as
-  owner decisions.
-- A pass closes the Stage. A failure names the exact decision or criterion contradicted.
+This section used to restate a Task-validation list (always the full gate) and an open-ended
+Stage-validation instruction ("look for regressions, scope drift, … missing evidence"). Both are
+replaced by the policy (governance correction, 2026-09-27). The Stage-validation procedure is
+`docs/refinement/prompts/INDEPENDENT_STAGE_VALIDATION.md`.
 
 ### 9.9 Documentation duties
 

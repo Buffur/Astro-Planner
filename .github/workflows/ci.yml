@@ -1,9 +1,28 @@
 name: CI
 
+# The full quality gate. A push or pull request that changes only
+# documentation (CLAUDE.md, "Verification Policy", V1's documentation class)
+# is skipped: the gate's inputs are unchanged. Any .dart file is re-included,
+# because `flutter analyze` reads every .dart file in the package. The two
+# path lists must stay identical.
 on:
   push:
     branches: [main]
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!CLAUDE.md'
+      - '!README.md'
+      - '!.agents/**.md'
+      - '**.dart'
   pull_request:
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!CLAUDE.md'
+      - '!README.md'
+      - '!.agents/**.md'
+      - '**.dart'
 
 jobs:
   quality-gate:

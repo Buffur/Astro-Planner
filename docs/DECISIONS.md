@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **Governance correction, 2026-09-27:** one canonical Verification Policy in `CLAUDE.md`
+> (E.1, "One canonical Verification Policy"). Process only.
 > **S4.V3, 2026-09-27:** ADR-019 §3.1 was reduced to the owner's approved decisions. S4.V2's five
 > inferred rules are withdrawn and listed as Stage 6/8 design questions. A bounded-validation rule
 > now applies to analysis-and-decision Stages. See E.1, "Bounded validation for analysis and
@@ -1403,7 +1405,7 @@ Stage 4 revalidation is still required.
     criterion, that is contradicted, with evidence;
   - Stage 4's scope is not expanded.
 - **For future Stages:** the bounded-validation rule applies to every analysis-and-decision Stage
-  (`CLAUDE.md`, "Validation Rules"; `refinement/POST_ROADMAP_PLAN.md` §9.8).
+  (`CLAUDE.md`, "Validation Rules" — since 2026-09-27 "Verification Policy (canonical)"; `refinement/POST_ROADMAP_PLAN.md` §9.8).
 - **Records:**
   - ADR-019's status line and §3.1 (reduced to the approved decisions);
   - the ADR-014 pointer, §3's Discard line, addendum §3.10, S4.R3 §13;
@@ -1411,6 +1413,26 @@ Stage 4 revalidation is still required.
   - the plan's S4.V3 section (the deferred list and the bounded scope) and §9.8;
   - `CLAUDE.md`'s Validation Rules; `PROGRESS.md`.
 - Documentation only. Next: the final, bounded, fresh-session Stage 4 validation.
+
+### One canonical Verification Policy (governance correction, 2026-09-27)
+
+- **Context:** Stages 1–4 each needed the owner after two failed validations. The causes were
+  overlapping test rules (`CLAUDE.md`, `.agents/rules/03-testing.md`, plan §9.8, `TEST_PLAN.md`),
+  no evidence-reuse rule (the full gate rerun on unchanged code), reviews widening their own
+  acceptance surface, corrections triggering whole-Stage revalidation, and a `PROGRESS.md` that
+  had grown into a history.
+- **Decided by:** the project owner, in chat (a governance prompt).
+- **Decision:** `CLAUDE.md`, "Verification Policy (canonical)", V1–V8, is the only statement of
+  required verification by change class, evidence reuse, the frozen review surface and what may
+  block, correction-scoped revalidation, PASS reopening, and stop/convergence. It generalises the
+  bounded-validation rule above to every validation and keeps that rule verbatim for
+  analysis-and-decision Stages. Other documents refer to it.
+- **Records:** `CLAUDE.md` (the policy; rules 13, 16, 17; "Testing"); `.agents/rules/03-testing.md`;
+  `TEST_PLAN.md` "Required Checks"; plan §9.1, §9.4, §9.8 and the Stage 5 validation;
+  `refinement/prompts/INDEPENDENT_STAGE_VALIDATION.md` and `CONTINUE_CURRENT_WORK.md`;
+  `.github/workflows/ci.yml` (documentation-only changes skip the gate); `PROGRESS.md`, reduced to
+  the handoff, with its history moved verbatim to `PROGRESS_HISTORY.md`.
+- Process only: no product, scientific or architecture decision changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

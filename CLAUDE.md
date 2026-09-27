@@ -88,15 +88,15 @@ Until Stage 0 is committed, the existing roadmap governance remains in force.
 
 12. **Ordinary implementation difficulty is not a reason to stop.** If the approved Task is coherent and achievable within scope, carry it through to completion.
 
-13. **For an approved implementation Task use:** `READ → VERIFY → PLAN → IMPLEMENT → TARGETED TESTS → REGRESSION / QUALITY GATE → SELF-REVIEW → DOCS → COMMIT → STOP`.
+13. **For an approved implementation Task use:** `READ → VERIFY → PLAN → IMPLEMENT → VERIFY (per the Verification Policy) → SELF-REVIEW → DOCS → COMMIT → STOP`.
 
 14. **Do not stop after planning when the implementation Task is already approved.**
 
 15. **Never start the next Task or Stage automatically.**
 
-16. **Run appropriate targeted tests after changes.**
+16. **Verify each change as the Verification Policy (below) requires for its change class.**
 
-17. **Run analyzer/formatter and the repository quality gate where applicable before calling an implementation Task complete.**
+17. **Reuse passing evidence whose inputs are unchanged; do not rerun checks for a newer hash or a new session** (Verification Policy V2, V3).
 
 18. **Do not remove or weaken tests merely to make a change pass.**
 
@@ -200,16 +200,56 @@ Research sessions normally do not modify production application code.
 
 Do not convert a research hypothesis into implementation merely because one solution appears practical.
 
-### Validation Rules
+### Verification Policy (canonical)
 
-Validation exists at two levels.
+This section is the **only** statement of what verification a change needs, when evidence may be reused, what a review may block on, and when work stops. Every other file (`.agents/rules/03-testing.md`, `POST_ROADMAP_PLAN.md` §9, `PROGRESS.md`, the prompts in `docs/refinement/prompts/`) refers here instead of restating it; where any of them differs, this section wins. Generic skills under `.agents/skills/` describe how to run a tool, not when this repository requires it. (Owner, 2026-09-27, the governance correction after Stages 1–4.)
 
-**Task validation** is part of the implementation Task and must include the applicable targeted tests, relevant regression tests, analyzer/formatter, quality gate, and explicit acceptance-criteria verification. A Task is not complete merely because code was written.
+**Principle:** verification is proportional to what changed and to what evidence the change could have invalidated. Rigor is kept where the risk is; repetition that cannot change the answer is removed.
 
-**Stage validation** is performed in a fresh independent session after the Stage's implementation Tasks are complete. The validator should attempt to disprove that the Stage is complete, checking for regressions, scope drift, incomplete work, stale assumptions, architecture/scientific-integrity violations, and missing evidence. Validation-only sessions do not silently implement fixes; surviving findings become focused follow-up Tasks.
+**V1 — Required verification by change class.** Classify by the files actually changed; the highest class present wins.
+
+| Change class | Required verification |
+| --- | --- |
+| **Documentation / governance only**: only files under `docs/`, `CLAUDE.md`, `README.md` or Markdown under `.agents/`, and none of them a `.dart` file (the analyzer reads every `.dart` file in the package, the `.agents/skills` examples included) | References and IDs resolve; the changed text is consistent with the documents it cites; `git diff --check` (whitespace). No application test, analyzer or gate run. |
+| **Localized code change** (one feature area, no shared contract) | Targeted tests for the changed behaviour (new or updated), the tests of the touched files' area, `flutter analyze --no-pub`, `dart format` on the changed files, and `dart run tool/check_encoding.dart`. |
+| **Shared behaviour** (a ViewModel, shared widget, theme, router, repository interface, or anything several screens use) | The above, plus the regression tests of every affected area. Run the full gate when the affected set cannot be listed with confidence. |
+| **High-risk surface**: schema/migrations, persistence and data integrity, scientific calculations, time/night semantics (UTC, zones, DST, SessionNight), metadata parsing and provenance, backup/export formats, dependencies/lockfiles, build or test tooling (`tool/`, `analysis_options.yaml`, `build.yaml`, CI steps or the CI Flutter version) | **The full quality gate** (`dart run tool/check.dart`), plus the domain probes the Task names (migration tests, the local real-sample test for metadata, reference fixtures for calculations). A CI change that only filters *when* the gate runs needs its syntax and path logic checked, not a gate run. |
+| **Correction after a review** | See V5: the original finding(s), the criteria the correction touches, and the correction's own regression surface, at the class of the files it changes. |
+| **Task completion** (any code) | The class above for the Task's cumulative diff, run **after the last code change**, plus an explicit check of each acceptance criterion. A Task that changed application code under the shared or high-risk classes ends with one full-gate pass. |
+| **Stage / release gate** | Exactly the frozen Stage or release acceptance checks. The full gate or device evidence only where that gate requires it, and V3 applies to both. |
+
+**V2 — A broader check satisfies a narrower one.** The full gate contains the encoding check, format, `flutter analyze`, all unit/widget tests and the host E2E suite. After it passes on the final inputs, do not rerun any of those separately. Targeted tests during development are for fast feedback; they are not required again after a passing broader run on unchanged inputs.
+
+**V3 — Evidence reuse.** Passing evidence stays valid while the inputs relevant to it are unchanged. The inputs of the full gate are: application code (`lib/`, `assets/`, `android/`, `ios/`, other platform folders), test code (`test/`, `integration_test/`), dependencies (`pubspec.yaml`, `pubspec.lock`), and tooling (`tool/`, `analysis_options.yaml`, `build.yaml`, the Flutter version in `.github/workflows/ci.yml`); for an environment-dependent result (device, platform, real samples), also that environment.
+- A new commit hash, a new chat or session, a changed review document or a changed `PROGRESS.md` does **not** invalidate evidence.
+- Do not rerun a check to obtain a newer timestamp or hash. Rerun it only when (a) a relevant input changed, (b) the previous run is known to be invalid or incomplete, or (c) the acceptance gate being judged explicitly requires a fresh run.
+- To reuse, record one line: the result, the commit or state it ran on, and why nothing since invalidates it (for example: `git diff --stat <commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty).
+
+**V4 — The acceptance surface is frozen before a review starts.** A Task review, Stage validation or sign-off judges only: the approved Task or Stage acceptance criteria; the approved owner decisions; the explicit invariants (the traps below, ADRs); and the verification this policy requires. A finding is a **BLOCKER** only if it shows:
+- A. evidence that one of those criteria, decisions or invariants is not met;
+- B. a regression caused by the work under review; or
+- C. a severe correctness, data-loss, data-integrity, privacy or safety defect exposed by the work (state the concrete failure, not a hypothetical).
+
+Everything else — a hypothetical edge case, an alternative design, an unspecified implementation detail, a preference, a newly invented policy — is recorded as `FOLLOW-UP`, `DEFERRED / IMPLEMENTATION DECISION` or `OWNER DECISION` (or in `TECH_DEBT.md` / `SCIENTIFIC_INTEGRITY.md`), and does not block. A review never adds acceptance criteria to the work it is judging, and never presents an inferred rule as an owner decision.
+
+**V5 — Revalidation after a correction.** After a corrective Task fixes a blocker, the next validation checks only:
+1. the original blocking finding(s);
+2. the acceptance criteria the correction touches;
+3. regressions plausibly caused by the correction (its own diff, at its V1 class).
+
+It does not restart open exploration of the Stage; everything else keeps its PASS. A complete Stage revalidation is chosen only when the correction changes the Stage's approved design or acceptance contract, or touches enough of the implementation that the earlier evidence is invalid under V3. Whoever chooses it records why in one line.
+
+**V6 — When a PASS may reopen.** Only on (a) new contradictory evidence (a failing test, a reproduced defect, a quoted contradiction), (b) a change to a relevant input under V3, or (c) an approved change to the criterion. A new session is not evidence; a different validator's reading of the same evidence is not by itself evidence.
+
+**V7 — Stop and converge.**
+- When every frozen criterion passes and no V4 blocker remains, the Task or Stage **closes**: record it and advance the Next Allowed Action. Do not validate the validation.
+- If two consecutive validations of the same Task or Stage fail on interpretation or scope (findings that restate or reinterpret criteria already judged, rather than new contradictory evidence under V6), stop automatic revalidation. Record the disagreement and ask the owner to resolve the scope. (Stages 1–4 each needed the owner after two failed validations.)
+- Validation-only sessions never fix what they find; surviving blockers become focused corrective Tasks.
+
+**V8 — Fresh sessions.** Stage validation runs in a fresh session where practical, for independent reasoning. A fresh session reconstructs state from `PROGRESS.md` (its Next Allowed Action and reusable evidence), the frozen criteria and the sources they reference. It does not rerun tests whose inputs are unchanged (V3), reread historical audits or validation reports beyond those referenced, reopen passed criteria (V6), or reconstruct project history.
 
 **Analysis-and-decision Stages** (research, owner decisions, ADRs and provisional Tasks; no
-application code) are validated against a **bounded scope**. The validation checks only:
+application code) are validated against a **bounded scope** — the V4 surface for such a Stage. The validation checks only:
 - that the Stage's research Tasks were completed;
 - that every required research gate has an explicit owner decision;
 - that the ADR or specification faithfully records those decisions;
@@ -232,20 +272,22 @@ report names only the exact approved decision or acceptance criterion that is co
 evidence, and the Stage's scope is not expanded. (Owner, 2026-09-27; DECISIONS E.1, "Bounded
 validation for analysis and decision Stages".)
 
+**CI.** `.github/workflows/ci.yml` runs the full gate on every push to `main` and every pull request, except when every changed file is in V1's documentation class (its `paths` filter lists the same paths and re-includes any `.dart` file). CI has not run yet: the push is deferred (RD-17).
+
 ## Current Baseline and Known Traps (as of 2026-09-24, TASKs 15.4 and 15.5 open until a device run; TASK 10.5 cut)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):
 
-- **`dart run tool/check.dart`** — the quality gate: an encoding check (`tool/check_encoding.dart`), `dart format --set-exit-if-changed`, `flutter analyze --no-pub`, `flutter test --no-pub` (format/analyze/test scoped to `lib`/`test`), and since TASK 15.5 the end-to-end suite on the host (`flutter test --no-pub integration_test -d flutter-tester`; plain `flutter test integration_test` asks for a device), in one command. Runs all steps regardless of an earlier failure, then prints a pass/fail summary and exits non-zero if any failed. Run this before calling a change complete (TASK 1.3, TD-046; encoding step added TASK 4.3, TD-015).
+- **`dart run tool/check.dart`** — the full quality gate: an encoding check (`tool/check_encoding.dart`), `dart format --set-exit-if-changed`, `flutter analyze --no-pub`, `flutter test --no-pub` (format/analyze/test scoped to `lib`/`test`), and since TASK 15.5 the end-to-end suite on the host (`flutter test --no-pub integration_test -d flutter-tester`; plain `flutter test integration_test` asks for a device), in one command. Runs all steps regardless of an earlier failure, then prints a pass/fail summary and exits non-zero if any failed. When it is required, and when an earlier pass may be reused, is decided by the Verification Policy (V1–V3) (TASK 1.3, TD-046; encoding step added TASK 4.3, TD-015).
 - `flutter analyze --no-pub` — expected: no issues.
 - `flutter test --no-pub` — expected: **1195 pass, 0 fail** (green since TASK 1.1; `TD-003` resolved; 83 → 135 in TASK 2.2 → 147 in TASK 2.3 → 152 in TASK 2.4 → 160 in TASK 3.2 → 166 in TASK 3.3 → 179 in TASK 4.1 → 193 in TASK 4.2 → 201 in TASK 4.3 → 205 in TASK 4.4 → 229 in TASK 5.2 → 249 in TASK 5.3 → 268 in TASK 5.4 → 282 in TASK 5.5 → 291 in TASK 5.6 → 299 in TASK 6.2 → 309 in TASK 6.3 → 319 in TASK 6.4 → 327 in TASK 6.5 → 347 in TASK 7.1 → 379 in TASK 7.2 → 404 in TASK 7.3 → 420 in TASK 7.4 → 451 in TASK 8.1 → 463 in TASK 8.2 → 483 in TASK 8.4 → 500 in TASK 8.5 → 511 in TASK 8.6 → 521 in TASK 9.2 → 535 in TASK 9.3 → 547 in TASK 9.4 → 572 in TASK 10.2 → 577 in TASK 10.3 → 584 in TASK 10.4 → 598 in TASK 11.2 → 613 in TASK 11.3 → 620 in TASK 11.4 → 625 in TASK 12.2 → 631 in TASK 12.3 → 651 in TASK 12.4 → 665 in TASK 12.5 → 760 in TASK 13.2 → 780 in TASK 13.3 → 795 in TASK 13.4 → 808 in TASK 14.1 → 814 in TASK 14.2 → 822 in TASK 14.3 → 835 in TASK 14.4 → 857 in TASK 15.1 → 864 in TASK 15.2 → 871 in TASK 15.3 → 878 in TASK 15.4 → 881 in TASK 16.1 → 889 in TASK 16.2 → 896 in TASK 16.3 → 897 in S1.1 → 901 in S1.2 → 908 in S1.3 → 909 in S1.4 → 919 in S1.5 → 929 in S1.6 → 935 in S1.7 → 936 in S1.8 → 943 in S1.9 → 944 in S1.10 → 945 in S1.11 → 947 in S1.12 → 948 in S1.13 → 949 in S1.17 → 954 in S1.V1 → 957 in S1.V2 → 962 in S1.V3 → 963 in S1.V4 → 980 in S2.1 → 995 in S2.2 → 1008 in S2.3 → 1016 in S2.4 → 1024 in S2.5 → 1034 in S2.7 → 1042 in S2.8 → 1052 in S2.V1–S2.V3 → 1062 in S2.9 → 1068 in S2.V4 → 1082 in S3.1 → 1093 in S3.2 → 1094 with TD-066's exposure test → 1115 in S3.4 → 1130 in S3.3 → 1143 in S3.5 → 1150 in S3.6 → 1159 in S3.8 → 1161 in S3.7 → 1165 in S3.9 → 1169 in S3.10 → 1173 in S3.V1 → 1177 in S3.V2 → 1182 in S3.V3 → 1186 in S3.V4 → 1191 in S3.V5 → 1195 in S3.V6). A failing test is now a regression.
 - **Metadata real samples (S2.3, ADR-017 §9):** `test/data/metadata/real_samples_test.dart` is skipped unless `ASTROPLAN_METADATA_SAMPLES` names a directory outside the repository holding `expected.json` (the owner's machine: `C:\Users\zalub\AstroPlanSamples\metadata`). Never commit the owner's files, slices of them or their values; committed fixtures are synthetic (`test/support/tiff_fixture.dart`).
 - `dart run tool/check_encoding.dart` — expected: no issues. Every `lib`/`test` `.dart` file must be valid UTF-8 and contain no Cyrillic character (U+0400–U+04FF); this codebase is English-only, so any Cyrillic is almost certainly mojibake (UTF-8 text misread as a single-byte codepage, then re-saved as UTF-8) — this is what TD-015's `Вµm`/`В°`/box-drawing corruption looked like. Do not write a literal mojibake string (even in a test asserting it's absent, or in a comment) — the checker will flag it; describe the character instead.
-- `dart format lib test` — expected: no changes (the whole tree was formatted once, TASK 1.3). Formatting is not yet enforced in CI; `tool/check.dart` is the only current gate.
+- `dart format lib test` — expected: no changes (the whole tree was formatted once, TASK 1.3). CI runs `tool/check.dart` (formatting included) but has not run yet, because the push is deferred (RD-17); until then the local run is the only gate.
 - **After changing Drift tables (TASK 3.2 workflow, `build.yaml` configures it):** dump a new snapshot with `dart run drift_dev schema dump lib/data/database/app_database.dart drift_schemas/`, regenerate verification code with `dart run drift_dev schema generate drift_schemas/ lib/data/database/generated_migrations/ --no-data-classes --no-companions`, regenerate the step shapes with `dart run drift_dev schema steps drift_schemas/ lib/data/database/schema_versions.dart` (TASK 5.3), add the new `fromNToM` step to the `migrationSteps(...)` call in `onUpgrade` — written against the step's own `schema.<table>` shapes, **never** the live tables, and add a migration test in `test/data/database/schema_migration_test.dart` (schema-equality + a data-preservation test). The floor is v8 (`kMinSupportedSchemaVersion`); `onUpgrade` throws `UnsupportedSchemaVersionException` for anything below it or newer than the app, before any statement runs; since S1.5 `main.dart` probes the database first (`refusedSchemaVersion`) and shows `UnsupportedDatabaseApp` instead of the app — a confirmed reset (`resetRefusedDatabase`, file kept as `.v<N>.bak`) only below the floor, never for a newer database (ADR-008 §2). To change a foreign key's `ON DELETE` action or drop a column, use `Migrator.alterTable(TableMigration(table))` (SQLite can't alter either in place) — pass the step's versioned shape (`schema.captureBlocks`), and list a brand-new column in `newColumns: [...]` (with a `columnTransformer` for its value), or the copy will try to select a column the old table doesn't have. Schema is **v18 since S3.4** (per-field equipment provenance and the metadata identity, ADR-018 §5: a spec's provenance is its own pair, else its group's; edit rigs through `withEditProvenance`, which keeps untouched verified values verified). Before that: v16 since TASK 11.2 (ADR-014: `session_logs` is the Session root — status, legacy, night key, SET NULL references, UTC-ms timestamps, JSON snapshots via `JsonMapConverter`; update session rows with a partial `write(companion)`, never a full-row `replace`, or the v16 columns are reset; pre-v16 rows are legacy and read-only; since TASK 11.3 sessions go only through `SessionRepository` — lifecycle enforced, one transaction per write, snapshots built by the pure `SessionSnapshotBuilder`; `LogbookRepository` is gone; the planner saves with `vm.saveSession()` and opens with `vm.openSession()` (since S1.6, a button that replaces the current session — New, Duplicate, Open — first calls `confirmLeavingUnsavedPlan`, and a site-change autosave passes `edit: false`), and a ViewModel that saves needs `sessionRepository:`; since TASK 11.4 the plan lives in the current draft session and every edit autosaves through the serialized `_autosave` — with a `sessionRepository` never write the plan or selected target/rig to preferences, and in widget tests run edits and Save inside `tester.runAsync` (Drift needs the real event loop)), v15 since TASK 8.5 (v14 in TASK 8.4, v13 in TASK 8.1, v12 in TASK 7.1). Equipment edits must go through `EquipmentProfile.withEditProvenance(original)`, and the rig editor is `showEquipmentEditor` over the pure `EquipmentDraft` form model (S3.5): never build a profile in the widget; only add a seed whose specs are verified against a primary source (cite it in `equipment_seeder.dart`). Target RA/Dec entered by a user go through `AstroMath.parseRightAscension`/`parseDeclination` (a bare RA number is **hours**) — never `double.parse`; an edit must never change `catalogId` (the repository ignores it on update). Weather (ADR-012): the only path is `WeatherRepository.fetchSnapshot` (UTC `WeatherSnapshot`, nullable values — never default a missing value to 0); the legacy `getCurrentWeather`/`WeatherConditions` were removed in TASK 9.4. The card reads `vm.nightWeatherSummary` (`NightWeatherSummarizer`, pure: sunset to sunrise, ranges, dew heuristic) — no weather arithmetic or good/bad thresholds in widgets, and no score. The night forecast state is `vm.nightWeather` (`NightWeatherService`: cache → fetch → typed states; freshness only via `WeatherFreshness`, never an ad-hoc age check); since S1.3 the age follows the clock — `NightClock` at the app root calls `checkClock()` every minute and `resumed()` on resume, and a snapshot re-ages first; never age a forecast anywhere else; tests inject `nightWeatherService:` with an in-memory store. Test doubles of `WeatherRepository` mix in `NoSnapshotWeather` (`test/support/`); a fake that serves hours must put them on whole UTC hours, as the provider does (the night starts at mean solar noon, not on the hour). The target catalog is generated — change `tool/build_catalog.dart` and regenerate `assets/catalog/catalog_v2.json` from the pinned OpenNGC release, never hand-edit it; a new catalog must bump `version` and mark new entries' `since`, or deleted targets could come back. The asset is CC BY-SA 4.0: keep `OPENNGC_NOTICE.txt` and the About page in sync.
 - Android: a debug APK and a release bundle **build** (2026-09-24, TASK 16.2); **no install or run on an Android device is recorded**: manual installs of some builds have happened (the owner's dogfooding, `docs/audit/08`), but no build, device, commit or date was recorded, so every acceptance that needs device evidence is still unmet (wording corrected S1.15 with the owner's approval; `POST_ROADMAP_PLAN.md` §1.3 item 2). Release builds: `flutter build appbundle --release` **without** `--no-pub` (with it, after a debug build, the release compile fails on the dev-only `integration_test` plugin), then `dart run tool/check_bundle.dart`; procedure in `docs/RELEASE.md`.
 
-**Testing rule:** `.agents/rules/03-testing.md` can be satisfied literally again (`DEV-P8` resolved 2026-09-21). Investigate any failure as a regression; do not delete or weaken a test.
+**Testing rule:** `.agents/rules/03-testing.md` defers to the Verification Policy (`DEV-P8` resolved 2026-09-21). Investigate any failure as a regression; do not delete or weaken a test.
 
 **Owner directives currently in force** (`docs/DECISIONS.md` Part C plus post-roadmap refinement governance):
 
@@ -432,12 +474,7 @@ Do not interpret a manual dogfooding proposal or audit hypothesis as approved im
 
 ## Testing
 
-After modifying business logic or user-visible behavior:
-
-- run relevant unit tests;
-- run `flutter analyze --no-pub` where applicable;
-- run relevant widget/integration tests;
-- run `dart run tool/check.dart` before calling an implementation Task complete unless the active Task explicitly documents why the full gate cannot run.
+What to run, and when, is decided only by the **Verification Policy** under "Post-Roadmap Workflow Governance" above (V1 change classes, V2 broader-satisfies-narrower, V3 evidence reuse). Add focused tests for new behaviour.
 
 Do not remove or weaken tests merely to make a Task pass.
 
