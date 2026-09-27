@@ -1676,7 +1676,7 @@ chat as the Stage 3 final sign-off, because the owner asked to move on there, no
 | S4.R1 | Flow inventory and question matrix | Research (docs) | M | — | — | **Done 2026-09-27** (`research/S4.R1_FLOW_INVENTORY.md`) |
 | S4.R2 | RG-04: Execution's role and how actuals are recorded | Research (docs) | M | S4.R1 | RG-04 | **Done 2026-09-27**; RG-04 decided (B + G2; E.1) |
 | S4.R3 | Session lifecycle, state display, defaults and the example plan | Research (docs) | M | S4.R2's decision | RD-05, RD-04 | **Done 2026-09-27**; RD-05 and RD-04 decided (L1, Y2, no preselection, U1; E.1) |
-| S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | Frozen; **next** |
+| S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | Research done 2026-09-27 (`research/RG-05_06_TONIGHT_AND_PLANNER.md`); **owner decision pending** |
 | S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | Frozen |
 | S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | Frozen |
 | S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen |
