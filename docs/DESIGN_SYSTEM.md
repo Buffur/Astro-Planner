@@ -6,8 +6,8 @@
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
 > icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test), S5.4 (status
-> tokens, the status block, the plan-state label), S5.5 (the collapsible section) and S5.6 (the
-> context line and the night picker).
+> tokens, the status block, the plan-state label), S5.5 (the collapsible section), S5.6 (the
+> context line and the night picker) and S5.7 (the detail-screen template).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -345,10 +345,29 @@ to five years ahead as the planner's picker allows, titled "Choose a night". It 
 evening as a `CalendarDate`, or null when cancelled. Tested red or black in field mode **by its
 theme alone**, without the app-wide red filter.
 
+### The detail-screen template (S5.7; `lib/presentation/shared/detail_scaffold.dart`)
+
+`DetailScaffold`: one layout for the detail screens, Night & Moon and Weather first (ADR-019 §9;
+addendum §3.4–§3.5), top to bottom:
+1. **The header:**
+   - the title (`titleLarge`, a semantic header);
+   - its context ("Fri, Nov 13 · Ljubljana", `bodyMedium` in `textSecondary`);
+   - the zone rule, exactly once (`bodySmall` in `textTertiary`; `ContextLine.zoneRule`).
+
+   All three wrap at 200 % text. So the title lives in the page header, not in the app bar, which
+   keeps only back and the actions (an app bar's title cannot wrap).
+2. **The summary**, on a card: facts, no score and no good or bad colour (ADR-012 for weather).
+3. **The full content:** the sections, separated by dividers. A long section is a
+   `CollapsibleSection`.
+
+**Every time on the page is in the zone the header names; a section never repeats the zone
+caption.** The gallery sweeps a sample Night & Moon page (not a route) in the three themes at
+100 % and 200 % text. Stage 6 adds the real detail routes (`AppRouter` constants) to the route
+sweep (trap 17).
+
 ### Still to come
 
-Added by S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
-RD-09 = M + S1).
+Added by S5.8: confirmation, feedback and destructive actions, per RD-09 = M + S1.
 
 ## 8. Known gaps, for adoption
 

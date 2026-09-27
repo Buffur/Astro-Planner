@@ -10,7 +10,9 @@ import 'package:astroplan/core/theme/app_palette.dart';
 import 'package:astroplan/core/theme/app_spacing.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/presentation/shared/app_words.dart';
 import 'package:astroplan/presentation/shared/context_line.dart';
+import 'package:astroplan/presentation/shared/detail_scaffold.dart';
 import 'package:astroplan/presentation/shared/collapsible_section.dart';
 import 'package:astroplan/presentation/shared/plan_state.dart';
 import 'package:astroplan/presentation/shared/status_block.dart';
@@ -251,6 +253,36 @@ List<Widget> _contextLines() => [
   ContextLine(siteName: null, night: null, onSite: () {}, onNight: () {}),
 ];
 
+/// S5.7: a sample detail page on the template, as the Night & Moon detail
+/// will be (addendum §3.4). Not a route: Stage 6 builds the real ones.
+Widget _detailPage() => DetailScaffold(
+  title: 'Night & Moon',
+  context: 'Fri, Nov 13 · Dark-sky site near the observatory',
+  zoneRule: ContextLine.zoneRule(
+    DateTime.utc(2026, 11, 13, 11),
+    zoneId: 'Europe/Ljubljana',
+  ),
+  summary: const Text('${AppWords.dark} 19:40 – 04:20 (Sun below −18°)'),
+  sections: const [
+    CollapsibleSection(
+      sectionKey: 'gallery.twilight',
+      title: 'Twilight',
+      summary: '6 events',
+      initiallyOpen: true,
+      child: Text(
+        '${AppWords.civilDusk} 17:03 · ${AppWords.nauticalDusk} 17:39 · '
+        '${AppWords.astronomicalDusk} 18:15',
+      ),
+    ),
+    CollapsibleSection(
+      sectionKey: 'gallery.moon',
+      title: 'Moon',
+      summary: '32 % lit · sets 22:10',
+      child: Text('Rises 11:20 · sets 22:10'),
+    ),
+  ],
+);
+
 List<Widget> _entries() => [
   ..._surfaces(),
   ..._buttons(),
@@ -320,6 +352,25 @@ Future<List<String>> _auditOverlays(
 }
 
 void main() {
+  for (final theme in GalleryTheme.values) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('the detail template meets the guidelines: ${theme.name}, '
+          '${(scale * 100).round()} % text', (tester) async {
+        await pumpGalleryPage(
+          tester,
+          theme: theme,
+          textScale: scale,
+          page: _detailPage(),
+        );
+        expect(find.byKey(const Key('detail.zone')), findsOneWidget);
+        expect(
+          await auditGallery(tester, contrast: theme != GalleryTheme.field),
+          isEmpty,
+        );
+      });
+    }
+  }
+
   testWidgets('the audit does see a problem (sanity)', (tester) async {
     await pumpGallery(
       tester,

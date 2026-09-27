@@ -48,6 +48,28 @@ Future<void> pumpGallery(
   await tester.pumpAndSettle();
 }
 
+/// Pumps a whole page (S5.7: a screen template) in [theme] at [textScale],
+/// on the same phone-width view as [pumpGallery].
+Future<void> pumpGalleryPage(
+  WidgetTester tester, {
+  required GalleryTheme theme,
+  required double textScale,
+  required Widget page,
+}) async {
+  tester.view.physicalSize = const Size(412, 12000);
+  tester.view.devicePixelRatio = 1.0;
+  tester.platformDispatcher.textScaleFactorTestValue = textScale;
+  addTearDown(tester.view.reset);
+  addTearDown(tester.platformDispatcher.clearAllTestValues);
+  await tester.pumpWidget(
+    ChangeNotifierProvider(
+      create: (_) => DisclosureViewModel(InMemoryDisplayPreferences()),
+      child: MaterialApp(theme: galleryThemeData(theme), home: page),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 /// Every problem on the page: layout exceptions (overflow), Android's
 /// 48 px tap targets, labels on tappable elements and, when [contrast],
 /// WCAG AA text contrast. Field mode's secondary red is below AA by design
