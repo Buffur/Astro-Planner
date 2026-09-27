@@ -9,8 +9,11 @@
 > §6.1); ADR-014; ADR-016; CALC-35 to CALC-38; 08 §3, §19, §24; 05 UX-25 to UX-28; 04 RT-10;
 > MASTER_ROADMAP §3.2–3.3, G13, G14, TASK 17.3; `PRODUCT_DIRECTION.md` §3–§4.
 > **Process note:** run in the same chat as S4.R1, at the owner's request, not in a fresh one.
-> **Status:** the owner's decision is pending (§10). Nothing here is approved until it is recorded
-> in DECISIONS E.1.
+> **Status: DECIDED 2026-09-27** (the owner, in chat; DECISIONS E.1, "RG-04 decided"): **D1 = B**
+> (the Logbook first; the tracker optional), **D2 = G2** (the outcome, with numbers only when
+> needed), **D3** as recommended (Not done → abandoned, with a reason; Partly → completed), **D4**
+> as recommended (a quiet line on Tonight, plus the Logbook). The text below is the research as
+> written before the decision.
 
 ## Contents
 
@@ -327,3 +330,16 @@ Under B and G2, for Stage 8's planning. S4.T turns it into provisional Tasks.
    separately.
 7. **Later, not decided here:** "fill from photos" in the result form (TASK 17.3), once batch
    metadata reading exists.
+
+## 12. The owner's decision (2026-09-27)
+
+The owner chose the recommended option on each question (DECISIONS E.1, "RG-04 decided"):
+- **D1:** B.
+- **D2:** G2. The optional conditions (temperature, humidity, cloud) stay optional, as today; they
+  were not asked separately, and Stage 8 planning may revisit them.
+- **D3:** "Not done" → `abandoned`, with an optional reason; "Partly" → `completed`.
+- **D4:** a quiet "how did it go?" line on Tonight for a saved plan whose night has passed, plus the
+  Logbook.
+
+ADR-019 (S4.D) records the ADR-014 and ADR-016 amendments; Stage 8 implements. Until then Execution
+stays as built.

@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **RG-04 decided (2026-09-27, S4.R2, documentation only):** Execution's role is B, the Logbook first and the tracker optional; the post-session result is G2 (Completed as planned, Partly with numbers, Not done → abandoned with a reason); a quiet "how did it go?" line on Tonight (E.1, "RG-04 decided"). ADR-014/016 amendments are left to ADR-019 (S4.D); no ADR changed yet; no code changed.
 > **Stage 3 closed; Stage 4 planned (2026-09-27, documentation only):** the final sign-off passed (`126d97f`); Stage 4's Task sequence frozen, optional owner-run tests, decisions after each research step (E.1, "Stage 3 closed; Stage 4 planning decisions"). No ADR changed.
 > **Stage 3 sign-off failed (2026-09-27):** corrective Tasks S3.V7 and S3.V8 approved by the owner, with a Stage-boundary adjustment for S3.V7; S3S-03 deferred (E.1, "Stage 3 sign-off failed: corrective Tasks"). **S3.V7 done (2026-09-27):** ADR-018 note below. **S3.V8 done (2026-09-27):** ADR-018 note below.
 > **Stage 3 validation failed (2026-09-26):** corrective Tasks S3.V1–S3.V5 approved by the owner (E.1, "Stage 3 validation failed: corrective Tasks").
@@ -1036,6 +1037,52 @@ from a stale match.
   (`PRODUCT_DIRECTION.md` §4). No ADR changed.
 - **Process note:** the planning ran in the same chat as the Stage 3 sign-off, at the owner's
   request, not in a fresh one (§9.1 step 1).
+
+### RG-04 decided: Execution's role and post-session results (S4.R2, 2026-09-27)
+
+- **Context:**
+  - the research is `refinement/research/RG-04_EXECUTION_ROLE.md` (committed `97ffab5`);
+  - the owner's clarifications of 08 (O1–O4) are in `refinement/research/S4.R1_FLOW_INVENTORY.md`
+    §6.1;
+  - the key fact: everything valued after a session depends on counts, not on the live tracker,
+    yet today a result can be recorded only through Start.
+- **Decided by:** the project owner, in chat, choosing the recommended option on each question.
+- **D1 — role: B, the Logbook first; the tracker optional.**
+  - The default flow is Planner → Save → image → Logbook → record the result.
+  - Start leaves the primary actions on Tonight and in the planner. It stays reachable as an
+    optional live mode on a saved session ("Track live (optional)"; the wording is RD-14's, S4.R5).
+  - The tracker's Finish leads to the same result form. Nothing is removed. The tracker may later
+    be hidden or removed (option C) if it goes unused; that would be a new owner decision.
+- **D2 — detail: G2, the outcome, with numbers only when needed.**
+  - "Completed as planned" takes one tap; the actual equals the plan, labelled as reported by the
+    user.
+  - "Partly" takes numbers per light block: pre-filled with the plan, editable, entered as numbers
+    rather than ±1.
+  - "Not done" takes an optional reason.
+  - Notes are optional. Temperature, humidity and cloud stay optional, as today (not asked
+    separately; Stage 8 planning may revisit).
+  - Rejected-frame counts are not asked in the default form. The existing counts stay readable.
+- **D3 — "Not completed":**
+  - "Not done" is the existing `abandoned` status, with an optional reason (clouds, wind, dew,
+    equipment, other);
+  - "Partly" is `completed` with the numbers entered;
+  - no new status. How the reason is stored is Stage 8's decision.
+- **D4 — after the night:**
+  - the result is recorded from the Logbook entry;
+  - Tonight shows a quiet line for a saved plan whose night has passed ("Last night: …. How did it
+    go?");
+  - no notifications (ADR-016 §6);
+  - the line's placement is S4.R4's; what the planner does with yesterday's plan is S4.R3's.
+- **Consequences, recorded by ADR-019 (S4.D) and implemented in Stage 8, not before:**
+  - ADR-014 §3: a planned session may be completed or abandoned by a result, without a run;
+  - ADR-016: post-session counts are written as events, so the counters still equal the replay;
+    the live mode becomes optional;
+  - CALC-37 and CALC-38: note the "reported as planned" provenance (with RD-13);
+  - RD-12 (the resume prompt's Finish) is expected to fold into "Finish leads to the result form",
+    decided in Stage 8;
+  - the core-loop E2E test moves to Save → result (trap 19).
+- **Unchanged until then:** Execution stays as built (`PRODUCT_DIRECTION.md` §4). No data is
+  deleted; existing runs, events and results stay readable and exported.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

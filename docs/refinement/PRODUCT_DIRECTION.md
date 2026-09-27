@@ -12,6 +12,8 @@
 > (current state).
 > **History is not rewritten.** Where this direction replaces an older product statement,
 > §9 says so. The older documents stay unchanged as evidence of how the baseline was built.
+> **Updated 2026-09-27 (S4.R2, owner-approved):** §4 records the RG-04 decision (Execution's
+> role; post-session results). Nothing else changed.
 
 ## 1. Primary product job
 
@@ -90,6 +92,14 @@ and backup stay in the product. They must:
 - not be removed or redesigned opportunistically. **Execution's final role** (primary,
   optional, simplified or post-session only) is an explicit product decision for Stage 4
   (RG-04), implemented in Stage 8. Until then Execution stays as built.
+
+**RG-04 decided (owner, 2026-09-27; DECISIONS E.1):**
+- The default flow after planning is **Save → image → Logbook → record the result**, with no
+  interaction while imaging.
+- The live tracker stays, but as an **optional** mode, off the primary path.
+- A result is **"Completed as planned"** (one tap), **"Partly"** (numbers per light block) or
+  **"Not done"** (a reason).
+- Implemented in Stage 8. Execution stays as built until then.
 
 ## 5. Product principles
 
