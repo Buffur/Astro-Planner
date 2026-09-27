@@ -67,6 +67,11 @@
 > - **Registers:** §3, §6.2, §7, §8 and Appendices A–B updated.
 >
 > Stage 5 stays closed. No frozen Task and no completed Stage changed.
+> **Updated 2026-09-27 (Stage 6 planning, verified at `783a723`):** Stage 6's Task sequence is
+> frozen ("Stage 6 — frozen Task sequence"): S6.1–S6.14, the conditional S6.15 and the owner-run
+> S6.E. S6.3, S6.9 and S6.14 are gated on S4-DEF-04, RD-08 and RD-10, and S6.15 on RD-11; their
+> options are prepared there ("Stage 6 gates"). S4-DEF-01 is allocated to Stage 8. §3, §8 and the
+> S4-DEF list updated. No other Stage changed, and no decision was taken.
 
 ## Contents
 
@@ -202,7 +207,7 @@ an overlap. Research gates may run earlier than their Stage (§4).
 | 3 | Metadata → Equipment / Device Import | Research and architecture gate, then implementation | RG-02, RG-03 | 2 |
 | 4 | Product Flow & Information Architecture | Product/UX analysis and owner decisions | RG-04 to RG-06; RD-04 to RD-07, RD-14 | 3 |
 | 5 | Design System Foundation | Implementation | RD-09 | 4 |
-| 6 | Core Planner Redesign | Implementation | RD-06, RD-10, RD-11; RD-08 before capture-plan work (P6.8) | 4, 5 |
+| 6 | Core Planner Redesign | Implementation | RD-06 (decided), RD-10, RD-11, S4-DEF-04; RD-08 before capture-plan work (P6.8, frozen as S6.9). Options prepared at Stage 6 planning (2026-09-27) | 4, 5 |
 | 7 | Data Entry & Automation | Research gates, then implementation | RG-07 to RG-11; RD-08 | 3, 5, 6 |
 | 8 | Sessions / Execution / Actuals / Logbook | Implementation after Stage 4's decisions; the tracker's retirement after an audit (2026-09-27) | RD-13 (RD-12 lapsed 2026-09-27) | 4, 6 (2 for assisted actuals) |
 | 9 | Secondary UX & Product Polish | Implementation, plus licence research | RG-12, RG-13; RD-01, RD-11; the owner's logo choice | 5 (and 4 for the Library) |
@@ -1963,10 +1968,10 @@ decides them within ADR-019 §3.1's invariant):
 
 | ID | Question | Decided in |
 | --- | --- | --- |
-| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning |
+| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back* |
 | S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8 |
 | S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8 |
-| S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6 |
+| S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6. *Options prepared 2026-09-27 ("Stage 6 gates"): **R revert to the saved plan (recommended)** / K keep the changes with the entry; the owner decides before S6.3* |
 | S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8 |
 | S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8 |
 | S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8 |
@@ -2607,7 +2612,7 @@ runs one bounded final validation.
   - no calculation in widgets (CLAUDE.md trap 13);
   - memoization keys (trap 16);
   - `SessionPlanViewModel` is at 299 of 300 lines (ENG-16), so plan its split before adding
-    to it;
+    to it; *(verified 2026-09-27 at Stage 6 planning: 300 of 300; S6.1 splits it)*
   - the E2E keys (trap 19) and the accessibility-sweep routes (trap 17);
   - tokens (trap 12);
   - ADR-015 §2 (sections and order) holds unless RD-06 amends it. *(RD-06 decided 2026-09-27:
@@ -2650,6 +2655,10 @@ Task adopts the RD-14 glossary for the screens it touches.*
 
 *P6.8–P6.11 come from the Stages 6–11 amendment (2026-09-27), not from ADR-019, and are
 provisional in the same way.*
+
+*Frozen 2026-09-27 by Stage 6's planning as S6.1–S6.15 and S6.E ("Stage 6 — frozen Task sequence",
+below, with the P-ID mapping). This table and its notes are kept as written; where they differ, the
+frozen Tasks govern.*
 
 | P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
 | --- | --- | --- | --- | --- | --- |
@@ -2766,6 +2775,633 @@ They stay Stage 6 candidates from its table above. *Amended 2026-09-27, each now
   - the drawn intervals equal `imagingOpportunity` and the fit (tests);
   - UX-08's points;
   - light, dark and field themes; 200 % text; the text alternative; the sweep.
+
+#### Stage 6 — frozen Task sequence (planning, 2026-09-27)
+
+Planned at `783a723`, on the amended plan: the owner started this planning on it (the session
+instruction, 2026-09-27), which closes the "owner reviews the amendment" step. The application code
+is unchanged since `178acbe` (`git diff --stat 178acbe HEAD -- . ':!docs' ':!CLAUDE.md'` is empty),
+so **Stage 5's closing gate PASS is the baseline, reused (V3)**: Encoding; Format, 404 files;
+Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation only.
+
+**The inputs, verified against the code at `783a723` (§9.7):**
+
+| Input | Verified state | Goes to |
+| --- | --- | --- |
+| ENG-16, the planner's ViewModel | `SessionPlanViewModel` is **300 physical lines (229 code)**, exactly at `viewmodel_rules_test.dart`'s cap (300 physical, 250 code); ENG-16's "299" is one line stale. It holds both the plan's contents and edits (night, target, rig, blocks, autosave) and its lifecycle (restore with defaults, resume, open, new, duplicate, save, start). Next at risk: `NightConditionsViewModel`, 297 lines (241 code); `CaptureAnalysisViewModel` is 271 (216) | S6.1; the headroom rule below |
+| UX-04, DEV-P9, 08 §5 and §8: the planner's identity | The app bar reads "Session planner", with "+" (New Session), Duplicate (a bare `showDatePicker` from `DateTime.now()`) and field mode; no target, night or state. New and Duplicate report only a failure (`runWithFeedback`) | S6.2 |
+| ADR-019 §4 and §6: Start and Save | The bottom bar holds "Save Session" (an `ElevatedButton`) beside a filled "Start" (`planner.start`). Tonight's plan card has an outlined Start (`tonight.start`). The core-loop E2E taps 'Save Session', expects 'Session saved to Logbook!' and taps `planner.start` | S6.2 (the planner), S6.13 (Tonight) |
+| TD-058 | Confirmed: `CurrentSession.startNew` and `adopt` await the chain, then switch the session outside it. Only Save and Start run inside `_inChain` (S1.12) | S6.2 |
+| U1, W1, V3, S1.6, UX-12 | `confirmLeavingUnsavedPlan` (Cancel · Discard) guards New (the planner and Tonight), Duplicate and Open (the session detail). Its Discard leaves the draft in the database, unlisted. A site change is written with `edit: false`, so it does not count as unsaved (W1 not built). No code deletes a replaced draft. `SessionRepository.delete` deletes any session with its blocks and events, with no status guard; only the Logbook calls it | S6.3 |
+| S4-DEF-04 | A saved snapshot holds the night key and zone, the site, target and rig ids, and every block field (`SessionSnapshotBuilder`), so a Saved · changed plan's saved state can be read back without a schema change. No repository operation restores it today | S6.3 (gate) |
+| TD-057 | Confirmed: (1) `load()` rolls a past night forward in memory only, and the stored key changes at the next edit; (2) the candidates screen evaluates once when opened | S6.4 |
+| RD-04, UX-24: defaults | `load()` selects M42 when no target id is stored, and the first rig when no rig id is stored. `newSession()` and a first load use the example plan (TASK 4.4's badge). Without a target or a rig, the planner replaces its whole body with an empty state ("Select a Target and Equipment profile…"). The E2E's first plan taps the "Target:" card, which exists only because M42 is preselected. 34 test files name M42 or the Orion Nebula | S6.6 (the planner without a target or rig), S6.8 |
+| UX-01, UX-02, UX-03, RD-06: the planner's order | Today: "Target / What" (a summary card, then "Tonight for this target": the chart and the window list) → "Equipment / How" (the rig's nine rows and the capability rows) → "Conditions & Timeline / When" (the "Session Date" row, the full weather card, the sky-darkness card, the light-pollution map card) → "Capture Plan" (Inputs; Outputs with the whole budget, the fit, fill, √N, storage and the assumptions `ExpansionTile`) → the bottom bar. The verdict ("Fit tonight") sits inside the capture plan's outputs, below everything else. The target card's "Current Altitude" is the altitude now, not on the planned night (UX-15 (3)) | S6.6 |
+| UX-05, UX-06, UX-07: disclosure | Always expanded: the budget's lines, the √N help paragraph, every weather variable and hour, the rig's rows. The only collapsible is the assumptions `ExpansionTile`, and its state is not remembered | S6.5 (weather, night), S6.7 (the rest) |
+| UX-10, TD-051 | No detail screen or route exists. `sky_darkness_widget.dart` shows Sunset, "Astro Dusk", "Astro Dawn", Sunrise and "True Night Window" at −18°, whatever the user's limit (TD-051). The weather card holds the model, attribution, age, night ranges, dew heuristic and hour strip. `NightTimeline` computes only −0.833°, −6°, −12° and −18°, on the same 5-minute grid as the opportunity | S6.5 |
+| TD-054, UX-11, UX-13, UX-17, UX-24: Tonight | "Dark (Sun below −18°)" comes from `astronomicalTwilight`. Tonight has its own status words ("Draft", "Planned, unsaved changes", …), a site card that opens `/select/site`, no night picker, an outlined Start on the plan card, and two site prompts without a site. The Moon row lists its up-intervals ("Moon up from noon–4:46 PM, …") | S6.13 |
+| UX-09, UX-15 (1), 08 §14, RD-09: the capture plan | Four heading levels ("Capture Plan" → "Inputs" → "Sequence Plan" → rows); rows read "LIGHT [L]" / "100 × 60 s · …"; a `drag_handle` and a red delete icon on every row; delete is immediate, with no undo. The capability warning is red on every light row, also when tracking is unknown ("if untracked") | S6.9 |
+| 08 §17, P6.9: outputs and storage | The budget lines use retired words ("Acquisition", "Session budget"). **Storage traced:** the rig's `averageRawFileSizeMB` (a camera-module column with its own provenance) → `CaptureAnalysisViewModel` → `CaptureBudgetCalculator.calculate` (each counted block × frames; library blocks 0; the total null when the size is null) → "Estimated Storage". Known and unknown are tested in the domain (the 375 MB vector). The seeded rig has no RAW size (the seeder says why), so a first plan reads "Unknown", with no reason and no way shown to supply it. **The trace finds case (C), an unknown input.** No calculation defect (A) or wiring defect (B) was found. Both inputs exist: the rig editor's RAW-size field and S3.8's DNG estimate | S6.10 |
+| P6.10: √N | One line per light group ("Ha · 60 s × 100 … 10.0x"), from `CaptureBudget.lightGroups`, and a help paragraph, always visible | S6.11 |
+| UX-08, P6.11: the chart | `AltitudeChartWidget`: a `CustomPaint`, 200 px, noon to noon, with a text alternative. Its hour labels are hand-formatted `HH:00` (24-hour) whatever the device setting, and the series labels are drawn at the left edge over the curves. The list of windows and excluded periods sits below it. `FitResult` gives `endUtc` and `unplacedFramesByBlock`, not per-window intervals. `pubspec.yaml` has no chart package | S6.12 |
+| RD-10, UX-29 | `CandidateList.sort`: usable time by default, then the name for ties. The header ends "(no score)" | S6.14 (gate) |
+| RD-11, TD-050 | Settings' planning rows hold the minimum altitude, darkness limit, dew margin, NPF k and feasibility margin. The Moon and cloud gates exist only in `PlanningPreferences` (off, persisted) | Gate; S6.15 only if the owner chooses Stage 6 |
+| RD-08, 08 §21 | Tracking (untracked, tracked, guided, unknown) is a rig field (`optical_rigs.tracking_state`, ADR-011 §5), recorded in the snapshot. `CapabilityCalculator` applies NPF to untracked and unknown rigs, "if untracked" for unknown (PD-11). The seeded rig declares none | S6.9 (gate) |
+| Words (S5.3's baseline) | On Stage 6 screens: `home_screen.dart` (Session planner; Equipment profile), `capture_budget_summary.dart` (Acquisition, Session budget), `sky_darkness_widget.dart` (Astro Dusk, Astro Dawn, True Night Window), `tonight_home_screen.dart` (Draft) | S6.2, S6.6, S6.7, S6.5, S6.13 |
+
+**Gates** (options under "Stage 6 gates" below; each blocks only its own Task):
+- **S4-DEF-04** (owner): what Discard does with a Saved · changed plan. It blocks S6.3 only.
+- **RD-08** (owner): tracking per rig or per plan. It blocks S6.9 only. A plan-level choice, if
+  chosen, is built in Stage 7.
+- **RD-10** (owner): the candidates' default order. It blocks S6.14 only.
+- **RD-11** (owner): where the Moon and cloud gate controls live. It decides whether S6.15 exists;
+  nothing else waits for it.
+- **S4-DEF-01** (Save on a Saved · changed plan, including a changed night or site): **allocated to
+  Stage 8's planning here, not decided.** Its answer (Save again, or a new saved plan) depends on the
+  next-day transition and the working copy (S4-DEF-02, S4-DEF-03), which are Stage 8's, and D1
+  forbids a partial saved-plan change before Stage 8. Stage 6 keeps today's Save (ADR-014's "Save
+  again"). The owner may move it back.
+- **No research gate.** Every Stage 6 Task applies decided design (ADR-019; the shared rules;
+  RD-04 to RD-07, RD-09, RD-14) to the code.
+- **S6.E** needs the owner to run it (a person must look), but it is evidence, not a decision.
+
+**Rules for every Stage 6 Task:**
+- **The shared rules** ("Stages 6–11: shared rules") and the Stage 6 constraints above apply to
+  each Task.
+- **Nothing reachable is lost:** every value reachable before a Task is reachable after it. A Task
+  that moves a value says where it went, in its commit and in ARCHITECTURE Part B.
+- **No calculation in widgets** (trap 13). A new value (the dark span at the user's limit, the
+  Moon during the dark span, a "what fits" figure, a curve's points) is added to the domain with
+  tests and read through a ViewModel. The memoization keys (trap 16) gain every new input.
+- **ViewModel headroom:** no ViewModel crosses `viewmodel_rules_test.dart`'s cap. A Task that would
+  split first, as S6.1 does; `NightConditionsViewModel` is the next at risk (S6.5, S6.13).
+- **Stage 5's system:** tokens only (trap 12); the components as `DESIGN_SYSTEM.md` §9 maps them
+  (the P→S mapping below). A reusable part a screen still lacks is added to that system by the Task
+  that needs it, and documented there. No second component system.
+- **Words:** the glossary through `AppWords`. Each Task removes its entries from the retired-terms
+  baseline (`DESIGN_SYSTEM.md` §9.3), and the test's baseline shrinks in the same commit.
+- **Tests:** every new route joins the accessibility sweep (trap 17). The core-loop E2E follows
+  every renamed label or key (trap 19) and is never weakened. A changed expectation is justified in
+  the commit.
+- **The tracker boundary:** Start becomes Track live (optional) in the planner's ⋮ (S6.2), and
+  Tonight's plan card loses its Start (S6.13). The tracker screen, the run card, the resume prompt,
+  and their code, data and tests stay as built until P8.4. Nothing new depends on them.
+- **Saved plans:** no Stage 6 Task changes a saved snapshot, or saved plans' resume and rollover
+  (D1; ADR-019 §3.1). S6.3's Discard follows the owner's S4-DEF-04 answer.
+- **Boundaries:** no schema change, no new dependency and no new external service (no Task needs
+  one); no Settings redesign (Stage 9), except S6.15 if RD-11 puts it here.
+- **Verification** (`CLAUDE.md` V1–V3): each Task ends with **the full gate after its last code
+  change**. The planner and Tonight are on the E2E and the sweep, so the affected set is the gate's
+  own. The exceptions are S6.14 and S6.15, whose classes are stated with them, and S6.E (no code).
+  High-risk Tasks add their probes: real-SQLite lifecycle tests (S6.2–S6.4), and reference vectors
+  for the dark span (S6.5).
+- **Documentation:** each Task updates `FEATURE_STATUS.md`, ARCHITECTURE Part B,
+  `DESIGN_SYSTEM.md` (the adoption rows it completes), `TECH_DEBT.md` (resolved items with date and
+  commit), `SCIENTIFIC_INTEGRITY.md` for any calculation, and `PROGRESS.md`. DEV-P9 is resolved when
+  S6.2, S6.6 and S6.13 have all landed.
+- **One Task per commit, then STOP** (§9.4). Never start the next Task automatically.
+
+| Task | Title | From | Size | Depends on | Gate | State |
+| --- | --- | --- | --- | --- | --- | --- |
+| S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | Frozen |
+| S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | Frozen |
+| S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 | Frozen, gated |
+| S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | Frozen |
+| S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
+| S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
+| S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | Frozen |
+| S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | Frozen |
+| S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 | Frozen, gated |
+| S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
+| S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
+| S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
+| S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | Frozen |
+| S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 | Frozen, gated |
+| S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | Conditional |
+| S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run) |
+
+**Order:** S6.1 → S6.2 → S6.3 → S6.4 → S6.5 → S6.6 → S6.7 → S6.8 → S6.9 → S6.10 → S6.11 → S6.12 →
+S6.13 → S6.14 → (S6.15) → S6.E → Stage 6 validation. When a gated Task comes up with its gate still
+open, the next ungated Task runs first; the others keep their order. S6.5, S6.14 and S6.15 depend on
+no earlier Stage 6 Task and may run earlier.
+
+**P-ID mapping:** P6.0 → S6.1; P6.1 → S6.2 and S6.3 (New plan's contents → S6.8); P6.2 → S6.8;
+P6.3 → S6.6; P6.4 → S6.7; P6.5 → S6.5; P6.6 → S6.13; P6.7 → S6.4; P6.8 → S6.9; P6.9 → S6.10;
+P6.10 → S6.11; P6.11 → S6.12; the acceptance evidence → S6.E. RD-10 → S6.14; RD-11 → S6.15 if the
+owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of `DESIGN_SYSTEM.md`
+§9.1 has its S-Task.
+
+##### S6.1 — Split the planner's ViewModel (P6.0; ENG-16)
+- **Objective:** room in the planner's ViewModels for Stage 6, with no behaviour change.
+- **Why:** `SessionPlanViewModel` is at the cap (above), and S6.2–S6.4 and S6.8 add lifecycle
+  behaviour to it.
+- **Scope:**
+  - split it by responsibility: for example, the plan's contents and edits apart from its lifecycle
+    (restore, resume, open, new, copy, save, start), or lifecycle logic that is not presentation
+    state moved into the domain beside `CurrentSession`. The Task chooses the split and records it;
+  - `AppViewModels`, `main.dart` and `PlannerHarness` compose the result, and each screen
+    `context.watch`es the part it needs;
+  - `CLAUDE.md` trap 11 and ARCHITECTURE Part B (B4) name each member's new owner.
+- **Out of scope:** any behaviour or wording change; splitting `NightConditionsViewModel` (a later
+  Task splits it only if it needs the room).
+- **Acceptance:**
+  - no test assertion changes. Call sites (screens and tests) that follow a moved member are
+    updated mechanically, and the commit lists them;
+  - every resulting ViewModel is at most 250 physical lines, and `viewmodel_rules_test.dart`
+    passes;
+  - the memoization tests, the lifecycle matrix and the E2E pass;
+  - the full gate.
+
+##### S6.2 — The plan's identity and actions (P6.1, first half; TD-058)
+- **Objective:** the planner says which plan it shows and in what state, and its plan actions sit
+  in one menu and say what happened.
+- **Why:** UX-04 and DEV-P9's first half; 08 §5 and §8 ("+" gives no feedback; the date control is
+  unclear); ADR-019 §3 and §6.1; TD-058.
+- **Scope:**
+  - **the app bar:** the target · the night · `PlanStateLabel`, wrapping at 200 % text ("Session
+    planner" leaves the baseline). ⋮ holds **New plan**, **Copy to another night** (through
+    `pickNight`) and, for a saved plan (Saved or Saved · changed, ADR-019 §3.1), **Track live
+    (optional)**. The field-mode button stays;
+  - **Start moves** from the bottom bar into ⋮ as Track live (optional), with today's behaviour and
+    requirements (`startSessionWithFeedback`). It is interim, until P8.4. Its key goes with it
+    (`planner.start`), and nothing else about the tracker changes;
+  - **the bottom bar** holds only **Save plan**, the filled primary button. Its message becomes
+    `showDone` ("Plan saved") instead of "Session saved to Logbook!";
+  - **feedback:** `showDone` after New plan ("New plan started"), Copy ("Copied to ⟨night⟩") and
+    Open (from the session detail);
+  - **TD-058:** `CurrentSession.startNew` and `adopt` run inside `_inChain`, as Save and Start do.
+    A UI-driven test in the manner of `save_start_race_test.dart` shows that an edit tapped during
+    New, Copy or Open lands in the new plan;
+  - New and Copy keep today's content (S6.8 changes it) and today's S1.6 guard (S6.3 replaces it).
+- **Out of scope:** the replace prompt and Discard (S6.3); a new plan's contents (S6.8); the body's
+  order (S6.6); Tonight's Start (S6.13).
+- **Acceptance:**
+  - the app bar shows the target, night and state for Not saved, Saved and Saved · changed (widget
+    tests), and passes the sweep at 200 % text;
+  - Track live appears in ⋮ only for a saved plan, and starts the run as Start did (the existing
+    tracker tests pass unchanged);
+  - each action reports what happened (tests);
+  - TD-058's race test passes, and TD-058 is resolved;
+  - the E2E follows the new labels (Save plan; Plan saved; ⋮ → Track live);
+  - the full gate.
+
+##### S6.3 — Replacing unsaved changes: Save · Discard · Cancel (P6.1, second half; gated on S4-DEF-04)
+- **Objective:** leaving a plan with unsaved changes asks Save · Discard · Cancel, and each answer
+  does exactly what it says, without touching a saved snapshot.
+- **Why:** U1 (RD-05), W1, V3 and UX-12; ADR-019 §3. It supersedes S1.6's interim guard.
+- **Scope:**
+  - `askUnsavedChanges` replaces `confirmLeavingUnsavedPlan` at all four callers: the planner's New
+    plan and Copy, Tonight's New plan, and the session detail's Open. `unsaved_plan_guard.dart` goes,
+    and each of its test cases is mapped to a new one;
+  - **Save** saves as today (ADR-014's "Save again"; S4-DEF-01 is Stage 8's), then goes on. A failed
+    Save stops and reports (`runWithFeedback`);
+  - **Discard:**
+    - a never-saved draft (`draft` with `plannedAtUtc == null`) is deleted, then the action goes on;
+    - a Saved · changed plan: as the owner decides S4-DEF-04;
+    - a saved snapshot is never changed or removed: a domain guard refuses it, tested at the
+      repository level;
+  - **Cancel**, and dismissing the prompt, change nothing;
+  - **an untouched replaced draft** (never saved and never edited) is deleted, without a prompt, when
+    New, Copy or Open replaces it;
+  - **W1 and V3:** a site change on a saved plan, and a new copy, count as unsaved;
+  - each delete and the switch run inside the autosave chain (S6.2), one transaction per write.
+- **Out of scope:** Save's version semantics (S4-DEF-01, Stage 8); the next-day transition (Stage 8);
+  deleting anything else.
+- **Acceptance:**
+  - UI-driven tests for each answer at each caller: Save, Discard (never saved; Saved · changed),
+    Cancel and dismiss, plus the untouched-draft replacement;
+  - real-SQLite tests:
+    - a discarded or replaced draft is gone with its blocks;
+    - no saved plan's row is deleted, and every saved snapshot is unchanged after every path;
+    - for every surviving session, the counters equal the replayed events;
+  - after a restart following Discard, and following an untouched-draft replacement, the planner
+    resumes the expected plan (`lifecycle_matrix_test.dart`'s method);
+  - the full gate.
+
+##### S6.4 — A never-saved draft's night at the rollover (P6.7; TD-057)
+- **Objective:** a never-saved draft's stored night follows the planner's night across the rollover,
+  and an open candidates list follows the new night.
+- **Why:** TD-057; D1 (ADR-019 §3.1).
+- **Scope:**
+  - when the night rolls over while the app is open (`NightClock`'s check) and at a restart, only a
+    never-saved draft (`draft`, `plannedAtUtc == null`) is rolled forward in place, and its new night
+    key is written through the autosave chain;
+  - a night the user picked in the future stays as it is;
+  - saved plans (Saved, Saved · changed) keep today's resume and rollover: no row of theirs is
+    written (D1);
+  - the candidates screen re-evaluates when the conditions report a new night.
+- **Out of scope:** the saved-plan transition (P8.3).
+- **Acceptance:**
+  - with an injected clock crossing mean solar noon, with the app open and at a restart:
+    - the draft's stored key equals the planner's night;
+    - a saved plan's row is not written (its `updatedAtUtc` and snapshot unchanged);
+    - an edit queued during the rollover and the rollover write land in order;
+    - a picked future night is kept;
+  - an open candidates list shows the new night;
+  - TD-057 resolved;
+  - the full gate.
+
+##### S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit (P6.5; TD-051)
+- **Objective:** two detail screens hold the night's and the weather's full detail, and the planner
+  keeps one factual summary row for each.
+- **Why:** UX-06 and UX-10; ADR-019 §5, §7 and §9; TD-051.
+- **Scope:**
+  - **the domain:** the dark span at the user's darkness limit (`PlanningPreferences.darknessLimit`),
+    from the same 5-minute Sun samples as the timeline and the opportunity's darkness gate (a
+    threshold on `NightTimeline`, or an equivalent domain value), registered as a CALC in
+    `SCIENTIFIC_INTEGRITY.md`. It is read through `NightConditionsViewModel`, within its cap;
+  - **the routes:** two root-navigator routes above the tabs, as `AppRouter` constants (paths
+    chosen here, ADR-019 §9), built on `DetailScaffold`. Both join the accessibility sweep;
+  - **Night & Moon:** sunset and sunrise; the dark span at the user's limit, labelled with it
+    (TD-051); the standard twilight names (`AppWords`), only here; the Moon (illumination, when it
+    is up, the closest approach to the target, as `sky_darkness_widget.dart` shows today); the zone
+    rule once;
+  - **Weather:** everything the weather card shows today: the night ranges, every variable and
+    hour, the dew heuristic, the model, the attribution, the age and stale label, the retry, and the
+    unavailable, beyond-horizon and unknown states. ADR-012: no score, no good/bad colouring;
+  - **in the planner:** the weather card and the night part of the sky card become two factual
+    summary rows, each opening its detail. The weather row gives its state with the age, or why
+    there is no forecast; the night row gives the dark span and the Moon. Sky darkness (Bortle, SQM,
+    the map link) stays in the planner (S6.7 folds it);
+  - **on Tonight:** its Night, Moon and Weather rows open the details (UX-10). Tonight's layout is
+    S6.13's.
+- **Out of scope:**
+  - the planner's order (S6.6);
+  - the details' richer presentation: the hourly visual, the weather icons, a timeline on Night &
+    Moon (Stage 9, on S6.12's primitive);
+  - TD-054's row on Tonight (S6.13);
+  - sky darkness's presentation (S6.7; Stage 9).
+- **Acceptance:**
+  - every weather and night value shown before is on a detail screen (a test lists them). The age,
+    stale label and attribution are visible without expanding anything;
+  - the dark span equals the opportunity's darkness at −18°, −15° and −12° on fixed nights
+    (reference vectors, including a night with no darkness), and equals `astronomicalTwilight` at
+    −18°. TD-051 resolved;
+  - "Astro Dusk", "Astro Dawn" and "True Night Window" leave the baseline;
+  - the planner's summary rows show the stale, unavailable and unknown states (tests);
+  - both routes pass the sweep at 100 % and 200 % text in the three themes;
+  - the full gate.
+
+##### S6.6 — The planner's answer-first structure (P6.3)
+- **Objective:** the planner's first screen answers Stage 6's seven questions (Purpose, above).
+- **Why:** UX-01 to UX-03 and UX-07; ADR-019 §6 (RD-06).
+- **Scope:**
+  - **the order:** `StatusBlock` → `ContextLine` (site ▾ · night ▾ with `pickNight`, instead of
+    the "Session Date" row) → the target and tonight's windows (the chart and the list, as today
+    until S6.12) → the capture plan → the conditions summary (Night & Moon ›, Weather ›, Sky) → the
+    rig summary → the bottom bar (Save plan);
+  - **the status:** the verdict with its relationship ("Fits: 2 h 05 min needed of 4 h 20 min
+    usable"), its key reason, when capture ends, the integration, and the domain's action where one
+    exists (fill or trim, from `CaptureAnalysisViewModel`). `FitAnalyzer` stays authoritative: no
+    percentage, score or good/bad rating. The capture plan's "Fit tonight" block goes, so the
+    answer's numbers are shown once (P6.9's notes);
+  - **without a target or a rig:** the structure stays, with a neutral "Needs a target" (or its
+    missing input) and the action to choose it. The old empty state goes ("Equipment profile" leaves
+    the baseline);
+  - **the rig summary:** the rig's name, the values this plan uses (FOV, pixel scale, frame fill)
+    and any active capability warning (NPF, the maximum exposure). The other rows stay reachable
+    (S6.7 folds them);
+  - **the target:** its current altitude stays reachable and says it is now (UX-15 (3));
+  - text roles and the type scale replace `colorScheme.primary`/`secondary` for values and labels in
+    the planner's rows (`InfoRow`, `PlannerSummaryCard`);
+  - the sweep and the E2E are updated.
+- **Out of scope:** disclosure (S6.7); the blocks (S6.9) and outputs (S6.10); the chart (S6.12);
+  defaults (S6.8).
+- **Acceptance:**
+  - on a 412 × 915 view at 100 % text, the first screen shows the target, night, site and state; the
+    verdict; time needed; usable time; the integration; the main limiting reason; and the next
+    action (a widget test of the first viewport, in the light, dark and field themes);
+  - every value reachable before is reachable (a test, or a mapping listed in the commit);
+  - the status's words and numbers equal `FitAnalyzer` and `CaptureBudget` for fits, tight, doesn't
+    fit, no window and needs input (tests);
+  - the planner without a target, and without a rig, shows its structure and a neutral status;
+  - the sweep at 200 %; the E2E; the full gate.
+
+##### S6.7 — Disclosure in the planner (P6.4)
+- **Objective:** technical depth one tap away behind factual summaries, while the "never hidden"
+  list stays visible.
+- **Why:** UX-05; ADR-019 §7; the shared rules' hierarchy and disclosure.
+- **Scope:**
+  - `CollapsibleSection`, remembered per key, for:
+    - **Budget details:** every ADR-009 line on its own line, in the glossary's words (Integration;
+      Imaging time; Time needed; Total time; calibration during and outside the window; setup;
+      library calibration);
+    - **Assumptions**, instead of its `ExpansionTile`;
+    - **the rig's rows**;
+    - **Sky:** Bortle and SQM with source and date, and the map link;
+  - **the √N help** one tap away; the √N values stay visible and relative (SI-003);
+  - each summary states a fact ("Budget details · 2 h 05 min needed"). One level deep; no nested
+    disclosure; nothing essential only in a tooltip;
+  - zone captions once per section (the zone rule kept).
+- **Out of scope:** the outputs' content and "what fits" (S6.10); the √N graph (S6.11).
+- **Acceptance:**
+  - each collapsed summary states a fact (tests);
+  - with every section collapsed, each "never hidden" item the planner can show today stays visible
+    (a test per item: an unknown that weakens a result, stale or unavailable weather, an active
+    constraint or capability warning, the reason a result cannot be evaluated);
+  - each budget line equals the calculator (ADR-009's vectors);
+  - "Acquisition" and "Session budget" leave the baseline;
+  - a section's state survives a restart (one test through the planner, on S5.5's mechanism);
+  - the sweep; the full gate.
+
+##### S6.8 — Defaults, New plan's contents and the first run (P6.2; P6.1's New plan; RD-04)
+- **Objective:** nothing the user did not choose looks chosen.
+- **Why:** RD-04; UX-24; ADR-019 §3 ("Defaults").
+- **Scope:**
+  - **a fresh install** selects no target and no rig: `load()` drops the M42 and first-rig
+    fallbacks, and a stored selection is still restored. The seeded rig stays in the list, labelled
+    as an example where it is listed and chosen;
+  - **the capture plan starts empty**, with **"Start from the example plan"** (one tap fills
+    `ExampleCapturePlan`; TASK 4.4's badge rule kept). "Needs a block" is neutral;
+  - **New plan** keeps the site and the rig, has no target, and asks for one: at least the neutral
+    status with its action to choose (opening the picker directly is this Task's choice). It starts
+    with an empty capture plan and the offer. Copy is unchanged;
+  - **the first-run page** (`/welcome`) no longer shows a rig or a target as chosen (UX-24);
+  - the tests that relied on the M42 default choose their target deliberately; none is weakened.
+    The E2E chooses its target and rig through the new path.
+- **Out of scope:** the example plan's contents; the seed itself (the verified-seed policy);
+  "Plan this target" (Stage 9).
+- **Acceptance:**
+  - a fresh install shows no target, no rig, an empty capture plan with the offer, and a neutral
+    status (tests);
+  - New plan keeps the site and rig and asks for a target (test);
+  - the offer fills exactly `ExampleCapturePlan.blocks()` and shows its badge until the first edit
+    (TASK 4.4's tests kept);
+  - the welcome page shows no step as done that the user did not do;
+  - a stored target and rig are still restored after a restart (test);
+  - the full gate.
+
+##### S6.9 — The capture plan's blocks (P6.8; gated on RD-08)
+- **Objective:** the block list is the plan's primary surface: each row says what will be
+  captured.
+- **Why:** UX-09, UX-15 (1); 08 §14; RD-09 (M + S1).
+- **Scope:**
+  - one heading ("Capture plan") instead of four; the card follows the system's radius and margins;
+  - each row leads with the block's identity and quantities, for example "Ha · 60 s × 100 · 1 h
+    40 min". The format is chosen after checking the four frame types, an empty and a long filter
+    name, a 412 px width, 200 % text and camera-specific values (ISO or gain, binning), which live
+    in the block's editor. A row's duration comes from the budget (`BlockBudget`), never from
+    arithmetic in the widget;
+  - edit (a tap) and reorder keep their meaning, with §6.5's icons (`drag_indicator`). Delete follows
+    RD-09 M + S1: a visible `DeleteButton`, then `showUndo`, which restores the identical block at its
+    index (the plan autosaves); `SwipeToDelete` if rows swipe;
+  - the capability warning stays on the rows it concerns, in the status tokens and with words (not
+    colour alone). The "if untracked" guidance for unknown tracking reads as a missing input
+    (neutral, with how to set tracking), while a known untracked rig's exceedance keeps the warning
+    tone. PD-11's text stays;
+  - the block dialog's Save is its primary button;
+  - an edit briefly marks what it changed (P6.9's notes; `AppMotion`, not under reduced motion);
+  - tracking stays where RD-08 puts it. This Task does not move it (a plan-level choice is built in
+    Stage 7); it shows the effective tracking where the warning needs it.
+- **Out of scope:** the outputs (S6.10); capture parameters (RG-11) and calibration workflows
+  (RG-10), both Stage 7; tracking as a plan field (Stage 7, if RD-08 chooses it).
+- **Acceptance:**
+  - the row text for each frame type and each edge case (widget tests, at 200 % text);
+  - delete then Undo restores the identical block at its index, and the autosaved plan equals the
+    plan before the delete (real SQLite). A timed-out Undo commits the delete;
+  - reorder and edit behave as before (the existing tests);
+  - unknown tracking shows no error-coloured warning, and a known untracked exceedance still does
+    (tests);
+  - the sweep; the E2E; the full gate.
+
+##### S6.10 — The capture plan's outputs: time, what fits, storage (P6.9)
+- **Objective:** the outputs lead with the practical answer, and the full calculation stays one tap
+  away. The notes on P6.9 above are part of this Task.
+- **Scope:**
+  - the capture-plan section shows Time needed · Total time; the answer's numbers are in the status
+    (S6.6); Budget details (S6.7) holds every ADR-009 line;
+  - **"what fits"** only from the fit's own outputs: `FitAnalyzer.maxFramesForBlock` (the last light
+    block) and `FitResult.unplacedFramesByBlock` ("Up to N × 60 s fit tonight", "+N frames still
+    fit", "N frames do not fit"). A wording the API cannot answer honestly goes to `TECH_DEBT.md`,
+    never into a UI calculation;
+  - **storage, per the trace (case C):** "Unknown" says why ("file size not known for this rig") and
+    how to supply it (the rig editor's RAW size; "Add from a photo" with a DNG, S3.8). A known value
+    keeps its note (binning and compression ignored), and says it is an estimate when the rig's RAW
+    size is one (ADR-018 §4);
+  - a budget visual only if the numbers already work and it passes the notes' four honesty tests.
+    Otherwise the numbers stay, and the commit records the choice;
+  - cause and effect after an edit (with S6.9's).
+- **Out of scope:** ADR-009, CALC-25 and CALC-26; any percentage or score; a storage input from
+  another source (Stage 7).
+- **Acceptance:** the notes' list:
+  - each output equals the calculator (ADR-009's vectors);
+  - storage tested known and unknown, with the reason and the way to supply it shown;
+  - "what fits" equals the fit's outputs;
+  - a kept visual matches the budget;
+  - the sweep at 200 % text; the full gate.
+
+##### S6.11 — The relative-stacking-gain graph (P6.10)
+- **Objective:** a compact graph answers "how does relative √N change as the frame count grows?".
+- **Scope:**
+  - one graph per compatible (filter, exposure) group: relative √N against frames, with the current
+    count and value marked and the diminishing gain visible. Groups are never combined;
+  - its points come from a pure domain function, tested (the widget draws them and computes
+    nothing); the marked value is `LightGroup.relativeStackingGain`;
+  - the number stays visible; the label stays "Relative stacking gain (√N vs one frame)" (SI-003),
+    never SNR, a noise model or an image-quality prediction; concise help says it is relative, and
+    the long explanation is one tap away (S6.7);
+  - its form is chosen after checking the width, 200 % text and field mode; a text alternative;
+  - no new chart dependency (a `CustomPaint`, like the altitude chart).
+- **Out of scope:** any other quality metric.
+- **Acceptance:**
+  - the marked value equals the budget's group value, and the drawn points equal the domain
+    function (tests);
+  - the label is `AppWords.relativeStackingGain`;
+  - the text alternative gives each group's value;
+  - light, dark and field themes at 200 % text; the full gate.
+
+##### S6.12 — The night and opportunity timeline (P6.11)
+- **Objective:** one timeline answers "when can I image this target, and how does the plan fit into
+  that?". The notes on P6.11 above are part of this Task.
+- **Scope:**
+  - **first, an inventory** of what the current chart and window list show well, recorded in
+    ARCHITECTURE Part B. Then `AltitudeChartWidget` is evolved, or composed with, into one
+    reusable primitive over one data mapping. Never a second chart of the same night;
+  - **layers:** the night state (the dark span at the user's limit, S6.5's value); the target's
+    visibility; the imaging opportunity (windows; excluded periods keep their reasons in the list);
+    the planned capture only as far as the fit exposes it (its end). A per-window placement only
+    from a new `FitAnalyzer` output tested against ADR-009's vectors, or not at all. The Moon and
+    "now" only where the domain supplies them. No continuous time across a gap;
+  - **UX-08:** the time axis follows the device's 12- or 24-hour setting and the zone rule, with
+    ticks on whole hours; labels stay off the curves; the bands have no seams; field mode's bands
+    stay distinguishable (the real-darkness check is Stage 11's);
+  - a density parameter, so that Tonight (S6.13, only if it answers something) and the Night & Moon
+    detail (Stage 9) reuse it;
+  - the text alternative (the windows and the usable time).
+- **Out of scope:** a planetarium, a sky map, planets, multi-target scheduling, any score; the
+  Night & Moon detail's timeline (Stage 9).
+- **Acceptance:**
+  - the drawn intervals equal `imagingOpportunity` and the fit (tests on the mapping);
+  - each UX-08 point has a test or a recorded render check;
+  - light, dark and field themes; 200 % text; the text alternative; the sweep;
+  - the full gate.
+
+##### S6.13 — Tonight, plan first (P6.6)
+- **Objective:** Tonight leads with the current plan and its answer, and sends detail to the detail
+  screens.
+- **Why:** UX-10, UX-11, UX-13, UX-17 and UX-24 (two site prompts); ADR-019 §5; TD-054; DEV-P9's
+  second half.
+- **Scope:**
+  - **the order** (ADR-019 §5): `ContextLine` (site ▾ · night ▾; the night picker changes the
+    current plan's night, UX-11) → the run card (as built, only during a live run) → an empty slot
+    for Stage 8's "how did it go?" line → **Your plan**: the target, `PlanStateLabel`, the
+    `StatusBlock` verdict with its reason and usable time, Open planner (without a target: Choose a
+    target, What can I image tonight?) → the Night, Moon and Weather rows to the details (S6.5) →
+    the secondary actions (What can I image tonight?, New plan with `showDone`);
+  - **no Start on the plan card** (UX-13). Track live stays in the planner's ⋮ (S6.2); the run card
+    and the resume prompt are unchanged;
+  - **TD-054:** the Dark row at the user's limit, from S6.5's value;
+  - **UX-17:** the Moon row gives the useful fact, the Moon during the dark span, from a domain
+    value (as the window list already words it);
+  - one site prompt without a site, not two;
+  - a compact timeline only if S6.12 shows it answers something the rows do not. The choice and its
+    reason are recorded;
+  - **TD-073** (the site prompt's "Open settings" message): kept until dismissed or given
+    `persist: false`, decided and recorded;
+  - Tonight's own status words go ("Draft" leaves the baseline).
+- **Out of scope:** Stage 8's line itself (P8.3); the tracker and its message (P8.4); the candidates
+  (S6.14).
+- **Acceptance:**
+  - the order (a test), at 200 % text in the sweep;
+  - the night picker changes the plan's night, and the plan autosaves (a test through the harness);
+  - the Dark row equals S6.5's dark span at −18°, −15° and −12° (tests); TD-054 resolved;
+  - no Start on Tonight; during a run the run card still opens the tracker (the existing tests);
+  - the Moon row's wording (tests); TD-073's message decided and tested;
+  - DEV-P9 resolved (with S6.2 and S6.6);
+  - the E2E; the full gate.
+
+##### S6.14 — The candidates' default order (RD-10; gated)
+- **Objective:** the default order of "What can I image tonight?" discriminates between targets
+  without a score.
+- **Scope:** the default ordering chain in `CandidateList.sort` and the list header's wording, as the
+  owner decides RD-10. The other sort choices stay. Sorting only (ADR-013 §5).
+- **Acceptance:**
+  - on a tie-heavy fixture, the default order follows the decided chain, with unknowns last (domain
+    tests);
+  - the header names the order;
+  - the batch still equals the single-target view (the existing test);
+  - **class: localized.** Its targeted tests, the candidates screen's tests, `flutter analyze`,
+    `dart format` and the encoding check.
+
+##### S6.15 — The Moon and cloud gate controls (conditional: only if RD-11 chooses Stage 6; TD-050)
+- **Scope:** two switch-and-threshold rows beside Settings' planning thresholds, for the Moon and
+  cloud gates (ADR-013 G4 and G5), through `SettingsViewModel`; words that say what each gate
+  excludes, as an assumption, not physics. The planner already names an active gate as a reason
+  (`OpportunityText`: "your Moon gate", "your cloud gate").
+- **Acceptance:** a change persists and changes the opportunity (a test through the harness); the
+  rows pass the sweep; TD-050 resolved. **Class: localized** (Settings): the Settings tests, the
+  sweep, `flutter analyze`, `dart format` and the encoding check.
+
+##### S6.E — The five-second test (owner-run evidence)
+- **Why:** the amended Exit takes it as the evidence for its comprehension points; S4.E was not run
+  in Stage 4 (S4V-03).
+- **Steps:**
+  1. **S4V-02 first** (documentation): correct `research/S4.R1_FLOW_INVENTORY.md` §7's device rules.
+     Test A's step 1 changes the current plan, and Test C starts a run, so neither only looks at the
+     app; say how to run them without disturbing the owner's data;
+  2. after S6.6 and S6.13, the owner runs Test A (§7.1) on the planner's and Tonight's first
+     screens, on the `.s2check` package or with a plan they are happy to change. Never reset or
+     uninstall the owner's app;
+  3. the answers go into `evidence/STAGE_6_FIVE_SECOND_TEST.md`: the questions, the answers and
+     whether each was right. No personal data about the people who try it.
+- **If it cannot be run:** the Stage 6 validation records the gap, and the owner decides (V7).
+
+##### Stage 6 validation
+A fresh-session, independent validation (§9.8, V8; this Stage writes application code), by
+`prompts/INDEPENDENT_STAGE_VALIDATION.md`. **Its frozen surface (V4):**
+- S6.1–S6.14 acceptance criteria (and S6.15's, if built);
+- the rules for every Stage 6 Task above;
+- the owner's answers to S4-DEF-04, RD-08, RD-10 and RD-11;
+- the Stage Exit as amended, including its ten comprehension points, with S6.E as their evidence;
+- the invariants: ADR-019 §3.1 and D1, the tracker boundary, and `CLAUDE.md`'s traps.
+
+It tries to disprove that each planning screen leads with its answer, that every value reachable
+before still is, that no saved snapshot changed, and that nothing regressed (the sweep, the darkness
+test, the E2E, the gate).
+
+##### Stage 6 gates: options prepared (2026-09-27)
+
+Each is the owner's decision. The options are prepared from the verified inputs above; nothing is
+decided here. The answer goes into DECISIONS E.1 and §8 (or the S4-DEF list) before its Task runs.
+
+**S4-DEF-04 — what Discard does with a Saved · changed plan's unsaved changes** (blocks S6.3 only)
+
+- **Verified:** a Saved · changed plan is a `draft` row with `plannedAtUtc` set and its plan
+  snapshot. Its working changes are in the row (the night key, references and blocks); the snapshot
+  holds what was saved (the night key and zone, the site, target and rig ids, every block field).
+  Today S1.6's Discard leaves the row as it is, still listed in the Logbook as "Planned, unsaved
+  changes". The invariant (ADR-019 §3.1): Discard never changes or removes a saved snapshot.
+- **R — revert to the saved plan (recommended).**
+  - Discard puts the entry back exactly as it was saved: its night, site, target, rig and blocks
+    are read from its snapshot, and it becomes Saved again. The snapshot is not touched, and nothing
+    is deleted.
+  - If the snapshot is unreadable, or names a site, target or rig that no longer exists, nothing
+    changes and the user is told (SI-008).
+  - Cost: one repository operation and a lifecycle amendment (Saved · changed → Saved, by Discard),
+    recorded in DECISIONS with the answer. No schema change.
+  - It does what the word says, and Stage 8's working-copy split meets fewer Saved · changed rows.
+- **K — keep the changes with the entry.**
+  - The planner moves on; the entry stays Saved · changed with its changes, as today, and nothing is
+    written.
+  - Since nothing is discarded, the button cannot honestly say Discard in this state. The prompt
+    reads Save · Keep changes · Cancel, a wording exception to U1 for this state only.
+  - Cheapest. The user must find the entry in the Logbook to see or undo the changes, and Stage 8
+    splits more rows.
+- **Not an option:** deleting the entry or its snapshot (the invariant).
+
+**RD-08 — tracking per rig or per plan** (blocks S6.9 only; a model change is built in Stage 7)
+
+- **Verified:** tracking is a rig field (ADR-011 §5), recorded in the snapshot. NPF guidance applies
+  to untracked and unknown rigs, "if untracked" for unknown (PD-11). The seeded rig declares none:
+  its mount is not part of the seed, and the verified-seed policy forbids guessing. 08 §21: tracking
+  belongs to the plan, because the same rig may be used with and without a tracking mount.
+- **T1 — per rig, as today.** No model change; it is set in the rig editor. 08 §21's inconvenience
+  stays.
+- **T2 — per plan only.** Tracking moves to the plan and leaves the rig. A schema change and a
+  migration in Stage 7 (existing rigs' values must be carried to their plans, or kept read-only).
+  Every plan must answer it, and a rig that is always tracked (a star tracker, a guided mount)
+  loses that fact.
+- **T3 — the rig's default, with a per-plan override (recommended).**
+  - The rig keeps its tracking as the default; ADR-011 §5 and PD-11 are unchanged.
+  - A plan may override it for its night ("this night on a tripod"). The snapshot records the
+    effective value and where it came from.
+  - It answers 08 §21 without asking every plan. Stage 7 adds a nullable plan field (a schema
+    change with its migration test) and the planner's control.
+- **In every option:**
+  - S6.9 shows the effective tracking beside the warning, and shows unknown tracking as a missing
+    input (its scope);
+  - `Tracked` stays distinct from Track live (the shared rules' Words);
+  - tracking never goes into global Settings (§8).
+
+**RD-10 — ordering Tonight's candidates without a score** (blocks S6.14 only)
+
+- **Verified:** usable time by default, then the name for ties. On UX-29's audited night every top
+  row had the whole dark window, so the top of the list was alphabetical. The other sorts exist
+  (window start, max altitude, Moon separation, frame fill, name). ADR-013 §5 allows ranking by
+  usable time and forbids a composite score.
+- **O1 — usable time, then frame fill, then the name (recommended).** Frame fill discriminates for
+  the user's rig (UX-29); without a rig it is unknown and sorts last. A chain of measured
+  quantities, never combined into one number.
+- **O2 — usable time, then the maximum altitude in the windows, then the name.** Always known when
+  there is a window, and independent of the rig, but it says less about what the rig can frame.
+- **O3 — thresholds and groups.** Groups by usable time (the whole dark window; at least N h; less),
+  each in a second order (Telescopius's pattern, 05 R12). More controls, and its threshold must be
+  user-configurable (`CLAUDE.md` rule 26).
+- **In every option:** the user's own sort choice stays; the header names the order ("Usable time,
+  then frame fill") instead of "(no score)". The no-score rule stays in ADR-013, not in the UI.
+
+**RD-11 — where the Moon and cloud gate controls live** (TD-050; decides whether S6.15 exists)
+
+- **Verified:** the gates exist in `PlanningPreferences` (off; 50 % when enabled; persisted) and the
+  calculator applies them, but no screen switches them on. Settings' planning rows already hold the
+  other opportunity thresholds (minimum altitude, darkness limit).
+- **S9 — Settings, in Stage 9 (P9.3), with RG-13 (recommended).** One owner for Settings (the shared
+  rules), and RG-13 decides once where each setting belongs. The gates stay off and unreachable
+  until then (TD-050 stays open); nobody is misled meanwhile, because they are off.
+- **S6 — Settings now, as S6.15.** Two rows beside the existing planning thresholds (TD-050's own
+  direction, S). TD-050 closes in Stage 6; RG-13 may move them later.
+- **P — in the planner.** Beside the opportunity, where they change the answer. They are global
+  preferences, so a switch inside one plan would change every plan. Not recommended.
 
 ### Stage 7 — Data Entry & Automation
 
@@ -3432,10 +4068,10 @@ any implementation Task is created.
 | RD-05 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): L1 (Draft internal; Not saved / Saved / Saved · changed; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), U1 (Save · Discard · Cancel; Discard deletes; V3 and W1 count as unsaved).** Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4. **Input from Stage 1 validation (V3, owner, 2026-09-25):** a site change on a saved plan turns the stored session into a draft ("Planned, unsaved changes", still listed) but does not count as unsaved while the app runs, so New does not ask; after a restart it does. Decide whether a site change edits a saved plan | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
-| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
+| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)** | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
 | RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. **Decided 2026-09-27 (owner): M + S1** (DECISIONS E.1, "RD-09 decided") | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
-| RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5 | 6 | — |
-| RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10 | 6 or 9 | P9.3 if Stage 9 (2026-09-27) |
+| RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups | 6 | S6.14 |
+| RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
 | RD-12 | **LAPSED 2026-09-27** (the tracker's retirement; DECISIONS E.1, "Stages 6–11 amended after Stage 5"): the resume prompt goes with the tracker. ADR-019 §4 already expected Finish to lead to the result form; how a run still in progress at the upgrade reaches it is P8.4's audit. *(Was: should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish?)* | RT-10, UX-26; ADR-016 §11 | 8 | — |
 | RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? *Narrowed 2026-09-27:* after P8.4 no new estimate is accepted, so it covers the existing accepted-estimate events and the "reported as planned" label (P8.1) | SCI-07 | 8 | — |
 | RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |

@@ -4,9 +4,203 @@
 > governance correction, so that `PROGRESS.md` is a short handoff. Nothing here was rewritten. Newer
 > entries are not added here as a matter of course: a Stage's validation detail lives in its
 > `STAGE_N_*.md` report, and a Task's in its commit and the living registers. The current state,
-> reusable evidence and next action are in `PROGRESS.md`.
+> reusable evidence and next action are in `PROGRESS.md`. **Exception, 2026-09-27 (Stage 6
+> planning):** the Stage 5, governance-correction and amendment entries were moved here verbatim,
+> because some of their facts are recorded nowhere else.
 
-## Earlier "Current state" entries (newest first, up to Stage 4's closure)
+## Earlier "Current state" entries (newest first, up to Stage 6 planning)
+
+*Moved verbatim from `PROGRESS.md` on 2026-09-27 at Stage 6 planning: Stage 5's entries, the
+governance correction and the Stages 6–11 amendment. Some of their facts (the owner's debug build,
+the CI filter cleanup) are recorded nowhere else. The Stage 4 entries follow them.*
+
+**Stages 6–11 amended after Stage 5, 2026-09-27** (planning and documentation only; the owner's
+brief `prompts/AMEND_STAGES_6_11_AFTER_STAGE5.md`):
+- **Amended, not replaced,** from the manual dogfooding (08) and the owner's post-Stage-5 UI/UX
+  analysis:
+  - new "Stages 6–11: shared rules" in the plan: one owner per responsibility, the answer-first
+    hierarchy with a "never hidden" list, disclosure, visualisation, look, words, exclusions;
+  - **Stage 6** gains P6.8 (the capture plan's blocks), P6.9 (outputs, "what fits", storage
+    verified first), P6.10 (the √N graph) and P6.11 (the night and opportunity timeline). P6.1 and
+    P6.3–P6.6 are clarified;
+  - **Stage 7:** its areas and RG-07 to RG-11 gain their required outputs (the automation order;
+    the calibration and capture-parameter matrices);
+  - **Stage 8:** P8.4 becomes the tracker's safe retirement, P8.5 is split into the list and P8.7
+    (the entry), and P8.6 (optional names) is kept;
+  - **Stage 9** gains P9.3 (Settings), P9.4 (logo and splash) and P9.5 (licence);
+  - **Stages 10 and 11** are clarified: measure first; one bounded final validation.
+- **Superseded (the owner):** the dedicated tracker leaves the target product (DECISIONS E.1,
+  "Stages 6–11 amended after Stage 5"; ADR-019 §2 and §4; RG-04's optional tracker;
+  `PRODUCT_DIRECTION.md` §3–§4). Stage 8 retires it after a dependency audit, and nothing is
+  deleted before that. RD-12 lapses; RD-13 narrows.
+- **Clarified:** `PRODUCT_DIRECTION.md` §5.2 (what disclosure never hides).
+- Stage 5 stays closed. No application code, test, tool or frozen Task changed. Verification: the
+  documentation class (V1).
+
+**Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
+- `CLAUDE.md` now holds the one canonical **Verification Policy** (V1–V8): verification by change
+  class, broader-satisfies-narrower, evidence reuse, the frozen review surface and what may block,
+  correction-scoped revalidation, PASS reopening, stop/convergence (two interpretation failures go
+  to the owner), and what a fresh session reads.
+- `.agents/rules/03-testing.md`, `CLAUDE.md` rules 13/16/17 and "Testing", and plan §9.1, §9.4 and
+  §9.8 now refer to it instead of restating it. New prompts: `prompts/INDEPENDENT_STAGE_VALIDATION.md`
+  and `prompts/CONTINUE_CURRENT_WORK.md` (neither existed before).
+- CI skips the gate when only documentation changed (same paths as V1's documentation class).
+- This file keeps only the handoff; the earlier entries are in `PROGRESS_HISTORY.md`, unchanged.
+- No application code, test, tool, dependency, Stage scope or product decision changed.
+- **Cleanup, 2026-09-27:** the M1/M2 device-check commit is `79f392c` (was misrecorded as
+  `360fd8f`); the CI filter excludes only `docs/**.md` and `docs/**.patch` (not all of `docs/`), so
+  any unknown file runs the gate; V1 now says a shared-behaviour Task ends with its affected
+  regression checks and escalates to the full gate only when that set cannot be bounded or its
+  Task/Stage gate requires it (high-risk Tasks still always end with the full gate). Verified by a
+  YAML parse and a 22-case path simulation; the app gate was not rerun (no gate input changed).
+
+**Stage 5** (plan: "Stage 5 — frozen Task sequence"; planned at `a354032`):
+- **RD-09 decided** 2026-09-27 by the owner: M + S1 (`9640915`; DECISIONS E.1, "RD-09 decided").
+- **S5.1 done** 2026-09-27 (`49344c9`): the text roles (`AppPalette.textPrimary`/`Secondary`/
+  `Tertiary`/`Disabled`), the raised surface and border tokens, `AppTypography.scale`, `AppRadius`,
+  the documented `AppSpacing`; the colour scheme follows the roles; the gallery test
+  (`test/presentation/design_system/`); `docs/DESIGN_SYSTEM.md`; ARCHITECTURE B17. The first gate
+  run caught a light-theme regression (black on the darker secondary in a selected segment,
+  2.99:1), fixed with an explicit selected container and a guarding test. Verification: shared
+  behaviour (the theme reaches every screen) and the Task's "gate green": the full gate after the
+  last code change, PASS (below). Every acceptance criterion checked.
+- **S5.2 done** 2026-09-27 (`6363727`): component themes for the controls (`AppTheme._withControls`):
+  - one button hierarchy (primary filled, secondary outlined, tertiary text, destructive via
+    `AppButtonStyles`, flat elevated = secondary), 48 dp, a 16 % pressed overlay;
+  - a quiet field underline: `colorScheme.outline` = `AppPalette.controlBorder` (3:1). Material
+    had drawn it black or white (08 §6); in field mode it is `#880000` (UX-39);
+  - text-role labels and hints; dialogs, sheets, menus and light/dark messages themed; dark
+    error `#F28B82` (AA on the raised surface);
+  - `AppMotion` (reduced motion honoured); an icon set;
+  - `FitText`'s neutral moved to `textSecondary`, since `outline` is no longer AA as text.
+
+  The gallery now holds every control in its states and opens a dialog, a message and a menu. New
+  `controls_theme_test.dart`. Verification: shared behaviour and the Task's "gate green": the full
+  gate after the last code change, PASS (below). Every acceptance criterion checked.
+- **S5.3 done** 2026-09-27 (`0343962`): the glossary's words once, in
+  `lib/presentation/shared/app_words.dart` (`AppWords`), pinned to the glossary by
+  `app_words_test.dart`. `retired_terms_test.dart` scans `lib/presentation`'s string literals
+  (imports, `Key` values, comments and identifiers exempt) against an explicit baseline: 16
+  occurrences in 8 files at `38925dd`. A new occurrence or a stale entry fails, and its own cases
+  show both. No existing string was renamed. Verification: the Task's "gate green", the full gate
+  after the last code change, PASS (below). Every acceptance criterion checked.
+- **S5.4 done** 2026-09-27 (`3e9a487`):
+  - **status and state tokens** in `AppPalette`, in the three themes (UX-16). `FitText.color`
+    reads them, with the same values as before;
+  - **`StatusBlock`** (`lib/presentation/shared/status_block.dart`): the verdict headline in the
+    glossary's words ("Fits: … needed of … usable"; the word alone when a duration is unknown;
+    Needs a target / a block neutral), the reason, key numbers and an action slot; plain values
+    in;
+  - **`PlanState`** (`plan_state.dart`): the pure mapping from stored status, `plannedAtUtc` and
+    legacy (every combination tested; Partly waits for Stage 8), and `PlanStateLabel`;
+  - both in the gallery; no screen changed.
+
+  Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
+  Every acceptance criterion checked.
+- **S5.5 done** 2026-09-27 (`2e8b95f`):
+  - **`CollapsibleSection`:** a 48 dp header with the title, a factual summary that stays
+    visible, and a turning chevron; the content opens below it. It is one semantics button with
+    its expanded state, hint and tap action;
+  - **remembered per section key:** `DisclosureViewModel` (in `AppViewModels`, loaded in
+    `main.dart` before the first frame) stores it through `DisplayPreferencesRepository`
+    (`section.<key>`; `guardStorage`). A broken store is logged and the section still works;
+  - **tested:** restart restores the state, keys are independent, a broken store is handled,
+    reduced motion is honoured, and the gallery includes it;
+  - **a bug found and fixed:** the reduced-motion test showed that `AnimatedSize` with a zero
+    duration throws a layout assertion. The section now leaves it out under reduced motion, and
+    `DESIGN_SYSTEM.md` §6.2 records the rule.
+
+  Verification: the full gate after the last `lib` change PASSED its tests (1,292, 1 skip) and
+  host E2E, but Analyze flagged one deprecated matcher in the new test. That test file was fixed,
+  then re-verified per V3: `flutter analyze` on the whole project, that file's tests, format and
+  encoding, all clean. No other input changed. Every acceptance criterion checked.
+- **S5.6 done** 2026-09-27 (`52631f6`):
+  - **`ContextLine`** (`lib/presentation/shared/context_line.dart`): site ▾ · night ▾, each a 48 dp
+    labelled button reporting its tap. The zone rule is shown once: the site's zone, or the
+    labelled device zone. Without a site there is no night and no rule;
+  - **`pickNight`:** the shared, themed date picker, returning a `CalendarDate` (null when
+    cancelled). Its pixel test shows it red or black in field mode by its theme alone, without the
+    app filter, plus a sanity run in light;
+  - in the gallery; no screen changed.
+
+  Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
+  Every acceptance criterion checked.
+- **S5.7 done** 2026-09-27 (`c9f2deb`): `DetailScaffold` (`lib/presentation/shared/detail_scaffold.dart`):
+  - a header with the title (a semantic header), its context and the zone rule exactly once, all
+    wrapping at 200 % text. The title is in the page header because an app bar's cannot wrap; the
+    app bar keeps back and the actions;
+  - a summary card, then the sections separated by dividers;
+  - the gallery sweeps a sample Night & Moon page on it (`pumpGalleryPage`), and a template test
+    checks the order, the single zone rule and the wrapping.
+
+  Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
+  Every acceptance criterion checked.
+- **S5.8 done** 2026-09-27 (`99e60af`), per RD-09 = M + S1:
+  - **confirmations** (`confirmation_patterns.dart`): `askUnsavedChanges` (Cancel · Discard ·
+    Save; dismiss = Cancel) and `confirmDestructive` (true only on its verb);
+  - **success** (`failure_feedback.dart`): `showDone`, beside `runWithFeedback`;
+  - **deleting** (`delete_patterns.dart`): `showUndo` (exactly one outcome, undone or committed),
+    `DeleteButton` (the visible Delete, S1), and `SwipeToDelete` (a swipe calls the same handler
+    and the row springs back, 08 §20);
+  - **tested:** every way out of each prompt; the undo outcomes on Undo, time-out, replacement
+    and removal; the swipe; red or black in field mode without the app filter; all in the gallery;
+  - **found:** Flutter keeps a message with an action on screen unless `persist: false`, so Undo
+    would never have committed. `showUndo` sets it (tested), and two existing messages with
+    actions are recorded as **TD-073** (not fixed);
+  - no screen changed.
+
+  Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
+  Every acceptance criterion checked.
+- **S5.9 done** 2026-09-27 (`8a6c5d8`):
+  - **the adoption plan:** `docs/DESIGN_SYSTEM.md` §9 maps each screen to the parts it adopts and
+    the P-Task (P6.1–P6.6, the Stage 6 capture-plan work, P8.2, P8.4, P8.5, P9.1, P9.2, Stage 9
+    Settings). Every Stage 5 part has at least one adopter, and every retired-terms baseline entry
+    has its Stage (§9.3). The provisional Stage 6, 8 and 9 tables gain adoption notes, still not
+    frozen;
+  - **the rendered evidence:** 15 host-rendered images in `docs/refinement/evidence/stage5/`: the
+    gallery in light, dark and field at 100 % and 200 %, plus the sample detail page, a
+    confirmation and an undo message in each theme. Real fonts; field mode through the app's
+    filter. See `evidence/STAGE_5_RENDERS.md`. They come from the opt-in
+    `render_gallery_test.dart` (`ASTROPLAN_RENDER_GALLERY`; skipped in the gate), and the
+    gallery's content now lives in `gallery_entries.dart`, shared by both tests;
+  - **a render bug fixed before committing:** the first run kept a dialog open into the next
+    image; each image now starts from an empty tree.
+
+  Verification: test-only changes, and the Task's "gate green": the full gate after the last code
+  change, PASS (below). Every acceptance criterion checked. The optional owner review of the
+  images is non-blocking.
+- **Stage 5 validation, 2026-09-27: FAIL at `8a6c5d8`, one narrow blocker**
+  ([report](STAGE_5_VALIDATION.md); run in this chat at the owner's request, so **not independent**,
+  disclosed).
+  - Every frozen item passes except **S5V-01**: S5.5's "a test rebuilds the graph on the same
+    store" has no committed graph-level test. The behaviour is correct (a probe through
+    `PlannerHarness` passes).
+  - Not blocking: TD-073 (predates Stage 5); UX-39's card borders in field mode (S5.2's documented
+    choice); `CLAUDE.md`'s stale test count (outside Stage 5).
+  - **The owner's question, answered in the report's §6.** The debug build looks unchanged
+    because the new components are on no screen yet (by design; Stage 6 adopts them), and the
+    theme changes are subtle: 1–10 % of pixels per screen in before/after renders
+    (`evidence/stage5_before_after/`). Where to look is listed there. If even those are missing,
+    the installed build predates `49344c9`.
+- **S5.V1 done** 2026-09-27 (`178acbe`), S5V-01: `disclosure_viewmodel_test.dart` gains "a restart
+  of the whole ViewModel graph on the same store keeps a section open". It builds two
+  `PlannerHarness` graphs on one display store, the second loading as `main.dart` does. Test-only.
+  Verification: the full gate after the change, PASS (below).
+- **Revalidation of S5V-01 (V5), 2026-09-27: PASS** at `178acbe`. The test exists, goes through
+  `AppViewModels`, and passes. The gate is reused (V3). **Stage 5 is closed**
+  ([report §7](STAGE_5_VALIDATION.md)).
+- **The owner's debug build, checked 2026-09-27 (read-only):**
+  - the phone runs exactly the current build (installed-APK SHA-1 `8debc76c…` equals the local
+    `app-debug.apk`, built after `178acbe`);
+  - the build contains Stages 1, 3 and 5 (markers found in its Dart kernel);
+  - the phone reports the app was first installed at 19:11 today, so earlier on-device data is not
+    on it unless restored.
+
+  Little looks different because Stages 1–5 changed little of the main screens' look. Stage 6
+  does that.
+
+---
 
 **Final, bounded Stage 4 validation, 2026-09-27: PASS** at `09a7f06`
 ([report](STAGE_4_FINAL_VALIDATION.md)). **Stage 4 is closed.**

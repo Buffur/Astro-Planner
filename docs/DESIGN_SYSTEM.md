@@ -9,7 +9,8 @@
 > tokens, the status block, the plan-state label), S5.5 (the collapsible section), S5.6 (the
 > context line and the night picker), S5.7 (the detail-screen template), S5.8 (confirmation,
 > feedback and destructive-action patterns, RD-09 = M + S1) and S5.9 (the adoption plan, §9, and
-> rendered evidence).
+> rendered evidence). 2026-09-27, Stage 6 planning: §9's Stage 6 P-Tasks mapped to the frozen
+> S6-Tasks (documentation only; the code is unchanged).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -460,6 +461,12 @@ words, components and patterns below are adopted by the Stage that redesigns eac
 P-IDs are the provisional Tasks of Stages 6, 8 and 9 (`refinement/POST_ROADMAP_PLAN.md`). Each
 Stage's own planning freezes them, and may move an item between its Tasks; it may not drop one
 without saying where it went.
+
+**Stage 6, frozen 2026-09-27** (`refinement/POST_ROADMAP_PLAN.md`, "Stage 6 — frozen Task
+sequence"): P6.1 → S6.2 (the app bar, `PlanStateLabel`, `showDone`, `pickNight`) and S6.3
+(`askUnsavedChanges`); P6.2 → S6.8; P6.3 → S6.6; P6.4 → S6.7; P6.5 → S6.5; P6.6 → S6.13 (with
+TD-073's site prompt); "the Stage 6 capture-plan work" (P6.8) → S6.9. P6.9–P6.11 → S6.10–S6.12. No
+item was dropped. Where the tables below say P6.x, read the S-Task.
 
 ### 9.1 By screen
 
