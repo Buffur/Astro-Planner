@@ -58,10 +58,12 @@ void main() {
           'error', () {
         final scheme = theme.colorScheme;
         final palette = theme.extension<AppPalette>()!;
-        expect(
-          FitText.color(FitState.needsInput, scheme, palette),
-          scheme.outline,
-        );
+        final neutral = FitText.color(FitState.needsInput, scheme, palette);
+        expect(neutral, palette.textSecondary);
+        expect(neutral, isNot(scheme.error));
+        for (final bg in [theme.scaffoldBackgroundColor, scheme.surface]) {
+          expect(_contrast(neutral, bg), greaterThanOrEqualTo(4.5));
+        }
         expect(FitText.color(FitState.noWindow, scheme, palette), scheme.error);
         expect(FitText.label(FitState.needsInput), 'No window');
       });

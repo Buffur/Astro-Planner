@@ -4,9 +4,11 @@
 > "Stage 5 — frozen Task sequence"). It describes the **code as built**. Each Stage 5 Task adds its
 > part; Stages 6–9 adopt it on the screens (see "Adoption", written by S5.9).
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
-> radius; the gallery test).
+> radius; the gallery test) and S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
+> icons; states and motion).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
-> `app_spacing.dart`, `app_radius.dart`, `app_theme.dart`).
+> `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
+> `app_theme.dart`).
 > **Tests:** `test/core/theme/` (tokens) and `test/presentation/design_system/` (the gallery).
 
 ## 1. Principles
@@ -64,7 +66,21 @@ Material would derive it from `secondary`, and black on the darker secondary is 
 route sweep caught it on Settings' segmented control). Dark keeps Material's derivation (black on
 `#A5A5A3`, AA). Tested: text on the selected container is AA in light and dark.
 
-### 2.3 Other tokens
+### 2.3 Control border and error (S5.2)
+
+| Token | Light | Dark | Field | Rule |
+| --- | --- | --- | --- | --- |
+| `AppPalette.controlBorder` = `colorScheme.outline` | `#8F8E8A` | `#6F6F6D` | `#880000` | A control's boundary (a field's line, an outlined button). At least 3:1 on every surface in light and dark (WCAG 1.4.11). In field mode brighter than a card border, so controls stay visible (UX-39) |
+| `colorScheme.outlineVariant` | `#E9E9E7` | `#2F2F2F` | `#330000` | Decorative outlines (chips), as the card border |
+| `colorScheme.error` / `onError` | `#B00020` / white | `#F28B82` / `#191919` | `#FF0000` / black | AA as text on every surface, and text on it is AA |
+
+- **Why `outline` is set:** Material falls back to `onBackground` for `outline` and
+  `outlineVariant`, so every field's underline and every chip border was black in light and white
+  in dark. That was the prominent underline of 08 §6.
+- **`FitText`'s neutral** ("needs input") was drawn in `outline`. It is now the secondary text
+  role, so it stays AA with the quieter outline (`fit_status_test.dart` asserts AA).
+
+### 2.4 Other tokens
 
 `AppPalette` also holds the night-event, Moon, chart and Bortle colours (TASK 12.4) and `caution`
 (S1.9). Status colours are S5.4's.
@@ -118,14 +134,91 @@ proves the audit catches a faint text and an unlabelled button. It also covers w
 sweep cannot see: components no route uses yet, and dialogs. Each Stage 5 Task adds its components
 to it.
 
-## 6. Controls, words, components and patterns
+## 6. Controls (S5.2)
 
-Added by S5.2 (controls), S5.3 (words), S5.4–S5.7 (components) and S5.8 (confirmation, feedback and
-destructive actions, per RD-09 = M + S1).
+All set through component themes in `AppTheme._withControls`, from the tokens only, so every
+existing control follows them without a screen edit. A widget's own `styleFrom` (a size, a padding)
+still merges over them.
 
-## 7. Known gaps, for adoption
+### 6.1 Buttons: one hierarchy
 
-What S5.1 changed app-wide, and what it leaves to the Stages that redesign screens:
+| Role | Widget | Look | Use |
+| --- | --- | --- | --- |
+| **Primary** | `FilledButton` | Filled with `colorScheme.primary`, `onPrimary` text | The screen's one main action (the planner's **Save plan**, ADR-019 §6) |
+| **Secondary** | `OutlinedButton` | Transparent, `textPrimary` text, a 1 px `controlBorder` | Other actions beside it |
+| **Tertiary** | `TextButton` | `textPrimary` text only | Low-weight actions; Cancel in dialogs |
+| **Destructive** | `FilledButton` or `TextButton` with `AppButtonStyles.destructive` / `destructiveText` | `error` fill, or `error` text | A delete or discard (S5.8's patterns) |
+| **Icon** | `IconButton` with a `tooltip` | `onSurfaceVariant` icon | Toolbar actions; the tooltip is its label |
+
+- **All buttons:** at least 48 dp tall (filled, outlined and elevated draw 48; text and icon buttons
+  keep Material's padded 48 dp tap target). Small radius, `labelLarge` text.
+- **Disabled:** `textDisabled` text on transparent (secondary, tertiary), or Material's disabled
+  fill (primary). WCAG exempts disabled controls from contrast.
+- **`ElevatedButton`** has no elevation in this flat design. It is themed as the secondary role on
+  the surface fill. New code uses `OutlinedButton`; the elevated ones are replaced as their screens
+  are redesigned (S5.9's adoption list). Until then, the planner's "Save Session" is secondary
+  beside a filled "Start", as UX-34 describes. Stage 6 (P6.3) makes Save plan primary and moves
+  Start into ⋮.
+
+### 6.2 States and motion
+
+- **Pressed:** a 16 % overlay of the foreground (`AppTheme.pressedOverlay`); Material's is 10 %.
+  This answers 08 §8's weak "+" feedback. Focused 12 %, hovered 8 %.
+- **Motion (`AppMotion`):** `short` 150 ms for a state change in place, `medium` 250 ms for content
+  appearing or collapsing, one curve (`easeOutCubic`).
+  `AppMotion.duration(context, …)` returns zero when the platform asks for less motion
+  (`disableAnimations`). Every Stage 5 component animates through it. Subtle only
+  (`.agents/rules/05-ui-design.md`).
+
+### 6.3 Text fields
+
+- **A quiet underline (08 §6):**
+  - the enabled line is 1 px in `controlBorder` (Material reads `colorScheme.outline`);
+  - focus draws it 2 px in `primary`; an error in `error`.
+
+  The field's geometry is unchanged, so no field's text room shrank (TD-069's fit test passes).
+- **Label** `textSecondary`; the floating label is `primary` when focused and `error` on an error.
+  **Hint** and **helper** are `textTertiary`, **error** text is `error`, and prefix and suffix icons
+  are `textSecondary`: all AA. A `filled` field uses the surface colour.
+- A field that sets its own border keeps it. The target search, for example, is a filled box with
+  no line.
+
+### 6.4 Dialogs, sheets, menus, messages, dividers
+
+- **Dialogs:** the raised surface, a 1 px border, the large radius. The title is `titleLarge` in
+  `textPrimary`; the content is `bodyMedium` in `textSecondary`.
+- **Bottom sheets:** the raised surface, top corners large.
+- **Popup and dropdown menus:** the raised surface, a 1 px border, the small radius; items
+  `bodyMedium` in `textPrimary`.
+- **Messages (snackbars):** light and dark invert: `textPrimary` background, background-coloured
+  text and action, AA. Field mode keeps its dim message (a `#330000` background with red text),
+  never a bright red block.
+- **Dividers:** 1 px in `border` (TASK 12.4).
+
+### 6.5 Icons
+
+- **Material icons, 24 dp** (the theme's default), outlined where a variant exists. An icon-only
+  button always has a `tooltip`.
+- **One icon per common action:**
+  - add `Icons.add`;
+  - edit `Icons.edit_outlined`;
+  - delete `Icons.delete_outline`;
+  - reorder `Icons.drag_indicator`;
+  - more `Icons.more_vert`;
+  - info `Icons.info_outline`;
+  - expand `Icons.expand_more` / collapse `Icons.expand_less`;
+  - open a detail `Icons.chevron_right`.
+- The capture plan's current `drag_handle` and red delete icon (08 §14) change when Stage 6 adopts
+  this set.
+
+## 7. Words, components and patterns
+
+Added by S5.3 (words), S5.4–S5.7 (components) and S5.8 (confirmation, feedback and destructive
+actions, per RD-09 = M + S1).
+
+## 8. Known gaps, for adoption
+
+What S5.1 and S5.2 changed app-wide, and what they leave to the Stages that redesign screens:
 - **Changed app-wide by the theme:**
   - default text is the primary role (light `#37352F` instead of black; dark `#EBEBEA` instead of
     white);
@@ -134,15 +227,28 @@ What S5.1 changed app-wide, and what it leaves to the Stages that redesign scree
   - titles are heavier;
   - dialogs and date pickers sit on the raised surface;
   - in light, selected segments and the navigation indicator are a light grey with primary text
-    (they were the secondary grey with black text).
+    (they were the secondary grey with black text);
+  - (S5.2) field underlines and chip borders are the quiet control border instead of black or
+    white; buttons share one shape, 48 dp primary and secondary heights, and a stronger pressed
+    overlay; elevated buttons are flat and outlined;
+  - (S5.2) dialogs are bordered with a smaller title; messages invert in light and dark;
+  - (S5.2) dark mode's error colour is `#F28B82` (Material's `#CF6679` was 4.26:1 on the raised
+    surface), so "Doesn't fit" and error text are lighter red in dark;
+  - (S5.2) the planner's "needs input" status reads in the secondary text colour, as before
+    neutral;
+  - (S5.2) in field mode, outlined buttons and field lines are `#880000` instead of `#660000`
+    (UX-39).
 - **Left for adoption:**
   - screens still colour values with `colorScheme.primary` and labels with `colorScheme.secondary`
     (e.g. `InfoRow`), and pick sizes per widget (10 `fontSize` and 34 `fontWeight` overrides);
   - `AppPalette.muted` (Material grey) is below AA as text in light: text should use
     `textTertiary`, and `muted` stays for icons and empty-state glyphs until adopted;
   - radius literals (for example a swiped row's 12) move to `AppRadius` when their screen is
-    redesigned.
+    redesigned;
+  - (S5.2) the 7 `ElevatedButton`s become `OutlinedButton` or `FilledButton` by role, and the
+    planner's Save plan becomes primary (P6.3);
+  - (S5.2) icons follow §6.5 as their screens are redesigned.
 
-## 8. Adoption
+## 9. Adoption
 
 Written by S5.9: which screen adopts which part, and in which Stage.

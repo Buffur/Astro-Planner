@@ -16,6 +16,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.textDisabled,
     required this.surfaceRaised,
     required this.border,
+    required this.controlBorder,
     required this.muted,
     required this.caution,
     required this.sunEvent,
@@ -51,8 +52,13 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// Dialogs, menus and sheets: one level above the card surface.
   final Color surfaceRaised;
 
-  /// Card, section and field outlines; dividers.
+  /// Card and section outlines; dividers (decorative).
   final Color border;
+
+  /// The boundary of a control (S5.2): a text field's underline or
+  /// outline, an outlined button. At least 3:1 in light and dark (WCAG
+  /// 1.4.11); in field mode brighter than [border] (UX-39).
+  final Color controlBorder;
 
   /// Secondary text and icons for empty or unknown states.
   final Color muted;
@@ -101,6 +107,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textDisabled: AppColors.lightTextDisabled,
     surfaceRaised: AppColors.lightSurfaceRaised,
     border: AppColors.lightBorder,
+    controlBorder: AppColors.lightControlBorder,
     muted: Colors.grey,
     caution: Color(0xFF9A5B00), // dark amber: 5.4:1 on white (AA)
     sunEvent: Colors.orange,
@@ -130,6 +137,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textDisabled: AppColors.darkTextDisabled,
     surfaceRaised: AppColors.darkSurfaceRaised,
     border: AppColors.darkBorder,
+    controlBorder: AppColors.darkControlBorder,
     muted: Colors.grey,
     caution: Color(0xFFFFB74D), // orange.shade300
     sunEvent: Colors.orange,
@@ -160,6 +168,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textDisabled: AppColors.fieldTextDisabled,
     surfaceRaised: AppColors.fieldSurfaceRaised,
     border: AppColors.fieldBorder,
+    controlBorder: AppColors.fieldControlBorder,
     muted: AppColors.fieldTextSecondary,
     // As bright as "Fits": in red mode the word carries the caution.
     caution: AppColors.fieldTextPrimary,
@@ -239,6 +248,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     textDisabled,
     surfaceRaised,
     border,
+    controlBorder,
     muted,
     caution,
     sunEvent,

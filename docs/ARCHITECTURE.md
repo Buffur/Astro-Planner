@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.2, 2026-09-27:** B17 extended (component themes for the controls; `AppMotion`).
 > **S5.1, 2026-09-27:** B17 added (the design system's foundation tokens and gallery test).
 > **S4.V3, 2026-09-27:** D5's lifecycle bullets now state only the owner's approved decisions;
 > the detailed rules are Stage 6/8 design questions. Documentation only; Part B unchanged.
@@ -781,8 +782,15 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   radius) and the gallery, `test/presentation/design_system/`, which audits shared components in
   the three themes at 100 % and 200 % text, including ones no route uses yet and dialogs (B16's
   gap).
+- **Controls (S5.2):** `AppTheme._withControls` sets the button, input, dialog, bottom-sheet,
+  menu and snackbar themes from the tokens, so existing controls follow them without screen edits.
+  `colorScheme.outline` is `AppPalette.controlBorder` (Material otherwise draws field underlines
+  in `onBackground`). `AppButtonStyles` adds the destructive role. `AppMotion` holds the motion
+  scale and turns motion off under the platform's reduced-motion setting. Tested by
+  `test/core/theme/controls_theme_test.dart` and the gallery, which also opens a dialog, a message
+  and a menu.
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
-  styles (DESIGN_SYSTEM §7).
+  styles (DESIGN_SYSTEM §8).
 
 ---
 

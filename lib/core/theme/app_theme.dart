@@ -40,6 +40,11 @@ class AppTheme {
         onSurface: AppColors.lightTextPrimary,
         onSurfaceVariant: AppColors.lightTextSecondary,
         surfaceContainerHigh: AppColors.lightSurfaceRaised,
+        // S5.2: Material falls back to black for both (the prominent
+        // field underline of 08 §6).
+        outline: AppColors.lightControlBorder,
+        outlineVariant: AppColors.lightBorder,
+        error: AppColors.lightError,
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.lightBorder,
@@ -83,6 +88,11 @@ class AppTheme {
         onSurface: AppColors.darkTextPrimary,
         onSurfaceVariant: AppColors.darkTextSecondary,
         surfaceContainerHigh: AppColors.darkSurfaceRaised,
+        // S5.2: Material falls back to white for both.
+        outline: AppColors.darkControlBorder,
+        outlineVariant: AppColors.darkBorder,
+        error: AppColors.darkError,
+        onError: AppColors.darkBackground,
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.darkBorder,
@@ -132,7 +142,7 @@ class AppTheme {
     surfaceContainer: AppColors.fieldSurface,
     surfaceContainerHigh: AppColors.fieldSurfaceRaised,
     surfaceContainerHighest: Color(0xFF220000),
-    outline: Color(0xFF660000),
+    outline: AppColors.fieldControlBorder,
     outlineVariant: AppColors.fieldBorder,
     shadow: AppColors.fieldBackground,
     scrim: AppColors.fieldBackground,
@@ -194,6 +204,7 @@ class AppTheme {
     ),
     AppPalette.field,
     textColor: AppColors.fieldTextPrimary,
+    field: true,
   );
 
   /// Red field mode's safety net (owner decision, TASK 12.4): applied over
@@ -218,6 +229,7 @@ class AppTheme {
     ThemeData base,
     AppPalette palette, {
     Color? textColor,
+    bool field = false,
   }) {
     TextTheme readable(TextTheme t) {
       final scaled = t.merge(AppTypography.scale);
@@ -226,10 +238,171 @@ class AppTheme {
           : scaled.apply(bodyColor: textColor, displayColor: textColor);
     }
 
-    return base.copyWith(
-      extensions: [palette],
-      textTheme: readable(base.textTheme),
-      primaryTextTheme: readable(base.primaryTextTheme),
+    return _withControls(
+      base.copyWith(
+        extensions: [palette],
+        textTheme: readable(base.textTheme),
+        primaryTextTheme: readable(base.primaryTextTheme),
+      ),
+      palette,
+      field: field,
     );
   }
+
+  /// The controls' look (S5.2; `docs/DESIGN_SYSTEM.md`): the button roles,
+  /// text fields, dialogs, sheets, menus and messages, from the tokens
+  /// only, so field mode stays red or black.
+  static ThemeData _withControls(
+    ThemeData t,
+    AppPalette p, {
+    required bool field,
+  }) {
+    final s = t.colorScheme;
+    final text = t.textTheme;
+    final shape = WidgetStatePropertyAll(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+    );
+    final label = WidgetStatePropertyAll(text.labelLarge);
+    const tall = WidgetStatePropertyAll(Size(64, 48));
+
+    // Pressed feedback stronger than Material's 10 % (08 §5, §8).
+    WidgetStateProperty<Color?> overlay(Color c) =>
+        WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return c.withValues(alpha: pressedOverlay);
+          }
+          if (states.contains(WidgetState.focused)) {
+            return c.withValues(alpha: 0.12);
+          }
+          if (states.contains(WidgetState.hovered)) {
+            return c.withValues(alpha: 0.08);
+          }
+          return null;
+        });
+    WidgetStateProperty<Color> onOff(Color on) =>
+        WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.disabled) ? p.textDisabled : on,
+        );
+    final secondary = ButtonStyle(
+      minimumSize: tall,
+      shape: shape,
+      textStyle: label,
+      foregroundColor: onOff(p.textPrimary),
+      iconColor: onOff(p.textPrimary),
+      overlayColor: overlay(p.textPrimary),
+      side: WidgetStateProperty.resolveWith(
+        (states) => BorderSide(
+          color: states.contains(WidgetState.disabled)
+              ? p.border
+              : p.controlBorder,
+        ),
+      ),
+    );
+
+    return t.copyWith(
+      filledButtonTheme: FilledButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: tall,
+          shape: shape,
+          textStyle: label,
+          overlayColor: overlay(s.onPrimary),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: secondary),
+      // The flat design has no elevation: an elevated button is the
+      // secondary role, on the surface.
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: secondary.copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? t.scaffoldBackgroundColor
+                : s.surface,
+          ),
+          elevation: const WidgetStatePropertyAll(0),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          shape: shape,
+          textStyle: label,
+          foregroundColor: onOff(p.textPrimary),
+          iconColor: onOff(p.textPrimary),
+          overlayColor: overlay(p.textPrimary),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(overlayColor: overlay(p.textPrimary)),
+      ),
+      // A quiet underline (08 §6): the enabled line is the control border
+      // (colorScheme.outline, which Material reads); focus draws it 2 px in
+      // the primary colour. Labels and hints are text roles (AA).
+      inputDecorationTheme: InputDecorationThemeData(
+        labelStyle: TextStyle(color: p.textSecondary),
+        floatingLabelStyle: WidgetStateTextStyle.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.error)
+                ? s.error
+                : states.contains(WidgetState.focused)
+                ? s.primary
+                : p.textSecondary,
+          ),
+        ),
+        hintStyle: TextStyle(color: p.textTertiary),
+        helperStyle: TextStyle(color: p.textTertiary),
+        errorStyle: TextStyle(color: s.error),
+        prefixIconColor: p.textSecondary,
+        suffixIconColor: p.textSecondary,
+        fillColor: s.surface,
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: p.surfaceRaised,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.large),
+          side: BorderSide(color: p.border),
+        ),
+        titleTextStyle: text.titleLarge?.copyWith(color: p.textPrimary),
+        contentTextStyle: text.bodyMedium?.copyWith(color: p.textSecondary),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: p.surfaceRaised,
+        modalBackgroundColor: p.surfaceRaised,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.large),
+          ),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: p.surfaceRaised,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.small),
+          side: BorderSide(color: p.border),
+        ),
+        labelTextStyle: WidgetStatePropertyAll(
+          text.bodyMedium?.copyWith(color: p.textPrimary),
+        ),
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(p.surfaceRaised),
+        ),
+      ),
+      // Field mode keeps its dim red message; light and dark invert.
+      snackBarTheme: field
+          ? t.snackBarTheme
+          : SnackBarThemeData(
+              backgroundColor: p.textPrimary,
+              contentTextStyle: text.bodyMedium?.copyWith(
+                color: t.scaffoldBackgroundColor,
+              ),
+              actionTextColor: t.scaffoldBackgroundColor,
+            ),
+    );
+  }
+
+  /// The pressed overlay's opacity on every button (S5.2).
+  static const double pressedOverlay = 0.16;
 }
