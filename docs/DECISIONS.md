@@ -3272,6 +3272,8 @@ MetadataRead → EquipmentEvidence → EquipmentCandidate → Match → Review �
 
 ### 7. Decision: visibility (D3, RD-16) and privacy
 
+*(Historical, superseded by S3.7 (`2b045eb`, 2026-09-26): the import is visible in every build as "Add from a photo" on the equipment screen, and the Settings viewer entry is removed. Marked by S3.V5 (S3V-07); the amendment is kept as written.)*
+
 **Owner amendment, 2026-09-26:** enable the existing read-only Settings →
 Import metadata viewer in debug builds now, to inspect Stage 2 output during
 Stage 3 development. `FeatureScope.metadataImport = kDebugMode` gates both

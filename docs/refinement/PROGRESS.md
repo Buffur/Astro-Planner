@@ -3,9 +3,11 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S3.V4). **Stage 3 validation FAILED** at `387e54b` (committed
-> `7f790df`). The owner approved the corrective Tasks S3.V1–S3.V5, one at a time. S3.V1–S3.V4 are
-> done. Next: **S3.V5**, the last. Then a fresh independent validation; Stage 4 waits.
+> **Last updated:** 2026-09-27 (S3.V5). **Stage 3 validation FAILED** at `387e54b` (committed
+> `7f790df`). The corrective Tasks S3.V1–S3.V5 are done, **but a re-run of the archived probes
+> found S3V-01 not fully closed**. P5 still fails: the ViewModel still hands out a rig draft built
+> from a stale match. The screen refreshes first, so no app path does this today. **S3.V6 is
+> proposed** to close it; owner approval needed. Stage 4 waits.
 
 ## Current state
 
@@ -22,6 +24,7 @@ the report discloses its earlier debug/exposure contributions and device limits.
 Current visibility is **Add from a photo on Equipment in all build modes**;
 the two debug/exposure amendments below are historical and superseded by S3.7.
 
+*(Historical as to visibility and M4; superseded by S3.7 (`2b045eb`, 2026-09-26): the import is visible in every build as "Add from a photo" on the equipment screen, and the Settings viewer entry is removed. TD-066's formatting itself stands. Marked by S3.V5, S3V-07.)*
 **Exposure formatting amendment, 2026-09-26 (owner, TD-066):** brought forward
 from S3.7 after enabling the debug viewer. Shared `QuantityText.exposure` uses
 integer reciprocal fractions within 0.5% relative error, with ≈ for approximation
@@ -32,6 +35,7 @@ and metadata-screen tests: 20 pass. Full quality gate passes: encoding, format,
 analysis, 1,094 unit/widget tests (one expected local-sample skip) and 2 host E2E
 tests. This run also includes the concurrent S3.2 tests present in the workspace.
 
+*(Historical; superseded by S3.7 (`2b045eb`, 2026-09-26): the import is visible in every build as "Add from a photo" on the equipment screen, and the Settings viewer entry is removed. Marked by S3.V5, S3V-07.)*
 **Debug access amendment, 2026-09-26 (owner):** Settings → Import metadata is
 enabled in debug builds for Stage 3 development (`FeatureScope.metadataImport`
 uses `kDebugMode`). Profile/release visibility and the planned Equipment
@@ -45,12 +49,12 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation (FAIL).** S3V-01–S3V-06 require correction; see `STAGE_3_VALIDATION.md`. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation.** The validation at `387e54b` failed (S3V-01–S3V-06, `STAGE_3_VALIDATION.md`); corrective Tasks S3.V1–S3.V5 are done; the probe re-run leaves P5 (S3V-01, ViewModel level) failing, so S3.V6 is proposed before a fresh validation. Original implementation order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7, then S3.9/S3.10 |
 | Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S3.V5 — real-database review coverage and stale wording (S3V-06, S3V-07)** (owner-approved, DECISIONS E.1) |
-| Code baseline | S3.V4 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | None. **Proposed S3.V6** (S3V-01 at the ViewModel level; awaiting the owner); then a fresh independent Stage 3 validation. The device recheck (S3V-08) is a separate validation action |
+| Code baseline | S3.V5 (see "Completed Tasks"). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -165,7 +169,9 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.V3 — Numeric fidelity (S3V-03, S3V-04) | 2026-09-27 | `18873ad` | `PrefilledSpec.values` carries the exact numbers behind pre-filled texts; `EquipmentDraft.build` saves them while the texts are unchanged (before the stored-sensor rule and before parsing). Copied pixel and RAW sizes display unrounded; the sensor display stays at 2 decimals (display-only). Regression tests through the real Drift repository with rereads (`equipment_numeric_fidelity_test.dart`): the validation's P3 (a chosen file sensor size applies the file's value, and the difference disappears) and P4 (copied 9.894 mm, 2.414123 µm and 30.04 MB stay exact and verified) failed before the fix, with a copied-then-retyped case; controls: estimates stay rounded, and an untouched open-and-save of a saved rig stays exact. No existing test changed. Gate green, 1182 + 1 skip + 2 E2E |
 
-| 3 | S3.V4 — Absurd image dimensions are unparseable (S3V-05) | 2026-09-27 | The S3.V4 commit* | `ExifValues.dimensions` rejects a side over `maxImageSidePx` = 65,535 (JPEG's format limit; a metadata sanity bound, deliberately wider than `EquipmentLimits.resolutionPx`); the shared conversion covers DNG IFD0 and DefaultCropSize, JPEG and HEIC. 4 regression tests in `image_dimensions_test.dart`: the validation's P7 (4,294,967,295 × 4,294,967,295 JPEG EXIF), a DNG width and crop over the bound, a HEIC side over it, and the boundary (65,535 known, 65,536 not); all failed before the fix. CALC-39 and an ADR-018 note updated. The local real samples still give their expected dimensions. Gate green, 1186 + 1 skip + 2 E2E |
+| 3 | S3.V4 — Absurd image dimensions are unparseable (S3V-05) | 2026-09-27 | `2447962` | `ExifValues.dimensions` rejects a side over `maxImageSidePx` = 65,535 (JPEG's format limit; a metadata sanity bound, deliberately wider than `EquipmentLimits.resolutionPx`); the shared conversion covers DNG IFD0 and DefaultCropSize, JPEG and HEIC. 4 regression tests in `image_dimensions_test.dart`: the validation's P7 (4,294,967,295 × 4,294,967,295 JPEG EXIF), a DNG width and crop over the bound, a HEIC side over it, and the boundary (65,535 known, 65,536 not); all failed before the fix. CALC-39 and an ADR-018 note updated. The local real samples still give their expected dimensions. Gate green, 1186 + 1 skip + 2 E2E |
+
+| 3 | S3.V5 — Real-database review coverage and stale wording (S3V-06, S3V-07) | 2026-09-27 | The S3.V5 commit* | `metadata_import_review_db_test.dart` runs S3.6's acceptance through the real screens and routes with a real in-memory SQLite database (only the file picker is fake), counting rows in `devices`, `camera_modules` and `optical_rigs`. The cases: Cancel at every step writes nothing (picker, leaving the review, Cancel in each editor); a new rig is written once, only by Save, then matched, with no duplicate on Open and Save; a difference is kept by default, a verified value survives, and only an explicit choice replaces it; another module adds a rig with the saved camera specs; navigation and re-entry. These are acceptance tests for behaviour already fixed by S3.V1–S3.V3 (S3V-06 was a coverage gap), so they pass; nothing to reproduce first. The list-fake tests are kept. S3V-07: the debug-only visibility wording in ADR-018 §7, the two `PROGRESS.md` amendments and F-45's "current visibility" bullet are marked superseded by S3.7, with their text kept verbatim. **Archived probes re-run (`evidence/STAGE_3_VALIDATION_PROBES.md`, recreated then deleted): P1–P4 and P6–P10 pass; P5 still fails (45 → 30.04 MB).** P5 calls `vm.rigDraft(vm.match!.rigs.single)` on a match kept from before an external edit, with no refresh. S3.V1 closed the screen paths (refresh on entry and before Open; P8 passes) but not this ViewModel API. Recorded; not fixed here (outside S3.V5's scope). Gate green, 1191 + 1 skip + 2 E2E |
 
 \* A file cannot contain its own commit hash. Find it with
 `git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
@@ -416,16 +422,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S3.V5 — real-database review coverage and stale wording (S3V-06, S3V-07)**, owner-approved
-(DECISIONS E.1):
-- the S3.6 acceptance matrix through widget tests with fake file access and a real in-memory
-  database: Cancel at every step, row counts, no duplicate, conflict choices, verified values
-  kept, navigation and re-entry;
-- the current-state wording that still describes the debug-only viewer corrected, keeping the
-  historical record.
-
-The device recheck (S3V-08) is kept separate, as its own validation action. One commit, then STOP.
-Then a fresh independent Stage 3 validation; do not start Stage 4.
+**Owner decision: approve S3.V6 (proposed, S) before the fresh Stage 3 validation.**
+- **Finding:** the re-run of the validation's archived probes after S3.V5 shows S3V-01 still
+  reproducible at the ViewModel level (P5). `MetadataImportViewModel.rigDraft(RigMatch)` and
+  `newRigDraft(cameraFrom:)` build drafts from whatever match they are given, including one read
+  before a newer edit.
+- **Scope today:** S3.V1 made every screen path refresh first (P8 passes).
+- **Proposed S3.V6:** make the stale path impossible. The ViewModel hands out a rig draft only
+  after re-reading the saved rigs (for example `Future<EquipmentDraft?> rigDraft(int rigId)`),
+  and the screen uses it. A regression test replays P5's sequence through that API, where it
+  fails today.
+- **Probe compatibility:** P5 as archived calls the old synchronous method, which would no longer
+  exist. The fresh validation re-states it against the new API; the report itself is not changed.
+- **Then:** a fresh independent Stage 3 validation. The device recheck (S3V-08) stays separate.
+  Do not start Stage 4.
 
 Useful inputs:
 - the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`

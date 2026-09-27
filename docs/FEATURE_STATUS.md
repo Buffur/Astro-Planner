@@ -688,6 +688,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.V5 (2026-09-27; S3V-06, S3V-07):** S3.6's acceptance is now tested through the real screens, routes and SQLite, counting rows in all three equipment tables. The cases: Cancel at every step, a single write on Save, no duplicate, a kept difference and a surviving verified value, an explicit choice, another camera module, and re-entry. **Current visibility: "Add from a photo" on the equipment screen, in every build** (since S3.7); the debug-only wording below is marked historical.
 - **S3.V4 (2026-09-27; S3V-05):** an image size over 65,535 px per side is now "Unreadable value" instead of a known size, in DNG, JPEG and HEIC.
 - **S3.V3 (2026-09-27; S3V-03, S3V-04):** numbers stay exact. "Use the file's sensor size" now saves the file's value even when it displays like the saved one. A new rig that takes a saved rig's camera specs keeps them exactly (9.894 mm stays 9.894, still verified). Only estimates are rounded.
 - **S3.V1 (2026-09-26, after the failed Stage 3 validation, S3V-01):** the review is matched again against the saved rigs whenever it is shown, and right before a rig is opened from it. A change made elsewhere since is therefore never reverted. A "use the file's value" choice made before that change is withdrawn, and a deleted or no-longer-matching rig is not opened. Tested through the real routes and SQLite.
@@ -708,7 +709,7 @@ see DATA_MODEL.md B2/B8.)
   - never the aperture diameter, rotation, tracking or maximum exposure;
   - a suggested name, and the identity evidence kept for matching.
 
-- **Current visibility, owner amendment 2026-09-26:** the read-only viewer is
+- *(Historical; superseded by S3.7 (`2b045eb`, 2026-09-26): the import is visible in every build as "Add from a photo" on the equipment screen, and the Settings viewer entry is removed. Marked by S3.V5, S3V-07.)* **Was: current visibility, owner amendment 2026-09-26:** the read-only viewer is
   now available at Settings → Import metadata in debug builds. Profile/release
   remain gated. The public Equipment action "Add from a photo" is S3.7, after
   review/confirmation; this development access does not implement that flow.

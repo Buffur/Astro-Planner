@@ -1384,7 +1384,8 @@ validation failed: corrective Tasks"). Then a fresh independent validation; Stag
 | S3.V2 | S3V-02 | Untouched legacy values are never attributed to the user because another field was edited | **Done 2026-09-27** |
 | S3.V3 | S3V-03, S3V-04 | The file's value, when chosen, is the value applied; persisted and verified values stay exact; rounding only for estimated or display-only values | **Done 2026-09-27** |
 | S3.V4 | S3V-05 | Image dimensions validated; impossible or absurd values rejected (S3.1's acceptance) | **Done 2026-09-27** |
-| S3.V5 | S3V-06, S3V-07 | The required real-database review coverage; stale documentation and status wording corrected | **Next** |
+| S3.V5 | S3V-06, S3V-07 | The required real-database review coverage; stale documentation and status wording corrected | **Done 2026-09-27** |
+| S3.V6 | S3V-01 (ViewModel level; probe P5 still fails after S3.V1–S3.V5) | No draft of a saved rig can be built from a stale match: the ViewModel re-reads the saved rigs before handing one out | **Proposed; awaiting the owner** |
 | (separate) | S3V-08 | A device recheck, as its own validation action with its evidence level, if the Stage 3 acceptance requires it | Not decided; kept apart from S3.V5 |
 | S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | **Done 2026-09-26** |
 
