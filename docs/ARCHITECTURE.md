@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S4.V3, 2026-09-27:** D5's lifecycle bullets now state only the owner's approved decisions;
+> the detailed rules are Stage 6/8 design questions. Documentation only; Part B unchanged.
 > **S4.V2, 2026-09-27:** D5's lifecycle bullets follow ADR-019 §3.1 as revised to the owner's R2 +
 > D1: an immutable saved snapshot per night, results without Save plan, Stage 8 delivering the
 > saved-plan transition at once. Documentation only; Part B unchanged.
@@ -941,11 +943,11 @@ Owner-approved on 2026-09-27; implemented by Stages 5, 6, 8 and 9. The architect
   - a saved plan's snapshot is the immutable intent for its night. Results and working edits never
     change it, and working edits belong to an independent working copy;
   - a recorded result completes or abandons a saved plan (Saved or Saved · changed) without a run
-    and without Save plan, and only once its saved night has ended;
+    and without Save plan, and never for a planned night that has not ended;
   - its counts are written as events against the snapshot's blocks, so the counters equal the
     replay (trap 14);
-  - from Stage 8, a saved plan whose night has ended stays on that night, and the planner continues
-    on an independent working copy. Only never-saved drafts roll forward in place. Until Stage 8,
+  - from Stage 8, a saved plan whose night has passed stays on that night, and the planner
+    continues on a copy for tonight, the independent working copy. Only never-saved drafts roll forward in place. Until Stage 8,
     saved plans behave as today (D1). ADR-019 §3.1 is normative (S4.V1, revised by S4.V2).
 - **Execution** (ADR-016 amended): optional ("Track live"); the event model is unchanged for live
   runs.

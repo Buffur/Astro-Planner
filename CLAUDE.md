@@ -208,6 +208,30 @@ Validation exists at two levels.
 
 **Stage validation** is performed in a fresh independent session after the Stage's implementation Tasks are complete. The validator should attempt to disprove that the Stage is complete, checking for regressions, scope drift, incomplete work, stale assumptions, architecture/scientific-integrity violations, and missing evidence. Validation-only sessions do not silently implement fixes; surviving findings become focused follow-up Tasks.
 
+**Analysis-and-decision Stages** (research, owner decisions, ADRs and provisional Tasks; no
+application code) are validated against a **bounded scope**. The validation checks only:
+- that the Stage's research Tasks were completed;
+- that every required research gate has an explicit owner decision;
+- that the ADR or specification faithfully records those decisions;
+- that companion documents (wireframes, addenda) are consistent with it;
+- that the decisions are mapped to later implementation Stages;
+- that no direct contradiction makes an approved core flow impossible;
+- that no Stage acceptance criterion is unmet.
+
+A finding is blocking only when it demonstrates a direct contradiction with an approved owner
+decision or an explicit Stage acceptance criterion. These are recorded as `DEFERRED /
+IMPLEMENTATION DECISION`, not as blockers:
+- an unspecified implementation detail;
+- a hypothetical edge case;
+- an alternative design;
+- a policy that can safely be decided in the implementing Stage.
+
+Neither a validation nor its corrective Task creates new product requirements, or presents inferred
+rules as owner decisions. If the bounded validation passes, the Stage closes. If it fails, the
+report names only the exact approved decision or acceptance criterion that is contradicted, with
+evidence, and the Stage's scope is not expanded. (Owner, 2026-09-27; DECISIONS E.1, "Bounded
+validation for analysis and decision Stages".)
+
 ## Current Baseline and Known Traps (as of 2026-09-24, TASKs 15.4 and 15.5 open until a device run; TASK 10.5 cut)
 
 **Commands** (prefer `--no-pub` to avoid unintended `pubspec.lock` changes):

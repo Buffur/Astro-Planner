@@ -3,11 +3,29 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S4.V2 complete: the owner's R2 + D1 recorded, documentation only).
-> Stage 4 remains **in validation**; Stage 3 closed (`126d97f`).
-> **Next:** a fresh-session Stage 4 revalidation.
+> **Last updated:** 2026-09-27 (S4.V3 complete: S4.V2's inferred rules withdrawn; the bounded
+> validation rule recorded). Stage 4 remains **in validation**; Stage 3 closed (`126d97f`).
+> **Next:** the final, bounded, fresh-session Stage 4 validation (seven questions; see "Next
+> allowed action").
 
 ## Current state
+
+**S4.V3 complete, 2026-09-27 (documentation and governance only; the owner's instruction).**
+- **The loop it stops:** each documentation validation derived more lifecycle policy, then
+  validated it. The owner stopped that. S4.V2's five inferred rules (re-save, Discard on a saved
+  entry, the working copy's night, "ended" as the SessionNight end, the live mode) are **not owner
+  decisions**.
+- **ADR-019 §3.1 now states only E2, R2 (with the owner's invariant) and D1.** The same reduction
+  was applied to the ADR-014 pointer, §3's Discard line, D5, addendum §3.10, S4.R3 §13, TD-057,
+  P6.1, P6.7 and P8.1–P8.3.
+- **The open implementation cases** are S4-DEF-01 to S4-DEF-08, `DEFERRED / IMPLEMENTATION
+  DECISION`, for Stage 6 or 8 (plan, S4.V3). They are not Stage 4 blockers.
+- **The final Stage 4 validation is bounded to seven questions.** Only a direct contradiction with
+  an approved decision or a Stage 4 acceptance criterion blocks. A pass closes Stage 4 and makes
+  Stage 5 next.
+- **The rule for future Stages:** the bounded-validation rule for analysis-and-decision Stages is
+  in `CLAUDE.md` ("Validation Rules"), plan §9.8 and E.1.
+- No application code or test changed.
 
 **S4.V2 complete, 2026-09-27 (documentation only; the owner decided R2 + D1).**
 - **The owner's invariant:** the plan snapshot is the immutable intent for its night; the result is
@@ -365,10 +383,10 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 4 — Product Flow & Information Architecture: In validation.** S4.V2 applied the owner's R2 + D1 for the revalidation's failures at `5ad69c4` (S4R-01 to S4R-04; `STAGE_4_REVALIDATION.md`); a fresh revalidation is pending. Stage 3 is complete (`126d97f`) |
+| Current Stage | **Stage 4 — Product Flow & Information Architecture: In validation.** S4.V2 applied the owner's R2 + D1 for the revalidation's failures at `5ad69c4` (S4R-01 to S4R-04; `STAGE_4_REVALIDATION.md`). S4.V3 withdrew S4.V2's inferred rules and bounded the final validation. The final, bounded validation is pending. Stage 3 is complete (`126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: a fresh-session Stage 4 revalidation after S4.V2. Stage 5 stays blocked until Stage 4 passes |
+| Next approved Task | None. Next: the final, bounded, fresh-session Stage 4 validation (plan, "S4.V3 — Bounded final validation"). A pass closes Stage 4 and makes Stage 5 next |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 4 revalidation**, 2026-09-27, re-run at `5ad69c4` on a clean tree (code unchanged since `92ebf2a`): Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -383,7 +401,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
-| 4 | Product Flow & Information Architecture | In validation | 2026-09-27 | — | **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1); a fresh revalidation is pending. S4V-02 is non-blocking and S4V-03 unverified |
+| 4 | Product Flow & Information Architecture | In validation | 2026-09-27 | — | **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which is pending. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
@@ -394,7 +412,13 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 
 ## Completed Tasks
 
-**S4.V2 — saved plans as immutable references**, 2026-09-27, this commit. Documentation only,
+**S4.V3 — bounded Stage 4 scope and validation rule**, 2026-09-27, this commit. Documentation and
+governance only, on the owner's instruction:
+- S4.V2's inferred rules are withdrawn, and are now S4-DEF-01 to S4-DEF-08;
+- the final validation is bounded;
+- the rule is recorded in `CLAUDE.md` and plan §9.8.
+
+**S4.V2 — saved plans as immutable references**, 2026-09-27, `b9eed65`. Documentation only,
 authorized by the owner's R2 + D1 decision with the saved-snapshot invariant. Resolves S4R-01 to
 S4R-04 in the design documents; a fresh revalidation must confirm it. No application or test
 changes.
@@ -645,8 +669,9 @@ These block a release, not refinement.
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
 - **Stage 4:**
-  - the revalidation after S4.V1 failed (S4R-01 and S4R-02). The owner decided R2 + D1, and S4.V2
-    recorded it; closure still requires a fresh revalidation;
+  - the revalidation after S4.V1 failed (S4R-01 and S4R-02). The owner decided R2 + D1, S4.V2
+    recorded it, and S4.V3 reduced it to the approved decisions. Closure requires only the final,
+    bounded validation;
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
@@ -657,6 +682,14 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **S4.V3 task self-review**, 2026-09-27. Documentation and governance only.
+  - Searched the current documents (DECISIONS, ARCHITECTURE, the addendum, the plan,
+    PRODUCT_DIRECTION, TECH_DEBT, the research notes) for S4.V2's inferred rules. They remain only
+    in S4.V2's matrix, which is labelled superseded and non-normative. ADR-007's own solar-noon text
+    is unrelated.
+  - `git diff --check` passed. The code is unchanged, so the gate at `5ad69c4` still applies.
+  - This is not a Stage validation.
 
 - **S4.V2 task self-review**, 2026-09-27. Documentation only.
   - Every current document that stated S4.V1's Review → Save → result guard or its Stage 6/8 split
@@ -856,6 +889,35 @@ These block a release, not refinement.
     committed; the owner decides. **Stages 2–11:** not started.
 
 ## Next allowed action
+
+**The final, bounded, fresh-session Stage 4 validation** (plan, "S4.V3 — Bounded final
+validation"; `CLAUDE.md`, "Validation Rules"; E.1, "Bounded validation for analysis and decision
+Stages").
+
+**It answers only whether:**
+1. S4.R1–S4.R5 were completed;
+2. every research gate required by Stage 4 has an explicit owner decision;
+3. ADR-019 faithfully represents those approved decisions;
+4. the wireframe addendum is consistent with ADR-019;
+5. S4.T maps the approved design into the appropriate later implementation Stages;
+6. the documents contain no direct contradiction that makes an approved core flow impossible;
+7. no Stage 4 acceptance criterion remains unmet.
+
+**Blocking and outcome:**
+- **BLOCKING:** only a direct contradiction with an approved owner decision or an explicit Stage 4
+  acceptance criterion.
+- **Not blocking:** S4-DEF-01 to S4-DEF-08 and any other open implementation detail. These are
+  `DEFERRED / IMPLEMENTATION DECISION`.
+- **No new requirements:** the validation creates none.
+- **If it passes:** close Stage 4 and set Stage 5 (Design System Foundation, planning) as the next
+  allowed action.
+- **If it fails:** name the exact decision or criterion contradicted, with evidence. Do not expand
+  Stage 4.
+
+S4.E remains optional. S4V-02 must be corrected before Test A or Test C runs on the owner's
+install, but it does not block Stage 4.
+
+*Superseded by S4.V3 (kept as written):*
 
 **Fresh-session Stage 4 revalidation after S4.V2** (§9.8).
 - **Check ADR-019 §3.1 as revised against the owner's invariant and R2 + D1** (E.1, "S4R-01 and

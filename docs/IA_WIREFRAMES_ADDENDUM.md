@@ -1,5 +1,7 @@
 # AstroPlan — Information architecture addendum (Stage 4)
 
+> **Updated 2026-09-27 (S4.V3):** §3.10 reduced to the owner's approved decisions. The details are
+> Stage 6/8 design questions.
 > **Updated 2026-09-27 (S4.V2):** §3.10 rewritten to ADR-019 §3.1 as revised (the owner's R2 +
 > D1): the result is reported against the saved snapshot, without Save plan; §3.7's pre-fill comes
 > from the snapshot. Not implemented yet.
@@ -234,34 +236,31 @@ Sites:   tap = edit · [Add site] (the active site is chosen from the context li
 [Done]   (nothing is preselected; the seeded rig is listed as an example)
 ```
 
-### 3.10 Saved plans across a night boundary, and their result (S4.V2; ADR-019 §3.1)
+### 3.10 Saved plans across a night boundary, and their result (ADR-019 §3.1)
 
-A saved plan's snapshot is the immutable intent for its night. The result reports what happened
-against that snapshot, and the planner's working copy is independent. **From Stage 8** (delivered
-at once, D1):
+- **What a saved plan is:** its snapshot is the immutable intent for its night. The result reports
+  what happened against that snapshot. The planner's working copy is independent.
+- **When this applies:** from Stage 8, delivered at once (D1). Until then, saved plans behave as
+  today.
 
 ```text
-Save Fri → working planner moved to Sat, blocks changed → Fri ends (next mean solar noon)
-  Logbook: Fri entry, snapshot for Fri, "Record result"      (never re-dated, never changed)
-  Planner: working copy · Sat · Not saved                     (the Sat changes live here)
+Save Fri → working planner moved to Sat, some fields changed → Fri has passed
+  Logbook: Fri's saved plan, awaiting Fri's result         (its snapshot unchanged)
+  Planner: copy for tonight · Not saved                     (the Sat changes live here)
 
-Logbook entry / Tonight "Last night: M42. How did it go?"   (only after the saved night ends)
-  Review saved plan: M42 · site · Fri 14 Nov · the saved blocks   (the snapshot, read-only)
+Logbook entry / Tonight "Last night: M42. How did it go?"  (never before that night has ended)
+  Review saved plan: Fri's snapshot (target, site, night, blocks)
   ( ) Completed as planned   ( ) Partly: numbers per saved block   ( ) Not done: reason
-  [Save result] → result + count events, one write; the snapshot is unchanged
-  [Cancel]      → nothing written
-  No Save plan; no planner opens; no Save · Discard · Cancel about the working copy
+  [Save result] → result and count events; the snapshot unchanged
+  No Save plan; no Save · Discard · Cancel about the working copy
 ```
 
-- **Until Stage 8, saved plans behave as today.** Stage 6 changes only never-saved drafts and
-  working plans.
-- **Opening an entry shows it.** It never replaces the working copy.
-- **Open plan** is offered while the saved night has not ended; **Plan again** (a copy) after.
-- **A Save for another night or site creates a new saved plan** (from Stage 8). Before Stage 8,
-  today's Save still applies.
-- **Discard never deletes a saved entry.** On Saved · changed it reverts only the working changes
-  (Stage 6).
-- **The live tracker's Finish is unchanged.**
+- **The live tracker's Finish** is unchanged.
+- **Left to Stage 6/8 design** (ADR-019 §3.1):
+  - save and version semantics;
+  - when a night has passed, and when a result may be reported;
+  - Discard on Saved · changed;
+  - what an opened entry offers.
 
 ## 4. Field constraints
 
