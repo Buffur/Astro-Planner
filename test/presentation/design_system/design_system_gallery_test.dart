@@ -8,6 +8,9 @@
 import 'package:astroplan/core/theme/app_button_styles.dart';
 import 'package:astroplan/core/theme/app_palette.dart';
 import 'package:astroplan/core/theme/app_spacing.dart';
+import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/presentation/shared/plan_state.dart';
+import 'package:astroplan/presentation/shared/status_block.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -172,11 +175,46 @@ List<Widget> _menus() => [
   ),
 ];
 
+/// S5.4: the status block in every state, on a card as the planner and
+/// Tonight will show it, and every plan-state label.
+List<Widget> _status() => [
+  const SizedBox(height: AppSpacing.lg),
+  for (final state in FitState.values)
+    Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: StatusBlock(
+          state: state,
+          needed: const Duration(hours: 2, minutes: 5),
+          usable: const Duration(hours: 4, minutes: 20),
+          reason: 'Everything fits with 2 h 15 min of window time to spare.',
+          keyNumbers: const [
+            ('Capture ends', '01:40'),
+            ('Integration', '1 h 40 min'),
+          ],
+          action: state == FitState.fits
+              ? TextButton(
+                  onPressed: () {},
+                  child: const Text("Fill tonight's window"),
+                )
+              : null,
+        ),
+      ),
+    ),
+  const SizedBox(height: AppSpacing.sm),
+  Wrap(
+    spacing: AppSpacing.sm,
+    runSpacing: AppSpacing.sm,
+    children: [for (final s in PlanState.values) PlanStateLabel(s)],
+  ),
+];
+
 List<Widget> _entries() => [
   ..._surfaces(),
   ..._buttons(),
   ..._fields(),
   ..._menus(),
+  ..._status(),
 ];
 
 /// S5.2: opens a dialog, a message and a menu over the gallery in turn and

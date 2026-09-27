@@ -5,7 +5,8 @@
 > part; Stages 6–9 adopt it on the screens (see "Adoption", written by S5.9).
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
-> icons; states and motion) and S5.3 (words: `AppWords` and the retired-terms test).
+> icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test) and S5.4 (status
+> tokens, the status block, the plan-state label).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -83,7 +84,27 @@ route sweep caught it on Settings' segmented control). Dark keeps Material's der
 ### 2.4 Other tokens
 
 `AppPalette` also holds the night-event, Moon, chart and Bortle colours (TASK 12.4) and `caution`
-(S1.9). Status colours are S5.4's.
+(S1.9).
+
+### 2.5 Status and state tokens (S5.4)
+
+| Token | Light | Dark | Field | Used for |
+| --- | --- | --- | --- | --- |
+| `statusFits` | `#37352F` | `#EBEBEA` | `#FF0000` | Fits |
+| `statusTight` | `#9A5B00` | `#FFB74D` | `#FF0000` | Tight: a caution, at least as prominent as Fits (S1.9) |
+| `statusDoesNotFit` | `#B00020` | `#F28B82` | `#FF0000` | Doesn't fit |
+| `statusNoWindow` | `#B00020` | `#F28B82` | `#FF0000` | No window (a real night with none) |
+| `statusNeutral` | `#5A5955` | `#A5A5A3` | `#AA0000` | Needs a target / a block: a missing input is not a verdict (UX-15(2)) |
+| `stateUnsaved` | `#9A5B00` | `#FFB74D` | `#FF0000` | Not saved, Saved · changed |
+| `stateSettled` | `#37352F` | `#EBEBEA` | `#FF0000` | Saved, Tracking, Completed |
+| `stateQuiet` | `#5A5955` | `#A5A5A3` | `#AA0000` | Partly, Not done, Old log |
+
+- **Values unchanged:** they are the colours `FitText.color` already drew. It now reads these
+  tokens, so every screen keeps its look.
+- **Contrast:** every token is AA as text on every surface in light and dark.
+- **Field mode:** everything is red, so the word carries the difference.
+- **Plan-state tones are tones, not verdicts.** Unsaved work draws attention; nothing is coloured
+  good or bad (the ADR-012/ADR-013 spirit).
 
 ## 3. Type scale (`AppTypography.scale`)
 
@@ -246,7 +267,37 @@ still merges over them.
 
 ## 7a. Components and patterns
 
-Added by S5.4–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
+### The status block (S5.4; `lib/presentation/shared/status_block.dart`)
+
+The answer first (ADR-019 §6; addendum §3.1–§3.2).
+- **The headline:** `titleMedium`, a semantic header, in the state's status colour. It uses the
+  glossary's words:
+  - with both durations known: "Fits: 2 h 5 min needed of 4 h 20 min usable" (likewise Tight and
+    Doesn't fit);
+  - with a duration unknown: the word alone. Unknown is never shown as zero;
+  - otherwise: "No window", "Needs a target" (or the missing word the screen passes), "Needs a
+    block".
+- **Then:** the reason (`textSecondary`); optional key numbers as label (`textTertiary`) and value
+  (`textPrimary`) pairs that wrap; an optional action slot (fill or trim).
+- **Plain values in.** The state, durations and reason come from the fit analysis through the
+  ViewModel; durations are formatted with `QuantityText`. It calculates nothing (trap 13).
+- `StatusBlock.headline(...)` is pure and tested.
+
+### The plan-state label (S5.4; `lib/presentation/shared/plan_state.dart`)
+
+- **`PlanState`:** Not saved · Saved · Saved · changed · Tracking · Completed · Partly · Not done ·
+  Old log (ADR-019 §3). The stored statuses stay internal; "Draft" is never shown.
+- **The mapping:** `PlanState.from(status, savedBefore, legacy)` maps today's stored fields: a
+  legacy row is an Old log; a `draft` is Not saved, or Saved · changed once saved before
+  (`plannedAtUtc`); `planned` is Saved; `inProgress` is Tracking; `completed` is Completed;
+  `abandoned` is Not done. Every combination is tested.
+- **Partly** has a word and a tone, but no stored data expresses it until Stage 8's result form.
+- **`PlanStateLabel`:** the word in its tone (`labelMedium`), in a quiet pill outlined in `border`.
+  It wraps at 200 % text and is not tappable.
+
+### Still to come
+
+Added by S5.5–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
 RD-09 = M + S1).
 
 ## 8. Known gaps, for adoption
@@ -280,7 +331,10 @@ What S5.1 and S5.2 changed app-wide, and what they leave to the Stages that rede
     redesigned;
   - (S5.2) the 7 `ElevatedButton`s become `OutlinedButton` or `FilledButton` by role, and the
     planner's Save plan becomes primary (P6.3);
-  - (S5.2) icons follow §6.5 as their screens are redesigned.
+  - (S5.2) icons follow §6.5 as their screens are redesigned;
+  - (S5.4) the planner, Tonight and the Logbook still show their own status texts ("Draft",
+    "Planned, unsaved changes", "In progress", "Abandoned", "Legacy log", "Fit tonight: …"). They
+    adopt `StatusBlock` and `PlanStateLabel` in P6.1, P6.3, P6.6 and P8.5.
 
 ## 9. Adoption
 

@@ -17,6 +17,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.surfaceRaised,
     required this.border,
     required this.controlBorder,
+    required this.statusFits,
+    required this.statusTight,
+    required this.statusDoesNotFit,
+    required this.statusNoWindow,
+    required this.statusNeutral,
+    required this.stateUnsaved,
+    required this.stateSettled,
+    required this.stateQuiet,
     required this.muted,
     required this.caution,
     required this.sunEvent,
@@ -60,6 +68,24 @@ class AppPalette extends ThemeExtension<AppPalette> {
   /// 1.4.11); in field mode brighter than [border] (UX-39).
   final Color controlBorder;
 
+  /// The verdict's colours (S5.4; UX-16): each `FitState` has one. A real
+  /// verdict is coloured; a missing input ([statusNeutral]) is not. "Tight"
+  /// is a caution at least as prominent as "Fits" (S1.9); in field mode all
+  /// are red and the word carries the difference.
+  final Color statusFits;
+  final Color statusTight;
+  final Color statusDoesNotFit;
+  final Color statusNoWindow;
+  final Color statusNeutral;
+
+  /// The plan-state label's tones (S5.4; ADR-019 §3): unsaved work draws
+  /// attention (Not saved, Saved · changed); a settled plan reads as
+  /// primary text (Saved, Tracking, Completed); the rest is quiet (Partly,
+  /// Not done, Old log). Tones, never verdicts.
+  final Color stateUnsaved;
+  final Color stateSettled;
+  final Color stateQuiet;
+
   /// Secondary text and icons for empty or unknown states.
   final Color muted;
 
@@ -100,7 +126,18 @@ class AppPalette extends ThemeExtension<AppPalette> {
   static AppPalette of(BuildContext context) =>
       Theme.of(context).extension<AppPalette>() ?? light;
 
+  static const _lightCaution = Color(0xFF9A5B00); // dark amber: 5.0:1+
+  static const _darkCaution = Color(0xFFFFB74D); // orange.shade300
+
   static const light = AppPalette(
+    statusFits: AppColors.lightTextPrimary,
+    statusTight: _lightCaution,
+    statusDoesNotFit: AppColors.lightError,
+    statusNoWindow: AppColors.lightError,
+    statusNeutral: AppColors.lightTextSecondary,
+    stateUnsaved: _lightCaution,
+    stateSettled: AppColors.lightTextPrimary,
+    stateQuiet: AppColors.lightTextSecondary,
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
     textTertiary: AppColors.lightTextTertiary,
@@ -109,7 +146,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     border: AppColors.lightBorder,
     controlBorder: AppColors.lightControlBorder,
     muted: Colors.grey,
-    caution: Color(0xFF9A5B00), // dark amber: 5.4:1 on white (AA)
+    caution: _lightCaution, // 5.4:1 on white, 5.0:1 on the surface (AA)
     sunEvent: Colors.orange,
     twilightEvent: Colors.indigo,
     moon: Colors.blueGrey,
@@ -131,6 +168,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
   );
 
   static const dark = AppPalette(
+    statusFits: AppColors.darkTextPrimary,
+    statusTight: _darkCaution,
+    statusDoesNotFit: AppColors.darkError,
+    statusNoWindow: AppColors.darkError,
+    statusNeutral: AppColors.darkTextSecondary,
+    stateUnsaved: _darkCaution,
+    stateSettled: AppColors.darkTextPrimary,
+    stateQuiet: AppColors.darkTextSecondary,
     textPrimary: AppColors.darkTextPrimary,
     textSecondary: AppColors.darkTextSecondary,
     textTertiary: AppColors.darkTextTertiary,
@@ -139,7 +184,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     border: AppColors.darkBorder,
     controlBorder: AppColors.darkControlBorder,
     muted: Colors.grey,
-    caution: Color(0xFFFFB74D), // orange.shade300
+    caution: _darkCaution,
     sunEvent: Colors.orange,
     twilightEvent: Colors.indigo,
     moon: Colors.blueGrey,
@@ -162,6 +207,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   /// Red on black only: brightness, not hue, tells elements apart.
   static const field = AppPalette(
+    statusFits: AppColors.fieldTextPrimary,
+    statusTight: AppColors.fieldTextPrimary,
+    statusDoesNotFit: AppColors.fieldTextPrimary,
+    statusNoWindow: AppColors.fieldTextPrimary,
+    statusNeutral: AppColors.fieldTextSecondary,
+    stateUnsaved: AppColors.fieldTextPrimary,
+    stateSettled: AppColors.fieldTextPrimary,
+    stateQuiet: AppColors.fieldTextSecondary,
     textPrimary: AppColors.fieldTextPrimary,
     textSecondary: AppColors.fieldTextSecondary,
     textTertiary: AppColors.fieldTextTertiary,
@@ -249,6 +302,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
     surfaceRaised,
     border,
     controlBorder,
+    statusFits,
+    statusTight,
+    statusDoesNotFit,
+    statusNoWindow,
+    statusNeutral,
+    stateUnsaved,
+    stateSettled,
+    stateQuiet,
     muted,
     caution,
     sunEvent,

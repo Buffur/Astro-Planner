@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.4, 2026-09-27:** B17 notes the status tokens, `StatusBlock` and `PlanState`.
 > **S5.3, 2026-09-27:** B17 notes the shared words (`AppWords`) and the retired-terms test.
 > **S5.2, 2026-09-27:** B17 extended (component themes for the controls; `AppMotion`).
 > **S5.1, 2026-09-27:** B17 added (the design system's foundation tokens and gallery test).
@@ -794,6 +795,14 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
   glossary's user-facing words. `test/presentation/shared/retired_terms_test.dart` keeps the
   retired terms out of `lib/presentation`'s string literals, against a baseline that only
   shrinks (DESIGN_SYSTEM §7).
+- **Status (S5.4):**
+  - `AppPalette` status and state tokens: `statusFits`, `statusTight`, `statusDoesNotFit`,
+    `statusNoWindow`, `statusNeutral`, `stateUnsaved`, `stateSettled`, `stateQuiet`. `FitText.color`
+    reads them, with the same values as before;
+  - `lib/presentation/shared/status_block.dart` (`StatusBlock`: the verdict headline, reason, key
+    numbers, action; plain values in);
+  - `lib/presentation/shared/plan_state.dart` (`PlanState`, the pure mapping from stored fields,
+    and `PlanStateLabel`). Not yet on a screen.
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
   styles (DESIGN_SYSTEM §8).
 

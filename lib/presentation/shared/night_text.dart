@@ -68,14 +68,16 @@ abstract final class FitText {
   };
 
   /// A real verdict in its colour; a missing input neutral (S1.9; UX-16,
-  /// UX-15(2)): "Tight" is a caution at least as prominent as "Fits". The
-  /// neutral is the secondary text role (S5.2: `outline` became the quiet
-  /// control border, too faint for text).
+  /// UX-15(2)): "Tight" is a caution at least as prominent as "Fits". Since
+  /// S5.4 the colours are the palette's status tokens (the same values as
+  /// before: `scheme.primary`, `caution`, `scheme.error`, the secondary
+  /// text); [scheme] is kept for the callers.
   static Color color(FitState state, ColorScheme scheme, AppPalette palette) =>
       switch (state) {
-        FitState.fits => scheme.primary,
-        FitState.tight => palette.caution,
-        FitState.doesNotFit || FitState.noWindow => scheme.error,
-        FitState.nothingToFit || FitState.needsInput => palette.textSecondary,
+        FitState.fits => palette.statusFits,
+        FitState.tight => palette.statusTight,
+        FitState.doesNotFit => palette.statusDoesNotFit,
+        FitState.noWindow => palette.statusNoWindow,
+        FitState.nothingToFit || FitState.needsInput => palette.statusNeutral,
       };
 }
