@@ -3,11 +3,31 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S4.R2 done; RG-04 decided). Stage 4 in progress; Stage 3 closed
-> (`126d97f`).
-> **Next: S4.R3** (session lifecycle, state display, defaults; RD-05, RD-04; documentation only).
+> **Last updated:** 2026-09-27 (S4.R3 done; RD-05 and RD-04 decided). Stage 4 in progress; Stage 3
+> closed (`126d97f`).
+> **Next: S4.R4** (Tonight, the planner's structure, and disclosure; RG-05, RD-06, RG-06;
+> documentation only).
 
 ## Current state
+
+**RD-05 and RD-04 decided, 2026-09-27 (S4.R3 done).** Research:
+[`research/S4.R3_SESSION_LIFECYCLE.md`](research/S4.R3_SESSION_LIFECYCLE.md) (`989a61e`). Verified
+conflict: yesterday's saved plan is resumed and rolled forward to tonight, which RG-04 cannot keep.
+The owner chose the recommended option on each question (DECISIONS E.1, "RD-05 and RD-04
+decided"):
+- **E1 = L1:** Draft is internal; the plan's state reads "Not saved", "Saved" or
+  "Saved · changed"; Save stays explicit, and only saved plans enter the Logbook.
+- **E2 = Y2:** a saved plan whose night has passed waits for its result; the planner continues on a
+  copy for tonight.
+- **E3 (RD-04):** nothing preselected on the first run; New keeps the site and rig and asks for the
+  target; an empty capture plan with "Start from the example plan".
+- **E4 = U1:** Save · Discard · Cancel; Discard deletes; a site change and a Duplicate count as
+  unsaved (W1, V3).
+- **Also decided:** the planner's app bar shows the target, night and state (UX-04); feedback after
+  New, Duplicate and Open; no failing Start (UX-13); TD-057 and TD-058 fixed where this is built.
+- **Supersedes:** TASK 11.4's "New = tonight + the example plan", and its roll-forward for saved
+  plans; the S1.6 interim.
+- ADR-019 (S4.D) amends ADR-014 §3. Stage 6 and Stage 8 implement. No code changed.
 
 **RG-04 decided, 2026-09-27 (S4.R2 done).** The owner chose the recommended option on each
 question (DECISIONS E.1, "RG-04 decided"):
@@ -196,7 +216,7 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S4.R3** — session lifecycle, state display, defaults and the example plan (RD-05, RD-04; `POST_ROADMAP_PLAN.md`, "S4.R3"). S4.R1 and S4.R2 are done; RG-04 is decided |
+| Next approved Task | **S4.R4** — Tonight, the planner's structure, and disclosure (RG-05, RD-06, RG-06; `POST_ROADMAP_PLAN.md`, "S4.R4"). S4.R1–S4.R3 are done; RG-04, RD-05 and RD-04 are decided |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -331,15 +351,18 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 4 | S4.R2 — RG-04 research: Execution's role and post-session results (documentation only) | 2026-09-27 | `97ffab5` | `research/RG-04_EXECUTION_ROLE.md` at `e5fd240`: evidence kept apart; capabilities C1–C12; G1–G3 × A–D; recommended B + G2; D1–D4 for the owner. S4.R1 §6.1 records the owner's O1–O4 answers |
 
-| 4 | RG-04 decided (the owner's D1–D4; documentation only) | 2026-09-27 | The RG-04 decision commit\*\*\* | D1 = B, D2 = G2, D3 and D4 as recommended (E.1, "RG-04 decided"). Recorded in the research's §12, `PRODUCT_DIRECTION.md` §4 and the RG register. ADR changes are left to S4.D |
+| 4 | RG-04 decided (the owner's D1–D4; documentation only) | 2026-09-27 | `abca03d` | D1 = B, D2 = G2, D3 and D4 as recommended (E.1, "RG-04 decided"). Recorded in the research's §12, `PRODUCT_DIRECTION.md` §4 and the RG register. ADR changes are left to S4.D |
+
+| 4 | S4.R3 — Session lifecycle research (documentation only) | 2026-09-27 | `989a61e` | `research/S4.R3_SESSION_LIFECYCLE.md`: verified lifecycle, the roll-forward conflict with RG-04, options L0–L2, n1–n3, U1–U2, Y1–Y3, the defaults; low-fi flows |
+
+| 4 | RD-05 and RD-04 decided (the owner's E1–E4; documentation only) | 2026-09-27 | The RD-05/RD-04 decision commit\*\*\* | L1, Y2, no preselection with an empty plan and "Start from the example plan", U1 (E.1). Recorded in the research's §11, `PRODUCT_DIRECTION.md` §10 and the RD register |
 
 \* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
 final sign-off.
 \*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
-\*\*\* Likewise for the RG-04 decision. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/research/RG-04_EXECUTION_ROLE.md`; the next Task
-records it here. (Stage 4 planning's `2a26185`, S4.R1's `e5fd240` and the S4.R2 research's
-`97ffab5` are recorded above.)
+\*\*\* Likewise for the RD-05/RD-04 decision. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/research/S4.R3_SESSION_LIFECYCLE.md`; the next
+Task records it here.
 
 ## Relevant commits
 
@@ -400,8 +423,8 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open |
 | RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
 | RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
-| RD-04 | New-draft defaults and the example plan | 4 | Open; **S4.R3** (frozen) |
-| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | Open; **interim decided** 2026-09-25: confirm before replacing (S1.6); final decision in **S4.R3** (frozen) |
+| RD-04 | New-draft defaults and the example plan | 4 | **Decided** 2026-09-27 (S4.R3; E.1): nothing preselected on the first run; New keeps the site and rig; an empty plan with "Start from the example plan" |
+| RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | **Decided** 2026-09-27 (S4.R3; E.1): L1 (Draft internal; Save explicit), Y2, U1. The S1.6 interim stands until Stage 6 builds U1 |
 | RD-06 | The planner's section order; integrity text one tap away | 4 | Open; **S4.R4** (frozen) |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | Open; **S4.R5** (frozen) |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
@@ -445,7 +468,7 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** S4.R1 and S4.R2 are done (RG-04 decided); nothing blocks S4.R3. Each later step
+- **Stage 4:** S4.R1–S4.R3 are done (RG-04, RD-05 and RD-04 decided); nothing blocks S4.R4. Each later step
   waits for the owner's decision on the step before (E.1). S4.E (owner-run tests) is optional and
   blocks nothing.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
@@ -614,23 +637,28 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S4.R3 — session lifecycle, state display, defaults and the example plan** (`POST_ROADMAP_PLAN.md`,
-"S4.R3"; RD-05, RD-04). Research, documentation only.
+**S4.R4 — Tonight, the planner's structure, and disclosure** (`POST_ROADMAP_PLAN.md`, "S4.R4";
+RG-05, RD-06, RG-06). Research, documentation only.
 
-It builds on RG-04 (Save → image → Logbook → record; the tracker optional) and the owner's O3
-(Draft may stay internal while its user-facing presentation is removed, merged or renamed).
+It builds on the decisions so far and the owner's O2 (the hierarchy should reflect how important
+planning is; the order is S4.R4's, not prescribed):
+- RG-04: Save → Logbook; the tracker optional; a quiet "how did it go?" line on Tonight;
+- RD-05: state in the app bar; a copy for tonight after a saved night.
 
 Questions:
-- a visible draft state, or not;
-- what New, "+", Duplicate and Open mean;
-- listing drafts (W1, V3);
-- the planner's identity and state (UX-04);
-- what happens to yesterday's saved plan the next day (it now rolls forward to tonight;
-  RG-04 D4);
-- the new draft's defaults and the example plan (RD-04, UX-24).
+- Tonight's order;
+- where Night, Moon and Weather lead (a planner section, detail screens, or an "Analytics"
+  destination, against PD-14 and ADR-015);
+- a night picker (UX-11);
+- the placement of the run card, the "how did it go?" line, New and Duplicate;
+- the planner's order and an answer-first status (UX-01, UX-02);
+- repeated facts (UX-03);
+- what may be one tap away (UX-05, UX-06, UX-07; integrity text reachable);
+- modes against progressive disclosure (RG-06).
 
-Output `research/S4.R3_SESSION_LIFECYCLE.md`; the owner then decides RD-05 and RD-04. A fresh chat
-is preferred (§9.1).
+Inputs: S4.R1 (§4 taps, the matrix); 05 §3 and §8; 07 §10; 08 §2, §8, §10, §12, §13, §17; S4.E
+results, if any. Output `research/RG-05_06_TONIGHT_AND_PLANNER.md`; the owner then decides. A
+fresh chat is preferred (§9.1).
 
 The owner may run S4.E at any time; it blocks nothing.
 

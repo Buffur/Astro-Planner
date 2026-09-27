@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **RD-05 and RD-04 decided (2026-09-27, S4.R3, documentation only):** L1 (Draft internal; "Not saved / Saved / Saved · changed"; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), no preselection with an empty capture plan and "Start from the example plan", U1 (Save · Discard · Cancel) (E.1, "RD-05 and RD-04 decided"). No ADR changed yet; no code changed.
 > **RG-04 decided (2026-09-27, S4.R2, documentation only):** Execution's role is B, the Logbook first and the tracker optional; the post-session result is G2 (Completed as planned, Partly with numbers, Not done → abandoned with a reason); a quiet "how did it go?" line on Tonight (E.1, "RG-04 decided"). ADR-014/016 amendments are left to ADR-019 (S4.D); no ADR changed yet; no code changed.
 > **Stage 3 closed; Stage 4 planned (2026-09-27, documentation only):** the final sign-off passed (`126d97f`); Stage 4's Task sequence frozen, optional owner-run tests, decisions after each research step (E.1, "Stage 3 closed; Stage 4 planning decisions"). No ADR changed.
 > **Stage 3 sign-off failed (2026-09-27):** corrective Tasks S3.V7 and S3.V8 approved by the owner, with a Stage-boundary adjustment for S3.V7; S3S-03 deferred (E.1, "Stage 3 sign-off failed: corrective Tasks"). **S3.V7 done (2026-09-27):** ADR-018 note below. **S3.V8 done (2026-09-27):** ADR-018 note below.
@@ -1083,6 +1084,55 @@ from a stale match.
   - the core-loop E2E test moves to Save → result (trap 19).
 - **Unchanged until then:** Execution stays as built (`PRODUCT_DIRECTION.md` §4). No data is
   deleted; existing runs, events and results stay readable and exported.
+
+### RD-05 and RD-04 decided: the session lifecycle and new-plan defaults (S4.R3, 2026-09-27)
+
+- **Context:** the research is `refinement/research/S4.R3_SESSION_LIFECYCLE.md` (committed
+  `989a61e`). A verified conflict with RG-04: yesterday's saved plan is resumed as the planner's
+  current plan and rolled forward to tonight.
+- **Decided by:** the project owner, in chat, choosing the recommended option on each question.
+- **E1 — the draft model: L1.**
+  - Draft stays an internal state. The user sees the plan's state as "Not saved", "Saved" or
+    "Saved · changed"; the final words are RD-14's (S4.R5).
+  - Save stays explicit and means "I plan to image this". Only saved plans enter the Logbook,
+    where they later wait for a result (RG-04).
+  - No data-model change.
+- **E2 — the next day: Y2.**
+  - A saved plan whose night has passed is not resumed as the planner's current plan. It stays on
+    its night, awaiting its result (the Logbook, and Tonight's line, RG-04 D4).
+  - The planner continues on a copy for tonight (the same target, rig and blocks; not saved).
+  - A never-saved draft whose night has passed keeps TASK 11.4's roll-forward.
+- **E3 — defaults and the example plan (RD-04):**
+  - nothing is preselected on the first run: no target, no rig. The seeded rig stays in the list,
+    labelled as an example;
+  - New keeps the site and rig, and asks for the target;
+  - the capture plan starts empty, with one tap to "Start from the example plan";
+  - the first-run page lists nothing as chosen that the user did not choose.
+- **E4 — unsaved plans: U1.**
+  - Replacing a plan with unsaved changes (New, Duplicate, Open) asks **Save · Discard · Cancel**.
+  - Discard deletes the discarded draft, and an untouched replaced draft is deleted too.
+  - A site change on a saved plan, and a fresh Duplicate, count as unsaved (W1 and V3 resolved in
+    principle).
+  - Unsaved plans are not listed.
+- **Decided with them, without alternatives** (the research's §8):
+  - the planner's app bar shows the target, the night and the state (UX-04);
+  - New, Duplicate and Open each confirm what happened;
+  - no card offers a Start that must fail while a run is in progress (UX-13);
+  - TD-058 and TD-057 are fixed where this is implemented;
+  - placement on screens is S4.R4's.
+- **Supersedes:**
+  - TASK 11.4's "New = tonight + the example plan";
+  - TASK 11.4's roll-forward, for **saved** plans only;
+  - the S1.6 interim safeguard, which becomes U1 when implemented.
+- **Stands:**
+  - TASK 11.3: unsaved drafts are not listed;
+  - TASK 4.4: the example plan never looks like the user's own;
+  - ADR-014's aggregate and snapshots.
+- **Consequences:**
+  - ADR-019 (S4.D) amends ADR-014 §3's "Current session" rule (E2);
+  - Stage 6 implements the planner parts;
+  - Stage 8 implements E2's resume rule together with RG-04's result recording.
+- No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

@@ -14,6 +14,7 @@
 > §9 says so. The older documents stay unchanged as evidence of how the baseline was built.
 > **Updated 2026-09-27 (S4.R2, owner-approved):** §4 records the RG-04 decision (Execution's
 > role; post-session results). Nothing else changed.
+> **Updated 2026-09-27 (S4.R3, owner-approved):** §10 notes the RD-05 and RD-04 decisions.
 
 ## 1. Primary product job
 
@@ -242,3 +243,15 @@ for owner decisions (RD). The main ones:
 - the licence (RG-12);
 - tracking per session (RD-08), drafts (RD-05), defaults (RD-04), and the planner's order
   and disclosure (RD-06).
+
+**Decided since (owner, 2026-09-27; DECISIONS E.1):**
+- **RG-04:** Execution is optional; results are recorded after the session (§4).
+- **RD-05:**
+  - Draft is internal; the plan's state reads "Not saved", "Saved" or "Saved · changed";
+  - Save stays explicit;
+  - yesterday's saved plan waits for its result, and the planner continues on a copy;
+  - replacing unsaved changes asks Save · Discard · Cancel.
+- **RD-04:**
+  - nothing is preselected on the first run;
+  - New keeps the site and rig and asks for the target;
+  - the capture plan starts empty, with "Start from the example plan".
