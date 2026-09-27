@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.9, 2026-09-27:** B17 points to the adoption plan (DESIGN_SYSTEM §9) and the opt-in render test.
 > **S5.8, 2026-09-27:** B17 notes the confirmation, feedback and delete patterns (RD-09 = M + S1).
 > **S5.7, 2026-09-27:** B17 notes the detail-screen template.
 > **S5.6, 2026-09-27:** B17 notes the context line and `pickNight`.
@@ -830,6 +831,11 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
     handler and the row springs back).
 
   Not yet on a screen.
+- **Adoption (S5.9):** DESIGN_SYSTEM §9 maps each screen to the parts it adopts, the Stage 6/8/9
+  Task that does it, and the retired terms it removes. The gallery's content is shared
+  (`test/presentation/design_system/gallery_entries.dart`) by the gallery test and the opt-in render
+  test (`render_gallery_test.dart`, `ASTROPLAN_RENDER_GALLERY`; skipped in the gate), whose images
+  are in `docs/refinement/evidence/stage5/`.
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
   styles (DESIGN_SYSTEM §8).
 

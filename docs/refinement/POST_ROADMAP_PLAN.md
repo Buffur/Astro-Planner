@@ -2096,7 +2096,9 @@ Planned at `38925dd`. The application code is unchanged since `92ebf2a`. **Basel
 | S5.6 | The context line (site ▾ · night ▾) | P5.3 | S | S5.1, S5.2 | **Done 2026-09-27** |
 | S5.7 | The detail-screen template | P5.5 | S | S5.5 | **Done 2026-09-27** |
 | S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, RD-09 (**decided 2026-09-27: M + S1**) | **Done 2026-09-27** |
-| S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | **Next** |
+| S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | **Done 2026-09-27** |
+
+**All nine Tasks are done (2026-09-27); Stage 5 is in validation.**
 
 **Order:** S5.1 → S5.2 → S5.3 → S5.4 → S5.5 → S5.6 → S5.7 → S5.8 (once RD-09 is decided) → S5.9.
 S5.3 depends on nothing and may run earlier. Then the Stage 5 validation, in a fresh session.
@@ -2495,6 +2497,16 @@ These sit alongside, not inside: the chart redesign, the weather timeline and ic
 sky darkness (TD-051, TD-054), the candidates' order (RD-10) and the capture plan's visuals (RD-09).
 They stay Stage 6 candidates from its table above.
 
+**Adoption of Stage 5's design system (S5.9, 2026-09-27; not frozen):**
+- P6.1: `PlanStateLabel` in the app bar; `askUnsavedChanges` instead of S1.6's guard; `showDone`
+  after New plan, Copy, Open and Save; `pickNight` for Copy.
+- P6.3: `StatusBlock` first; `ContextLine` + `pickNight`; Save plan as the filled primary button.
+- P6.4: `CollapsibleSection` for Budget details, Assumptions, the rig's rows and sky detail.
+- P6.5: `DetailScaffold` for Night & Moon and Weather.
+- P6.6: `ContextLine`, `StatusBlock` and `PlanStateLabel` on Tonight; TD-073's site-prompt message.
+- The capture-plan work: `showUndo` and `DeleteButton` (RD-09 M), and the §6.5 icons.
+- The retired-terms entries each Task removes are in `docs/DESIGN_SYSTEM.md` §9.3.
+
 ### Stage 7 — Data Entry & Automation
 
 - **Purpose:** reduce unnecessary manual entry for targets, sites, equipment, capture-plan
@@ -2574,6 +2586,13 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | P8.5 | **The Logbook** | §2, §8, §10 | P8.2 | The tab labelled Logbook. Upcoming and Past groups. An entry opens its plan and result. "Export as file". **Progress by target** moved in from the Library (RD-07). The 08 §24 proposals (search, a filter panel, the share output) are scoped by this Stage's planning, not by ADR-019 | M |
 | P8.6 | **An optional plan name** (08 §24), if this Stage's planning keeps it | §10 | P8.5 | "Name (optional)"; the Logbook shows the name, else target · night. A schema change with its migration and tests; the export updated | S–M |
 
+**Adoption of Stage 5's design system (S5.9, 2026-09-27; not frozen):**
+- P8.2: `showDone` after Save result; `PlanStateLabel`.
+- P8.4: `confirmDestructive` for Abandon; TD-073's "Open it" message.
+- P8.5: `PlanStateLabel`; `SwipeToDelete`, `DeleteButton` and `confirmDestructive` for entries;
+  `AppWords`. It removes the Logbook's and the entry's retired terms (`docs/DESIGN_SYSTEM.md`
+  §9.3).
+
 ### Stage 9 — Secondary UX & Product Polish
 
 - **Scope:**
@@ -2602,6 +2621,14 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | --- | --- | --- | --- | --- | --- |
 | P9.1 | **The Library manages** (RD-07; TD-053) | §8 | P8.5 (Progress moved out first), P6.1 (the guard) | A tap on a rig, target or site opens or edits, and never changes the plan. Choosing happens only through `/select/…` (a picker mode of the same lists). "Plan this target" starts a new plan under the guard. "Add from a photo" stays in both modes. The Progress row is gone. ADR-015 §7 as amended. UI tests: browsing the Library leaves the plan unchanged | M |
 | P9.2 | **The vocabulary completed** | §10 | P5.1 | The remaining screens (Settings, About, Library, the rig editor's "Equipment" labels) use the glossary. The retired-terms baseline from P5.1 is empty | S |
+
+**Adoption of Stage 5's design system (S5.9, 2026-09-27; not frozen):**
+- P9.1: `SwipeToDelete`, `DeleteButton` and `confirmDestructive` (one wording) for rigs, targets
+  and sites; the button hierarchy; `AppWords`.
+- P9.2: the editors' `AppWords` and primary Save; it empties the retired-terms baseline.
+- Settings (after RG-13): `confirmDestructive` for Restore.
+- The deletion animations use `AppMotion` and `SwipeToDelete`.
+- See `docs/DESIGN_SYSTEM.md` §9.
 
 #### Order across Stages for ADR-019 (S4.T)
 

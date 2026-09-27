@@ -7,8 +7,9 @@
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
 > icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test), S5.4 (status
 > tokens, the status block, the plan-state label), S5.5 (the collapsible section), S5.6 (the
-> context line and the night picker), S5.7 (the detail-screen template) and S5.8 (confirmation,
-> feedback and destructive-action patterns, RD-09 = M + S1).
+> context line and the night picker), S5.7 (the detail-screen template), S5.8 (confirmation,
+> feedback and destructive-action patterns, RD-09 = M + S1) and S5.9 (the adoption plan, §9, and
+> rendered evidence).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -452,6 +453,70 @@ What S5.1 and S5.2 changed app-wide, and what they leave to the Stages that rede
     "Planned, unsaved changes", "In progress", "Abandoned", "Legacy log", "Fit tonight: …"). They
     adopt `StatusBlock` and `PlanStateLabel` in P6.1, P6.3, P6.6 and P8.5.
 
-## 9. Adoption
+## 9. Adoption (S5.9)
 
-Written by S5.9: which screen adopts which part, and in which Stage.
+Stage 5 changed no screen's structure or wording. The theme (§2–§6) already applies everywhere; the
+words, components and patterns below are adopted by the Stage that redesigns each screen. The
+P-IDs are the provisional Tasks of Stages 6, 8 and 9 (`refinement/POST_ROADMAP_PLAN.md`). Each
+Stage's own planning freezes them, and may move an item between its Tasks; it may not drop one
+without saying where it went.
+
+### 9.1 By screen
+
+| Screen or widget (today) | Adopts | P-Task | Retired terms it removes from S5.3's baseline |
+| --- | --- | --- | --- |
+| The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 | Session planner |
+| The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 | Equipment profile (the empty state) |
+| Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 | Acquisition, Session budget (budget summary) |
+| Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 | Astro Dusk, Astro Dawn, True Night Window (with TD-051) |
+| Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 | Draft (Tonight's status) |
+| The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) | — |
+| The result form and the live tracker (`results_screen.dart`, `execution_screen.dart`) | `confirmDestructive` for Abandon; `showDone` after Save result; `PlanStateLabel` | P8.2, P8.4 | — |
+| The Logbook and an entry (`logbook_screen.dart`, `session_detail_screen.dart`) | `PlanStateLabel` instead of `sessionStatusLabel`; `SwipeToDelete` + `DeleteButton` + `confirmDestructive` instead of the swipe-only `Dismissible`; `AppWords` (Logbook, Export as file, Old log, the budget names); `DetailScaffold` where an entry fits it | P8.5 | Legacy (×3), Draft, Window load, Session budget |
+| The Library lists (`equipment_selection_screen.dart`, `target_selection_screen.dart`, `sites_screen.dart`) | `SwipeToDelete` + `DeleteButton` + `confirmDestructive` (one wording instead of four); the button hierarchy; `AppWords` (Rig, Add rig) | P9.1 | Equipment profile (the empty rig list) |
+| The rig editor and the other editors (`equipment_editor.dart`, site and target forms) | The field look is already themed (§6.3); `AppWords` titles and labels; the dialog's Save as the primary button | P9.2 (with Stage 7 when it reworks the forms) | Equipment profile (the editor's title) |
+| Settings and About (`settings_screen.dart`, `backup_section.dart`, `about_screen.dart`) | `confirmDestructive` for Restore; text roles; `CollapsibleSection` where RG-13 keeps advanced settings | Stage 9 (Settings, after RG-13) and P9.2 | — |
+| Messages with an action (`location_feedback.dart`, `start_session.dart`; TD-073) | A decision per message: keep until dismissed, or `persist: false` | P6.6 (the site prompt), P8.4 (Track live replaces Start) | — |
+| Shared rows (`info_row.dart`, `planner_summary_card.dart`) | Text roles instead of `colorScheme.primary`/`secondary` for values and labels | With the screens that show them (P6.3, P6.4) | — |
+| Deletion animations everywhere (08 §20) | `AppMotion` and `SwipeToDelete`; nothing else animates | Stage 9 ("deletion interactions and animations") | — |
+
+### 9.2 By component: at least one adopter each
+
+| Part (S5.x) | Adopted by |
+| --- | --- |
+| Text roles, type scale, surfaces, spacing, radius (S5.1) | Every redesigned screen: P6.3, P6.4, P6.5, P6.6, P8.5, P9.1, P9.2 |
+| Button hierarchy, `AppButtonStyles`, field look, dialogs, messages, icons, `AppMotion` (S5.2) | P6.3 (Save plan primary), Stage 6 capture plan (icons), P9.1, P9.2; `AppMotion` through every component, Stage 9 animations |
+| `AppWords` and the retired-terms baseline (S5.3) | P6.1, P6.3, P6.4, P6.5, P6.6, P8.5, P9.1, P9.2 (the last empties the baseline) |
+| Status tokens, `StatusBlock` (S5.4) | P6.3 (the planner's status), P6.6 (Tonight's plan card) |
+| `PlanState`, `PlanStateLabel` (S5.4) | P6.1 (the app bar), P6.6, P8.2, P8.5 |
+| `CollapsibleSection`, `DisclosureViewModel` (S5.5) | P6.4, P6.5 |
+| `ContextLine`, `pickNight` (S5.6) | P6.3, P6.6 (`ContextLine`); P6.1 (`pickNight` for Copy) |
+| `DetailScaffold` (S5.7) | P6.5 (Night & Moon, Weather); their routes join the accessibility sweep |
+| `askUnsavedChanges`, `showDone` (S5.8) | P6.1 (New plan, Copy, Open, Save); `showDone` also P6.6, P8.2 |
+| `confirmDestructive` (S5.8) | P8.4 (Abandon), P8.5 (Logbook entries), P9.1 (rigs, targets, sites), Stage 9 Settings (Restore) |
+| `showUndo`, `DeleteButton`, `SwipeToDelete` (S5.8) | Stage 6 capture plan (`showUndo`, `DeleteButton`); P8.5 and P9.1 (`SwipeToDelete`, `DeleteButton`) |
+
+### 9.3 The retired-terms baseline, by Stage
+
+| Baseline entry (`retired_terms_test.dart`) | Removed by |
+| --- | --- |
+| `home_screen.dart`: Session planner | P6.1 |
+| `home_screen.dart`: Equipment profile | P6.3 |
+| `capture_budget_summary.dart`: Acquisition, Session budget | P6.4 |
+| `sky_darkness_widget.dart`: Astro Dusk, Astro Dawn, True Night Window | P6.5 |
+| `tonight_home_screen.dart`: Draft | P6.6 |
+| `logbook_screen.dart`: Legacy (2), Draft | P8.5 |
+| `session_detail_screen.dart`: Legacy, Window load, Session budget | P8.5 |
+| `equipment_selection_screen.dart`: Equipment profile | P9.1 |
+| `equipment_editor.dart`: Equipment profile | P9.2 (or Stage 7 if it reworks the rig form first) |
+
+After P9.2 the baseline is empty (S5.3; ADR-019 §10).
+
+### 9.4 Rendered evidence
+
+Host-rendered images of the gallery and the sample detail page, for the owner's review (optional,
+non-blocking): `refinement/evidence/stage5/` and
+[`refinement/evidence/STAGE_5_RENDERS.md`](refinement/evidence/STAGE_5_RENDERS.md). They are made
+by the opt-in `test/presentation/design_system/render_gallery_test.dart`
+(`ASTROPLAN_RENDER_GALLERY`), which stays outside the gate. Host renders only: they are not device
+evidence.

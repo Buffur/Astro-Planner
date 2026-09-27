@@ -4,19 +4,19 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (S5.8 done).
-> **Next:** S5.9 — the adoption plan for Stages 6–9 and rendered evidence; then the one bounded
-> Stage 5 validation.
+> **Last updated:** 2026-09-27 (S5.9 done; every Stage 5 Task is done; Stage 5 is in validation).
+> **Next:** the one bounded Stage 5 validation, in a fresh session
+> (`prompts/INDEPENDENT_STAGE_VALIDATION.md`; the plan's "Stage 5 validation").
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1–S5.8 done) |
+| Current Stage | **Stage 5 — Design System Foundation: in validation** (planned at `38925dd`; S5.1–S5.9 done) |
 | Current Task | None in progress |
-| Next Task | S5.9 (frozen; the frozen sequence is the approval) |
-| Code baseline | S5.8 (this commit): the confirmation, feedback and delete patterns. Not pushed (S1.14, RD-17) |
+| Next Task | None: the Stage 5 validation is next |
+| Code baseline | S5.9 (this commit): test-only (the gallery's content shared; the opt-in render test). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -118,7 +118,7 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **S5.8 done** 2026-09-27 (this commit), per RD-09 = M + S1:
+- **S5.8 done** 2026-09-27 (`99e60af`), per RD-09 = M + S1:
   - **confirmations** (`confirmation_patterns.dart`): `askUnsavedChanges` (Cancel · Discard ·
     Save; dismiss = Cancel) and `confirmDestructive` (true only on its verb);
   - **success** (`failure_feedback.dart`): `showDone`, beside `runWithFeedback`;
@@ -134,7 +134,25 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **Next:** S5.9 (the adoption plan and rendered evidence), then the one bounded Stage 5
+- **S5.9 done** 2026-09-27 (this commit):
+  - **the adoption plan:** `docs/DESIGN_SYSTEM.md` §9 maps each screen to the parts it adopts and
+    the P-Task (P6.1–P6.6, the Stage 6 capture-plan work, P8.2, P8.4, P8.5, P9.1, P9.2, Stage 9
+    Settings). Every Stage 5 part has at least one adopter, and every retired-terms baseline entry
+    has its Stage (§9.3). The provisional Stage 6, 8 and 9 tables gain adoption notes, still not
+    frozen;
+  - **the rendered evidence:** 15 host-rendered images in `docs/refinement/evidence/stage5/`: the
+    gallery in light, dark and field at 100 % and 200 %, plus the sample detail page, a
+    confirmation and an undo message in each theme. Real fonts; field mode through the app's
+    filter. See `evidence/STAGE_5_RENDERS.md`. They come from the opt-in
+    `render_gallery_test.dart` (`ASTROPLAN_RENDER_GALLERY`; skipped in the gate), and the
+    gallery's content now lives in `gallery_entries.dart`, shared by both tests;
+  - **a render bug fixed before committing:** the first run kept a dialog open into the next
+    image; each image now starts from an empty tree.
+
+  Verification: test-only changes, and the Task's "gate green": the full gate after the last code
+  change, PASS (below). Every acceptance criterion checked. The optional owner review of the
+  images is non-blocking.
+- **Stage 5 is in validation.** Every Task is done; the next action is the bounded Stage 5
   validation.
 
 ## Reusable validation evidence
@@ -143,7 +161,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (402 files, 0 changed); Analyze; 1,319 tests, 1 expected skip (local real samples); 2 host E2E | S5.8's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (404 files, 0 changed); Analyze; 1,319 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S5.9's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -158,7 +176,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1–S5.8 done) |
+| 5 | Design System Foundation | In validation | 2026-09-27 | — | Pending: the one bounded validation (planned at `38925dd`; RD-09 decided M + S1; S5.1–S5.9 done) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -247,7 +265,8 @@ These block a release, not refinement.
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
-- **Stage 5 (in progress):** nothing blocks. RD-09 decided 2026-09-27 (M + S1).
+- **Stage 5 (in validation):** nothing blocks. RD-09 decided 2026-09-27 (M + S1). TD-073 recorded
+  (S5.8; not fixed). The owner's review of the S5.9 images is optional.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -256,18 +275,22 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S5.9 — The adoption plan for Stages 6–9, and rendered evidence**. It is frozen, and the frozen
-sequence is the approval (implement, verify per the policy, document, commit, then STOP).
-- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.9, and the rules
-  for every Stage 5 Task above it.
-- **Read first:**
-  - `docs/DESIGN_SYSTEM.md` (§7a and §8, "Known gaps");
-  - the provisional Stage 6, 8 and 9 tables in the plan (P6.x, P8.x, P9.x);
-  - the retired-terms baseline in `test/presentation/shared/retired_terms_test.dart`;
-  - `equipment_editor_fit_test.dart` (loading Roboto for renders);
-  - the gallery.
-- **Then** the one bounded Stage 5 validation, in a fresh session where practical
-  (`prompts/INDEPENDENT_STAGE_VALIDATION.md`; the plan's "Stage 5 validation").
+**The one bounded Stage 5 validation**, in a fresh session where practical, with
+`prompts/INDEPENDENT_STAGE_VALIDATION.md` under `CLAUDE.md`'s Verification Policy (V4–V8).
+Validation only: it fixes nothing.
+- **Frozen surface:** `POST_ROADMAP_PLAN.md`, "Stage 5 validation":
+  - S5.1–S5.9's acceptance criteria;
+  - the rules for every Stage 5 Task;
+  - RD-09 as decided (M + S1);
+  - the checks listed there (tested and documented; no screen's wording or structure changed
+    except through theme tokens; no regression; the adoption plan complete; RD-09 built as
+    decided).
+- **Evidence to reuse (V3):** the full-gate PASS above, while `git diff --stat <this commit> HEAD
+  -- . ':!docs' ':!CLAUDE.md'` is empty. The gallery, the pattern tests and the renders are in
+  the repository.
+- **Outcome:**
+  - no blocker: Stage 5 closes, and Stage 6 planning is next;
+  - a blocker: a focused corrective Task, then revalidation per V5.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);
