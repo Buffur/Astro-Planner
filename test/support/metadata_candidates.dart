@@ -13,22 +13,25 @@ KnownValue<T> _k<T>(T v, String field) => KnownValue(
 );
 
 /// A phone main camera's JPEG (neutral strings, committed RG-01 optics).
-EquipmentCandidate phoneCandidate({bool withDims = true, bool with35 = true}) =>
-    EquipmentCandidate.fromReading(
-      MetadataRead(
-        MetadataFormat.jpeg,
-        CaptureMetadata(
-          cameraMake: _k('TestMake', 'Make'),
-          cameraModel: _k('TestMake TestPhone', 'Model'),
-          focalLengthMm: _k(6.57, 'FocalLength'),
-          fNumber: _k(1.6, 'FNumber'),
-          exposureSeconds: _k(30.0, 'ExposureTime'),
-          focalLength35mmEquivalentMm: with35
-              ? _k(23.0, 'FocalLengthIn35mmFilm')
-              : const AbsentValue(),
-          imageDimensions: withDims
-              ? _k(const ImageDimensions(3072, 4096), 'dims')
-              : const AbsentValue(),
-        ),
-      ),
-    );
+/// [dims] and [focalLengthMm] vary the output mode and the optics.
+EquipmentCandidate phoneCandidate({
+  bool withDims = true,
+  bool with35 = true,
+  ImageDimensions dims = const ImageDimensions(3072, 4096),
+  double focalLengthMm = 6.57,
+}) => EquipmentCandidate.fromReading(
+  MetadataRead(
+    MetadataFormat.jpeg,
+    CaptureMetadata(
+      cameraMake: _k('TestMake', 'Make'),
+      cameraModel: _k('TestMake TestPhone', 'Model'),
+      focalLengthMm: _k(focalLengthMm, 'FocalLength'),
+      fNumber: _k(1.6, 'FNumber'),
+      exposureSeconds: _k(30.0, 'ExposureTime'),
+      focalLength35mmEquivalentMm: with35
+          ? _k(23.0, 'FocalLengthIn35mmFilm')
+          : const AbsentValue(),
+      imageDimensions: withDims ? _k(dims, 'dims') : const AbsentValue(),
+    ),
+  ),
+);

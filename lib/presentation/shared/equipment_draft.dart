@@ -1,4 +1,6 @@
 import '../../domain/equipment_import/equipment_candidate.dart';
+import '../../domain/equipment_import/equipment_matcher.dart';
+import '../../domain/metadata/capture_metadata.dart';
 import '../../domain/models/equipment_limits.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/spec_confidence.dart';
@@ -76,6 +78,29 @@ class PrefilledSpec {
   final List<num?> values;
 }
 
+/// Camera specs of a saved rig that were not copied into a new rig because
+/// the file's pixel count differs from that rig's (S3.V8, S3S-02): binning,
+/// a crop, resampling or another sensor mode could explain it, and metadata
+/// cannot tell which, so the values stay unknown for the user to provide.
+class WithheldCameraSpecs {
+  const WithheldCameraSpecs({
+    required this.rigName,
+    required this.specs,
+    required this.file,
+    required this.rig,
+  });
+
+  /// The saved rig the specs were not copied from.
+  final String rigName;
+
+  /// The specs left empty (pixel size, sensor size).
+  final Set<EquipmentSpec> specs;
+
+  /// The file's pixel dimensions, and the saved rig's resolution.
+  final ImageDimensions file;
+  final ImageDimensions rig;
+}
+
 /// The result of [EquipmentDraft.build]: a profile ready to save, or the
 /// aperture problem to show.
 class EquipmentDraftResult {
@@ -97,6 +122,7 @@ class EquipmentDraft {
     this.prefilled = const {},
     this.metadataMake,
     this.metadataModel,
+    this.withheldFromSavedRig,
   });
 
   /// The editor for [existing] (null: a blank new rig), as before S3.5.
@@ -130,7 +156,9 @@ class EquipmentDraft {
   /// fields stay empty for the user to fill; the aperture diameter, rotation,
   /// tracking and maximum exposure are never pre-filled. [cameraFrom], a
   /// saved rig with the same camera (ADR-018 §6), fills the camera specs
-  /// the file lacks, with that rig's provenance.
+  /// the file lacks, with that rig's provenance, except its pixel size and
+  /// sensor size when the file's pixel count differs from that rig's (S3.V8:
+  /// they belong to another output mode; see [withheldFromSavedRig]).
   factory EquipmentDraft.fromCandidate(
     EquipmentCandidate c, {
     EquipmentProfile? cameraFrom,
@@ -180,6 +208,15 @@ class EquipmentDraft {
 
     SpecProvenance? from(EquipmentSpec spec) => cameraFrom?.provenanceOf(spec);
     final rig = cameraFrom;
+    // S3.V8 (S3S-02): a pixel size describes one output mode. When the file
+    // has another pixel count than the saved rig, its pitch and sensor size
+    // are not copied; the relationship is not inferred.
+    final fileDims = c.evidence.imageDimensions;
+    final otherPixelCount =
+        rig != null &&
+        fileDims != null &&
+        !EquipmentMatcher.samePixelCount(fileDims, rig);
+    final geometryFrom = otherPixelCount ? null : rig;
 
     final texts = EquipmentFormTexts(
       name: c.suggestedName ?? '',
@@ -203,7 +240,7 @@ class EquipmentDraft {
         EquipmentSpec.pixelPitch,
         c.pixelPitchUm,
         (v) => _estimateText(v, EquipmentCandidate.pixelPitchDecimals),
-        fallback: rig?.pixelPitchUm,
+        fallback: geometryFrom?.pixelPitchUm,
         fallbackProvenance: from(EquipmentSpec.pixelPitch),
         showSaved: (v) => numberText(v.toDouble()),
       ),
@@ -211,14 +248,14 @@ class EquipmentDraft {
         EquipmentSpec.sensorSize,
         c.sensorWidthMm,
         (v) => v.toStringAsFixed(EquipmentCandidate.sensorDecimals),
-        fallback: rig?.sensorWidthMm,
+        fallback: geometryFrom?.sensorWidthMm,
         fallbackProvenance: from(EquipmentSpec.sensorSize),
       ),
       sensorHeight: fill(
         EquipmentSpec.sensorSize,
         c.sensorHeightMm,
         (v) => v.toStringAsFixed(EquipmentCandidate.sensorDecimals),
-        fallback: rig?.sensorHeightMm,
+        fallback: geometryFrom?.sensorHeightMm,
         fallbackProvenance: from(EquipmentSpec.sensorSize),
       ),
       focalLength: fill(
@@ -249,11 +286,28 @@ class EquipmentDraft {
         fromSavedRig: p.fromSavedRig,
       );
     }
+    final withheld = {
+      if (otherPixelCount && c.pixelPitchUm is! ProposedField)
+        EquipmentSpec.pixelPitch,
+      if (otherPixelCount && c.sensorWidthMm is! ProposedField)
+        EquipmentSpec.sensorSize,
+    };
     return EquipmentDraft(
       initial: texts,
       prefilled: prefilled,
       metadataMake: c.evidence.cameraMake,
       metadataModel: c.evidence.cameraModel,
+      withheldFromSavedRig: withheld.isEmpty
+          ? null
+          : WithheldCameraSpecs(
+              rigName: rig!.name,
+              specs: withheld,
+              file: fileDims!,
+              rig: ImageDimensions(
+                rig.resolutionWidthPx,
+                rig.resolutionHeightPx,
+              ),
+            ),
     );
   }
 
@@ -356,6 +410,9 @@ class EquipmentDraft {
   /// The file's raw identity, stored for later matching (ADR-018 §5).
   final String? metadataMake;
   final String? metadataModel;
+
+  /// A saved rig's camera specs not copied (S3.V8); null when none were.
+  final WithheldCameraSpecs? withheldFromSavedRig;
 
   /// [spec]'s pre-fill while [texts] still hold the pre-filled value; null
   /// once the user changed it (or it was not pre-filled).
@@ -485,6 +542,15 @@ class EquipmentDraft {
 
 /// How a pre-filled value's origin reads under its field.
 abstract final class PrefillText {
+  /// Why a saved rig's pixel size was not copied (S3.V8).
+  static String withheld(WithheldCameraSpecs w) {
+    String px(ImageDimensions d) => '${d.longSidePx} × ${d.shortSidePx} px';
+    return 'Pixel size not copied from "${w.rigName}": this file is '
+        '${px(w.file)}, that rig ${px(w.rig)}. Binning, a crop or another '
+        'mode could explain the difference, so enter the pixel size for this '
+        'one.';
+  }
+
   static String note(PrefilledSpec p) {
     final source = p.provenance.source ?? '';
     if (p.fromSavedRig) {

@@ -1,5 +1,7 @@
 # AstroPlan — Scientific Integrity Register
 
+> **S3.V8 (2026-09-27):** SI-014 resolved (no camera-spec copy across pixel counts). No formula changed.
+
 > **Stage 3 sign-off validation (2026-09-27):** SI-014 recorded (a copied pixel pitch can belong to another output mode; S3S-02, TD-071). No formula changed.
 
 > **S3.V4 (2026-09-27):** CALC-39's image dimensions have a sanity bound: a side over 65,535 px is unparseable (S3V-05). No formula changed.
@@ -122,7 +124,7 @@ Correct Interpretation → Required Future Action.**
 | SI-011 | Seed equipment data provenance and internal consistency | **Resolved** for shipped seeds (TASK 8.5) | TD-008 |
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
-| SI-014 | Camera specs copied into another output mode (equipment import) | **Open** (found 2026-09-27, S3S-02) | TD-071 |
+| SI-014 | Camera specs copied into another output mode (equipment import) | **Resolved 2026-09-27 (S3.V8)** | TD-071 (resolved) |
 
 ---
 
@@ -797,7 +799,9 @@ S3.V8 (proposed, owner's choice of rule): do not copy pitch or sensor size when 
 differ (recommended), or warn and require an explicit confirmation. Record the rule in ADR-018's
 notes.
 
-**Status:** Open. **Work item:** TD-071.
+**Resolved 2026-09-27 (S3.V8, owner option (a)):** a saved rig's pixel size and sensor size are not copied into a file with another pixel count (compared orientation-free, `EquipmentMatcher.samePixelCount`). They stay unknown until the user enters the pixel size, and the editor says why. The equal-pixel-count copy and the file's own estimate are unchanged. No formula changed.
+
+**Status:** Resolved. **Work item:** TD-071 (resolved).
 
 ---
 

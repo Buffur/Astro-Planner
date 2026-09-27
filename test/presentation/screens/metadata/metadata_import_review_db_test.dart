@@ -57,6 +57,18 @@ List<int> _phoneJpeg() {
   return jpegFile([exifApp1(exif.build().bytes)]);
 }
 
+/// The same JPEG without a 35 mm equivalent, so no estimate: the camera
+/// specs can only come from a saved rig (S3.V8).
+List<int> _phoneJpegNo35() {
+  final exif = phoneStyleJpegExif();
+  exif.exif!.removeWhere((e) => e.tag == 41989);
+  exif.exif!.addAll([
+    FixtureEntry.long(40962, 3072),
+    FixtureEntry.long(40963, 4096),
+  ]);
+  return jpegFile([exifApp1(exif.build().bytes)]);
+}
+
 /// A saved rig for that camera with verified camera specs; its 2.4 µm
 /// differs from the file's 2.414 µm estimate.
 const _verifiedPhone = EquipmentProfile(
@@ -294,5 +306,38 @@ void main() {
     expect(app.files.picks, 1, reason: 'no new pick');
     expect(_headline(t), startsWith('You already have this rig'));
     expect(await app.counts(t), [1, 1, 1]);
+  });
+
+  // S3.V8 (S3S-02): the tele module's 4064 × 3056 px is not this file's
+  // 4096 × 3072 px, so its pixel and sensor size are not copied.
+  testWidgets("another pixel count: the saved pixel size is not copied, Save "
+      "waits for the user's, and only then writes", (t) async {
+    final app = await _start(t, saved: [_tele]);
+    app.files.file('IMG.jpg', _phoneJpegNo35());
+    await t.tap(find.byKey(const Key('metadata.pick')));
+    await _settle(t);
+    expect(_headline(t), startsWith('Same camera as "Phone tele"'));
+    await t.tap(find.byKey(const Key('import.newFrom.1')));
+    await _settle(t);
+
+    final pitch = find.widgetWithText(TextFormField, '3.76').first;
+    expect(t.widget<TextFormField>(pitch).controller!.text, '');
+    expect(find.byKey(const Key('editor.withheld')), findsOneWidget);
+    await _tapText(t, 'Save');
+    expect(await app.counts(t), [1, 1, 1], reason: 'nothing without it');
+
+    await t.enterText(pitch, '1.4');
+    await _settle(t);
+    expect(find.byKey(const Key('editor.withheld')), findsNothing);
+    await _tapText(t, 'Save');
+    expect(await app.counts(t), [2, 2, 2]);
+    final rig = (await app.rigs(t)).firstWhere((r) => r.focalLengthMm == 6.57);
+    expect(rig.pixelPitchUm, 1.4);
+    expect(rig.resolutionWidthPx, 4096);
+    expect(rig.sensorWidthMm, closeTo(4096 * 1.4 / 1000, 0.005));
+    expect(rig.provenanceOf(EquipmentSpec.pixelPitch), SpecProvenance.user);
+    // The saved tele rig is unchanged.
+    final tele = (await app.rigs(t)).firstWhere((r) => r.focalLengthMm == 8.8);
+    expect(tele.pixelPitchUm, 1.25);
   });
 }

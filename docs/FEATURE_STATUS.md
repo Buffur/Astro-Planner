@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S3.V8, 2026-09-27 (F-45):** "New rig with the camera specs of" a saved rig no longer copies its pixel size or sensor size into a file with another pixel count. They stay empty for the user, with the reason shown (SI-014). Stage 3 stays open until a fresh-session sign-off passes.
+
 > **S3.V7, 2026-09-27 (F-45, F-23):** the rig editor states where a saved rig's specs came from per spec. An imported rig's estimates read as estimated and its file values as from the file, never as the user's. New session snapshots omit a group provenance its specs do not share. Per-field snapshot provenance is deferred to Stage 8 (TD-070). Stage 3 stays open: S3.V8 (S3S-02) is next.
 
 > **Metadata update, 2026-09-26 (S3.2):** the equipment candidate (pure domain, CALC-40); F-45

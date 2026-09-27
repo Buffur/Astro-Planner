@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../metadata/capture_metadata.dart';
 import '../models/equipment_profile.dart';
 import '../models/spec_confidence.dart';
 import '../models/spec_provenance.dart';
@@ -162,6 +163,14 @@ abstract final class EquipmentMatcher {
     return const {'/', ' ', '-', '_'}.contains(long[short.length]);
   }
 
+  /// Whether a file's pixel dimensions are the rig's resolution, in either
+  /// orientation (the file's orientation is not interpreted, ADR-018 §3).
+  static bool samePixelCount(ImageDimensions dims, EquipmentProfile rig) =>
+      dims.longSidePx ==
+          math.max(rig.resolutionWidthPx, rig.resolutionHeightPx) &&
+      dims.shortSidePx ==
+          math.min(rig.resolutionWidthPx, rig.resolutionHeightPx);
+
   static bool _close(double a, double b, double tolerance) =>
       (a - b).abs() <= tolerance * math.max(a.abs(), b.abs());
 
@@ -225,11 +234,7 @@ abstract final class EquipmentMatcher {
     // Capture mode: pixel count, and the field of view the file implies.
     final dims = c.evidence.imageDimensions;
     final modeReasons = <MatchReason>[
-      if (dims != null &&
-          (dims.longSidePx !=
-                  math.max(rig.resolutionWidthPx, rig.resolutionHeightPx) ||
-              dims.shortSidePx !=
-                  math.min(rig.resolutionWidthPx, rig.resolutionHeightPx)))
+      if (dims != null && !samePixelCount(dims, rig))
         MatchReason.pixelCountDiffers,
       if (c.evidence.focalLength35mmEquivalentMm case final f35?
           when !_close(f35, _implied35mm(rig), fieldOfViewTolerance))

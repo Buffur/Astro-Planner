@@ -288,6 +288,18 @@ class _EquipmentEditor {
                               ),
                         ),
                         const SizedBox(height: 8),
+                        // S3.V8: a saved rig's pixel size of another
+                        // output mode was not copied; say why while empty.
+                        if (form.withheldFromSavedRig case final w?
+                            when pixelCtrl.text.trim().isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              PrefillText.withheld(w),
+                              key: const Key('editor.withheld'),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
                         prefillNote(context, EquipmentSpec.pixelPitch),
                         // Sensor Size W × H mm — auto-calculated
                         _StellariumRow(
