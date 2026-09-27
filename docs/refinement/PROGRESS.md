@@ -4,18 +4,19 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (S5.7 done).
-> **Next:** S5.8 — confirmation, feedback and destructive-action patterns (P5.6; RD-09 = M + S1).
+> **Last updated:** 2026-09-27 (S5.8 done).
+> **Next:** S5.9 — the adoption plan for Stages 6–9 and rendered evidence; then the one bounded
+> Stage 5 validation.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1–S5.7 done) |
+| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1–S5.8 done) |
 | Current Task | None in progress |
-| Next Task | S5.8 (frozen; the frozen sequence is the approval) |
-| Code baseline | S5.7 (this commit): `DetailScaffold`. Not pushed (S1.14, RD-17) |
+| Next Task | S5.9 (frozen; the frozen sequence is the approval) |
+| Code baseline | S5.8 (this commit): the confirmation, feedback and delete patterns. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -107,7 +108,7 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **S5.7 done** 2026-09-27 (this commit): `DetailScaffold` (`lib/presentation/shared/detail_scaffold.dart`):
+- **S5.7 done** 2026-09-27 (`c9f2deb`): `DetailScaffold` (`lib/presentation/shared/detail_scaffold.dart`):
   - a header with the title (a semantic header), its context and the zone rule exactly once, all
     wrapping at 200 % text. The title is in the page header because an app bar's cannot wrap; the
     app bar keeps back and the actions;
@@ -117,7 +118,24 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **Next:** S5.8 (confirmation, feedback and destructive patterns, per RD-09 = M + S1).
+- **S5.8 done** 2026-09-27 (this commit), per RD-09 = M + S1:
+  - **confirmations** (`confirmation_patterns.dart`): `askUnsavedChanges` (Cancel · Discard ·
+    Save; dismiss = Cancel) and `confirmDestructive` (true only on its verb);
+  - **success** (`failure_feedback.dart`): `showDone`, beside `runWithFeedback`;
+  - **deleting** (`delete_patterns.dart`): `showUndo` (exactly one outcome, undone or committed),
+    `DeleteButton` (the visible Delete, S1), and `SwipeToDelete` (a swipe calls the same handler
+    and the row springs back, 08 §20);
+  - **tested:** every way out of each prompt; the undo outcomes on Undo, time-out, replacement
+    and removal; the swipe; red or black in field mode without the app filter; all in the gallery;
+  - **found:** Flutter keeps a message with an action on screen unless `persist: false`, so Undo
+    would never have committed. `showUndo` sets it (tested), and two existing messages with
+    actions are recorded as **TD-073** (not fixed);
+  - no screen changed.
+
+  Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
+  Every acceptance criterion checked.
+- **Next:** S5.9 (the adoption plan and rendered evidence), then the one bounded Stage 5
+  validation.
 
 ## Reusable validation evidence
 
@@ -125,7 +143,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (399 files, 0 changed); Analyze; 1,307 tests, 1 expected skip (local real samples); 2 host E2E | S5.7's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (402 files, 0 changed); Analyze; 1,319 tests, 1 expected skip (local real samples); 2 host E2E | S5.8's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -140,7 +158,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1–S5.7 done) |
+| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1–S5.8 done) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -238,21 +256,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S5.8 — Confirmation, feedback and destructive-action patterns (P5.6)**, per RD-09 = M + S1. It is
-frozen, and the frozen sequence is the approval (implement, verify per the policy, document,
-commit, then STOP).
-- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.8, and the rules
+**S5.9 — The adoption plan for Stages 6–9, and rendered evidence**. It is frozen, and the frozen
+sequence is the approval (implement, verify per the policy, document, commit, then STOP).
+- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.9, and the rules
   for every Stage 5 Task above it.
 - **Read first:**
-  - DECISIONS E.1, "RD-09 decided";
-  - the plan's "RD-09 — confirm or undo" evidence;
-  - addendum §3.3 (the three-way prompt);
-  - `lib/presentation/shared/failure_feedback.dart` (`runWithFeedback`) and `unsaved_plan_guard.dart`;
-  - `AppButtonStyles`, `AppMotion`, `AppWords`;
-  - the gallery (`_auditOverlays`);
-  - `docs/DESIGN_SYSTEM.md` §6 and §7a.
-- **Then** S5.9 (the adoption plan and rendered evidence), then the one bounded Stage 5
-  validation.
+  - `docs/DESIGN_SYSTEM.md` (§7a and §8, "Known gaps");
+  - the provisional Stage 6, 8 and 9 tables in the plan (P6.x, P8.x, P9.x);
+  - the retired-terms baseline in `test/presentation/shared/retired_terms_test.dart`;
+  - `equipment_editor_fit_test.dart` (loading Roboto for renders);
+  - the gallery.
+- **Then** the one bounded Stage 5 validation, in a fresh session where practical
+  (`prompts/INDEPENDENT_STAGE_VALIDATION.md`; the plan's "Stage 5 validation").
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

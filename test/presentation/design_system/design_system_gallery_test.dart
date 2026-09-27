@@ -11,7 +11,10 @@ import 'package:astroplan/core/theme/app_spacing.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/services/fit_analyzer.dart';
 import 'package:astroplan/presentation/shared/app_words.dart';
+import 'package:astroplan/presentation/shared/confirmation_patterns.dart';
 import 'package:astroplan/presentation/shared/context_line.dart';
+import 'package:astroplan/presentation/shared/delete_patterns.dart';
+import 'package:astroplan/presentation/shared/failure_feedback.dart';
 import 'package:astroplan/presentation/shared/detail_scaffold.dart';
 import 'package:astroplan/presentation/shared/collapsible_section.dart';
 import 'package:astroplan/presentation/shared/plan_state.dart';
@@ -283,6 +286,21 @@ Widget _detailPage() => DetailScaffold(
   ],
 );
 
+/// S5.8: a deletable row: a visible Delete, and a swipe to the same
+/// handler.
+List<Widget> _deletable() => [
+  const SizedBox(height: AppSpacing.lg),
+  SwipeToDelete(
+    itemKey: const ValueKey('gallery.rig'),
+    onDelete: () {},
+    child: ListTile(
+      title: const Text('Refractor 400'),
+      subtitle: const Text('FOV 3.4° × 2.2° · 1.94″/px'),
+      trailing: DeleteButton(tooltip: 'Delete rig', onPressed: () {}),
+    ),
+  ),
+];
+
 List<Widget> _entries() => [
   ..._surfaces(),
   ..._buttons(),
@@ -291,6 +309,7 @@ List<Widget> _entries() => [
   ..._status(),
   ..._sections(),
   ..._contextLines(),
+  ..._deletable(),
 ];
 
 /// S5.2: opens a dialog, a message and a menu over the gallery in turn and
@@ -302,42 +321,45 @@ Future<List<String>> _auditOverlays(
   final problems = <String>[];
   final context = tester.element(find.byType(ListView));
 
-  showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Delete this rig?'),
-      content: const Text('Plans that use it keep their saved values.'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          style: AppButtonStyles.destructiveText(Theme.of(context).colorScheme),
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
+  // S5.8: the shared confirmation for a stored record.
+  confirmDestructive(
+    context,
+    title: 'Delete rig "Refractor 400"?',
+    message: 'Plans that use it keep their saved values.',
   );
   await tester.pumpAndSettle();
   expect(find.byType(AlertDialog), findsOneWidget);
   problems.addAll(
-    (await auditGallery(tester, contrast: contrast)).map((p) => 'dialog: $p'),
+    (await auditGallery(
+      tester,
+      contrast: contrast,
+    )).map((p) => 'confirmation: $p'),
   );
-  await tester.tap(find.text('Cancel').last);
+  await tester.tap(find.byKey(const Key('confirm.cancel')));
   await tester.pumpAndSettle();
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: const Text('Block deleted'),
-      action: SnackBarAction(label: 'Undo', onPressed: () {}),
-    ),
+  // S5.8: the unsaved-changes prompt.
+  askUnsavedChanges(context, plan: 'M42 · Fri, Nov 13');
+  await tester.pumpAndSettle();
+  expect(find.text('Unsaved changes'), findsOneWidget);
+  problems.addAll(
+    (await auditGallery(tester, contrast: contrast)).map((p) => 'prompt: $p'),
   );
+  await tester.tap(find.byKey(const Key('unsaved.cancel')));
+  await tester.pumpAndSettle();
+
+  // S5.8: the undo message, then the success message replacing it.
+  showUndo(context, message: 'Block deleted', onUndo: () {});
   await tester.pumpAndSettle();
   expect(find.text('Block deleted'), findsOneWidget);
   problems.addAll(
-    (await auditGallery(tester, contrast: contrast)).map((p) => 'message: $p'),
+    (await auditGallery(tester, contrast: contrast)).map((p) => 'undo: $p'),
+  );
+  showDone(context, 'Copied to Sat, Nov 14');
+  await tester.pumpAndSettle();
+  expect(find.text('Copied to Sat, Nov 14'), findsOneWidget);
+  problems.addAll(
+    (await auditGallery(tester, contrast: contrast)).map((p) => 'done: $p'),
   );
   ScaffoldMessenger.of(context).removeCurrentSnackBar();
   await tester.pumpAndSettle();

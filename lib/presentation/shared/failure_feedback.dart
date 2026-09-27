@@ -35,6 +35,18 @@ Future<bool> runWithFeedback(
   }
 }
 
+/// Says what an action did (S5.8; 08 §5, §8): a short message naming the
+/// result, "New plan started", "Copied to Sat 15 Nov", "Plan saved". The
+/// success twin of [runWithFeedback]'s failure message; red in field mode
+/// by the theme. Call it after the action succeeded.
+void showDone(BuildContext context, String message) {
+  ScaffoldMessenger.maybeOf(context)
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
+    );
+}
+
 /// A list or page that could not be loaded (TASK 15.1): says so, instead of
 /// looking empty, and offers to try again.
 class LoadFailureView extends StatelessWidget {

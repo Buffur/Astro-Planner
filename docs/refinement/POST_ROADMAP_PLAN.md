@@ -2095,8 +2095,8 @@ Planned at `38925dd`. The application code is unchanged since `92ebf2a`. **Basel
 | S5.5 | A collapsible section with a remembered state | P5.2 | S–M | S5.1, S5.2 | **Done 2026-09-27** |
 | S5.6 | The context line (site ▾ · night ▾) | P5.3 | S | S5.1, S5.2 | **Done 2026-09-27** |
 | S5.7 | The detail-screen template | P5.5 | S | S5.5 | **Done 2026-09-27** |
-| S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, RD-09 (**decided 2026-09-27: M + S1**) | **Next** |
-| S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | Frozen |
+| S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, RD-09 (**decided 2026-09-27: M + S1**) | **Done 2026-09-27** |
+| S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | **Next** |
 
 **Order:** S5.1 → S5.2 → S5.3 → S5.4 → S5.5 → S5.6 → S5.7 → S5.8 (once RD-09 is decided) → S5.9.
 S5.3 depends on nothing and may run earlier. Then the Stage 5 validation, in a fresh session.

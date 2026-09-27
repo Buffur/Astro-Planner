@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S5.8, 2026-09-27:** B17 notes the confirmation, feedback and delete patterns (RD-09 = M + S1).
 > **S5.7, 2026-09-27:** B17 notes the detail-screen template.
 > **S5.6, 2026-09-27:** B17 notes the context line and `pickNight`.
 > **S5.5, 2026-09-27:** B17 notes the collapsible section and `DisclosureViewModel`.
@@ -819,6 +820,15 @@ measured above a frame. Measurements: `docs/TEST_PLAN.md` (TASK 15.2).
 - **Detail screens (S5.7):** `lib/presentation/shared/detail_scaffold.dart` (`DetailScaffold`):
   a header (title, context, the zone rule once), a summary card, then sections. Stage 6's Night &
   Moon and Weather details (P6.5) are built on it; their routes join the accessibility sweep.
+  Not yet on a screen.
+- **Confirming, reporting and deleting (S5.8; RD-09 = M + S1):**
+  - `lib/presentation/shared/confirmation_patterns.dart`: `askUnsavedChanges` (Save · Discard ·
+    Cancel) and `confirmDestructive`;
+  - `showDone` beside `runWithFeedback` in `failure_feedback.dart`;
+  - `lib/presentation/shared/delete_patterns.dart`: `showUndo` (exactly one outcome;
+    `persist: false`), `DeleteButton`, and `SwipeToDelete` (a swipe calls the visible Delete's
+    handler and the row springs back).
+
   Not yet on a screen.
 - Screens adopt the roles and components in Stages 6–9; until then most keep their explicit
   styles (DESIGN_SYSTEM §8).

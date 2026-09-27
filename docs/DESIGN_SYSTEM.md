@@ -7,7 +7,8 @@
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
 > icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test), S5.4 (status
 > tokens, the status block, the plan-state label), S5.5 (the collapsible section), S5.6 (the
-> context line and the night picker) and S5.7 (the detail-screen template).
+> context line and the night picker), S5.7 (the detail-screen template) and S5.8 (confirmation,
+> feedback and destructive-action patterns, RD-09 = M + S1).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -365,9 +366,51 @@ caption.** The gallery sweeps a sample Night & Moon page (not a route) in the th
 100 % and 200 % text. Stage 6 adds the real detail routes (`AppRouter` constants) to the route
 sweep (trap 17).
 
-### Still to come
+### Confirmation, feedback and deleting (S5.8; RD-09 = M + S1, DECISIONS E.1)
 
-Added by S5.8: confirmation, feedback and destructive actions, per RD-09 = M + S1.
+**Which pattern for which action:**
+
+| Action | Pattern |
+| --- | --- |
+| Replacing a plan with unsaved changes (New plan, Copy, Open; P6.1) | `askUnsavedChanges`: Save · Discard · Cancel |
+| Deleting an edit inside a plan: a capture block | At once, with `showUndo` |
+| Deleting a stored record: a rig, a target, a site, a Logbook entry | `confirmDestructive`, then delete |
+| Abandon (a live run), Restore (a backup), resetting data | `confirmDestructive` with its own verb |
+| Any action that succeeded: New plan, Copy, Open, Save | `showDone` ("New plan started", "Copied to …", "Plan saved") |
+| Any action that failed | `runWithFeedback` (TASK 15.1) |
+
+- **`askUnsavedChanges`** (`confirmation_patterns.dart`; addendum §3.3):
+  - "Unsaved changes", '"M42 · Fri, Nov 13" has changes that are not saved.', then Cancel ·
+    Discard · Save;
+  - Discard is styled destructive;
+  - back or a tap outside is Cancel;
+  - it returns the choice only. What Save and Discard do is P6.1's; the S1.6 guard stays until
+    then.
+- **`confirmDestructive`** (same file):
+  - the title names the item ('Delete rig "Refractor 400"?') and the message the consequence;
+  - Cancel, then the destructive verb (`AppButtonStyles.destructiveText`);
+  - it is true only when the verb is tapped: Cancel, back and a tap outside all keep the item. It
+    replaces today's four differently worded delete dialogs as their screens adopt it.
+- **`showUndo`** (`delete_patterns.dart`):
+  - "Block deleted · Undo", shown after the edit is applied;
+  - it reports **exactly one outcome**: `onUndo` when Undo is tapped, otherwise `onCommit` when
+    the message closes (it timed out after 6 s, was swiped away or was replaced);
+  - `persist: false` is required, because Flutter otherwise keeps any message with an action on
+    screen until it is dismissed, and Undo would never commit (the time-out test found it);
+  - the adopter restores exactly and tests its own restore.
+- **`showDone`** (`failure_feedback.dart`, next to `runWithFeedback`): a short message naming what
+  happened. It replaces the previous message.
+- **The visible Delete, `DeleteButton`** (S1; UX-38): an icon button (`Icons.delete_outline`)
+  whose tooltip is its label ("Delete rig"). Where it sits is decided at adoption: blocks in Stage
+  6, the Logbook in Stage 8, the Library in Stage 9.
+- **`SwipeToDelete`** (S1; 08 §20):
+  - a swipe from the end calls the **same handler** as the visible Delete;
+  - the row springs back at once, and is never left slid away behind a dialog. The handler then
+    confirms or deletes with Undo, and the list drops the row when the item is really gone;
+  - the background is the error colour with a delete icon, large radius.
+- **Field mode:** the prompt, the confirmation and both messages are red or black by the theme
+  alone (a pixel test without the app's red filter). The message is the dim field message, never a
+  white flash.
 
 ## 8. Known gaps, for adoption
 
@@ -401,6 +444,10 @@ What S5.1 and S5.2 changed app-wide, and what they leave to the Stages that rede
   - (S5.2) the 7 `ElevatedButton`s become `OutlinedButton` or `FilledButton` by role, and the
     planner's Save plan becomes primary (P6.3);
   - (S5.2) icons follow §6.5 as their screens are redesigned;
+  - (S5.8) the existing delete paths (a capture block at once without undo; swipe-only rigs,
+    targets and Logbook entries behind a lingering dialog; a site's dialog), the S1.6 guard and the
+    silent New and Duplicate keep their behaviour until they adopt §7a's patterns (P6.1; Stages 6,
+    8, 9);
   - (S5.4) the planner, Tonight and the Logbook still show their own status texts ("Draft",
     "Planned, unsaved changes", "In progress", "Abandoned", "Legacy log", "Fit tonight: …"). They
     adopt `StatusBlock` and `PlanStateLabel` in P6.1, P6.3, P6.6 and P8.5.
