@@ -3,11 +3,30 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (Stage 4 planned; its Task sequence frozen). Stage 3 closed by
-> its final sign-off (`126d97f`).
-> **Next: S4.R1** (flow inventory and question matrix; documentation only).
+> **Last updated:** 2026-09-27 (S4.R1 done). Stage 4 in progress; Stage 3 closed (`126d97f`).
+> **Next: S4.R2** (RG-04, Execution's role; research, documentation only), after the owner has
+> read S4.R1 and, optionally, answered its clarifications O1–O4.
 
 ## Current state
+
+**S4.R1 done, 2026-09-27 (research, documentation only):**
+[`research/S4.R1_FLOW_INVENTORY.md`](research/S4.R1_FLOW_INVENTORY.md), at `2a26185`.
+- The routes against the wireframes: 3 deviations recorded in ADR-015 §7, 1 by ADR-018 §7 (the
+  import route), and the content deviations UX-04, UX-11 and the Sessions tab's missing "+" and
+  grouping.
+- Every session action, with its entry points, confirmation, feedback and effect. Notable:
+  - New keeps the target and rig and resets the night and blocks;
+  - after Start the planner continues on a copy, and Tonight offers that copy's Start;
+  - **a result can be recorded only through Start**, so a plan logged after the night gets a run
+    stamped "now", an estimate of about zero, and +1 per frame. This is an RG-04 input.
+- Session states on each screen (the planner shows none; pure drafts are not listed).
+- Taps per core task, re-measured from the code: 16 rows, 2 new (a result after the night: 6 taps
+  plus 1 per frame; a rig from a photo: about 5).
+- The question matrix: 22 questions from 08 (each with a home; 7 outside Stage 4) and 18 UX
+  findings (all current, UX-12 mitigated by S1.6).
+- Four owner clarifications (O1–O4; not decisions), and the S4.E script with a record table.
+- No code changed; the gate result at `92ebf2a` still applies. Run in the same chat as Stage 4
+  planning, at the owner's request.
 
 **Stage 4 planning, 2026-09-27 (documentation only), at `126d97f`.** Stage 4 — Product Flow &
 Information Architecture — is **in progress**. Its Task sequence is frozen
@@ -141,7 +160,7 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S4.R1** — flow inventory and question matrix (research, documentation only; `POST_ROADMAP_PLAN.md`, "S4.R1") |
+| Next approved Task | **S4.R2** — RG-04: Execution's role and how actuals are recorded (research, documentation only; `POST_ROADMAP_PLAN.md`, "S4.R2"). S4.R1 is done |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -272,12 +291,14 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 \* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
 final sign-off.
-| 4 | Stage 4 planning (documentation only) | 2026-09-27 | The planning commit\*\*\* | Every Stage 4 input re-verified at `126d97f` (none stale). Frozen: S4.R1–S4.R5, S4.D, S4.T; S4.E optional. Owner: the recommended option on each planning question (E.1, "Stage 3 closed; Stage 4 planning decisions"). `POST_ROADMAP_PLAN.md`, "Stage 4 — frozen Task sequence" |
+| 4 | Stage 4 planning (documentation only) | 2026-09-27 | `2a26185` | Every Stage 4 input re-verified at `126d97f` (none stale). Frozen: S4.R1–S4.R5, S4.D, S4.T; S4.E optional. Owner: the recommended option on each planning question (E.1, "Stage 3 closed; Stage 4 planning decisions"). `POST_ROADMAP_PLAN.md`, "Stage 4 — frozen Task sequence" |
+
+| 4 | S4.R1 — Flow inventory and question matrix (research, documentation only) | 2026-09-27 | The S4.R1 commit\*\*\* | `research/S4.R1_FLOW_INVENTORY.md` at `2a26185`: routes against the wireframes, every session action, states per screen, 16 re-measured tap counts, a 22 + 18 row question matrix, owner clarifications O1–O4, the S4.E script. Key RG-04 input: a result can be recorded only through Start |
 
 \*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
-\*\*\* Likewise for the planning. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/POST_ROADMAP_PLAN.md`; the next Task records it
-here.
+\*\*\* Likewise for S4.R1. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/research/S4.R1_FLOW_INVENTORY.md`; the next Task
+records it here. (Stage 4 planning's `2a26185` was recorded by S4.R1.)
 
 ## Relevant commits
 
@@ -383,8 +404,9 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** nothing blocks S4.R1. Each later step waits for the owner's decision on the step
-  before it (E.1). S4.E (owner-run tests) is optional and blocks nothing.
+- **Stage 4:** S4.R1 is done; nothing blocks S4.R2. S4.R3 onwards each wait for the owner's
+  decision on the step before (E.1). S4.E (owner-run tests) and O1–O4 are optional and block
+  nothing.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -551,13 +573,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S4.R1 — Flow inventory and question matrix** (`POST_ROADMAP_PLAN.md`, "S4.R1"). Research,
-documentation only: the routes and screens against `IA_WIREFRAMES.md`; every action that creates,
-opens, replaces, saves, starts, finishes, abandons or deletes a session; how each screen shows the
-session's state; taps per core task; the matrix mapping each 08 flow question and UX-01 to UX-14
-and UX-24 to UX-27 to its current fact and its S4 step; and the S4.E script. Output
-`research/S4.R1_FLOW_INVENTORY.md`; one commit, then STOP. A fresh chat is preferred (§9.1).
-Then S4.R2 (RG-04), after the owner has read S4.R1.
+**S4.R2 — RG-04: Execution's role and how actuals are recorded** (`POST_ROADMAP_PLAN.md`,
+"S4.R2"). Research, documentation only: options (A) as built, (B) the tracker optional with
+results recorded after the night, (C) after the session only, (D) a simplified tracker; for each,
+the user's night, where Start lives, CALC-37/38, ADR-016's events, RD-12, RD-13, UX-13, UX-25,
+UX-26, TD-063, and what happens to existing sessions. Inputs: S4.R1 (§2's "a result only through
+Start"; §4 row 11; the owner's answer to O4 if given). Output `research/RG-04_EXECUTION_ROLE.md`
+with the owner's questions; the owner decides RG-04 before S4.R3. One commit, then STOP. A fresh
+chat is preferred (§9.1).
+
+The owner may answer S4.R1's clarifications O1–O4, and run S4.E, at any time. Neither blocks.
 
 The separate S3V-08 device recheck, if the owner wants it, is its own action through `.s2check`,
 never the owner's installed app.
