@@ -15,6 +15,7 @@
 > **Updated 2026-09-27 (S4.R2, owner-approved):** §4 records the RG-04 decision (Execution's
 > role; post-session results). Nothing else changed.
 > **Updated 2026-09-27 (S4.R3, owner-approved):** §10 notes the RD-05 and RD-04 decisions.
+> **Updated 2026-09-27 (S4.R4, owner-approved):** §10 notes the RG-05, RD-06 and RG-06 decisions.
 
 ## 1. Primary product job
 
@@ -255,3 +256,10 @@ for owner decisions (RD). The main ones:
   - nothing is preselected on the first run;
   - New keeps the site and rig and asks for the target;
   - the capture plan starts empty, with "Start from the example plan".
+- **RG-05:**
+  - Tonight puts the plan first, under a site · night context line;
+  - the night, Moon and weather have their own detail screens, with no new tab.
+- **RD-06:**
+  - the planner answers "does it fit?" first, then follows the decision order;
+  - detail is one tap away, with factual summaries.
+- **RG-06:** no Basic/Advanced modes; progressive disclosure (principle 2).

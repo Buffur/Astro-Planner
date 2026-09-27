@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **RG-05, RD-06 and RG-06 decided (2026-09-27, S4.R4, documentation only):** Tonight plan-first with a site · night context line (T1); Night & Moon and Weather detail screens, no new tab (D-b); the planner answer-first in decision order (P-1, amends ADR-015 §2); detail one tap away with factual summaries, no modes (M0; ADR-009 §2's "own line" within the budget details) (E.1, "RG-05, RD-06 and RG-06 decided"). ADR text changes are left to ADR-019; no code changed.
 > **RD-05 and RD-04 decided (2026-09-27, S4.R3, documentation only):** L1 (Draft internal; "Not saved / Saved / Saved · changed"; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), no preselection with an empty capture plan and "Start from the example plan", U1 (Save · Discard · Cancel) (E.1, "RD-05 and RD-04 decided"). No ADR changed yet; no code changed.
 > **RG-04 decided (2026-09-27, S4.R2, documentation only):** Execution's role is B, the Logbook first and the tracker optional; the post-session result is G2 (Completed as planned, Partly with numbers, Not done → abandoned with a reason); a quiet "how did it go?" line on Tonight (E.1, "RG-04 decided"). ADR-014/016 amendments are left to ADR-019 (S4.D); no ADR changed yet; no code changed.
 > **Stage 3 closed; Stage 4 planned (2026-09-27, documentation only):** the final sign-off passed (`126d97f`); Stage 4's Task sequence frozen, optional owner-run tests, decisions after each research step (E.1, "Stage 3 closed; Stage 4 planning decisions"). No ADR changed.
@@ -1132,6 +1133,65 @@ from a stale match.
   - ADR-019 (S4.D) amends ADR-014 §3's "Current session" rule (E2);
   - Stage 6 implements the planner parts;
   - Stage 8 implements E2's resume rule together with RG-04's result recording.
+- No code changed.
+
+### RG-05, RD-06 and RG-06 decided: Tonight, the planner's structure and disclosure (S4.R4, 2026-09-27)
+
+- **Context:** the research is `refinement/research/RG-05_06_TONIGHT_AND_PLANNER.md` (committed
+  `8578ab8`). The planner's verdict is on its last screen (05 §3), and only the assumptions panel
+  collapses today. S4.E (owner-run tests) was not run; the gap is stated there.
+- **Decided by:** the project owner, in chat, choosing the recommended option on each question.
+- **F1 — Tonight (RG-05): T1, the plan first.**
+  - A context line (site ▾ · night ▾) serves as the site switcher and night picker. It is the same
+    control as the planner's, and the night picker changes the current plan's night (UX-11).
+  - Then, in order: the live-run card (only during an optional run); the "how did it go?" line (only
+    when due); **the current plan** (state, the fit with its reason and usable time, Open planner, or
+    "Choose a target" / "What can I image tonight?" without one); the Night, Moon and Weather rows;
+    the secondary actions (What can I image tonight?, New plan).
+- **F2 — drill-downs (RG-05): D-b.**
+  - New "Night & Moon" and "Weather" detail screens, opened from Tonight's rows and from the
+    planner's condition summaries (UX-10, UX-03).
+  - The target-specific chart stays in the planner.
+  - No new tab: ADR-015's four tabs stand, and 08 §2's "Analytics" idea is met by the detail
+    screens.
+- **F3 — the planner (RD-06): P-1, answer first and then decision order.**
+  - The order: the status (the verdict with its reason, time needed against usable time, when
+    capture ends, total integration, fill or trim) → the context (site · night) → the target and
+    tonight's windows → the capture plan → a conditions summary (to the detail screens) → a rig
+    summary (to the full rows).
+  - Save sits in the bottom bar.
+  - This amends ADR-015 §2's "same sections and order" (UX-01, UX-02).
+- **F4 — disclosure and modes (RD-06, RG-06): M0.**
+  - **Always visible:** the verdict and its reason, usable time, time needed, when capture ends,
+    total integration, the weather summary with its age and a "stale" label, the attribution, and
+    unknowns.
+  - **One tap away,** in collapsed sections whose summary states facts, not verdicts, and whose
+    state is remembered:
+    - the budget breakdown lines;
+    - the √N help text (the √N values stay visible, labelled relative);
+    - the assumptions panel;
+    - every weather variable and the hour strip;
+    - the rig's reference rows;
+    - sky-darkness detail and the map link.
+  - Zone captions appear once per section; the rule that every time names its zone stands.
+  - **No Basic/Advanced modes,** and no density preference. Both stay possible later, only on new
+    evidence.
+- **Amendments approved here, recorded by ADR-019 (S4.D):**
+  - ADR-015 §2: the planner's order, and two detail routes in the route map;
+  - ADR-009 §2's "each shown on its own line": on its own line **within the budget details**, one
+    tap away. Nothing is removed.
+- **Unchanged:**
+  - PD-14 (Tonight fixed, no customisable dashboard);
+  - ADR-012 (no weather score or good/bad colouring; age and attribution shown);
+  - ADR-013 (no score; reasons);
+  - SI-003 (√N relative, never SNR);
+  - SI-008;
+  - every calculation.
+- **Out of these decisions, with their homes** (the research's §8):
+  - the chart's redesign, weather icons and a √N graph: Stage 6;
+  - typography and the collapsed forms' look: Stage 5;
+  - the map link: Stage 7;
+  - "Fit tonight"'s wording: RD-14 (S4.R5).
 - No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline

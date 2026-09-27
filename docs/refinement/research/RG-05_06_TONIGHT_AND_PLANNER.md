@@ -15,7 +15,9 @@
 >
 > **Process note:** run in the same chat as S4.R1–S4.R3, at the owner's request. S4.E
 > (owner-run tests) was not run; the evidence gap is stated in §5.
-> **Status:** the owner's decision is pending (§9).
+> **Status: DECIDED 2026-09-27** (the owner, in chat; DECISIONS E.1, "RG-05, RD-06 and RG-06
+> decided"): F1 = T1, F2 = D-b, F3 = P-1, F4 = M0 with §3's rule. The text below is the research as
+> written before the decision.
 
 ## Contents
 
@@ -364,3 +366,14 @@ S4.T turns this into provisional Tasks.
 - **Stage 9:** the Settings side of anything that moves out of context (RG-13).
 - **Unchanged calculations:** none are touched. Only placement and disclosure change, and every
   value stays reachable.
+
+## 11. The owner's decision (2026-09-27)
+
+The owner chose the recommended option on each question (DECISIONS E.1, "RG-05, RD-06 and RG-06
+decided"):
+- **F1:** T1, with the context line; the night picker changes the current plan's night.
+- **F2:** D-b, the Night & Moon and Weather detail screens; no new tab.
+- **F3:** P-1. It amends ADR-015 §2.
+- **F4:** M0 with §3's rule. ADR-009 §2's "own line" means within the budget details. No modes.
+
+ADR-019 (S4.D) records the amendments; Stages 5, 6 and 9 implement.
