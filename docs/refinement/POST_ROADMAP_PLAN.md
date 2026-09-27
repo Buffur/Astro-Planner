@@ -19,6 +19,8 @@
 > **Updated 2026-09-26 (S3.D):** the owner decided D1–D4 (each the recommended option); ADR-018
 > accepted; RG-02 decided; RG-03 deferred; RD-16 resolved; S3.1–S3.8 frozen ("Stage 3 — frozen
 > Task sequence").
+> **Updated 2026-09-27 (Stage 3 final sign-off, verified at `92ebf2a`):** Stage 3 passed its
+> fresh-session sign-off and is closed; Stage 4 planning is next. No Stage definition changed.
 
 ## Contents
 
@@ -1390,6 +1392,7 @@ validation failed: corrective Tasks"). Then a fresh independent validation; Stag
 | S3.V7 | S3S-01 (TD-070), fresh-session sign-off `d7dead0` | The Equipment editor uses each value's stored provenance; a rig-wide `user` never presents estimated or imported values as user-reported. No snapshot provenance migration: a saved-session record never presents the rig-wide source as every field's; per-field session provenance and its export/schema changes go to Stage 8. Missing per-field provenance is never replaced with an invented `user` | **Done 2026-09-27** (owner-approved, E.1 "Stage 3 sign-off failed: corrective Tasks") |
 | S3.V8 | S3S-02 (TD-071, SI-014) | Option (a): when the photo's pixel dimensions differ from the matched saved rig's, pixel size and physical sensor size are not copied; they stay unknown until the user confirms or provides them; the relationship is not inferred | **Done 2026-09-27** |
 | — | S3S-03 (TD-072) | Not part of S3.V8; deferred to a later Equipment/data-entry cleanup (owner) | Deferred |
+| Sign-off | S3V-01–S3V-06, S3S-01, S3S-02, and the original Stage 3 acceptance | A fresh-session sign-off (§9.8) | **PASS 2026-09-27** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`); **Stage 3 closed**. Non-blocking: S3F-01 (TD-072 addendum), S3F-02 (TD-071 note). S3V-08 stays unverified |
 | S3.8 | Average RAW size from a DNG pick (ADR-018 §4, D4) | S | S3.6 | **Done 2026-09-26** |
 
 Order: S3.1 → S3.2 → S3.4 → S3.3 → S3.5 → S3.6 → S3.8 → S3.7. S3.7 goes last because it makes

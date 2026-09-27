@@ -3,11 +3,30 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S3.V8 done). Both blocking findings of the failed fresh-session
-> sign-off (`d7dead0`) are fixed: S3S-01 by S3.V7, S3S-02 by S3.V8. S3S-03 is deferred.
-> **Next: a fresh-session Stage 3 sign-off.** Stage 3 is not closed. Stage 4 has not started.
+> **Last updated:** 2026-09-27 (Stage 3 final sign-off: **PASS** at `92ebf2a`; Stage 3 closed).
+> **Next: Stage 4 planning** (Product Flow & Information Architecture). No Stage 4 Task has
+> started.
 
 ## Current state
+
+**Stage 3 final sign-off, 2026-09-27: PASS** at `92ebf2a`, in a fresh session. See
+[the report](STAGE_3_FINAL_SIGNOFF.md) and [probe evidence](evidence/STAGE_3_FINAL_SIGNOFF_PROBES.md).
+Stage 3 is **closed**.
+- **Freshly executed, all pass:**
+  - the full gate (Encoding; Format, 376 files, 0 changed; Analyze; 1,214 tests, one expected
+    skip; 2 host E2E);
+  - the Stage 3 targeted suites (352 tests, one expected skip);
+  - the four real samples (856 / 856 / 843 / 4,051 bytes, unchanged);
+  - the four native JVM tests;
+  - the archived probes P1–P10, R1, F1a, F2 and both P+; F1b and F3, which pinned S3S-01 and
+    S3S-02, now fail as expected;
+  - 13 new probes (G1–G6 for S3.V7, H1–H7 for S3.V8 and the paths next to it).
+- **Resolved and re-verified:** S3V-01 to S3V-07, S3S-01, S3S-02.
+- **Non-blocking, recorded, not fixed:** S3F-01 (a portrait-entered rig's sensor size is copied
+  transposed; addendum to TD-072); S3F-02 (the RAW size is still copied across pixel counts; a
+  note on TD-071, no Task proposed). S3S-03 (TD-072) stays deferred.
+- **Unverified:** S3V-08 (device). No device interaction; M4 stays the recorded device evidence.
+- No application code, test or dependency changed.
 
 **S3.V8 done, 2026-09-27 (S3S-02; TD-071 and SI-014 resolved; owner option (a)).**
 - "New rig with the camera specs of" a saved rig no longer copies its pixel size or sensor size
@@ -104,12 +123,12 @@ an already-running debug app to register the route.
 | Item | State |
 | --- | --- |
 | Current strategic phase | **Post-roadmap refinement** (Stages 0–11, `POST_ROADMAP_PLAN.md`). The Master Development Roadmap is closed as a task queue; its open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
-| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: In validation.** The corrective Tasks after the failed fresh-session sign-off (`STAGE_3_SIGNOFF_VALIDATION.md`, `d7dead0`) are done: S3.V7, S3.V8. A fresh-session sign-off is next. Device recheck S3V-08 is separately unverified |
-| Next Stage | Stage 4 — Product Flow & Information Architecture: Not started |
+| Current Stage | **Stage 3 — Metadata → Equipment / Device Import: Complete** (fresh-session final sign-off PASS at `92ebf2a`, `STAGE_3_FINAL_SIGNOFF.md`). Device recheck S3V-08 is separately unverified |
+| Next Stage | Stage 4 — Product Flow & Information Architecture: Not started; **planning is next** |
 | Current approved Task | None in progress |
-| Next approved Task | None. Next: a **fresh-session Stage 3 sign-off** (validation only). Stage 4 stays blocked until Stage 3 receives a PASS |
-| Code baseline | S3.V8 (see "Completed Tasks"). Not pushed (S1.14) |
-| Quality gate at the baseline | **Green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
+| Next approved Task | None. Next: **Stage 4 planning** (§9.1), which freezes Stage 4's Task sequence with the owner |
+| Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
+| Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
 
 ## Stage status
@@ -121,8 +140,8 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 0 | Refinement Baseline | Complete | 2026-09-25 | 2026-09-25 | Self-review against the Stage 0 prompt's §22 checklist (below). The prompt asks for no separate validation session |
 | 1 | Verified Fixes & Clean Baseline | Complete (owner waiver) | 2026-09-25 | 2026-09-26 | **Did not pass**: independent validation failed at `4e653fb` (TD-059–TD-062, fixed), then at `c99bd7f` (TD-063, X2). The owner closed the Stage anyway: TD-063 goes to Stage 8; X2 and W1 are carried |
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
-| 3 | Metadata → Equipment / Device Import | In validation | 2026-09-26 | — | **Fresh-session sign-off FAIL** at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`: S3S-01, S3S-02 blocking; S3S-03 low). Before that: FAIL at `387e54b`, then a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`). Device recheck S3V-08 unverified |
-| 4 | Product Flow & Information Architecture | Not started | — | — | — |
+| 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
+| 4 | Product Flow & Information Architecture | Not started (planning next) | — | — | — |
 | 5 | Design System Foundation | Not started | — | — | — |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
@@ -232,10 +251,15 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 3 | S3.V7 — Per-field provenance in the rig editor; no invented `user` in new snapshots (S3S-01, TD-070) | 2026-09-27 | `1166986` | Owner-approved with a Stage-boundary adjustment (E.1). `EquipmentProfile.groupProvenance` lists a group's valued specs with `provenanceOf` (the RAW size only when set); `sharedProvenance` is the one they all have, else null. The editor's provenance line (keyed `editor.provenance`) gives one phrase for a group that shares a provenance, else one per spec; it never shows the group pair alone. `SessionSnapshotBuilder` writes a group's source/confidence only when shared, else null (snapshot `"v": 1` and export unchanged). Regression tests first (they failed before the fix): `equipment_shared_provenance_test.dart` (6), `equipment_editor_provenance_test.dart` (4: imported, hand-typed unchanged, edited verified seed, edited legacy), and 3 snapshot cases in `session_snapshot_builder_test.dart`. Existing tests unchanged. Deferred to Stage 8: per-field snapshot provenance and snapshots already saved. Gate green, 1208 + 1 skip + 2 E2E |
 
-| 3 | S3.V8 — No camera-spec copy across pixel counts (S3S-02, TD-071, SI-014) | 2026-09-27 | The S3.V8 commit* | Owner-approved, option (a) (E.1). `EquipmentDraft.fromCandidate(c, cameraFrom:)` does not copy the saved rig's pixel size or sensor size when the file's pixel dimensions are known and differ from its resolution (`EquipmentMatcher.samePixelCount`, orientation-free, also used by the mode check). It records them in `withheldFromSavedRig`, and the editor shows `PrefillText.withheld` (keyed `editor.withheld`) while the pixel field is empty. Resolution and RAW size fallbacks, the file's own values and estimates, and the equal-count copy are unchanged. Regression tests first (they failed before the fix, the real-database one with the saved 1.25 µm copied): `equipment_camera_copy_mode_test.dart` (5), and one real-database case in `metadata_import_review_db_test.dart` (Save waits for the user's pixel size; then one new chain; the saved rig unchanged). `phoneCandidate` in `test/support` gained `dims` and `focalLengthMm` parameters (defaults unchanged). Existing tests unchanged. Gate green, 1214 + 1 skip + 2 E2E |
+| 3 | S3.V8 — No camera-spec copy across pixel counts (S3S-02, TD-071, SI-014) | 2026-09-27 | `92ebf2a`* | Owner-approved, option (a) (E.1). `EquipmentDraft.fromCandidate(c, cameraFrom:)` does not copy the saved rig's pixel size or sensor size when the file's pixel dimensions are known and differ from its resolution (`EquipmentMatcher.samePixelCount`, orientation-free, also used by the mode check). It records them in `withheldFromSavedRig`, and the editor shows `PrefillText.withheld` (keyed `editor.withheld`) while the pixel field is empty. Resolution and RAW size fallbacks, the file's own values and estimates, and the equal-count copy are unchanged. Regression tests first (they failed before the fix, the real-database one with the saved 1.25 µm copied): `equipment_camera_copy_mode_test.dart` (5), and one real-database case in `metadata_import_review_db_test.dart` (Save waits for the user's pixel size; then one new chain; the saved rig unchanged). `phoneCandidate` in `test/support` gained `dims` and `focalLengthMm` parameters (defaults unchanged). Existing tests unchanged. Gate green, 1214 + 1 skip + 2 E2E |
 
-\* A file cannot contain its own commit hash. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/PROGRESS.md`; the next Task records it here.
+| 3 | Stage 3 final sign-off, fresh session (validation and closeout documentation only) | 2026-09-27 | The sign-off commit\*\* | **PASS** at `92ebf2a`; Stage 3 closed. Gate green (1214 + 1 skip + 2 E2E); targeted Stage 3 suites 352 + 1 skip; real samples, 4 native JVM tests; archived probes re-run (F1b and F3 now fail, as their defects are fixed); 13 new probes. S3S-01 and S3S-02 resolved; S3F-01 (TD-072 addendum) and S3F-02 (TD-071 note) non-blocking; S3V-08 unverified. See `STAGE_3_FINAL_SIGNOFF.md` |
+
+\* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
+final sign-off.
+\*\* Likewise for the sign-off. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/STAGE_3_FINAL_SIGNOFF.md`; the next Task records
+it here.
 
 ## Relevant commits
 
@@ -327,7 +351,8 @@ These block a release, not refinement.
   `POST_ROADMAP_PLAN.md` Appendix B).
 - Stage 3: say which cameras and optics you use besides the phone (a DSLR/mirrorless JPEG, or a
   FITS file, would let Stage 3 check those classes on real files). The phone is needed for S3.7's
-  device check M4.
+  device check M4. *(M4 passed at `2b045eb`; the phone is now needed only for the optional S3V-08
+  recheck and S2V-06's checks. Noted at the Stage 3 final sign-off.)*
   Samples for FITS, PNG, AVIF or RAW, when available, enable their readers later. The DNG,
   JPEG and HEIC samples stay outside Git.
 
@@ -337,9 +362,11 @@ These block a release, not refinement.
   a proposed input to RD-05.
 - **Stage 2 (closed by waiver):** nothing blocks. The carried items are listed under "Next
   allowed action".
-- **Stage 3:** closure waits for a fresh-session sign-off with a PASS (owner, 2026-09-27; no
-  waiver). S3S-01 and S3S-02 are fixed (S3.V7, S3.V8). Equipment identity for dedicated
-  astro cameras needs a FITS sample (S2.6).
+- **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
+  (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
+  Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
+- **Stage 4:** no blocker known before planning; RG-04, RG-05, RG-06 and the Stage 4 RD items are
+  its gates.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -347,6 +374,16 @@ These block a release, not refinement.
 - **Release:** RD-01; the 16.2 upload key; the 16.3 policy. These do not block refinement.
 
 ## Validation status
+
+- **Stage 3 final sign-off (fresh session)**, 2026-09-27, at `92ebf2a`: **PASS**
+  (`STAGE_3_FINAL_SIGNOFF.md`). Stage 3 closed.
+  - Passed: the gate (Encoding; Format, 376 files, 0 changed; Analyze; 1,214 tests, 1 expected
+    skip; 2 host E2E); the targeted Stage 3 suites (352, 1 skip); the real samples; the 4 native
+    JVM tests; every archived probe that asserts required behaviour; 13 new probes.
+  - Resolved: S3V-01 to S3V-07, S3S-01, S3S-02.
+  - Non-blocking: S3F-01, S3F-02; S3S-03 deferred.
+  - Unverified: S3V-08 (device). Nothing is claimed as device verified.
+  - Validation only: no application, test or dependency change; the probe files were removed.
 
 - **Fresh-session Stage 3 sign-off**, 2026-09-27, at `74026ca`: **FAIL**
   (`STAGE_3_SIGNOFF_VALIDATION.md`).
@@ -492,30 +529,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**A fresh-session Stage 3 sign-off** (§9.8; owner, DECISIONS E.1, "Stage 3 sign-off failed:
-corrective Tasks"). Validation only; it must not implement fixes.
-- Verify the original Stage 3 acceptance and every previous blocking finding: S3V-01 to S3V-06
-  (`STAGE_3_VALIDATION.md`), and S3S-01 and S3S-02 (`STAGE_3_SIGNOFF_VALIDATION.md`). The archived
-  probes are in `evidence/`.
-- Check for regressions around the corrected areas: editor provenance, session snapshots, and the
-  camera-spec copy.
-- Do not add product requirements or an Equipment redesign.
-- Out of scope, as decided:
-  - S3S-03 (TD-072) is deferred;
-  - per-field snapshot provenance is Stage 8's (TD-070).
-- Surviving findings become focused Tasks for the owner.
+**Stage 4 planning** (Product Flow & Information Architecture; `POST_ROADMAP_PLAN.md` §5, Stage 4,
+and §9.1). Planning only: re-verify Stage 4's candidate work against the repository, place its
+research gates (RG-04, RG-05, RG-06) and owner decisions (RD-04 to RD-07, RD-14; W1 and V3 as
+inputs to RD-05), and propose a Task sequence for the owner to freeze. No Stage 4 implementation
+starts before that.
 
-Stage 4 stays blocked until Stage 3 receives a PASS. The separate S3V-08 device recheck must use
-`.s2check`, never the owner's app.
-
-Useful inputs:
-- the local samples, `ASTROPLAN_METADATA_SAMPLES=C:/Users/zalub/AstroPlanSamples/metadata`
-  (2 DNGs, a JPEG and a HEIC);
-- `research/RG-01_METADATA_FORMATS.md` and `research/S2.R2_HEIF_METADATA.md` (identity
-  evidence);
-- ADR-008 §6, ADR-011 and ADR-017.
+The separate S3V-08 device recheck, if the owner wants it, is its own action through `.s2check`,
+never the owner's installed app.
 
 **Carried open items:**
+- S3V-08: a device recheck of the corrected Stage 3 flow (unverified; separate);
+- TD-072 (S3S-03, deferred by the owner) with its S3F-01 addendum; S3F-02 (a note on TD-071, no
+  Task proposed);
+- TD-070's remainder (per-field snapshot provenance; snapshots saved before S3.V7): Stage 8;
 - W1 (proposed input to RD-05);
 - TD-063 (Stage 8);
 - TD-057 and TD-058;
