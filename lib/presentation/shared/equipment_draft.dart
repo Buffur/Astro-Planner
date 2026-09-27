@@ -54,7 +54,12 @@ class EquipmentFormTexts {
 /// A pre-filled value's origin, shown in the editor while its text is
 /// unchanged (ADR-018 §4, §7).
 class PrefilledSpec {
-  const PrefilledSpec(this.provenance, this.texts, {this.fromSavedRig = false});
+  const PrefilledSpec(
+    this.provenance,
+    this.texts, {
+    this.values = const [],
+    this.fromSavedRig = false,
+  });
 
   final SpecProvenance provenance;
 
@@ -63,6 +68,12 @@ class PrefilledSpec {
 
   /// The texts as pre-filled; any change makes the value the user's own.
   final List<String> texts;
+
+  /// The exact values behind [texts], one per text (null where a text has
+  /// none, such as the empty diameter). While the texts are unchanged these
+  /// are what is saved, so display rounding never alters a saved, verified
+  /// or chosen value (S3.V3).
+  final List<num?> values;
 }
 
 /// The result of [EquipmentDraft.build]: a profile ready to save, or the
@@ -131,6 +142,7 @@ class EquipmentDraft {
       String Function(num) show, {
       num? fallback,
       SpecProvenance? fallbackProvenance,
+      String Function(num)? showSaved,
     }) {
       if (field case ProposedField(
         :final value,
@@ -138,11 +150,19 @@ class EquipmentDraft {
         :final confidence,
       )) {
         final text = show(value);
-        _add(prefilled, spec, SpecProvenance(source, confidence), text);
+        _add(
+          prefilled,
+          spec,
+          SpecProvenance(source, confidence),
+          text,
+          value: value,
+        );
         return text;
       }
       if (fallback != null) {
-        final text = show(fallback);
+        // A saved value is shown in full (only estimates are rounded), and
+        // saved exactly (S3.V3).
+        final text = (showSaved ?? show)(fallback);
         // A legacy rig's value has no provenance; it stays unknown, never
         // the new rig's `user` (S3.V2).
         _add(
@@ -150,6 +170,7 @@ class EquipmentDraft {
           spec,
           fallbackProvenance ?? SpecProvenance.unknown,
           text,
+          value: fallback,
           fromSavedRig: true,
         );
         return text;
@@ -184,6 +205,7 @@ class EquipmentDraft {
         (v) => _estimateText(v, EquipmentCandidate.pixelPitchDecimals),
         fallback: rig?.pixelPitchUm,
         fallbackProvenance: from(EquipmentSpec.pixelPitch),
+        showSaved: (v) => numberText(v.toDouble()),
       ),
       sensorWidth: fill(
         EquipmentSpec.sensorSize,
@@ -215,14 +237,17 @@ class EquipmentDraft {
         (v) => _estimateText(v, EquipmentCandidate.rawSizeDecimals),
         fallback: rig?.averageRawFileSizeMB,
         fallbackProvenance: from(EquipmentSpec.rawFileSize),
+        showSaved: (v) => numberText(v.toDouble()),
       ),
     );
     // The focal ratio's texts include the (empty) diameter.
     if (prefilled[EquipmentSpec.focalRatio] case final p?) {
-      prefilled[EquipmentSpec.focalRatio] = PrefilledSpec(p.provenance, [
-        ...p.texts,
-        '',
-      ], fromSavedRig: p.fromSavedRig);
+      prefilled[EquipmentSpec.focalRatio] = PrefilledSpec(
+        p.provenance,
+        [...p.texts, ''],
+        values: [...p.values, null],
+        fromSavedRig: p.fromSavedRig,
+      );
     }
     return EquipmentDraft(
       initial: texts,
@@ -260,10 +285,17 @@ class EquipmentDraft {
       EquipmentSpec.focalLength => [num1(v)],
       EquipmentSpec.focalRatio => [num1(v), ''],
     };
+    List<num?> values(EquipmentSpec spec, Object v) => switch (spec) {
+      EquipmentSpec.resolution ||
+      EquipmentSpec.sensorSize => [for (final side in v as List) side as num],
+      EquipmentSpec.focalRatio => [v as num, null],
+      _ => [v as num],
+    };
     for (final MapEntry(key: spec, value: choice) in taken.entries) {
       prefilled[spec] = PrefilledSpec(
         choice.provenance,
         texts(spec, choice.value),
+        values: values(spec, choice.value),
       );
     }
     List<String>? of(EquipmentSpec s) => prefilled[s]?.texts;
@@ -301,13 +333,16 @@ class EquipmentDraft {
     EquipmentSpec spec,
     SpecProvenance provenance,
     String text, {
+    required num value,
     bool fromSavedRig = false,
   }) {
     final before = into[spec];
-    into[spec] = PrefilledSpec(provenance, [
-      ...?before?.texts,
-      text,
-    ], fromSavedRig: fromSavedRig);
+    into[spec] = PrefilledSpec(
+      provenance,
+      [...?before?.texts, text],
+      values: [...?before?.values, value],
+      fromSavedRig: fromSavedRig,
+    );
   }
 
   /// The rig being edited; null for a new one.
@@ -372,12 +407,22 @@ class EquipmentDraft {
     EquipmentFormTexts texts,
     TrackingType trackingType,
   ) {
-    final focal = EquipmentFormInput.parse(texts.focalLength)!;
+    // S3.V3: while a pre-filled value's texts are unchanged, its exact value
+    // is saved, never the (possibly rounded) text.
+    num? exact(EquipmentSpec spec, int index) {
+      final p = unchangedPrefill(spec, texts);
+      return p == null || index >= p.values.length ? null : p.values[index];
+    }
+
+    final focal =
+        exact(EquipmentSpec.focalLength, 0)?.toDouble() ??
+        EquipmentFormInput.parse(texts.focalLength)!;
     final diameterText = texts.diameter.trim();
     final aperture = resolveAperture(
       focalLengthMm: focal,
       focalRatio: diameterText.isEmpty
-          ? EquipmentFormInput.parse(texts.focalRatio)
+          ? exact(EquipmentSpec.focalRatio, 0)?.toDouble() ??
+                EquipmentFormInput.parse(texts.focalRatio)
           : null,
       diameterMm: diameterText.isEmpty
           ? null
@@ -394,23 +439,34 @@ class EquipmentDraft {
       name: texts.name.trim(),
       manufacturer: optionalText(texts.manufacturer),
       cameraModel: optionalText(texts.cameraModel),
-      resolutionWidthPx: int.parse(texts.resolutionWidth.trim()),
-      resolutionHeightPx: int.parse(texts.resolutionHeight.trim()),
-      pixelPitchUm: EquipmentFormInput.parse(texts.pixelPitch)!,
-      // An untouched sensor field keeps the stored value exactly, so opening
+      resolutionWidthPx:
+          exact(EquipmentSpec.resolution, 0)?.toInt() ??
+          int.parse(texts.resolutionWidth.trim()),
+      resolutionHeightPx:
+          exact(EquipmentSpec.resolution, 1)?.toInt() ??
+          int.parse(texts.resolutionHeight.trim()),
+      pixelPitchUm:
+          exact(EquipmentSpec.pixelPitch, 0)?.toDouble() ??
+          EquipmentFormInput.parse(texts.pixelPitch)!,
+      // A chosen or copied sensor size is saved exactly (S3.V3); otherwise
+      // an untouched sensor field keeps the stored value exactly, so opening
       // and saving never alters verified specs (TASK 8.5).
       sensorWidthMm:
-          e != null && texts.sensorWidth == _sensorText(e.sensorWidthMm)
-          ? e.sensorWidthMm
-          : EquipmentFormInput.parse(texts.sensorWidth)!,
+          exact(EquipmentSpec.sensorSize, 0)?.toDouble() ??
+          (e != null && texts.sensorWidth == _sensorText(e.sensorWidthMm)
+              ? e.sensorWidthMm
+              : EquipmentFormInput.parse(texts.sensorWidth)!),
       sensorHeightMm:
-          e != null && texts.sensorHeight == _sensorText(e.sensorHeightMm)
-          ? e.sensorHeightMm
-          : EquipmentFormInput.parse(texts.sensorHeight)!,
+          exact(EquipmentSpec.sensorSize, 1)?.toDouble() ??
+          (e != null && texts.sensorHeight == _sensorText(e.sensorHeightMm)
+              ? e.sensorHeightMm
+              : EquipmentFormInput.parse(texts.sensorHeight)!),
       focalLengthMm: focal,
       focalRatio: aperture.focalRatio!,
       apertureDiameterMm: aperture.diameterMm,
-      averageRawFileSizeMB: EquipmentFormInput.parse(texts.rawFileSize),
+      averageRawFileSizeMB:
+          exact(EquipmentSpec.rawFileSize, 0)?.toDouble() ??
+          EquipmentFormInput.parse(texts.rawFileSize),
       rotationDeg: EquipmentFormInput.parse(texts.rotation),
       trackingType: trackingType,
       maxExposureS: EquipmentFormInput.parse(texts.maxExposure),
