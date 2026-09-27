@@ -16,6 +16,7 @@
 > role; post-session results). Nothing else changed.
 > **Updated 2026-09-27 (S4.R3, owner-approved):** §10 notes the RD-05 and RD-04 decisions.
 > **Updated 2026-09-27 (S4.R4, owner-approved):** §10 notes the RG-05, RD-06 and RG-06 decisions.
+> **Updated 2026-09-27 (S4.R5, owner-approved):** §10 notes the RD-07 and RD-14 decisions.
 
 ## 1. Primary product job
 
@@ -263,3 +264,9 @@ for owner decisions (RD). The main ones:
   - the planner answers "does it fit?" first, then follows the decision order;
   - detail is one tap away, with factual summaries.
 - **RG-06:** no Basic/Advanced modes; progressive disclosure (principle 2).
+- **RD-07:**
+  - the Library manages rigs, targets and sites, and never changes the plan;
+  - choosing happens in the planner and on Tonight;
+  - Progress lives in the Logbook.
+- **RD-14:** one name per concept, with Rig, Plan and Logbook (the glossary in
+  `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5).

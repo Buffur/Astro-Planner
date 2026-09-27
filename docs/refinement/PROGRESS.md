@@ -3,11 +3,32 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S4.R4 done; RG-05, RD-06 and RG-06 decided). Stage 4 in progress;
-> Stage 3 closed (`126d97f`).
-> **Next: S4.R5** (the Library's role and the vocabulary; RD-07, RD-14; documentation only).
+> **Last updated:** 2026-09-27 (S4.R5 done; RD-07 and RD-14 decided; every Stage 4 gate decided).
+> Stage 4 in progress; Stage 3 closed (`126d97f`).
+> **Next: S4.D** (ADR-019 and the wireframe addendum; documentation only).
 
 ## Current state
+
+**RD-07 and RD-14 decided, 2026-09-27 (S4.R5 done). Every Stage 4 gate is now decided.** Research:
+[`research/S4.R5_LIBRARY_AND_VOCABULARY.md`](research/S4.R5_LIBRARY_AND_VOCABULARY.md)
+(`160ee37`). The owner chose the recommended option on each question (DECISIONS E.1, "RD-07 and
+RD-14 decided"):
+- **H1:**
+  - the Library manages rigs, targets and sites, and a tap never changes the plan (TD-053, when
+    built);
+  - choosing happens in the planner, Tonight's context line and the first run;
+  - "Plan this target";
+  - Progress moves to the Logbook.
+- **H2:** Rig.
+- **H3:** Plan + Logbook.
+- **H4:** the glossary as proposed:
+  - the states and results;
+  - "Dark" with its limit;
+  - the budget: Integration · Imaging time · Time needed · Total time;
+  - the verdict headline;
+  - "Export as file";
+  - "Name (optional)".
+- Next: S4.D records all of it in ADR-019, with a wireframe addendum. No code changed.
 
 **RG-05, RD-06 and RG-06 decided, 2026-09-27 (S4.R4 done).** Research:
 [`research/RG-05_06_TONIGHT_AND_PLANNER.md`](research/RG-05_06_TONIGHT_AND_PLANNER.md)
@@ -231,7 +252,7 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S4.R5** — the Library's role and the vocabulary (RD-07, RD-14; `POST_ROADMAP_PLAN.md`, "S4.R5"). S4.R1–S4.R4 are done; RG-04, RG-05, RG-06, RD-04, RD-05 and RD-06 are decided |
+| Next approved Task | **S4.D** — ADR-019 and the wireframe addendum (`POST_ROADMAP_PLAN.md`, "S4.D"). S4.R1–S4.R5 are done; every Stage 4 gate (RG-04, RG-05, RG-06, RD-04, RD-05, RD-06, RD-07, RD-14) is decided |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -374,13 +395,17 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 
 | 4 | S4.R4 — Tonight and planner research (documentation only) | 2026-09-27 | `8578ab8` | `research/RG-05_06_TONIGHT_AND_PLANNER.md`: current structure, measurements, binding rules, a visible vs one-tap-away rule, options T1–T2, D-a–D-c, P-0–P-2, M0–M2, low-fi wireframes |
 
-| 4 | RG-05, RD-06 and RG-06 decided (the owner's F1–F4; documentation only) | 2026-09-27 | The RG-05/RD-06/RG-06 decision commit\*\*\* | T1, D-b, P-1 (amends ADR-015 §2), M0 (ADR-009 §2's "own line" within the budget details); no modes (E.1). Recorded in the research's §11, `PRODUCT_DIRECTION.md` §10 and the registers |
+| 4 | RG-05, RD-06 and RG-06 decided (the owner's F1–F4; documentation only) | 2026-09-27 | `0506b04` | T1, D-b, P-1 (amends ADR-015 §2), M0 (ADR-009 §2's "own line" within the budget details); no modes (E.1). Recorded in the research's §11, `PRODUCT_DIRECTION.md` §10 and the registers |
+
+| 4 | S4.R5 — Library and vocabulary research (documentation only) | 2026-09-27 | `160ee37` | `research/S4.R5_LIBRARY_AND_VOCABULARY.md`: the Library's current behaviour (TD-053), a string inventory, options LB1–LB3 and PR1–PR2, naming principles, a glossary |
+
+| 4 | RD-07 and RD-14 decided (the owner's H1–H4; documentation only) | 2026-09-27 | The RD-07/RD-14 decision commit\*\*\* | LB1 + PR2; Rig; Plan + Logbook; the glossary as proposed (E.1). Recorded in the research's §9, `PRODUCT_DIRECTION.md` §10 and the RD register. Every Stage 4 gate is decided |
 
 \* A file cannot contain its own commit hash; S3.V8's (`92ebf2a`) was recorded by the Stage 3
 final sign-off.
 \*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
-\*\*\* Likewise for the RG-05/RD-06/RG-06 decision. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/research/RG-05_06_TONIGHT_AND_PLANNER.md`; the next
+\*\*\* Likewise for the RD-07/RD-14 decision. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/research/S4.R5_LIBRARY_AND_VOCABULARY.md`; the next
 Task records it here.
 
 ## Relevant commits
@@ -445,14 +470,14 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-04 | New-draft defaults and the example plan | 4 | **Decided** 2026-09-27 (S4.R3; E.1): nothing preselected on the first run; New keeps the site and rig; an empty plan with "Start from the example plan" |
 | RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | **Decided** 2026-09-27 (S4.R3; E.1): L1 (Draft internal; Save explicit), Y2, U1. The S1.6 interim stands until Stage 6 builds U1 |
 | RD-06 | The planner's section order; integrity text one tap away | 4 | **Decided** 2026-09-27 (S4.R4; E.1): answer first, decision order; detail one tap away |
-| RD-07 | The Library's role and pickers; where Progress lives | 4 | Open; **S4.R5** (frozen) |
+| RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
 | RD-09 | Destructive interactions: confirm or undo | 5 | Open |
 | RD-10 | Ordering Tonight's candidates without a score | 6 | Open |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 | Open |
 | RD-12 | The resume prompt's Finish | 8 | Open |
 | RD-13 | Provenance of an accepted estimate | 8 | Open |
-| RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | Open; **S4.R5** (frozen) |
+| RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
@@ -487,8 +512,7 @@ These block a release, not refinement.
 - **Stage 3 (closed by the final sign-off PASS, 2026-09-27):** nothing blocks. Carried: S3V-08
   (device recheck, `.s2check` only), TD-072 with S3F-01, S3F-02, TD-070's Stage 8 remainder.
   Equipment identity for dedicated astro cameras still needs a FITS sample (S2.6).
-- **Stage 4:** S4.R1–S4.R4 are done (RG-04, RG-05, RG-06, RD-04, RD-05, RD-06 decided); nothing
-  blocks S4.R5. Each later step
+- **Stage 4:** S4.R1–S4.R5 are done, and every Stage 4 gate is decided; nothing blocks S4.D. Each later step
   waits for the owner's decision on the step before (E.1). S4.E (owner-run tests) is optional and
   blocks nothing.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
@@ -657,26 +681,24 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S4.R5 — the Library's role and the vocabulary** (`POST_ROADMAP_PLAN.md`, "S4.R5"; RD-07,
-RD-14). Research, documentation only.
+**S4.D — ADR-019 and the wireframe addendum** (`POST_ROADMAP_PLAN.md`, "S4.D"). Decision
+record, documentation only.
 
-RD-07 questions:
-- should the Library's rig and target lists select for the plan (TD-053, UX-14)?
-- is target selection kept there?
-- where does Progress live (08 §19; with RG-04, Progress comes from recorded results)?
-- where does "Add from a photo" sit?
+- **ADR-019, "Product flow and information architecture":**
+  - it records the decided gates (RG-04, RG-05, RG-06, RD-04, RD-05, RD-06, RD-07, RD-14) as one
+    design;
+  - it amends:
+    - ADR-014 §3 (results without a run; which session is resumed as current);
+    - ADR-015 §2 (the planner's order), its route map (the Night & Moon and Weather details) and §7
+      (the Library's manage mode);
+    - ADR-016 (the tracker is optional; post-session counts as events);
+    - ADR-009 §2's "own line" (within the budget details).
+- **`docs/IA_WIREFRAMES_ADDENDUM.md`:** low-fidelity Tonight, planner, detail screens, the Logbook,
+  the result form and the Library. `IA_WIREFRAMES.md` stays as it is.
+- **Also:** record UX-04 and UX-11 as implementation deviations until they are built, and update
+  S4.R1's question matrix with each answer.
 
-RD-14 questions: one name per concept, with a glossary covering UX-18, 08 and the words the
-decisions so far introduced:
-- rig or equipment; Sessions or Logbook;
-- "Not saved / Saved / Saved · changed";
-- the dark-window names; "Fit tonight";
-- "Track live (optional)", "Record result", "Completed as planned / Partly / Not done";
-- "New plan" or "New session";
-- how optional session names are worded.
-
-Output `research/S4.R5_LIBRARY_AND_VOCABULARY.md`; the owner then decides. A fresh chat is
-preferred (§9.1).
+The owner accepts the ADR. A fresh chat is preferred (§9.1).
 
 The owner may run S4.E at any time; it blocks nothing.
 

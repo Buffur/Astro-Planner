@@ -27,6 +27,8 @@
 > **Updated 2026-09-27 (S4.R2):** RG-04 decided (E.1); S4.R1 and S4.R2 done.
 > **Updated 2026-09-27 (S4.R3):** RD-05 and RD-04 decided (E.1); S4.R3 done.
 > **Updated 2026-09-27 (S4.R4):** RG-05, RD-06 and RG-06 decided (E.1); S4.R4 done.
+> **Updated 2026-09-27 (S4.R5):** RD-07 and RD-14 decided (E.1); S4.R5 done. Every Stage 4 gate
+> is decided.
 
 ## Contents
 
@@ -1678,8 +1680,8 @@ chat as the Stage 3 final sign-off, because the owner asked to move on there, no
 | S4.R2 | RG-04: Execution's role and how actuals are recorded | Research (docs) | M | S4.R1 | RG-04 | **Done 2026-09-27**; RG-04 decided (B + G2; E.1) |
 | S4.R3 | Session lifecycle, state display, defaults and the example plan | Research (docs) | M | S4.R2's decision | RD-05, RD-04 | **Done 2026-09-27**; RD-05 and RD-04 decided (L1, Y2, no preselection, U1; E.1) |
 | S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | **Done 2026-09-27**; RG-05, RD-06 and RG-06 decided (T1, D-b, P-1, M0; E.1) |
-| S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | Research done 2026-09-27 (`research/S4.R5_LIBRARY_AND_VOCABULARY.md`); **owner decision pending** |
-| S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | Frozen |
+| S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | **Done 2026-09-27**; RD-07 and RD-14 decided (LB1 + PR2; Rig, Plan, Logbook; the glossary; E.1) |
+| S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | Frozen; **next** |
 | S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen |
 | S4.E | Owner-run quick tests | Owner evidence | S | S4.R1's script | feeds S4.R4 | Optional, non-blocking |
 
@@ -2127,14 +2129,14 @@ any implementation Task is created.
 | RD-04 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): nothing preselected on the first run; New keeps the site and rig and asks for the target; an empty capture plan with "Start from the example plan".** New-draft defaults: should a new draft pre-select M42 and the first rig, and how are defaults and the "Example plan" labelled or offered? 08 §14 asks whether the example plan adds value | ENG-15, SCI-12, UX-24; TASK 4.4 | 4 | Stage 6 |
 | RD-05 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): L1 (Draft internal; Not saved / Saved / Saved · changed; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), U1 (Save · Discard · Cancel; Discard deletes; V3 and W1 count as unsaved).** Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4. **Input from Stage 1 validation (V3, owner, 2026-09-25):** a site change on a saved plan turns the stored session into a draft ("Planned, unsaved changes", still listed) but does not count as unsaved while the app runs, so New does not ask; after a restart it does. Decide whether a site change edits a saved plan | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
-| RD-07 | The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
+| RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
 | RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan; Stage 7 |
 | RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | Stages 6–9 |
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5 | 6 | — |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10 | 6 or 9 | — |
 | RD-12 | Should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish? | RT-10, UX-26; ADR-016 §11 | 8 | — |
 | RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? | SCI-07 | 8 | — |
-| RD-14 | Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
+| RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | **RESOLVED (owner, 2026-09-26, S3.D; ADR-018 §7):** visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. Earlier: **resolved for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
 | RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |

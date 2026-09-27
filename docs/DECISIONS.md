@@ -90,6 +90,7 @@
 > **TASK 13.1 (2026-09-24, documentation only, no code changed):** ADR-016 (execution model under Android constraints) accepted in Part F of DECISIONS with a state diagram and kill, reboot, clock and stale scenarios; PD-20 resolved. Owner decisions: opt-in keep-screen-on (a wakelock plugin approved for 13.3); one session in progress at a time; a session still in progress after its night ends gets a resume prompt and is never auto-finished; execution events in a new append-only `session_events` table (schema v17, TASK 13.2). Progress is derived from persisted UTC timestamps; estimated frames = running time ÷ (exposure + per-frame overhead), shown as an estimate and written only when the user confirms it; foreground only; no notifications, camera control, ASCOM or INDI.
 > **Stage 1 planning (2026-09-25, documentation only, no code changed, verified at `652ad80`):** RD-03 resolved, the RD-05 interim safeguard decided and RD-17 included in Stage 1 (E.1, "Stage 1 planning decisions"). No ADR changed.
 > **Stage 1 closure (2026-09-26, documentation only):** the owner closed Stage 1 after a failed repeat validation (a waiver); TD-063 moved to Stage 8 (E.1, "Stage 1 closed by the owner"). No ADR changed.
+> **RD-07 and RD-14 decided (2026-09-27, S4.R5, documentation only):** the Library manages and never changes the plan; "Plan this target"; Progress moves to the Logbook; Rig, Plan and Logbook, and the glossary as proposed (E.1, "RD-07 and RD-14 decided"). No code changed.
 > **RG-05, RD-06 and RG-06 decided (2026-09-27, S4.R4, documentation only):** Tonight plan-first with a site · night context line (T1); Night & Moon and Weather detail screens, no new tab (D-b); the planner answer-first in decision order (P-1, amends ADR-015 §2); detail one tap away with factual summaries, no modes (M0; ADR-009 §2's "own line" within the budget details) (E.1, "RG-05, RD-06 and RG-06 decided"). ADR text changes are left to ADR-019; no code changed.
 > **RD-05 and RD-04 decided (2026-09-27, S4.R3, documentation only):** L1 (Draft internal; "Not saved / Saved / Saved · changed"; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), no preselection with an empty capture plan and "Start from the example plan", U1 (Save · Discard · Cancel) (E.1, "RD-05 and RD-04 decided"). No ADR changed yet; no code changed.
 > **RG-04 decided (2026-09-27, S4.R2, documentation only):** Execution's role is B, the Logbook first and the tracker optional; the post-session result is G2 (Completed as planned, Partly with numbers, Not done → abandoned with a reason); a quiet "how did it go?" line on Tonight (E.1, "RG-04 decided"). ADR-014/016 amendments are left to ADR-019 (S4.D); no ADR changed yet; no code changed.
@@ -1192,6 +1193,54 @@ from a stale match.
   - typography and the collapsed forms' look: Stage 5;
   - the map link: Stage 7;
   - "Fit tonight"'s wording: RD-14 (S4.R5).
+- No code changed.
+
+### RD-07 and RD-14 decided: the Library's role and the vocabulary (S4.R5, 2026-09-27)
+
+- **Context:** the research is `refinement/research/S4.R5_LIBRARY_AND_VOCABULARY.md` (committed
+  `160ee37`). Today the Library's rig and target lists are the planner's pickers: a tap changes the
+  current plan (TD-053).
+- **Decided by:** the project owner, in chat, choosing the recommended option on each question.
+- **H1 — the Library (RD-07): LB1 + PR2.**
+  - The Library manages the reusable things (rigs, targets, sites). A tap opens or edits and
+    **never changes the plan**.
+  - A rig, target or site is chosen for the plan only from the planner, Tonight's context line and
+    the first run (the `/select/…` pickers).
+  - A target has an explicit **"Plan this target"** action. It starts a new plan with it, and RD-05's
+    guard applies.
+  - **Progress moves to the Logbook**, as "Progress by target". It stays on an entry's detail and on
+    a target's page.
+  - "Add from a photo" stays on the rig list, in both the Library and the picker.
+  - This resolves TD-053 when implemented, and amends ADR-015 §7.
+- **H2 (RD-14):** **Rig** (a camera + lens or telescope). "Equipment" and "Equipment profile" are
+  retired from the UI.
+- **H3 (RD-14):**
+  - the thing the user makes is a **Plan** ("New plan", "Save plan", "Your plan", "Copy to another
+    night");
+  - the tab is the **Logbook**: saved plans before their night, results after it;
+  - "Session planner", "Save Session" and "New Session" are retired. "Session" stays a code term.
+- **H4 (RD-14): the glossary is accepted as proposed** (the research's §5):
+  - plan states: Not saved · Saved · Saved · changed;
+  - result states: Tracking · Completed · Partly · Not done · Old log;
+  - actions: Record result / Edit result; Track live (optional);
+  - "Dark", with its limit beside the times. The standard civil, nautical and astronomical twilight
+    names appear on the Night & Moon detail only. "True Night Window" and "Astro Dusk/Dawn" are
+    retired;
+  - the budget: Integration · Imaging time · Time needed · Total time. The calibration and setup
+    lines stay inside Budget details. "Acquisition", "Window load" and "Session budget" are
+    retired;
+  - the verdict headline: Fits · Tight · Doesn't fit · No window · Needs a target / a block,
+    followed by "tonight" or the date, as in "Fits: 2 h 05 min needed of 4 h 20 min usable";
+  - "Export as file";
+  - "Name (optional)" for the Stage 8 name field.
+- **Kept as they are:** Site, Target, Library, Progress, Imaging window, Darkness limit, Relative
+  stacking gain (√N vs one frame) (SI-003), and Red field mode.
+- **Consequences:**
+  - ADR-019 (S4.D) records the ADR-015 §7 amendment;
+  - Stage 5 puts the vocabulary in one shared place, with a test that keeps retired terms out of
+    `lib/presentation`;
+  - Stages 6, 8 and 9 apply it with their screens;
+  - the core-loop E2E test is updated with each renamed label (trap 19).
 - No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
