@@ -947,6 +947,11 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 
 ### Stage 3 validation failed: corrective Tasks (2026-09-26)
 
+*(Added 2026-09-27.)* After S3.V5, re-running the archived probes found P5 still failing: S3V-01
+was open at the ViewModel level. The owner approved **S3.V6** in chat ("let's move on to the next
+task", in reply to the proposal) to close it the same way: no draft of a saved rig can be built
+from a stale match.
+
 - **Context:** the independent Stage 3 validation at `387e54b` failed (`refinement/STAGE_3_VALIDATION.md`,
   committed `7f790df` as written): S3V-01 to S3V-06 are blocking.
 - **Decided by:** the project owner, in chat, 2026-09-26:

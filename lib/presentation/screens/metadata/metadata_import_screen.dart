@@ -170,18 +170,17 @@ class _EquipmentCard extends StatelessWidget {
   /// opened (the review then shows the current match).
   Future<void> _openCurrent(
     BuildContext context,
-    int rigId,
-    EquipmentDraft Function(RigMatch current) draftFor,
+    Future<EquipmentDraft?> Function() currentDraft,
   ) async {
-    RigMatch? current;
+    EquipmentDraft? draft;
     final read = await runWithFeedback(
       context,
       'check the saved rigs',
-      () async => current = await vm.currentMatchFor(rigId),
+      () async => draft = await currentDraft(),
     );
     if (!read || !context.mounted) return;
-    final rig = current;
-    if (rig == null) {
+    final current = draft;
+    if (current == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -192,7 +191,7 @@ class _EquipmentCard extends StatelessWidget {
       );
       return;
     }
-    await _edit(context, draftFor(rig));
+    await _edit(context, current);
   }
 
   Future<void> _edit(BuildContext context, EquipmentDraft draft) async {
@@ -266,7 +265,7 @@ class _EquipmentCard extends StatelessWidget {
                   OutlinedButton(
                     key: Key('import.open.${r.rig.id}'),
                     onPressed: () =>
-                        _openCurrent(context, r.rig.id, vm.rigDraft),
+                        _openCurrent(context, () => vm.rigDraft(r.rig.id)),
                     child: Text('Open "${r.rig.name}"'),
                   ),
                 if (outcome == MatchKind.sameCameraOtherOptics)
@@ -274,8 +273,7 @@ class _EquipmentCard extends StatelessWidget {
                     key: Key('import.newFrom.${r.rig.id}'),
                     onPressed: () => _openCurrent(
                       context,
-                      r.rig.id,
-                      (current) => vm.newRigDraft(cameraFrom: current.rig),
+                      () => vm.newRigDraftWithCameraOf(r.rig.id),
                     ),
                     child: Text(
                       'New rig with the camera specs of "${r.rig.name}"',

@@ -101,7 +101,8 @@ class MetadataImportViewModel extends ChangeNotifier {
 
   /// The match for rig [rigId] against the saved rigs as they are now, or
   /// null when it no longer relates to the file (changed or deleted).
-  Future<RigMatch?> currentMatchFor(int rigId) async {
+  /// Private since S3.V6: callers get drafts, never a match to build from.
+  Future<RigMatch?> _currentMatchFor(int rigId) async {
     await refreshMatch();
     return _match?.rigs.where((r) => r.rig.id == rigId).firstOrNull;
   }
@@ -131,20 +132,38 @@ class MetadataImportViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// A new rig from the file, optionally with a saved rig's camera specs
-  /// (ADR-018 §6, "same camera, other optics").
-  EquipmentDraft newRigDraft({EquipmentProfile? cameraFrom}) =>
-      EquipmentDraft.fromCandidate(_candidate!, cameraFrom: cameraFrom);
+  /// A new rig from the file alone. It reads no saved rig, so it cannot be
+  /// stale.
+  EquipmentDraft newRigDraft() => EquipmentDraft.fromCandidate(_candidate!);
 
-  /// The matched rig for editing, with the file's values the user chose,
-  /// and the file's value for any spec the rig does not know (the RAW size,
-  /// ADR-018 §6): shown with its origin, never replacing a saved value.
-  EquipmentDraft rigDraft(RigMatch m) => EquipmentDraft.forRig(m.rig, {
-    for (final c in m.conflicts)
-      if (takesImported(m.rig, c.spec))
-        c.spec: (value: c.imported, provenance: c.importedProvenance),
-    for (final spec in m.fillable) spec: ?_fillValue(spec),
-  });
+  /// A new rig from the file with saved rig [rigId]'s camera specs (ADR-018
+  /// §6, "same camera, other optics"), as they are now: the saved rigs are
+  /// read again first (S3.V6). Null when that rig was deleted or no longer
+  /// matches the file.
+  Future<EquipmentDraft?> newRigDraftWithCameraOf(int rigId) async {
+    final m = await _currentMatchFor(rigId);
+    return m == null
+        ? null
+        : EquipmentDraft.fromCandidate(_candidate!, cameraFrom: m.rig);
+  }
+
+  /// Saved rig [rigId] for editing, as it is now (S3.V6: the saved rigs are
+  /// read again first, so no caller can get a draft that reverts a newer
+  /// edit). It carries the file's values the user chose, still valid
+  /// against the current values (S3.V1), and the file's value for any spec
+  /// the rig does not know (the RAW size, ADR-018 §6), shown with its
+  /// origin and never replacing a saved value. Null when the rig was deleted
+  /// or no longer matches the file.
+  Future<EquipmentDraft?> rigDraft(int rigId) async {
+    final m = await _currentMatchFor(rigId);
+    if (m == null) return null;
+    return EquipmentDraft.forRig(m.rig, {
+      for (final c in m.conflicts)
+        if (takesImported(m.rig, c.spec))
+          c.spec: (value: c.imported, provenance: c.importedProvenance),
+      for (final spec in m.fillable) spec: ?_fillValue(spec),
+    });
+  }
 
   ({Object value, SpecProvenance provenance})? _fillValue(EquipmentSpec s) =>
       switch ((s, _candidate?.averageRawFileSizeMB)) {

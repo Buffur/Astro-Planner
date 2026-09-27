@@ -688,6 +688,7 @@ see DATA_MODEL.md B2/B8.)
 - **Roadmap relevance:** Phase 14 (ahead of phase).
 
 ## F-45 — Metadata import (EXIF / FITS)
+- **S3.V6 (2026-09-27; S3V-01):** a draft of a saved rig is only ever built from the rigs as they are now, at the ViewModel as well as on the screen, so no path can revert a newer edit. The validation's probes P1–P10 all pass (P5 restated against the new API).
 - **S3.V5 (2026-09-27; S3V-06, S3V-07):** S3.6's acceptance is now tested through the real screens, routes and SQLite, counting rows in all three equipment tables. The cases: Cancel at every step, a single write on Save, no duplicate, a kept difference and a surviving verified value, an explicit choice, another camera module, and re-entry. **Current visibility: "Add from a photo" on the equipment screen, in every build** (since S3.7); the debug-only wording below is marked historical.
 - **S3.V4 (2026-09-27; S3V-05):** an image size over 65,535 px per side is now "Unreadable value" instead of a known size, in DNG, JPEG and HEIC.
 - **S3.V3 (2026-09-27; S3V-03, S3V-04):** numbers stay exact. "Use the file's sensor size" now saves the file's value even when it displays like the saved one. A new rig that takes a saved rig's camera specs keeps them exactly (9.894 mm stays 9.894, still verified). Only estimates are rounded.
