@@ -30,6 +30,8 @@
 > **Updated 2026-09-27 (S4.R5):** RD-07 and RD-14 decided (E.1); S4.R5 done. Every Stage 4 gate
 > is decided.
 > **Updated 2026-09-27 (S4.D):** ADR-019 accepted; `docs/IA_WIREFRAMES_ADDENDUM.md` added; S4.D done.
+> **Updated 2026-09-27 (S4.T):** provisional Tasks from ADR-019 added to Stages 5–9 (not frozen);
+> §6.2 rows updated. Every Stage 4 Task is done; Stage 4 awaits its fresh-session validation.
 
 ## Contents
 
@@ -1683,7 +1685,7 @@ chat as the Stage 3 final sign-off, because the owner asked to move on there, no
 | S4.R4 | Tonight, the planner's structure, and disclosure | Research (docs) | M–L (one cohesive question) | S4.R2 and S4.R3 decisions; S4.E if run | RG-05, RD-06, RG-06 | **Done 2026-09-27**; RG-05, RD-06 and RG-06 decided (T1, D-b, P-1, M0; E.1) |
 | S4.R5 | The Library's role and the vocabulary | Research (docs) | S | S4.R2–S4.R4 decisions | RD-07, RD-14 | **Done 2026-09-27**; RD-07 and RD-14 decided (LB1 + PR2; Rig, Plan, Logbook; the glossary; E.1) |
 | S4.D | ADR-019 and the wireframe addendum | Decision (docs) | M | S4.R1–S4.R5 | records all | **Done 2026-09-27**; ADR-019 accepted; `docs/IA_WIREFRAMES_ADDENDUM.md` |
-| S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | Frozen; **next** |
+| S4.T | The decisions as provisional Tasks for Stages 5, 6, 8 and 9 | Planning (docs) | M | S4.D | — | **Done 2026-09-27** (provisional Tasks P5.x–P9.x in each Stage's section) |
 | S4.E | Owner-run quick tests | Owner evidence | S | S4.R1's script | feeds S4.R4 | Optional, non-blocking |
 
 Then a fresh-session Stage 4 validation. It checks the Stage exit: every 08 flow question has an
@@ -1867,6 +1869,22 @@ answer or an owner deferral.
 - **Exit:** the tokens and components exist and are tested (style rules, accessibility, red
   mode) and documented; Stage 5 validation passes.
 
+#### Stage 5 — provisional Tasks from ADR-019 (S4.T, 2026-09-27)
+
+*Provisional (S4.T, 2026-09-27). These come from ADR-019; they are not frozen. This Stage's own
+planning re-verifies them against the code (§9.7), then confirms, changes, merges or drops each, and
+gives the frozen Tasks their S-IDs. The P-IDs are placeholders and are never reused as S-IDs. Each
+Task adopts the RD-14 glossary for the screens it touches.*
+
+| P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
+| --- | --- | --- | --- | --- | --- |
+| P5.1 | **The shared vocabulary**, in one place like `QuantityText`, with a test against retired terms | §10 | — | The glossary's user-facing words are defined once. A test fails on a retired term ("Equipment profile", "Session planner", "Draft", "Legacy", "True Night Window", "Astro Dusk/Dawn", "Window load", "Acquisition", "Session budget") in `lib/presentation`, against an explicit baseline of today's occurrences that later Stages shrink to empty. Code identifiers are exempt | S |
+| P5.2 | **A collapsible section with a factual summary**, its state remembered | §7 | — | The summary states facts, never verdicts. Open or closed is persisted per section key (a display preference, like `ThemeViewModel`). 48 dp; 200 % text; light, dark and field themes; semantics announce the state | S–M |
+| P5.3 | **The context line**, site ▾ · night ▾ | §5, §6 | — | One widget for Tonight and the planner. It opens the site picker and the night picker. It shows the site zone rule. Accessible at 200 %; red mode | S |
+| P5.4 | **The status block and the state label** | §3, §6 | P5.1 | The verdict headline (Fits · Tight · Doesn't fit · No window · Needs a target / a block) with its reason and key numbers. Explicit status tokens (UX-16, beyond S1.9). The plan-state label (Not saved · Saved · Saved · changed; Tracking · Completed · Partly · Not done · Old log). Field mode red only | S–M |
+| P5.5 | **The detail-screen template** | §9 | P5.2 | A title with the context (night, site), a summary block, then the full content. The zone caption once. It is added to the accessibility sweep's pattern | S |
+| P5.6 | **Confirmation and feedback patterns** | §3 | RD-09 (decided in this Stage) | The three-way prompt (Save · Discard · Cancel). A short message naming what happened after New, Copy, Open and Save. Confirm or undo for destructive actions, per RD-09. Red mode, no white flash | S–M |
+
 ### Stage 6 — Core Planner Redesign
 
 - **Purpose:** apply the approved IA and design system to the main planning experience.
@@ -1895,11 +1913,35 @@ answer or an owner deferral.
     to it;
   - the E2E keys (trap 19) and the accessibility-sweep routes (trap 17);
   - tokens (trap 12);
-  - ADR-015 §2 (sections and order) holds unless RD-06 amends it.
+  - ADR-015 §2 (sections and order) holds unless RD-06 amends it. *(RD-06 decided 2026-09-27:
+    ADR-019 §6 amends it; see the provisional Tasks below. S4.T.)*
 - **Out of scope:** new data sources (Stage 7); execution and the Logbook (Stage 8); Settings,
   Library and About (Stage 9).
 - **Exit:** each planning screen leads with its answer; every value that was reachable before
   still is; widget, accessibility and E2E tests are updated; Stage 6 validation passes.
+
+#### Stage 6 — provisional Tasks from ADR-019 (S4.T, 2026-09-27)
+
+*Provisional (S4.T, 2026-09-27). These come from ADR-019; they are not frozen. This Stage's own
+planning re-verifies them against the code (§9.7), then confirms, changes, merges or drops each, and
+gives the frozen Tasks their S-IDs. The P-IDs are placeholders and are never reused as S-IDs. Each
+Task adopts the RD-14 glossary for the screens it touches.*
+
+| P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
+| --- | --- | --- | --- | --- | --- |
+| P6.0 | **Split `SessionPlanViewModel`** before adding to it (ENG-16; trap 11's cap) | — | — | A behaviour-preserving split; every existing test passes unchanged; each ViewModel within the limit | S–M |
+| P6.1 | **The plan's lifecycle in the planner** | §3 | P6.0, P5.4, P5.6 | The app bar shows target · night · state (UX-04; DEV-P9's first half). ⋮ holds New plan, Copy to another night, and **Track live (optional)**, which moves Start there so results stay reachable until Stage 8. New plan keeps the site and rig and asks for the target. Each action confirms what happened. Save · Discard · Cancel: Discard deletes; an untouched replaced draft is deleted; a site change and a copy count as unsaved (W1, V3). TD-058 fixed (New, Copy and Open inside the autosave chain). UI-driven tests for each guard path | M |
+| P6.2 | **Defaults and the first run** (RD-04) | §3 | P6.1 | Nothing preselected on a fresh install. The seeded rig is labelled as an example. The capture plan starts empty, with "Start from the example plan" (TASK 4.4's badge rule kept). The first-run page is honest (UX-24). "Needs a target / a block" is neutral. The tests that relied on the M42 default are updated deliberately, not weakened | S–M |
+| P6.3 | **The planner's structure** | §6 | P5.3, P5.4, P6.1 | Answer-first order: status → context → target and windows → capture plan → conditions summary → rig summary → Save plan (UX-01, UX-02; ADR-015 §2 as amended). Start leaves the bottom bar. Every value that was reachable before still is. The sweep and E2E are updated | M–L |
+| P6.4 | **Disclosure in the planner** | §7 | P5.2, P6.3 | Budget details (each ADR-009 line on its own line), the √N help, the assumptions, the rig's rows and sky-darkness detail sit behind factual summaries. The verdict, key numbers, weather age, attribution and unknowns stay visible. Zone captions once per section (the zone rule kept). No modes | M |
+| P6.5 | **The Night & Moon and Weather detail screens** | §5, §9 | P5.5 | Two root-navigator routes (`AppRouter` constants), opened from Tonight's rows and the planner's summaries (UX-10). The Weather detail keeps ADR-012: age, stale label, attribution, no score or good/bad colour. The standard twilight names appear only there. Both are in the sweep | M |
+| P6.6 | **Tonight, plan first** | §5 | P5.3, P5.4, P6.5 | The context line with a night picker that changes the current plan's night (UX-11; DEV-P9's second half). Then the run card, "Your plan", the rows to the details, and secondary actions. No Start on the card, and no failing Start while a run is in progress (UX-13). A slot for Stage 8's "how did it go?" line | M |
+| P6.7 | **The night key at the rollover** (TD-057) | §3 (Y2 depends on correct night keys) | — | The current draft's night key is written at mean solar noon. An open candidates list re-evaluates on a new night | S |
+| — | **Acceptance evidence for Stage 6** | §14 | P6.3, P6.6 | A five-second test of Tonight's and the planner's first screens (S4.E's script), recorded as evidence, because S4.E was not run in Stage 4 | — |
+
+These sit alongside, not inside: the chart redesign, the weather timeline and icons, a √N graph,
+sky darkness (TD-051, TD-054), the candidates' order (RD-10) and the capture plan's visuals (RD-09).
+They stay Stage 6 candidates from its table above.
 
 ### Stage 7 — Data Entry & Automation
 
@@ -1924,6 +1966,11 @@ answer or an owner deferral.
   - a new external service needs the owner's approval.
 - **Exit:** each area is implemented after its gate, or explicitly deferred by the owner;
   Stage 7 validation passes.
+
+#### Stage 7 — from ADR-019 (S4.T, 2026-09-27)
+
+No provisional Task comes from ADR-019. RD-08 (tracking per rig or per plan) is still decided before
+Stage 6's capture-plan work. The site and rig forms adopt the glossary when this Stage touches them.
 
 ### Stage 8 — Sessions / Execution / Actuals / Logbook
 
@@ -1959,6 +2006,22 @@ answer or an owner deferral.
 - **Exit:** the Stage 4 decisions are implemented with the data preserved; tests pass;
   Stage 8 validation passes.
 
+#### Stage 8 — provisional Tasks from ADR-019 (S4.T, 2026-09-27)
+
+*Provisional (S4.T, 2026-09-27). These come from ADR-019; they are not frozen. This Stage's own
+planning re-verifies them against the code (§9.7), then confirms, changes, merges or drops each, and
+gives the frozen Tasks their S-IDs. The P-IDs are placeholders and are never reused as S-IDs. Each
+Task adopts the RD-14 glossary for the screens it touches.*
+
+| P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
+| --- | --- | --- | --- | --- | --- |
+| P8.1 | **Results without a run: domain and data** | §3, §4 | — | ADR-014 §3 as amended: planned → completed ("Completed as planned" or "Partly") and draft/planned → abandoned ("Not done", with a reason). Counts are written as events, so the counters equal the replay (trap 14; ADR-016 §4); the event kind is chosen here. Where "Not done"'s reason lives (column or event; any schema change follows the migration workflow). "Reported as planned" provenance (CALC-37 and CALC-38 notes; RD-13 decided alongside). The export is checked (`manifest_version` bumped only if incompatible). Tests: replay equals counters; old sessions unchanged | M–L |
+| P8.2 | **The result form** | §4 | P8.1, P5.6 | `/session/:id/results` becomes "How did it go?": Completed as planned (one tap) · Partly (numbers per light block, pre-filled, not ±1; UX-25) · Not done (reason); optional notes and conditions. The tracker's Finish opens it pre-filled from the confirmed counts. RD-12 decided (the resume prompt's Finish; UX-26). The core-loop E2E test moves to Save → result (trap 19); the live path is tested on its own | M |
+| P8.3 | **The next day: the resume rule and Tonight's line** | §3, §4 | P8.1, P6.6, P6.7 | A planned session whose night has passed is not resumed as current; the planner continues on a copy for tonight, not saved. A never-saved draft still rolls forward (TASK 11.4). Tonight's "Last night: …. How did it go?" line opens the result form. No notifications | M |
+| P8.4 | **The live mode as an option** | §4 | P6.1 | "Track live (optional)" on a saved plan's entry (and the planner's ⋮, from P6.1). No failing Start (UX-13). TD-063 fixed (opening uses the session's current stored state). The resume prompt, one-run rule and keep-screen-on unchanged | S–M |
+| P8.5 | **The Logbook** | §2, §8, §10 | P8.2 | The tab labelled Logbook. Upcoming and Past groups. An entry opens its plan and result. "Export as file". **Progress by target** moved in from the Library (RD-07). The 08 §24 proposals (search, a filter panel, the share output) are scoped by this Stage's planning, not by ADR-019 | M |
+| P8.6 | **An optional plan name** (08 §24), if this Stage's planning keeps it | §10 | P8.5 | "Name (optional)"; the Logbook shows the name, else target · night. A schema change with its migration and tests; the export updated | S–M |
+
 ### Stage 9 — Secondary UX & Product Polish
 
 - **Scope:**
@@ -1975,6 +2038,28 @@ answer or an owner deferral.
   - the splash screen (08 §1), with subtle animation only (`.agents/rules/05-ui-design.md`);
   - final visual consistency.
 - **Exit:** the areas above are done or deferred by the owner; Stage 9 validation passes.
+
+#### Stage 9 — provisional Tasks from ADR-019 (S4.T, 2026-09-27)
+
+*Provisional (S4.T, 2026-09-27). These come from ADR-019; they are not frozen. This Stage's own
+planning re-verifies them against the code (§9.7), then confirms, changes, merges or drops each, and
+gives the frozen Tasks their S-IDs. The P-IDs are placeholders and are never reused as S-IDs. Each
+Task adopts the RD-14 glossary for the screens it touches.*
+
+| P-ID | Task | ADR-019 | Depends on | Acceptance sketch | Size |
+| --- | --- | --- | --- | --- | --- |
+| P9.1 | **The Library manages** (RD-07; TD-053) | §8 | P8.5 (Progress moved out first), P6.1 (the guard) | A tap on a rig, target or site opens or edits, and never changes the plan. Choosing happens only through `/select/…` (a picker mode of the same lists). "Plan this target" starts a new plan under the guard. "Add from a photo" stays in both modes. The Progress row is gone. ADR-015 §7 as amended. UI tests: browsing the Library leaves the plan unchanged | M |
+| P9.2 | **The vocabulary completed** | §10 | P5.1 | The remaining screens (Settings, About, Library, the rig editor's "Equipment" labels) use the glossary. The retired-terms baseline from P5.1 is empty | S |
+
+#### Order across Stages for ADR-019 (S4.T)
+
+- **Keep a path to results at every step.** Stage 6 moves Start into ⋮ as "Track live (optional)"
+  (P6.1). It never removes Start before Stage 8's result form (P8.1–P8.2) exists.
+- **P6.6 leaves a slot** for Tonight's "how did it go?" line; P8.3 fills it.
+- **The Library's Progress row goes** (P9.1) only after P8.5 has moved Progress into the Logbook.
+- **P5.1's retired-terms baseline** shrinks with each Stage (6, 8, 9) and ends empty at P9.2.
+- **Every Stage updates the core-loop E2E test** with the labels it renames (trap 19), and the
+  accessibility sweep with the screens it adds (trap 17).
 
 ### Stage 10 — Performance & Application Size
 
@@ -2042,18 +2127,18 @@ answer or an owner deferral.
 
 | Finding | 06 verdict | Destination |
 | --- | --- | --- |
-| UX-01 answer on the planner's last screen | Partially confirmed | Stage 6 (RD-06) |
-| UX-02 section order | Owner decision | RD-06 (Stage 4) |
-| UX-03 repeated facts | Partially confirmed | Stage 6 |
-| UX-04 no identity or state in the planner | Confirmed (wireframe deviation) | Stage 6, after Stage 4 |
-| UX-05 always-expanded explanations; UX-06 weather card | Documented / owner decision | RD-06, then Stage 6 (within ADR-012) |
-| UX-07 rig rows on every visit | Requires verification | Stage 6 |
-| UX-08 chart | Partially confirmed | Stage 6; the red-mode bands in Stage 11 |
-| UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09) |
-| UX-10 drill-downs; UX-11 night picker | Partially confirmed | Stage 4, then Stage 6 |
-| UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8 |
-| UX-13 second card after Start | Partially confirmed | Stages 4 and 8 |
-| UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9 |
+| UX-01 answer on the planner's last screen | Partially confirmed | Stage 6 (RD-06); **S4.T:** ADR-019 §6 → P6.3 |
+| UX-02 section order | Owner decision | RD-06 (Stage 4); **S4.T:** decided (ADR-019 §6) → P6.3 |
+| UX-03 repeated facts | Partially confirmed | Stage 6; **S4.T:** ADR-019 §5, §7 → P6.4, P6.5 |
+| UX-04 no identity or state in the planner | Confirmed (wireframe deviation) | Stage 6, after Stage 4; **S4.T:** ADR-019 §3 (DEV-P9) → P6.1 |
+| UX-05 always-expanded explanations; UX-06 weather card | Documented / owner decision | RD-06, then Stage 6 (within ADR-012); **S4.T:** decided (ADR-019 §7) → P6.4, P6.5 |
+| UX-07 rig rows on every visit | Requires verification | Stage 6; **S4.T:** ADR-019 §6–§7 → P6.3, P6.4 |
+| UX-08 chart | Partially confirmed | Stage 6; the red-mode bands in Stage 11; **S4.T:** placement ADR-019 §6 (P6.3); the redesign stays a Stage 6 candidate |
+| UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09); **S4.T:** RD-09 (Stage 5) → P5.6; visuals a Stage 6 candidate |
+| UX-10 drill-downs; UX-11 night picker | Partially confirmed | Stage 4, then Stage 6; **S4.T:** decided (ADR-019 §5, §9; DEV-P9) → P6.5, P6.6 |
+| UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8; **S4.T:** decided (ADR-019 §3) → P6.1 |
+| UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4 |
+| UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9; **S4.T:** decided (ADR-019 §8) → P9.1 |
 | UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work) |
 | UX-17 Moon wording | Partially confirmed | Stage 6 |
 | UX-18 terminology | Confirmed | C4 (IA-independent part); RD-14 (Stage 4); Stage 5 shared vocabulary |
@@ -2061,9 +2146,9 @@ answer or an owner deferral.
 | UX-21 site editor | Elevation documented; discard requires verification | Stage 7 (RG-08); Stage 5 form patterns |
 | UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import) |
 | UX-23 typing | Documented | Stage 7 |
-| UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4) |
-| UX-25 reconciliation ±1 | Confirmed | Stage 8 |
-| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8) |
+| UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
+| UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2 |
+| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2 |
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |
 | UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24) |
@@ -2091,7 +2176,9 @@ answer or an owner deferral.
 | 01: AC7 review | Confirmed (no record) | Stage 11 |
 | 01: TD-050 gate UI has no owning task | Confirmed | RD-11 |
 
-Findings 06 rejected or accepted as documented are listed in Appendix C.
+Findings 06 rejected or accepted as documented are listed in Appendix C. *(S4.T, 2026-09-27: UX-27,
+listed there, is unchanged by ADR-019. The optional live mode keeps today's tracker, and new
+countdowns stay new scope.)*
 
 ---
 
