@@ -142,11 +142,11 @@ void main() {
     });
     await tester.pumpAndSettle();
 
-    expect(find.text('Session planner'), findsOneWidget);
+    expect(find.text('Plan'), findsOneWidget);
 
     // Scroll down to reveal the Save Session button
     final listFinder = find.byType(Scrollable).first;
-    final saveButtonFinder = find.text('Save Session');
+    final saveButtonFinder = find.text('Save plan');
     await tester.dragUntilVisible(
       saveButtonFinder,
       listFinder,
@@ -160,7 +160,7 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 1)); // allow SnackBar to render
 
-    expect(find.text('Session saved to Logbook!'), findsOneWidget);
+    expect(find.text('Plan saved'), findsOneWidget);
 
     // Scroll back to top to reveal AppBar icons
     await tester.drag(listFinder, const Offset(0, 2000));
@@ -233,7 +233,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final listFinder = find.byType(Scrollable).first;
-      final saveButtonFinder = find.text('Save Session');
+      final saveButtonFinder = find.text('Save plan');
       await tester.dragUntilVisible(
         saveButtonFinder,
         listFinder,

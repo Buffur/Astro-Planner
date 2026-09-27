@@ -188,6 +188,12 @@ Future<void> tap(WidgetTester tester, Finder finder) async {
   await settle(tester);
 }
 
+/// Track live, from the plan's ⋮ menu (S6.2; interim until P8.4).
+Future<void> trackLive(WidgetTester tester) async {
+  await tap(tester, find.byKey(const Key('planner.menu')));
+  await tap(tester, find.byKey(const Key('planner.start')));
+}
+
 /// Scrolls the page's main list from the top until [finder] is visible.
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
   final list = find
@@ -274,7 +280,7 @@ void main() {
     AppRouter.router.go(AppRouter.tonight);
     await settle(tester);
     await tap(tester, find.byKey(const Key('tonight.openPlanner')));
-    expect(find.text('Session planner'), findsOneWidget);
+    expect(find.text('Plan'), findsOneWidget);
     await chooseTargetAndRig(tester);
     expect(vm.plan.selectedTarget?.catalogId, 'M31');
     expect(vm.plan.selectedEquipment?.name, contains('ASI2600MC'));
@@ -288,11 +294,11 @@ void main() {
     expect(vm.conditions.imagingOpportunity!.windows, isNotEmpty);
 
     // Plan: the example plan, trimmed to tonight's window, then Save.
-    await tap(tester, find.text('Save Session'));
-    expect(find.text('Session saved to Logbook!'), findsOneWidget);
+    await tap(tester, find.text('Save plan'));
+    expect(find.text('Plan saved'), findsOneWidget);
 
-    // Execute: Start, three frames.
-    await tap(tester, find.byKey(const Key('planner.start')));
+    // Execute: Track live (the plan's ⋮ menu since S6.2), three frames.
+    await trackLive(tester);
     expect(find.byKey(const Key('run.confirmed')), findsOneWidget);
     for (var i = 0; i < 3; i++) {
       await tap(tester, find.byKey(const Key('run.plus')));
@@ -419,7 +425,9 @@ void main() {
     await settle(tester);
     await chooseTargetAndRig(tester);
     device.clock.now = DateTime.utc(2026, 11, 1, 5, 30); // 01:30 EDT
-    await tap(tester, find.byKey(const Key('planner.start')));
+    // Since S6.2 Track live is offered for a saved plan.
+    await tap(tester, find.text('Save plan'));
+    await trackLive(tester);
     final run = vm.execution!.session!;
     expect(run.executionStartSnapshot!.timeZoneId, 'America/New_York');
     device.clock.now = DateTime.utc(2026, 11, 1, 7, 30); // 01:30 EST

@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (**S6.1 done**: the planner's ViewModel split; Stage 6 in progress).
-> **Next:** S6.2 (no gate). The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
+> **Last updated:** 2026-09-27 (**S6.2 done**: the plan's identity and actions; Stage 6 in progress).
+> **Next:** S6.3 is gated on S4-DEF-04, so S6.4 (no gate) is next unless the owner decides it first. The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
 > each before its Task.
 
 ## Current state
@@ -13,11 +13,23 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1, S6.2 done) |
 | Current Task | None in progress |
-| Next Task | **S6.2 — The plan's identity and actions** (no gate) |
-| Code baseline | S6.1 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.4 — A never-saved draft's night at the rollover** (no gate); S6.3 waits for S4-DEF-04 |
+| Code baseline | S6.2 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.2 done, 2026-09-27** (P6.1's first half; TD-058 resolved; DEV-P9's first half): the planner is
+titled "Plan", with a strip under its app bar showing the target, the night and the plan's state
+(it wraps at 200 % text). ⋮ holds New plan, Copy to another night (`pickNight`) and, for a saved
+plan, Track live (optional), which replaces the bottom bar's Start (interim until P8.4). Save plan
+is the one primary button. Save, New plan, Copy and Open each say what happened (`showDone`).
+`CurrentSession.startNew`/`adopt` run in the autosave chain; the new tests
+(`current_session_chain_test.dart`, `plan_identity_actions_test.dart`) fail without the fix. Tests
+and the E2E follow the renamed labels; two race tests make their edit through the ViewModel
+because the closing menu covers the row (assertions unchanged). Tonight's Start and the S1.6 guard
+stay until S6.13 and S6.3. Verification: the full gate after the last code change, PASS (below);
+every acceptance criterion checked.
 
 **S6.1 done, 2026-09-27** (P6.0; ENG-16 resolved): `SessionPlanViewModel` is split, with no behaviour
 change. It keeps the plan's contents, edits, autosave and read-only state (220 lines). The new
@@ -68,7 +80,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (405 files, 0 changed); Analyze; 1,320 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.1's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (407 files, 0 changed); Analyze; 1,327 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.2's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -189,12 +201,17 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.2 — The plan's identity and actions** (the plan's "Stage 6 — frozen Task sequence", S6.2). It is
-frozen and has no gate, so the frozen sequence is the approval.
-- **Read:** S6.2, "Rules for every Stage 6 Task"; `home_screen.dart`, `PlanLifecycleViewModel`,
-  `CurrentSession` (TD-058), the Stage 5 parts it adopts (`PlanStateLabel`, `showDone`,
-  `pickNight`, `AppWords`), `save_start_race_test.dart` and the core-loop E2E.
-- **Verification:** the full gate after the last code change.
+**S6.3 is gated on S4-DEF-04** (what Discard does with a Saved · changed plan; options in the plan's
+"Stage 6 gates": R, revert to the saved plan, recommended; K, keep the changes). If the owner
+decides it, S6.3 runs next. Otherwise the next ungated Task runs first:
+
+**S6.4 — A never-saved draft's night at the rollover** (P6.7; TD-057). Frozen, no gate; the frozen
+sequence is the approval.
+- **Read:** S6.4 and "Rules for every Stage 6 Task"; TD-057; ADR-019 §3.1 and D1;
+  `PlanLifecycleViewModel.load`, `SessionPlanViewModel`, `CurrentSession`, `NightClock`, the
+  candidates screen.
+- **Verification:** the full gate after the last code change (time/night semantics and
+  persistence: high-risk).
 - Then commit and STOP.
 
 **Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations

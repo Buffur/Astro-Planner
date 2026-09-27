@@ -27,6 +27,10 @@ import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
 import '../../widgets/weather_forecast_widget.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../shared/app_words.dart';
+import '../../shared/context_line.dart' show pickNight;
+import '../../shared/plan_state.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/unsaved_plan_guard.dart';
 
@@ -45,54 +49,10 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Session planner'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'New Session',
-            onPressed: () async {
-              // S1.6: ask before an unsaved plan is left behind.
-              if (!await confirmLeavingUnsavedPlan(context)) return;
-              if (!context.mounted) return;
-              await runWithFeedback(
-                context,
-                'start a new session',
-                context.read<PlanLifecycleViewModel>().newSession,
-              );
-            },
-          ),
-          // TASK 11.4: a copy of the current plan as a new draft for another
-          // night; the current session is not changed.
-          IconButton(
-            icon: const Icon(Icons.copy_all),
-            tooltip: 'Duplicate for another night',
-            onPressed: () async {
-              final lifecycle = context.read<PlanLifecycleViewModel>();
-              if (!await confirmLeavingUnsavedPlan(context)) return;
-              if (!context.mounted) return;
-              final now = DateTime.now();
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: now.add(const Duration(days: 1)),
-                firstDate: DateTime(now.year - 1, now.month, now.day),
-                lastDate: DateTime(now.year + 5, now.month, now.day),
-                helpText: 'Duplicate for which night?',
-              );
-              if (picked != null && context.mounted) {
-                await runWithFeedback(
-                  context,
-                  'duplicate the session',
-                  () => lifecycle.duplicateForNight(
-                    CalendarDate.fromDateTimeFields(picked),
-                  ),
-                );
-              }
-            },
-          ),
-          const FieldModeButton(),
-          // TASK 12.2 (ADR-015): candidates, settings, the logbook and
-          // metadata import moved to the Tonight, Settings and Sessions tabs.
-        ],
+        // S6.2: the plan's target, night and state are in the strip below
+        // (it wraps at large text, which an app bar's title cannot).
+        title: const Text(AppWords.plan),
+        actions: const [FieldModeButton(), _PlanMenu()],
       ),
       body: startupVm.hasBootstrapError
           ? _BootstrapErrorView(
@@ -102,6 +62,7 @@ class HomeScreen extends StatelessWidget {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                const _PlanIdentity(),
                 if (siteVm.isDefaultLocation) const _DefaultLocationBanner(),
                 if (planVm.autosaveFailure != null)
                   const _AutosaveFailureBanner(),
@@ -325,47 +286,24 @@ class HomeScreen extends StatelessWidget {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            // TASK 11.3 (ADR-014): saves the plan as a
-                            // planned session with a fresh plan snapshot.
-                            final saved = await runWithFeedback(
-                              context,
-                              'save the session',
-                              analysisVm.saveSession,
-                            );
-                            if (saved && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Session saved to Logbook!'),
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save Session'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // TASK 13.3 (ADR-016): start tracking this plan.
-                      Expanded(
-                        child: FilledButton.icon(
-                          key: const Key('planner.start'),
-                          onPressed: () => startSessionWithFeedback(context),
-                          icon: const Icon(Icons.play_arrow),
-                          label: const Text('Start'),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.all(16),
-                          ),
-                        ),
-                      ),
-                    ],
+                  // S6.2 (ADR-019 §6): Save plan is the one primary action;
+                  // Track live moved into the ⋮ menu.
+                  child: FilledButton.icon(
+                    key: const Key('planner.save'),
+                    onPressed: () async {
+                      // TASK 11.3 (ADR-014): saves the plan as a planned
+                      // session with a fresh plan snapshot.
+                      final saved = await runWithFeedback(
+                        context,
+                        'save the plan',
+                        analysisVm.saveSession,
+                      );
+                      if (saved && context.mounted) {
+                        showDone(context, 'Plan saved');
+                      }
+                    },
+                    icon: const Icon(Icons.save_outlined),
+                    label: const Text(AppWords.savePlan),
                   ),
                 ),
               ),
@@ -573,6 +511,141 @@ class _NoSiteCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(child: Text(message)),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The plan's actions (S6.2; ADR-019 §6): New plan, Copy to another night
+/// and, for a saved plan, Track live — interim, until Stage 8 retires the
+/// tracker (P8.4). Each says what happened.
+class _PlanMenu extends StatelessWidget {
+  const _PlanMenu();
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = context.watch<SessionPlanViewModel>();
+    final session = plan.activeSession;
+    final state = session == null ? null : PlanState.of(session);
+    // Start's requirements (a site, a target, a rig), for a saved plan.
+    final canTrack =
+        (state == PlanState.saved || state == PlanState.savedChanged) &&
+        plan.sessionNight != null &&
+        plan.selectedTarget != null &&
+        plan.selectedEquipment != null;
+    return PopupMenuButton<_PlanAction>(
+      key: const Key('planner.menu'),
+      tooltip: 'Plan actions',
+      icon: const Icon(Icons.more_vert),
+      onSelected: (action) => switch (action) {
+        _PlanAction.newPlan => _newPlan(context),
+        _PlanAction.copy => _copy(context),
+        _PlanAction.trackLive => startSessionWithFeedback(context),
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          key: Key('planner.newPlan'),
+          value: _PlanAction.newPlan,
+          child: Text(AppWords.newPlan),
+        ),
+        const PopupMenuItem(
+          key: Key('planner.copy'),
+          value: _PlanAction.copy,
+          child: Text(AppWords.copyToAnotherNight),
+        ),
+        if (canTrack)
+          const PopupMenuItem(
+            key: Key('planner.start'),
+            value: _PlanAction.trackLive,
+            child: Text(AppWords.trackLiveOptional),
+          ),
+      ],
+    );
+  }
+
+  static Future<void> _newPlan(BuildContext context) async {
+    // S1.6: ask before an unsaved plan is left behind.
+    if (!await confirmLeavingUnsavedPlan(context)) return;
+    if (!context.mounted) return;
+    final started = await runWithFeedback(
+      context,
+      'start a new plan',
+      context.read<PlanLifecycleViewModel>().newSession,
+    );
+    if (started && context.mounted) showDone(context, 'New plan started');
+  }
+
+  /// TASK 11.4: a copy of the current plan as a new draft for another
+  /// night; the current session is not changed.
+  static Future<void> _copy(BuildContext context) async {
+    final lifecycle = context.read<PlanLifecycleViewModel>();
+    final night = context.read<SessionPlanViewModel>().eveningDate;
+    if (!await confirmLeavingUnsavedPlan(context)) return;
+    if (!context.mounted) return;
+    final picked = await pickNight(context, initial: night?.addDays(1));
+    if (picked == null || !context.mounted) return;
+    final copied = await runWithFeedback(
+      context,
+      'copy the plan',
+      () => lifecycle.duplicateForNight(picked),
+    );
+    if (copied && context.mounted) {
+      showDone(context, 'Copied to ${NightTimeFormatter.eveningDate(picked)}');
+    }
+  }
+}
+
+enum _PlanAction { newPlan, copy, trackLive }
+
+/// Which plan the planner shows (S6.2; UX-04, ADR-019 §6): the target, the
+/// night and the plan's state, under the app bar. It wraps at large text.
+class _PlanIdentity extends StatelessWidget {
+  const _PlanIdentity();
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = context.watch<SessionPlanViewModel>();
+    final target = plan.selectedTarget;
+    final evening = plan.eveningDate;
+    final session = plan.activeSession;
+    final text = Theme.of(context).textTheme;
+    return Semantics(
+      key: const Key('planner.identity'),
+      container: true,
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        child: SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  target == null
+                      ? 'No target'
+                      : target.commonName ?? target.catalogId,
+                  style: text.titleMedium,
+                ),
+                Text(
+                  evening == null
+                      ? 'No night without a site'
+                      : '${AppWords.nightOf} '
+                            '${NightTimeFormatter.eveningDate(evening)}',
+                  style: text.bodyMedium,
+                ),
+                if (session != null) PlanStateLabel(PlanState.of(session)),
+              ],
+            ),
+          ),
         ),
       ),
     );

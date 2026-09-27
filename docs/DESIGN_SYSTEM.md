@@ -181,9 +181,8 @@ still merges over them.
   fill (primary). WCAG exempts disabled controls from contrast.
 - **`ElevatedButton`** has no elevation in this flat design. It is themed as the secondary role on
   the surface fill. New code uses `OutlinedButton`; the elevated ones are replaced as their screens
-  are redesigned (S5.9's adoption list). Until then, the planner's "Save Session" is secondary
-  beside a filled "Start", as UX-34 describes. Stage 6 (P6.3) makes Save plan primary and moves
-  Start into ⋮.
+  are redesigned (S5.9's adoption list). Since S6.2 the planner's Save plan is the filled
+  primary button, alone in its bottom bar, and Start is Track live in ⋮ (UX-34).
 
 ### 6.2 States and motion
 
@@ -472,7 +471,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 
 | Screen or widget (today) | Adopts | P-Task | Retired terms it removes from S5.3's baseline |
 | --- | --- | --- | --- |
-| The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 | Session planner |
+| The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 done**, except `askUnsavedChanges`: S6.3). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
 | The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 | Equipment profile (the empty state) |
 | Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 | Acquisition, Session budget (budget summary) |
 | Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 | Astro Dusk, Astro Dawn, True Night Window (with TD-051) |
@@ -507,7 +506,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 
 | Baseline entry (`retired_terms_test.dart`) | Removed by |
 | --- | --- |
-| `home_screen.dart`: Session planner | P6.1 |
+| `home_screen.dart`: Session planner | P6.1 (**removed by S6.2**) |
 | `home_screen.dart`: Equipment profile | P6.3 |
 | `capture_budget_summary.dart`: Acquisition, Session budget | P6.4 |
 | `sky_darkness_widget.dart`: Astro Dusk, Astro Dawn, True Night Window | P6.5 |

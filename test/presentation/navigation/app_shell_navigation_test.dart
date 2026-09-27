@@ -148,7 +148,7 @@ void main() {
       AppRouter.librarySites: 'Sites',
       AppRouter.settings: 'Planning Settings',
       AppRouter.about: 'About & data sources',
-      AppRouter.session(): 'Session planner',
+      AppRouter.session(): 'Plan',
       AppRouter.selectTarget: 'Select Target',
       AppRouter.selectRig: 'Select Equipment',
       AppRouter.selectSite: 'Sites',
@@ -209,7 +209,7 @@ void main() {
     await pumpApp(tester);
     await tester.tap(find.byKey(const Key('tonight.openPlanner')));
     await settle(tester);
-    expect(find.text('Session planner'), findsOneWidget);
+    expect(find.text('Plan'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
 
     await back(tester);

@@ -76,11 +76,12 @@ class CurrentSession {
     }
   }
 
-  /// Makes a new draft for [plan] the current session.
-  Future<Session> startNew(SessionPlan plan) => _replacing(() async {
-    await _chain;
-    return _session = await _repository.create(plan);
-  });
+  /// Makes a new draft for [plan] the current session. It runs in the
+  /// autosave chain, so an edit made meanwhile lands in the new draft, not
+  /// in the one it replaces (TD-058, S6.2).
+  Future<Session> startNew(SessionPlan plan) => _replacing(
+    () => _inChain(() async => _session = await _repository.create(plan)),
+  );
 
   /// Runs an operation after which the plan counts as unedited; if it
   /// fails, the changes still count as unsaved (S1.6).
@@ -99,10 +100,15 @@ class CurrentSession {
 
   /// Opens [session]: a draft or planned one becomes current; a frozen one
   /// is copied — as [copy] — into a new draft (owner decision, TASK 11.4).
+  /// In the autosave chain, like [startNew] (TD-058, S6.2).
   Future<void> adopt(Session session, SessionPlan Function() copy) =>
-      _replacing(() async {
-        _session = session.planEditable ? session : await startNew(copy());
-      });
+      _replacing(
+        () => _inChain(() async {
+          _session = session.planEditable
+              ? session
+              : await _repository.create(copy());
+        }),
+      );
 
   /// Autosaves [plan] into the current session (a planned one returns to
   /// draft until the next Save). Never throws: a failure is kept in
@@ -161,9 +167,10 @@ class CurrentSession {
       );
 
   /// Runs [op] after every write queued so far and queues later writes
-  /// after it, so an edit made while Save or Start is running can never
-  /// land in the middle of it — before S1.12 it could reach a session that
-  /// was being started (ENG-08, RT-04). A failure of [op] reaches the
+  /// after it, so an edit made while Save, Start, New or Open is running
+  /// can never land in the middle of it — before S1.12 (Save, Start) and
+  /// S6.2 (New, Open; TD-058) it could reach the session being replaced
+  /// (ENG-08, RT-04). A failure of [op] reaches the
   /// caller through the returned future; the chain itself goes on.
   Future<T> _inChain<T>(Future<T> Function() op) {
     final result = _chain.then((_) => op());

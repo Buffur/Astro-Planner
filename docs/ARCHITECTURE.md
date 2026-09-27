@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.2, 2026-09-27:** B4 notes the planner's identity strip and ⋮ menu, and that `CurrentSession.startNew`/`adopt` run in the autosave chain (TD-058).
 > **S6.1, 2026-09-27:** B1 and B4 record the split of `SessionPlanViewModel` into the plan's contents (`SessionPlanViewModel`) and its lifecycle (`PlanLifecycleViewModel`).
 > **S5.9, 2026-09-27:** B17 points to the adoption plan (DESIGN_SYSTEM §9) and the opt-in render test.
 > **S5.8, 2026-09-27:** B17 notes the confirmation, feedback and delete patterns (RD-09 = M + S1).
@@ -411,6 +412,14 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 >   the plan ViewModel). `StartupViewModel` loads through the lifecycle, and
 >   `CaptureAnalysisViewModel.saveSession`/`startSession` save and start through it.
 > - Sizes after the split: 220 and 167 physical lines (the cap is 300; S6.1's target was 250).
+
+> **Since S6.2 (2026-09-27)** the planner (`home_screen.dart`) is titled "Plan"; `_PlanIdentity`, a
+> strip under the app bar, shows the target, the night and `PlanStateLabel` and wraps at large text.
+> `_PlanMenu` (⋮, `planner.menu`) holds New plan, Copy to another night (`pickNight`) and, for a saved
+> plan with a site, target and rig, Track live (`planner.start`, interim until P8.4). The bottom bar
+> holds only Save plan (`planner.save`). `CurrentSession.startNew` and `adopt` run inside `_inChain`,
+> so every switch of the current session (New, Copy, Open, Save, Start) is serialized with the
+> autosaves (TD-058 resolved).
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

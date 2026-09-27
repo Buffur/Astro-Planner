@@ -2864,7 +2864,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | Task | Title | From | Size | Depends on | Gate | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | **Done 2026-09-27** |
-| S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | Frozen |
+| S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | **Done 2026-09-27** |
 | S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 | Frozen, gated |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | Frozen |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
@@ -2948,6 +2948,14 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - TD-058's race test passes, and TD-058 is resolved;
   - the E2E follows the new labels (Save plan; Plan saved; ⋮ → Track live);
   - the full gate.
+- **Done 2026-09-27:** the planner is titled "Plan", and the identity (target · night ·
+  `PlanStateLabel`) is a strip under the app bar that wraps, since an app bar's title cannot (the
+  reason S5.7 gave; DEV-P9's first half, recorded there). ⋮ holds New plan, Copy to another night
+  and, for a saved plan with a site, target and rig, Track live (`planner.start`). Save plan is the
+  bottom bar's one primary button. `showDone` after Save, New plan, Copy and Open. TD-058 resolved
+  (`startNew`, `adopt` in `_inChain`); its tests fail without the fix. Two existing race tests make
+  their edit through the ViewModel call the row's button makes, because the closing menu covers
+  the row (assertions unchanged). Full gate PASS: 1,327 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.3 — Replacing unsaved changes: Save · Discard · Cancel (P6.1, second half; gated on S4-DEF-04)
 - **Objective:** leaving a plan with unsaved changes asks Save · Discard · Cancel, and each answer

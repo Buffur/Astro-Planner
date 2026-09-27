@@ -456,9 +456,9 @@ void main() {
     });
     await _settle(tester);
     expect(find.byKey(const Key('planner.autosaveFailure')), findsOneWidget);
-    await tester.tap(find.text('Save Session'));
+    await tester.tap(find.text('Save plan'));
     await _settle(tester);
-    expect(find.textContaining("Couldn't save the session"), findsOneWidget);
+    expect(find.textContaining("Couldn't save the plan"), findsOneWidget);
     await tester.pump(const Duration(seconds: 10)); // the message times out
     await _settle(tester);
 

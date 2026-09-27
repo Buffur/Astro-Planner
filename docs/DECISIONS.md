@@ -357,6 +357,11 @@ import screen (G17).*
   - the user cannot see whether the plan being edited is saved, or for which night;
   - planning another night from Tonight takes about five taps and scrolling (S4.R1 §4).
 - **Status:** open. Recorded 2026-09-27 (S4.D). It is resolved when Stage 6 builds ADR-019 §5–§6.
+  **First half built 2026-09-27 (S6.2):** the planner shows the target, the night and the plan's
+  state in a strip under its app bar (titled "Plan"), with New plan, Copy to another night and
+  Track live in ⋮. The strip sits under the bar, not in its title, because an app bar's title
+  cannot wrap at 200 % text (the reason S5.7's detail header gave). The planner's context line
+  (S6.6) and Tonight's night picker (S6.13) remain.
 
 ---
 

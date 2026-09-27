@@ -122,7 +122,10 @@ void main() {
     expect(find.byKey(const Key('fieldMode.toggle')), findsOneWidget);
     expect(await colouredPixels(tester), 0, reason: 'planner');
 
-    await tester.tap(find.byTooltip('Duplicate for another night'));
+    // S6.2: Copy to another night is in the plan's ⋮ menu.
+    await tester.tap(find.byKey(const Key('planner.menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('planner.copy')));
     await settle(tester);
     expect(find.byType(DatePickerDialog), findsOneWidget);
     expect(await colouredPixels(tester), 0, reason: 'date picker');

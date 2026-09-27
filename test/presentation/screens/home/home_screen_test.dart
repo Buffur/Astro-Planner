@@ -185,7 +185,7 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    expect(find.text('Session planner'), findsOneWidget);
+    expect(find.text('Plan'), findsOneWidget);
     expect(find.textContaining('default location'), findsNothing);
   });
 
@@ -251,7 +251,7 @@ void main() {
 
       await tester.pumpWidget(wrap(vm));
       await tester.pump();
-      expect(find.text('Session planner'), findsOneWidget);
+      expect(find.text('Plan'), findsOneWidget);
 
       // Weather loads after the first frame and fails.
       await tester.pumpAndSettle();
@@ -455,7 +455,7 @@ void main() {
       find.text("Set your site to see tonight's altitude chart."),
       findsOneWidget,
     );
-    expect(find.text('Save Session'), findsNothing);
+    expect(find.text('Save plan'), findsNothing);
   });
 
   testWidgets('a gated feature has no entry point (TASK 4.3, TD-014, PD-06)', (

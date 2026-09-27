@@ -3,6 +3,8 @@
 // saved or started session. Driven through the planner's own buttons with
 // the real database — no injected delays.
 
+import 'dart:async';
+
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart' show AppDatabase;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
@@ -82,7 +84,7 @@ void main() {
   testWidgets('Save, then an edit: the planner and the stored session agree, '
       'and the edit counts as unsaved', (tester) async {
     await start(tester);
-    final saveButton = find.text('Save Session');
+    final saveButton = find.text('Save plan');
     await tester.ensureVisible(deleteBlock.first);
     final before = vm.captureBlocks.length;
 
@@ -107,10 +109,18 @@ void main() {
     await start(tester);
     await tester.ensureVisible(deleteBlock.first);
     final before = vm.captureBlocks.length;
+    // S6.2: Track live is in the ⋮ menu, for a saved plan.
+    await tester.tap(find.text('Save plan'));
+    await settle(tester);
     final original = vm.activeSessionId!;
+    await tester.tap(find.byKey(const Key('planner.menu')));
+    await settle(tester);
 
     await tester.tap(find.byKey(const Key('planner.start')));
-    await tester.tap(deleteBlock.first); // before Start has finished
+    // Before Start has finished. The closing menu still covers the row's
+    // Delete for its exit animation, so the edit is the call that button
+    // makes (S6.2 moved Start into the menu).
+    unawaited(vm.plan.removeCaptureBlock(0));
     await settle(tester);
     await tester.runAsync(() => vm.plan.idle);
 

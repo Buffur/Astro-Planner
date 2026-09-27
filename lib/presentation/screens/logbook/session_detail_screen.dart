@@ -397,7 +397,14 @@ class _Actions extends StatelessWidget {
               'open the session',
               () => lifecycle.openSession(s),
             );
-            if (opened && context.mounted) context.push(AppRouter.session());
+            if (opened && context.mounted) {
+              // S6.2: say what happened; a frozen session opens as a copy.
+              showDone(
+                context,
+                s.planEditable ? 'Plan opened' : 'Opened as a new copy',
+              );
+              context.push(AppRouter.session());
+            }
           },
           style: OutlinedButton.styleFrom(minimumSize: tall),
           child: Text(s.planEditable ? 'Open in planner' : 'Plan again (copy)'),

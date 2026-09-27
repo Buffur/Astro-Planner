@@ -77,6 +77,14 @@ void main() {
     await settle(tester);
   }
 
+  /// Picks a plan action from the planner's ⋮ menu (S6.2 moved New and
+  /// Copy there from the app bar).
+  Future<void> planAction(WidgetTester tester, String key) async {
+    await tester.tap(find.byKey(const Key('planner.menu')));
+    await settle(tester);
+    await tester.tap(find.byKey(Key(key)));
+  }
+
   Future<void> edit(WidgetTester tester) => tester.runAsync(
     () => vm.addCaptureBlock(
       CaptureBlock(
@@ -91,7 +99,7 @@ void main() {
   testWidgets('New on an untouched draft does not ask', (tester) async {
     await start(tester, AppRouter.session());
     final before = vm.activeSessionId;
-    await tester.tap(find.byTooltip('New Session'));
+    await planAction(tester, 'planner.newPlan');
     await settle(tester);
     expect(_discardTitle, findsNothing);
     expect(vm.activeSessionId, isNot(before));
@@ -103,7 +111,7 @@ void main() {
     await edit(tester);
     final before = vm.activeSessionId;
 
-    await tester.tap(find.byTooltip('New Session'));
+    await planAction(tester, 'planner.newPlan');
     await settle(tester);
     expect(_discardTitle, findsOneWidget);
     await tester.tap(find.text('Cancel'));
@@ -111,7 +119,7 @@ void main() {
     expect(vm.activeSessionId, before);
     expect(vm.captureBlocks.last.frameCount, 7);
 
-    await tester.tap(find.byTooltip('New Session'));
+    await planAction(tester, 'planner.newPlan');
     await settle(tester);
     await tester.tap(_discard);
     await settle(tester);
@@ -142,7 +150,7 @@ void main() {
       }
       tester.view.physicalSize = const Size(412, 915);
       await edit(tester);
-      await tester.tap(find.byTooltip('New Session'));
+      await planAction(tester, 'planner.newPlan');
       await settle(tester);
       expect(_discardTitle, findsOneWidget);
       expect(tester.takeException(), isNull, reason: 'no overflow');
@@ -207,18 +215,18 @@ void main() {
   ) async {
     await start(tester, AppRouter.session());
     await edit(tester);
-    await tester.tap(find.byTooltip('Duplicate for another night'));
+    await planAction(tester, 'planner.copy');
     await settle(tester);
     expect(_discardTitle, findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await settle(tester);
-    expect(find.text('Duplicate for which night?'), findsNothing);
+    expect(find.text('Choose a night'), findsNothing);
 
-    await tester.tap(find.byTooltip('Duplicate for another night'));
+    await planAction(tester, 'planner.copy');
     await settle(tester);
     await tester.tap(_discard);
     await settle(tester);
-    expect(find.text('Duplicate for which night?'), findsOneWidget);
+    expect(find.text('Choose a night'), findsOneWidget);
   });
 
   testWidgets("Tonight's New session asks too", (tester) async {
@@ -232,14 +240,14 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await settle(tester);
     expect(vm.activeSessionId, before);
-    expect(find.text('Session planner'), findsNothing);
+    expect(find.text('Plan'), findsNothing);
 
     await tester.tap(button);
     await settle(tester);
     await tester.tap(_discard);
     await settle(tester);
     expect(vm.activeSessionId, isNot(before));
-    expect(find.text('Session planner'), findsOneWidget);
+    expect(find.text('Plan'), findsOneWidget);
   });
 
   testWidgets('opening another session asks; opening the current one does '
