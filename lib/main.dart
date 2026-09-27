@@ -155,6 +155,9 @@ Future<void> _start() async {
   // Field mode is restored before the first frame, so a restart in field
   // mode never flashes the normal theme (TASK 12.4).
   await vms.theme.load();
+  // S5.5: collapsible sections open as the user left them, from the first
+  // frame.
+  await vms.disclosure.load();
   await vms.tonight.load();
   try {
     await vms.backup?.load();

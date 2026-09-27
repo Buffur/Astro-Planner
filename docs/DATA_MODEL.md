@@ -1,5 +1,7 @@
 # AstroPlan Data Model
 
+> **S5.5 (2026-09-27):** display preferences (SharedPreferences, not the database) gain one boolean per collapsible section, under the key `section.<sectionKey>` (open = true). They stay on the device, like field mode; no schema change.
+
 > **S3.V7 (2026-09-27):** a new session snapshot's rig provenance is the provenance every spec of a group shares, else null (never the group pair alone). No schema or snapshot-format change.
 
 > **S3.V2 (2026-09-27):** an equipment spec's own pair may hold the source id `unknown` with NULL confidence: the field's origin is known to be unknown, and the group's provenance does not cover it. No schema change.

@@ -49,6 +49,7 @@ import 'package:astroplan/presentation/viewmodels/session_plan_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/settings_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
+import 'package:astroplan/presentation/viewmodels/disclosure_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
 import 'package:astroplan/domain/services/screen_wake.dart';
 import 'package:astroplan/domain/services/backup_service.dart';
@@ -135,6 +136,7 @@ class PlannerHarness extends ChangeNotifier {
   CaptureAnalysisViewModel get analysis => vms.analysis;
   StartupViewModel get startup => vms.startup;
   ThemeViewModel get theme => vms.theme;
+  DisclosureViewModel get disclosure => vms.disclosure;
   TonightViewModel get tonight => vms.tonight;
   ResumeRunViewModel? get resumeRun => vms.resumeRun;
   ExecutionViewModel? get execution => vms.execution;

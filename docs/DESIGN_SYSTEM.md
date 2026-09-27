@@ -5,8 +5,8 @@
 > part; Stages 6–9 adopt it on the screens (see "Adoption", written by S5.9).
 > **Updated:** 2026-09-27, S5.1 (foundation tokens: text roles, surfaces, type scale, spacing,
 > radius; the gallery test), S5.2 (controls: buttons, fields, dialogs, sheets, menus, messages,
-> icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test) and S5.4 (status
-> tokens, the status block, the plan-state label).
+> icons; states and motion), S5.3 (words: `AppWords` and the retired-terms test), S5.4 (status
+> tokens, the status block, the plan-state label) and S5.5 (the collapsible section).
 > **Code:** `lib/core/theme/` (`app_colors.dart`, `app_palette.dart`, `app_typography.dart`,
 > `app_spacing.dart`, `app_radius.dart`, `app_motion.dart`, `app_button_styles.dart`,
 > `app_theme.dart`).
@@ -190,6 +190,9 @@ still merges over them.
   `AppMotion.duration(context, …)` returns zero when the platform asks for less motion
   (`disableAnimations`). Every Stage 5 component animates through it. Subtle only
   (`.agents/rules/05-ui-design.md`).
+- **Never give `AnimatedSize` a zero duration:** it throws a layout assertion (S5.5's
+  reduced-motion test found it). With reduced motion, leave the `AnimatedSize` out, as
+  `CollapsibleSection` does.
 
 ### 6.3 Text fields
 
@@ -295,9 +298,31 @@ The answer first (ADR-019 §6; addendum §3.1–§3.2).
 - **`PlanStateLabel`:** the word in its tone (`labelMedium`), in a quiet pill outlined in `border`.
   It wraps at 200 % text and is not tappable.
 
+### The collapsible section (S5.5; `lib/presentation/shared/collapsible_section.dart`)
+
+Detail one tap away (ADR-019 §7; RD-06, RG-06: progressive disclosure, no modes).
+- **The header:**
+  - it is at least 48 dp and the whole row is tappable, with an `InkWell` ripple;
+  - it shows the title (`titleSmall`, `textPrimary`), the **factual summary** (`bodyMedium`,
+    `textSecondary`) and a chevron that turns (`AppMotion.short`);
+  - the summary stays visible when the section is open.
+- **The summary states facts, never a verdict** ("4 lines · 2 h 35 min total", not "looks
+  good"). The verdict belongs to the status block. What each summary says is decided where it is
+  adopted (Stage 6).
+- **The content:** it opens below the header (`AnimatedSize`, `AppMotion.medium`; none with
+  reduced motion). It is not built while closed.
+- **Semantics:** one button node labelled "title, summary", with `expanded` true or false, the
+  hint "Expand" or "Collapse", and a tap action (trap 17: `enabled` and `onTap` are set).
+- **Remembered per `sectionKey`** (`DisclosureViewModel`, in `AppViewModels`; loaded before the
+  first frame, like field mode):
+  - closed by default, unless the caller passes `initiallyOpen`;
+  - stored in `DisplayPreferencesRepository` (`section.<key>` in SharedPreferences);
+  - a store that cannot be read or written is logged, and the section still opens and closes;
+  - keys are stable names such as `planner.budgetDetails`: never rename one without a reason.
+
 ### Still to come
 
-Added by S5.5–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
+Added by S5.6–S5.7 (components) and S5.8 (confirmation, feedback and destructive actions, per
 RD-09 = M + S1).
 
 ## 8. Known gaps, for adoption

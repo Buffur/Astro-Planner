@@ -4,8 +4,12 @@
 // no route uses yet, nor a dialog; the gallery can.
 
 import 'package:astroplan/core/theme/app_theme.dart';
+import 'package:astroplan/presentation/viewmodels/disclosure_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
+import '../../support/in_memory_display_preferences.dart';
 
 enum GalleryTheme { light, dark, field }
 
@@ -30,10 +34,14 @@ Future<void> pumpGallery(
   addTearDown(tester.view.reset);
   addTearDown(tester.platformDispatcher.clearAllTestValues);
   await tester.pumpWidget(
-    MaterialApp(
-      theme: galleryThemeData(theme),
-      home: Scaffold(
-        body: ListView(padding: const EdgeInsets.all(16), children: children),
+    // S5.5: collapsible sections read their state from here.
+    ChangeNotifierProvider(
+      create: (_) => DisclosureViewModel(InMemoryDisplayPreferences()),
+      child: MaterialApp(
+        theme: galleryThemeData(theme),
+        home: Scaffold(
+          body: ListView(padding: const EdgeInsets.all(16), children: children),
+        ),
       ),
     ),
   );

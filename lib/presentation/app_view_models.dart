@@ -30,6 +30,7 @@ import 'viewmodels/session_plan_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
 import 'viewmodels/site_viewmodel.dart';
 import 'viewmodels/startup_viewmodel.dart';
+import 'viewmodels/disclosure_viewmodel.dart';
 import 'viewmodels/theme_viewmodel.dart';
 import 'viewmodels/results_viewmodel.dart';
 import 'viewmodels/resume_run_viewmodel.dart';
@@ -113,6 +114,7 @@ class AppViewModels {
         : ExecutionViewModel(sessions, clock, display, screenWake);
     results = sessions == null ? null : ResultsViewModel(sessions);
     theme = ThemeViewModel(display);
+    disclosure = DisclosureViewModel(display);
     metadataImport = captureFiles == null
         ? null
         : MetadataImportViewModel(captureFiles, equipment);
@@ -142,6 +144,9 @@ class AppViewModels {
   late final ResultsViewModel? results;
   late final ThemeViewModel theme;
 
+  /// Collapsible sections' remembered states (S5.5).
+  late final DisclosureViewModel disclosure;
+
   /// Null where capture files cannot be opened (off Android; tests), S2.5.
   late final MetadataImportViewModel? metadataImport;
   late final TonightViewModel tonight;
@@ -158,6 +163,7 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: targetList),
     if (sessionList case final s?) ChangeNotifierProvider.value(value: s),
     ChangeNotifierProvider.value(value: theme),
+    ChangeNotifierProvider.value(value: disclosure),
     ChangeNotifierProvider.value(value: tonight),
     ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
     ChangeNotifierProvider<BackupViewModel?>.value(value: backup),

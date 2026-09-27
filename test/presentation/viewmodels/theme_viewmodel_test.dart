@@ -18,6 +18,12 @@ class _BrokenStore implements DisplayPreferencesRepository {
 
   @override
   Future<void> saveKeepScreenOn(bool on) async {}
+
+  @override
+  Future<Map<String, bool>> loadSectionStates() async => {};
+
+  @override
+  Future<void> saveSectionState(String key, bool open) async {}
 }
 
 void main() {

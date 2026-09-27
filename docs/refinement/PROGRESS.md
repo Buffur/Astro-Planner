@@ -4,18 +4,18 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (S5.4 done).
-> **Next:** S5.5 — a collapsible section with a remembered state (P5.2).
+> **Last updated:** 2026-09-27 (S5.5 done).
+> **Next:** S5.6 — the context line, site ▾ · night ▾ (P5.3).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1–S5.4 done) |
+| Current Stage | **Stage 5 — Design System Foundation: in progress** (planned at `38925dd`; S5.1–S5.9 frozen; S5.1–S5.5 done) |
 | Current Task | None in progress |
-| Next Task | S5.5 (frozen; the frozen sequence is the approval) |
-| Code baseline | S5.4 (this commit): status tokens, `StatusBlock`, `PlanState`, their tests. Not pushed (S1.14, RD-17) |
+| Next Task | S5.6 (frozen; the frozen sequence is the approval) |
+| Code baseline | S5.5 (this commit): `CollapsibleSection`, `DisclosureViewModel`, section states in `DisplayPreferencesRepository`. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -66,7 +66,7 @@
   occurrences in 8 files at `38925dd`. A new occurrence or a stale entry fails, and its own cases
   show both. No existing string was renamed. Verification: the Task's "gate green", the full gate
   after the last code change, PASS (below). Every acceptance criterion checked.
-- **S5.4 done** 2026-09-27 (this commit):
+- **S5.4 done** 2026-09-27 (`3e9a487`):
   - **status and state tokens** in `AppPalette`, in the three themes (UX-16). `FitText.color`
     reads them, with the same values as before;
   - **`StatusBlock`** (`lib/presentation/shared/status_block.dart`): the verdict headline in the
@@ -79,7 +79,24 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **Next:** S5.5 (the collapsible section).
+- **S5.5 done** 2026-09-27 (this commit):
+  - **`CollapsibleSection`:** a 48 dp header with the title, a factual summary that stays
+    visible, and a turning chevron; the content opens below it. It is one semantics button with
+    its expanded state, hint and tap action;
+  - **remembered per section key:** `DisclosureViewModel` (in `AppViewModels`, loaded in
+    `main.dart` before the first frame) stores it through `DisplayPreferencesRepository`
+    (`section.<key>`; `guardStorage`). A broken store is logged and the section still works;
+  - **tested:** restart restores the state, keys are independent, a broken store is handled,
+    reduced motion is honoured, and the gallery includes it;
+  - **a bug found and fixed:** the reduced-motion test showed that `AnimatedSize` with a zero
+    duration throws a layout assertion. The section now leaves it out under reduced motion, and
+    `DESIGN_SYSTEM.md` §6.2 records the rule.
+
+  Verification: the full gate after the last `lib` change PASSED its tests (1,292, 1 skip) and
+  host E2E, but Analyze flagged one deprecated matcher in the new test. That test file was fixed,
+  then re-verified per V3: `flutter analyze` on the whole project, that file's tests, format and
+  encoding, all clean. No other input changed. Every acceptance criterion checked.
+- **Next:** S5.6 (the context line).
 
 ## Reusable validation evidence
 
@@ -87,7 +104,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (391 files, 0 changed); Analyze; 1,283 tests, 1 expected skip (local real samples); 2 host E2E | S5.4's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (395 files, 0 changed); Analyze; 1,292 tests, 1 expected skip (local real samples); 2 host E2E | S5.5's final inputs (this commit). The last gate run had one analyzer notice in `collapsible_section_test.dart`; after fixing only that file, Analyze (whole project), that file's tests, format and encoding were rerun and pass (V3) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -102,7 +119,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1–S5.4 done) |
+| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; RD-09 decided M + S1; S5.1–S5.5 done) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -200,19 +217,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S5.5 — A collapsible section with a remembered state (P5.2)**. It is frozen, and the frozen
-sequence is the approval (implement, verify per the policy, document, commit, then STOP).
-- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.5, and the rules
+**S5.6 — The context line, site ▾ · night ▾ (P5.3)**. It is frozen, and the frozen sequence is the
+approval (implement, verify per the policy, document, commit, then STOP).
+- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.6, and the rules
   for every Stage 5 Task above it.
 - **Read first:**
-  - ADR-019 §7;
-  - `lib/domain/repositories/display_preferences_repository.dart` and its SharedPreferences
-    implementation (`guardStorage`, `StorageFailure`, trap 15);
-  - `ThemeViewModel`, `AppViewModels` and `test/support/in_memory_display_preferences.dart`;
-  - `AppMotion`;
-  - the gallery;
-  - `docs/DESIGN_SYSTEM.md` §6.2 and §7a.
-- **Then** S5.6 to S5.9 in order.
+  - ADR-019 §5 and §6, and addendum §3.1–§3.2;
+  - `lib/presentation/shared/night_time_formatter.dart` (the zone caption and the night's date;
+    trap 2);
+  - the planner's current night picker (`home_screen.dart`, "Session Date") and Tonight's site
+    card;
+  - `CalendarDate`;
+  - `test/presentation/theme/field_mode_darkness_test.dart` (the date picker check);
+  - the gallery.
+- **Then** S5.7 to S5.9 in order.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

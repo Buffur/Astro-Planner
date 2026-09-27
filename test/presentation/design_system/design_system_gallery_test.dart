@@ -9,6 +9,7 @@ import 'package:astroplan/core/theme/app_button_styles.dart';
 import 'package:astroplan/core/theme/app_palette.dart';
 import 'package:astroplan/core/theme/app_spacing.dart';
 import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/presentation/shared/collapsible_section.dart';
 import 'package:astroplan/presentation/shared/plan_state.dart';
 import 'package:astroplan/presentation/shared/status_block.dart';
 import 'package:flutter/material.dart';
@@ -209,12 +210,33 @@ List<Widget> _status() => [
   ),
 ];
 
+/// S5.5: a collapsible section closed and one open, each with its factual
+/// summary.
+List<Widget> _sections() => [
+  const SizedBox(height: AppSpacing.lg),
+  const CollapsibleSection(
+    sectionKey: 'gallery.closed',
+    title: 'Budget details',
+    summary: '4 lines · 2 h 35 min total',
+    child: Text('Calibration during the window 10 min'),
+  ),
+  const Divider(),
+  const CollapsibleSection(
+    sectionKey: 'gallery.open',
+    title: 'Assumptions',
+    summary: '5 assumptions',
+    initiallyOpen: true,
+    child: Text('Per-frame overhead 2 s (your setting)'),
+  ),
+];
+
 List<Widget> _entries() => [
   ..._surfaces(),
   ..._buttons(),
   ..._fields(),
   ..._menus(),
   ..._status(),
+  ..._sections(),
 ];
 
 /// S5.2: opens a dialog, a message and a menu over the gallery in turn and

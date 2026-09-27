@@ -9,6 +9,9 @@ class SharedPrefsDisplayPreferencesRepository
   static const _fieldMode = 'fieldMode';
   static const _keepScreenOn = 'keepScreenOnWhileTracking';
 
+  /// Section states are stored one key each, under this prefix (S5.5).
+  static const sectionPrefix = 'section.';
+
   @override
   Future<bool> loadFieldMode() => guardStorage(
     'read the display preferences',
@@ -34,5 +37,25 @@ class SharedPrefsDisplayPreferencesRepository
     'save the display preferences',
     () async =>
         (await SharedPreferences.getInstance()).setBool(_keepScreenOn, on),
+  );
+
+  @override
+  Future<Map<String, bool>> loadSectionStates() =>
+      guardStorage('read the display preferences', () async {
+        final prefs = await SharedPreferences.getInstance();
+        return {
+          for (final k in prefs.getKeys())
+            if (k.startsWith(sectionPrefix))
+              k.substring(sectionPrefix.length): prefs.getBool(k) ?? false,
+        };
+      });
+
+  @override
+  Future<void> saveSectionState(String key, bool open) => guardStorage(
+    'save the display preferences',
+    () async => (await SharedPreferences.getInstance()).setBool(
+      '$sectionPrefix$key',
+      open,
+    ),
   );
 }
