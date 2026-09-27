@@ -3,11 +3,36 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (S4.R1 done). Stage 4 in progress; Stage 3 closed (`126d97f`).
-> **Next: S4.R2** (RG-04, Execution's role; research, documentation only), after the owner has
-> read S4.R1 and, optionally, answered its clarifications O1–O4.
+> **Last updated:** 2026-09-27 (S4.R2 research done; the owner's RG-04 decision is pending).
+> Stage 4 in progress; Stage 3 closed (`126d97f`).
+> **Next: the owner decides RG-04** (D1–D4 in `research/RG-04_EXECUTION_ROLE.md` §10). Then S4.R3.
 
 ## Current state
+
+**S4.R2 research done, 2026-09-27 (documentation only):**
+[`research/RG-04_EXECUTION_ROLE.md`](research/RG-04_EXECUTION_ROLE.md), at `e5fd240`. The owner
+accepted S4.R1 and answered O1–O4 (recorded in S4.R1 §6.1). The key points: no practical reason
+is seen for Start → Tracker → Results; the intended flow is plan → save → image → Logbook →
+record; only Completed / Not completed was proposed; detailed actuals are options, not
+requirements.
+- **Evidence** is kept apart: current behaviour, roadmap intent, the owner's report and the audits.
+- **Capabilities today, C1–C12:** everything valued after the session (results, planned vs actual,
+  Progress) depends on counts, not on the tracker.
+- **Verified:** there is no result without Start (ADR-014 §3; events only for a started run), and
+  no UI to mark an unstarted plan "not done".
+- **Options:**
+  - what is recorded after a session: G1 outcome only; G2 outcome, with numbers only when needed;
+    G3 full results;
+  - Execution's role: A as built; B Logbook first, tracker optional; C Logbook only (hidden or
+    removed); D simplified tracker.
+- **Recommended:** B with G2. C (hidden) is the strong alternative if simplicity outweighs keeping
+  the live mode.
+- **Owner decisions pending:**
+  - D1: the role;
+  - D2: how much is recorded;
+  - D3: "Not done" maps to abandoned, with a reason;
+  - D4: a quiet "How did it go?" line on Tonight.
+- No code changed.
 
 **S4.R1 done, 2026-09-27 (research, documentation only):**
 [`research/S4.R1_FLOW_INVENTORY.md`](research/S4.R1_FLOW_INVENTORY.md), at `2a26185`.
@@ -160,7 +185,7 @@ an already-running debug app to register the route.
 | Current Stage | **Stage 4 — Product Flow & Information Architecture: In progress** (planned 2026-09-27; Task sequence frozen). Stage 3 is complete (final sign-off PASS, `126d97f`) |
 | Next Stage | Stage 5 — Design System Foundation: Not started |
 | Current approved Task | None in progress |
-| Next approved Task | **S4.R2** — RG-04: Execution's role and how actuals are recorded (research, documentation only; `POST_ROADMAP_PLAN.md`, "S4.R2"). S4.R1 is done |
+| Next approved Task | **S4.R2's owner decision** (RG-04: D1–D4), then **S4.R3** — session lifecycle, state display, defaults (`POST_ROADMAP_PLAN.md`, "S4.R3"). S4.R1 is done; S4.R2's research is done |
 | Code baseline | S3.V8 (`92ebf2a`). Not pushed (S1.14) |
 | Quality gate at the baseline | **Green at the Stage 3 final sign-off**, 2026-09-27, re-run at `92ebf2a` on a clean tree: Encoding, Format (376 files, 0 changed), Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V8**, 2026-09-27: Encoding, Format, Analyze, 1214 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V7**, 2026-09-27: Encoding, Format, Analyze, 1208 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V6**, 2026-09-27: Encoding, Format, Analyze, 1195 tests with 1 expected skip, 2 host E2E; archived probes P1–P10 pass. Earlier, **green after S3.V5**, 2026-09-27: Encoding, Format, Analyze, 1191 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V4**, 2026-09-27: Encoding, Format, Analyze, 1186 tests with 1 expected skip, 2 host E2E; the local real-sample test passes. Earlier, **green after S3.V3**, 2026-09-27: Encoding, Format, Analyze, 1182 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V2**, 2026-09-27: Encoding, Format, Analyze, 1177 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.V1**, 2026-09-26: Encoding, Format, Analyze, 1173 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.10**, 2026-09-26: Encoding, Format, Analyze, 1169 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.9**, 2026-09-26: Encoding, Format, Analyze, 1165 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.7**, 2026-09-26: Encoding, Format, Analyze, 1161 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.8**, 2026-09-26: Encoding, Format, Analyze, 1159 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.6**, 2026-09-26: Encoding, Format, Analyze, 1150 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.5**, 2026-09-26: Encoding, Format, Analyze, 1143 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.3**, 2026-09-26: Encoding, Format, Analyze, 1130 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.4**, 2026-09-26: Encoding, Format, Analyze, 1115 tests with 1 expected skip, 2 host E2E. Earlier, **green after S3.2**, 2026-09-26: Encoding, Format, Analyze, Test, E2E (host). The run included another session's uncommitted TD-066 edits (1094 tests); The committed state after both sessions has 1094 + 1 skip. Earlier, **green after S3.1**, 2026-09-26: Encoding, Format, Analyze; 1082 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 856/856, JPEG 843, HEIC 4,051 bytes). Earlier: **green**, re-run at `0c4848b` on 2026-09-26 by the Stage 3 planning pass (same result; the local real-sample test also passes). First recorded after S2.V4, 2026-09-26: Encoding; Format (349 files, 0 changed); Analyze (no issues); 1068 tests with 1 expected local-sample skip; 2 host E2E; the local real-sample test passes (DNG 848/848, JPEG 843, HEIC 4,051 bytes); no Kotlin change since the native tests were re-run (4 pass) |
 | Schema | **v18** (S3.4) |
@@ -293,12 +318,14 @@ No visibility change; S2V-04 gates and device verification limits remain open.
 final sign-off.
 | 4 | Stage 4 planning (documentation only) | 2026-09-27 | `2a26185` | Every Stage 4 input re-verified at `126d97f` (none stale). Frozen: S4.R1–S4.R5, S4.D, S4.T; S4.E optional. Owner: the recommended option on each planning question (E.1, "Stage 3 closed; Stage 4 planning decisions"). `POST_ROADMAP_PLAN.md`, "Stage 4 — frozen Task sequence" |
 
-| 4 | S4.R1 — Flow inventory and question matrix (research, documentation only) | 2026-09-27 | The S4.R1 commit\*\*\* | `research/S4.R1_FLOW_INVENTORY.md` at `2a26185`: routes against the wireframes, every session action, states per screen, 16 re-measured tap counts, a 22 + 18 row question matrix, owner clarifications O1–O4, the S4.E script. Key RG-04 input: a result can be recorded only through Start |
+| 4 | S4.R1 — Flow inventory and question matrix (research, documentation only) | 2026-09-27 | `e5fd240` | `research/S4.R1_FLOW_INVENTORY.md` at `2a26185`: routes against the wireframes, every session action, states per screen, 16 re-measured tap counts, a 22 + 18 row question matrix, owner clarifications O1–O4, the S4.E script. Key RG-04 input: a result can be recorded only through Start |
 
 \*\* Likewise for the sign-off (`126d97f`), recorded by Stage 4 planning.
-\*\*\* Likewise for S4.R1. Find it with
-`git log --format="%h %s" -1 -- docs/refinement/research/S4.R1_FLOW_INVENTORY.md`; the next Task
-records it here. (Stage 4 planning's `2a26185` was recorded by S4.R1.)
+| 4 | S4.R2 — RG-04 research: Execution's role and post-session results (documentation only; the owner's decision pending) | 2026-09-27 | The S4.R2 research commit\*\*\* | `research/RG-04_EXECUTION_ROLE.md` at `e5fd240`: evidence kept apart; capabilities C1–C12; G1–G3 × A–D; recommended B + G2; D1–D4 for the owner. S4.R1 §6.1 records the owner's O1–O4 answers |
+
+\*\*\* Likewise for the S4.R2 research. Find it with
+`git log --format="%h %s" -1 -- docs/refinement/research/RG-04_EXECUTION_ROLE.md`; the next
+commit records it here. (Stage 4 planning's `2a26185` and S4.R1's `e5fd240` are recorded above.)
 
 ## Relevant commits
 
@@ -338,7 +365,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
 | RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3; may return through Stage 7 |
-| RG-04 | Execution's role and how actuals are captured | 4 | Open; **S4.R2** (frozen) |
+| RG-04 | Execution's role and how actuals are captured | 4 | Open; research done (S4.R2, `research/RG-04_EXECUTION_ROLE.md`); **owner decision pending** |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | Open; **S4.R4** (frozen) |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | Open; **S4.R4** (frozen) |
 | RG-07 | Target catalog expansion, names and search | 7 | Open |
@@ -573,16 +600,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S4.R2 — RG-04: Execution's role and how actuals are recorded** (`POST_ROADMAP_PLAN.md`,
-"S4.R2"). Research, documentation only: options (A) as built, (B) the tracker optional with
-results recorded after the night, (C) after the session only, (D) a simplified tracker; for each,
-the user's night, where Start lives, CALC-37/38, ADR-016's events, RD-12, RD-13, UX-13, UX-25,
-UX-26, TD-063, and what happens to existing sessions. Inputs: S4.R1 (§2's "a result only through
-Start"; §4 row 11; the owner's answer to O4 if given). Output `research/RG-04_EXECUTION_ROLE.md`
-with the owner's questions; the owner decides RG-04 before S4.R3. One commit, then STOP. A fresh
-chat is preferred (§9.1).
+**The owner decides RG-04** (`research/RG-04_EXECUTION_ROLE.md` §10):
+- D1: Execution's role (A, B, C-hidden or C-removed, D);
+- D2: what is recorded after a session (G1, G2, G3);
+- D3: what "Not completed" means;
+- D4: a reminder after the night.
 
-The owner may answer S4.R1's clarifications O1–O4, and run S4.E, at any time. Neither blocks.
+The decision is recorded in DECISIONS E.1, and RG-04 is marked decided. Then **S4.R3** (RD-05,
+RD-04), documentation only; a fresh chat is preferred (§9.1).
+
+The owner may run S4.E at any time; it blocks nothing.
 
 The separate S3V-08 device recheck, if the owner wants it, is its own action through `.s2check`,
 never the owner's installed app.
