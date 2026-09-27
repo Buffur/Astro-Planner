@@ -4,19 +4,20 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (S5.9 done; every Stage 5 Task is done; Stage 5 is in validation).
-> **Next:** the one bounded Stage 5 validation, in a fresh session
-> (`prompts/INDEPENDENT_STAGE_VALIDATION.md`; the plan's "Stage 5 validation").
+> **Last updated:** 2026-09-27 (the Stage 5 validation FAILED on one narrow blocker, S5V-01;
+> `STAGE_5_VALIDATION.md`).
+> **Next:** S5.V1 — the committed graph-level restart test for collapsible sections (S5V-01);
+> then revalidation of S5V-01 only.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in validation** (planned at `38925dd`; S5.1–S5.9 done) |
+| Current Stage | **Stage 5 — Design System Foundation: in validation** (S5.1–S5.9 done; validation FAIL on S5V-01; S5.V1 next) |
 | Current Task | None in progress |
-| Next Task | None: the Stage 5 validation is next |
-| Code baseline | S5.9 (this commit): test-only (the gallery's content shared; the opt-in render test). Not pushed (S1.14, RD-17) |
+| Next Task | S5.V1 (corrective, test-only; proposed, runs on the owner's go) |
+| Code baseline | S5.9 (`8a6c5d8`). The validation changed no code. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -134,7 +135,7 @@
 
   Verification: the Task's "gate green", the full gate after the last code change, PASS (below).
   Every acceptance criterion checked.
-- **S5.9 done** 2026-09-27 (this commit):
+- **S5.9 done** 2026-09-27 (`8a6c5d8`):
   - **the adoption plan:** `docs/DESIGN_SYSTEM.md` §9 maps each screen to the parts it adopts and
     the P-Task (P6.1–P6.6, the Stage 6 capture-plan work, P8.2, P8.4, P8.5, P9.1, P9.2, Stage 9
     Settings). Every Stage 5 part has at least one adopter, and every retired-terms baseline entry
@@ -152,8 +153,19 @@
   Verification: test-only changes, and the Task's "gate green": the full gate after the last code
   change, PASS (below). Every acceptance criterion checked. The optional owner review of the
   images is non-blocking.
-- **Stage 5 is in validation.** Every Task is done; the next action is the bounded Stage 5
-  validation.
+- **Stage 5 validation, 2026-09-27: FAIL at `8a6c5d8`, one narrow blocker**
+  ([report](STAGE_5_VALIDATION.md); run in this chat at the owner's request, so **not independent**,
+  disclosed).
+  - Every frozen item passes except **S5V-01**: S5.5's "a test rebuilds the graph on the same
+    store" has no committed graph-level test. The behaviour is correct (a probe through
+    `PlannerHarness` passes).
+  - Not blocking: TD-073 (predates Stage 5); UX-39's card borders in field mode (S5.2's documented
+    choice); `CLAUDE.md`'s stale test count (outside Stage 5).
+  - **The owner's question, answered in the report's §6.** The debug build looks unchanged
+    because the new components are on no screen yet (by design; Stage 6 adopts them), and the
+    theme changes are subtle: 1–10 % of pixels per screen in before/after renders
+    (`evidence/stage5_before_after/`). Where to look is listed there. If even those are missing,
+    the installed build predates `49344c9`.
 
 ## Reusable validation evidence
 
@@ -176,7 +188,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In validation | 2026-09-27 | — | Pending: the one bounded validation (planned at `38925dd`; RD-09 decided M + S1; S5.1–S5.9 done) |
+| 5 | Design System Foundation | In validation | 2026-09-27 | — | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01 ([report](STAGE_5_VALIDATION.md); same-chat, disclosed); S5.V1, then revalidation of S5V-01 only |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -265,8 +277,9 @@ These block a release, not refinement.
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
-- **Stage 5 (in validation):** nothing blocks. RD-09 decided 2026-09-27 (M + S1). TD-073 recorded
-  (S5.8; not fixed). The owner's review of the S5.9 images is optional.
+- **Stage 5 (in validation):** S5V-01 (a missing graph-level test) blocks the close; S5.V1 fixes it.
+  RD-09 decided (M + S1). TD-073 recorded (not fixed). The owner's review of the S5.9 images is
+  optional.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -275,22 +288,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**The one bounded Stage 5 validation**, in a fresh session where practical, with
-`prompts/INDEPENDENT_STAGE_VALIDATION.md` under `CLAUDE.md`'s Verification Policy (V4–V8).
-Validation only: it fixes nothing.
-- **Frozen surface:** `POST_ROADMAP_PLAN.md`, "Stage 5 validation":
-  - S5.1–S5.9's acceptance criteria;
-  - the rules for every Stage 5 Task;
-  - RD-09 as decided (M + S1);
-  - the checks listed there (tested and documented; no screen's wording or structure changed
-    except through theme tokens; no regression; the adoption plan complete; RD-09 built as
-    decided).
-- **Evidence to reuse (V3):** the full-gate PASS above, while `git diff --stat <this commit> HEAD
-  -- . ':!docs' ':!CLAUDE.md'` is empty. The gallery, the pattern tests and the renders are in
-  the repository.
-- **Outcome:**
-  - no blocker: Stage 5 closes, and Stage 6 planning is next;
-  - a blocker: a focused corrective Task, then revalidation per V5.
+**S5.V1 — the graph-level restart test for collapsible sections (S5V-01)**, a corrective,
+test-only Task. It is proposed by `STAGE_5_VALIDATION.md` and runs on the owner's go.
+- **Scope:** one committed test that builds two `PlannerHarness` graphs (`AppViewModels`) on one
+  in-memory display store. The first opens a section; the second loads as `main.dart` does
+  (`vms.disclosure.load()`) and finds it open. No `lib` change.
+- **Verification:** the test itself, and the gate kept green (a test-only change; V1).
+- **Then:** revalidation of S5V-01 only (V5). If it passes, Stage 5 closes and Stage 6 planning is
+  next.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

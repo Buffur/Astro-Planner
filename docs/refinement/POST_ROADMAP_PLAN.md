@@ -2385,6 +2385,16 @@ that:
 - the adoption plan is complete;
 - RD-09 is recorded and built as decided.
 
+**Result, 2026-09-27: FAIL at `8a6c5d8`, one narrow blocker** (`STAGE_5_VALIDATION.md`). Run in the
+building chat at the owner's request, so not independent (disclosed). Every frozen item passes
+except S5.5's "a test rebuilds the graph on the same store" (**S5V-01**). The behaviour is correct:
+a probe through the composed graph passes. The committed graph-level test is missing.
+
+| Task | Finding | Acceptance | State |
+| --- | --- | --- | --- |
+| S5.V1 | S5V-01 | A committed test rebuilds the app's ViewModel graph (`PlannerHarness` / `AppViewModels`) on one display store, loading as `main.dart` does, and finds a section's state kept. Test-only; the gate stays green | **Next** (proposed; runs on the owner's go) |
+| Revalidation | S5V-01 only (V5) | The test exists and passes; nothing else reopens (V6) | After S5.V1 |
+
 ##### RD-09 — confirm or undo (owner decision; blocks S5.8 only)
 
 **Decided 2026-09-27 by the owner: M + S1** (DECISIONS E.1, "RD-09 decided"). The options below are
