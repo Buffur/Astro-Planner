@@ -45,6 +45,9 @@
 > - §9.8 gains the bounded-validation rule for analysis-and-decision Stages.
 > **Updated 2026-09-27 (Stage 4 closed):** the final, bounded validation passed at `09a7f06`
 > (`STAGE_4_FINAL_VALIDATION.md`). Stage 5 planning is next.
+> **Updated 2026-09-27 (Stage 5 planning, verified at `38925dd`):** Stage 5's Task sequence is
+> frozen ("Stage 5 — frozen Task sequence"): S5.1–S5.9, with S5.8 gated on RD-09, whose options are
+> prepared there. §6.2 and §8 rows updated. No other Stage changed.
 
 ## Contents
 
@@ -2017,6 +2020,415 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | P5.5 | **The detail-screen template** | §9 | P5.2 | A title with the context (night, site), a summary block, then the full content. The zone caption once. It is added to the accessibility sweep's pattern | S |
 | P5.6 | **Confirmation and feedback patterns** | §3 | RD-09 (decided in this Stage) | The three-way prompt (Save · Discard · Cancel). A short message naming what happened after New, Copy, Open and Save. Confirm or undo for destructive actions, per RD-09. Red mode, no white flash | S–M |
 
+*The table above is the provisional state from S4.T, kept as written. The frozen sequence follows.*
+
+#### Stage 5 — frozen Task sequence (planning, 2026-09-27)
+
+Planned at `38925dd`. The application code is unchanged since `92ebf2a`. **Baseline gate at
+`38925dd`: PASS** (Encoding; Format, 376 files, 0 changed; Analyze; 1,214 tests, 1 expected skip;
+2 host E2E). Planning is documentation only.
+
+**The inputs, verified against the code (§9.7):**
+
+| Input | Verified state at `38925dd` | Goes to |
+| --- | --- | --- |
+| The theme (TASK 12.4) | Three `ThemeData`s (light, dark, field) built from `AppColors`, `AppPalette` (18 tokens plus the Bortle lists) and `AppSpacing` (4–48). Only the app bar, cards and dividers are themed, plus field mode's icon and snackbar themes. There is **no** button, input or dialog theme, and no light or dark snackbar theme. The type scale is Material's default, with only `labelSmall` raised to 12 sp | S5.1, S5.2 |
+| 08 §7, text hierarchy | Two text colours by convention: `colorScheme.primary` for values and `secondary` for labels (`InfoRow`), and a grey `AppPalette.muted`. No roles are documented. `lib/presentation` has 10 `fontSize` and 34 `fontWeight` overrides, and uses 11 `textTheme` styles ad hoc. **Confirmed** | S5.1 |
+| 08 §6 and §22, forms | 46 `InputDecoration`s with Material's default underline; 4 set `filled` locally and 1 an outline. **Confirmed** for styling. The typing lag is Stage 10's (measure first) | S5.2 |
+| UX-34, button hierarchy | Tonight: "Open planner" filled, "Start" outlined. Planner: "Save Session" is an `ElevatedButton` beside a filled "Start". Constructed: 15 filled, 7 elevated, 19 outlined and 41 text buttons; no button theme. **Which action is primary is already decided** (ADR-019 §4, §6: Save plan; Start leaves the primary path). The visual hierarchy is open | S5.2; applied by P6.3 |
+| 08 §5 and §8, feedback | New Session ("+") and Duplicate report only a failure (`runWithFeedback`); success is silent. **Confirmed** | S5.2 (pressed states), S5.8 (messages) |
+| UX-16 beyond S1.9 | `FitText.color` maps to `scheme.primary`, `scheme.error`, `scheme.outline` and `palette.caution`. There are no status tokens | S5.4 |
+| UX-18, RD-14, ADR-019 §10 | The retired terms appear **16 times, in 8 files**, in `lib/presentation` string literals (imports and `Key` values excluded). No user-facing string outside `lib/presentation` contains one | S5.3 |
+| RD-09, UX-38, 08 §14, §20 | See "RD-09" below: a capture block is deleted at once; rigs, targets and Logbook entries are deleted by swipe only, through a dialog shown while the row stays slid away; a site has a visible delete | S5.8 (owner decision first) |
+| P5.2 | `DisplayPreferencesRepository` holds field mode and keep-screen-on. The only collapsible is the assumptions panel's `ExpansionTile`, and its state is not remembered | S5.5 |
+| P5.3 | Tonight's site card opens `/select/site` and shows "Night of …"; there is no night picker (UX-11). The planner's night picker is the "Session Date" row (a date picker) in its "Conditions & Timeline / When" section. `NightTimeFormatter.zoneCaption` gives the zone rule | S5.6 |
+| P5.5 | No detail screen exists. The accessibility sweep is route-based, so it cannot see a component that no route uses. ARCHITECTURE B16 lists dialogs as not swept | S5.1 (the gallery), S5.7 |
+| UX-39, red mode | Outlined buttons (`#660000`) and card borders (`#330000`) are near-invisible on black. A documented trade-off (B16); the darkness test is Stage 11's | S5.2 |
+
+**Gates:**
+- **RD-09 (owner decision)** blocks only S5.8's destructive-action part. The options are below.
+  Every other Task can go ahead.
+- **No research gate.** The visual system is this Stage's approved work (the Stage definition
+  above; 08 §7 and 08 §27, "Design System"). Its visual choices are implementation decisions
+  within the rules below. They are documented in `docs/DESIGN_SYSTEM.md` and shown to the owner as
+  rendered sheets (S5.9). They are tokens, so changing them later is cheap.
+- **Optional owner visual review** of S5.9's sheets. It is non-blocking, like S4.E.
+
+**Rules for every Stage 5 Task:**
+- **Stage 5 changes no screen's structure or wording.**
+  - The theme-level tokens (S5.1, S5.2) apply app-wide by design: 08 §27 ("Design System") asks
+    for rules applied throughout the application rather than screen by screen.
+  - Everything else is a shared component or pattern that Stages 6–9 adopt, per S5.9's adoption
+    plan.
+- **Tokens only (trap 12):**
+  - no `Colors.*`, colour literal, text under 12 sp or shrink-wrapped tap target in
+    `lib/presentation`;
+  - a new colour token goes into all three palettes;
+  - field-mode tokens are red or black only.
+- **Every component:**
+  - targets of at least 48 dp;
+  - 200 % text without overflow;
+  - a label on everything tappable (a tooltip on icon-only buttons);
+  - WCAG AA contrast in light and dark (field mode's secondary red stays below AA by design, B16);
+  - no calculation in widgets (trap 13): plain values in, or values from an existing ViewModel.
+- **The gallery test (S5.1)** sweeps every shared component in the three themes at 100 % and
+  200 % text. Each Task adds its components to it.
+- **Documentation:** each Task updates `docs/DESIGN_SYSTEM.md` (new, living; created by S5.1, with
+  a pointer from ARCHITECTURE Part B).
+- **Words:** every new string uses the RD-14 glossary, and none uses a retired term.
+- **Existing tests:** the accessibility sweep, the field-mode darkness test and the host E2E pass.
+  A changed expectation is justified in the commit, never weakened.
+- **Boundaries:** no schema change, no new dependency, no new external service. S5.5's display
+  preference goes through `DisplayPreferencesRepository`, with `guardStorage` and `StorageFailure`
+  (trap 15).
+- **One Task per commit, then STOP** (§9.4). Never start the next Task automatically.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S5.1 | Foundation tokens: type scale, text roles, surfaces, spacing; the gallery test; `DESIGN_SYSTEM.md` | Stage scope; 08 §7 | M | — | **Next** |
+| S5.2 | Controls: buttons, text fields, dialogs, messages, menus, icons, dividers; states and motion | UX-34; 08 §5, §6, §8, §22; UX-39 | M | S5.1 | Frozen |
+| S5.3 | The shared vocabulary and the retired-terms test | P5.1 | S | — | Frozen |
+| S5.4 | Status tokens, the status block and the plan-state label | P5.4; UX-16 | S–M | S5.1, S5.3 | Frozen |
+| S5.5 | A collapsible section with a remembered state | P5.2 | S–M | S5.1, S5.2 | Frozen |
+| S5.6 | The context line (site ▾ · night ▾) | P5.3 | S | S5.1, S5.2 | Frozen |
+| S5.7 | The detail-screen template | P5.5 | S | S5.5 | Frozen |
+| S5.8 | Confirmation, feedback and destructive-action patterns | P5.6; RD-09; UX-38; 08 §5, §8, §14, §20 | M | S5.2, S5.3, **RD-09** | Frozen; **gated on RD-09** |
+| S5.9 | The adoption plan for Stages 6–9, and rendered evidence | Stage output | S | S5.1–S5.8 | Frozen |
+
+**Order:** S5.1 → S5.2 → S5.3 → S5.4 → S5.5 → S5.6 → S5.7 → S5.8 (once RD-09 is decided) → S5.9.
+S5.3 depends on nothing and may run earlier. Then the Stage 5 validation, in a fresh session.
+
+**P-ID mapping:** P5.1 → S5.3; P5.2 → S5.5; P5.3 → S5.6; P5.4 → S5.4; P5.5 → S5.7; P5.6 → S5.8.
+S5.1, S5.2 and S5.9 come from the Stage definition, not from ADR-019. No P-Task was dropped.
+
+##### S5.1 — Foundation tokens: type scale, text roles, surfaces and spacing
+- **Objective:** one documented type scale, three text roles (primary, secondary, tertiary),
+  surface levels, radii and spacing, as theme tokens in the light, dark and field themes; and the
+  test that sweeps shared components.
+- **Why:** 08 §7: nearly all text is white, and secondary information weighs as much as primary.
+  Today two text colours are used by convention, and sizes are chosen per widget.
+- **Scope:**
+  - `AppTheme`: an explicit `TextTheme` scale (size, weight, line height) for the styles in use,
+    shared by the three themes, with nothing under 12 sp;
+  - text-role tokens (primary, secondary, tertiary, disabled) in the three themes, with their use
+    documented. Every role used for text must stay AA in light and dark, so the steps come from
+    size and weight as well as colour;
+  - surfaces: background, surface, raised surface and border; the card and section styles; one
+    radius scale (6 and 12 are mixed today);
+  - `AppSpacing` kept and documented, with the section and row rhythm;
+  - the **gallery test** (`test/presentation/design_system/`): shared components in the three
+    themes at 100 % and 200 % text on a 412 px view. It checks tap targets, labels, contrast (light
+    and dark) and overflow, and covers dialogs, which the route sweep does not. S5.1 puts the text
+    roles and surfaces in it;
+  - **`docs/DESIGN_SYSTEM.md`** (new, living): the principles (PRODUCT_DIRECTION §5,
+    `.agents/rules/05-ui-design.md`, 08), the tokens, the type scale and the roles.
+    ARCHITECTURE Part B gains a short B17 pointing to it.
+- **Out of scope:**
+  - screens' explicit styles (adopted in Stages 6–9);
+  - controls (S5.2);
+  - status colours (S5.4).
+- **Acceptance:**
+  - the scale and the roles exist in all three themes and are documented;
+  - tests:
+    - each text role is at least 4.5:1 on the background and on each surface, in light and dark;
+    - the roles are distinct from each other by a documented step;
+    - field-mode roles are red or black;
+  - the gallery test, the style-rules test, the accessibility sweep, the darkness test and the
+    E2E pass;
+  - gate green.
+
+##### S5.2 — Controls: buttons, fields, dialogs, messages, menus, icons, dividers; states and motion
+- **Objective:** one visual hierarchy and one look for the interactive controls in the three
+  themes, set through component themes, so existing controls follow it without per-screen edits.
+- **Why:**
+  - UX-34;
+  - 08 §6 and §22: underlines too prominent, forms flat;
+  - 08 §5 and §8: weak pressed feedback;
+  - UX-39: red-mode outlines near-invisible.
+- **Scope:**
+  - **button roles:**
+    - primary (filled), secondary (outlined), tertiary (text), destructive and icon;
+    - the filled, outlined, text and icon button themes;
+    - `ElevatedButton` themed to one of those roles (the flat design has no elevation);
+    - all at least 48 dp;
+  - **states and motion:**
+    - pressed, focus and disabled states visible in the three themes (08 §8's "+");
+    - a documented motion scale (durations and curves), subtle (`05-ui-design.md`), that honours
+      the platform's reduced-motion setting;
+  - **text fields:** one `InputDecorationTheme` (border, fill, label, hint, helper, error, prefix
+    and suffix, dense rows) that answers 08 §6 with a quieter underline or another documented
+    style. Labels and hints are AA in light and dark;
+  - **dialogs, bottom sheets, snackbars, menus and dividers:** themed in light and dark, next to
+    field mode's existing snackbar;
+  - **icons:** sizes, and a documented set for the common actions (add, edit, delete, reorder,
+    more, info, expand, open). The capture plan's icons (08 §14) are changed in Stage 6;
+  - **field mode:** control boundaries (outlined buttons, fields, cards) use a documented red
+    token. The Task records its choice against UX-39 and does not claim the darkness test (Stage
+    11);
+  - the gallery shows each control in its states.
+- **Out of scope:**
+  - which button a screen uses (Stage 6 applies ADR-019 §6: Save plan primary);
+  - the confirmation and feedback patterns (S5.8);
+  - form layout and field count (Stage 7);
+  - form performance (08 §22; Stage 10).
+- **Acceptance:**
+  - the gallery covers, in the three themes at 100 % and 200 % text:
+    - every button role;
+    - a field in each state (empty, filled, focused, error, disabled);
+    - a dialog, a snackbar and a menu;
+  - every component theme is red or black in field mode, and the darkness test's dialog, date
+    picker and snackbar pass;
+  - the accessibility sweep, the E2E and `equipment_editor_fit_test.dart` pass;
+  - gate green.
+
+##### S5.3 — The shared vocabulary and the retired-terms test (P5.1)
+- **Objective:** the glossary's user-facing words defined once, and a test that keeps retired
+  terms out of `lib/presentation` (ADR-019 §10).
+- **Scope:**
+  - **the words, in one place like `QuantityText`:** `lib/presentation/shared/`, or
+    `lib/core/utils/` if a domain reason text needs a word. They are the terms of
+    `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5 that Stages 5–9 use:
+    - Rig;
+    - Plan and its actions: New plan, Save plan, Your plan, Copy to another night;
+    - Logbook;
+    - Capture plan, and block;
+    - the plan and result states;
+    - Record result, Edit result, Track live;
+    - the verdict words;
+    - Dark and Imaging window;
+    - Integration, Imaging time, Time needed, Total time, Budget details;
+    - Export as file, Name (optional), Progress by target;
+  - **the test** scans the string literals of `lib/presentation`, case-insensitively, for the
+    retired terms: "Equipment profile", "Session planner", "Draft", "Legacy", "True Night Window",
+    "Astro Dusk", "Astro Dawn", "Window load", "Acquisition" and "Session budget". Imports, `Key`
+    values and code identifiers are exempt;
+  - **the baseline** is explicit: today's occurrences (16, in 8 files, at `38925dd`):
+    - a new occurrence fails;
+    - a baseline entry that no longer occurs also fails, so the baseline only shrinks;
+  - `DESIGN_SYSTEM.md` gains a "Words" section.
+- **Out of scope:** renaming any existing string. Stages 6, 8 and 9 shrink the baseline, and P9.2
+  empties it.
+- **Acceptance:**
+  - the test's own cases show it failing on an added term and on a stale baseline entry;
+  - a test lists the vocabulary's words against §5;
+  - gate green.
+
+##### S5.4 — Status tokens, the status block and the plan-state label (P5.4)
+- **Objective:** explicit status colours, and the two components that show a plan's answer and
+  its state wherever they appear.
+- **Why:** UX-16 beyond S1.9 (07 §9 asks for explicit status tokens); ADR-019 §3 and §6; addendum
+  §3.1–§3.2.
+- **Scope:**
+  - **status tokens** in `AppPalette`, in the three themes:
+    - fits, tight (today's `caution`), doesn't fit, no window, needs input (neutral);
+    - the tones of the plan states;
+    - field mode red or black, with "Tight" as bright as "Fits" (S1.9's rule kept);
+  - **`FitText.color`** returns the tokens. Today's colours are kept unless the Task documents a
+    change, and `fit_status_test.dart` keeps its assertions;
+  - **the status block:**
+    - the verdict headline in the glossary's words ("Fits: 2 h 05 min needed of 4 h 20 min
+      usable"), its reason, optional key numbers and an action slot (fill or trim);
+    - it takes plain values (the state, the durations, the reason) and calculates nothing;
+      durations go through `QuantityText`;
+    - "Needs a target" and "Needs a block" are neutral. Which one a screen shows is decided where
+      it is adopted (Stage 6);
+  - **the plan-state label:**
+    - Not saved · Saved · Saved · changed · Tracking · Completed · Partly · Not done · Old log;
+    - a pure mapping from today's stored fields (status, `plannedAtUtc`, legacy) to the states
+      they can already express;
+    - "Partly" appears once Stage 8 stores a partial result (no data holds one yet);
+  - both components in the gallery.
+- **Out of scope:**
+  - replacing the planner's, Tonight's or the Logbook's current status texts (P6.1, P6.3, P6.6,
+    P8.5);
+  - a partial-result status in the data (Stage 8);
+  - `FitAnalyzer`'s logic and its reason texts.
+- **Acceptance:**
+  - every `FitState` and every plan state has its word and its token in the three themes;
+  - a missing input is neutral and a real no-window is in the error colour (S1.9 kept);
+  - the mapping is tested for every stored combination, legacy rows included;
+  - the gallery passes at 200 % text;
+  - gate green.
+
+##### S5.5 — A collapsible section with a remembered state (P5.2)
+- **Objective:** one collapsible section whose closed form shows a factual summary, and whose open
+  or closed state is remembered for each section.
+- **Scope:**
+  - **the widget:**
+    - a header row (title, factual summary, chevron) of at least 48 dp, with the content below;
+    - semantics announce "expanded" or "collapsed" and the action;
+    - 200 % text; the three themes; S5.2's motion scale;
+  - **persistence:**
+    - `DisplayPreferencesRepository` gains the state per section key, with its SharedPreferences
+      implementation, `guardStorage` and `InMemoryDisplayPreferences`;
+    - a section is closed by default unless its caller says otherwise;
+    - a ViewModel in `AppViewModels` owns the state (like `ThemeViewModel`);
+    - a failed write is logged (`AppLog`), and the section still opens and closes;
+  - **the summary** is the caller's text. The component's documentation says it states facts,
+    never verdicts (ADR-019 §7);
+  - in the gallery.
+- **Out of scope:** converting the assumptions panel or any planner section (P6.4); what each
+  summary says (Stage 6).
+- **Acceptance:**
+  - the state survives a restart (a test rebuilds the graph on the same store);
+  - two keys are independent;
+  - a storage failure keeps the section working and is logged;
+  - the expanded and collapsed semantics are tested;
+  - the gallery passes;
+  - gate green.
+
+##### S5.6 — The context line (P5.3)
+- **Objective:** one control for "site ▾ · night ▾", for Tonight and the planner (ADR-019 §5,
+  §6).
+- **Scope:**
+  - **the component:**
+    - two targets, site and night, each at least 48 dp, wrapping at 200 % text;
+    - it shows the site's name or a no-site state, the night (through `NightTimeFormatter`), and
+      the zone rule: the site's zone caption, or the device-zone label without a zone (trap 2);
+    - it reports "choose a site" and "choose a night" through callbacks;
+  - **a shared night-picker helper:** the date picker, themed and red in field mode, returning a
+    `CalendarDate`;
+  - in the gallery.
+- **Out of scope:**
+  - placing it on Tonight or in the planner, and what a picked night does to the current plan
+    (P6.3, P6.6; UX-11);
+  - the site picker's screen.
+- **Acceptance:**
+  - each target fires its callback;
+  - the zone caption follows the rule for a site with a zone and one without;
+  - the picker helper returns the chosen night and stays red or black in field mode (checked as
+    the darkness test checks the date picker);
+  - the gallery passes;
+  - gate green.
+
+##### S5.7 — The detail-screen template (P5.5)
+- **Objective:** one layout for the new detail screens (Night & Moon and Weather first): a title
+  with its context, a summary block, then the full content (ADR-019 §9; addendum §3.4–§3.5).
+- **Scope:**
+  - a scaffold with:
+    - the title and its context (night, site);
+    - a summary area;
+    - content sections, using S5.5's section where content is long;
+    - the zone caption once;
+  - a sample page built on it, swept by the gallery (it is not a route). Stage 6 adds its detail
+    routes to the accessibility sweep (trap 17).
+- **Out of scope:** the Night & Moon and Weather content and routes (P6.5).
+- **Acceptance:**
+  - the zone caption appears exactly once;
+  - the title and its context wrap at 200 % text;
+  - the sample page passes the gallery in the three themes;
+  - gate green.
+
+##### S5.8 — Confirmation, feedback and destructive-action patterns (P5.6; gated on RD-09)
+- **Objective:** the shared patterns for confirming, reporting and deleting, so that each action
+  says what happened and nothing is lost silently.
+- **Scope:**
+  - **the three-way prompt** (Save · Discard · Cancel), as a shared dialog following addendum §3.3.
+    What Discard does belongs to P6.1;
+  - **the result message:**
+    - a short message naming what happened ("New plan started", "Copied to Sat 15 Nov", "Plan
+      saved");
+    - one helper for success, next to `runWithFeedback`'s failure message;
+    - red in field mode, with no white flash;
+  - **destructive actions, as RD-09 decides:**
+    - the shared confirmation: a title naming the item, the consequence, a destructive-styled
+      action, and Cancel;
+    - and/or the undo message;
+    - the swipe pattern (08 §20: no row left slid away behind a dialog; UX-38: a visible delete);
+  - in the gallery. `DESIGN_SYSTEM.md` records which kind of action uses which pattern.
+- **Out of scope:** changing existing screens' dialogs and delete paths. The capture plan's delete
+  (Stage 6), the Library's lists (Stage 9) and the Logbook (Stage 8) adopt the pattern. The S1.6
+  guard stays until P6.1.
+- **Acceptance:**
+  - each pattern in the three themes at 100 % and 200 % text;
+  - a confirmation cannot be dismissed into a delete (Cancel and a tap outside keep the item);
+  - if undo is chosen, the undo message reports exactly one outcome (undone or committed), tested;
+    the adopter tests its own restore;
+  - red or black only in field mode;
+  - gate green.
+
+##### S5.9 — The adoption plan for Stages 6–9, and rendered evidence
+- **Objective:** say where each part of the system is adopted in Stages 6–9, and show the owner
+  what it looks like.
+- **Scope:**
+  - **`DESIGN_SYSTEM.md`, "Adoption":** a table covering the planner, Tonight, the capture plan,
+    the Logbook and its entry, the Library lists, Settings, the editors and the dialogs. For each
+    screen or widget it names:
+    - the components and patterns it adopts;
+    - the P-Task that does it (P6.1–P6.7, P8.x, P9.x);
+    - the retired terms it removes from S5.3's baseline;
+  - **rendered sheets** of the gallery (light, dark and field; 100 % and 200 % text), made by an
+    opt-in test outside the gate (Roboto loaded, as `equipment_editor_fit_test.dart` does) and
+    committed under `docs/refinement/evidence/`;
+  - the provisional Stage 6, 8 and 9 tables gain their adoption items, still not frozen.
+- **Out of scope:** adopting anything.
+- **Acceptance:**
+  - every Stage 5 component and pattern has at least one named adopter;
+  - every retired-term baseline entry has a Stage;
+  - the sheets exist;
+  - gate green.
+
+##### Stage 5 validation
+A fresh-session, independent validation (§9.8, the implementation model: this Stage writes
+application code). It tries to disprove that:
+- the tokens and components exist, are tested (style rules, the gallery's accessibility checks,
+  red mode) and are documented;
+- no screen's wording or structure changed, other than through the theme tokens;
+- nothing regressed (the accessibility sweep, the darkness test, the E2E, the gate);
+- the adoption plan is complete;
+- RD-09 is recorded and built as decided.
+
+##### RD-09 — confirm or undo (owner decision; blocks S5.8 only)
+
+**Verified at `38925dd`:**
+
+| Action | Today |
+| --- | --- |
+| Delete a capture block | A red delete icon; the block goes at once, with no confirmation and no undo (`capture_plan_widget.dart:175–177`); the plan autosaves |
+| Delete a rig, a target or a Logbook entry | Swipe only (`Dismissible`). A red background appears, then a dialog, while the row stays slid away. Confirmed, the row is deleted; a failed delete brings it back (`equipment_selection_screen.dart:168`, `target_selection_screen.dart:362`, `logbook_screen.dart:147`) |
+| Delete a site | A visible icon button, then a dialog: "This cannot be undone.", or a note on what changes when it is the active site (`sites_screen.dart:21–53`) |
+| Abandon a run; restore a backup; leave an unsaved plan | A confirmation dialog each |
+
+- **The constraint:** `IA_WIREFRAMES.md` §3 (accepted with ADR-015) says "No destructive action
+  without a confirmation (delete, abandon); no silent loss". Any undo amends it.
+- **The data:**
+  - deleting a rig, a target or a site sets plans' references to NULL (`ON DELETE SET NULL`; their
+    snapshots keep the values);
+  - deleting a Logbook entry also deletes its blocks and events (cascade);
+  - so an undo of a stored record must delay the real delete until its message closes. It cannot
+    rebuild the rows afterwards.
+- **The dialogs' wording is inconsistent** ("Delete Equipment?", "Delete Target?", "Delete
+  Session?", "Delete ⟨site⟩?"). The shared pattern fixes that whichever option is chosen.
+
+**Q1 — confirm or undo:**
+- **C, confirm every destructive action.** `IA_WIREFRAMES.md` §3 stays as it is, and a capture
+  block gains a confirmation. It costs one more tap on the most frequent delete.
+- **M, undo for edits inside a plan; confirm for stored records (recommended).**
+  - Deleting a capture block happens at once, with "Block deleted · Undo". The block is restored
+    exactly, and the plan autosaves.
+  - Rigs, targets, sites, Logbook entries, Abandon, Restore, and leaving an unsaved plan keep a
+    confirmation, in one shared style.
+  - It amends §3 for edits inside a plan only, and nothing is lost silently.
+  - Common guidance (for example Nielsen Norman Group's on confirmation dialogs) keeps
+    confirmations for rare, consequential actions and prefers undo for frequent ones.
+- **U, undo for every delete.** Confirmations stay only for Abandon, Restore and leaving an
+  unsaved plan. Records vanish at once, and the delete is committed when the message closes. A
+  missed Undo loses a rig, a target or a Logbook entry with its results. It amends §3 broadly.
+
+**Q2 — swipe:**
+- **S1, a visible Delete on every deletable item; swipe kept as a shortcut to the same pattern
+  (recommended).** It answers UX-38 (swipe is not discoverable) and 08 §20 (the row comes back
+  when cancelled; nothing lingers).
+- **S2, a visible Delete only; swipe removed.** Simpler, but it loses a shortcut some users
+  expect.
+
+Where a visible Delete sits (a row's ⋮ menu or the item's editor) is decided when it is adopted:
+for blocks in Stage 6, and in the Library's manage mode in Stage 9 (P9.1).
+
+**Recording:** the decision goes into DECISIONS E.1 and this register before S5.8 starts. If it
+amends `IA_WIREFRAMES.md` §3, that file gets an amendment note, and ADR-015 an "Amended by"
+pointer.
+
 ### Stage 6 — Core Planner Redesign
 
 - **Purpose:** apply the approved IA and design system to the main planning experience.
@@ -2271,16 +2683,16 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | UX-05 always-expanded explanations; UX-06 weather card | Documented / owner decision | RD-06, then Stage 6 (within ADR-012); **S4.T:** decided (ADR-019 §7) → P6.4, P6.5 |
 | UX-07 rig rows on every visit | Requires verification | Stage 6; **S4.T:** ADR-019 §6–§7 → P6.3, P6.4 |
 | UX-08 chart | Partially confirmed | Stage 6; the red-mode bands in Stage 11; **S4.T:** placement ADR-019 §6 (P6.3); the redesign stays a Stage 6 candidate |
-| UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09); **S4.T:** RD-09 (Stage 5) → P5.6; visuals a Stage 6 candidate |
+| UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09); **S4.T:** RD-09 (Stage 5) → P5.6; visuals a Stage 6 candidate; **Stage 5 planning:** the pattern is S5.8 (after RD-09); the capture plan adopts it in Stage 6 |
 | UX-10 drill-downs; UX-11 night picker | Partially confirmed | Stage 4, then Stage 6; **S4.T:** decided (ADR-019 §5, §9; DEV-P9) → P6.5, P6.6 |
 | UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8; **S4.T:** decided (ADR-019 §3) → P6.1 |
 | UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4 |
 | UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9; **S4.T:** decided (ADR-019 §8) → P9.1 |
 | UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work) |
 | UX-17 Moon wording | Partially confirmed | Stage 6 |
-| UX-18 terminology | Confirmed | C4 (IA-independent part); RD-14 (Stage 4); Stage 5 shared vocabulary |
+| UX-18 terminology | Confirmed | C4 (IA-independent part); RD-14 (Stage 4); Stage 5 shared vocabulary (**S5.3**, with the retired-terms baseline) |
 | UX-19 formats | Confirmed | A5, C2; the chart axis in Stage 6 |
-| UX-21 site editor | Elevation documented; discard requires verification | Stage 7 (RG-08); Stage 5 form patterns |
+| UX-21 site editor | Elevation documented; discard requires verification | Stage 7 (RG-08); Stage 5 form patterns (**S5.2**, styling only) |
 | UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import) |
 | UX-23 typing | Documented | Stage 7 |
 | UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
@@ -2289,8 +2701,8 @@ Task adopts the RD-14 glossary for the screens it touches.*
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |
 | UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24) |
-| UX-34 button hierarchy; UX-38 swipe-only delete | Requires verification | Stage 5 (RD-09); Stage 11 |
-| UX-39 red-mode outlines and bands | Documented; requires verification | Stage 5 constraints; Stage 11 darkness test |
+| UX-34 button hierarchy; UX-38 swipe-only delete | Requires verification | Stage 5 (RD-09); Stage 11. **Stage 5 planning:** mechanisms verified at `38925dd`. UX-34's primary action is decided by ADR-019 §6 (Save plan); the visual hierarchy is S5.2, applied by P6.3. UX-38 is RD-09's Q2, then S5.8 |
+| UX-39 red-mode outlines and bands | Documented; requires verification | Stage 5 constraints; Stage 11 darkness test. **Stage 5 planning:** S5.2 records the field-mode control-boundary token; the bands stay Stage 6/11 |
 | ENG-04 planner tests on the preferences path | Partially confirmed | E4 (optional) |
 | ENG-08 Save/Start race | Requires verification | F (Stage 1) |
 | ENG-09 accumulating drafts | Partially confirmed (the UX half) | as UX-12 |
@@ -2356,7 +2768,7 @@ any implementation Task is created.
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
 | RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan; Stage 7 |
-| RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | Stages 6–9 |
+| RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. Open | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5 | 6 | — |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10 | 6 or 9 | — |
 | RD-12 | Should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish? | RT-10, UX-26; ADR-016 §11 | 8 | — |

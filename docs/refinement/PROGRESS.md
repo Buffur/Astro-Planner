@@ -3,11 +3,43 @@
 > The compact operational state of post-roadmap refinement. Update it at every Task and Stage
 > boundary (see "How to update this file" at the end). Strategy lives in
 > `POST_ROADMAP_PLAN.md`, direction in `PRODUCT_DIRECTION.md`.
-> **Last updated:** 2026-09-27 (the final, bounded Stage 4 validation **PASSED**;
-> `STAGE_4_FINAL_VALIDATION.md`). **Stage 4 is closed.**
-> **Next:** Stage 5 — Design System Foundation, Stage planning.
+> **Last updated:** 2026-09-27 (Stage 5 planning: the Task sequence S5.1–S5.9 is frozen in
+> `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence").
+> **Next:** S5.1 — foundation tokens (type scale, text roles, surfaces, spacing), the gallery test
+> and `docs/DESIGN_SYSTEM.md`. RD-09 is needed before S5.8 only.
 
 ## Current state
+
+**Stage 5 planning done, 2026-09-27 (documentation only).** Stage 5 is in progress.
+- **Verified at `38925dd`** (§9.7), against the code:
+  - the theme has no button, input or dialog theme, and no light or dark snackbar theme;
+  - text roles are a convention, not tokens (08 §7);
+  - fields use Material's default underline (08 §6);
+  - UX-34's mechanism is as reported, and its primary action is already decided by ADR-019 §6;
+  - `FitText.color` has no status tokens (UX-16);
+  - the retired terms occur 16 times in 8 files of `lib/presentation`;
+  - the delete paths are listed under RD-09;
+  - New and Duplicate succeed silently (08 §5, §8).
+- **The frozen sequence:**
+  - S5.1: foundation tokens, the gallery test, `DESIGN_SYSTEM.md`;
+  - S5.2: controls;
+  - S5.3: the vocabulary (P5.1);
+  - S5.4: status tokens, the status block and the state label (P5.4);
+  - S5.5: the collapsible section (P5.2);
+  - S5.6: the context line (P5.3);
+  - S5.7: the detail-screen template (P5.5);
+  - S5.8: confirmation, feedback and destructive patterns (P5.6), **gated on RD-09**;
+  - S5.9: the adoption plan and rendered evidence.
+- **The rule:** Stage 5 changes no screen's structure or wording. Theme tokens apply app-wide by
+  design, and components are adopted in Stages 6–9.
+- **RD-09 (owner):** the options are prepared (plan §5, "RD-09 — confirm or undo"):
+  - Q1: C, **M (recommended: undo for edits inside a plan, confirm for stored records)** or U;
+  - Q2: **S1 (recommended: a visible Delete, swipe kept as a shortcut)** or S2.
+- **No research gate.** The visual choices are this Stage's implementation decisions, with an
+  optional owner review of S5.9's rendered sheets.
+- **Baseline gate at `38925dd`: PASS** (Encoding; Format, 376 files, 0 changed; Analyze; 1,214
+  tests, 1 expected skip; 2 host E2E).
+- No application code or test changed.
 
 **Final, bounded Stage 4 validation, 2026-09-27: PASS** at `09a7f06`
 ([report](STAGE_4_FINAL_VALIDATION.md)). **Stage 4 is closed.**
@@ -421,7 +453,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | Not started | — | — | — |
+| 5 | Design System Foundation | In progress | 2026-09-27 | — | — (planned at `38925dd`: S5.1–S5.9 frozen; S5.8 gated on RD-09) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -430,6 +462,11 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
 ## Completed Tasks
+
+**Stage 5 planning (documentation only)**, 2026-09-27, this commit: S5.1–S5.9 frozen, with S5.8
+gated on RD-09 (its options prepared). The inputs P5.1–P5.6, UX-16, UX-18, UX-34, UX-38, UX-39 and
+08 §5–§8, §14, §20, §22 were re-verified at `38925dd`. Baseline gate PASS. No application or test
+change.
 
 **Final, bounded Stage 4 validation (validation and closeout only)**, 2026-09-27, this commit:
 **PASS** at `09a7f06`, and Stage 4 is closed. The report is `STAGE_4_FINAL_VALIDATION.md`. No
@@ -651,7 +688,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-06 | The planner's section order; integrity text one tap away | 4 | **Decided** 2026-09-27 (S4.R4; E.1): answer first, decision order; detail one tap away |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work) | Open |
-| RD-09 | Destructive interactions: confirm or undo | 5 | Open |
+| RD-09 | Destructive interactions: confirm or undo | 5 | Open; **options prepared** 2026-09-27 (Stage 5 planning; plan §5, "RD-09 — confirm or undo"): Q1 C / M (recommended) / U; Q2 S1 (recommended) / S2. Blocks S5.8 only |
 | RD-10 | Ordering Tonight's candidates without a score | 6 | Open |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 | Open |
 | RD-12 | The resume prompt's Finish | 8 | Open |
@@ -697,6 +734,7 @@ These block a release, not refinement.
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
+- **Stage 5 (in progress):** RD-09 blocks S5.8 only. S5.1–S5.7 can proceed.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `360fd8f`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -705,6 +743,9 @@ These block a release, not refinement.
 
 ## Validation status
 
+- **Stage 5 baseline**, 2026-09-27, at `38925dd`: the quality gate **PASS** (Encoding; Format,
+  376 files, 0 changed; Analyze; 1,214 tests, 1 expected skip; 2 host E2E). The Stage 5 validation
+  (fresh session, implementation model) comes after S5.9.
 - **Final, bounded Stage 4 validation**, 2026-09-27, at `09a7f06`: **PASS**
   (`STAGE_4_FINAL_VALIDATION.md`). Stage 4 is closed.
   - The seven owner-frozen questions all pass.
@@ -919,6 +960,28 @@ These block a release, not refinement.
     committed; the owner decides. **Stages 2–11:** not started.
 
 ## Next allowed action
+
+**S5.1 — Foundation tokens: type scale, text roles, surfaces and spacing; the gallery test;
+`docs/DESIGN_SYSTEM.md`**, in a fresh chat where practical. It is frozen, and the frozen sequence is
+the approval (§9.4: implement, test, document, commit, then STOP).
+- **Definition:** `POST_ROADMAP_PLAN.md`, "Stage 5 — frozen Task sequence", S5.1, and the rules
+  for every Stage 5 Task above it.
+- **Read first:**
+  - `lib/core/theme/` (`app_theme.dart`, `app_palette.dart`, `app_colors.dart`,
+    `app_spacing.dart`);
+  - `test/presentation/theme/`;
+  - `test/presentation/accessibility_test.dart` (the guidelines to reuse);
+  - ARCHITECTURE B16.
+- **Then** S5.2 to S5.7 in order; S5.3 may run earlier.
+- **Owner decision RD-09** (plan §5, "RD-09 — confirm or undo") is needed before S5.8, and can be
+  given at any time before it.
+
+**Carried:**
+- S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);
+- S4V-02 (correct the S4.E script before Test A or C runs on the owner's install);
+- the earlier carried items below.
+
+*Superseded by the Stage 5 planning (kept as written):*
 
 **Stage 5 — Design System Foundation: Stage planning**, in a fresh chat where practical (§9.1).
 - Read Stage 5's section and its provisional Tasks P5.1–P5.6 (from ADR-019).
