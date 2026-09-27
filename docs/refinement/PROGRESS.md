@@ -4,18 +4,18 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (S5.V1 done: the graph-level restart test for S5V-01).
-> **Next:** revalidation of S5V-01 only (V5); if it passes, Stage 5 closes.
+> **Last updated:** 2026-09-27 (**Stage 5 closed**: the revalidation of S5V-01 passed at `178acbe`).
+> **Next:** Stage 6 — Core Planner Redesign, Stage planning.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 5 — Design System Foundation: in validation** (S5.1–S5.9 done; validation FAIL on S5V-01; S5.V1 done; revalidation of S5V-01 next) |
+| Current Stage | **Stage 6 — Core Planner Redesign: not started** (Stage 5 closed 2026-09-27) |
 | Current Task | None in progress |
-| Next Task | None: the revalidation of S5V-01 is next |
-| Code baseline | S5.V1 (this commit): one test added. Not pushed (S1.14, RD-17) |
+| Next Task | None: Stage 6 planning comes first |
+| Code baseline | S5.V1 (`178acbe`). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
 **Governance correction, 2026-09-27 (documentation, prompts and CI filter; the owner's request).**
@@ -164,10 +164,22 @@
     theme changes are subtle: 1–10 % of pixels per screen in before/after renders
     (`evidence/stage5_before_after/`). Where to look is listed there. If even those are missing,
     the installed build predates `49344c9`.
-- **S5.V1 done** 2026-09-27 (this commit), S5V-01: `disclosure_viewmodel_test.dart` gains "a restart
+- **S5.V1 done** 2026-09-27 (`178acbe`), S5V-01: `disclosure_viewmodel_test.dart` gains "a restart
   of the whole ViewModel graph on the same store keeps a section open". It builds two
   `PlannerHarness` graphs on one display store, the second loading as `main.dart` does. Test-only.
   Verification: the full gate after the change, PASS (below).
+- **Revalidation of S5V-01 (V5), 2026-09-27: PASS** at `178acbe`. The test exists, goes through
+  `AppViewModels`, and passes. The gate is reused (V3). **Stage 5 is closed**
+  ([report §7](STAGE_5_VALIDATION.md)).
+- **The owner's debug build, checked 2026-09-27 (read-only):**
+  - the phone runs exactly the current build (installed-APK SHA-1 `8debc76c…` equals the local
+    `app-debug.apk`, built after `178acbe`);
+  - the build contains Stages 1, 3 and 5 (markers found in its Dart kernel);
+  - the phone reports the app was first installed at 19:11 today, so earlier on-device data is not
+    on it unless restored.
+
+  Little looks different because Stages 1–5 changed little of the main screens' look. Stage 6
+  does that.
 
 ## Reusable validation evidence
 
@@ -190,7 +202,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 2 | Metadata Foundation | Complete (owner waiver) | 2026-09-26 | 2026-09-26 | **Did not pass independently**: it failed at `79f392c` (fixed, `ffaff57`) and at `5d8bdbb` (S2R-01/TD-067; fixed by S2.V4/S2.V5, `d8e792c`/`435b3ce`). The owner then waived a third validation (E.1, "Stage 2 closed by the owner") |
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
-| 5 | Design System Foundation | In validation | 2026-09-27 | — | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01 ([report](STAGE_5_VALIDATION.md); same-chat, disclosed); S5.V1 done; revalidation of S5V-01 only is next |
+| 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 6 | Core Planner Redesign | Not started | — | — | — |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
@@ -279,9 +291,11 @@ These block a release, not refinement.
   - S4.E stays optional, and Stage 6 carries a five-second test;
   - S4V-02's script correction is separate and non-blocking, but it must precede Test A or C on the
     owner's install.
-- **Stage 5 (in validation):** S5V-01 (a missing graph-level test) blocks the close; S5.V1 fixes it.
-  RD-09 decided (M + S1). TD-073 recorded (not fixed). The owner's review of the S5.9 images is
-  optional.
+- **Stage 5 (closed 2026-09-27):** nothing blocks.
+  - Carried: TD-073 (two messages with an action persist); UX-39's field-mode card borders (Stage
+    11 darkness test); `CLAUDE.md`'s stale test count.
+  - Optional: the owner's review of the S5.9 images.
+  - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -290,11 +304,19 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Revalidation of S5V-01 only** (V5: the original finding, the criterion it touches, and S5.V1's own
-diff, which is test-only). Everything else keeps its PASS (V6).
-- **Check:** the committed test exists, rebuilds the app's ViewModel graph on one store, and
-  passes. The gate above covers the rest.
-- **Outcome:** a pass closes Stage 5, and Stage 6 planning is next.
+**Stage 6 — Core Planner Redesign: Stage planning**, in a fresh chat where practical.
+- **Read:**
+  - Stage 6's section and its provisional Tasks P6.0–P6.7 (ADR-019);
+  - the Stage 5 adoption notes under that table;
+  - `docs/DESIGN_SYSTEM.md` §9 (what each screen adopts, and the retired terms each Task removes).
+- **Re-verify them against the code** (§9.7).
+- **Identify the gates:**
+  - RD-10 (the candidates' order);
+  - RD-11 (where the Moon and cloud gate controls live, if Stage 6);
+  - RD-08 (tracking per rig or per plan), which is decided before Stage 6's capture-plan work;
+  - S4-DEF-04 (Discard on Saved · changed).
+- **Freeze a Task sequence** with scope, acceptance and validation.
+- Update the documents, commit, and STOP before implementation.
 
 **Carried:**
 - S4-DEF-01 to S4-DEF-08 (Stages 6 and 8);

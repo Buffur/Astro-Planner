@@ -8,7 +8,8 @@
 > and built Stage 5. The same author judged its own work, a known weakness (Stage 1's same-session
 > validation passed where an independent one found four defects). To offset it, every criterion was
 > judged on fresh evidence (diffs, probes, renders), not on the Task notes.
-> **Result: FAIL, one narrow blocker (S5V-01).** Every other frozen item passes. The blocker's
+> **Revalidation of S5V-01 (V5), 2026-09-27, at `178acbe`: PASS. Stage 5 is closed** (§7).
+> **Result of the first validation: FAIL, one narrow blocker (S5V-01).** Every other frozen item passes. The blocker's
 > behaviour is correct (a probe proves it); the committed test the criterion names is missing. A
 > focused corrective Task, S5.V1, is proposed. Then revalidation of S5V-01 only (V5).
 
@@ -170,3 +171,26 @@ Manually, the debug build looks almost the same as before. That is expected, for
    installing the separate `.s2check` debug package, as the project's device checks do, never the
    owner's own installed app, would show the list above. Those are device observations; the
    renders here are host evidence only.
+
+## 7. Revalidation of S5V-01 (V5), 2026-09-27
+
+- **Scope (V5):**
+  - the original finding S5V-01;
+  - the criterion it touches (S5.5, "the state survives a restart (a test rebuilds the graph on the
+    same store)");
+  - S5.V1's own diff (`178acbe`), which is test-only.
+
+  Every other item keeps its PASS (V6). Same chat, at the owner's request: not independent, as
+  above.
+- **Evidence:**
+  - **The test:** `test/presentation/viewmodels/disclosure_viewmodel_test.dart`, "a restart of the
+    whole ViewModel graph on the same store keeps a section open". It builds two `PlannerHarness`
+    graphs on one `InMemoryDisplayPreferences` store. `PlannerHarness.disclosure` is
+    `AppViewModels.disclosure`, which is built on the store passed in (`app_view_models.dart:117`).
+    The second graph loads as `main.dart` does, and the section is open in the new graph's
+    ViewModel (a different instance). It passes.
+  - **The gate, reused (V3):** full gate PASS at `178acbe` (1,320 tests, 2 expected skips, 2 host
+    E2E; Format, 404 files; Analyze; Encoding). HEAD is `178acbe`.
+  - **Regression surface:** S5.V1 changed only a test file and documentation. No `lib/` input
+    changed.
+- **Verdict:** S5V-01 **PASS**. No blocker remains, so **Stage 5 closes** (V7).

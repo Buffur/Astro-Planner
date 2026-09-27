@@ -45,6 +45,8 @@
 > - §9.8 gains the bounded-validation rule for analysis-and-decision Stages.
 > **Updated 2026-09-27 (Stage 4 closed):** the final, bounded validation passed at `09a7f06`
 > (`STAGE_4_FINAL_VALIDATION.md`). Stage 5 planning is next.
+> **Updated 2026-09-27 (Stage 5 closed):** S5.1–S5.9 and S5.V1 done; the validation failed on S5V-01
+> only, and its revalidation passed at `178acbe` (`STAGE_5_VALIDATION.md`). Stage 6 planning is next.
 > **Updated 2026-09-27 (Stage 5 planning, verified at `38925dd`):** Stage 5's Task sequence is
 > frozen ("Stage 5 — frozen Task sequence"): S5.1–S5.9, with S5.8 gated on RD-09, whose options are
 > prepared there. §6.2 and §8 rows updated. No other Stage changed.
@@ -2393,7 +2395,7 @@ a probe through the composed graph passes. The committed graph-level test is mis
 | Task | Finding | Acceptance | State |
 | --- | --- | --- | --- |
 | S5.V1 | S5V-01 | A committed test rebuilds the app's ViewModel graph (`PlannerHarness` / `AppViewModels`) on one display store, loading as `main.dart` does, and finds a section's state kept. Test-only; the gate stays green | **Done 2026-09-27** |
-| Revalidation | S5V-01 only (V5) | The test exists and passes; nothing else reopens (V6) | **Next** |
+| Revalidation | S5V-01 only (V5) | The test exists and passes; nothing else reopens (V6) | **PASS 2026-09-27** at `178acbe`; **Stage 5 closed** |
 
 ##### RD-09 — confirm or undo (owner decision; blocks S5.8 only)
 
