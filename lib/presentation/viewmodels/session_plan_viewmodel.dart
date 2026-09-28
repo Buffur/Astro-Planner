@@ -157,13 +157,16 @@ class SessionPlanViewModel extends ChangeNotifier {
     _site.displayZoneId,
   );
 
-  /// The night key includes the site: a site change is a plan edit.
+  /// The night key includes the site: a site change is written into the
+  /// plan. On a saved plan it is an unsaved change (V3, S6.3): leaving the
+  /// plan then asks. On a never-saved draft it is not (S1.6).
   void _onSiteChanged() {
     notifyListeners();
     final key = _currentSiteKey();
     if (!_loaded || key == _siteKey) return;
     _siteKey = key;
-    unawaited(_current?.write(currentPlan, edit: false));
+    final saved = activeSession?.plannedAtUtc != null;
+    unawaited(_current?.write(currentPlan, edit: saved));
   }
 
   Future<void> _edited() async {

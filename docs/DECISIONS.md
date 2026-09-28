@@ -1557,7 +1557,7 @@ Stage 4 revalidation is still required.
   ADR-019 §3 carries the pointer.
 - **Rejected:** K (keep the changes with the entry, the button reading "Keep changes"). Deleting the
   entry or its snapshot was never an option (the invariant).
-- **Built by** S6.3. No code changed by this entry.
+- **Built by** S6.3 (2026-09-28). No code changed by this entry.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

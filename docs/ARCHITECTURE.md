@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.3, 2026-09-28:** B4 notes Save · Discard · Cancel, the replaced-draft deletion and the revert of a changed saved plan (S4-DEF-04 = R).
 > **S6.4, 2026-09-28:** B11 notes the rollover rule for a never-saved draft (`PlanLifecycleViewModel.followNight`, TD-057).
 > **S6.2, 2026-09-27:** B4 notes the planner's identity strip and ⋮ menu, and that `CurrentSession.startNew`/`adopt` run in the autosave chain (TD-058).
 > **S6.1, 2026-09-27:** B1 and B4 record the split of `SessionPlanViewModel` into the plan's contents (`SessionPlanViewModel`) and its lifecycle (`PlanLifecycleViewModel`).
@@ -421,6 +422,21 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > holds only Save plan (`planner.save`). `CurrentSession.startNew` and `adopt` run inside `_inChain`,
 > so every switch of the current session (New, Copy, Open, Save, Start) is serialized with the
 > autosaves (TD-058 resolved).
+
+> **Since S6.3 (2026-09-28; U1, W1, V3; S4-DEF-04 = R)** leaving a plan asks Save · Discard · Cancel
+> (`askBeforeLeavingPlan`, `lib/presentation/shared/unsaved_plan_prompt.dart`, over S5.8's
+> `askUnsavedChanges`; the S1.6 guard is gone). New plan, Copy, Tonight's New and Open pass the
+> answer to `PlanLifecycleViewModel` as `discard:`. In `CurrentSession`:
+> - every switch goes through `_switch`, in the autosave chain. The replaced session, when it is a
+>   never-saved draft, is deleted (`SessionRepository.deleteDraft`) if the user discarded it or
+>   never edited it; a saved plan is never deleted there;
+> - `revertSavedChanges()` runs first on Discard: a Saved · changed plan goes back to its plan
+>   snapshot (`SessionRepository.revertToSaved`, through the pure `SavedPlanReader`); the snapshot
+>   and `plannedAtUtc` are unchanged. It is refused with `SavedPlanUnavailable` (nothing changes, and
+>   `FailureText` says why) when the snapshot is unreadable or names a site, target or rig that no
+>   longer exists;
+> - `startNew(unsaved: true)` marks a copy as unsaved (W1). `SessionPlanViewModel` writes a site
+>   change as an edit on a saved plan (V3), not on a never-saved draft.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

@@ -49,6 +49,13 @@ class SessionStateError extends StateError {
   SessionStateError(super.message);
 }
 
+/// Discard on a Saved · changed plan was refused (S4-DEF-04 = R; S6.3): its
+/// saved snapshot cannot be read, or names a site, target or rig that no
+/// longer exists. Nothing was changed; the user can Save or Cancel instead.
+class SavedPlanUnavailable extends SessionStateError {
+  SavedPlanUnavailable(super.message);
+}
+
 /// The plan the planner edits (ADR-014 §2): references, night key, blocks,
 /// and the display labels written to the pre-v16 text columns (never used
 /// to resolve references; ADR-014 §10).

@@ -32,7 +32,7 @@ import '../../shared/app_words.dart';
 import '../../shared/context_line.dart' show pickNight;
 import '../../shared/plan_state.dart';
 import '../../shared/failure_feedback.dart';
-import '../../shared/unsaved_plan_guard.dart';
+import '../../shared/unsaved_plan_prompt.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -565,13 +565,15 @@ class _PlanMenu extends StatelessWidget {
   }
 
   static Future<void> _newPlan(BuildContext context) async {
-    // S1.6: ask before an unsaved plan is left behind.
-    if (!await confirmLeavingUnsavedPlan(context)) return;
-    if (!context.mounted) return;
+    // S6.3 (U1): Save · Discard · Cancel before an unsaved plan is left.
+    final leaving = await askBeforeLeavingPlan(context);
+    if (leaving == null || !context.mounted) return;
     final started = await runWithFeedback(
       context,
       'start a new plan',
-      context.read<PlanLifecycleViewModel>().newSession,
+      () => context.read<PlanLifecycleViewModel>().newSession(
+        discard: leaving == LeavingPlan.discard,
+      ),
     );
     if (started && context.mounted) showDone(context, 'New plan started');
   }
@@ -581,14 +583,17 @@ class _PlanMenu extends StatelessWidget {
   static Future<void> _copy(BuildContext context) async {
     final lifecycle = context.read<PlanLifecycleViewModel>();
     final night = context.read<SessionPlanViewModel>().eveningDate;
-    if (!await confirmLeavingUnsavedPlan(context)) return;
-    if (!context.mounted) return;
+    final leaving = await askBeforeLeavingPlan(context);
+    if (leaving == null || !context.mounted) return;
     final picked = await pickNight(context, initial: night?.addDays(1));
     if (picked == null || !context.mounted) return;
     final copied = await runWithFeedback(
       context,
       'copy the plan',
-      () => lifecycle.duplicateForNight(picked),
+      () => lifecycle.duplicateForNight(
+        picked,
+        discard: leaving == LeavingPlan.discard,
+      ),
     );
     if (copied && context.mounted) {
       showDone(context, 'Copied to ${NightTimeFormatter.eveningDate(picked)}');

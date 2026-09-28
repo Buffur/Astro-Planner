@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.4 done**: a never-saved draft's night follows the rollover; Stage 6 in progress).
-> **Next:** S6.3 (S4-DEF-04 decided 2026-09-28: R). The owner answers RD-08, RD-10 and RD-11 whenever convenient,
+> **Last updated:** 2026-09-28 (**S6.3 done**: Save · Discard · Cancel; Stage 6 in progress).
+> **Next:** S6.5 (no gate). The owner answers RD-08, RD-10 and RD-11 whenever convenient,
 > each before its Task.
 
 ## Current state
@@ -13,11 +13,20 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1, S6.2, S6.4 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.4 done) |
 | Current Task | None in progress |
-| Next Task | **S6.3 — Replacing unsaved changes: Save · Discard · Cancel** (S4-DEF-04 decided: R) |
-| Code baseline | S6.4 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit** (no gate) |
+| Code baseline | S6.3 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.3 done, 2026-09-28** (P6.1's second half; U1, W1, V3, UX-12; S4-DEF-04 = R): leaving a plan
+with unsaved changes asks Save · Discard · Cancel at New plan, Copy, Tonight's New and Open. Discard
+deletes a never-saved plan and reverts a Saved · changed one to its snapshot (unchanged; nothing
+deleted; refused with a message when the snapshot cannot be restored). An untouched never-saved draft
+is deleted when replaced; a copy counts as unsaved; a site change on a saved plan is an edit. The
+S1.6 guard is gone. Tests: 48 new or mapped (reader, repository, `CurrentSession`, the UI matrix);
+four S6.2 tests changed deliberately (see the plan). Verification: the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
 
 **S4-DEF-04 decided, 2026-09-28 (the owner, in chat): R.** Discard on a Saved · changed plan reverts it
 to its saved snapshot; the snapshot is unchanged and nothing is deleted (DECISIONS E.1). It unblocks
@@ -94,7 +103,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (408 files, 0 changed); Analyze; 1,335 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.4's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (412 files, 0 changed); Analyze; 1,374 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.3's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -215,14 +224,15 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.3 — Replacing unsaved changes: Save · Discard · Cancel** (P6.1's second half; U1, W1, V3,
-UX-12; S4-DEF-04 decided: R). Frozen; the frozen sequence is the approval.
-- **Read:** S6.3, "Rules for every Stage 6 Task", DECISIONS E.1 "S4-DEF-04 decided", ADR-019 §3 and
-  §3.1; `CurrentSession`, `PlanLifecycleViewModel`, `SessionRepository`/`DriftSessionRepository`,
-  `unsaved_plan_guard.dart` and its tests, `askUnsavedChanges`.
-- **Verification:** the full gate after the last code change (persistence and data integrity:
-  high-risk), with the real-SQLite tests S6.3 names.
-- Then commit and STOP. S6.5 follows.
+**S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit** (P6.5;
+UX-10; TD-051). Frozen, no gate; the frozen sequence is the approval.
+- **Read:** S6.5 and "Rules for every Stage 6 Task"; TD-051; ADR-019 §5, §7, §9; ADR-012;
+  `sky_darkness_widget.dart`, `weather_forecast_widget.dart`, `NightTimeline` and the timeline
+  calculation, `NightConditionsViewModel` (297 lines: mind the cap), `DetailScaffold`, the router and
+  the accessibility sweep.
+- **Verification:** the full gate after the last code change (a calculation and time/night
+  semantics: high-risk), with reference vectors for the dark span.
+- Then commit and STOP.
 
 **Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations
 in the plan's "Stage 6 gates"):
@@ -233,7 +243,7 @@ in the plan's "Stage 6 gates"):
 If a gated Task comes up with its gate still open, the next ungated Task runs first.
 
 **Carried:**
-- S4-DEF-04 decided (R; built by S6.3); S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,
+- S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,
   S4-DEF-03 and S4-DEF-05 to S4-DEF-08 (Stage 8);
 - S4V-02 (correct the S4.E script before Test A or C runs on the owner's install): the first step of
   S6.E;

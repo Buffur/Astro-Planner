@@ -17,7 +17,7 @@ import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
 import '../library/progress_screen.dart';
 import 'logbook_screen.dart';
-import '../../shared/unsaved_plan_guard.dart';
+import '../../shared/unsaved_plan_prompt.dart';
 import '../../../core/utils/quantity_text.dart';
 import '../../../core/utils/astro_math.dart';
 
@@ -383,19 +383,23 @@ class _Actions extends StatelessWidget {
         OutlinedButton(
           key: const Key('detail.openInPlanner'),
           onPressed: () async {
-            // A frozen session opens as a copy in a new draft (TASK 11.4);
-            // S1.6: ask before another plan's unsaved changes are left.
+            // A frozen session opens as a copy in a new draft (TASK 11.4).
+            // Leaving another plan's unsaved changes asks first (S6.3).
             final plan = context.read<SessionPlanViewModel>();
             final lifecycle = context.read<PlanLifecycleViewModel>();
-            if (s.id != plan.activeSessionId &&
-                !await confirmLeavingUnsavedPlan(context)) {
-              return;
-            }
-            if (!context.mounted) return;
+            // S6.3 (U1): Save · Discard · Cancel, unless it is the plan
+            // already open.
+            final leaving = s.id == plan.activeSessionId
+                ? LeavingPlan.keep
+                : await askBeforeLeavingPlan(context);
+            if (leaving == null || !context.mounted) return;
             final opened = await runWithFeedback(
               context,
               'open the session',
-              () => lifecycle.openSession(s),
+              () => lifecycle.openSession(
+                s,
+                discard: leaving == LeavingPlan.discard,
+              ),
             );
             if (opened && context.mounted) {
               // S6.2: say what happened; a frozen session opens as a copy.

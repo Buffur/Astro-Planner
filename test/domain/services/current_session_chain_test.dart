@@ -78,6 +78,8 @@ void main() {
   test('an edit written while New is creating its draft lands in the new '
       'draft', () async {
     final old = await current.startNew(_plan(10));
+    // Edited, so the switch keeps it (S6.3 deletes an untouched draft).
+    await current.write(() => _plan(10));
 
     final created = current.startNew(_plan(20));
     final edit = current.write(() => _plan(7)); // before New has finished
@@ -94,6 +96,8 @@ void main() {
   test('an edit written while Open copies a frozen session lands in the '
       'copy', () async {
     final old = await current.startNew(_plan(10));
+    // Edited, so the switch keeps it (S6.3 deletes an untouched draft).
+    await current.write(() => _plan(10));
     final run = await repo.start(
       (await repo.create(_plan(20))).id,
       _snapshot(),

@@ -1,5 +1,7 @@
 # AstroPlan Data Model
 
+> **S6.3 (2026-09-28; S4-DEF-04 = R):** two `SessionRepository` writes, no schema change. `deleteDraft` deletes only a never-saved draft (`draft` without `planned_at_utc_ms`) with its blocks, and refuses any other row. `revertToSaved` turns a Saved · changed row (`draft` with `planned_at_utc_ms`) back to `planned`, rewriting its plan columns and blocks from `plan_snapshot`; `plan_snapshot` and `planned_at_utc_ms` are not written. A new lifecycle transition (ADR-014 §3 as amended in DECISIONS E.1).
+
 > **S5.5 (2026-09-27):** display preferences (SharedPreferences, not the database) gain one boolean per collapsible section, under the key `section.<sectionKey>` (open = true). They stay on the device, like field mode; no schema change.
 
 > **S3.V7 (2026-09-27):** a new session snapshot's rig provenance is the provenance every spec of a group shares, else null (never the group pair alone). No schema or snapshot-format change.

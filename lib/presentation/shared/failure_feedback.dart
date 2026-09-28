@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/diagnostics/app_log.dart';
+import '../../domain/models/session.dart';
 import '../../domain/repositories/storage_failure.dart';
 
 /// User-facing wording for a failed action (TASK 15.1). The error itself
@@ -8,6 +9,11 @@ import '../../domain/repositories/storage_failure.dart';
 abstract final class FailureText {
   /// [action] is a verb phrase: "save the rig", "load the sessions".
   static String message(String action, Object error) => switch (error) {
+    // S6.3: Discard on a changed saved plan was refused; nothing changed.
+    SavedPlanUnavailable() =>
+      "Couldn't discard the changes: the saved plan can't be restored "
+          '(it cannot be read, or its site, target or rig was deleted). '
+          'Nothing was changed. Save the plan or cancel instead.',
     StorageFailure() =>
       "Couldn't $action: the app's data on this device could not be read "
           'or written. Please try again.',

@@ -155,8 +155,16 @@ class PlanLifecycleViewModel {
   /// Opens [session] (TASK 11.4): a draft or planned one becomes current, a
   /// frozen one is copied into a new draft; the current, editable one is left
   /// as it is live — a caller's copy may be stale (S1.V4, TD-062).
-  Future<void> openSession(Session session) async {
+  ///
+  /// [discard]: the user chose Discard for the plan being left (S6.3, U1):
+  /// a Saved · changed one first goes back to what was saved (refused with
+  /// [SavedPlanUnavailable], and then nothing changes); a never-saved one is
+  /// deleted after the switch. An untouched never-saved draft is deleted
+  /// without being asked. The same holds for [newSession] and
+  /// [duplicateForNight].
+  Future<void> openSession(Session session, {bool discard = false}) async {
     if (session.id == _plan.activeSessionId && session.planEditable) return;
+    if (discard) await _current?.revertSavedChanges();
     // Switching the site here is opening, not an edit.
     await _plan.restoring(() async {
       if (session.siteId case final id?) await _site.selectSite(id);
@@ -167,12 +175,13 @@ class PlanLifecycleViewModel {
             ),
       );
       await _apply(session);
-      await _current?.adopt(session, _plan.currentPlan);
+      await _current?.adopt(session, _plan.currentPlan, discard: discard);
     });
   }
 
   /// A new draft for tonight with the example plan (owner decision).
-  Future<void> newSession() async {
+  Future<void> newSession({bool discard = false}) async {
+    if (discard) await _current?.revertSavedChanges();
     _plan.replaceNight(null);
     _plan.replaceContents(
       target: _plan.selectedTarget,
@@ -180,14 +189,23 @@ class PlanLifecycleViewModel {
       blocks: ExampleCapturePlan.blocks(),
       isExample: true,
     );
-    await _current?.startNew(_plan.currentPlan());
+    await _current?.startNew(_plan.currentPlan(), discard: discard);
     _plan.markChanged();
   }
 
-  /// A new draft with the current plan on [date]; the original stays.
-  Future<void> duplicateForNight(CalendarDate date) async {
+  /// A new draft with the current plan on [date]; the original stays. The
+  /// copy is a new plan that is not saved, so leaving it asks (W1, S6.3).
+  Future<void> duplicateForNight(
+    CalendarDate date, {
+    bool discard = false,
+  }) async {
+    if (discard) await _current?.revertSavedChanges();
     _plan.replaceNight(date);
-    await _current?.startNew(_plan.currentPlan());
+    await _current?.startNew(
+      _plan.currentPlan(),
+      discard: discard,
+      unsaved: true,
+    );
     _plan.markChanged();
   }
 

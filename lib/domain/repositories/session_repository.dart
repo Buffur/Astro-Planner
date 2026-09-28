@@ -85,4 +85,18 @@ abstract class SessionRepository {
 
   /// Deletes the session with its blocks.
   Future<void> delete(int id);
+
+  /// Discards a never-saved draft (`draft` without `plannedAtUtc`; S6.3,
+  /// U1): deletes it with its blocks. Any other session — a saved plan, a
+  /// run, a result, a legacy log — is refused with [SessionStateError] and
+  /// nothing changes. A session already gone is not an error.
+  Future<void> deleteDraft(int id);
+
+  /// Discards a Saved · changed plan's unsaved changes (S4-DEF-04 = R;
+  /// S6.3): its plan is restored from its plan snapshot and it becomes
+  /// planned again. The snapshot and `plannedAtUtc` are not touched.
+  /// Throws [SavedPlanUnavailable] when the snapshot cannot be read or names
+  /// a site, target or rig that no longer exists, and [SessionStateError]
+  /// for any other session; nothing changes then.
+  Future<Session> revertToSaved(int id);
 }

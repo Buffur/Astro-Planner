@@ -10,6 +10,7 @@ import '../../domain/models/session_log.dart' as domain;
 import '../../domain/models/session_snapshot.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/services/execution_machine.dart';
+import '../../domain/services/saved_plan_reader.dart';
 import '../../domain/services/session_reconciliation.dart';
 import '../database/app_database.dart';
 
@@ -303,6 +304,67 @@ class DriftSessionRepository implements SessionRepository {
   Future<void> delete(int id) async {
     // capture_blocks and session_events cascade (ADR-008 §4, ADR-016 §4).
     await (_db.delete(_db.sessionLogs)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<void> deleteDraft(int id) => _db.transaction(() async {
+    final s = await get(id);
+    if (s == null) return;
+    if (s.legacy || s.status != SessionStatus.draft || s.plannedAtUtc != null) {
+      throw SessionStateError('Only a plan that was never saved is deleted.');
+    }
+    await (_db.delete(_db.sessionLogs)..where((t) => t.id.equals(id))).go();
+  });
+
+  @override
+  Future<Session> revertToSaved(int id) => _change(id, (s) async {
+    if (s.legacy || s.status != SessionStatus.draft || s.plannedAtUtc == null) {
+      throw SessionStateError('Only a saved plan with changes is reverted.');
+    }
+    final snapshot = s.planSnapshot;
+    final plan = snapshot == null ? null : SavedPlanReader.read(snapshot);
+    if (plan == null) {
+      throw SavedPlanUnavailable(
+        'The saved plan of session $id is unreadable.',
+      );
+    }
+    await _requireReferences(plan);
+    await _writePlan(
+      id,
+      plan,
+      const SessionLogsCompanion(status: Value('planned')),
+    );
+  });
+
+  /// A restored plan's site, target and rig must still exist (S6.3): a
+  /// deleted one is never silently dropped from it (SI-008).
+  Future<void> _requireReferences(SessionPlan plan) async {
+    Future<bool> exists(TableInfo table, Expression<bool> where) async =>
+        (await (_db.selectOnly(table)
+              ..addColumns([countAll()])
+              ..where(where))
+            .map((r) => r.read(countAll())!)
+            .getSingle()) >
+        0;
+    final missing = [
+      if (plan.siteId case final id?)
+        if (!await exists(
+          _db.locationProfiles,
+          _db.locationProfiles.id.equals(id),
+        ))
+          'site',
+      if (plan.targetId case final id?)
+        if (!await exists(_db.astroTargets, _db.astroTargets.id.equals(id)))
+          'target',
+      if (plan.rigId case final id?)
+        if (!await exists(_db.opticalRigs, _db.opticalRigs.id.equals(id)))
+          'rig',
+    ];
+    if (missing.isNotEmpty) {
+      throw SavedPlanUnavailable(
+        'The saved plan names a ${missing.join(', ')} that no longer exists.',
+      );
+    }
   }
 
   /// Loads the session, applies [write] in one transaction and returns the

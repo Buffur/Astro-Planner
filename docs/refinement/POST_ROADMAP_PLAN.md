@@ -2866,7 +2866,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | --- | --- | --- | --- | --- | --- | --- |
 | S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | **Done 2026-09-27** |
 | S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | **Done 2026-09-27** |
-| S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 (**decided: R**) | Frozen |
+| S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 (**decided: R**) | **Done 2026-09-28** |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
@@ -2990,6 +2990,17 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - after a restart following Discard, and following an untouched-draft replacement, the planner
     resumes the expected plan (`lifecycle_matrix_test.dart`'s method);
   - the full gate.
+- **Done 2026-09-28** (S4-DEF-04 = R): `askBeforeLeavingPlan` (`unsaved_plan_prompt.dart`) at the
+  four callers; the lifecycle takes `discard:`. `SessionRepository.deleteDraft` (only a never-saved
+  draft) and `revertToSaved` (Saved · changed → planned from the snapshot, through the pure
+  `SavedPlanReader`; refused with `SavedPlanUnavailable`, and the user is told). `CurrentSession`
+  switches in the chain and deletes a replaced never-saved draft that was discarded or untouched; a
+  copy counts as unsaved (W1); a site change on a saved plan is an edit (V3). Tests: the reader (3),
+  the repository (7, real SQLite, including counters equal to the replay), `CurrentSession` (5),
+  and the prompt through the UI (33: S1.6's 9 cases mapped, every answer at every caller, restarts,
+  V3, W1, a refused revert). Four S6.2 tests changed deliberately: an untouched draft is now deleted
+  when replaced, and after a Copy, Open asks (their other assertions unchanged). Full gate PASS:
+  1,374 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.4 — A never-saved draft's night at the rollover (P6.7; TD-057)
 - **Objective:** a never-saved draft's stored night follows the planner's night across the rollover,

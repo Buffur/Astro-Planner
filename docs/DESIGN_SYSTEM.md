@@ -385,8 +385,9 @@ sweep (trap 17).
     Discard · Save;
   - Discard is styled destructive;
   - back or a tap outside is Cancel;
-  - it returns the choice only. What Save and Discard do is P6.1's; the S1.6 guard stays until
-    then.
+  - it returns the choice only. Since S6.3 the planner's `askBeforeLeavingPlan`
+    (`unsaved_plan_prompt.dart`) wraps it and does Save; the lifecycle does Discard (a never-saved
+    plan deleted, a saved one reverted, S4-DEF-04 = R). The S1.6 guard is gone.
 - **`confirmDestructive`** (same file):
   - the title names the item ('Delete rig "Refractor 400"?') and the message the consequence;
   - Cancel, then the destructive verb (`AppButtonStyles.destructiveText`);
@@ -446,9 +447,9 @@ What S5.1 and S5.2 changed app-wide, and what they leave to the Stages that rede
     planner's Save plan becomes primary (P6.3);
   - (S5.2) icons follow §6.5 as their screens are redesigned;
   - (S5.8) the existing delete paths (a capture block at once without undo; swipe-only rigs,
-    targets and Logbook entries behind a lingering dialog; a site's dialog), the S1.6 guard and the
-    silent New and Duplicate keep their behaviour until they adopt §7a's patterns (P6.1; Stages 6,
-    8, 9);
+    targets and Logbook entries behind a lingering dialog; a site's dialog) keep their behaviour
+    until they adopt §7a's patterns (Stages 6, 8, 9). The S1.6 guard and the silent New and
+    Duplicate were replaced by S6.2 and S6.3;
   - (S5.4) the planner, Tonight and the Logbook still show their own status texts ("Draft",
     "Planned, unsaved changes", "In progress", "Abandoned", "Legacy log", "Fit tonight: …"). They
     adopt `StatusBlock` and `PlanStateLabel` in P6.1, P6.3, P6.6 and P8.5.
@@ -471,7 +472,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 
 | Screen or widget (today) | Adopts | P-Task | Retired terms it removes from S5.3's baseline |
 | --- | --- | --- | --- |
-| The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 done**, except `askUnsavedChanges`: S6.3). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
+| The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 and S6.3 done**). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
 | The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 | Equipment profile (the empty state) |
 | Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 | Acquisition, Session budget (budget summary) |
 | Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 | Astro Dusk, Astro Dawn, True Night Window (with TD-051) |

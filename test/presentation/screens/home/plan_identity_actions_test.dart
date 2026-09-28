@@ -175,6 +175,10 @@ void main() {
     await tester.ensureVisible(open);
     await tester.tap(open);
     await settle(tester);
+    // S6.3 (W1): the copy is a new plan that is not saved, so Open asks.
+    expect(find.text('Unsaved changes'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('unsaved.discard')));
+    await settle(tester);
     expect(find.text('Plan opened'), findsOneWidget);
     expect(vm.activeSessionId, saved);
   });
@@ -183,7 +187,6 @@ void main() {
       'the new draft, not the old one', (tester) async {
     await start(tester);
     final old = vm.activeSessionId!;
-    final oldBlocks = vm.captureBlocks.length;
 
     await openMenu(tester);
     await tester.tap(find.byKey(const Key('planner.newPlan')));
@@ -198,8 +201,9 @@ void main() {
       () => sessions.get(vm.activeSessionId!),
     ))!;
     expect(created.blocks.last.frameCount, 7, reason: 'the edit is kept');
-    final before = (await tester.runAsync(() => sessions.get(old)))!;
-    expect(before.blocks, hasLength(oldBlocks), reason: 'left as it was');
+    // S6.3: the old draft was never edited, so the switch deletes it; the
+    // edit is in the new draft (above), not lost with the old one.
+    expect(await tester.runAsync(() => sessions.get(old)), isNull);
     expect(vm.plan.hasUnsavedChanges, isTrue);
   });
 
@@ -207,7 +211,6 @@ void main() {
       'copy, not the original', (tester) async {
     await start(tester);
     final original = vm.activeSessionId!;
-    final originalBlocks = vm.captureBlocks.length;
 
     await openMenu(tester);
     await tester.tap(find.byKey(const Key('planner.copy')));
@@ -223,8 +226,9 @@ void main() {
       () => sessions.get(vm.activeSessionId!),
     ))!;
     expect(copy.blocks.last.frameCount, 7, reason: 'the edit is kept');
-    final before = (await tester.runAsync(() => sessions.get(original)))!;
-    expect(before.blocks, hasLength(originalBlocks), reason: 'left as it was');
+    // S6.3: the original was never edited, so the switch deletes it; the
+    // edit is in the copy (above), not lost with the original.
+    expect(await tester.runAsync(() => sessions.get(original)), isNull);
   });
 }
 

@@ -78,10 +78,77 @@ class CurrentSession {
 
   /// Makes a new draft for [plan] the current session. It runs in the
   /// autosave chain, so an edit made meanwhile lands in the new draft, not
-  /// in the one it replaces (TD-058, S6.2).
-  Future<Session> startNew(SessionPlan plan) => _replacing(
-    () => _inChain(() async => _session = await _repository.create(plan)),
+  /// in the one it replaces (TD-058, S6.2). [discard] and the replaced draft:
+  /// see [_switch]. [unsaved]: the new draft counts as unsaved at once (a
+  /// copy, W1).
+  Future<Session> startNew(
+    SessionPlan plan, {
+    bool discard = false,
+    bool unsaved = false,
+  }) => _switch(
+    () => _repository.create(plan),
+    discard: discard,
+    unsaved: unsaved,
   );
+
+  /// A never-saved draft (ADR-019 §3.1).
+  static bool _neverSaved(Session s) =>
+      !s.legacy && s.status == SessionStatus.draft && s.plannedAtUtc == null;
+
+  /// Replaces the current session with [next]'s, in the autosave chain
+  /// (S6.3; U1). The replaced session, when it is a never-saved draft, is
+  /// deleted if the user chose Discard ([discard]) or never edited it: no
+  /// plan is left behind where no screen lists it. A saved plan is never
+  /// deleted here. A failed delete is logged; the switch stands.
+  Future<Session> _switch(
+    Future<Session> Function() next, {
+    bool discard = false,
+    bool unsaved = false,
+  }) {
+    final untouched = !_edited;
+    return _replacing(
+      () => _inChain(() async {
+        final previous = _session;
+        final session = _session = await next();
+        if (previous != null &&
+            previous.id != session.id &&
+            _neverSaved(previous) &&
+            (discard || untouched)) {
+          try {
+            await _repository.deleteDraft(previous.id);
+          } catch (e, s) {
+            AppLog.warning(
+              'session',
+              'Replaced draft ${previous.id} not deleted',
+              error: e,
+              stackTrace: s,
+            );
+          }
+        }
+        if (unsaved) {
+          _edited = true;
+          await _mark(session.id);
+        }
+        return session;
+      }),
+    );
+  }
+
+  /// Discard on a Saved · changed plan (S4-DEF-04 = R; S6.3): the current
+  /// session goes back to what was saved, in the autosave chain, before the
+  /// action that replaces it. Any other session is left alone. Throws
+  /// [SavedPlanUnavailable] when the saved plan cannot be restored; nothing
+  /// changes then.
+  Future<void> revertSavedChanges() => _inChain(() async {
+    final s = _session;
+    if (s == null ||
+        s.legacy ||
+        s.status != SessionStatus.draft ||
+        s.plannedAtUtc == null) {
+      return;
+    }
+    _session = await _repository.revertToSaved(s.id);
+  });
 
   /// Runs an operation after which the plan counts as unedited; if it
   /// fails, the changes still count as unsaved (S1.6).
@@ -100,15 +167,17 @@ class CurrentSession {
 
   /// Opens [session]: a draft or planned one becomes current; a frozen one
   /// is copied — as [copy] — into a new draft (owner decision, TASK 11.4).
-  /// In the autosave chain, like [startNew] (TD-058, S6.2).
-  Future<void> adopt(Session session, SessionPlan Function() copy) =>
-      _replacing(
-        () => _inChain(() async {
-          _session = session.planEditable
-              ? session
-              : await _repository.create(copy());
-        }),
-      );
+  /// In the autosave chain, like [startNew] (TD-058, S6.2); [discard] and
+  /// the replaced draft as in [_switch].
+  Future<void> adopt(
+    Session session,
+    SessionPlan Function() copy, {
+    bool discard = false,
+  }) => _switch(
+    () async =>
+        session.planEditable ? session : await _repository.create(copy()),
+    discard: discard,
+  );
 
   /// Autosaves [plan] into the current session (a planned one returns to
   /// draft until the next Save). Never throws: a failure is kept in
