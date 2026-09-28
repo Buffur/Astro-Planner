@@ -2870,7 +2870,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | **Done 2026-09-28** |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | **Done 2026-09-28** |
-| S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | Frozen |
+| S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | Frozen |
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 | Frozen, gated |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
@@ -3157,6 +3157,22 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - "Acquisition" and "Session budget" leave the baseline;
   - a section's state survives a restart (one test through the planner, on S5.5's mechanism);
   - the sweep; the full gate.
+- **Done 2026-09-28:** five `CollapsibleSection`s keyed by `PlannerSections`: Budget details
+  ("2 h 5 min needed · 3 h total"; each ADR-009 line in the glossary's words), the √N explanation
+  (the values stay visible), Assumptions (its summary keeps the darkness limit, minimum altitude
+  and margin in view), the rig's Specifications (the review flag in the summary; the plan's values
+  and capability warnings stay on the card) and Sky darkness (Bortle, SQM, the map link; "Unknown"
+  in the summary). Two changes the Task needed: the status shows the integration in every state
+  (its budget line is folded, and it needs no site, target or rig), and the Conditions section
+  carries the zone rule once. The sweep now also audits the planner with every section open; it
+  found the Bortle badge (32 px high, white text on the class colour at 2.68:1), which the sweep's
+  scroll had never shown before, so the picker shows the colour as a swatch beside text in the
+  text roles, at 48 dp (sky darkness's presentation is S6.7's, S6.5's out-of-scope). The
+  assumptions' degrees now go through `QuantityText` ("−18°"). `planner_disclosure_test.dart` (4:
+  facts when collapsed; the never-hidden items; the budget lines against ADR-009's E3 and E4; a
+  restart). Deliberate test changes: five tests open the section they read (the budget and √N help,
+  the sky card (3), the map link), and the budget test reads the renamed lines. "Acquisition" and
+  "Session budget" left the baseline. Full gate PASS: 1,395 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.8 — Defaults, New plan's contents and the first run (P6.2; P6.1's New plan; RD-04)
 - **Objective:** nothing the user did not choose looks chosen.

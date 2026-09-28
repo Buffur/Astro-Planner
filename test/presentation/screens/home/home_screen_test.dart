@@ -558,6 +558,9 @@ void main() {
     await tester.pumpAndSettle();
     // Visible since TASK 7.4, its PD-06 phase (before, this asserted
     // findsNothing): with a site, the map opens at the site's coordinates.
+    // S6.7: it is in the Sky darkness section, one tap away.
+    await tester.tap(find.text('Sky darkness'));
+    await tester.pumpAndSettle();
     expect(find.text('Open Light Pollution Map'), findsOneWidget);
 
     // Stays visible per PD-06 (on the core path): since TASK 12.2 it is

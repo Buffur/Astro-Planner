@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/services/capture_budget_calculator.dart';
+import '../../shared/app_words.dart';
+import '../../shared/collapsible_section.dart';
+import '../../shared/context_line.dart';
 import '../../shared/night_time_formatter.dart';
+import '../planner_sections.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
@@ -15,8 +20,10 @@ String formatBudgetDuration(int ms) =>
 /// The capture plan's outputs (ADR-009 §2, §7; TASK 5.6): the budget
 /// breakdown, relative stacking gain per group and storage. The fit, its
 /// reason, its end and "fill the window" are the planner's status since S6.6
-/// (`PlanStatus`), shown once. Renders ViewModel/domain values only — no
-/// calculations here.
+/// (`PlanStatus`), shown once. Since S6.7 (ADR-019 §7) the breakdown is in
+/// Budget details and the √N explanation one tap away, each behind a
+/// factual summary; the √N values and storage stay visible. Renders
+/// ViewModel/domain values only — no calculations here.
 class CaptureBudgetSummary extends StatelessWidget {
   const CaptureBudgetSummary({super.key});
 
@@ -41,61 +48,97 @@ class CaptureBudgetSummary extends StatelessWidget {
             zoneId: zoneId,
           );
 
+    final library = budget.libraryBlockIndexes.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _Line(
-          'Integration (light exposure)',
-          formatBudgetDuration(budget.integrationMs),
-        ),
-        _Line(
-          'Acquisition (lights + overheads)',
-          formatBudgetDuration(budget.acquisitionMs),
-        ),
-        if (budget.inWindowCalibrationMs > 0)
-          _Line(
-            'Calibration during the window',
-            formatBudgetDuration(budget.inWindowCalibrationMs),
+        // S6.7 (ADR-019 §7): every ADR-009 line on its own line, one tap
+        // away; the status above shows the answer's numbers.
+        CollapsibleSection(
+          sectionKey: PlannerSections.budgetDetails,
+          title: AppWords.budgetDetails,
+          summary: budgetSummary(budget),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Line(
+                '${AppWords.integration} (light exposure)',
+                formatBudgetDuration(budget.integrationMs),
+                key: const Key('budget.integration'),
+              ),
+              _Line(
+                '${AppWords.imagingTime} (lights + overheads)',
+                formatBudgetDuration(budget.acquisitionMs),
+                key: const Key('budget.imagingTime'),
+              ),
+              if (budget.inWindowCalibrationMs > 0)
+                _Line(
+                  'Calibration during the window',
+                  formatBudgetDuration(budget.inWindowCalibrationMs),
+                  key: const Key('budget.calibrationIn'),
+                ),
+              _Line(
+                '${AppWords.timeNeeded} (in the window)',
+                fit.availableMs > 0
+                    ? '${formatBudgetDuration(budget.windowLoadMs)} of '
+                          '${formatBudgetDuration(fit.availableMs)}'
+                    : formatBudgetDuration(budget.windowLoadMs),
+                key: const Key('budget.timeNeeded'),
+                emphasis: true,
+              ),
+              _Line(
+                'Calibration outside the window',
+                budget.outsideWindowCalibrationMs > 0
+                    ? formatBudgetDuration(budget.outsideWindowCalibrationMs)
+                    : 'None',
+                key: const Key('budget.calibrationOut'),
+              ),
+              _Line(
+                'Setup',
+                budget.setupMs == null
+                    ? 'Not included'
+                    : setupStart == null
+                    ? formatBudgetDuration(budget.setupMs!)
+                    : '${formatBudgetDuration(budget.setupMs!)} — start by '
+                          '${clock(setupStart)}',
+                key: const Key('budget.setup'),
+              ),
+              _Line(
+                AppWords.totalTime,
+                formatBudgetDuration(budget.sessionBudgetMs),
+                key: const Key('budget.totalTime'),
+                emphasis: true,
+              ),
+              if (library > 0)
+                _Line(
+                  'Library calibration',
+                  '$library block${library == 1 ? '' : 's'}, no time needed',
+                  key: const Key('budget.library'),
+                ),
+              // The zone rule, once for the section's one time (trap 2).
+              if (setupStart != null && night != null)
+                Text(
+                  ContextLine.zoneRule(night.startUtc, zoneId: zoneId),
+                  style: theme.textTheme.bodySmall,
+                ),
+            ],
           ),
-        _Line(
-          'Time needed in window',
-          fit.availableMs > 0
-              ? '${formatBudgetDuration(budget.windowLoadMs)} of '
-                    '${formatBudgetDuration(fit.availableMs)}'
-              : formatBudgetDuration(budget.windowLoadMs),
-          emphasis: true,
         ),
-        _Line(
-          'Calibration outside the window',
-          budget.outsideWindowCalibrationMs > 0
-              ? formatBudgetDuration(budget.outsideWindowCalibrationMs)
-              : 'None',
-        ),
-        _Line(
-          'Setup',
-          budget.setupMs == null
-              ? 'Not included'
-              : setupStart == null
-              ? formatBudgetDuration(budget.setupMs!)
-              : '${formatBudgetDuration(budget.setupMs!)} — start by '
-                    '${clock(setupStart)}',
-        ),
-        _Line(
-          'Session budget',
-          formatBudgetDuration(budget.sessionBudgetMs),
-          emphasis: true,
-        ),
-        if (budget.libraryBlockIndexes.isNotEmpty)
-          Text(
-            '${budget.libraryBlockIndexes.length} calibration '
-            'block${budget.libraryBlockIndexes.length == 1 ? '' : 's'} '
-            'from your library (no time needed).',
+        const SizedBox(height: 12),
+        // The √N values stay visible and relative (SI-003); the long
+        // explanation is one tap away.
+        CollapsibleSection(
+          sectionKey: PlannerSections.gainHelp,
+          title: AppWords.relativeStackingGain,
+          summary: 'Per filter and exposure, against one frame',
+          child: Text(
+            '√N compares the random noise of a stack with one frame of the '
+            'same filter and exposure. It only applies within such a group, '
+            'is not a signal-to-noise ratio of your image, and ignores sky '
+            'brightness, the target and your camera.',
+            key: const Key('capturePlan.gainHelp'),
             style: theme.textTheme.bodySmall,
           ),
-        const SizedBox(height: 12),
-        const Text(
-          'Relative stacking gain (√N vs one frame)',
-          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         if (budget.lightGroups.isEmpty)
           Text('No light frames.', style: theme.textTheme.bodySmall)
@@ -106,14 +149,6 @@ class CaptureBudgetSummary extends StatelessWidget {
                   '${_seconds(g.exposureMs)} × ${g.frames}',
               '${g.relativeStackingGain.toStringAsFixed(1)}x',
             ),
-        Text(
-          '√N compares the random noise of a stack with one frame of the '
-          'same filter and exposure. It only applies within such a group, '
-          'is not a signal-to-noise ratio of your image, and ignores sky '
-          'brightness, the target and your camera.',
-          key: const Key('capturePlan.gainHelp'),
-          style: theme.textTheme.bodySmall,
-        ),
         const SizedBox(height: 12),
         _Line(
           'Estimated Storage',
@@ -132,6 +167,12 @@ class CaptureBudgetSummary extends StatelessWidget {
     );
   }
 
+  /// Budget details' collapsed summary, a fact: "2 h 5 min needed · 3 h
+  /// total" (S6.7).
+  static String budgetSummary(CaptureBudget budget) =>
+      '${formatBudgetDuration(budget.windowLoadMs)} needed · '
+      '${formatBudgetDuration(budget.sessionBudgetMs)} total';
+
   static String _seconds(int ms) {
     final s = ms / 1000;
     return s == s.roundToDouble() ? '${s.round()} s' : '$s s';
@@ -139,7 +180,7 @@ class CaptureBudgetSummary extends StatelessWidget {
 }
 
 class _Line extends StatelessWidget {
-  const _Line(this.label, this.value, {this.emphasis = false});
+  const _Line(this.label, this.value, {super.key, this.emphasis = false});
 
   final String label;
   final String value;

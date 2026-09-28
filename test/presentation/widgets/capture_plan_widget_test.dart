@@ -281,11 +281,18 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
+    // S6.7: the breakdown and the √N help are one tap away; the √N values
+    // stay visible. The lines carry the glossary's names (RD-14).
+    expect(find.text('Ha · 300 s × 20'), findsOneWidget);
+    expect(find.text('Integration (light exposure)'), findsNothing);
+    await tester.tap(find.text('Budget details'));
+    await tester.pumpAndSettle();
     expect(find.text('Integration (light exposure)'), findsOneWidget);
     expect(find.text('1 h 40 min'), findsOneWidget); // 20 x 300 s
-    expect(find.text('Acquisition (lights + overheads)'), findsOneWidget);
-    expect(find.text('Session budget'), findsOneWidget);
-    expect(find.text('Ha · 300 s × 20'), findsOneWidget);
+    expect(find.text('Imaging time (lights + overheads)'), findsOneWidget);
+    expect(find.text('Total time'), findsOneWidget);
+    await tester.tap(find.text('Relative stacking gain (√N vs one frame)'));
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('capturePlan.gainHelp')), findsOneWidget);
     expect(find.textContaining('not a signal-to-noise ratio'), findsOneWidget);
 

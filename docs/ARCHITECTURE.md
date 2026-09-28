@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.7, 2026-09-28:** B4 notes the planner's collapsible sections (`PlannerSections`) and where each value went.
 > **S6.6, 2026-09-28:** B4 notes the planner's answer-first structure (`PlanStatus`, the context line, the section order).
 > **S6.5, 2026-09-28:** B4 notes the Night & Moon and Weather detail routes, the dark span at the user's limit and `CandidatesViewModel`.
 > **S6.3, 2026-09-28:** B4 notes Save · Discard · Cancel, the replaced-draft deletion and the revert of a changed saved plan (S4-DEF-04 = R).
@@ -459,6 +460,16 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `_ChooseCard` in its section. `InfoRow` uses the text roles. Where each value went: the fit, its
 > reason, its end and fill/trim → the status; "Session Date" → the context line; the rest stays in
 > its section (the rig's rows reordered, "Current Altitude" renamed "Altitude now").
+
+> **Since S6.7 (2026-09-28; ADR-019 §7)** the planner's technical depth is in `CollapsibleSection`s
+> keyed by `PlannerSections` (remembered by `DisclosureViewModel`). Where each value went: the
+> budget's lines → Budget details (`CaptureBudgetSummary`, keyed `budget.*`); the √N help → its own
+> section above the √N values, which stay visible; the assumptions → a section instead of the
+> `ExpansionTile`; the rig's focal length, focal ratio, sensor and tracking → Specifications, below
+> the card's tappable part (`PlannerSummaryCard.below`); Bortle, SQM and the map link →
+> `SkyDarknessWidget`'s section (the map link moved out of `home_screen.dart`). Storage, the
+> capability warnings and every "never hidden" item stay visible; the status shows the integration
+> in every state. Summaries are pure static functions beside their widgets.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

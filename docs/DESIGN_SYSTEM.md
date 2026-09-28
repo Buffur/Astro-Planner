@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.7, 2026-09-28:** §7a records the planner's five collapsible sections and the Bortle picker; §9's P6.4 rows are done.
+
 > **Status:** living, built by Stage 5 (Design System Foundation; `refinement/POST_ROADMAP_PLAN.md`,
 > "Stage 5 — frozen Task sequence"). It describes the **code as built**. Each Stage 5 Task adds its
 > part; Stages 6–9 adopt it on the screens (see "Adoption", written by S5.9).
@@ -327,6 +329,22 @@ Detail one tap away (ADR-019 §7; RD-06, RG-06: progressive disclosure, no modes
   - stored in `DisplayPreferencesRepository` (`section.<key>` in SharedPreferences);
   - a store that cannot be read or written is logged, and the section still opens and closes;
   - keys are stable names such as `planner.budgetDetails`: never rename one without a reason.
+- **In the planner (S6.7):** five sections, their keys in `PlannerSections`
+  (`lib/presentation/widgets/planner_sections.dart`):
+
+  | Section | Summary (a fact) | Content |
+  | --- | --- | --- |
+  | Budget details | "2 h 5 min needed · 3 h total" | Every ADR-009 line in the glossary's words (Integration, Imaging time, Time needed, Calibration during and outside the window, Setup, Total time, Library calibration); the zone rule when the setup time is shown |
+  | Relative stacking gain (√N vs one frame) | "Per filter and exposure, against one frame" | The √N explanation; the √N values stay visible below the section (SI-003) |
+  | Assumptions | "Darkness limit −18° · minimum altitude 30° · margin 15 %" (the constraints that shape the window stay in view) | Every overhead and threshold, the placement rule, the link to Settings |
+  | Specifications (the rig) | "400 mm · f/5.0 · Tracking: Guided" (the focal ratio's review flag stays in view) | Focal length, focal ratio, sensor, tracking. The values the plan uses and the capability warnings stay on the card |
+  | Sky darkness | "Bortle 4 · SQM 21.30 mag/arcsec²", "Unknown", "not saved" | The Bortle picker, the values with source and date, the light-pollution map link |
+
+  The accessibility sweep also audits the planner with every `PlannerSections.all` key open, so a
+  new section's key joins that list.
+- **The Bortle picker (S6.7):** the class's conventional colour is a swatch beside the text, which
+  uses the text roles, at 48 dp. The old badge (white text on the class colour, 32 px high) failed
+  the tap-target and contrast guidelines once the sweep could see it.
 
 ### The context line (S5.6; `lib/presentation/shared/context_line.dart`)
 
@@ -479,7 +497,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | --- | --- | --- | --- |
 | The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 and S6.3 done**). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
 | The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 (**S6.6 done**: `PlanStatus`; the context line; no empty state; `InfoRow` text roles) | Equipment profile (the empty state; **removed by S6.6**) |
-| Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 | Acquisition, Session budget (budget summary) |
+| Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 (**S6.7 done**: `PlannerSections`, see §7a) | Acquisition, Session budget (budget summary; **removed by S6.7**) |
 | Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 (**S6.5 done**: `/night`, `/weather`) | Astro Dusk, Astro Dawn, True Night Window (with TD-051; **removed by S6.5**) |
 | Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 | Draft (Tonight's status) |
 | The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) | — |
@@ -514,7 +532,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | --- | --- |
 | `home_screen.dart`: Session planner | P6.1 (**removed by S6.2**) |
 | `home_screen.dart`: Equipment profile | P6.3 (**removed by S6.6**) |
-| `capture_budget_summary.dart`: Acquisition, Session budget | P6.4 |
+| `capture_budget_summary.dart`: Acquisition, Session budget | P6.4 (**removed by S6.7**) |
 | `sky_darkness_widget.dart`: Astro Dusk, Astro Dawn, True Night Window | P6.5 (**removed by S6.5**) |
 | `tonight_home_screen.dart`: Draft | P6.6 |
 | `logbook_screen.dart`: Legacy (2), Draft | P8.5 |

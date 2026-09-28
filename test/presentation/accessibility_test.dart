@@ -18,6 +18,7 @@ import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/weather_snapshot.dart';
+import 'package:astroplan/presentation/widgets/planner_sections.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
@@ -264,6 +265,17 @@ void main() {
           if (problems.isNotEmpty) {
             report.add('$route:\n${problems.join('\n')}');
           }
+        }
+        // S6.7: the planner again with every section open, so the sweep
+        // sees the detail that is one tap away too.
+        for (final key in PlannerSections.all) {
+          await app.vm.disclosure.setOpen(key, true);
+        }
+        AppRouter.router.go(AppRouter.session());
+        await _settle(tester);
+        final open = await _audit(tester, contrast: theme != _Theme.field);
+        if (open.isNotEmpty) {
+          report.add('planner, sections open:\n${open.join('\n')}');
         }
         handle.dispose();
         expect(report, isEmpty, reason: report.join('\n\n'));

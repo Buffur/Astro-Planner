@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../shared/app_words.dart';
+import '../shared/collapsible_section.dart';
+import '../shared/light_pollution_map_link.dart';
+import 'planner_sections.dart';
 import '../shared/night_time_formatter.dart';
 import '../../core/theme/app_palette.dart';
 import '../../../core/config/feature_scope.dart';
@@ -16,48 +20,104 @@ import '../../core/utils/quantity_text.dart';
 /// The site's sky darkness in the planner (TASK 7.4): Bortle and SQM as
 /// entered, with their sources, or unknown. Since S6.5 the night's timeline
 /// and the Moon are on the Night & Moon detail ([NightTimelineSection],
-/// [MoonSection]); the planner shows a summary row for them.
+/// [MoonSection]); the planner shows a summary row for them. Since S6.7
+/// (ADR-019 §7) the Bortle picker, the sources and the light-pollution map
+/// link are one tap away; the summary states the values, or "Unknown".
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
+
+  /// The collapsed summary, a fact: "Bortle 4 · SQM 21.30 mag/arcsec²",
+  /// "Unknown", and "not saved" for a transient position's value.
+  static String summary(SkyDarkness darkness) {
+    if (darkness.isUnknown) return 'Unknown';
+    return [
+      if (darkness.hasBortle) 'Bortle ${darkness.bortleClass}',
+      if (darkness.hasSqm)
+        'SQM ${darkness.sqm!.toStringAsFixed(2)} mag/arcsec²',
+      if (!darkness.isSaved) 'not saved',
+    ].join(' · ');
+  }
 
   @override
   Widget build(BuildContext context) {
     final siteVm = context.watch<SiteViewModel>();
-    final theme = Theme.of(context);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // TASK 15.3: wraps instead of overflowing at large text.
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                Text(
-                  'Sky darkness',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: CollapsibleSection(
+          sectionKey: PlannerSections.sky,
+          title: 'Sky darkness',
+          summary: FeatureScope.lightPollutionContext
+              ? summary(siteVm.skyDarkness)
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (FeatureScope.lightPollutionContext) ...[
+                _BortleBadge(
+                  bortleClass: siteVm.bortleClass,
+                  onChanged: siteVm.setBortleClass,
                 ),
-                if (FeatureScope.lightPollutionContext)
-                  _BortleBadge(
-                    bortleClass: siteVm.bortleClass,
-                    onChanged: siteVm.setBortleClass,
-                  ),
+                _SkyDarknessLine(
+                  darkness: siteVm.skyDarkness,
+                  hasSite: siteVm.activeSite != null,
+                ),
+                // TASK 7.4 (PD-05 option A): the external map, centred on
+                // the current position. Hidden without one — the London
+                // default is not the user's sky.
+                if (!siteVm.isDefaultLocation)
+                  _MapLink(lat: siteVm.latitude, lon: siteVm.longitude),
               ],
-            ),
-            if (FeatureScope.lightPollutionContext)
-              _SkyDarknessLine(
-                darkness: siteVm.skyDarkness,
-                hasSite: siteVm.activeSite != null,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Opens the light-pollution map at the site (TASK 7.4), to read a value
+/// and enter it as Bortle or SQM.
+class _MapLink extends StatelessWidget {
+  const _MapLink({required this.lat, required this.lon});
+
+  final double lat;
+  final double lon;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        final url = LightPollutionMapLink.at(lat, lon);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(Icons.map_outlined),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Open Light Pollution Map',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'Centred here. Read the value, then enter it as Bortle '
+                    'or SQM for your site.',
+                  ),
+                ],
               ),
+            ),
+            Icon(Icons.open_in_browser),
           ],
         ),
       ),
@@ -107,6 +167,9 @@ class _SkyDarknessLine extends StatelessWidget {
   }
 }
 
+/// The Bortle picker (TASK 7.4). Since S6.7 the class's conventional colour
+/// is a swatch beside the text, which uses the text roles, so every class
+/// reads at AA contrast; a 48 dp target (trap 17).
 class _BortleBadge extends StatelessWidget {
   /// Null when unknown (SI-007, TASK 7.1).
   final int? bortleClass;
@@ -117,31 +180,31 @@ class _BortleBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    final i = bortleClass ?? 0;
-    final badgeColor = palette.bortle[i];
-    final textColor = palette.onBortle[i];
+    final text = Theme.of(context).textTheme;
 
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+    Widget swatch(int i) => Container(
+      width: 16,
+      height: 16,
       decoration: BoxDecoration(
-        color: badgeColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.swatchBorder, width: 0.5),
+        color: palette.bortle[i],
+        shape: BoxShape.circle,
+        border: Border.all(color: palette.swatchBorder),
       ),
+    );
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int?>(
           value: bortleClass,
           dropdownColor: Theme.of(context).cardColor,
-          icon: Icon(Icons.arrow_drop_down, color: textColor),
+          icon: Icon(Icons.arrow_drop_down, color: palette.textSecondary),
           items: [
             DropdownMenuItem<int?>(
               value: null,
               child: Text(
                 'Bortle unknown',
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
+                style: TextStyle(color: text.bodyLarge?.color),
               ),
             ),
             ...List.generate(
@@ -150,9 +213,7 @@ class _BortleBadge extends StatelessWidget {
                 value: index + 1,
                 child: Text(
                   'Bortle ${index + 1}',
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
+                  style: TextStyle(color: text.bodyLarge?.color),
                 ),
               ),
             ),
@@ -160,19 +221,19 @@ class _BortleBadge extends StatelessWidget {
           onChanged: onChanged,
           selectedItemBuilder: (BuildContext context) {
             return List.generate(10, (i) {
-              final index = i - 1; // item 0 is "unknown"
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 4.0),
-                  child: Text(
-                    i == 0 ? 'Bortle ?' : 'Bortle ${index + 1}',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  swatch(i),
+                  const SizedBox(width: 8),
+                  Text(
+                    i == 0 ? 'Bortle ?' : 'Bortle $i',
+                    style: text.titleSmall?.copyWith(
+                      color: palette.textPrimary,
                     ),
                   ),
-                ),
+                  const SizedBox(width: 4),
+                ],
               );
             });
           },

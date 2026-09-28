@@ -1,5 +1,6 @@
 // TASK 7.4: the sky card states the known sky darkness with its source, or
-// says it is unknown — never a default value.
+// says it is unknown — never a default value. Since S6.7 the detail is one
+// tap away and the collapsed summary states the values, or "Unknown".
 
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -75,8 +76,16 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// S6.7: the detail is one tap away.
+  Future<void> open(WidgetTester tester) async {
+    await tester.tap(find.text('Sky darkness'));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('unknown sky darkness says so and how to add it', (tester) async {
     await pumpCard(tester);
+    expect(find.text('Unknown'), findsOneWidget); // the summary (S6.7)
+    await open(tester);
     expect(
       // S1.8 (UX-20): names both entry points — the picker and the editor.
       find.text(
@@ -92,6 +101,8 @@ void main() {
     tester,
   ) async {
     await pumpCard(tester, bortle: 4, sqm: 21.3);
+    expect(find.text('Bortle 4 · SQM 21.30 mag/arcsec²'), findsOneWidget);
+    await open(tester);
     expect(
       find.text(
         'Bortle 4 (user, 2026-09-23) · '
@@ -105,6 +116,8 @@ void main() {
     tester,
   ) async {
     await pumpCard(tester, sqm: 19.0);
+    expect(find.text('SQM 19.00 mag/arcsec²'), findsOneWidget);
+    await open(tester);
     expect(
       find.text('SQM 19.00 mag/arcsec² (meter, 2026-08-01)'),
       findsOneWidget,

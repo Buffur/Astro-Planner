@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
 import '../../viewmodels/startup_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
@@ -12,9 +10,12 @@ import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../widgets/planner_sections.dart';
+import '../../shared/info_row.dart';
+import '../../../domain/models/equipment_profile.dart';
+import '../../shared/collapsible_section.dart';
 import '../../widgets/plan_status.dart';
 import '../../shared/capability_text.dart';
-import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/start_session.dart';
 import '../../shared/night_time_formatter.dart';
@@ -170,6 +171,22 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // S6.7: the zone rule, once for the section's
+                        // times (trap 2).
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(
+                            ContextLine.zoneRule(
+                              night.startUtc,
+                              zoneId: siteVm.displayZoneId,
+                            ),
+                            key: const Key('planner.conditionsZone'),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppPalette.of(context).textTertiary,
+                                ),
+                          ),
+                        ),
                       ] else
                         PlannerSummaryCard(
                           title: 'Location: ${siteVm.locationName ?? "Custom"}',
@@ -182,63 +199,6 @@ class HomeScreen extends StatelessWidget {
                           onTap: () => context.push(AppRouter.selectSite),
                         ),
                       const SkyDarknessWidget(),
-                      // TASK 10.3 (ADR-013 §6): the fixed sky warning
-                      // is gone; the Moon and sky darkness are shown as
-                      // facts per window and in the card above.
-                      // TASK 7.4 (PD-05 option A): the external map,
-                      // centred on the current position. Hidden
-                      // without one — the London default is not the
-                      // user's sky.
-                      if (FeatureScope.lightPollutionContext &&
-                          !siteVm.isDefaultLocation)
-                        Card(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          color: Theme.of(context).cardTheme.color,
-                          child: InkWell(
-                            onTap: () async {
-                              final url = LightPollutionMapLink.at(
-                                siteVm.latitude,
-                                siteVm.longitude,
-                              );
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(
-                                  url,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(6),
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.map_outlined),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Open Light Pollution Map',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          'Centred here. Read the value, '
-                                          'then enter it as Bortle or '
-                                          'SQM for your site.',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.open_in_browser),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
                       _SectionHeader(AppWords.rig),
                       if (equipment != null) ...[
                         PlannerSummaryCard(
@@ -246,8 +206,8 @@ class HomeScreen extends StatelessWidget {
                           data: {
                             // S6.6: the values this plan uses first,
                             // then any active capability warning
-                            // (TASK 8.6, guidance); the reference rows
-                            // after them (S6.7 folds those).
+                            // (TASK 8.6, guidance). S6.7: the reference
+                            // rows are one tap away, below.
                             if (analysisVm.rigCapability case final cap?)
                               'Field of view': CapabilityText.fov(cap),
                             'Pixel scale': analysisVm.pixelScale != null
@@ -263,15 +223,39 @@ class HomeScreen extends StatelessWidget {
                                 when cap.recommendedMaxSubS != null)
                               'Max sub (guide)':
                                   CapabilityText.recommendedMaxSub(cap)!,
-                            'Focal length':
-                                '${_trimNumber(equipment.focalLengthMm)} mm',
-                            'Focal ratio': equipment.needsApertureReview
-                                ? 'f/${_trimNumber(equipment.focalRatio)} — please review'
-                                : 'f/${equipment.focalRatio.toStringAsFixed(1)}',
-                            'Sensor':
-                                '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
-                            'Tracking': equipment.trackingType.label,
                           },
+                          below: CollapsibleSection(
+                            sectionKey: PlannerSections.rigDetails,
+                            title: 'Specifications',
+                            // A fact, and the review flag stays in view.
+                            summary:
+                                '${_trimNumber(equipment.focalLengthMm)} mm · '
+                                '${_focalRatio(equipment)} · '
+                                '${AppWords.tracking}: ${equipment.trackingType.label}',
+                            child: Column(
+                              children: [
+                                for (final (label, value) in [
+                                  (
+                                    'Focal length',
+                                    '${_trimNumber(equipment.focalLengthMm)} mm',
+                                  ),
+                                  ('Focal ratio', _focalRatio(equipment)),
+                                  (
+                                    'Sensor',
+                                    '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
+                                  ),
+                                  (
+                                    AppWords.tracking,
+                                    equipment.trackingType.label,
+                                  ),
+                                ])
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: InfoRow(label: label, value: value),
+                                  ),
+                              ],
+                            ),
+                          ),
                           onTap: () => context.push(AppRouter.selectRig),
                         ),
                       ] else
@@ -430,6 +414,11 @@ class _ChooseCard extends StatelessWidget {
 /// A number without trailing zeros (e.g. 400.0 → "400", 3.76 → "3.76").
 String _trimNumber(double value) =>
     value == value.roundToDouble() ? value.toInt().toString() : '$value';
+
+/// The rig's focal ratio, with its review flag (TASK 8.4, trap 3).
+String _focalRatio(EquipmentProfile rig) => rig.needsApertureReview
+    ? 'f/${_trimNumber(rig.focalRatio)} — please review'
+    : 'f/${rig.focalRatio.toStringAsFixed(1)}';
 
 /// The first-run prompt (TASK 7.3), shown while the ViewModel has no site
 /// or position and is using the hard-coded default. Nothing asks for the

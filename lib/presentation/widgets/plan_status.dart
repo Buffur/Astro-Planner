@@ -68,13 +68,14 @@ class PlanStatus extends StatelessWidget {
               ? 'A rig is needed to save the plan and to check exposures.'
               : fit.reason,
           keyNumbers: [
-            if (missing == null)
-              (
-                AppWords.integration,
-                QuantityText.duration(
-                  Duration(milliseconds: analysis.captureBudget.integrationMs),
-                ),
+            // Always (S6.7): the budget's lines are folded into Budget
+            // details, and integration needs no site, target or rig.
+            (
+              AppWords.integration,
+              QuantityText.duration(
+                Duration(milliseconds: analysis.captureBudget.integrationMs),
               ),
+            ),
             if (missing == null &&
                 end != null &&
                 night != null &&
