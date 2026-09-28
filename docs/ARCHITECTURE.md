@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.V1, 2026-09-28:** B4 notes that a delete's Undo owns only the deleted block (TD-082).
 > **S6.16, 2026-09-28:** B4 notes the corrective pass: the planner's amended order, Tonight's finish, the missing inputs' reasons, the √N graph's labels, Night & Moon without repetition, and the blocks' Undo (`BlocksEdit`).
 > **S6.14, 2026-09-28:** B4 notes the candidates' default order (RD-10 = O1).
 > **S6.13, 2026-09-28:** B4 notes Tonight's plan-first order and where each value went.
@@ -492,7 +493,11 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > **Since S6.9 (2026-09-28; RD-09 M + S1, RD-08 T3)** capture-block rows are worded by the pure
 > `BlockText` (`presentation/shared/block_text.dart`) from the block and its `BlockBudget`; Delete
 > goes through `DeleteButton` and `showUndo`, and Undo calls `SessionPlanViewModel.restoreCaptureBlock`
-> (the identical block at its index, the example badge as it was). `SessionPlanViewModel.effectiveTracking`
+> (the identical block at its index). *Since S6.V1 (TD-082)* the delete runs through
+> `deleteBlockWithUndo` (`widgets/capture_plan/blocks_undo.dart`), which records it as a `BlocksEdit`:
+> the Undo owns that block only, so edits made since stay; the example badge returns only while
+> `BlocksEdit.isCurrent` holds, and a replaced plan (`BlocksEdit.inPlan` fails) is left alone with
+> "Not undone". `SessionPlanViewModel.effectiveTracking`
 > is the tracking the guidance uses: the rig's default until Stage 7 adds the plan's override; the
 > rows read unknown tracking from `RigCapability.recommendationIsConditional`. Where each value
 > went: the "Inputs", "Outputs" and "Sequence Plan" headings are gone (the planner's "Capture plan"

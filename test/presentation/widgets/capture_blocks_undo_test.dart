@@ -250,6 +250,138 @@ void main() {
     expect([for (final b in after.blocks) b.frameCount], [500]);
   });
 
+  // S6.V1 (S6V-01, TD-082): a delete's Undo owns only the deleted block. It
+  // goes back at its index and every edit made since stays; the example
+  // badge comes back only when nothing changed since the delete (TASK 4.4:
+  // the badge lasts until the first edit); a replaced plan is never touched.
+  group('Delete with Undo owns only the deleted block (TD-082)', () {
+    Future<void> deleteFirst(WidgetTester tester) async {
+      await tester.tap(find.byTooltip('Delete block').first);
+      await settle(tester);
+    }
+
+    testWidgets('example, Delete, Add, then the old Undo: the block returns, '
+        'the new block stays, and the plan is not the example', (tester) async {
+      await build(tester);
+      await tester.runAsync(vm.plan.useExamplePlan);
+      await settle(tester);
+      final example = vm.captureBlocks.toList();
+      expect(vm.plan.isExampleCapturePlan, isTrue);
+
+      await deleteFirst(tester);
+      expect(vm.plan.isExampleCapturePlan, isFalse);
+      await tester.tap(find.byTooltip('Add capture block'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Exposure (seconds)'),
+        '60',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Frame Count'),
+        '7',
+      );
+      await tester.tap(find.byKey(const Key('blockDialog.submit')));
+      await settle(tester);
+      expect(vm.captureBlocks.last.frameCount, 7);
+      await tapUndo(tester);
+
+      expect(vm.captureBlocks, hasLength(4));
+      for (var i = 0; i < 3; i++) {
+        expect(
+          identical(vm.captureBlocks[i], example[i]),
+          isTrue,
+          reason: '$i',
+        );
+      }
+      expect(vm.captureBlocks.last.frameCount, 7);
+      expect(vm.plan.isExampleCapturePlan, isFalse);
+      expect(find.text(ExampleText.plan), findsNothing);
+      expect(find.text(notUndone), findsNothing);
+      expect(await storedFrames(tester), [100, 20, 20, 7]);
+    });
+
+    testWidgets('a block edited since stays edited', (tester) async {
+      await build(tester);
+      await tester.runAsync(vm.plan.useExamplePlan);
+      await settle(tester);
+      final light = vm.captureBlocks.first;
+
+      await deleteFirst(tester);
+      // An edit with no message of its own, while the Undo is still up.
+      await tester.runAsync(() => vm.plan.updateCaptureBlock(0, _ha(3)));
+      await settle(tester);
+      await tapUndo(tester);
+
+      expect(identical(vm.captureBlocks.first, light), isTrue);
+      expect([for (final b in vm.captureBlocks) b.frameCount], [100, 3, 20]);
+      expect(vm.plan.isExampleCapturePlan, isFalse);
+      expect(await storedFrames(tester), [100, 3, 20]);
+    });
+
+    testWidgets('Undo at once restores the example exactly, badge included', (
+      tester,
+    ) async {
+      await build(tester);
+      await tester.runAsync(vm.plan.useExamplePlan);
+      await settle(tester);
+      final example = vm.captureBlocks.toList();
+
+      await deleteFirst(tester);
+      expect(find.text(ExampleText.plan), findsNothing);
+      await tapUndo(tester);
+
+      expect(vm.captureBlocks, hasLength(3));
+      for (var i = 0; i < 3; i++) {
+        expect(
+          identical(vm.captureBlocks[i], example[i]),
+          isTrue,
+          reason: '$i',
+        );
+      }
+      expect(vm.plan.isExampleCapturePlan, isTrue);
+      expect(find.text(ExampleText.plan), findsOneWidget);
+      expect(await storedFrames(tester), [100, 20, 20]);
+    });
+
+    testWidgets('after the plan was replaced, the old Undo changes nothing '
+        'and says so', (tester) async {
+      await build(tester, blocks: [_ha(10), _ha(20)]);
+      final oldId = vm.plan.activeSessionId!;
+      await deleteFirst(tester);
+      await tester.runAsync(() => vm.newSession());
+      await settle(tester);
+      expect(vm.plan.activeSessionId, isNot(oldId));
+      await tapUndo(tester);
+
+      expect(vm.captureBlocks, isEmpty);
+      expect(find.text(notUndone), findsOneWidget);
+      expect(await storedFrames(tester), isEmpty);
+      final old = (await tester.runAsync(() => sessions.get(oldId)))!;
+      expect([for (final b in old.blocks) b.frameCount], [20]);
+    });
+
+    testWidgets('on a saved plan Undo is an edit: the saved snapshot is '
+        'unchanged', (tester) async {
+      await build(tester, blocks: [_ha(10), _ha(20)]);
+      await tester.runAsync(() => vm.saveSession());
+      await settle(tester);
+      final id = vm.plan.activeSessionId!;
+      final saved = (await tester.runAsync(() => sessions.get(id)))!;
+      final snapshot = jsonEncode(saved.planSnapshot!.json);
+      final before = vm.captureBlocks.toList();
+
+      await tester.tap(find.byTooltip('Delete block').at(1));
+      await settle(tester);
+      await tapUndo(tester);
+
+      expect(identical(vm.captureBlocks[1], before[1]), isTrue);
+      final after = (await tester.runAsync(() => sessions.get(id)))!;
+      expect(jsonEncode(after.planSnapshot!.json), snapshot);
+      expect(after.plannedAtUtc, saved.plannedAtUtc);
+      expect([for (final b in after.blocks) b.frameCount], [10, 20]);
+    });
+  });
+
   // The recovery adds no motion of its own: the marks on what changed follow
   // AppMotion, so with reduced motion there is none (the message is the
   // app's standard one; TD-081 records the framework's message animation).

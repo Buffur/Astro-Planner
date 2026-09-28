@@ -231,16 +231,20 @@ class SessionPlanViewModel extends ChangeNotifier {
     if (_valid(index)) await _editBlocks((b) => b.removeAt(index));
   }
 
-  /// Undo of a delete (RD-09, S6.9): [block] back at [index], and the
-  /// example badge as it was, so the plan equals the one before the delete.
-  Future<void> restoreCaptureBlock(
+  /// Undo of [deletion] (RD-09, S6.9): [block] back at [index]. It owns that
+  /// block only (TD-082): edits since stay, and the badge returns only if
+  /// nothing changed since; refused (false) once the plan was replaced.
+  Future<bool> restoreCaptureBlock(
     int index,
     CaptureBlock block, {
-    required bool wasExample,
-  }) {
+    required BlocksEdit deletion,
+  }) async {
+    if (!deletion.inPlan(_contents, activeSessionId)) return false;
+    final untouched = deletion.isCurrent(_blocks, _contents, activeSessionId);
     _blocks.insert(index.clamp(0, _blocks.length), block);
-    _isExample = wasExample;
-    return _edited();
+    _isExample = untouched && deletion.wasExample;
+    await _edited();
+    return true;
   }
 
   /// [newIndex] is already adjusted for the removal (the `onReorderItem`

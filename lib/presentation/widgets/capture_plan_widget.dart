@@ -62,21 +62,16 @@ class _BlockListState extends State<_BlockList> {
   bool _built = false;
 
   /// RD-09 (M + S1): the block goes at once, with Undo; Undo puts the
-  /// identical block back at its index (the plan autosaves either way).
-  void _delete(int index, CaptureBlock block) {
-    final plan = context.read<SessionPlanViewModel>();
-    final wasExample = plan.isExampleCapturePlan;
-    unawaited(plan.removeCaptureBlock(index));
-    unawaited(
-      showUndo(
-        context,
-        message: 'Deleted ${BlockText.row(block, null)}',
-        onUndo: () => unawaited(
-          plan.restoreCaptureBlock(index, block, wasExample: wasExample),
-        ),
-      ),
-    );
-  }
+  /// identical block back at its index (the plan autosaves either way),
+  /// without undoing a later edit (S6.V1, TD-082).
+  void _delete(int index, CaptureBlock block) => unawaited(
+    deleteBlockWithUndo(
+      context,
+      index: index,
+      block: block,
+      message: 'Deleted ${BlockText.row(block, null)}',
+    ),
+  );
 
   /// A new block from the dialog.
   Future<void> _add() async {

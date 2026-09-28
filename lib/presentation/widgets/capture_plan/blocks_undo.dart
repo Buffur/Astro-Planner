@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/diagnostics/app_log.dart';
+import '../../../domain/models/capture_block.dart';
 import '../../shared/delete_patterns.dart';
 import '../../shared/failure_feedback.dart';
-import '../../viewmodels/blocks_edit.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 
 /// A way back from a one-tap change to the capture blocks (TD-079, S6.16;
@@ -30,24 +30,56 @@ Future<bool> editBlocksWithUndo(
     showUndo(
       context,
       message: message,
-      onUndo: () => unawaited(_undo(plan, edit, messenger)),
+      onUndo: () =>
+          unawaited(_undo(() => plan.undoBlocksEdit(edit), messenger)),
     ),
   );
   return true;
 }
 
-/// Said when Undo comes after another edit to the blocks (TD-079).
+/// Delete with Undo (RD-09 = M + S1, S6.9): the block at [index] goes at
+/// once, then "[message] · Undo". Undo owns that block only (S6.V1,
+/// TD-082): it goes back at its index and an edit made since stays, but
+/// the example badge returns only when nothing changed since, and once the
+/// plan was replaced nothing changes and the user is told. No history.
+Future<void> deleteBlockWithUndo(
+  BuildContext context, {
+  required int index,
+  required CaptureBlock block,
+  required String message,
+}) async {
+  final plan = context.read<SessionPlanViewModel>();
+  final messenger = ScaffoldMessenger.of(context);
+  final deletion = await plan.recordBlocksEdit(
+    () => plan.removeCaptureBlock(index),
+  );
+  if (!deletion.changed || !context.mounted) return;
+  unawaited(
+    showUndo(
+      context,
+      message: message,
+      onUndo: () => unawaited(
+        _undo(
+          () => plan.restoreCaptureBlock(index, block, deletion: deletion),
+          messenger,
+        ),
+      ),
+    ),
+  );
+}
+
+/// Said when Undo comes after another edit to the blocks (TD-079), or,
+/// for a delete, after the plan was replaced (TD-082).
 const notUndone = 'Not undone: the capture plan was changed again since.';
 
 /// Undo may run after the screen that offered it has gone, so it reports
 /// through the [messenger] it was given (trap 18: a failed write is said).
 Future<void> _undo(
-  SessionPlanViewModel plan,
-  BlocksEdit edit,
+  Future<bool> Function() undo,
   ScaffoldMessengerState messenger,
 ) async {
   try {
-    if (!await plan.undoBlocksEdit(edit)) {
+    if (!await undo()) {
       messenger.showSnackBar(const SnackBar(content: Text(notUndone)));
     }
   } catch (e, s) {

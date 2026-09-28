@@ -4,8 +4,9 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**Stage 6 validation BLOCKED**, S6V-01 / TD-082).
-> **Next:** S6.V1, the bounded deletion-Undo correction, then V5 revalidation.
+> **Last updated:** 2026-09-28 (**S6.V1 done**: S6V-01 / TD-082 resolved; Stage 6 awaits its V5
+> revalidation).
+> **Next:** the V5 bounded revalidation of S6V-01 / TD-082, then Stage 6's closure.
 > S6.E remains **UNVERIFIED — no independent participant available**; the owner accepts the gap.
 
 ## Current state
@@ -13,11 +14,35 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: BLOCKED** by S6V-01 / TD-082 (S6.1–S6.14 and S6.16 implemented; S6.15 not built, RD-11 = S9) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in validation.** The validation was BLOCKED by S6V-01 / TD-082; S6.V1 corrects it (S6.1–S6.14, S6.16 and S6.V1 implemented; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.V1 — make deletion Undo stale-safe**, as bounded in `STAGE_6_VALIDATION.md`; no implementation in the validation session |
-| Code baseline | S6.16 (`d7e1477`); documentation only since. Not pushed (S1.14, RD-17) |
+| Next Task | **The V5 bounded revalidation** of S6V-01 / TD-082 (below, "Next allowed action"); no implementation in it |
+| Code baseline | S6.V1 (its commit: `git log --grep "S6.V1"`). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.V1 done, 2026-09-28** (S6V-01 / TD-082 resolved; the owner's S6.V1 prompt; the plan's
+"Stage 6 validation" table): a delete's Undo owns only the deleted block.
+- **Root cause:** `_BlockListState._delete` kept the example badge as it was at the delete, and
+  `restoreCaptureBlock` wrote it back unconditionally. Add shows no message of its own, so the
+  delete's Undo stays up after it, and tapping it relabelled the edited plan as the untouched
+  example. A plan replaced meanwhile (New, Copy, Open, Track live) would also have received the
+  old block.
+- **Fix:** Delete runs through `deleteBlockWithUndo` (`widgets/capture_plan/blocks_undo.dart`),
+  which records the delete as S6.16's `BlocksEdit`, with the session read after its autosave.
+  `SessionPlanViewModel.restoreCaptureBlock(index, block, deletion:)` puts the identical block
+  back at its index and keeps every edit made since. It restores the badge only while
+  `BlocksEdit.isCurrent` holds (nothing changed since the delete). When `BlocksEdit.inPlan` fails
+  (the plan was replaced), it is refused with S6.16's "Not undone" message. No history, no schema
+  or persistence change. The removal is still immediate; its Undo message now appears once the
+  delete's autosave has finished, as S6.16's messages do.
+- **Tests:** five in `capture_blocks_undo_test.dart` ("Delete with Undo owns only the deleted
+  block (TD-082)"): the exact sequence; a block edited since; Undo at once restores the example
+  with its badge; a replaced plan; a saved plan's snapshot unchanged. The first, second and fourth
+  fail on the old code. The recorded probe (`evidence/S6V_01_DELETE_UNDO_PROBE.patch`, applied
+  temporarily, then removed) passes. S6.9's and S6.16's tests are unchanged and pass.
+- **Verification:** class shared behaviour (a ViewModel and a shared helper). The full gate ran
+  once, after the last code change, because the Stage Exit's gate must hold on the final inputs:
+  PASS (below). Every acceptance criterion of the prompt checked. Stage 6 is **not** closed.
 
 **Stage 6 validation, 2026-09-28: BLOCKED** ([report](STAGE_6_VALIDATION.md)). S6V-01 /
 TD-082 reproduced: Delete from the example → Add a block → old Undo preserves the new block
@@ -250,10 +275,10 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,486 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.16's final inputs (`d7e1477`) | Nothing since: only documentation changed after `d7e1477` (`git diff --stat d7e1477 HEAD -- . ':!docs' ':!CLAUDE.md'` is empty). It supersedes S6.13's gate (S6.14's inputs included) |
+| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,491 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.V1's final inputs (the S6.V1 commit) | Valid while `git diff --stat <S6.V1 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S6.16's gate at `d7e1477` |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
-| **Focused probe FAIL**, S6V-01 / TD-082: Delete → Add → stale Undo restores the example badge incorrectly | Stage 6 validation at `6b50369` (application code `d7e1477`) | New uncovered sequence, not a rerun of the gate; reproduction in `evidence/S6V_01_DELETE_UNDO_PROBE.patch`. Recheck after S6.V1; other passing evidence remains valid |
+| **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
 
 ## Stage status
 
@@ -267,7 +292,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 6 | Core Planner Redesign | In progress | 2026-09-27 | — | **BLOCKED**, S6V-01 / TD-082 ([validation](STAGE_6_VALIDATION.md)); other technical criteria PASS; S6.E UNVERIFIED, gap accepted by the owner |
+| 6 | Core Planner Redesign | In validation | 2026-09-27 | — | **BLOCKED** at `6b50369`, S6V-01 / TD-082 ([validation](STAGE_6_VALIDATION.md)); S6.V1 done 2026-09-28; the V5 revalidation next. Other technical criteria PASS; S6.E UNVERIFIED, gap accepted by the owner |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
@@ -360,8 +385,9 @@ These block a release, not refinement.
     stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
-- **Stage 6:** S6V-01 / TD-082 is blocking: stale deletion Undo restores the example badge after
-  a newer block edit. S6.V1 is the bounded correction ([report](STAGE_6_VALIDATION.md)). All
+- **Stage 6:** S6V-01 / TD-082 blocked the validation (stale deletion Undo restored the example
+  badge after a newer block edit); S6.V1 resolved it in code (2026-09-28). Stage 6 closes only when
+  the V5 revalidation passes ([report](STAGE_6_VALIDATION.md)). All
   product gates remain decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1), RD-11 (S9).
   S6.E is UNVERIFIED; the owner explicitly accepts the missing independent participant, so it is
   not a blocker. The tracker stays until P8.4; TD-081 remains Stage 9 or 11 debt.
@@ -373,18 +399,22 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S6.V1 — make deletion Undo stale-safe** (S6V-01 / TD-082), exactly as bounded in
-   [STAGE_6_VALIDATION.md](STAGE_6_VALIDATION.md#blocking-finding-f1--s6v-01--td-082): guard
-   deletion recovery against newer block edits and plan replacement; retain immediate exact
-   restore, autosave, timeout, saved-snapshot integrity and reduced-motion behavior. Reuse the
-   existing bounded recovery mechanism; no global undo or product redesign.
-2. **V5 bounded revalidation:** the original failure, affected S6.8/S6.9 criteria and the
-   correction's regression surface only. Other PASS results stand. S6.E stays
-   **UNVERIFIED — no independent participant available**, with the owner's accepted gap.
+1. **V5 bounded revalidation of S6V-01 / TD-082, then Stage 6's closure** (`CLAUDE.md` V5; a
+   fresh session where practical, V8). It checks only:
+   - the original failure: the recorded probe (`evidence/S6V_01_DELETE_UNDO_PROBE.patch`) and
+     S6.V1's committed regression tests;
+   - the criteria S6.V1 touches: S6.8's "badge until the first edit" and S6.9's Delete + Undo
+     (the identical block at its index, the timeout, the autosave);
+   - S6.V1's own regression surface (its diff, the shared-behaviour class). The full gate at
+     S6.V1's inputs is reusable under V3 (above).
 
-The correction is recorded, not implemented by the validation. Do not start Stage 7. After
-successful closure, the next Stage action is **Stage 7 planning** against the amended roadmap,
-freezing its research/decision/implementation sequence; no Stage 7 task sequence is frozen yet.
+   Every other PASS in [STAGE_6_VALIDATION.md](STAGE_6_VALIDATION.md) stands (V6). S6.E stays
+   **UNVERIFIED — no independent participant available**, with the owner's accepted gap. If the
+   revalidation passes, Stage 6 closes; if it fails, the report names the exact criterion.
+2. Only after Stage 6 closes: **Stage 7 planning** against the amended roadmap, freezing its
+   research, decision and implementation sequence; no Stage 7 Task sequence is frozen yet.
+
+Do not start Stage 7 before Stage 6 is closed.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

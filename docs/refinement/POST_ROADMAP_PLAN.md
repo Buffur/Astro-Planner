@@ -72,6 +72,9 @@
 > S6.E. S6.3, S6.9 and S6.14 are gated on S4-DEF-04, RD-08 and RD-10, and S6.15 on RD-11; their
 > options are prepared there ("Stage 6 gates"). S4-DEF-01 is allocated to Stage 8. §3, §8 and the
 > S4-DEF list updated. No other Stage changed, and no decision was taken.
+> **Updated 2026-09-28 (S6.V1):** the Stage 6 validation was blocked by S6V-01 / TD-082
+> (`STAGE_6_VALIDATION.md`); the corrective S6.V1 is done ("Stage 6 validation", below). The V5
+> revalidation is next. No frozen Task, criterion or decision changed.
 
 ## Contents
 
@@ -3575,6 +3578,16 @@ A fresh-session, independent validation (§9.8, V8; this Stage writes applicatio
 It tries to disprove that each planning screen leads with its answer, that every value reachable
 before still is, that no saved snapshot changed, and that nothing regressed (the sweep, the darkness
 test, the E2E, the gate).
+
+**Result, 2026-09-28: BLOCKED at `6b50369`, one blocker** (`STAGE_6_VALIDATION.md`, F1). S6V-01 /
+TD-082: after Delete from the example and a newer block edit, the deletion's Undo restored the
+example badge. Every other technical criterion passed; S6.E is UNVERIFIED (no independent
+participant), a gap the owner accepts.
+
+| Task | Finding | Acceptance | State |
+| --- | --- | --- | --- |
+| S6.V1 | S6V-01 / TD-082 | The owner's S6.V1 prompt. A delete's Undo owns only the deleted block: it returns at its index; blocks added or edited since stay; the example badge returns only when nothing changed since the delete; once the plan was replaced (New, Copy, Open, Track live), nothing changes and the user is told; a saved snapshot is never touched. Immediate Undo, timeout and autosave unchanged; no global history. Regression tests through the UI and real SQLite | **Done 2026-09-28**: `deleteBlockWithUndo` records the delete as S6.16's `BlocksEdit`; `restoreCaptureBlock(index, block, deletion:)` is guarded by `BlocksEdit.inPlan`/`isCurrent`. Five tests in `capture_blocks_undo_test.dart`, three of which fail on the old code; the recorded probe passes |
+| Revalidation | S6V-01 only (V5) | The original failure, the affected S6.8/S6.9 criteria and S6.V1's own regression surface; nothing else reopens (V6) | Next |
 
 ##### Stage 6 gates: options prepared (2026-09-27)
 
