@@ -75,6 +75,10 @@
 > **Updated 2026-09-28 (S6.V1):** the Stage 6 validation was blocked by S6V-01 / TD-082
 > (`STAGE_6_VALIDATION.md`); the corrective S6.V1 is done ("Stage 6 validation", below). The V5
 > revalidation is next. No frozen Task, criterion or decision changed.
+> **Updated 2026-09-28 (Stage 6 closed):** S6.1–S6.14, S6.16 and S6.V1 done (S6.15 not built,
+> RD-11 = S9); the validation was blocked on S6V-01 only, and its V5 revalidation passed at
+> `da4c53d` (`STAGE_6_VALIDATION.md`; same chat as S6.V1 at the owner's request, disclosed). S6.E
+> stays UNVERIFIED, a gap the owner accepted. Stage 7 planning is next.
 
 ## Contents
 
@@ -3587,7 +3591,7 @@ participant), a gap the owner accepts.
 | Task | Finding | Acceptance | State |
 | --- | --- | --- | --- |
 | S6.V1 | S6V-01 / TD-082 | The owner's S6.V1 prompt. A delete's Undo owns only the deleted block: it returns at its index; blocks added or edited since stay; the example badge returns only when nothing changed since the delete; once the plan was replaced (New, Copy, Open, Track live), nothing changes and the user is told; a saved snapshot is never touched. Immediate Undo, timeout and autosave unchanged; no global history. Regression tests through the UI and real SQLite | **Done 2026-09-28**: `deleteBlockWithUndo` records the delete as S6.16's `BlocksEdit`; `restoreCaptureBlock(index, block, deletion:)` is guarded by `BlocksEdit.inPlan`/`isCurrent`. Five tests in `capture_blocks_undo_test.dart`, three of which fail on the old code; the recorded probe passes |
-| Revalidation | S6V-01 only (V5) | The original failure, the affected S6.8/S6.9 criteria and S6.V1's own regression surface; nothing else reopens (V6) | Next |
+| Revalidation | S6V-01 only (V5) | The original failure, the affected S6.8/S6.9 criteria and S6.V1's own regression surface; nothing else reopens (V6) | **PASS 2026-09-28** at `da4c53d` (not independent, disclosed); **Stage 6 closed** |
 
 ##### Stage 6 gates: options prepared (2026-09-27)
 

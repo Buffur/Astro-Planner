@@ -4,9 +4,9 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.V1 done**: S6V-01 / TD-082 resolved; Stage 6 awaits its V5
-> revalidation).
-> **Next:** the V5 bounded revalidation of S6V-01 / TD-082, then Stage 6's closure.
+> **Last updated:** 2026-09-28 (**Stage 6 closed**: the V5 revalidation of S6V-01 / TD-082 passed
+> at `da4c53d`).
+> **Next:** Stage 7 planning (not started).
 > S6.E remains **UNVERIFIED — no independent participant available**; the owner accepts the gap.
 
 ## Current state
@@ -14,13 +14,25 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in validation.** The validation was BLOCKED by S6V-01 / TD-082; S6.V1 corrects it (S6.1–S6.14, S6.16 and S6.V1 implemented; S6.15 not built, RD-11 = S9) |
+| Current Stage | **Stage 6 — Core Planner Redesign: Complete** (closed 2026-09-28). Stage 7 not started |
 | Current Task | None in progress |
-| Next Task | **The V5 bounded revalidation** of S6V-01 / TD-082 (below, "Next allowed action"); no implementation in it |
-| Code baseline | S6.V1 (its commit: `git log --grep "S6.V1"`). Not pushed (S1.14, RD-17) |
+| Next Task | **Stage 7 planning** (below, "Next allowed action"); no Stage 7 Task is frozen yet |
+| Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
-**S6.V1 done, 2026-09-28** (S6V-01 / TD-082 resolved; the owner's S6.V1 prompt; the plan's
+**Stage 6 closed, 2026-09-28** ([report](STAGE_6_VALIDATION.md), "Revalidation of S6V-01 /
+TD-082 (V5)"): the V5 revalidation passed at `da4c53d`. Run in the chat that wrote S6.V1, at the
+owner's request, so **not independent** (disclosed). Scope: F1, S6.8's badge rule, S6.9's Delete +
+Undo, stale recovery and S6.V1's regression surface; every other PASS stands (V6). Evidence: the
+full gate and the recorded probe reused (V3); the five committed regression tests; four fresh
+adversarial probes, all PASS (a target change keeps the badge; a reorder, a second delete and Copy
+behave; temporary, not committed). No blocker; one observation (after a reorder the block returns
+at its old index, as S6.9 specifies). S6.E stays **UNVERIFIED — no independent participant
+available**, the gap the owner accepted. Verification: documentation class. The Stage 6 entries
+below stay here until Stage 7 planning moves them verbatim to `PROGRESS_HISTORY.md`, as Stage 6
+planning did for Stage 5's.
+
+**S6.V1 done, 2026-09-28** (`da4c53d`; S6V-01 / TD-082 resolved; the owner's S6.V1 prompt; the plan's
 "Stage 6 validation" table): a delete's Undo owns only the deleted block.
 - **Root cause:** `_BlockListState._delete` kept the example badge as it was at the delete, and
   `restoreCaptureBlock` wrote it back unconditionally. Add shows no message of its own, so the
@@ -275,7 +287,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,491 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.V1's final inputs (the S6.V1 commit) | Valid while `git diff --stat <S6.V1 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S6.16's gate at `d7e1477` |
+| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,491 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.V1's final inputs (`da4c53d`) | Valid while `git diff --stat da4c53d HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S6.16's gate at `d7e1477` |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -292,7 +304,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 6 | Core Planner Redesign | In validation | 2026-09-27 | — | **BLOCKED** at `6b50369`, S6V-01 / TD-082 ([validation](STAGE_6_VALIDATION.md)); S6.V1 done 2026-09-28; the V5 revalidation next. Other technical criteria PASS; S6.E UNVERIFIED, gap accepted by the owner |
+| 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
@@ -385,12 +397,14 @@ These block a release, not refinement.
     stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
-- **Stage 6:** S6V-01 / TD-082 blocked the validation (stale deletion Undo restored the example
-  badge after a newer block edit); S6.V1 resolved it in code (2026-09-28). Stage 6 closes only when
-  the V5 revalidation passes ([report](STAGE_6_VALIDATION.md)). All
-  product gates remain decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1), RD-11 (S9).
-  S6.E is UNVERIFIED; the owner explicitly accepts the missing independent participant, so it is
-  not a blocker. The tracker stays until P8.4; TD-081 remains Stage 9 or 11 debt.
+- **Stage 6 (closed 2026-09-28):** nothing blocks. S6V-01 / TD-082 was resolved by S6.V1 and its
+  V5 revalidation passed ([report](STAGE_6_VALIDATION.md)). Product gates decided: S4-DEF-04 (R),
+  RD-08 (T3, the override built in Stage 7), RD-10 (O1), RD-11 (S9).
+  - Carried: S6.E UNVERIFIED (the owner accepts the missing independent participant); the tracker
+    until P8.4; TD-074 (Stage 7 or 9); TD-050 (Stage 9, P9.3); TD-081 (Stage 9 or 11); the
+    validation's DEFERRED items (Stage 7: RD-08's override, calibration, ISO/gain/binning, source
+    automation; Stage 8: saved-plan working copy and results, P8.1–P8.4, P8.7; Stage 9: richer
+    detail screens).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -399,22 +413,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **V5 bounded revalidation of S6V-01 / TD-082, then Stage 6's closure** (`CLAUDE.md` V5; a
-   fresh session where practical, V8). It checks only:
-   - the original failure: the recorded probe (`evidence/S6V_01_DELETE_UNDO_PROBE.patch`) and
-     S6.V1's committed regression tests;
-   - the criteria S6.V1 touches: S6.8's "badge until the first edit" and S6.9's Delete + Undo
-     (the identical block at its index, the timeout, the autosave);
-   - S6.V1's own regression surface (its diff, the shared-behaviour class). The full gate at
-     S6.V1's inputs is reusable under V3 (above).
+1. **Stage 7 planning (Data Entry & Automation)** against the amended plan
+   (`POST_ROADMAP_PLAN.md`, Stage 7 and its gates RG-07 to RG-11; RD-08's per-plan override):
+   verify its inputs against the code, freeze its research, decision and implementation sequence,
+   and prepare the owner's options for each gate. Planning only: no application code, no research
+   answer taken as a decision. On the way, move Stage 6's "Current state" entries verbatim to
+   `PROGRESS_HISTORY.md`, as Stage 6 planning did for Stage 5's.
 
-   Every other PASS in [STAGE_6_VALIDATION.md](STAGE_6_VALIDATION.md) stands (V6). S6.E stays
-   **UNVERIFIED — no independent participant available**, with the owner's accepted gap. If the
-   revalidation passes, Stage 6 closes; if it fails, the report names the exact criterion.
-2. Only after Stage 6 closes: **Stage 7 planning** against the amended roadmap, freezing its
-   research, decision and implementation sequence; no Stage 7 Task sequence is frozen yet.
-
-Do not start Stage 7 before Stage 6 is closed.
+No Stage 7 Task runs before its sequence is frozen and its gates are decided by the owner.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

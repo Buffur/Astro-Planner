@@ -1,5 +1,9 @@
 # Stage 6 — bounded final validation
 
+> **Revalidation of S6V-01 / TD-082 (V5), 2026-09-28, at `da4c53d`: PASS. Stage 6 is closed**
+> ("Revalidation of S6V-01 / TD-082 (V5)", at the end). The first validation's result below stands
+> as recorded.
+
 Date: 2026-09-28. Checkout: `6b50369`; application baseline: `d7e1477` (S6.16).
 Validation only, under CLAUDE.md V1–V8 and the owner's supplied validation prompt.
 
@@ -269,3 +273,87 @@ Documentation only: this report and unapplied probe; `PROGRESS.md` result/next a
 observations remain unchanged. References/IDs and whitespace are checked; no full gate rerun
 is required for these records. The validation procedure requires one documentation commit.
 Push remains deferred (RD-17). STOP after that commit.
+
+## Revalidation of S6V-01 / TD-082 (V5), 2026-09-28
+
+Checkout `da4c53d` (S6.V1), working tree clean. Validation only; nothing was fixed here.
+
+- **Disclosure:** run in the same chat that wrote S6.V1, at the owner's request (the owner chose
+  this over a fresh session). It is **not independent** (V8's "where practical"), as Stage 5's
+  revalidation was not.
+- **Scope (V5), frozen before any check:**
+  - the original finding F1 (S6V-01 / TD-082);
+  - the criteria it touches: S6.8's "shows its badge until the first edit" (TASK 4.4's rule) and
+    S6.9's "delete then Undo restores the identical block at its index, and the autosaved plan
+    equals the plan before the delete; a timed-out Undo commits the delete";
+  - the correction's stale-recovery requirements from F1 and the owner's S6.V1 prompt: a later
+    block edit or a replaced plan cannot restore stale blocks or badge state; newer edits stay;
+    no saved snapshot changes;
+  - S6.V1's own regression surface: its diff (`blocks_edit.dart`, `session_plan_viewmodel.dart`,
+    `blocks_undo.dart`, `capture_plan_widget.dart`), the shared-behaviour class.
+
+  Every other row of the matrix above keeps its PASS (V6). S6.E stays **UNVERIFIED — no
+  independent participant available**, the gap the owner accepted.
+
+### Evidence
+
+- **Gate, reused (V3):** full quality gate PASS on S6.V1's final inputs: Encoding; Format (439
+  files, 0 changed); Analyze (no issues); 1,491 tests, 2 expected skips; 2 host E2E.
+  `git diff --stat da4c53d HEAD -- . ':!docs' ':!CLAUDE.md'` is empty (HEAD is `da4c53d`).
+- **The original failure, reused (V3):** `evidence/S6V_01_DELETE_UNDO_PROBE.patch`, applied
+  unchanged on the same inputs, prints "4 blocks, last count 7, example badge false" and passes.
+  It was removed afterwards.
+- **Committed regressions:** `capture_blocks_undo_test.dart`, group "Delete with Undo owns only
+  the deleted block (TD-082)", five tests, in the gate. Against the pre-fix `lib/`, three fail:
+  the exact sequence, a block edited since, a replaced plan. The other two pass on both the old
+  and new code, because they guard behaviour that must not change: immediate Undo restores the
+  example with its badge; a saved plan's snapshot is unchanged.
+- **Fresh adversarial probes (this revalidation; temporary file, run, deleted; not committed):**
+  sequences the committed tests do not cover, all PASS:
+
+  | Probe | Sequence | Observed | Expected by |
+  | --- | --- | --- | --- |
+  | V5-P1 | example → Delete → change the target → Undo | 3 identical blocks, badge **true**, new target kept, stored `[100, 20, 20]` | TASK 4.4: the badge ends at a block edit; a target change is not one |
+  | V5-P2 | example → Delete → reorder the rest → Undo | `[light, flat, dark]`, badge false | the reorder stays; the block returns at its index (S6.9) |
+  | V5-P3 | Delete → Copy to another night → Undo | a new session; its blocks `[20]` unchanged; "Not undone" shown | a replaced plan is never touched |
+  | V5-P4 | example → Delete → Delete again → Undo | `[dark, flat]`, badge false | the second message replaces the first; only its block returns |
+
+- **Code inspection of the diff:**
+  - the removal is still applied synchronously on tap (`recordBlocksEdit` runs the change before
+    its first await);
+  - Undo inserts; it never assigns the block list, so no newer edit is overwritten;
+  - the badge is `untouched && wasExample`, with `untouched` = `BlocksEdit.isCurrent` (same plan
+    and session, the same block instances). It can only become true when the result equals the
+    plan before the delete;
+  - the plan-identity check keys on the contents generation (New, Open, restore) and the session
+    id read after the delete's autosave (Copy and Track live start a new session);
+  - the refactor of `_undo` to take a callback leaves TD-079's three operations unchanged (their
+    tests are in the gate);
+  - `SessionPlanViewModel` is at 300 physical lines, within `viewmodel_rules_test.dart`'s cap;
+  - no persistence, schema, snapshot or motion code changed.
+
+### Criteria
+
+| Criterion | Result |
+| --- | --- |
+| F1 / S6V-01: Delete → Add → old Undo keeps the new block and does not show the example | **PASS** (probe; committed test) |
+| S6.8: the example badge lasts until the first block edit; it never returns after one | **PASS** (committed tests; V5-P1, V5-P2, V5-P4) |
+| S6.9: delete then Undo restores the identical block at its index; the autosaved plan equals the one before; a timed-out Undo commits | **PASS** (S6.9's tests unchanged, in the gate) |
+| Stale recovery: a newer edit stays; a replaced plan (New, Copy) is untouched, with a message | **PASS** (committed tests; V5-P3) |
+| No saved snapshot changes | **PASS** (committed test) |
+| S6.V1's regression surface: TD-079 Undo, reduced motion, the sweep, the E2E, the gate | **PASS** (the gate) |
+
+### Findings
+
+- **No blocker.**
+- **Observation, not a finding:** after a reorder, the block returns at its old index (V5-P2), so
+  its neighbours may differ. This is S6.9's specified behaviour ("at its index"), not a
+  regression. It is recorded only so that a later Task does not rediscover it.
+
+### Verdict
+
+**S6V-01 / TD-082: PASS.** No V4 blocker remains, so **Stage 6 closes** (V7), with S6.E
+**UNVERIFIED — no independent participant available** (the owner's accepted gap) and the
+carried items in `PROGRESS.md`. Stage 7 is not started: its planning is the next allowed
+action. This revalidation changed documentation only; verification: references resolve,
+`git diff --check`.
