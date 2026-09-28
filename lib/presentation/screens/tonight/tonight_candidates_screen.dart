@@ -35,6 +35,18 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
   bool _ownOnly = false;
   String? _type;
 
+  /// The header names the order in use (RD-10 = O1, S6.14): the default
+  /// breaks ties by frame fill; every order falls back to the name. The
+  /// no-score rule stays in ADR-013, not in the header.
+  static const _orderLabels = {
+    CandidateSort.usableTime: 'usable time, then frame fill',
+    CandidateSort.windowStart: 'window start',
+    CandidateSort.maxAltitude: 'max altitude',
+    CandidateSort.moonSeparation: 'Moon separation',
+    CandidateSort.frameFill: 'frame fill',
+    CandidateSort.name: 'name',
+  };
+
   static const _sortLabels = {
     CandidateSort.usableTime: 'Usable time',
     CandidateSort.windowStart: 'Window start',
@@ -141,7 +153,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
             'Night of ${NightTimeFormatter.eveningDate(night.eveningDate)}'
             '${siteVm.locationName == null ? '' : ' at ${siteVm.locationName}'} · '
             '${rows.length} of ${all.length} targets · sorted by '
-            '${_sortLabels[_sort]!.toLowerCase()} (no score)',
+            '${_orderLabels[_sort]!}',
             key: const Key('tonight.header'),
             style: theme.textTheme.bodySmall,
           ),

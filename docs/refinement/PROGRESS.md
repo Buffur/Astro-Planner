@@ -4,19 +4,26 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.13 done**: Tonight, plan first; Stage 6 in progress).
-> **Next:** S6.14 (RD-10 decided: O1). S6.15 is not built (RD-11 = S9). Then S6.E, owner-run.
+> **Last updated:** 2026-09-28 (**S6.14 done**: the candidates' default order; Stage 6's code Tasks
+> are all done).
+> **Next:** S6.E, the five-second test (owner-run; its first step is documentation an agent can do
+> when asked), then Stage 6 validation in a fresh session.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.13 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 done; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.14 — The candidates' default order** (RD-10 decided: O1) |
-| Code baseline | S6.13 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.E — The five-second test** (owner-run) |
+| Code baseline | S6.14 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.14 done, 2026-09-28** (RD-10 = O1; UX-29): "What can I image tonight?" orders by usable time,
+then frame fill (unknown last), then the name; the header names the order. Verification: the
+Task's class, localized (targeted and candidates-screen tests, analyze, format, encoding), PASS;
+every acceptance criterion checked.
 
 **RD-10 and RD-11 decided, 2026-09-28 (the owner, in chat):** O1 (candidates by usable time, then
 frame fill, then the name; the header names the order) and S9 (the Moon and cloud gate controls in
@@ -185,7 +192,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (436 files, 0 changed); Analyze; 1,466 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.13's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (436 files, 0 changed); Analyze; 1,466 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.13's final inputs (`6651cf7`) | Still valid except where S6.14 changed inputs (`candidate_evaluator.dart`, the candidates screen and their two tests); S6.14's localized checks PASS on its final inputs. Stage 6 validation decides whether it needs a fresh full gate (V3 (c)) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -306,15 +313,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.14 — The candidates' default order** (RD-10 = O1; UX-29). Frozen; the frozen sequence is the
-approval. **Class: localized** (its targeted tests, the candidates screen's tests, `flutter analyze`,
-`dart format`, the encoding check).
-- **Read:** S6.14; RD-10 (DECISIONS E.1); `CandidateList.sort` and the candidates screen's header;
-  ADR-013 §5.
-
-Then **S6.E**, the five-second test (owner-run; its first step, S4V-02's correction of
-`research/S4.R1_FLOW_INVENTORY.md` §7, is documentation an agent can do when asked), then Stage 6
-validation in a fresh session.
+**S6.E — The five-second test** (owner-run evidence; the plan's "S6.E"):
+1. **S4V-02 first** (documentation; an agent can do it when asked): correct
+   `research/S4.R1_FLOW_INVENTORY.md` §7's device rules, so Tests A and C can run without disturbing
+   the owner's data;
+2. the owner runs Test A on the planner's and Tonight's first screens (the `.s2check` package, or a
+   plan they are happy to change; never reset or uninstall the owner's app);
+3. the answers go into `evidence/STAGE_6_FIVE_SECOND_TEST.md`.
+If it cannot be run, the Stage 6 validation records the gap and the owner decides (V7). Then
+**Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
+validation").
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

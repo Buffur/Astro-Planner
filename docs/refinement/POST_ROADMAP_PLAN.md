@@ -2881,7 +2881,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | **Done 2026-09-28** |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | **Done 2026-09-28** |
-| S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | Frozen |
+| S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | **Done 2026-09-28** |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | **Not built: RD-11 = S9** (Stage 9, P9.3) |
 | S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run) |
 
@@ -3428,6 +3428,14 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - the batch still equals the single-target view (the existing test);
   - **class: localized.** Its targeted tests, the candidates screen's tests, `flutter analyze`,
     `dart format` and the encoding check.
+- **Done 2026-09-28** (RD-10 = O1): `CandidateList.sort`'s usable-time order breaks ties by frame fill
+  (unknown last) before the name; the header reads "sorted by usable time, then frame fill" (each
+  order named; "(no score)" gone, the rule stays in ADR-013). A tie-heavy test (seven rows, five
+  with the same usable time) and one showing a larger frame fill never lifts a smaller usable time.
+  The existing sort test's usable-time case changed deliberately (a fill of 0.2 now precedes an
+  unknown one, which the name used to decide). Localized checks PASS: the candidate evaluator tests
+  (the batch still equals the single-target view) and the Tonight screens' tests (40), `flutter
+  analyze`, `dart format`, the encoding check.
 
 ##### S6.15 — The Moon and cloud gate controls (conditional: only if RD-11 chooses Stage 6; TD-050)
 - **Scope:** two switch-and-threshold rows beside Settings' planning thresholds, for the Moon and

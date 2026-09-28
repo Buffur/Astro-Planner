@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.14, 2026-09-28:** B4 notes the candidates' default order (RD-10 = O1).
 > **S6.13, 2026-09-28:** B4 notes Tonight's plan-first order and where each value went.
 > **S6.12, 2026-09-28:** B4 records the timeline's inventory and its evolution (`TimelineData`, `TimelinePainter`, densities).
 > **S6.11, 2026-09-28:** B4 notes the stacking-gain graph.
@@ -543,6 +544,10 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > rig line stays (with the example label), "Choose rig" → the status's Choose a rig; Start → gone
 > (Track live in the planner's ⋮); the Moon's up-intervals → Night & Moon only. The compact timeline
 > is not used here (the choice and its reason are in `tonight_home_screen.dart`).
+
+> **Since S6.14 (2026-09-28; RD-10 = O1)** `CandidateList.sort`'s `usableTime` order breaks ties by
+> `frameFillFraction` (descending, unknown last) before the name; every other order is unchanged.
+> The candidates header names the order in use (`_orderLabels`).
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

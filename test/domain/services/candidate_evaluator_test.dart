@@ -238,11 +238,47 @@ void main() {
       for (final x in r) x.target.catalogId,
     ];
 
+    // S6.14 (RD-10 = O1): on a tie-heavy night (UX-29: every top row has the
+    // whole dark window) the default order is usable time, then frame fill
+    // (unknown last), then the name; the quantities are never combined.
+    test('the default order: usable time, then frame fill, then the name', () {
+      final tied = [
+        row('Zeta', minutes: 480, fill: 0.1),
+        row('Alpha', minutes: 480),
+        row('Mu', minutes: 480, fill: 0.6),
+        row('Beta', minutes: 480, fill: 0.6),
+        row('Omega', minutes: 600),
+        row('Eta', minutes: 480, fill: 0.3),
+        row('Gamma', minutes: 480),
+      ];
+      expect(names(CandidateList.sort(tied, CandidateSort.usableTime)), [
+        'Omega', // most usable time, fill unknown
+        'Beta', // 0.6, then by name
+        'Mu',
+        'Eta',
+        'Zeta',
+        'Alpha', // fill unknown: last among the ties, by name
+        'Gamma',
+      ]);
+      // A smaller usable time is never lifted by a larger frame fill.
+      final uneven = [
+        row('Big', minutes: 60, fill: 0.9),
+        row('Small', minutes: 61, fill: 0.01),
+      ];
+      expect(names(CandidateList.sort(uneven, CandidateSort.usableTime)), [
+        'Small',
+        'Big',
+      ]);
+    });
+
     test('each column sorts; unknown last; ties by name', () {
+      // S6.14 (RD-10 = O1): usable time breaks ties by frame fill, unknown
+      // last, before the name; before, a (fill unknown) came before b by
+      // name.
       expect(names(CandidateList.sort(rows, CandidateSort.usableTime)), [
         'c',
-        'a',
         'b',
+        'a',
         'd',
       ]);
       expect(names(CandidateList.sort(rows, CandidateSort.windowStart)), [

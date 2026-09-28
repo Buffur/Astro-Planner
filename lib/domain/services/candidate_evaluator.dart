@@ -215,7 +215,10 @@ enum CandidateSort {
 abstract final class CandidateList {
   /// Sorts by [by]: usable time, max altitude, Moon separation and frame
   /// fill descending; window start ascending; name A–Z. Unknown values
-  /// always sort last; ties fall back to the name.
+  /// always sort last; ties fall back to the name. Usable time, the
+  /// default, breaks its ties by frame fill before the name (RD-10 = O1,
+  /// S6.14): a chain of measured quantities, never one combined number
+  /// (ADR-013 §5).
   static List<TonightCandidate> sort(
     List<TonightCandidate> rows,
     CandidateSort by,
@@ -236,7 +239,16 @@ abstract final class CandidateList {
     final out = [...rows];
     out.sort((a, b) {
       final c = switch (by) {
-        CandidateSort.usableTime => b.usableTime.compareTo(a.usableTime),
+        CandidateSort.usableTime => switch (b.usableTime.compareTo(
+          a.usableTime,
+        )) {
+          0 => nullsLast(
+            a.frameFillFraction,
+            b.frameFillFraction,
+            descending: true,
+          ),
+          final c => c,
+        },
         CandidateSort.windowStart => nullsLast(
           a.firstWindowStartUtc,
           b.firstWindowStartUtc,
