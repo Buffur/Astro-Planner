@@ -123,10 +123,27 @@ void main() {
     await tester.pumpWidget(wrap(vm));
     await tester.pumpAndSettle();
 
-    expect(find.text('Choose a Target'), findsOneWidget);
-    expect(find.text('Choose Equipment'), findsOneWidget);
+    // S6.6: no empty state; the structure stays with a neutral status and
+    // an action where the target and the rig go.
+    expect(find.byKey(const Key('planner.status')), findsOneWidget);
+    expect(find.byKey(const Key('planner.noTarget')), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('planner.noRig')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.byKey(const Key('planner.noRig')), findsOneWidget);
 
-    await tester.tap(find.text('Choose a Target'));
+    final choose = find.descendant(
+      of: find.byKey(const Key('planner.noTarget')),
+      matching: find.text('Choose a target'),
+    );
+    await tester.scrollUntilVisible(
+      choose,
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(choose);
     await tester.pumpAndSettle();
 
     expect(find.text('Select Target'), findsOneWidget);
@@ -532,8 +549,9 @@ void main() {
 
     // Scroll through the whole body to check the light-pollution map card.
     final listFinder = find.byType(Scrollable).first;
+    // S6.6: the rig is the planner's last section.
     await tester.dragUntilVisible(
-      find.text('Capture Plan'),
+      find.text('Rig'),
       listFinder,
       const Offset(0, -300),
     );

@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.6, 2026-09-28:** B4 notes the planner's answer-first structure (`PlanStatus`, the context line, the section order).
 > **S6.5, 2026-09-28:** B4 notes the Night & Moon and Weather detail routes, the dark span at the user's limit and `CandidatesViewModel`.
 > **S6.3, 2026-09-28:** B4 notes Save · Discard · Cancel, the replaced-draft deletion and the revert of a changed saved plan (S4-DEF-04 = R).
 > **S6.4, 2026-09-28:** B11 notes the rollover rule for a never-saved draft (`PlanLifecycleViewModel.followNight`, TD-057).
@@ -449,6 +450,15 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `NightConditionsViewModel.nightTimeline` and cached per night and limit. **`CandidatesViewModel`**
 > (a plain `Provider`) took `tonightCandidates()` out of `NightConditionsViewModel`, which reads the
 > forecast for it through the public `opportunityWeather`; the conditions ViewModel is 274 lines.
+
+> **Since S6.6 (2026-09-28; ADR-019 §6)** the planner's body is one list, never an empty-state page:
+> `PlanStatus` (`widgets/plan_status.dart`: `StatusBlock` over `fitAnalysis` and `captureBudget`,
+> with `FillWindowAction` moved out of the budget summary), `ContextLine` with `pickNight`, the
+> target and `TonightOpportunityWidget`, `CapturePlanWidget` (its outputs no longer show the fit),
+> the conditions rows, and the rig card. A missing site, target or rig gives a neutral status and a
+> `_ChooseCard` in its section. `InfoRow` uses the text roles. Where each value went: the fit, its
+> reason, its end and fill/trim → the status; "Session Date" → the context line; the rest stays in
+> its section (the rig's rows reordered, "Current Altitude" renamed "Altitude now").
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_palette.dart';
+
 import '../../core/theme/app_spacing.dart';
 
 class InfoRow extends StatelessWidget {
@@ -16,7 +18,8 @@ class InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    // S6.6: the text roles (S5.1), not the scheme's primary and secondary.
+    final palette = AppPalette.of(context);
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
@@ -29,7 +32,7 @@ class InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.secondary,
+                color: palette.textSecondary,
               ),
             ),
           ),
@@ -38,7 +41,7 @@ class InfoRow extends StatelessWidget {
             child: Text(
               value,
               style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.primary,
+                color: palette.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),

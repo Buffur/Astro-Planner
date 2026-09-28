@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.5 done**: the Night & Moon and Weather details; Stage 6 in progress).
-> **Next:** S6.6 (no gate). The owner answers RD-08, RD-10 and RD-11 whenever convenient,
+> **Last updated:** 2026-09-28 (**S6.6 done**: the planner answers first; Stage 6 in progress).
+> **Next:** S6.7 (no gate). The owner answers RD-08, RD-10 and RD-11 whenever convenient,
 > each before its Task.
 
 ## Current state
@@ -13,11 +13,19 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.5 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.6 done) |
 | Current Task | None in progress |
-| Next Task | **S6.6 — The planner's answer-first structure** (no gate) |
-| Code baseline | S6.5 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.7 — Disclosure in the planner** (no gate) |
+| Code baseline | S6.6 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.6 done, 2026-09-28** (P6.3; UX-01 to UX-03, UX-07, UX-15 (3)): the planner answers first:
+the status (verdict with time needed and usable time, reason, capture end, integration, fill or
+trim), the context line (site ▾ · night ▾), then the target, the capture plan, the conditions and
+the rig. No empty state: a missing site, target or rig is a neutral status with a way to choose.
+**For the owner:** "Needs a site" and "Needs a rig" follow the glossary's "Needs a …" pattern but
+are kept out of `AppWords` until you confirm them (`DESIGN_SYSTEM.md` §7). Verification: the full
+gate after the last code change, PASS (below); every acceptance criterion checked.
 
 **S6.5 done, 2026-09-28** (P6.5; UX-06, UX-10; TD-051 resolved; CALC-41): two detail screens above
 the tabs, Night & Moon (`/night`: the dark span at the user's limit, the twilight names, the Moon,
@@ -111,7 +119,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (418 files, 0 changed); Analyze; 1,386 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.5's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (420 files, 0 changed); Analyze; 1,391 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.6's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -232,11 +240,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.6 — The planner's answer-first structure** (P6.3; UX-01 to UX-03, UX-07, UX-15 (3)). Frozen,
-no gate; the frozen sequence is the approval.
-- **Read:** S6.6 and "Rules for every Stage 6 Task"; ADR-019 §6; `home_screen.dart`, `StatusBlock`,
-  `ContextLine`/`pickNight`, `PlannerSummaryCard`/`InfoRow`, `FitAnalyzer`/`CaptureAnalysisViewModel`,
-  the accessibility sweep and the E2E.
+**S6.7 — Disclosure in the planner** (P6.4; UX-05; ADR-019 §7). Frozen, no gate; the frozen sequence
+is the approval.
+- **Read:** S6.7 and "Rules for every Stage 6 Task"; ADR-019 §7; ADR-009 §2; `CollapsibleSection`
+  and `DisclosureViewModel`; `capture_budget_summary.dart`, `capture_assumptions_panel.dart`, the
+  rig card and `SkyDarknessWidget` in `home_screen.dart`.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

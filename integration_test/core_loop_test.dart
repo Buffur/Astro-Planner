@@ -240,8 +240,9 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
   await settle(tester);
   await tap(tester, find.textContaining('(M31)').first);
 
-  await scrollTo(tester, find.textContaining('Equipment:'));
-  await tap(tester, find.textContaining('Equipment:'));
+  // S6.6: the rig's card is titled "Rig: …".
+  await scrollTo(tester, find.textContaining('Rig:'));
+  await tap(tester, find.textContaining('Rig:'));
   expect(find.text('Select Equipment'), findsOneWidget);
   await tap(tester, find.textContaining('ASI2600MC').first);
 }

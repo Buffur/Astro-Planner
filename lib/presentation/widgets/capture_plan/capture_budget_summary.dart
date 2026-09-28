@@ -1,32 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme/app_palette.dart';
-
-import '../../../domain/services/fit_analyzer.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
-import '../../shared/night_text.dart';
 import '../../../core/utils/quantity_text.dart';
 
 /// A millisecond duration in the app's one duration form (S1.7).
 String formatBudgetDuration(int ms) =>
     QuantityText.duration(Duration(milliseconds: ms));
 
-/// The capture plan's outputs (ADR-009 §2, §6–§7; TASK 5.6): the budget
-/// breakdown, the fit with its reason and end time, "fill the window",
-/// relative stacking gain per group and storage. Renders ViewModel/domain
-/// values only — no calculations here.
+/// The capture plan's outputs (ADR-009 §2, §7; TASK 5.6): the budget
+/// breakdown, relative stacking gain per group and storage. The fit, its
+/// reason, its end and "fill the window" are the planner's status since S6.6
+/// (`PlanStatus`), shown once. Renders ViewModel/domain values only — no
+/// calculations here.
 class CaptureBudgetSummary extends StatelessWidget {
   const CaptureBudgetSummary({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final analysis = context.watch<CaptureAnalysisViewModel>();
     final plan = context.watch<SessionPlanViewModel>();
     final budget = analysis.captureBudget;
@@ -97,49 +93,6 @@ class CaptureBudgetSummary extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Flexible(
-              child: Text(
-                'Fit tonight',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                FitText.label(fit.state),
-                key: const Key('capturePlan.fitState'),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: FitText.color(
-                    fit.state,
-                    scheme,
-                    AppPalette.of(context),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        // ADR-009 §6: every fit result carries a reason.
-        Text(
-          fit.reason,
-          key: const Key('capturePlan.fitReason'),
-          style: theme.textTheme.bodySmall,
-        ),
-        if (fit.endUtc != null &&
-            (fit.state == FitState.fits || fit.state == FitState.tight))
-          Text(
-            'Capture ends at ${clock(fit.endUtc!)} '
-            '(${NightTimeFormatter.zoneCaption(fit.endUtc!, zoneId: zoneId)}).',
-            key: const Key('capturePlan.fitEnd'),
-            style: theme.textTheme.bodySmall,
-          ),
-        _FillWindowAction(fit: fit),
-        const SizedBox(height: 12),
         const Text(
           'Relative stacking gain (√N vs one frame)',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -182,53 +135,6 @@ class CaptureBudgetSummary extends StatelessWidget {
   static String _seconds(int ms) {
     final s = ms / 1000;
     return s == s.roundToDouble() ? '${s.round()} s' : '$s s';
-  }
-}
-
-/// "Fill tonight's window": one action that sets the plan's last light
-/// block to the largest frame count that still places (TASK 5.6
-/// acceptance: see why a plan doesn't fit and fix it with one action).
-class _FillWindowAction extends StatelessWidget {
-  const _FillWindowAction({required this.fit});
-
-  final FitResult fit;
-
-  @override
-  Widget build(BuildContext context) {
-    if (fit.state == FitState.noWindow ||
-        fit.state == FitState.needsInput ||
-        fit.state == FitState.nothingToFit) {
-      return const SizedBox.shrink();
-    }
-    final viewModel = context.watch<CaptureAnalysisViewModel>();
-    final index = viewModel.fillWindowBlockIndex;
-    final target = viewModel.fillWindowFrameCount;
-    if (index == null || target == null) return const SizedBox.shrink();
-    final block = context.watch<SessionPlanViewModel>().captureBlocks[index];
-    final label =
-        '${block.filterName ?? 'Light'} ${QuantityText.exposure(block.exposureTimeSeconds)}';
-    if (target < 1) {
-      return Text(
-        'Not even one $label frame fits tonight.',
-        style: Theme.of(context).textTheme.bodySmall,
-      );
-    }
-    if (target == block.frameCount) return const SizedBox.shrink();
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton.icon(
-        key: const Key('capturePlan.fillWindow'),
-        icon: Icon(
-          target < block.frameCount ? Icons.content_cut : Icons.open_in_full,
-        ),
-        label: Text(
-          target < block.frameCount
-              ? 'Trim $label to $target frames to fit tonight'
-              : 'Fill tonight\'s window: $label × $target',
-        ),
-        onPressed: () => viewModel.fillWindow(),
-      ),
-    );
   }
 }
 

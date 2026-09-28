@@ -12,14 +12,12 @@ import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
+import '../../widgets/plan_status.dart';
 import '../../shared/capability_text.dart';
 import '../../shared/light_pollution_map_link.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/start_session.dart';
 import '../../shared/night_time_formatter.dart';
-import '../../../domain/models/calendar_date.dart';
-import '../../../domain/models/astro_target.dart';
-import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/field_mode_button.dart';
 import '../../widgets/capture_plan_widget.dart';
@@ -30,7 +28,7 @@ import '../details/night_moon_screen.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shared/app_words.dart';
-import '../../shared/context_line.dart' show pickNight;
+import '../../shared/context_line.dart';
 import '../../shared/plan_state.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/unsaved_plan_prompt.dart';
@@ -68,224 +66,224 @@ class HomeScreen extends StatelessWidget {
                 if (planVm.autosaveFailure != null)
                   const _AutosaveFailureBanner(),
                 Expanded(
-                  child: target == null || equipment == null
-                      ? _EmptyStateView(target: target, equipment: equipment)
-                      : ListView(
-                          padding: const EdgeInsets.all(16.0),
-                          children: [
-                            _SectionHeader('Target / What'),
-                            PlannerSummaryCard(
-                              title:
-                                  (target.commonName != null &&
-                                      target.commonName != target.catalogId)
-                                  ? 'Target: ${target.commonName} (${target.catalogId})'
-                                  : 'Target: ${target.commonName ?? target.catalogId}',
-                              data: {
-                                'Type': target.type,
-                                // ADR-010 §3: existing moving-type targets
-                                // stay usable, with a visible warning.
-                                if (TargetTypes.isMoving(target.type))
-                                  'Note': TargetTypes.movingWarning,
-                                if (conditionsVm.currentAltitude != null)
-                                  'Current Altitude':
-                                      '${conditionsVm.currentAltitude?.toStringAsFixed(1)}°',
-                                // TASK 10.3: inside tonight's windows, not
-                                // at culmination (possibly in daylight).
-                                if (conditionsVm.imagingOpportunity
-                                    case final o?)
-                                  'Max altitude in windows':
-                                      o.maxAltitudeInWindowsDeg == null
-                                      ? 'no window tonight'
-                                      : '${o.maxAltitudeInWindowsDeg!.toStringAsFixed(1)}°',
-                              },
-                              onTap: () => context.push(AppRouter.selectTarget),
+                  // S6.6 (ADR-019 §6; UX-01, UX-02): the answer first, then
+                  // the context, the target and its windows, the capture
+                  // plan, the conditions and the rig. Without a target or a
+                  // rig the structure stays, with a neutral status.
+                  child: ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      const PlanStatus(),
+                      ContextLine(
+                        siteName: siteVm.isDefaultLocation
+                            ? null
+                            : siteVm.activeSite?.name ??
+                                  siteVm.locationName ??
+                                  'Current position',
+                        night: planVm.eveningDate,
+                        zoneId: siteVm.displayZoneId,
+                        nightStartUtc: planVm.sessionNight?.startUtc,
+                        onSite: () => context.push(AppRouter.selectSite),
+                        onNight: () async {
+                          final picked = await pickNight(
+                            context,
+                            initial: planVm.eveningDate,
+                          );
+                          if (picked != null && context.mounted) {
+                            await runWithFeedback(
+                              context,
+                              'change the night',
+                              () => planVm.setEveningDate(picked),
+                            );
+                          }
+                        },
+                      ),
+                      _SectionHeader('Target'),
+                      if (target != null) ...[
+                        PlannerSummaryCard(
+                          title:
+                              (target.commonName != null &&
+                                  target.commonName != target.catalogId)
+                              ? 'Target: ${target.commonName} (${target.catalogId})'
+                              : 'Target: ${target.commonName ?? target.catalogId}',
+                          data: {
+                            'Type': target.type,
+                            // ADR-010 §3: existing moving-type targets
+                            // stay usable, with a visible warning.
+                            if (TargetTypes.isMoving(target.type))
+                              'Note': TargetTypes.movingWarning,
+                            if (conditionsVm.currentAltitude != null)
+                              // UX-15 (3): the altitude now, not on
+                              // the planned night.
+                              'Altitude now':
+                                  '${conditionsVm.currentAltitude?.toStringAsFixed(1)}°',
+                            // TASK 10.3: inside tonight's windows, not
+                            // at culmination (possibly in daylight).
+                            if (conditionsVm.imagingOpportunity case final o?)
+                              'Max altitude in windows':
+                                  o.maxAltitudeInWindowsDeg == null
+                                  ? 'no window tonight'
+                                  : '${o.maxAltitudeInWindowsDeg!.toStringAsFixed(1)}°',
+                          },
+                          onTap: () => context.push(AppRouter.selectTarget),
+                        ),
+                      ] else
+                        _ChooseCard(
+                          key: const Key('planner.noTarget'),
+                          text: 'No target chosen.',
+                          action: 'Choose a target',
+                          onTap: () => context.push(AppRouter.selectTarget),
+                        ),
+                      if (planVm.sessionNight != null)
+                        const TonightOpportunityWidget()
+                      else
+                        const _NoSiteCard(
+                          message:
+                              "Set your site to see tonight's altitude chart.",
+                        ),
+                      _SectionHeader(AppWords.capturePlan),
+                      const CapturePlanWidget(),
+                      _SectionHeader('Conditions'),
+                      // S6.5 (UX-06, UX-10): the night and its
+                      // forecast in full are on their detail screens;
+                      // here one factual row each. Without a site the
+                      // location card is shown (ADR-012).
+                      if (planVm.sessionNight case final night?) ...[
+                        _DetailRow(
+                          key: const Key('planner.night'),
+                          title: 'Night & Moon',
+                          onTap: () => context.push(AppRouter.nightMoon),
+                          child: NightSummary(
+                            night: night,
+                            conditions: conditionsVm,
+                            zoneId: siteVm.displayZoneId,
+                          ),
+                        ),
+                        _DetailRow(
+                          key: const Key('planner.weather'),
+                          title: 'Weather',
+                          onTap: () => context.push(AppRouter.weather),
+                          child: Text(
+                            WeatherText.summary(
+                              conditionsVm.nightWeather,
+                              conditionsVm.nightWeatherSummary,
                             ),
-                            if (planVm.sessionNight != null)
-                              const TonightOpportunityWidget()
-                            else
-                              const _NoSiteCard(
-                                message: "Set your site to see tonight's altitude chart.",
-                              ),
-                            _SectionHeader('Equipment / How'),
-                            PlannerSummaryCard(
-                              title: 'Equipment: ${equipment.name}',
-                              data: {
-                                'Pixel Scale': analysisVm.pixelScale != null
-                                    ? '${analysisVm.pixelScale!.toStringAsFixed(2)} arcsec/px'
-                                    : 'Unknown',
-                                // TASK 8.6: capability summary (guidance).
-                                if (analysisVm.rigCapability case final cap?)
-                                  'Field of view': CapabilityText.fov(cap),
-                                if (analysisVm.rigCapability case final cap?
-                                    when cap.npf != null)
-                                  'NPF (untracked)': CapabilityText.npf(cap)!,
-                                if (analysisVm.rigCapability case final cap?
-                                    when cap.recommendedMaxSubS != null)
-                                  'Max sub (guide)':
-                                      CapabilityText.recommendedMaxSub(cap)!,
-                                if (analysisVm.rigCapability case final cap?
-                                    when cap.frameFillFraction != null)
-                                  'Target size': CapabilityText.frameFill(cap)!,
-                                'Focal length':
-                                    '${_trimNumber(equipment.focalLengthMm)} mm',
-                                'Focal ratio': equipment.needsApertureReview
-                                    ? 'f/${_trimNumber(equipment.focalRatio)} — please review'
-                                    : 'f/${equipment.focalRatio.toStringAsFixed(1)}',
-                                'Sensor':
-                                    '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
-                                'Tracking': equipment.trackingType.label,
-                              },
-                              onTap: () => context.push(AppRouter.selectRig),
-                            ),
-                            _SectionHeader('Conditions & Timeline / When'),
-                            Card(
-                              margin: const EdgeInsets.only(bottom: 16),
-                              child: ListTile(
-                                leading: const Icon(Icons.calendar_month),
-                                title: const Text('Session Date'),
-                                subtitle: Text(
-                                  planVm.eveningDate != null
-                                      ? 'Night of ${NightTimeFormatter.eveningDate(planVm.eveningDate!)}'
-                                      : 'No site set',
-                                ),
-                                trailing: const Icon(Icons.edit, size: 16),
-                                onTap: () async {
-                                  final evening = planVm.eveningDate;
-                                  final now = DateTime.now();
-                                  final picked = await showDatePicker(
-                                    context: context,
-                                    initialDate: evening != null
-                                        ? DateTime(
-                                            evening.year,
-                                            evening.month,
-                                            evening.day,
-                                          )
-                                        : now,
-                                    firstDate: DateTime(
-                                      now.year - 1,
-                                      now.month,
-                                      now.day,
-                                    ),
-                                    lastDate: DateTime(
-                                      now.year + 5,
-                                      now.month,
-                                      now.day,
-                                    ),
-                                  );
-                                  if (picked != null) {
-                                    planVm.setEveningDate(
-                                      CalendarDate.fromDateTimeFields(picked),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                            // S6.5 (UX-06, UX-10): the night and its
-                            // forecast in full are on their detail screens;
-                            // here one factual row each. Without a site the
-                            // location card is shown (ADR-012).
-                            if (planVm.sessionNight case final night?) ...[
-                              _DetailRow(
-                                key: const Key('planner.night'),
-                                title: 'Night & Moon',
-                                onTap: () => context.push(AppRouter.nightMoon),
-                                child: NightSummary(
-                                  night: night,
-                                  conditions: conditionsVm,
-                                  zoneId: siteVm.displayZoneId,
-                                ),
-                              ),
-                              _DetailRow(
-                                key: const Key('planner.weather'),
-                                title: 'Weather',
-                                onTap: () => context.push(AppRouter.weather),
-                                child: Text(
-                                  WeatherText.summary(
-                                    conditionsVm.nightWeather,
-                                    conditionsVm.nightWeatherSummary,
-                                  ),
-                                ),
-                              ),
-                            ] else
-                              PlannerSummaryCard(
-                                title:
-                                    'Location: ${siteVm.locationName ?? "Custom"}',
-                                data: {
-                                  'Latitude': siteVm.latitude.toStringAsFixed(
-                                    4,
-                                  ),
-                                  'Longitude': siteVm.longitude.toStringAsFixed(
-                                    4,
-                                  ),
-                                  if (siteVm.locationNameAttribution != null)
-                                    'Place name':
-                                        siteVm.locationNameAttribution!,
-                                },
-                                onTap: () => context.push(AppRouter.selectSite),
-                              ),
-                            const SkyDarknessWidget(),
-                            // TASK 10.3 (ADR-013 §6): the fixed sky warning
-                            // is gone; the Moon and sky darkness are shown as
-                            // facts per window and in the card above.
-                            // TASK 7.4 (PD-05 option A): the external map,
-                            // centred on the current position. Hidden
-                            // without one — the London default is not the
-                            // user's sky.
-                            if (FeatureScope.lightPollutionContext &&
-                                !siteVm.isDefaultLocation)
-                              Card(
-                                margin: const EdgeInsets.only(bottom: 16),
-                                color: Theme.of(context).cardTheme.color,
-                                child: InkWell(
-                                  onTap: () async {
-                                    final url = LightPollutionMapLink.at(
-                                      siteVm.latitude,
-                                      siteVm.longitude,
-                                    );
-                                    if (await canLaunchUrl(url)) {
-                                      await launchUrl(
-                                        url,
-                                        mode: LaunchMode.externalApplication,
-                                      );
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(16.0),
-                                    child: Row(
+                          ),
+                        ),
+                      ] else
+                        PlannerSummaryCard(
+                          title: 'Location: ${siteVm.locationName ?? "Custom"}',
+                          data: {
+                            'Latitude': siteVm.latitude.toStringAsFixed(4),
+                            'Longitude': siteVm.longitude.toStringAsFixed(4),
+                            if (siteVm.locationNameAttribution != null)
+                              'Place name': siteVm.locationNameAttribution!,
+                          },
+                          onTap: () => context.push(AppRouter.selectSite),
+                        ),
+                      const SkyDarknessWidget(),
+                      // TASK 10.3 (ADR-013 §6): the fixed sky warning
+                      // is gone; the Moon and sky darkness are shown as
+                      // facts per window and in the card above.
+                      // TASK 7.4 (PD-05 option A): the external map,
+                      // centred on the current position. Hidden
+                      // without one — the London default is not the
+                      // user's sky.
+                      if (FeatureScope.lightPollutionContext &&
+                          !siteVm.isDefaultLocation)
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          color: Theme.of(context).cardTheme.color,
+                          child: InkWell(
+                            onTap: () async {
+                              final url = LightPollutionMapLink.at(
+                                siteVm.latitude,
+                                siteVm.longitude,
+                              );
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(
+                                  url,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(6),
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.map_outlined),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.map_outlined),
-                                        SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Open Light Pollution Map',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Text(
-                                                'Centred here. Read the value, '
-                                                'then enter it as Bortle or '
-                                                'SQM for your site.',
-                                              ),
-                                            ],
+                                        Text(
+                                          'Open Light Pollution Map',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        Icon(Icons.open_in_browser),
+                                        Text(
+                                          'Centred here. Read the value, '
+                                          'then enter it as Bortle or '
+                                          'SQM for your site.',
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
+                                  Icon(Icons.open_in_browser),
+                                ],
                               ),
-                            _SectionHeader('Capture Plan'),
-                            const CapturePlanWidget(),
-                            const SizedBox(height: 32),
-                          ],
+                            ),
+                          ),
                         ),
+                      _SectionHeader(AppWords.rig),
+                      if (equipment != null) ...[
+                        PlannerSummaryCard(
+                          title: '${AppWords.rig}: ${equipment.name}',
+                          data: {
+                            // S6.6: the values this plan uses first,
+                            // then any active capability warning
+                            // (TASK 8.6, guidance); the reference rows
+                            // after them (S6.7 folds those).
+                            if (analysisVm.rigCapability case final cap?)
+                              'Field of view': CapabilityText.fov(cap),
+                            'Pixel scale': analysisVm.pixelScale != null
+                                ? '${analysisVm.pixelScale!.toStringAsFixed(2)} arcsec/px'
+                                : 'Unknown',
+                            if (analysisVm.rigCapability case final cap?
+                                when cap.frameFillFraction != null)
+                              'Target size': CapabilityText.frameFill(cap)!,
+                            if (analysisVm.rigCapability case final cap?
+                                when cap.npf != null)
+                              'NPF (untracked)': CapabilityText.npf(cap)!,
+                            if (analysisVm.rigCapability case final cap?
+                                when cap.recommendedMaxSubS != null)
+                              'Max sub (guide)':
+                                  CapabilityText.recommendedMaxSub(cap)!,
+                            'Focal length':
+                                '${_trimNumber(equipment.focalLengthMm)} mm',
+                            'Focal ratio': equipment.needsApertureReview
+                                ? 'f/${_trimNumber(equipment.focalRatio)} — please review'
+                                : 'f/${equipment.focalRatio.toStringAsFixed(1)}',
+                            'Sensor':
+                                '${_trimNumber(equipment.sensorWidthMm)} × ${_trimNumber(equipment.sensorHeightMm)} mm (${_trimNumber(equipment.pixelPitchUm)} µm pixels)',
+                            'Tracking': equipment.trackingType.label,
+                          },
+                          onTap: () => context.push(AppRouter.selectRig),
+                        ),
+                      ] else
+                        _ChooseCard(
+                          key: const Key('planner.noRig'),
+                          text: 'No rig chosen.',
+                          action: AppWords.chooseRig,
+                          onTap: () => context.push(AppRouter.selectRig),
+                        ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -395,56 +393,33 @@ class _BootstrapErrorView extends StatelessWidget {
   }
 }
 
-/// Shown when target and/or equipment have not been selected yet, with an
-/// action for each missing piece.
-class _EmptyStateView extends StatelessWidget {
-  final AstroTarget? target;
-  final EquipmentProfile? equipment;
+/// A missing target or rig in its section (S6.6): says so and offers the
+/// picker; the planner's structure stays around it.
+class _ChooseCard extends StatelessWidget {
+  const _ChooseCard({
+    super.key,
+    required this.text,
+    required this.action,
+    required this.onTap,
+  });
 
-  const _EmptyStateView({required this.target, required this.equipment});
+  final String text;
+  final String action;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.all(16),
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Icon(
-              Icons.auto_awesome,
-              size: 48,
-              color: AppPalette.of(context).muted,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Select a Target and Equipment profile to begin planning.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppPalette.of(context).muted,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              alignment: WrapAlignment.center,
-              children: [
-                if (target == null)
-                  ElevatedButton.icon(
-                    onPressed: () => context.push(AppRouter.selectTarget),
-                    icon: const Icon(Icons.explore_outlined),
-                    label: const Text('Choose a Target'),
-                  ),
-                if (equipment == null)
-                  ElevatedButton.icon(
-                    onPressed: () => context.push(AppRouter.selectRig),
-                    icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text('Choose Equipment'),
-                  ),
-              ],
-            ),
+            Text(text),
+            OutlinedButton(onPressed: onTap, child: Text(action)),
           ],
         ),
       ),

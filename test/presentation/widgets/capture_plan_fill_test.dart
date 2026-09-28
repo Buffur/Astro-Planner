@@ -8,6 +8,7 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
+import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -16,6 +17,7 @@ import 'package:astroplan/domain/services/fit_analyzer.dart';
 import '../../support/planner_harness.dart';
 
 import 'package:astroplan/presentation/widgets/capture_plan_widget.dart';
+import 'package:astroplan/presentation/widgets/plan_status.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +38,8 @@ void main() {
       database = AppDatabase(NativeDatabase.memory());
       final targets = DriftTargetRepository(database);
       await CatalogSeeder(targets).seedIfNeeded(); // M42
+      // S6.6: without a rig the status asks for one instead of the fill.
+      await EquipmentSeeder(DriftEquipmentRepository(database)).seedIfNeeded();
       final locations = DriftLocationRepository(database);
       final id = await locations.insertLocation(
         domain.LocationProfile(
@@ -76,7 +80,11 @@ void main() {
         providers: vm.providers,
         child: const MaterialApp(
           home: Scaffold(
-            body: SingleChildScrollView(child: CapturePlanWidget()),
+            // S6.6: the verdict and "fill the window" are the planner's
+            // status (PlanStatus), above the capture plan.
+            body: SingleChildScrollView(
+              child: Column(children: [PlanStatus(), CapturePlanWidget()]),
+            ),
           ),
         ),
       ),
@@ -90,7 +98,7 @@ void main() {
     await build(tester);
     expect(vm.visibilityWindows, isNotEmpty);
     expect(vm.fitAnalysis.state, FitState.doesNotFit);
-    expect(find.text("Doesn't fit"), findsOneWidget);
+    expect(find.textContaining("Doesn't fit"), findsOneWidget);
     expect(find.textContaining("don't fit tonight"), findsOneWidget);
     expect(find.textContaining('similar nights'), findsOneWidget);
 
@@ -109,8 +117,8 @@ void main() {
 
     expect(vm.captureBlocks.single.frameCount, target);
     expect(vm.fitAnalysis.state, isNot(FitState.doesNotFit));
-    expect(find.text("Doesn't fit"), findsNothing);
-    expect(find.byKey(const Key('capturePlan.fitEnd')), findsOneWidget);
+    expect(find.textContaining("Doesn't fit"), findsNothing);
+    expect(find.textContaining('Capture ends'), findsOneWidget);
     // Already filled: the action disappears.
     expect(find.byKey(const Key('capturePlan.fillWindow')), findsNothing);
   });

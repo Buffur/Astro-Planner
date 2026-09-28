@@ -2869,7 +2869,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 (**decided: R**) | **Done 2026-09-28** |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | **Done 2026-09-28** |
-| S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
+| S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | **Done 2026-09-28** |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | Frozen |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | Frozen |
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 | Frozen, gated |
@@ -3119,6 +3119,17 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
     fit, no window and needs input (tests);
   - the planner without a target, and without a rig, shows its structure and a neutral status;
   - the sweep at 200 %; the E2E; the full gate.
+- **Done 2026-09-28:** `PlanStatus` (over `StatusBlock`; `FillWindowAction` moved into it), the
+  context line with `pickNight`, then the target and windows, the capture plan (no fit block), the
+  conditions and the rig card ("Rig: …", the plan's values first). No empty state: a missing site,
+  target or rig gives a neutral status and a choose card. "Needs a site" and "Needs a rig" apply the
+  glossary's "Needs a …" pattern but are **not** added to `AppWords` (the owner's glossary; the
+  owner may confirm them). `InfoRow` uses the text roles. `planner_structure_test.dart` (5: the
+  first screen in light, dark and field; the status against the fit and the budget; no rig).
+  Deliberate test changes: the empty-state test checks the new structure, the fill test pumps the
+  status with the capture plan (and seeds the rig), the gated-feature test scrolls to "Rig", and
+  the E2E opens the rig by "Rig:". "Equipment profile" left `home_screen.dart`'s baseline. Full gate
+  PASS: 1,391 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.7 — Disclosure in the planner (P6.4)
 - **Objective:** technical depth one tap away behind factual summaries, while the "never hidden"
