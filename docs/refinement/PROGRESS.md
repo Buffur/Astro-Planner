@@ -20,6 +20,12 @@
 | Code baseline | S6.14 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
 
+**S6.E device set up, 2026-09-28:** the separate `.s2check` build (application code of `f19aef7`)
+is installed on the owner's phone beside the owner's app, which was not touched; a saved test plan
+(Test site, M31, the example rig and plan; "Fits") is ready, and the setup and true answers are in
+`evidence/STAGE_6_FIVE_SECOND_TEST.md`. The five questions still need a person. Found while setting
+up: TD-075 (the status's reason can contradict a missing-input headline; recorded, not fixed).
+
 **S6.E step 1 done, 2026-09-28** (S4V-02 corrected; documentation only):
 `research/S4.R1_FLOW_INVENTORY.md` §7's device rules now say that no test only looks (the plan
 autosaves; Save plan and Track live store records), how to run Test A on the owner's app without
