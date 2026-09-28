@@ -4,10 +4,10 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.16 done**: the owner's corrective pass before the Stage 6
-> validation; TD-075–TD-080 resolved; ADR-019 §6 amended).
-> **Next:** S6.E's five-second test on a refreshed `.s2check` build with an independent participant
-> (or the gap recorded), then the Stage 6 validation in a fresh session (below).
+> **Last updated:** 2026-09-28 (**S6.E device refreshed**: the `.s2check` app rebuilt from S6.16's
+> `d7e1477` and the test plan set up again; the test itself still needs a participant).
+> **Next:** S6.E's five-second test on the refreshed `.s2check` build with an independent
+> participant (or the gap recorded), then the Stage 6 validation in a fresh session (below).
 
 ## Current state
 
@@ -16,9 +16,19 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 and S6.16 done; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.E's run** (the five-second test, on a refreshed `.s2check`), then **Stage 6 validation** |
-| Code baseline | S6.16 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.E's run** (the five-second test, on the refreshed `.s2check`; a participant is needed), then **Stage 6 validation** |
+| Code baseline | S6.16 (`d7e1477`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.E device refreshed, 2026-09-28, 22:52–22:55** (documentation only; details in
+`evidence/STAGE_6_FIVE_SECOND_TEST.md`): the separate `.s2check` app is now a debug build of
+`d7e1477` (S6.16), built in a detached worktree with the local application-id suffix (reverted,
+never committed) and installed as an update. The owner's app was not touched (last update 22:44:13
+before and after; that update came from an Android Studio `flutter run` session, not this setup). A
+new saved test plan (Test site, M31, the example rig and plan, night of Mon, Sep 28) reads "Fits: 1 h
+48 min needed of 8 h 35 min usable"; the owner's review plan stays in Sessions. Both test screens
+render; no device defect prevents the test. TD-080's two target actions are approved by the owner as
+built. The five questions still need an independent participant.
 
 **S6.16 done, 2026-09-28** (the owner's corrective pass; DECISIONS E.1, "Stage 6 corrective pass
 decided"): TD-075–TD-080 resolved; ADR-019 §6 amended and built (status → site and night → target →
@@ -26,8 +36,8 @@ rig → capture plan → "Tonight for this target" → conditions); the core scr
 page title, context card, "Your plan" heading, Open planner always primary, the target rows; the
 planner's status card and section headings); Undo for Fill/Trim, a saved block edit and the example
 plan (no global undo). TD-081 recorded (messages slide even with reduced motion; not fixed).
-**The `.s2check` build is stale** (it has `f19aef7`'s code): refresh it from this commit before the
-five-second test. Verification: the full gate after the last code change, PASS (below); every acceptance criterion checked.
+The `.s2check` build was refreshed from S6.16's commit afterwards (above). Verification: the full gate
+after the last code change, PASS (below); every acceptance criterion checked.
 
 **Owner decisions, 2026-09-28 (in the session prompt):** the corrective pass above, the planner's
 order (ADR-019 §6 amended), the visual finish of Tonight and the planner in Stage 6 (Stage 9 keeps the
@@ -48,11 +58,9 @@ frames: RG-10, RG-11; elevation, Bortle, SQM: RG-08, RG-09), Stage 8 (results an
 P8.1, P8.2, P8.7), Stage 9 (detail screens' presentation, typography consistency, Tonight's rows,
 Settings: P9.3). **The five-second test stays UNVERIFIED.** Verification: documentation class.
 
-**S6.E device set up, 2026-09-28:** the separate `.s2check` build (application code of `f19aef7`)
-is installed on the owner's phone beside the owner's app, which was not touched; a saved test plan
-(Test site, M31, the example rig and plan; "Fits") is ready, and the setup and true answers are in
-`evidence/STAGE_6_FIVE_SECOND_TEST.md`. The five questions still need a person. Found while setting
-up: TD-075 (the status's reason can contradict a missing-input headline; recorded, not fixed).
+**S6.E device first set up, 2026-09-28** (superseded by the refresh above): a `.s2check` build of
+`f19aef7`'s code, used by the owner's review. Found while setting up: TD-075 (since resolved by
+S6.16).
 
 **S6.E step 1 done, 2026-09-28** (S4V-02 corrected; documentation only):
 `research/S4.R1_FLOW_INVENTORY.md` §7's device rules now say that no test only looks (the plan
@@ -234,7 +242,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,486 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.16's final inputs (this commit) | Nothing since: every gate input is this commit's. It supersedes S6.13's gate (S6.14's inputs included) |
+| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,486 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.16's final inputs (`d7e1477`) | Nothing since: only documentation changed after `d7e1477` (`git diff --stat d7e1477 HEAD -- . ':!docs' ':!CLAUDE.md'` is empty). It supersedes S6.13's gate (S6.14's inputs included) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -345,7 +353,8 @@ These block a release, not refinement.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
 - **Stage 6 (planned 2026-09-27):** every gate is decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1) and
   RD-11 (S9, so no S6.15), all 2026-09-28. S6.16 (the owner's corrective pass) is done. S6.E needs an
-  independent participant on a refreshed `.s2check` build, or the validation records the gap (V7).
+  independent participant on the refreshed `.s2check` build (refreshed 2026-09-28), or the
+  validation records the gap (V7).
   The tracker stays as built until P8.4. TD-081 is recorded for Stage 9 or 11.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
@@ -355,13 +364,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S6.E's five-second test (UNVERIFIED):** rebuild the separate `.s2check` app from S6.16's commit
-   (an agent does this when the phone is connected; the owner's app is never touched), set up the
-   same test plan (Test site, M31, the example rig and plan, saved), and have **one independent
-   participant who has not worked on the product** answer Test A's five questions, recorded word
-   for word in `evidence/STAGE_6_FIVE_SECOND_TEST.md`. The owner's review does not count, and an
-   agent is never the participant. If no participant is available, the test stays UNVERIFIED and
-   the validation records the gap (V7).
+1. **S6.E's five-second test (UNVERIFIED):** the separate `.s2check` app is rebuilt from S6.16's
+   commit and the test plan (Test site, M31, the example rig and plan, saved) is set up for the night
+   of Mon, Sep 28 (done 2026-09-28; on a later night, prepare the plan for that night first, as the
+   evidence file says). Next, **one independent participant who has not worked on the product**
+   answers Test A's five questions, recorded word for word in `evidence/STAGE_6_FIVE_SECOND_TEST.md`.
+   The owner's review does not count, and an agent is never the participant. If no participant is
+   available, the test stays UNVERIFIED and the validation records the gap (V7).
 2. Then **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
    validation", now including S6.16's criteria and the owner's corrective-pass decisions). It may
    reuse S6.16's full gate (V3).

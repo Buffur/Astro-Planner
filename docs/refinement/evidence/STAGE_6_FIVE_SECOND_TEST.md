@@ -4,22 +4,25 @@
 > comprehension points: can a person tell, in five seconds, what the first screens say?
 > **Script:** Test A, `research/S4.R1_FLOW_INVENTORY.md` §7.1, with its device rules as corrected on
 > 2026-09-28 (S6.E step 1, S4V-02).
-> **App state:** the code at `f19aef7` (Stage 6's code Tasks done). Record the build you used below.
+> **App state:** the code at `d7e1477` (S6.16; Stage 6's code Tasks done), on `.s2check` since the
+> refresh of 2026-09-28 (Setup, below). The owner's review below used the first setup's `f19aef7`
+> code.
 > **Privacy:** no personal data about the people who try it; a role is enough ("owner", "friend, no
 > astro experience").
-> **Status:** the five-second test is **UNVERIFIED**: the device and the test plan are set up
-> (2026-09-28, by an agent over USB), but no independent participant has answered the five
+> **Status:** the five-second test is **UNVERIFIED**: the refreshed device and the test plan are set
+> up (2026-09-28, by an agent over USB), but no independent participant has answered the five
 > questions. An **owner manual UX review** was recorded on 2026-09-28 (below); it is a different
 > kind of evidence and does not stand in for the test.
-> **Build stale since S6.16 (2026-09-28):** the owner's corrective pass (DECISIONS E.1, "Stage 6
-> corrective pass decided") changed both first screens: Tonight's title, context card, "Your plan"
-> card and target actions; the planner's status card and its order below the status. The
-> `.s2check` app installed above is `f19aef7`'s code, so **it must be rebuilt from S6.16's commit
-> before a participant runs the test** (the owner's app untouched; the same test plan: Test site,
-> M31, the example rig and plan, saved). S6.16 changes no calculation, so for the same night the
-> plan's verdict and numbers are unchanged; if the test runs on another night, re-record the true
-> answers for that night before asking. The participant must be someone who has not worked
-> on the product; an agent is never the participant (item 7 of the owner's decision).
+> **Build refreshed after S6.16 (2026-09-28, 22:52):** the owner's corrective pass (DECISIONS E.1,
+> "Stage 6 corrective pass decided") changed both first screens (Tonight's title, context card,
+> "Your plan" card and target actions; the planner's status card and its order below the status),
+> so the `.s2check` app was rebuilt from S6.16's commit and an equivalent test plan was made and
+> saved (Setup, below). S6.16 changes no calculation: for the night of Mon, Sep 28 the plan's verdict
+> and numbers are the same as at the first setup. **If the test runs on a later night,** prepare the
+> plan for that night first (in `.s2check`: ⋮ → New plan, Andromeda Galaxy, "Start from the example
+> plan", Save plan) and re-record the true answers before asking. The participant must be someone
+> who has not worked on the product; an agent is never the participant (item 7 of the owner's
+> decision).
 
 ## How to run it
 
@@ -38,12 +41,12 @@
 
 | Item | Value |
 | --- | --- |
-| Date | 2026-09-28 (setup) |
-| Build (`.s2check` or own app; commit if known) | `io.github.chacha12.astroplanner.s2check`, a debug build of `934fb1a` (application code identical to `f19aef7`), with a local application-id suffix that was reverted before install. The owner's app was not touched (its last update time, 2026-09-28 19:02:04, was the same before and after) |
-| Phone | The owner's Xiaomi 14T Pro (Android 16), over USB |
-| Plan: site, target, rig | "Test site" at 50.45° N, 30.52° E (public city coordinates, 180 m, zone Europe/Kiev as the phone's); Andromeda Galaxy (M31); the example rig (ZWO ASI2600MC + example 72 mm f/5.6 refractor); the example plan (L 60 s × 100, 20 darks, 20 flats); night of Mon, Sep 28 |
+| Date | 2026-09-28: first setup 19:05; **refreshed 22:52–22:55** (the build and plan this test uses) |
+| Build (`.s2check` or own app; commit if known) | `io.github.chacha12.astroplanner.s2check`, a debug build of **`d7e1477`** (S6.16). Built in a separate, detached Git worktree of that commit with a local `applicationIdSuffix = ".s2check"`, reverted before the worktree was removed and never committed; the main working tree was not changed. Before install, `aapt2` showed the package `io.github.chacha12.astroplanner.s2check` and `apksigner` the Android debug certificate (APK SHA-256 `7e0ba4229ef31eb5069e4fb4adc082e955cebd6922fed9954d7944767ea7b89f`). Installed with `adb install -r` as an update of the existing `.s2check` package, so its data was kept. **The owner's app was not touched:** `io.github.chacha12.astroplanner`'s last update time (2026-09-28 22:44:13) and code path were the same before and after. That 22:44:13 update was not this setup's: when the setup began, a `flutter run` debug session from Android Studio on this machine was attached to the owner's app, and the separate worktree kept this build away from it. *First setup (superseded; the owner's review used it):* a debug build of `934fb1a` (application code identical to `f19aef7`), installed at 19:05; the owner's app's last update time then (19:02:04) was unchanged by it |
+| Phone | The owner's Xiaomi 14T Pro (Android 16), over USB; the system's dark theme (the app followed it), font scale 1.0 |
+| Plan: site, target, rig | "Test site" at 50.45° N, 30.52° E (public city coordinates, 180 m, zone Europe/Kiev as the phone's); Andromeda Galaxy (M31); the example rig (ZWO ASI2600MC + example 72 mm f/5.6 refractor); the example plan (L 60 s × 100, 20 darks, 20 flats); night of Mon, Sep 28. **Refresh:** made again through the app: ⋮ → New plan (it kept the site and rig), Andromeda Galaxy chosen from the catalogue, "Start from the example plan", Save plan |
 | Plan saved before the test? | Yes: Save plan was tapped, so the state is **Saved** |
-| The true answers (fits / tight / doesn't fit; the night; saved or not) | **Tonight:** it can be imaged: "Fits: 1 h 48 min needed of 8 h 35 min usable"; to change the plan, **Open planner** (the site ▾ · night ▾ line changes the site or night); **Saved**. **Planner:** Andromeda Galaxy, the night of Mon, Sep 28, Saved; it fits (1 h 48 min of 8 h 35 min; capture ends 22:21) |
+| The true answers (fits / tight / doesn't fit; the night; saved or not) | **Tonight:** it can be imaged: "Fits: 1 h 48 min needed of 8 h 35 min usable"; to change the plan, **Open planner** (the site ▾ · night ▾ context card changes the site or night); **Saved**. **Planner:** Andromeda Galaxy, the night of Mon, Sep 28, Saved; it fits (1 h 48 min of 8 h 35 min; capture ends 22:21). *Re-checked on the refreshed build at 22:54–22:55: both screens display exactly these values; valid for the night of Mon, Sep 28 only* |
 
 ## Answers
 
@@ -74,7 +77,8 @@ Notes:
 ## Observations while setting up (by the agent; not test answers)
 
 What the agent saw on the device while it built the test plan through the app's own screens. These
-are observations for the Stage 6 validation to weigh; they are not the five-second answers.
+are observations for the Stage 6 validation to weigh; they are not the five-second answers. The
+first list is the first setup (19:05, `f19aef7`'s code); the second is the refresh on S6.16's build.
 
 - Both first screens show, without scrolling on this phone (1220 × 2712 px): **Tonight** the site ▾
   · night ▾ line, "Your plan" with the target, the "Saved" label, the rig (marked "example rig"),
@@ -90,6 +94,30 @@ are observations for the Stage 6 validation to weigh; they are not the five-seco
   is nothing to fit." (the fit's own reason for an empty plan), which does not match the headline.
 - The weather row said "No forecast. Offline or the service did not answer." during setup (the
   forecast did not load on the phone at the time); this does not affect the five questions.
+
+### The refresh on S6.16's build (2026-09-28, 22:52–22:55; by the agent; not test answers)
+
+- **Before:** the `.s2check` app's current plan was the owner's review plan, saved at 475 light
+  frames and reading "Tight: 8 h 35 min needed of 8 h 35 min usable". It was not changed or deleted:
+  Sessions lists it beside the new test plan (both "Mon, Sep 28 - Andromeda Galaxy", Planned, 475 and
+  100 planned frames).
+- **The steps read as S6.16 intends:** after New plan, "Needs a target" with "Choose a target to
+  see tonight's windows." (TD-075's own reason); after M31, "Needs a block" with the fit's reason;
+  "Start from the example plan" filled the same three rows and showed "Started from the example
+  plan" with Undo (TD-079; not tapped); Save plan turned the strip to "Saved".
+- **Both first screens render without scrolling** on this phone. **Tonight:** the "Tonight" page
+  title; the context card (Test site ▾ · Mon, Sep 28 ▾, the zone line); "Your plan" with Saved,
+  Andromeda Galaxy, the rig marked "(example rig)", the verdict "Fits: 1 h 48 min needed of 8 h 35
+  min usable", its reason "Everything fits with 6 h 47 min of window time to spare." and the filled
+  Open planner; below them, the Night and Moon rows. Further down (scrolled): the Weather row
+  ("Cloud 0–70 %"; the forecast loaded this time), "What can I image tonight?" once and New plan.
+  **The planner:** the strip (Andromeda Galaxy · Night of Mon, Sep 28 · Saved); the status card
+  with the same verdict and reason, Integration 1 h 40 min, Capture ends 22:21 and "Fill tonight's
+  window: L 60 s × 475"; the context card; the start of the Target section; Save plan at the bottom.
+- **The time of day:** the refresh ended at about 22:55, after the capture end the screens show
+  (22:21). The screens' figures cover the whole night of Mon, Sep 28, not only the part still
+  ahead. Recorded as a fact for the validation; not classified here.
+- No crash, error message or layout defect was seen; nothing on the device prevents the test.
 
 ## Owner manual UX review (2026-09-28)
 
