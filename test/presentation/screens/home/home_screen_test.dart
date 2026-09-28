@@ -29,6 +29,7 @@ import 'package:astroplan/domain/repositories/location_repository.dart';
 import '../../../support/planner_harness.dart';
 
 import 'package:astroplan/presentation/widgets/sky_darkness_widget.dart';
+import 'package:astroplan/presentation/widgets/plan_status.dart';
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:astroplan/core/time/clock.dart';
@@ -276,13 +277,20 @@ void main() {
       expect(throwingWeather.calls, greaterThan(0));
 
       // TASK 10.3: one opportunity card; the fixed sky warning is gone.
+      // S6.16 (ADR-019 §6 as amended): it follows the capture plan, so the
+      // lazy list is scrolled to it first.
+      final list = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(
+        find.text('Tonight for this target'),
+        300,
+        scrollable: list,
+      );
       expect(find.text('Tonight for this target'), findsOneWidget);
       expect(find.text('Max Altitude'), findsNothing);
 
       // The list builds lazily; scroll the weather row into view. S6.5:
       // the planner's row says why there is no forecast, and the retry card
       // is on the Weather detail it opens.
-      final list = find.byType(Scrollable).first;
       final row = find.byKey(const Key('planner.weather'));
       await tester.scrollUntilVisible(row, 300, scrollable: list);
       expect(
@@ -478,6 +486,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('No site set'), findsOneWidget);
+    // TD-075 (S6.16): the status names the missing site with its own
+    // reason, not the empty plan's.
+    expect(find.text(PlanStatus.needsSite), findsOneWidget);
+    expect(find.text(PlanStatus.siteReason), findsOneWidget);
+    expect(find.textContaining('no light frames'), findsNothing);
+    // S6.16 (ADR-019 §6 as amended): the chart's place follows the capture
+    // plan; the lazy list is scrolled to it.
+    await tester.scrollUntilVisible(
+      find.text("Set your site to see tonight's altitude chart."),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       find.text("Set your site to see tonight's altitude chart."),
       findsOneWidget,
@@ -552,9 +572,10 @@ void main() {
 
     // Scroll through the whole body to check the light-pollution map card.
     final listFinder = find.byType(Scrollable).first;
-    // S6.6: the rig is the planner's last section.
+    // S6.16 (ADR-019 §6 as amended): the conditions, with Sky darkness,
+    // are the planner's last section (the rig was, since S6.6).
     await tester.dragUntilVisible(
-      find.text('Rig'),
+      find.text('Sky darkness'),
       listFinder,
       const Offset(0, -300),
     );

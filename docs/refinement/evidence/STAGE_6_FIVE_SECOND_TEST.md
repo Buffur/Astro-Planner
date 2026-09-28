@@ -11,6 +11,15 @@
 > (2026-09-28, by an agent over USB), but no independent participant has answered the five
 > questions. An **owner manual UX review** was recorded on 2026-09-28 (below); it is a different
 > kind of evidence and does not stand in for the test.
+> **Build stale since S6.16 (2026-09-28):** the owner's corrective pass (DECISIONS E.1, "Stage 6
+> corrective pass decided") changed both first screens: Tonight's title, context card, "Your plan"
+> card and target actions; the planner's status card and its order below the status. The
+> `.s2check` app installed above is `f19aef7`'s code, so **it must be rebuilt from S6.16's commit
+> before a participant runs the test** (the owner's app untouched; the same test plan: Test site,
+> M31, the example rig and plan, saved). S6.16 changes no calculation, so for the same night the
+> plan's verdict and numbers are unchanged; if the test runs on another night, re-record the true
+> answers for that night before asking. The participant must be someone who has not worked
+> on the product; an agent is never the participant (item 7 of the owner's decision).
 
 ## How to run it
 

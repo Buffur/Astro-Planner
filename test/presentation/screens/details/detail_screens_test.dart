@@ -184,7 +184,16 @@ void main() {
     expect(find.text('Night & Moon'), findsOneWidget);
     expect(find.textContaining('Night of '), findsWidgets);
     expect(find.textContaining('Times in'), findsOneWidget);
-    expect(find.byKey(const Key('night.dark')), findsOneWidget);
+    // TD-078 (S6.16): the dark span and the Moon's up-times are the
+    // summary's, once; the sections below do not repeat them.
+    expect(find.byKey(const Key('nightSummary.dark')), findsOneWidget);
+    expect(find.textContaining('Dark (Sun below −18°): '), findsOneWidget);
+    expect(find.byKey(const Key('nightSummary.moon')), findsOneWidget);
+    expect(find.textContaining('Moon up'), findsOneWidget);
+    expect(find.byKey(const Key('night.dark')), findsNothing);
+    expect(find.byKey(const Key('sky.moonUp')), findsNothing);
+    expect(find.text('Sun and twilight'), findsOneWidget);
+    expect(find.text('Moon'), findsOneWidget);
     for (final name in [
       'Sunset',
       AppWords.civilDusk,
@@ -197,11 +206,7 @@ void main() {
     ]) {
       expect(find.text(name), findsOneWidget, reason: name);
     }
-    expect(
-      find.textContaining('Moon Illumination at midnight'),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('sky.moonUp')), findsOneWidget);
+    expect(find.textContaining('Illumination at midnight'), findsOneWidget);
 
     // TD-051: the span follows the user's darkness limit.
     await tester.runAsync(
@@ -212,8 +217,8 @@ void main() {
     await settle(tester);
     expect(
       find.textContaining('Dark (Sun below −12°): '),
-      findsWidgets,
-      reason: 'the detail and its summary',
+      findsOneWidget,
+      reason: 'the summary, once (TD-078)',
     );
   });
 

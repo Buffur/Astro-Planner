@@ -14,7 +14,6 @@ import '../../../core/config/feature_scope.dart';
 import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/sky_darkness.dart';
-import '../shared/night_text.dart';
 import '../../core/utils/quantity_text.dart';
 
 /// The site's sky darkness in the planner (TASK 7.4): Bortle and SQM as
@@ -245,11 +244,14 @@ class _BortleBadge extends StatelessWidget {
 
 /// The night's Sun timeline for the Night & Moon detail (S6.5, TD-051):
 /// sunset, each standard twilight and sunrise — the only place their names
-/// appear (ADR-019 §10) — and the dark span at the user's darkness limit,
-/// which the imaging opportunity uses. Times are in the zone the detail's
-/// header names once.
+/// appear (ADR-019 §10). Times are in the zone the detail's header names
+/// once. Since S6.16 (TD-078) the dark span at the user's darkness limit is
+/// the detail's summary alone, not repeated here, and the section has its
+/// own heading.
 class NightTimelineSection extends StatelessWidget {
   const NightTimelineSection({super.key});
+
+  static const title = 'Sun and twilight';
 
   @override
   Widget build(BuildContext context) {
@@ -293,17 +295,7 @@ class NightTimelineSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (timeline.darkAtLimit case final dark?)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              DarkText.span(dark, at),
-              key: const Key('night.dark'),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+        _SectionTitle(title, key: const Key('night.timelineTitle')),
         for (final (label, time) in rows)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
@@ -323,8 +315,10 @@ class NightTimelineSection extends StatelessWidget {
 }
 
 /// The Moon for the Night & Moon detail (TASK 6.4; moved here in S6.5):
-/// its illumination at midnight, when it is up, and how close it comes to
-/// the target — annotations only, never an "impact %" (ADR-010).
+/// its illumination at midnight and how close it comes to the target —
+/// annotations only, never an "impact %" (ADR-010). Since S6.16 (TD-078)
+/// when it is up is the detail's summary alone, and the section has its own
+/// heading.
 class MoonSection extends StatelessWidget {
   const MoonSection({super.key});
 
@@ -339,19 +333,18 @@ class MoonSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.nightlight_round,
-              size: 20,
-              color: AppPalette.of(context).moon,
-            ),
+            Icon(Icons.nightlight_round, color: AppPalette.of(context).moon),
             const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Moon Illumination at midnight: $lunarIllum',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
+            const Expanded(child: _SectionTitle('Moon')),
           ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 32),
+          child: Text(
+            'Illumination at midnight: $lunarIllum',
+            key: const Key('sky.moonIllumination'),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
         _MoonDetails(conditions: conditionsVm.moonConditions, zoneId: zoneId),
       ],
@@ -359,7 +352,29 @@ class MoonSection extends StatelessWidget {
   }
 }
 
-/// When the Moon is up tonight and how close it comes to the target.
+/// A detail section's heading (S6.16, TD-078): the scale's group-heading
+/// role, a semantic header, so each section reads apart from the summary.
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: Semantics(
+      header: true,
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.titleSmall
+            ?.copyWith(color: AppPalette.of(context).textPrimary),
+      ),
+    ),
+  );
+}
+
+/// How close the Moon comes to the target tonight (its up-times are the
+/// detail's summary, S6.16).
 class _MoonDetails extends StatelessWidget {
   const _MoonDetails({required this.conditions, required this.zoneId});
 
@@ -380,8 +395,6 @@ class _MoonDetails extends StatelessWidget {
       zoneId: zoneId,
     );
 
-    final upText = MoonText.up(c, at);
-
     final hasTarget =
         c.samples.isNotEmpty && c.samples.first.separationDeg != null;
     final approach = c.closestApproachWhileBothUp;
@@ -392,16 +405,10 @@ class _MoonDetails extends StatelessWidget {
         : 'Closest to the target while both are up: '
               '${approach.separationDeg.round()}° at ${at(approach.instantUtc)}.';
 
+    if (sepText == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 28, top: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(upText, key: const Key('sky.moonUp'), style: style),
-          if (sepText != null)
-            Text(sepText, key: const Key('sky.moonSeparation'), style: style),
-        ],
-      ),
+      padding: const EdgeInsets.only(left: 32, top: 4),
+      child: Text(sepText, key: const Key('sky.moonSeparation'), style: style),
     );
   }
 }

@@ -16,6 +16,7 @@ import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
 import '../../domain/services/example_capture_plan.dart';
 import '../../domain/services/session_night_resolver.dart';
+import 'blocks_edit.dart';
 import 'site_viewmodel.dart';
 
 /// The plan the planner shows (ADR-014; TASKs 11.3–11.4; split out of the
@@ -55,6 +56,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   CalendarDate? _pickedEveningDate;
   bool _loaded = false;
   Object? _siteKey;
+  int _contents = 0; // bumped when the lifecycle replaces the plan (TD-079)
 
   AstroTarget? get selectedTarget => _target;
   EquipmentProfile? get selectedEquipment => _rig;
@@ -137,6 +139,7 @@ class SessionPlanViewModel extends ChangeNotifier {
     _rig = rig;
     _blocks = List.of(blocks);
     _isExample = isExample;
+    _contents++;
   }
 
   /// Sets the picked night (null = tonight) with no autosave and no
@@ -244,6 +247,34 @@ class SessionPlanViewModel extends ChangeNotifier {
   /// contract, TD-010) — do not re-adjust it.
   Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) =>
       _editBlocks((b) => b.insert(newIndex, b.removeAt(oldIndex)));
+
+  /// Runs [change], an edit to the blocks, and returns what it replaced, for
+  /// [undoBlocksEdit] (TD-079, S6.16); the blocks it left are taken as soon
+  /// as it has applied them, the session once its autosave has finished.
+  Future<BlocksEdit> recordBlocksEdit(Future<Object?> Function() change) async {
+    final before = List.of(_blocks), example = _isExample, gen = _contents;
+    final done = change();
+    final after = List.of(_blocks);
+    await done;
+    return BlocksEdit(
+      before: before,
+      wasExample: example,
+      after: after,
+      contents: gen,
+      sessionId: activeSessionId,
+    );
+  }
+
+  /// Undo (TD-079): the blocks and badge exactly as [edit] found them,
+  /// autosaved like any edit (a saved snapshot is never touched); refused
+  /// (false) when the blocks or the plan changed since.
+  Future<bool> undoBlocksEdit(BlocksEdit edit) async {
+    if (!edit.isCurrent(_blocks, _contents, activeSessionId)) return false;
+    _blocks = List.of(edit.before);
+    _isExample = edit.wasExample;
+    await _edited();
+    return true;
+  }
 
   /// Re-reads the selection after an edit or delete (TASK 4.2, TD-028).
   Future<void> refreshSelectedTarget() async {

@@ -68,41 +68,48 @@ class HomeScreen extends StatelessWidget {
                 if (planVm.autosaveFailure != null)
                   const _AutosaveFailureBanner(),
                 Expanded(
-                  // S6.6 (ADR-019 §6; UX-01, UX-02): the answer first, then
-                  // the context, the target and its windows, the capture
-                  // plan, the conditions and the rig. Without a target or a
-                  // rig the structure stays, with a neutral status.
+                  // S6.6 (ADR-019 §6; UX-01, UX-02): the answer first. Since
+                  // S6.16 (ADR-019 §6 as amended by the owner): the context,
+                  // the target, the rig and the capture plan, then the
+                  // target's night as supporting analysis, then the
+                  // conditions. Without a target or a rig the structure
+                  // stays, with a neutral status.
                   child: ListView(
                     padding: const EdgeInsets.all(16.0),
                     children: [
                       const PlanStatus(),
-                      ContextLine(
-                        siteName: siteVm.isDefaultLocation
-                            ? null
-                            : siteVm.activeSite?.name ??
-                                  siteVm.locationName ??
-                                  'Current position',
-                        night: planVm.eveningDate,
-                        zoneId: siteVm.displayZoneId,
-                        nightStartUtc: planVm.sessionNight?.startUtc,
-                        onSite: () => context.push(AppRouter.selectSite),
-                        onNight: () async {
-                          final picked = await pickNight(
-                            context,
-                            initial: planVm.eveningDate,
-                          );
-                          if (picked != null && context.mounted) {
-                            await runWithFeedback(
+                      KeyedSubtree(
+                        key: const Key('planner.context'),
+                        child: ContextLine(
+                          framed: true,
+                          siteName: siteVm.isDefaultLocation
+                              ? null
+                              : siteVm.activeSite?.name ??
+                                    siteVm.locationName ??
+                                    'Current position',
+                          night: planVm.eveningDate,
+                          zoneId: siteVm.displayZoneId,
+                          nightStartUtc: planVm.sessionNight?.startUtc,
+                          onSite: () => context.push(AppRouter.selectSite),
+                          onNight: () async {
+                            final picked = await pickNight(
                               context,
-                              'change the night',
-                              () => planVm.setEveningDate(picked),
+                              initial: planVm.eveningDate,
                             );
-                          }
-                        },
+                            if (picked != null && context.mounted) {
+                              await runWithFeedback(
+                                context,
+                                'change the night',
+                                () => planVm.setEveningDate(picked),
+                              );
+                            }
+                          },
+                        ),
                       ),
                       _SectionHeader('Target'),
                       if (target != null) ...[
                         PlannerSummaryCard(
+                          key: const Key('planner.target'),
                           title:
                               (target.commonName != null &&
                                   target.commonName != target.catalogId)
@@ -136,73 +143,10 @@ class HomeScreen extends StatelessWidget {
                           action: 'Choose a target',
                           onTap: () => context.push(AppRouter.selectTarget),
                         ),
-                      if (planVm.sessionNight != null)
-                        const TonightOpportunityWidget()
-                      else
-                        const _NoSiteCard(
-                          message:
-                              "Set your site to see tonight's altitude chart.",
-                        ),
-                      _SectionHeader(AppWords.capturePlan),
-                      const CapturePlanWidget(),
-                      _SectionHeader('Conditions'),
-                      // S6.5 (UX-06, UX-10): the night and its
-                      // forecast in full are on their detail screens;
-                      // here one factual row each. Without a site the
-                      // location card is shown (ADR-012).
-                      if (planVm.sessionNight case final night?) ...[
-                        _DetailRow(
-                          key: const Key('planner.night'),
-                          title: 'Night & Moon',
-                          onTap: () => context.push(AppRouter.nightMoon),
-                          child: NightSummary(
-                            night: night,
-                            conditions: conditionsVm,
-                            zoneId: siteVm.displayZoneId,
-                          ),
-                        ),
-                        _DetailRow(
-                          key: const Key('planner.weather'),
-                          title: 'Weather',
-                          onTap: () => context.push(AppRouter.weather),
-                          child: Text(
-                            WeatherText.summary(
-                              conditionsVm.nightWeather,
-                              conditionsVm.nightWeatherSummary,
-                            ),
-                          ),
-                        ),
-                        // S6.7: the zone rule, once for the section's
-                        // times (trap 2).
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Text(
-                            ContextLine.zoneRule(
-                              night.startUtc,
-                              zoneId: siteVm.displayZoneId,
-                            ),
-                            key: const Key('planner.conditionsZone'),
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: AppPalette.of(context).textTertiary,
-                                ),
-                          ),
-                        ),
-                      ] else
-                        PlannerSummaryCard(
-                          title: 'Location: ${siteVm.locationName ?? "Custom"}',
-                          data: {
-                            'Latitude': siteVm.latitude.toStringAsFixed(4),
-                            'Longitude': siteVm.longitude.toStringAsFixed(4),
-                            if (siteVm.locationNameAttribution != null)
-                              'Place name': siteVm.locationNameAttribution!,
-                          },
-                          onTap: () => context.push(AppRouter.selectSite),
-                        ),
-                      const SkyDarknessWidget(),
                       _SectionHeader(AppWords.rig),
                       if (equipment != null) ...[
                         PlannerSummaryCard(
+                          key: const Key('planner.rig'),
                           title: '${AppWords.rig}: ${equipment.name}',
                           data: {
                             // RD-04 (S6.8): the example says it is one.
@@ -269,6 +213,77 @@ class HomeScreen extends StatelessWidget {
                           action: AppWords.chooseRig,
                           onTap: () => context.push(AppRouter.selectRig),
                         ),
+                      _SectionHeader(AppWords.capturePlan),
+                      const CapturePlanWidget(),
+                      // The target's night, supporting the plan (S6.16): the
+                      // chart and the windows, after the plan is built. With
+                      // a site but no target there is nothing to show yet
+                      // (the status asks for the target), so no heading.
+                      if (planVm.sessionNight == null) ...[
+                        _SectionHeader(TonightOpportunityWidget.title),
+                        const _NoSiteCard(
+                          message:
+                              "Set your site to see tonight's altitude chart.",
+                        ),
+                      ] else if (target != null) ...[
+                        _SectionHeader(TonightOpportunityWidget.title),
+                        const TonightOpportunityWidget(),
+                      ],
+                      _SectionHeader('Conditions'),
+                      // S6.5 (UX-06, UX-10): the night and its
+                      // forecast in full are on their detail screens;
+                      // here one factual row each. Without a site the
+                      // location card is shown (ADR-012).
+                      if (planVm.sessionNight case final night?) ...[
+                        _DetailRow(
+                          key: const Key('planner.night'),
+                          title: 'Night & Moon',
+                          onTap: () => context.push(AppRouter.nightMoon),
+                          child: NightSummary(
+                            night: night,
+                            conditions: conditionsVm,
+                            zoneId: siteVm.displayZoneId,
+                          ),
+                        ),
+                        _DetailRow(
+                          key: const Key('planner.weather'),
+                          title: 'Weather',
+                          onTap: () => context.push(AppRouter.weather),
+                          child: Text(
+                            WeatherText.summary(
+                              conditionsVm.nightWeather,
+                              conditionsVm.nightWeatherSummary,
+                            ),
+                          ),
+                        ),
+                        // S6.7: the zone rule, once for the section's
+                        // times (trap 2).
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Text(
+                            ContextLine.zoneRule(
+                              night.startUtc,
+                              zoneId: siteVm.displayZoneId,
+                            ),
+                            key: const Key('planner.conditionsZone'),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppPalette.of(context).textTertiary,
+                                ),
+                          ),
+                        ),
+                      ] else
+                        PlannerSummaryCard(
+                          title: 'Location: ${siteVm.locationName ?? "Custom"}',
+                          data: {
+                            'Latitude': siteVm.latitude.toStringAsFixed(4),
+                            'Longitude': siteVm.longitude.toStringAsFixed(4),
+                            if (siteVm.locationNameAttribution != null)
+                              'Place name': siteVm.locationNameAttribution!,
+                          },
+                          onTap: () => context.push(AppRouter.selectSite),
+                        ),
+                      const SkyDarknessWidget(),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -324,6 +339,8 @@ class _SectionHeader extends StatelessWidget {
 
   const _SectionHeader(this.title);
 
+  /// S6.16: the section-heading role of the type scale (DESIGN_SYSTEM §3),
+  /// a semantic header, so the sections no longer outrank the answer.
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -333,10 +350,13 @@ class _SectionHeader extends StatelessWidget {
         left: 4.0,
         right: 4.0,
       ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge
-            ?.copyWith(fontWeight: FontWeight.bold),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(color: AppPalette.of(context).textPrimary),
+        ),
       ),
     );
   }

@@ -25,6 +25,7 @@ import 'package:astroplan/presentation/shared/status_block.dart';
 import 'package:astroplan/presentation/widgets/altitude_chart_widget.dart';
 import 'package:astroplan/presentation/widgets/plan_status.dart';
 import 'package:astroplan/presentation/widgets/timeline_data.dart';
+import 'package:astroplan/presentation/widgets/tonight_opportunity_widget.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -248,12 +249,88 @@ void main() {
     expect(fit.endUtc, isNotNull);
   });
 
+  // S6.16 (ADR-019 §6 as amended by the owner, DECISIONS E.1 "Stage 6
+  // corrective pass decided"): the answer, then the context, the target, the
+  // rig and the capture plan, then the target's night as supporting
+  // analysis, then the conditions.
+  testWidgets('the order: status, context, target, rig, capture plan, the '
+      "target's night, the conditions", (tester) async {
+    await start(tester, size: const Size(800, 8000));
+    final order = [
+      ('status', find.byKey(const Key('planner.status'))),
+      ('context', find.byKey(const Key('planner.context'))),
+      ('target', find.byKey(const Key('planner.target'))),
+      ('rig', find.byKey(const Key('planner.rig'))),
+      ('capture plan', find.text(AppWords.capturePlan)),
+      ("the target's night", find.text(TonightOpportunityWidget.title)),
+      ('the chart', find.byType(AltitudeChartWidget)),
+      ('Night & Moon', find.byKey(const Key('planner.night'))),
+      ('Weather', find.byKey(const Key('planner.weather'))),
+      ('Sky darkness', find.text('Sky darkness')),
+    ];
+    for (final (name, f) in order) {
+      expect(f, findsOneWidget, reason: name);
+    }
+    for (var i = 1; i < order.length; i++) {
+      expect(
+        tester.getTopLeft(order[i].$2).dy,
+        greaterThan(tester.getTopLeft(order[i - 1].$2).dy),
+        reason: '${order[i].$1} after ${order[i - 1].$1}',
+      );
+    }
+    // The finish (S6.16): the context on a card, the answer marked in its
+    // status colour, the sections in the section-heading role.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('planner.context')),
+        matching: find.byKey(const Key('context.card')),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('planner.statusMark')), findsOneWidget);
+    final heading = tester.widget<Text>(find.text(AppWords.capturePlan));
+    final theme = Theme.of(tester.element(find.text(AppWords.capturePlan)));
+    expect(heading.style?.fontSize, theme.textTheme.titleMedium?.fontSize);
+    expect(heading.style?.fontWeight, theme.textTheme.titleMedium?.fontWeight);
+  });
+
+  // TD-075 (S6.16): a missing input has its own reason; the fit's reason for
+  // an empty plan is shown only once the planning context exists.
+  testWidgets("a missing target has its own reason, never the empty plan's; "
+      'then an empty plan says so', (tester) async {
+    await start(tester, size: const Size(800, 3000));
+    final target = vm.selectedTarget!;
+    await tester.runAsync(() async {
+      await vm.newSession(); // keeps the site and rig; no target, no blocks
+      await vm.plan.idle;
+    });
+    await settle(tester);
+    final status = find.byKey(const Key('planner.status'));
+    Finder inStatus(String text) =>
+        find.descendant(of: status, matching: find.text(text));
+    expect(vm.captureBlocks, isEmpty);
+    expect(inStatus(AppWords.needsTarget), findsOneWidget);
+    expect(inStatus(PlanStatus.targetReason), findsOneWidget);
+    expect(find.textContaining('no light frames'), findsNothing);
+
+    await tester.runAsync(() async {
+      await vm.plan.setTarget(target);
+      await vm.plan.idle;
+    });
+    await settle(tester);
+    expect(vm.fitAnalysis.state, FitState.nothingToFit);
+    expect(inStatus(AppWords.needsBlock), findsOneWidget);
+    expect(inStatus(vm.fitAnalysis.reason), findsOneWidget);
+    expect(vm.fitAnalysis.reason, contains('no light frames'));
+  });
+
   testWidgets('without a rig the structure stays and the status is neutral', (
     tester,
   ) async {
     await start(tester, seedRig: false, size: const Size(800, 3000));
     expect(vm.selectedEquipment, isNull);
     expect(find.text(PlanStatus.needsRig), findsOneWidget);
+    expect(find.text(PlanStatus.rigReason), findsOneWidget);
     expect(find.byKey(const Key('status.choose')), findsOneWidget);
     expect(find.byKey(const Key('planner.noRig')), findsOneWidget);
     // The rest of the plan is still there.

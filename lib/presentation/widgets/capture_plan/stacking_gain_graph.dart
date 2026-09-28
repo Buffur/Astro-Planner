@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../domain/services/stacking_gain_curve.dart';
+import '../../shared/app_words.dart';
 
 /// "How does relative √N change as the frame count grows?" (S6.11; P6.10),
 /// for one (filter, exposure) group: the curve from one frame to twice the
 /// planned count, with the planned count marked. It draws the domain's
 /// points ([StackingGainCurve], CALC-42) and computes nothing; the figure
 /// itself stays in the row above it. Relative only (SI-003).
+///
+/// S6.16 (TD-076): the plan's own point is named — "Your plan", its count
+/// and value, beside a swatch drawn like the dot — and the curve's end is
+/// named as a comparison, so it never reads as a target or a recommendation.
 class StackingGainGraph extends StatelessWidget {
   const StackingGainGraph({
     super.key,
@@ -22,22 +28,32 @@ class StackingGainGraph extends StatelessWidget {
 
   static String _x(double gain) => '${gain.toStringAsFixed(1)}x';
 
-  /// The text alternative: the group's value, and where the curve ends.
+  /// The plan's point, as its label says it: "Your plan: 100 frames ·
+  /// 10.0x" (TD-076).
+  static String planLabel(StackingGainCurve c) =>
+      '${AppWords.yourPlan}: ${c.frames} frames · ${_x(c.markedGain)}';
+
+  /// The curve's end, named as a comparison (TD-076).
+  static String comparisonLabel(StackingGainCurve c) =>
+      'For comparison: ${c.maxFrames} frames · ${_x(c.endGain)}';
+
+  /// The text alternative: the group's value (the plan's point), and where
+  /// the curve ends, for comparison.
   static String describe(StackingGainCurve c, String groupLabel) =>
       'Relative stacking gain graph, $groupLabel: ${_x(c.markedGain)} at '
-      '${c.frames} frames, rising more slowly to ${_x(c.endGain)} at '
-      '${c.maxFrames} frames.';
+      '${c.frames} frames, your plan; rising more slowly to '
+      '${_x(c.endGain)} at ${c.maxFrames} frames, for comparison.';
 
   @override
   Widget build(BuildContext context) {
     final palette = AppPalette.of(context);
-    final small = Theme.of(context).textTheme.bodySmall
-        ?.copyWith(color: palette.textTertiary);
+    final text = Theme.of(context).textTheme;
+    final small = text.bodySmall?.copyWith(color: palette.textTertiary);
     return Semantics(
       label: describe(curve, groupLabel),
       excludeSemantics: true,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -51,9 +67,29 @@ class StackingGainGraph extends StatelessWidget {
                 Expanded(child: Text('1 frame', style: small)),
                 Flexible(
                   child: Text(
-                    '${curve.maxFrames} frames · ${_x(curve.endGain)}',
+                    comparisonLabel(curve),
+                    key: const Key('gainGraph.comparison'),
                     style: small,
                     textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            // The plan's point, keyed to the dot by the same drawing.
+            Row(
+              children: [
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CustomPaint(painter: PlanPointSwatch(palette)),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    planLabel(curve),
+                    key: const Key('gainGraph.plan'),
+                    style: text.bodySmall?.copyWith(color: palette.textPrimary),
                   ),
                 ),
               ],
@@ -63,6 +99,20 @@ class StackingGainGraph extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The plan's point as the graph draws it (S6.16, TD-076), for its label.
+class PlanPointSwatch extends CustomPainter {
+  PlanPointSwatch(this.palette);
+
+  final AppPalette palette;
+
+  @override
+  void paint(Canvas canvas, Size size) =>
+      StackingGainPainter.paintPoint(canvas, size.center(Offset.zero), palette);
+
+  @override
+  bool shouldRepaint(PlanPointSwatch old) => old.palette != palette;
 }
 
 /// Paints [curve]: frames along x (from 1 to its end), relative √N along y
@@ -111,9 +161,15 @@ class StackingGainPainter extends CustomPainter {
           ..color = palette.chartGrid
           ..strokeWidth = 1,
       );
-      canvas.drawCircle(mark, 5, Paint()..color = palette.chartNow);
-      canvas.drawCircle(mark, 2, Paint()..color = palette.chartNowCentre);
+      paintPoint(canvas, mark, palette);
     }
+  }
+
+  /// The plan's point: the altitude chart's "now" dot (S6.11); its label's
+  /// swatch draws the same (S6.16).
+  static void paintPoint(Canvas canvas, Offset at, AppPalette palette) {
+    canvas.drawCircle(at, 5, Paint()..color = palette.chartNow);
+    canvas.drawCircle(at, 2, Paint()..color = palette.chartNowCentre);
   }
 
   @override

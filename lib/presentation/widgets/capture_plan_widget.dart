@@ -16,6 +16,7 @@ import '../shared/example_text.dart';
 import '../shared/failure_feedback.dart';
 import '../viewmodels/capture_analysis_viewmodel.dart';
 import '../viewmodels/session_plan_viewmodel.dart';
+import 'capture_plan/blocks_undo.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
 import 'capture_plan/capture_block_dialog.dart';
 import 'capture_plan/capture_budget_summary.dart';
@@ -77,6 +78,35 @@ class _BlockListState extends State<_BlockList> {
     );
   }
 
+  /// A new block from the dialog.
+  Future<void> _add() async {
+    final block = await showCaptureBlockDialog(context);
+    if (block == null || !mounted) return;
+    final plan = context.read<SessionPlanViewModel>();
+    await runWithFeedback(
+      context,
+      'add the block',
+      () => plan.addCaptureBlock(block),
+    );
+  }
+
+  /// TD-079 (S6.16): an edit saved in the dialog applies at once and says
+  /// so, with Undo back to the block as it was.
+  Future<void> _edit(int index, CaptureBlock block) async {
+    final edited = await showCaptureBlockDialog(context, initial: block);
+    if (edited == null || !mounted) return;
+    final plan = context.read<SessionPlanViewModel>();
+    await runWithFeedback(
+      context,
+      'change the block',
+      () => editBlocksWithUndo(
+        context,
+        message: 'Block changed: ${BlockText.row(edited, null)}',
+        change: () => plan.updateCaptureBlock(index, edited),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -131,7 +161,7 @@ class _BlockListState extends State<_BlockList> {
               tooltip: 'Add capture block',
               icon: const Icon(Icons.add_circle),
               color: scheme.primary,
-              onPressed: () => showCaptureBlockDialog(context, viewModel),
+              onPressed: _add,
             ),
           ],
         ),
@@ -148,10 +178,15 @@ class _BlockListState extends State<_BlockList> {
                 const Text('No blocks yet.'),
                 OutlinedButton(
                   key: const Key('capturePlan.useExample'),
+                  // TD-079 (S6.16): with Undo back to the empty plan.
                   onPressed: () => runWithFeedback(
                     context,
                     'start from the example plan',
-                    viewModel.useExamplePlan,
+                    () => editBlocksWithUndo(
+                      context,
+                      message: 'Started from the example plan',
+                      change: viewModel.useExamplePlan,
+                    ),
                   ),
                   child: const Text(ExampleText.startFromExample),
                 ),
@@ -196,12 +231,7 @@ class _BlockListState extends State<_BlockList> {
                 builder: (tint) => ListTile(
                   tileColor: tint,
                   contentPadding: EdgeInsets.zero,
-                  onTap: () => showCaptureBlockDialog(
-                    context,
-                    viewModel,
-                    editIndex: index,
-                    initial: block,
-                  ),
+                  onTap: () => _edit(index, block),
                   title: Text(BlockText.row(block, budget)),
                   subtitle: placement == null && !exceeds && fits == null
                       ? null

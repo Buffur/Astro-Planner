@@ -104,8 +104,11 @@ void main() {
   }
 
   /// The visible page's app-bar title (a pushed route does not change
-  /// the router's `uri`, so tests look at what is on screen).
-  Finder title(String text) => find.widgetWithText(AppBar, text);
+  /// the router's `uri`, so tests look at what is on screen). Since S6.16
+  /// Tonight's title is its page's own header, not the app bar's.
+  Finder title(String text) => text == 'Tonight'
+      ? find.byKey(const Key('tonight.title'))
+      : find.widgetWithText(AppBar, text);
 
   Future<void> back(WidgetTester tester) async {
     await tester.binding.handlePopRoute();

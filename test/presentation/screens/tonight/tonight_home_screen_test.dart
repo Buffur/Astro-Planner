@@ -280,6 +280,154 @@ void main() {
       expect(find.text('Select Target'), findsWidgets);
     });
 
+    // S6.16 (the owner's decisions, DECISIONS E.1 "Stage 6 corrective pass
+    // decided"): the finish of the core screen.
+    testWidgets('the title is a header in the scale\'s headline role; the '
+        'context is on a card', (tester) async {
+      await start(tester, lightFrames: 10);
+      final handle = tester.ensureSemantics();
+      final title = find.byKey(const Key('tonight.title'));
+      expect(title, findsOneWidget);
+      final ctx = tester.element(title);
+      expect(
+        tester.widget<Text>(title).style?.fontSize,
+        Theme.of(ctx).textTheme.headlineSmall?.fontSize,
+      );
+      expect(
+        tester.getSemantics(title),
+        matchesSemantics(label: 'Tonight', isHeader: true),
+      );
+      handle.dispose();
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('tonight.context')),
+          matching: find.byKey(const Key('context.card')),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('TD-077: "Your plan" is the card\'s heading; the target and '
+        'rig read below it', (tester) async {
+      await start(tester, lightFrames: 10);
+      final handle = tester.ensureSemantics();
+      final heading = find.byKey(const Key('tonight.planHeading'));
+      final theme = Theme.of(tester.element(heading));
+      final style = tester.widget<Text>(heading).style!;
+      expect(tester.widget<Text>(heading).data, AppWords.yourPlan);
+      expect(style.fontSize, theme.textTheme.titleMedium?.fontSize);
+      expect(style.fontWeight, theme.textTheme.titleMedium?.fontWeight);
+      expect(
+        tester.getSemantics(heading),
+        matchesSemantics(label: AppWords.yourPlan, isHeader: true),
+      );
+      handle.dispose();
+      final target = tester
+          .widget<Text>(find.byKey(const Key('tonight.planTarget')))
+          .style!;
+      expect(target.fontSize, theme.textTheme.bodyLarge?.fontSize);
+      expect(target.fontWeight, theme.textTheme.bodyLarge?.fontWeight);
+    });
+
+    for (final chosen in [true, false]) {
+      testWidgets('Open planner is the plan card\'s filled action (a target '
+          'chosen: $chosen)', (tester) async {
+        await start(tester, firstRunDone: chosen);
+        final open = find.byKey(const Key('tonight.openPlanner'));
+        expect(open, findsOneWidget);
+        expect(tester.widget(open), isA<FilledButton>());
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('tonight.plan')),
+            matching: open,
+          ),
+          findsOneWidget,
+        );
+      });
+    }
+
+    testWidgets('TD-080: without a target, each way to a target says what it '
+        'offers, and What can I image tonight? is shown once', (tester) async {
+      await start(tester, firstRunDone: false);
+      final choose = find.byKey(const Key('tonight.chooseTarget'));
+      final candidates = find.byKey(const Key('tonight.planCandidates'));
+      expect(
+        find.descendant(
+          of: choose,
+          matching: find.text('Any object in the catalogue'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: candidates,
+          matching: find.text(
+            'Candidates for this site and night, by usable time',
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('What can I image tonight?'), findsOneWidget);
+      expect(find.byKey(const Key('tonight.candidates')), findsNothing);
+      await tester.tap(candidates);
+      await settle(tester);
+      expect(find.text("Tonight's candidates"), findsWidgets);
+    });
+
+    testWidgets('TD-080: with a target, What can I image tonight? stays in the '
+        'secondary actions', (tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await start(tester, lightFrames: 10);
+      expect(find.byKey(const Key('tonight.planCandidates')), findsNothing);
+      expect(find.byKey(const Key('tonight.chooseTarget')), findsNothing);
+      expect(find.byKey(const Key('tonight.candidates')), findsOneWidget);
+      expect(find.text('What can I image tonight?'), findsOneWidget);
+    });
+
+    testWidgets(
+      "TD-075: the reason names the missing site or target, never the "
+      "empty plan's",
+      (tester) async {
+        // No site and an empty plan: the case TD-075 was seen in.
+        await start(tester, site: false);
+        await tester.runAsync(() async {
+          while (vm.plan.captureBlocks.isNotEmpty) {
+            await vm.plan.removeCaptureBlock(0);
+          }
+          await vm.plan.idle;
+        });
+        await settle(tester);
+        final status = find.byKey(const Key('tonight.status'));
+        Finder inStatus(String text) =>
+            find.descendant(of: status, matching: find.text(text));
+        expect(inStatus(PlanStatus.needsSite), findsOneWidget);
+        expect(inStatus(PlanStatus.siteReason), findsOneWidget);
+        expect(find.textContaining('no light frames'), findsNothing);
+      },
+    );
+
+    testWidgets('TD-075: without a target, the target\'s reason', (
+      tester,
+    ) async {
+      await start(tester, firstRunDone: false);
+      final status = find.byKey(const Key('tonight.status'));
+      expect(vm.plan.captureBlocks, isEmpty);
+      expect(
+        find.descendant(of: status, matching: find.text(AppWords.needsTarget)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: status,
+          matching: find.text(PlanStatus.targetReason),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('no light frames'), findsNothing);
+    });
+
     testWidgets("the night picker changes the plan's night, and the plan "
         'autosaves', (tester) async {
       await start(tester, lightFrames: 10);

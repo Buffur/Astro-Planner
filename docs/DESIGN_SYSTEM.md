@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.16, 2026-09-28:** §3 records the page title's headline role (Tonight); §7a the status block's key numbers and the planner's status edge, the framed context line, the √N graph's labels, and Undo for one-tap block changes; §9.1's Tonight and planner rows note the core screens' finish.
+
 > **S6.13, 2026-09-28:** §9's Tonight and site-prompt rows are done; "Draft" left the baseline.
 
 > **S6.12, 2026-09-28:** §7a adds the night and opportunity timeline.
@@ -144,6 +146,10 @@ Material's.
 
 - Titles are heavier than Material's defaults (500 or 400) so headings carry the hierarchy.
 - The app bar's title is 18/600 (`AppTheme`, TASK 12.4).
+- **A page title in the body** (S6.16): Tonight's title is its page's own header in `headlineSmall`
+  (24/32), a semantic header, with the app bar keeping only the actions, as the detail screens keep
+  their title in the page (S5.7). A title in the page wraps at large text; one in an app bar
+  cannot.
 - Tested: every style in every theme has the scale's size, line height and weight, and none is
   under 12 sp.
 
@@ -308,8 +314,14 @@ The answer first (ADR-019 §6; addendum §3.1–§3.2).
   - with a duration unknown: the word alone. Unknown is never shown as zero;
   - otherwise: "No window", "Needs a target" (or the missing word the screen passes), "Needs a
     block".
-- **Then:** the reason (`textSecondary`); optional key numbers as label (`textTertiary`) and value
-  (`textPrimary`) pairs that wrap; an optional action slot (fill or trim).
+- **Then:** the reason (`textSecondary`); optional key numbers, each a label (`bodySmall`,
+  `textTertiary`) above its value (`titleSmall`, `textPrimary`), one semantics node per pair, in a
+  wrapping row (S6.16; they were inline pairs); an optional action slot (fill or trim, an outlined
+  button since S6.16).
+- **The planner's status card** (S6.16) has a 4 px edge in the verdict's status token
+  (`planner.statusMark`), so the answer reads as the screen's primary surface; the word still
+  carries the meaning (red only, in field mode). Tonight's plan card holds the same block without
+  the edge.
 - **Plain values in.** The state, durations and reason come from the fit analysis through the
   ViewModel; durations are formatted with `QuantityText`. It calculates nothing (trap 13).
 - `StatusBlock.headline(...)` is pure and tested.
@@ -345,6 +357,10 @@ dot) and a guide line. 48 px high; the axis' ends are `Text` below it (`bodySmal
 `textTertiary`) so they scale and wrap. The number stays in the line above; the section's title is
 `AppWords.relativeStackingGain`. The text alternative gives the group's value and where the curve
 ends. A `CustomPaint`: no chart dependency.
+**Since S6.16 (TD-076):** the curve's end reads "For comparison: 200 frames · 14.1x" (`textTertiary`),
+and a line below names the plan's point, "Your plan: 100 frames · 10.0x" (`textPrimary`), beside a
+`PlanPointSwatch` drawn exactly like the dot (`StackingGainPainter.paintPoint`). The text
+alternative says which point is the plan and which is for comparison.
 
 ### The change mark (S6.10; `lib/presentation/shared/change_mark.dart`)
 
@@ -411,6 +427,10 @@ for Tonight and the planner (ADR-019 §5, §6; addendum §3.1–§3.2).
 - **The night is today's `NightTimeFormatter.eveningDate`** ("Fri, Nov 13"). The glossary's "Fri
   14 Nov" order is a formatter change for the Stage that adopts the line, not S5.6's.
 
+**Framed** (S6.16): `ContextLine(framed: true)` sets the line on a card (`context.card`), so the site
+and night read as one deliberate context area; each part leads with its icon (`place_outlined`,
+`event_outlined`, `textSecondary`). Tonight and the planner both use it framed.
+
 **The night picker** (`pickNight`, same file): the date picker in the app's theme, from a year ago
 to five years ahead as the planner's picker allows, titled "Choose a night". It returns the chosen
 evening as a `CalendarDate`, or null when cancelled. Tested red or black in field mode **by its
@@ -444,6 +464,7 @@ sweep (trap 17).
 | --- | --- |
 | Replacing a plan with unsaved changes (New plan, Copy, Open; P6.1) | `askUnsavedChanges`: Save · Discard · Cancel |
 | Deleting an edit inside a plan: a capture block | At once, with `showUndo` |
+| A one-tap change to a plan's blocks: Fill or Trim, a block edit saved in its dialog, "Start from the example plan" (S6.16, TD-079) | At once, with `editBlocksWithUndo` (`widgets/capture_plan/blocks_undo.dart`) over `showUndo`: Undo restores the blocks and the example badge exactly through the normal autosave, and is refused, with a message, once the blocks were edited again; nothing outlives the message |
 | Deleting a stored record: a rig, a target, a site, a Logbook entry | `confirmDestructive`, then delete |
 | Abandon (a live run), Restore (a backup), resetting data | `confirmDestructive` with its own verb |
 | Any action that succeeded: New plan, Copy, Open, Save | `showDone` ("New plan started", "Copied to …", "Plan saved") |
@@ -542,10 +563,10 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | Screen or widget (today) | Adopts | P-Task | Retired terms it removes from S5.3's baseline |
 | --- | --- | --- | --- |
 | The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 and S6.3 done**). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
-| The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 (**S6.6 done**: `PlanStatus`; the context line; no empty state; `InfoRow` text roles) | Equipment profile (the empty state; **removed by S6.6**) |
+| The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 (**S6.6 done**: `PlanStatus`; the context line; no empty state; `InfoRow` text roles. **S6.16**: ADR-019 §6's amended order, the framed context line, the status edge, section headings in `titleMedium`, "Tonight for this target" in the text roles) | Equipment profile (the empty state; **removed by S6.6**) |
 | Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 (**S6.7 done**: `PlannerSections`, see §7a) | Acquisition, Session budget (budget summary; **removed by S6.7**) |
 | Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 (**S6.5 done**: `/night`, `/weather`) | Astro Dusk, Astro Dawn, True Night Window (with TD-051; **removed by S6.5**) |
-| Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 (**S6.13 done**) | Draft (Tonight's status; **removed by S6.13**) |
+| Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 (**S6.13 done**; **S6.16**, the owner's corrective pass: the page title in `headlineSmall`, the framed context line, "Your plan" in `titleMedium`, Open planner always the card's `FilledButton`, the two target rows with a line each) | Draft (Tonight's status; **removed by S6.13**) |
 | The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) (**S6.9 done**: `DeleteButton` + `showUndo` with an exact restore; `drag_indicator`; `FilledButton` Save; rows through `BlockText`; the change mark on `AppMotion.highlight`. The rows do not swipe, so no `SwipeToDelete`) | — |
 | The result form and the live tracker (`results_screen.dart`, `execution_screen.dart`) | `confirmDestructive` for Abandon; `showDone` after Save result; `PlanStateLabel` | P8.2, P8.4 | — |
 | The Logbook and an entry (`logbook_screen.dart`, `session_detail_screen.dart`) | `PlanStateLabel` instead of `sessionStatusLabel`; `SwipeToDelete` + `DeleteButton` + `confirmDestructive` instead of the swipe-only `Dismissible`; `AppWords` (Logbook, Export as file, Old log, the budget names); `DetailScaffold` where an entry fits it | P8.5 | Legacy (×3), Draft, Window load, Session budget |

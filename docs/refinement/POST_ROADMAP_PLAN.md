@@ -2884,9 +2884,13 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | **Done 2026-09-28** |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | **Not built: RD-11 = S9** (Stage 9, P9.3) |
 | S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run); step 1 done; the device set up; **the test UNVERIFIED** (an owner manual UX review is recorded instead, 2026-09-28) |
+| S6.16 | Corrective pass before the validation: TD-075–TD-080, the planner's order, the core screens' finish | The owner's decisions of 2026-09-28 (DECISIONS E.1, "Stage 6 corrective pass decided"); the S6.E owner review | M | S6.1–S6.14 | — (decided) | **Done 2026-09-28** |
 
 **Order:** S6.1 → S6.2 → S6.3 → S6.4 → S6.5 → S6.6 → S6.7 → S6.8 → S6.9 → S6.10 → S6.11 → S6.12 →
-S6.13 → S6.14 → (S6.15) → S6.E → Stage 6 validation. When a gated Task comes up with its gate still
+S6.13 → S6.14 → (S6.15) → S6.E → Stage 6 validation. *Amended 2026-09-28 (the owner):* S6.16 runs
+after the owner's review, before the five-second test's run and the validation: … → S6.14 → S6.E's
+setup and the owner's review → **S6.16** → S6.E's run (on a refreshed `.s2check` build) → Stage 6
+validation. When a gated Task comes up with its gate still
 open, the next ungated Task runs first; the others keep their order. S6.5, S6.14 and S6.15 depend on
 no earlier Stage 6 Task and may run earlier.
 
@@ -3467,13 +3471,104 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   that, classified against this plan, and **not** a five-second result. The test stays UNVERIFIED.
   Findings: TD-075–TD-078 (current-stage issues) and TD-079, TD-080 (new bounded follow-ups); the
   rest is owned by Stages 7, 8 and 9 or is an owner preference, as the evidence file lists.
+- *(2026-09-28, the owner, DECISIONS E.1 "Stage 6 corrective pass decided", item 7):* the review
+  does not count as the test. After S6.16, the `.s2check` build is refreshed if the core screens
+  changed (the owner's app untouched, an equivalent test plan), then ideally one independent
+  participant who has not worked on the product answers, word for word. Without one, the test stays
+  UNVERIFIED and the validation records the gap (V7). An agent is never the participant.
+
+##### S6.16 — Corrective pass before the validation (TD-075–TD-080; the planner's order; the core screens' finish)
+- **Objective:** close the current-stage issues and the owner's decisions from the S6.E review, so
+  that Tonight and the planner are finished core surfaces before the Stage 6 validation.
+- **Why:** the owner's decisions of 2026-09-28 (DECISIONS E.1, "Stage 6 corrective pass decided");
+  the review's items 1.1–1.3, 2.3, 3.1, 3.2, 4.1, 4.2, 5.1, 6.1, 7.4
+  (`evidence/STAGE_6_FIVE_SECOND_TEST.md`).
+- **Scope:**
+  - **TD-075:** each missing input (a site, a target, a rig) has its own reason in the shared
+    `PlanStatus` missing input, used by the planner and Tonight; the fit's own reason only once
+    the site, target and rig exist;
+  - **TD-076:** the graph labels the plan's point ("Your plan", its count and value) with a swatch
+    that matches the drawn dot, and labels the curve's end as a comparison; the text alternative
+    names both; √N and the domain's points unchanged;
+  - **TD-077:** "Your plan" in the card-heading role (`titleMedium`, a semantic header), the card's
+    content below it in body roles;
+  - **TD-078:** Night & Moon's sections no longer repeat the summary's two lines; each section gets
+    a heading so it reads apart from the summary; every other value stays;
+  - **the planner's order** (ADR-019 §6 as amended): status → context → target → rig → capture
+    plan → "Tonight for this target" (the chart and windows) → conditions (Night & Moon, Weather,
+    the zone rule, Sky darkness). Nothing duplicated, nothing lost;
+  - **the core screens' finish** (Stage 5's system only): Tonight's page title in the scale's
+    headline role, as a semantic header; the context line in a card on both screens (the same
+    control and meaning); Open planner as the plan card's filled action in every state; the
+    planner's status card marked by its status colour and its key numbers as label and value; the
+    planner's section headings in the section-heading role; "Tonight for this target" in the text
+    roles (no ad hoc weights), no chart redesign;
+  - **TD-079:** a bounded Undo, through S5.8's `showUndo`, for Fill or Trim, a block edit saved in
+    its dialog, and "Start from the example plan": the blocks and the example badge as they were,
+    autosaved like any edit; refused, with a message, when the blocks changed again since; no
+    history kept beyond the message;
+  - **TD-080:** without a target, Your plan's two target actions each carry one short line saying
+    what they offer, and the secondary actions do not repeat the second;
+  - the sweep, the E2E and the planner's and Tonight's tests follow the new order and words.
+- **Out of scope:** everything the owner deferred (DECISIONS E.1, item 6): Stages 7, 8 and 9; the
+  detail screens' richer presentation; Tonight's Night, Moon and Weather rows' presentation (review
+  item 2.4, Stage 9); a global undo; any calculation or schema change.
+- **Acceptance:**
+  - **TD-075:** without a site the status reads "Needs a site" with a site reason, and without a
+    target "Needs a target" with a target reason, on the planner and on Tonight, never "no light
+    frames"; "Needs a rig" keeps its reason; with a site, target and rig, an empty plan still reads
+    "Needs a block" with the fit's reason (tests);
+  - **TD-076:** each graph shows "Your plan" with its count and the group's value, and "For
+    comparison" with the end's count and value; the text alternative names both; the label is still
+    `AppWords.relativeStackingGain` and no text says SNR; 200 % text in three themes (tests);
+  - **TD-077:** "Your plan" is `titleMedium` and a semantic header, the target `bodyLarge` (a test);
+  - **TD-078:** on Night & Moon the dark span and the Moon's up-times appear once, in the summary;
+    the twilight rows, the illumination and the closest approach stay (tests);
+  - **the order:** a test of the planner's vertical order; S6.6's first-screen test passes in the
+    light, dark and field themes; every value reachable before is reachable;
+  - **the finish:** Tonight's title is a semantic header; the context line is on a card on both
+    screens; Open planner is a `FilledButton` with and without a target; the sweep passes at 100 %
+    and 200 % text in three themes;
+  - **TD-079:** each of the three changes shows an Undo message; Undo restores the identical blocks
+    and badge (tests through the harness on a real database); after a later block edit, Undo
+    changes nothing and says so; on a saved plan, an Undo leaves the saved snapshot unchanged (a
+    test); no new motion outside `AppMotion`;
+  - **TD-080:** without a target, both actions show their line, and "What can I image tonight?"
+    appears once; with a target it stays in the secondary actions (tests);
+  - **class: the Task's cumulative diff** touches the planner, Tonight and shared components, on
+    the E2E and the sweep: **the full gate after the last code change**.
+- **Done 2026-09-28:** every item of the scope, each with its tests.
+  - **TD-075:** `PlanStatus.missingInput` returns a `MissingInput` (headline, its own reason, action,
+    route), shared by both screens;
+  - **TD-076:** `StackingGainGraph.planLabel`/`comparisonLabel` and `PlanPointSwatch`;
+  - **TD-077:** "Your plan" `titleMedium`, a header; the target `bodyLarge`, the rig a caption;
+  - **TD-078:** "Sun and twilight" and "Moon" sections without the summary's two lines;
+  - **the order** as amended, "Tonight for this target" shown once there is a target (or the no-site
+    card), never as an empty heading;
+  - **the finish:** Tonight's page title (`headlineSmall`), `ContextLine(framed: true)` on both
+    screens, Open planner always the plan card's `FilledButton`, the status card's edge and
+    label-over-value numbers, section headings in `titleMedium`, "Tonight for this target" in the
+    text roles;
+  - **TD-079:** `SessionPlanViewModel.recordBlocksEdit`/`undoBlocksEdit` over a `BlocksEdit` value
+    (`viewmodels/blocks_edit.dart`, so the ViewModel stays under the cap: 296 lines) and
+    `editBlocksWithUndo`; the block dialog returns its block. No case needed new architecture;
+  - **TD-080:** the two rows with a line each; "What can I image tonight?" shown once.
+
+  **Recorded, not fixed:** TD-081 (messages slide even with reduced motion; the framework honours
+  only accessible navigation; app-wide). **Deliberate test changes:** the navigation test finds
+  Tonight's title as the page header; three planner tests scroll to sections that moved below the
+  capture plan; the Night & Moon and Moon-section tests assert the summary's lines once, as TD-078
+  requires; the √N painter test picks the graph's painter beside the new swatch. New tests:
+  `capture_blocks_undo_test.dart` (8), the planner's order and TD-075 (`planner_structure_test.dart`,
+  2), Tonight (8), the √N labels (1). Full gate PASS after the last code change: Encoding; Format, 439 files; Analyze; 1,486 tests, 2 expected skips; 2 host E2E.
 
 ##### Stage 6 validation
 A fresh-session, independent validation (§9.8, V8; this Stage writes application code), by
 `prompts/INDEPENDENT_STAGE_VALIDATION.md`. **Its frozen surface (V4):**
-- S6.1–S6.14 acceptance criteria (and S6.15's, if built);
+- S6.1–S6.14 acceptance criteria (and S6.15's, if built); *(2026-09-28)* S6.16's;
 - the rules for every Stage 6 Task above;
-- the owner's answers to S4-DEF-04, RD-08, RD-10 and RD-11;
+- the owner's answers to S4-DEF-04, RD-08, RD-10 and RD-11; *(2026-09-28)* the owner's corrective-pass
+  decisions (DECISIONS E.1, "Stage 6 corrective pass decided"), including ADR-019 §6 as amended;
 - the Stage Exit as amended, including its ten comprehension points, with S6.E as their evidence;
 - the invariants: ADR-019 §3.1 and D1, the tracker boundary, and `CLAUDE.md`'s traps.
 
@@ -3887,6 +3982,12 @@ and are provisional in the same way.*
   - *(added 2026-09-27)* **Tonight and the other entry points** consistent with Stage 6's planner:
     each row opens its intended detail, never the planner's top; no Draft concept, no duplicate plan
     state, and no "Analytics" tab.
+  - *(2026-09-28, the owner; DECISIONS E.1, "Stage 6 corrective pass decided")* **Not here:** the
+    visual finish of the core Tonight and planner screens that the S6.E review recorded (Tonight's
+    title, context area, Your plan and Open planner; the planner's status area, order and "Tonight
+    for this target") is Stage 6's (S6.16). Stage 9 keeps the secondary screens, global and
+    secondary polish, Settings, the Library, the detail screens' richer presentation, Tonight's
+    Night, Moon and Weather rows' presentation (review item 2.4) and branding.
 - **No feature creep (2026-09-27):** every Stage 9 item traces to this plan, an owner decision, an
   08 problem, or an inconsistency Stages 6–8 created. The exclusions in "Stages 6–11: shared rules"
   stand.

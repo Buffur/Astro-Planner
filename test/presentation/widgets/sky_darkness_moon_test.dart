@@ -1,5 +1,7 @@
 // TASK 6.4: the sky card shows when the Moon is up and its closest approach
 // to the target — annotations only, no "impact %" — from MoonConditions.
+// Since S6.16 (TD-078) when it is up is the Night & Moon summary's alone
+// (`detail_screens_test.dart`); this section keeps the rest.
 
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -25,9 +27,7 @@ import '../../support/no_snapshot_weather.dart';
 class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
 void main() {
-  testWidgets('Moon illumination, up-times and closest approach render', (
-    tester,
-  ) async {
+  testWidgets('Moon illumination and closest approach render', (tester) async {
     late AppDatabase database;
     late PlannerHarness vm;
     await tester.runAsync(() async {
@@ -73,10 +73,11 @@ void main() {
 
     final c = vm.moonConditions!;
     final pct = (c.illuminationAtMidnight * 100).round();
-    expect(find.text('Moon Illumination at midnight: $pct %'), findsOneWidget);
+    expect(find.text('Moon'), findsOneWidget);
+    expect(find.text('Illumination at midnight: $pct %'), findsOneWidget);
     expect(find.textContaining('approx'), findsNothing);
-    expect(find.byKey(const Key('sky.moonUp')), findsOneWidget);
-    expect(find.textContaining('Moon up'), findsOneWidget);
+    expect(find.byKey(const Key('sky.moonUp')), findsNothing);
+    expect(find.textContaining('Moon up'), findsNothing);
     final approach = c.closestApproachWhileBothUp!;
     expect(
       find.textContaining(

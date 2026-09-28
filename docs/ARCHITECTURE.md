@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.16, 2026-09-28:** B4 notes the corrective pass: the planner's amended order, Tonight's finish, the missing inputs' reasons, the √N graph's labels, Night & Moon without repetition, and the blocks' Undo (`BlocksEdit`).
 > **S6.14, 2026-09-28:** B4 notes the candidates' default order (RD-10 = O1).
 > **S6.13, 2026-09-28:** B4 notes Tonight's plan-first order and where each value went.
 > **S6.12, 2026-09-28:** B4 records the timeline's inventory and its evolution (`TimelineData`, `TimelinePainter`, densities).
@@ -548,6 +549,32 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > **Since S6.14 (2026-09-28; RD-10 = O1)** `CandidateList.sort`'s `usableTime` order breaks ties by
 > `frameFillFraction` (descending, unknown last) before the name; every other order is unchanged.
 > The candidates header names the order in use (`_orderLabels`).
+
+> **Since S6.16 (2026-09-28; the owner's corrective pass, DECISIONS E.1 "Stage 6 corrective pass
+> decided"; ADR-019 §6 as amended)** the planner's list is `PlanStatus` → `ContextLine(framed)`
+> (`planner.context`) → the target card (`planner.target`) → the rig card (`planner.rig`) →
+> `CapturePlanWidget` → "Tonight for this target" (`TonightOpportunityWidget`, its heading now the
+> planner's section heading, shown with a site and a target, or the no-site card) → the conditions
+> (Night & Moon, Weather, the zone rule, `SkyDarknessWidget`). Where each value went: the chart and
+> the windows moved from under the target to after the capture plan; the rig moved from last to
+> above the capture plan; nothing else moved or was removed. The section headings use the scale's
+> `titleMedium`. `PlanStatus.missingInput` returns a `MissingInput` record with the input's own
+> reason (TD-075), shared by the planner and Tonight; the status card carries a status-colour edge
+> (`planner.statusMark`) and `StatusBlock`'s key numbers are label-over-value pairs. Tonight: the
+> page's own title (`tonight.title`, `headlineSmall`; the app bar keeps the actions), the context
+> on a card, `_PlanCard` with "Your plan" in `titleMedium` (TD-077), Open planner always its
+> `FilledButton`, and, without a target, the two target rows with a line each (TD-080; the
+> secondary actions then leave out What can I image tonight?). The √N graph labels the plan's point
+> and the comparison end (`StackingGainGraph.planLabel`/`comparisonLabel`, `PlanPointSwatch`;
+> TD-076). Night & Moon's sections no longer repeat the summary: `NightTimelineSection` ("Sun and
+> twilight") without the dark span, `MoonSection` ("Moon") without the up-times (TD-078).
+> **Undo for one-tap block changes (TD-079):** `SessionPlanViewModel.recordBlocksEdit` runs a change
+> and returns a `BlocksEdit` (`viewmodels/blocks_edit.dart`: the blocks and example badge before, the
+> block instances after, the lifecycle's contents generation and the session);
+> `undoBlocksEdit` restores them through the normal autosave only while `BlocksEdit.isCurrent`
+> holds. `editBlocksWithUndo` (`widgets/capture_plan/blocks_undo.dart`) wraps Fill/Trim, a block
+> edit and "Start from the example plan" with S5.8's `showUndo`; nothing outlives the message. The
+> block dialog (`showCaptureBlockDialog`) now returns the block and changes nothing itself.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

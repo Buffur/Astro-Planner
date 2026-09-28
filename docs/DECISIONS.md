@@ -1,5 +1,10 @@
 # AstroPlan Decisions
 
+> **Stage 6 corrective pass decided, 2026-09-28 (the owner):** TD-075 to TD-080 fixed before the
+> Stage 6 validation as one bounded Task (S6.16); ADR-019 §6's order amended (status, context,
+> target, rig, capture plan, then the opportunity analysis and the conditions); the visual finish
+> of Tonight and the planner stays in Stage 6 (E.1, "Stage 6 corrective pass decided"). Pointers
+> under ADR-019 §5 and §6.
 > **RD-10 and RD-11 decided, 2026-09-28 (Stage 6):** O1 (usable time, then frame fill, then the name) and S9 (the gate controls in Stage 9's Settings; no S6.15) (E.1, "RD-10 and RD-11 decided"). Documentation only.
 > **S6.13, 2026-09-28:** DEV-P9 resolved (Tonight's context line with the night picker, after S6.2 and S6.6).
 > **RD-08 decided, 2026-09-28 (Stage 6):** T3, tracking is the rig's default with a per-plan
@@ -1621,6 +1626,92 @@ Stage 4 revalidation is still required.
 - **Rejected:** RD-10's O2 (usable time, then the maximum altitude) and O3 (thresholds and groups);
   RD-11's S6 (Settings now, as S6.15) and P (in the planner).
 - Documentation only. No code changed.
+
+### Stage 6 corrective pass decided: TD-075–TD-080, the planner's order, the core screens' finish (Stage 6, 2026-09-28)
+
+- **Context:** the owner's manual UX review of the `.s2check` app
+  (`refinement/evidence/STAGE_6_FIVE_SECOND_TEST.md`, `142341a`) recorded four current-stage issues
+  (TD-075–TD-078), two new bounded follow-ups (TD-079, TD-080) and two questions for the owner: the
+  planner's order (review item 5.1) and who owns the visual finish of Tonight and the planner (items
+  1.1, 1.2, 3.2, 4.1, 6.1). `refinement/PROGRESS.md` listed them as the decisions before the Stage 6
+  validation.
+- **Decided by:** the project owner, in the session prompt of 2026-09-28: one final bounded Stage 6
+  corrective Task before the validation (S6.16 in the plan).
+- **1. TD-075 to TD-078 are fixed before the validation,** in that one Task. Stage 6's design is not
+  reopened broadly and nothing is pulled forward from Stages 7–9.
+  - **TD-075:** under "Needs a site" or "Needs a target", the reason matches the missing input,
+    never the empty plan's "no light frames". Unknown and missing-input honesty stays, and a real
+    capture-plan warning still shows once the planning context exists.
+  - **TD-076:** the relative-stacking-gain graph and its √N meaning stay. The plan's own point is
+    identifiable at once, visually and in words, and the comparison end never reads as a target or
+    a recommendation. Unchanged: √N relative gain only, per compatible-frame group, no physical SNR,
+    no image-quality prediction, a text alternative, Stage 5's visual and accessibility rules. The
+    scientific model is not redesigned.
+  - **TD-077:** "Your plan" is a card heading in the existing semantic heading role, with no ad hoc
+    font size, and the card's target, rig and content no longer outrank it.
+  - **TD-078:** the summary under Night & Moon's summary card is not repeated. Nothing useful is
+    removed; one clear summary stays, with the deeper detail where it adds information. Not the
+    Stage 9 richer-detail redesign.
+- **2. The planner's order: ADR-019 §6 is amended.** Answer first stays: the practical status or
+  verdict leads. Below it, the planning workflow follows this conceptual order:
+  1. the plan's status, the practical answer;
+  2. the date and the site;
+  3. the target;
+  4. the rig;
+  5. the capture plan;
+  6. the optional night and target-opportunity analysis;
+  7. the supporting conditions, such as Weather and Night & Moon;
+  8. deeper technical detail on demand.
+
+  It is a conceptual order, not permission to duplicate information or to make a card of every item.
+  The status keeps Stage 6's primary-answer requirements (fit, time needed, usable time,
+  integration, the main blocker or reason, the saved or changed state) and never moves below the
+  form content. **What it changes in §6:** the target's windows leave item 4 for the analysis after
+  the capture plan; the rig moves above the capture plan; the conditions follow the analysis. Items
+  1–3 and 8 of §6, and §7, stand. A pointer marks §6.
+- **3. The visual finish of the core Tonight and planner screens stays in Stage 6,** and is not
+  deferred to Stage 9, for the core-screen observations already recorded in the review:
+  - **Tonight:** a stronger screen title in Stage 5's typography; the date and site as a
+    deliberate, structured context area (a box or card is one option, not a requirement; the
+    context line's approved meaning stays, without redundant information); "Your plan" (TD-077);
+    Open planner reading as an intentional, important action; the distinct roles of Choose a target
+    and What can I image tonight? kept, with TD-080's wording;
+  - **the planner:** the status area finished as Stage 6's primary surface in the existing design
+    system; the order above; the timeline and opportunity section as supporting analysis that does
+    not interrupt building the plan; the recorded visual-integration issues of "Tonight for this
+    target", without a new chart redesign beyond Stage 6's contract.
+
+  **Stage 9 keeps:** secondary screens, global and secondary polish, Settings, the Library, the
+  detail screens' richer presentation, branding and its other scope. No new design system, and no
+  visual clone of another product.
+- **4. TD-079 is fixed now as bounded recovery, never a global undo.** Stage 5's reversible-action
+  patterns and the current planner state model come first. A clear way back for the confirmed
+  cases: Fill or Trim, a capture-block edit already saved, and "Start from the example plan"; the
+  mechanism may differ by operation where that is cleaner. The user can see how to recover right
+  after the change; recovery restores the actual previous state; saved historical intent is never
+  changed silently; no second planner-state architecture and no large persistent history for Undo;
+  reduced motion is respected; focused tests. A case that cannot be made safely reversible without
+  substantial new architecture is reported with its evidence, not built.
+- **5. TD-080 is fixed now.** Both functions stay: one browses the whole target catalogue, the other
+  lists the candidates for the current night and site. Wording, supporting copy or presentation
+  tells them apart before a tap, concisely, with the existing vocabulary, and with no explanatory
+  paragraphs on Tonight's primary surface.
+- **6. Deferred, with their owners unchanged:**
+  - Stage 7: binning; ISO and gain; calibration parameters' inheritance and ownership; darks, flats
+    and bias; elevation and Bortle automation; SQM's ownership and source (RG-08 to RG-11);
+  - Stage 8: result reporting; Completed, Partly and Not done; planned against actual; the Sessions
+    and Logbook interaction; the Download (export-all) classification (P8.1, P8.2, P8.7);
+  - Stage 9: the full Settings review; the detail screens' richer presentation; app-wide secondary
+    polish; branding and the licence.
+- **7. The five-second test:** the owner's review does not count as it. After S6.16 is verified,
+  the separate `.s2check` app is rebuilt if the core screens changed, the owner's own app is left
+  untouched and the prepared test plan stays equivalent; then, ideally, one independent participant
+  who has not worked on the product answers, recorded word for word. Without one, the test stays
+  UNVERIFIED and the Stage 6 validation records the gap (V7). No human evidence is fabricated, and
+  an agent is never the participant.
+- **Records:** ADR-019's status line and pointers under §5 and §6; `refinement/POST_ROADMAP_PLAN.md`,
+  S6.16 (its acceptance criteria), Stage 6 validation's surface and Stage 9's scope note.
+- **Built by** S6.16 (2026-09-28). No code is changed by this entry.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -4031,6 +4122,10 @@ Status: accepted (owner, 2026-09-27, S4.D). The owner accepted it in chat after 
   from them go the same way: §5's run card, §6's ⋮ item and §14's "Track live (optional)". §3's
   Tracking state remains for live runs until P8.4, and afterwards only for runs that already exist.
   The text below is kept as accepted; pointers mark §2 and §4.
+- **Amended by the owner, 2026-09-28** (E.1, "Stage 6 corrective pass decided"): §6's order below
+  the status (the rig above the capture plan; the target's windows and the conditions after it).
+  The text below is kept as accepted; a pointer marks §6, and one under §5 records how S6.16 applied
+  TD-080.
 
 It records, as one design, the eight Stage 4 decisions the owner took in chat on 2026-09-27 (DECISIONS
 E.1):
@@ -4275,6 +4370,12 @@ The order, top to bottom:
 Tonight stays a fixed view (PD-14), with four tabs (ADR-015 §2). The detail screens meet 08 §2's
 "Analytics" idea without a fifth tab.
 
+> **As built by S6.16 (TD-080, 2026-09-28; within the owner's instruction in E.1, "Stage 6
+> corrective pass decided", not a new decision):** without a target, Your plan offers Choose a
+> target and What can I image tonight?, each with one short line saying what it offers, and the
+> secondary actions do not repeat What can I image tonight?; with a target, it is in the secondary
+> actions. Both functions stay. The order of items 1–6 is unchanged.
+
 ### 6. Decision: the planner (RD-06; amends ADR-015 §2's "same sections and order")
 
 1. **App bar:** target · night · state; ⋮ holds New plan, Copy to another night, and Track live
@@ -4288,6 +4389,14 @@ Tonight stays a fixed view (PD-14), with four tabs (ADR-015 §2). The detail scr
 6. **Conditions summary:** Night & Moon ›, Weather ›, Sky ›, leading to the detail screens.
 7. **Rig summary:** name, FOV, pixel scale, frame fill ›, leading to the full rows.
 8. **Bottom bar:** **Save plan**, the primary action, in the lower half.
+
+> **Amended (the owner, 2026-09-28; E.1, "Stage 6 corrective pass decided"):** below the status
+> (item 2), the conceptual order is: the context (site ▾ · night ▾); the target; the rig (its
+> summary, as item 7 describes); the capture plan (item 5); then the night and target-opportunity
+> analysis (the chart and the windows, out of item 4); then the supporting conditions (item 6);
+> deeper technical detail on demand throughout (§7). A conceptual order, not a card per item and no
+> duplicated information. Items 1–3 and 8 stand, and the status never moves below the form
+> content. Built by S6.16.
 
 ### 7. Decision: disclosure (RD-06, RG-06; amends ADR-009 §2's display wording)
 

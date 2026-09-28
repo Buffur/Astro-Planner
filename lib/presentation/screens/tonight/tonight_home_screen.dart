@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/night_weather.dart';
 import '../../../domain/services/fit_analyzer.dart';
@@ -82,8 +83,14 @@ class TonightHomeScreen extends StatelessWidget {
       body = const Center(child: CircularProgressIndicator());
     } else {
       body = ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
         children: const [
+          _Title(),
           _Context(),
           _RunCard(),
           // Stage 8 (P8.3) adds "Last night: … How did it go?" here.
@@ -95,18 +102,43 @@ class TonightHomeScreen extends StatelessWidget {
       );
     }
 
+    // S6.16 (the owner's review, 1.1): the screen's title is the page's own
+    // header, in the scale's headline role, as on the detail screens
+    // (S5.7): it wraps at large text, which an app bar's title cannot. The
+    // app bar keeps the actions.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tonight'),
-        actions: const [FieldModeButton()],
-      ),
+      appBar: AppBar(actions: const [FieldModeButton()]),
       body: body,
     );
   }
 }
 
+/// "Tonight", the page's title (S6.16): a semantic header.
+class _Title extends StatelessWidget {
+  const _Title();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Semantics(
+        header: true,
+        child: Text(
+          'Tonight',
+          key: const Key('tonight.title'),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: AppPalette.of(context).textPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Site ▾ · night ▾ (ADR-019 §5; UX-11): the same control as the planner's;
-/// the night picker changes the current plan's night.
+/// the night picker changes the current plan's night. On a card since S6.16
+/// (the owner's review, 1.2).
 class _Context extends StatelessWidget {
   const _Context();
 
@@ -114,10 +146,10 @@ class _Context extends StatelessWidget {
   Widget build(BuildContext context) {
     final siteVm = context.watch<SiteViewModel>();
     final planVm = context.watch<SessionPlanViewModel>();
-    return Padding(
+    return KeyedSubtree(
       key: const Key('tonight.context'),
-      padding: const EdgeInsets.only(bottom: 12),
       child: ContextLine(
+        framed: true,
         siteName: siteVm.isDefaultLocation
             ? null
             : siteVm.activeSite?.name ??
@@ -179,6 +211,11 @@ class _RunCard extends StatelessWidget {
 /// Your plan (ADR-019 §5): the target and state, the verdict with its
 /// reason and usable time (`StatusBlock`, the planner's words), and Open
 /// planner; without a target, Choose a target and What can I image tonight?
+///
+/// S6.16: "Your plan" is the card's heading in the card-heading role, above
+/// the target (body text) and the rig (a caption) (TD-077); Open planner is
+/// the card's primary action in every state (the owner's review, 3.2); the
+/// two ways to a target each say what they offer (TD-080).
 class _PlanCard extends StatelessWidget {
   const _PlanCard();
 
@@ -187,10 +224,11 @@ class _PlanCard extends StatelessWidget {
     final planVm = context.watch<SessionPlanViewModel>();
     final fit = context.watch<CaptureAnalysisViewModel>().fitAnalysis;
     final theme = Theme.of(context);
+    final palette = AppPalette.of(context);
     final target = planVm.selectedTarget;
     final rig = planVm.selectedEquipment;
     final session = planVm.activeSession;
-    final (missing, _, _) = PlanStatus.missingInput(planVm);
+    final missing = PlanStatus.missingInput(planVm);
     final measured =
         missing == null &&
         (fit.state == FitState.fits ||
@@ -200,99 +238,134 @@ class _PlanCard extends StatelessWidget {
     return Card(
       key: const Key('tonight.plan'),
       margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(AppWords.yourPlan, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 4),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              crossAxisAlignment: WrapCrossAlignment.center,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        AppWords.yourPlan,
+                        key: const Key('tonight.planHeading'),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                    ),
+                    if (session != null)
+                      PlanStateLabel(
+                        PlanState.of(session),
+                        key: const Key('tonight.planState'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   target == null
                       ? 'No target chosen'
                       : target.commonName ?? target.catalogId,
-                  style: theme.textTheme.titleMedium,
-                ),
-                if (session != null)
-                  PlanStateLabel(
-                    PlanState.of(session),
-                    key: const Key('tonight.planState'),
+                  key: const Key('tonight.planTarget'),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: target == null
+                        ? palette.textSecondary
+                        : palette.textPrimary,
                   ),
+                ),
+                if (rig != null)
+                  Text(
+                    ExampleText.rigName(rig), // RD-04 (S6.8)
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: palette.textTertiary,
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.md),
+                StatusBlock(
+                  key: const Key('tonight.status'),
+                  state: missing != null ? FitState.needsInput : fit.state,
+                  missing: missing?.headline,
+                  needed: measured
+                      ? Duration(milliseconds: fit.windowLoadMs)
+                      : null,
+                  usable: measured && fit.availableMs > 0
+                      ? Duration(milliseconds: fit.availableMs)
+                      : null,
+                  // TD-075: a missing input's own reason, else the fit's.
+                  reason: missing?.reason ?? fit.reason,
+                  action: missing?.headline == PlanStatus.needsRig
+                      ? OutlinedButton(
+                          key: const Key('tonight.chooseRig'),
+                          onPressed: () => context.push(AppRouter.selectRig),
+                          child: const Text(AppWords.chooseRig),
+                        )
+                      : null,
+                ),
               ],
             ),
-            if (rig != null)
-              Text(
-                ExampleText.rigName(rig), // RD-04 (S6.8)
-                style: theme.textTheme.bodySmall,
-              ),
-            const SizedBox(height: 8),
-            StatusBlock(
-              key: const Key('tonight.status'),
-              state: missing != null ? FitState.needsInput : fit.state,
-              missing: missing,
-              needed: measured
-                  ? Duration(milliseconds: fit.windowLoadMs)
-                  : null,
-              usable: measured && fit.availableMs > 0
-                  ? Duration(milliseconds: fit.availableMs)
-                  : null,
-              reason: missing == PlanStatus.needsRig
-                  ? 'A rig is needed to save the plan and to check exposures.'
-                  : fit.reason,
-              action: missing == PlanStatus.needsRig
-                  ? OutlinedButton(
-                      key: const Key('tonight.chooseRig'),
-                      onPressed: () => context.push(AppRouter.selectRig),
-                      child: const Text(AppWords.chooseRig),
-                    )
-                  : null,
+          ),
+          // TD-080: the two ways to a target, each saying what it offers.
+          if (_offersTargets(planVm)) ...[
+            const Divider(height: 1),
+            _Row(
+              key: const Key('tonight.chooseTarget'),
+              icon: Icons.search,
+              label: 'Choose a target',
+              lines: const ['Any object in the catalogue'],
+              onTap: () => context.push(AppRouter.selectTarget),
             ),
-            const SizedBox(height: 12),
-            if (target == null && planVm.sessionNight != null) ...[
-              FilledButton(
-                key: const Key('tonight.chooseTarget'),
-                onPressed: () => context.push(AppRouter.selectTarget),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: const Text('Choose a target'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                key: const Key('tonight.planCandidates'),
-                onPressed: () => context.push(AppRouter.candidates),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: const Text('What can I image tonight?'),
-              ),
-              const SizedBox(height: 8),
-              TextButton(
-                key: const Key('tonight.openPlanner'),
-                onPressed: () => context.push(AppRouter.session()),
-                child: const Text('Open planner'),
-              ),
-            ] else
-              FilledButton.icon(
-                key: const Key('tonight.openPlanner'),
-                onPressed: () => context.push(AppRouter.session()),
-                icon: const Icon(Icons.edit_calendar_outlined),
-                label: const Text('Open planner'),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-              ),
+            const Divider(height: 1, indent: AppSpacing.md),
+            _Row(
+              key: const Key('tonight.planCandidates'),
+              icon: Icons.format_list_numbered,
+              label: _candidatesLabel,
+              lines: const [_candidatesLine],
+              onTap: () => context.push(AppRouter.candidates),
+            ),
+            const Divider(height: 1),
           ],
-        ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: FilledButton.icon(
+              key: const Key('tonight.openPlanner'),
+              onPressed: () => context.push(AppRouter.session()),
+              icon: const Icon(Icons.edit_calendar_outlined),
+              label: const Text('Open planner'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
+/// "What can I image tonight?" and its line (TD-080): the candidates for
+/// this site and night, in RD-10's order.
+const _candidatesLabel = 'What can I image tonight?';
+const _candidatesLine = 'Candidates for this site and night, by usable time';
+
+/// Your plan offers the two ways to a target (no target yet, and a night to
+/// list candidates for); the secondary actions then leave the second out,
+/// so it is shown once (TD-080).
+bool _offersTargets(SessionPlanViewModel plan) =>
+    plan.selectedTarget == null && plan.sessionNight != null;
 
 /// The night, the Moon and the weather, each opening its detail (S6.5) —
 /// or, without a site, the one site prompt (ADR-007 §9: no night is
@@ -441,19 +514,22 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final inPlanCard = _offersTargets(context.watch<SessionPlanViewModel>());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        OutlinedButton.icon(
-          key: const Key('tonight.candidates'),
-          onPressed: () => context.push(AppRouter.candidates),
-          icon: const Icon(Icons.format_list_numbered),
-          label: const Text('What can I image tonight?'),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(48),
+        if (!inPlanCard) ...[
+          OutlinedButton.icon(
+            key: const Key('tonight.candidates'),
+            onPressed: () => context.push(AppRouter.candidates),
+            icon: const Icon(Icons.format_list_numbered),
+            label: const Text(_candidatesLabel),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         OutlinedButton.icon(
           key: const Key('tonight.newSession'),
           onPressed: () async {

@@ -94,22 +94,27 @@ class StatusBlock extends StatelessWidget {
           ),
         ],
         if (keyNumbers.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
+          // S6.16: each number as a label above its value, so the answer's
+          // figures read as a set (the scale's caption and group roles).
           Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.xs,
+            spacing: AppSpacing.lg,
+            runSpacing: AppSpacing.sm,
             children: [
               for (final (label, value) in keyNumbers)
-                Text.rich(
-                  TextSpan(
+                MergeSemantics(
+                  child: Column(
+                    key: Key('status.number.$label'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextSpan(
-                        text: '$label ',
+                      Text(
+                        label,
                         style: text.bodySmall?.copyWith(color: p.textTertiary),
                       ),
-                      TextSpan(
-                        text: value,
-                        style: text.bodyMedium?.copyWith(color: p.textPrimary),
+                      Text(
+                        value,
+                        style: text.titleSmall?.copyWith(color: p.textPrimary),
                       ),
                     ],
                   ),
@@ -117,7 +122,7 @@ class StatusBlock extends StatelessWidget {
             ],
           ),
         ],
-        if (action != null) ...[const SizedBox(height: AppSpacing.sm), action!],
+        if (action != null) ...[const SizedBox(height: AppSpacing.md), action!],
       ],
     );
   }

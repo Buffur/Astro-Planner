@@ -15,6 +15,10 @@ import 'night_time_formatter.dart';
 /// Below it, once, the zone rule (trap 2): times are in the site's zone, or
 /// labelled as the device zone when the site has none. Without a site there
 /// is no night (ADR-007 §9), so only the site part shows.
+///
+/// S6.16: [framed] sets it on a card, so the site and night read as one
+/// deliberate context area (Tonight and the planner); each part leads with
+/// its icon (a place, a date).
 class ContextLine extends StatelessWidget {
   const ContextLine({
     super.key,
@@ -24,6 +28,7 @@ class ContextLine extends StatelessWidget {
     required this.onNight,
     this.zoneId,
     this.nightStartUtc,
+    this.framed = false,
   });
 
   /// Null when no site is set.
@@ -42,6 +47,9 @@ class ContextLine extends StatelessWidget {
   /// without it.
   final DateTime? nightStartUtc;
 
+  /// On a card (S6.16).
+  final bool framed;
+
   /// Shown instead of a site name when none is set.
   static const noSite = 'No site set';
 
@@ -57,7 +65,7 @@ class ContextLine extends StatelessWidget {
     final nightText = night == null
         ? null
         : NightTimeFormatter.eveningDate(night!);
-    return Column(
+    final line = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(
@@ -65,6 +73,7 @@ class ContextLine extends StatelessWidget {
           children: [
             _Choice(
               key: const Key('context.site'),
+              icon: Icons.place_outlined,
               text: siteName ?? noSite,
               semanticsLabel: '${AppWords.site}: ${siteName ?? noSite}',
               hint: 'Choose a site',
@@ -79,6 +88,7 @@ class ContextLine extends StatelessWidget {
               ),
               _Choice(
                 key: const Key('context.night'),
+                icon: Icons.event_outlined,
                 text: nightText,
                 semanticsLabel: '${AppWords.night}: $nightText',
                 hint: 'Choose a night',
@@ -88,12 +98,29 @@ class ContextLine extends StatelessWidget {
           ],
         ),
         if (night != null && nightStartUtc != null)
-          Text(
-            zoneRule(nightStartUtc!, zoneId: zoneId),
-            key: const Key('context.zone'),
-            style: text.bodySmall?.copyWith(color: p.textTertiary),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+            child: Text(
+              zoneRule(nightStartUtc!, zoneId: zoneId),
+              key: const Key('context.zone'),
+              style: text.bodySmall?.copyWith(color: p.textTertiary),
+            ),
           ),
       ],
+    );
+    if (!framed) return line;
+    return Card(
+      key: const Key('context.card'),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.sm,
+          AppSpacing.xs,
+          AppSpacing.md,
+          AppSpacing.sm,
+        ),
+        child: line,
+      ),
     );
   }
 }
@@ -102,12 +129,14 @@ class ContextLine extends StatelessWidget {
 class _Choice extends StatelessWidget {
   const _Choice({
     super.key,
+    required this.icon,
     required this.text,
     required this.semanticsLabel,
     required this.hint,
     required this.onTap,
   });
 
+  final IconData icon;
   final String text;
   final String semanticsLabel;
   final String hint;
@@ -132,6 +161,8 @@ class _Choice extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Icon(icon, color: p.textSecondary),
+                const SizedBox(width: AppSpacing.xs),
                 Flexible(
                   child: Text(
                     text,

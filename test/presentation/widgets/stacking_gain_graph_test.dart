@@ -95,7 +95,12 @@ void main() {
                   .widget<CustomPaint>(
                     find.descendant(
                       of: find.byWidget(graphs[i]),
-                      matching: find.byType(CustomPaint),
+                      // S6.16: the plan's swatch is a second painter.
+                      matching: find.byWidgetPredicate(
+                        (w) =>
+                            w is CustomPaint &&
+                            w.painter is StackingGainPainter,
+                      ),
                     ),
                   )
                   .painter!
@@ -122,6 +127,71 @@ void main() {
           ),
         ),
         findsOneWidget,
+      );
+    }
+    handle.dispose();
+  });
+
+  // TD-076 (S6.16): the plan's own point is named with its count and value,
+  // beside a swatch drawn like the dot; the curve's end is a comparison,
+  // never a target or a recommendation. √N and the points are unchanged.
+  testWidgets("each graph names the plan's point, and its end as a "
+      'comparison', (tester) async {
+    await start(tester);
+    final handle = tester.ensureSemantics();
+    final graphs = tester
+        .widgetList<StackingGainGraph>(find.byType(StackingGainGraph))
+        .toList();
+    for (final (i, g) in vm.captureBudget.lightGroups.indexed) {
+      final curve = graphs[i].curve;
+      final graph = find.byWidget(graphs[i]);
+      final value = '${g.relativeStackingGain.toStringAsFixed(1)}x';
+      final plan = find.descendant(
+        of: graph,
+        matching: find.byKey(const Key('gainGraph.plan')),
+      );
+      expect(
+        tester.widget<Text>(plan).data,
+        '${AppWords.yourPlan}: ${g.frames} frames · $value',
+      );
+      expect(StackingGainGraph.planLabel(curve), contains(value));
+      final comparison = find.descendant(
+        of: graph,
+        matching: find.byKey(const Key('gainGraph.comparison')),
+      );
+      expect(
+        tester.widget<Text>(comparison).data,
+        'For comparison: ${curve.maxFrames} frames · '
+        '${curve.endGain.toStringAsFixed(1)}x',
+      );
+      // The swatch beside the plan's label draws the plan's dot.
+      expect(
+        find.descendant(
+          of: graph,
+          matching: find.byWidgetPredicate(
+            (w) => w is CustomPaint && w.painter is PlanPointSwatch,
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(
+          RegExp(
+            '${RegExp.escape(value)} at ${g.frames} frames, your plan; .* '
+            'at ${curve.maxFrames} frames, for comparison',
+          ),
+        ),
+        findsOneWidget,
+      );
+    }
+    for (final word in ['target', 'recommend', 'SNR', 'potential']) {
+      expect(
+        find.descendant(
+          of: find.byType(StackingGainGraph),
+          matching: find.textContaining(word),
+        ),
+        findsNothing,
+        reason: word,
       );
     }
     handle.dispose();

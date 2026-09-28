@@ -4,21 +4,36 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.14 done**: the candidates' default order; Stage 6's code Tasks
-> are all done).
-> **Next:** the owner's decisions on closing Stage 6 (below): S6.E's five-second test is still
-> UNVERIFIED; an owner manual UX review is recorded; four small current-stage issues are open.
+> **Last updated:** 2026-09-28 (**S6.16 done**: the owner's corrective pass before the Stage 6
+> validation; TD-075–TD-080 resolved; ADR-019 §6 amended).
+> **Next:** S6.E's five-second test on a refreshed `.s2check` build with an independent participant
+> (or the gap recorded), then the Stage 6 validation in a fresh session (below).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 done; S6.15 not built, RD-11 = S9) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 and S6.16 done; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **Owner decisions before Stage 6 validation** (S6.E unverified; TD-075–TD-080; the planner's order; the primary screens' visual finish) |
-| Code baseline | S6.14 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.E's run** (the five-second test, on a refreshed `.s2check`), then **Stage 6 validation** |
+| Code baseline | S6.16 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.16 done, 2026-09-28** (the owner's corrective pass; DECISIONS E.1, "Stage 6 corrective pass
+decided"): TD-075–TD-080 resolved; ADR-019 §6 amended and built (status → site and night → target →
+rig → capture plan → "Tonight for this target" → conditions); the core screens' finish (Tonight's
+page title, context card, "Your plan" heading, Open planner always primary, the target rows; the
+planner's status card and section headings); Undo for Fill/Trim, a saved block edit and the example
+plan (no global undo). TD-081 recorded (messages slide even with reduced motion; not fixed).
+**The `.s2check` build is stale** (it has `f19aef7`'s code): refresh it from this commit before the
+five-second test. Verification: the full gate after the last code change, PASS (below); every acceptance criterion checked.
+
+**Owner decisions, 2026-09-28 (in the session prompt):** the corrective pass above, the planner's
+order (ADR-019 §6 amended), the visual finish of Tonight and the planner in Stage 6 (Stage 9 keeps the
+secondary screens), TD-079 as bounded recovery, TD-080's wording, and the five-second test's rule
+(an independent participant, or UNVERIFIED and recorded by the validation; never the owner's review
+or an agent). DECISIONS E.1, "Stage 6 corrective pass decided".
 
 **Owner manual UX review, 2026-09-28** (HUMAN / OWNER MANUAL UX REVIEW, **not** a five-second
 result; `evidence/STAGE_6_FIVE_SECOND_TEST.md`): 22 observations on the `.s2check` app, each
@@ -219,7 +234,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (436 files, 0 changed); Analyze; 1,466 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.13's final inputs (`6651cf7`) | Still valid except where S6.14 changed inputs (`candidate_evaluator.dart`, the candidates screen and their two tests); S6.14's localized checks PASS on its final inputs. Stage 6 validation decides whether it needs a fresh full gate (V3 (c)) |
+| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,486 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.16's final inputs (this commit) | Nothing since: every gate input is this commit's. It supersedes S6.13's gate (S6.14's inputs included) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -235,7 +250,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 6 | Core Planner Redesign | In progress | 2026-09-27 | — | — (planned 2026-09-27: S6.1–S6.15 and S6.E frozen in the plan, "Stage 6 — frozen Task sequence"; four gates open) |
+| 6 | Core Planner Redesign | In progress | 2026-09-27 | — | — (planned 2026-09-27: S6.1–S6.15 and S6.E frozen; every gate decided; S6.16, the owner's corrective pass, added and done 2026-09-28; S6.E's test UNVERIFIED) |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
@@ -329,8 +344,9 @@ These block a release, not refinement.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
 - **Stage 6 (planned 2026-09-27):** every gate is decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1) and
-  RD-11 (S9, so no S6.15), all 2026-09-28. S6.E needs the owner to
-  run it. The tracker stays as built until P8.4.
+  RD-11 (S9, so no S6.15), all 2026-09-28. S6.16 (the owner's corrective pass) is done. S6.E needs an
+  independent participant on a refreshed `.s2check` build, or the validation records the gap (V7).
+  The tracker stays as built until P8.4. TD-081 is recorded for Stage 9 or 11.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -339,21 +355,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**Owner decisions before Stage 6 validation** (no agent work starts until the owner chooses):
-1. **S6.E's five-second test (UNVERIFIED):** a separate, independent participant runs Test A on the
-   prepared `.s2check` app (`evidence/STAGE_6_FIVE_SECOND_TEST.md`, "How to run it"), or the owner
-   accepts the gap and the Stage 6 validation records it (V7). The owner's review does not count as
-   the test;
-2. **the current-stage issues** TD-075 to TD-078: corrected before the validation (each small; one
-   bounded corrective Task could hold them), or left for the validation to weigh;
-3. **the planner's order** (review item 5.1): keep ADR-019 §6, or amend it (then a bounded Stage 6
-   change, the status staying first);
-4. **the visual finish of Tonight and the planner** (review items 1.2, 3.2, 4.1, 6.1): a bounded
-   Stage 6 follow-up now, or an explicit line in Stage 9's scope;
-5. **the new bounded follow-ups** TD-079 (a way back for Fill/Trim, a saved block edit, the example
-   plan) and TD-080 (the two target actions' wording): now, or later.
-Then **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
-validation").
+1. **S6.E's five-second test (UNVERIFIED):** rebuild the separate `.s2check` app from S6.16's commit
+   (an agent does this when the phone is connected; the owner's app is never touched), set up the
+   same test plan (Test site, M31, the example rig and plan, saved), and have **one independent
+   participant who has not worked on the product** answer Test A's five questions, recorded word
+   for word in `evidence/STAGE_6_FIVE_SECOND_TEST.md`. The owner's review does not count, and an
+   agent is never the participant. If no participant is available, the test stays UNVERIFIED and
+   the validation records the gap (V7).
+2. Then **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
+   validation", now including S6.16's criteria and the owner's corrective-pass decisions). It may
+   reuse S6.16's full gate (V3).
+
+No other Stage 6 Task is open. Nothing from Stages 7–9 starts before Stage 6 closes.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

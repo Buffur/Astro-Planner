@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/capture_block.dart';
-import '../../viewmodels/session_plan_viewmodel.dart';
 
 const _filters = ['L', 'R', 'G', 'B', 'Ha', 'OIII', 'SII', 'OSC', 'None'];
 
 /// Add/edit dialog for one capture block (TASK 4.1; policy, binning and a
 /// typed gain added in TASK 5.6). Validation mirrors the domain bounds
-/// (TASK 5.3), so an invalid block can never be submitted.
-Future<void> showCaptureBlockDialog(
-  BuildContext context,
-  SessionPlanViewModel viewModel, {
-  int? editIndex,
+/// (TASK 5.3), so an invalid block can never be submitted. It returns the
+/// block (null when cancelled) and changes nothing itself: the caller adds
+/// it, or applies an edit with Undo (TD-079, S6.16). [initial] makes it an
+/// edit of that block.
+Future<CaptureBlock?> showCaptureBlockDialog(
+  BuildContext context, {
   CaptureBlock? initial,
 }) {
-  return showDialog(
+  return showDialog<CaptureBlock>(
     context: context,
-    builder: (ctx) => _CaptureBlockDialog(
-      viewModel: viewModel,
-      editIndex: editIndex,
-      initial: initial,
-    ),
+    builder: (ctx) => _CaptureBlockDialog(initial: initial),
   );
 }
 
 class _CaptureBlockDialog extends StatefulWidget {
-  const _CaptureBlockDialog({
-    required this.viewModel,
-    required this.editIndex,
-    required this.initial,
-  });
+  const _CaptureBlockDialog({required this.initial});
 
-  final SessionPlanViewModel viewModel;
-  final int? editIndex;
   final CaptureBlock? initial;
 
   @override
@@ -127,12 +117,7 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
       gain: _gain(),
       calibrationPolicy: isLight ? null : _policy,
     );
-    if (widget.editIndex == null) {
-      widget.viewModel.addCaptureBlock(block);
-    } else {
-      widget.viewModel.updateCaptureBlock(widget.editIndex!, block);
-    }
-    Navigator.pop(context);
+    Navigator.pop(context, block);
   }
 
   @override
@@ -140,7 +125,7 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
     final isLight = _type == FrameType.light;
     return AlertDialog(
       title: Text(
-        widget.editIndex == null ? 'Add Capture Block' : 'Edit Capture Block',
+        widget.initial == null ? 'Add Capture Block' : 'Edit Capture Block',
       ),
       content: Form(
         key: _formKey,
@@ -298,7 +283,7 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
         FilledButton(
           key: const Key('blockDialog.submit'),
           onPressed: _submit,
-          child: Text(widget.editIndex == null ? 'Add' : 'Save'),
+          child: Text(widget.initial == null ? 'Add' : 'Save'),
         ),
       ],
     );
