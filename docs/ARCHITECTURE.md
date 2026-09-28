@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.13, 2026-09-28:** B4 notes Tonight's plan-first order and where each value went.
 > **S6.12, 2026-09-28:** B4 records the timeline's inventory and its evolution (`TimelineData`, `TimelinePainter`, densities).
 > **S6.11, 2026-09-28:** B4 notes the stacking-gain graph.
 > **S6.10, 2026-09-28:** B4 notes "what fits", the storage note and `ChangeMark`.
@@ -531,6 +532,17 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `TimelineDensity` (`full` in the planner, `compact` for a summary; S6.13 decides whether Tonight
 > uses it). The text alternative names the windows with their times, the usable time and the
 > capture's end.
+
+> **Since S6.13 (2026-09-28; ADR-019 §5)** Tonight is `_Context` (`ContextLine` + `pickNight` →
+> `SessionPlanViewModel.setEveningDate`) → `_RunCard` → (Stage 8's slot) → `_PlanCard` (`StatusBlock`
+> fed by `PlanStatus.missingInput`, now shared with the planner, and `fitAnalysis`; `PlanStateLabel`)
+> → `_NightCard` (the Dark row from `NightTimeline.darkAtLimit`; the Moon row from
+> `NightConditionsViewModel.moonDuringDark`, CALC-43) → the secondary actions. Where each value went:
+> the site card → the context line; "Night of …" → the context line's night; Tonight's status words →
+> `PlanStateLabel`; "Fits"/reason/"Usable time tonight" → the `StatusBlock` headline and reason; the
+> rig line stays (with the example label), "Choose rig" → the status's Choose a rig; Start → gone
+> (Track live in the planner's ⋮); the Moon's up-intervals → Night & Moon only. The compact timeline
+> is not used here (the choice and its reason are in `tonight_home_screen.dart`).
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

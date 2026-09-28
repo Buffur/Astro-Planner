@@ -90,6 +90,18 @@ abstract final class MoonText {
     );
     return 'Moon up ${spans.join(', ')}.';
   }
+
+  /// The useful fact for Tonight (S6.13; UX-17), worded as the imaging
+  /// windows' Moon note: "Moon down while dark (3 % lit at midnight)",
+  /// "Moon up all the dark time (…)", or "Moon up 2 h of the 7 h 30 min
+  /// dark (…)". Null means there is no dark span to speak of.
+  static String duringDark(MoonDuringDark m) {
+    final lit = '${QuantityText.percent(m.illumination * 100)} lit at midnight';
+    if (m.moonDown) return 'Moon down while dark ($lit)';
+    if (m.upAllDark) return 'Moon up all the dark time ($lit)';
+    return 'Moon up ${QuantityText.duration(m.moonUp)} of the '
+        '${QuantityText.duration(m.dark)} dark ($lit)';
+  }
 }
 
 abstract final class FitText {

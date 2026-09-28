@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **S6.13, 2026-09-28:** DEV-P9 resolved (Tonight's context line with the night picker, after S6.2 and S6.6).
 > **RD-08 decided, 2026-09-28 (Stage 6):** T3, tracking is the rig's default with a per-plan
 > override; the snapshot keeps the effective value; Unknown stays possible (E.1, "RD-08 decided").
 > Built in Stage 7; S6.9 shows the effective tracking. Pointer under ADR-011 §5. Documentation only.
@@ -368,6 +369,9 @@ import screen (G17).*
   Track live in ⋮. The strip sits under the bar, not in its title, because an app bar's title
   cannot wrap at 200 % text (the reason S5.7's detail header gave). The planner's context line
   (S6.6) and Tonight's night picker (S6.13) remain.
+  **Resolved 2026-09-28 (S6.13),** with S6.2 and S6.6: the planner's context line (S6.6), and
+  Tonight's site ▾ · night ▾ context line, whose night picker changes the current plan's night
+  (UX-11). The planner's state is in the strip under its bar rather than in the title (above).
 
 ---
 

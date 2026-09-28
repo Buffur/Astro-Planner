@@ -2878,7 +2878,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | **Done 2026-09-28** |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | **Done 2026-09-28** |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | **Done 2026-09-28** |
-| S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | Frozen |
+| S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | **Done 2026-09-28** |
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 | Frozen, gated |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | Conditional |
 | S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run) |
@@ -3399,6 +3399,20 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - the Moon row's wording (tests); TD-073's message decided and tested;
   - DEV-P9 resolved (with S6.2 and S6.6);
   - the E2E; the full gate.
+- **Done 2026-09-28:** the order of ADR-019 §5 with `ContextLine` (its night picker sets the plan's
+  night, autosaved), the run card, Your plan (`StatusBlock` through the planner's shared
+  `PlanStatus.missingInput`, `PlanStateLabel`; Choose a target and What can I image tonight?
+  without a target, Choose a rig without a rig), the rows, and New plan with `showDone`. No Start.
+  The Dark row is S6.5's dark span (TD-054 resolved); the Moon row is the Moon during the dark span
+  (CALC-43; UX-17). One site prompt: the context line is the control, the card the prompt.
+  **No compact timeline:** ADR-019 §5's fixed order has none, the plan card gives the usable time,
+  and the planner's timeline is one tap away. **TD-073's site prompt:** kept until dismissed (it
+  offers the fix), with a close button; without an action it times out. DEV-P9 resolved. Tests:
+  7 new on Tonight (order, no target, the night picker, the Dark row at three limits, the Moon row,
+  New plan), `moon_during_dark_test.dart` (6), a wording test, two TD-073 tests. Deliberate changes:
+  three Tonight tests read the shared status, and the execution test starts the run as the planner
+  does (Tonight has no Start) and opens the tracker from the run card. "Draft" left the baseline.
+  Full gate PASS: 1,466 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.14 — The candidates' default order (RD-10; gated)
 - **Objective:** the default order of "What can I image tonight?" discriminates between targets

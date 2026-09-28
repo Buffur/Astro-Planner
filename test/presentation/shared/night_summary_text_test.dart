@@ -3,6 +3,7 @@
 // forecast's state with its age, stale wording or the reason there is none
 // (ADR-012: no score, no good/bad word).
 
+import 'package:astroplan/domain/models/moon_conditions.dart';
 import 'package:astroplan/domain/models/night_timeline.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
 import 'package:astroplan/domain/models/weather_snapshot.dart';
@@ -81,6 +82,27 @@ void main() {
     expect(
       WeatherText.summary(const NightWeatherLoading(), null),
       'Loading the forecast…',
+    );
+  });
+
+  // S6.13 (UX-17): the Moon while it is dark, worded as the windows' note.
+  test('the Moon during the dark span: down, all of it, or part', () {
+    MoonDuringDark m(int upMin) => MoonDuringDark(
+      dark: const Duration(hours: 7, minutes: 30),
+      moonUp: Duration(minutes: upMin),
+      illumination: 0.03,
+    );
+    expect(
+      MoonText.duringDark(m(0)),
+      'Moon down while dark (3 % lit at midnight)',
+    );
+    expect(
+      MoonText.duringDark(m(450)),
+      'Moon up all the dark time (3 % lit at midnight)',
+    );
+    expect(
+      MoonText.duringDark(m(120)),
+      'Moon up 2 h of the 7 h 30 min dark (3 % lit at midnight)',
     );
   });
 }

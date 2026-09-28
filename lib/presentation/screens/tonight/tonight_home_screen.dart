@@ -5,22 +5,24 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/night_weather.dart';
-import '../../../domain/models/session.dart';
 import '../../../domain/services/fit_analyzer.dart';
 import '../../navigation/app_router.dart';
 import '../../../core/utils/quantity_text.dart';
+import '../../shared/app_words.dart';
+import '../../shared/context_line.dart';
 import '../../shared/example_text.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_text.dart';
 import '../../shared/night_time_formatter.dart';
-import '../../shared/opportunity_text.dart';
+import '../../shared/plan_state.dart';
+import '../../shared/status_block.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../../domain/models/execution.dart';
-import '../../shared/start_session.dart';
 import '../../viewmodels/execution_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
+import '../../widgets/plan_status.dart';
 import 'resume_run_dialog.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/plan_lifecycle_viewmodel.dart';
@@ -30,23 +32,18 @@ import '../../viewmodels/tonight_viewmodel.dart';
 import '../../shared/unsaved_plan_prompt.dart';
 import '../../shared/failure_feedback.dart';
 
-/// The Tonight tab's root (ADR-015, TASK 12.5): "what can I capture
-/// tonight" at a glance — the site and night, the dark window, the Moon,
-/// the weather with its age, and the current session's fit with its
-/// reason. A summary only: every value comes from the ViewModels, and each
-/// row drills down into the planner or a picker.
+/// The Tonight tab's root (ADR-015, TASK 12.5; plan first since S6.13,
+/// ADR-019 §5): which site and night, the run in progress if any, the
+/// current plan with its answer, then the night, the Moon and the weather,
+/// each opening its detail, then the secondary actions. A summary only:
+/// every value comes from the ViewModels.
+///
+/// S6.13 records two choices: no compact timeline here (ADR-019 §5's fixed
+/// order has none, the plan card gives the usable time, and the full
+/// timeline is one tap away in the planner); and no Start (UX-13): Track
+/// live stays in the planner's ⋮ (S6.2) until P8.4.
 class TonightHomeScreen extends StatelessWidget {
   const TonightHomeScreen({super.key});
-
-  static String _status(Session? s) => switch (s?.status) {
-    null => 'Current plan',
-    SessionStatus.draft =>
-      s!.plannedAtUtc != null ? 'Planned, unsaved changes' : 'Draft',
-    SessionStatus.planned => 'Planned',
-    SessionStatus.inProgress => 'In progress',
-    SessionStatus.completed => 'Completed',
-    SessionStatus.abandoned => 'Abandoned',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -87,10 +84,11 @@ class TonightHomeScreen extends StatelessWidget {
       body = ListView(
         padding: const EdgeInsets.all(16),
         children: const [
+          _Context(),
           _RunCard(),
-          _SiteCard(),
+          // Stage 8 (P8.3) adds "Last night: … How did it go?" here.
+          _PlanCard(),
           _NightCard(),
-          _SessionCard(),
           SizedBox(height: 8),
           _QuickActions(),
         ],
@@ -103,6 +101,43 @@ class TonightHomeScreen extends StatelessWidget {
         actions: const [FieldModeButton()],
       ),
       body: body,
+    );
+  }
+}
+
+/// Site ▾ · night ▾ (ADR-019 §5; UX-11): the same control as the planner's;
+/// the night picker changes the current plan's night.
+class _Context extends StatelessWidget {
+  const _Context();
+
+  @override
+  Widget build(BuildContext context) {
+    final siteVm = context.watch<SiteViewModel>();
+    final planVm = context.watch<SessionPlanViewModel>();
+    return Padding(
+      key: const Key('tonight.context'),
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ContextLine(
+        siteName: siteVm.isDefaultLocation
+            ? null
+            : siteVm.activeSite?.name ??
+                  siteVm.locationName ??
+                  'Current position',
+        night: planVm.eveningDate,
+        zoneId: siteVm.displayZoneId,
+        nightStartUtc: planVm.sessionNight?.startUtc,
+        onSite: () => context.push(AppRouter.selectSite),
+        onNight: () async {
+          final picked = await pickNight(context, initial: planVm.eveningDate);
+          if (picked != null && context.mounted) {
+            await runWithFeedback(
+              context,
+              'change the night',
+              () => planVm.setEveningDate(picked),
+            );
+          }
+        },
+      ),
     );
   }
 }
@@ -141,37 +176,127 @@ class _RunCard extends StatelessWidget {
   }
 }
 
-class _SiteCard extends StatelessWidget {
-  const _SiteCard();
+/// Your plan (ADR-019 §5): the target and state, the verdict with its
+/// reason and usable time (`StatusBlock`, the planner's words), and Open
+/// planner; without a target, Choose a target and What can I image tonight?
+class _PlanCard extends StatelessWidget {
+  const _PlanCard();
 
   @override
   Widget build(BuildContext context) {
-    final siteVm = context.watch<SiteViewModel>();
-    final evening = context.watch<SessionPlanViewModel>().eveningDate;
+    final planVm = context.watch<SessionPlanViewModel>();
+    final fit = context.watch<CaptureAnalysisViewModel>().fitAnalysis;
+    final theme = Theme.of(context);
+    final target = planVm.selectedTarget;
+    final rig = planVm.selectedEquipment;
+    final session = planVm.activeSession;
+    final (missing, _, _) = PlanStatus.missingInput(planVm);
+    final measured =
+        missing == null &&
+        (fit.state == FitState.fits ||
+            fit.state == FitState.tight ||
+            fit.state == FitState.doesNotFit);
+
     return Card(
+      key: const Key('tonight.plan'),
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        key: const Key('tonight.site'),
-        leading: const Icon(Icons.place_outlined),
-        title: Text(
-          siteVm.isDefaultLocation
-              ? 'No site set'
-              : siteVm.locationName ?? 'Current position',
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(AppWords.yourPlan, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  target == null
+                      ? 'No target chosen'
+                      : target.commonName ?? target.catalogId,
+                  style: theme.textTheme.titleMedium,
+                ),
+                if (session != null)
+                  PlanStateLabel(
+                    PlanState.of(session),
+                    key: const Key('tonight.planState'),
+                  ),
+              ],
+            ),
+            if (rig != null)
+              Text(
+                ExampleText.rigName(rig), // RD-04 (S6.8)
+                style: theme.textTheme.bodySmall,
+              ),
+            const SizedBox(height: 8),
+            StatusBlock(
+              key: const Key('tonight.status'),
+              state: missing != null ? FitState.needsInput : fit.state,
+              missing: missing,
+              needed: measured
+                  ? Duration(milliseconds: fit.windowLoadMs)
+                  : null,
+              usable: measured && fit.availableMs > 0
+                  ? Duration(milliseconds: fit.availableMs)
+                  : null,
+              reason: missing == PlanStatus.needsRig
+                  ? 'A rig is needed to save the plan and to check exposures.'
+                  : fit.reason,
+              action: missing == PlanStatus.needsRig
+                  ? OutlinedButton(
+                      key: const Key('tonight.chooseRig'),
+                      onPressed: () => context.push(AppRouter.selectRig),
+                      child: const Text(AppWords.chooseRig),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            if (target == null && planVm.sessionNight != null) ...[
+              FilledButton(
+                key: const Key('tonight.chooseTarget'),
+                onPressed: () => context.push(AppRouter.selectTarget),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: const Text('Choose a target'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                key: const Key('tonight.planCandidates'),
+                onPressed: () => context.push(AppRouter.candidates),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                child: const Text('What can I image tonight?'),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                key: const Key('tonight.openPlanner'),
+                onPressed: () => context.push(AppRouter.session()),
+                child: const Text('Open planner'),
+              ),
+            ] else
+              FilledButton.icon(
+                key: const Key('tonight.openPlanner'),
+                onPressed: () => context.push(AppRouter.session()),
+                icon: const Icon(Icons.edit_calendar_outlined),
+                label: const Text('Open planner'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+              ),
+          ],
         ),
-        subtitle: Text(
-          evening == null
-              ? 'Set a site to see tonight.'
-              : 'Night of ${NightTimeFormatter.eveningDate(evening)}',
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.push(AppRouter.selectSite),
       ),
     );
   }
 }
 
-/// The night, the Moon and the weather — or the site prompt without a site
-/// (ADR-007 §9: no night is computed for the default location).
+/// The night, the Moon and the weather, each opening its detail (S6.5) —
+/// or, without a site, the one site prompt (ADR-007 §9: no night is
+/// computed for the default location).
 class _NightCard extends StatelessWidget {
   const _NightCard();
 
@@ -237,23 +362,27 @@ class _NightCard extends StatelessWidget {
           label: 'Night',
           lines: [
             _span('Sunset to sunrise', timeline.sunriseSunset, at),
-            _span('Dark (Sun below −18°)', timeline.astronomicalTwilight, at),
+            // TD-054 (S6.13): the dark span at the user's limit (S6.5).
+            if (timeline.darkAtLimit case final dark?) DarkText.span(dark, at),
             'Times in ${NightTimeFormatter.zoneCaption(timeline.night.startUtc, zoneId: zoneId)}',
           ],
           onTap: openNight,
         ),
       );
       if (moon != null) {
+        final during = conditions.moonDuringDark;
         rows.add(
           _Row(
             key: const Key('tonight.moon'),
             icon: Icons.nightlight_round,
             label: 'Moon',
+            // UX-17 (S6.13): the Moon during the dark span, the useful
+            // fact; its rise and set times are on Night & Moon.
             lines: [
-              // Night-level: the value at mean solar midnight (SCI-09).
-              '${QuantityText.percent(moon.illuminationAtMidnight * 100)} lit '
-                  'at midnight',
-              MoonText.up(moon, at),
+              during != null
+                  ? MoonText.duringDark(during)
+                  : '${QuantityText.percent(moon.illuminationAtMidnight * 100)} '
+                        'lit at midnight; no dark time tonight',
             ],
             onTap: openNight,
           ),
@@ -307,109 +436,6 @@ class _NightCard extends StatelessWidget {
       };
 }
 
-class _SessionCard extends StatelessWidget {
-  const _SessionCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final planVm = context.watch<SessionPlanViewModel>();
-    final theme = Theme.of(context);
-    final target = planVm.selectedTarget;
-    final rig = planVm.selectedEquipment;
-    final hasNight = planVm.sessionNight != null;
-    final fit = hasNight
-        ? context.watch<CaptureAnalysisViewModel>().fitAnalysis
-        : null;
-    final opportunity = hasNight
-        ? context.watch<NightConditionsViewModel>().imagingOpportunity
-        : null;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              TonightHomeScreen._status(planVm.activeSession),
-              key: const Key('tonight.sessionStatus'),
-              style: theme.textTheme.labelLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              target == null
-                  ? 'No target chosen'
-                  : target.commonName ?? target.catalogId,
-              style: theme.textTheme.titleMedium,
-            ),
-            if (rig == null)
-              Wrap(
-                key: const Key('tonight.noRig'),
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  const Text('No rig chosen'),
-                  TextButton(
-                    onPressed: () => context.push(AppRouter.selectRig),
-                    child: const Text('Choose rig'),
-                  ),
-                ],
-              )
-            else
-              Text(ExampleText.rigName(rig)), // RD-04 (S6.8)
-            if (fit != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                FitText.label(fit.state),
-                key: const Key('tonight.fit'),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: FitText.color(
-                    fit.state,
-                    theme.colorScheme,
-                    AppPalette.of(context),
-                  ),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (fit.reason.isNotEmpty)
-                Text(fit.reason, key: const Key('tonight.fitReason')),
-              if (opportunity != null && fit.state != FitState.noWindow)
-                Text(
-                  'Usable time tonight: '
-                  '${OpportunityText.duration(opportunity.usableTime)}',
-                  style: theme.textTheme.bodySmall,
-                ),
-            ],
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              key: const Key('tonight.openPlanner'),
-              onPressed: () => context.push(AppRouter.session()),
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: const Text('Open planner'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-              ),
-            ),
-            // TASK 13.3 (ADR-016; owner: same requirements as Save).
-            if (hasNight && target != null && rig != null) ...[
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const Key('tonight.start'),
-                onPressed: () => startSessionWithFeedback(context),
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Start'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _QuickActions extends StatelessWidget {
   const _QuickActions();
 
@@ -437,15 +463,18 @@ class _QuickActions extends StatelessWidget {
             if (leaving == null || !context.mounted) return;
             final started = await runWithFeedback(
               context,
-              'start a new session',
+              'start a new plan',
               () => context.read<PlanLifecycleViewModel>().newSession(
                 discard: leaving == LeavingPlan.discard,
               ),
             );
-            if (started && context.mounted) context.push(AppRouter.session());
+            if (started && context.mounted) {
+              showDone(context, 'New plan started');
+              context.push(AppRouter.session());
+            }
           },
           icon: const Icon(Icons.add),
-          label: const Text('New session'),
+          label: const Text(AppWords.newPlan),
           style: OutlinedButton.styleFrom(
             minimumSize: const Size.fromHeight(48),
           ),

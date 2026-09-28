@@ -195,6 +195,12 @@ class NightConditionsViewModel extends ChangeNotifier {
 
   double? get lunarIllumination => moonConditions?.illuminationAtMidnight;
 
+  /// The Moon during the dark span at the user's limit (S6.13; UX-17).
+  MoonDuringDark? get moonDuringDark => switch (nightTimeline?.darkAtLimit) {
+    final dark? => moonConditions?.duringDark(dark),
+    null => null,
+  };
+
   /// The forecast as the opportunity reads it (also the candidates').
   OpportunityWeather? get opportunityWeather {
     final weather = _nightWeather;

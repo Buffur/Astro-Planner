@@ -26,6 +26,21 @@ class PlanStatus extends StatelessWidget {
   static const needsSite = 'Needs a site';
   static const needsRig = 'Needs a rig';
 
+  /// The input the answer waits for, in the order it is needed: (the
+  /// headline, the action's label, its route), or nulls when nothing is
+  /// missing. Shared with Tonight's plan card (S6.13). The glossary's
+  /// "Needs a …" pattern (a target, a block) is applied to a site and a rig
+  /// here; the site's action is the banner's and the context line's, so it
+  /// is not repeated.
+  static (String?, String?, String?) missingInput(SessionPlanViewModel plan) =>
+      plan.sessionNight == null
+      ? (needsSite, null, null)
+      : plan.selectedTarget == null
+      ? (AppWords.needsTarget, 'Choose a target', AppRouter.selectTarget)
+      : plan.selectedEquipment == null
+      ? (needsRig, AppWords.chooseRig, AppRouter.selectRig)
+      : (null, null, null);
+
   @override
   Widget build(BuildContext context) {
     final analysis = context.watch<CaptureAnalysisViewModel>();
@@ -34,17 +49,7 @@ class PlanStatus extends StatelessWidget {
     final fit = analysis.fitAnalysis;
     final night = plan.sessionNight;
 
-    // The input the answer waits for, in the order it is needed. The
-    // glossary's "Needs a …" pattern (a target, a block) is applied to a
-    // site and a rig here; the site's action is the banner's and the
-    // context line's, so it is not repeated.
-    final (String? missing, String? pick, String? route) = night == null
-        ? (needsSite, null, null)
-        : plan.selectedTarget == null
-        ? (AppWords.needsTarget, 'Choose a target', AppRouter.selectTarget)
-        : plan.selectedEquipment == null
-        ? (needsRig, AppWords.chooseRig, AppRouter.selectRig)
-        : (null, null, null);
+    final (missing, pick, route) = missingInput(plan);
     final state = missing != null ? FitState.needsInput : fit.state;
 
     final measured =

@@ -39,7 +39,6 @@ const baseline = {
   'lib/presentation/screens/logbook/session_detail_screen.dart|Window load': 1,
   'lib/presentation/screens/logbook/session_detail_screen.dart|Session budget':
       1,
-  'lib/presentation/screens/tonight/tonight_home_screen.dart|Draft': 1,
 };
 
 final _literal = RegExp(r'''('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")''');

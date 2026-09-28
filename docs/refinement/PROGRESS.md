@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.12 done**: the night and opportunity timeline; Stage 6 in progress).
-> **Next:** S6.13 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
+> **Last updated:** 2026-09-28 (**S6.13 done**: Tonight, plan first; Stage 6 in progress).
+> **Next:** the owner's gates. S6.14 waits for RD-10 and S6.15 for RD-11; S6.E is owner-run. No
+> ungated Stage 6 Task is left before them.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.12 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.13 done) |
 | Current Task | None in progress |
-| Next Task | **S6.13 — Tonight, plan first** (no gate) |
-| Code baseline | S6.12 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.14** once the owner decides RD-10; **S6.15** only if RD-11 chooses Stage 6; **S6.E** is owner-run |
+| Code baseline | S6.13 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.13 done, 2026-09-28** (P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054 resolved; TD-073's site
+prompt decided; DEV-P9 resolved): Tonight leads with site ▾ · night ▾ (the night picker changes the
+plan's night), the run card, Your plan with the planner's verdict, then the Night, Moon and Weather
+rows and the secondary actions; no Start; the Dark row at the user's limit; the Moon row says what
+the Moon does while it is dark (CALC-43). No compact timeline (recorded why). Verification: the full
+gate after the last code change, PASS (below); every acceptance criterion checked.
 
 **S6.12 done, 2026-09-28** (P6.11; UX-08): the altitude chart is evolved into the night and
 opportunity timeline over one mapping: seamless bands with drawn edges (field mode), the windows,
@@ -173,7 +181,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (435 files, 0 changed); Analyze; 1,449 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.12's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (436 files, 0 changed); Analyze; 1,466 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.13's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -294,20 +302,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.13 — Tonight, plan first** (P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073's site
-prompt; DEV-P9's second half). Frozen, no gate; the frozen sequence is the approval.
-- **Read:** S6.13 and "Rules for every Stage 6 Task"; ADR-019 §5; `tonight_home_screen.dart`;
-  `ContextLine`, `StatusBlock`, `PlanStateLabel`; S6.5's `DarkText`/`NightSummary`; the timeline's
-  `compact` density (use it only if it answers something the rows do not); TD-054, TD-073.
+**The owner's gates** (every ungated Stage 6 Task is done):
+- **RD-10**, the candidates' default order (O1 recommended / O2 / O3; the plan's "Stage 6 gates"):
+  S6.14 runs once it is decided;
+- **RD-11**, where the Moon and cloud gate controls live (S9 recommended / S6 / P): S6.15 exists
+  only if it chooses Stage 6;
+- **S6.E**, the five-second test: owner-run. Its first step, S4V-02's correction of
+  `research/S4.R1_FLOW_INVENTORY.md` §7 (documentation), can be done by an agent when asked.
+Then Stage 6 validation, in a fresh session.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
-
-**Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations
-in the plan's "Stage 6 gates"):
-- RD-10, the candidates' order: before S6.14;
-- RD-11, where the gate controls live: decides whether S6.15 exists.
-
-If a gated Task comes up with its gate still open, the next ungated Task runs first.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

@@ -361,9 +361,12 @@ void main() {
   });
 
   group('Tonight', () {
-    testWidgets('Start opens the tracker; Tonight then shows the run', (
-      tester,
-    ) async {
+    // S6.13 (UX-13): Tonight has no Start (Track live is in the planner's
+    // ⋮ until P8.4). Before, this test started the run from Tonight's
+    // Start; now the run is started as the planner does it, and Tonight's
+    // run card still opens the tracker.
+    testWidgets('no Start on Tonight; during a run its card opens the '
+        'tracker', (tester) async {
       tester.view.physicalSize = const Size(800, 1800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -374,16 +377,13 @@ void main() {
         MultiProvider(providers: vm.providers, child: const AstroPlanApp()),
       );
       await settle(tester);
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('tonight.start')),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.tap(find.byKey(const Key('tonight.start')));
-      await settle(tester);
-      expect(find.byKey(const Key('run.plus')), findsOneWidget);
+      expect(find.byKey(const Key('tonight.start')), findsNothing);
+      expect(find.text('Start'), findsNothing);
 
-      await tester.pageBack();
+      await tester.runAsync(() async {
+        final run = await vm.analysis.startSession();
+        await vm.execution!.open(run.id);
+      });
       await settle(tester);
       await tester.scrollUntilVisible(
         find.byKey(const Key('tonight.run')),
@@ -391,6 +391,10 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.textContaining('In progress: Orion Nebula'), findsOneWidget);
+      expect(find.byKey(const Key('tonight.start')), findsNothing);
+      await tester.tap(find.byKey(const Key('tonight.run')));
+      await settle(tester);
+      expect(find.byKey(const Key('run.plus')), findsOneWidget);
     });
   });
 }

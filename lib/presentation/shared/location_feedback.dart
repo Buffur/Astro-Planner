@@ -17,6 +17,11 @@ void showLocationFailure(
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(LocationFailureText.message(reason)),
+      // TD-073, decided in S6.13: a failure the user can fix in settings
+      // stays until they act on it or close it; one without an action
+      // times out.
+      persist: target != null,
+      showCloseIcon: target != null,
       duration: const Duration(seconds: 8),
       action: target == null
           ? null

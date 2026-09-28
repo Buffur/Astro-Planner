@@ -17,6 +17,15 @@ import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:drift/native.dart';
+import 'package:astroplan/domain/services/fit_analyzer.dart';
+import 'package:astroplan/presentation/shared/status_block.dart';
+import 'package:astroplan/presentation/widgets/plan_status.dart';
+import 'package:astroplan/core/utils/quantity_text.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
+import 'package:astroplan/domain/models/planning_preferences.dart';
+import 'package:astroplan/presentation/shared/app_words.dart';
+import 'package:astroplan/presentation/shared/night_text.dart';
+import 'package:astroplan/presentation/shared/night_time_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -150,10 +159,16 @@ void main() {
     );
   });
 
+  // S6.13: the plan card's status says what is missing, in the planner's
+  // words, and offers the picker (before: its own "No rig chosen" line).
   testWidgets('no rig: says so and offers the rig picker', (tester) async {
     await start(tester, rig: false);
-    expect(find.byKey(const Key('tonight.noRig')), findsOneWidget);
-    await tester.tap(find.text('Choose rig'));
+    final status = find.byKey(const Key('tonight.status'));
+    expect(
+      find.descendant(of: status, matching: find.text(PlanStatus.needsRig)),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('tonight.chooseRig')));
     await settle(tester);
     expect(find.text('Select Equipment'), findsWidgets);
   });
@@ -162,15 +177,30 @@ void main() {
     tester,
   ) async {
     await start(tester, lightFrames: 10);
-    expect(find.text('Fits'), findsOneWidget);
-    expect(find.byKey(const Key('tonight.fitReason')), findsOneWidget);
-    expect(find.textContaining('Usable time tonight:'), findsOneWidget);
+    // S6.13: the StatusBlock verdict, as in the planner: the headline
+    // carries the usable time.
+    final fit = vm.fitAnalysis;
+    expect(fit.state, FitState.fits);
+    expect(
+      find.text(
+        StatusBlock.headline(
+          fit.state,
+          needed: Duration(milliseconds: fit.windowLoadMs),
+          usable: Duration(milliseconds: fit.availableMs),
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('usable'), findsWidgets);
+    expect(find.text(fit.reason), findsOneWidget);
   });
 
   testWidgets("a huge plan doesn't fit, with the reason", (tester) async {
     await start(tester, lightFrames: 2000);
-    expect(find.text("Doesn't fit"), findsOneWidget);
-    expect(find.byKey(const Key('tonight.fitReason')), findsOneWidget);
+    final fit = vm.fitAnalysis;
+    expect(fit.state, FitState.doesNotFit);
+    expect(find.textContaining("Doesn't fit:"), findsOneWidget);
+    expect(find.text(fit.reason), findsOneWidget);
   });
 
   group('200 % text on a 360 × 640 dp phone: no overflow', () {
@@ -203,6 +233,132 @@ void main() {
       await tester.drag(find.byType(ListView).last, const Offset(0, -3000));
       await settle(tester);
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  // S6.13 (P6.6; ADR-019 §5): plan first.
+  group('plan first (S6.13)', () {
+    testWidgets('the order: site and night, the plan with its answer, the '
+        'night rows, then the secondary actions', (tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await start(tester, lightFrames: 10);
+      double y(String key) => tester.getTopLeft(find.byKey(Key(key))).dy;
+      final order = [
+        'tonight.context',
+        'tonight.plan',
+        'tonight.night',
+        'tonight.moon',
+        'tonight.weather',
+        'tonight.candidates',
+        'tonight.newSession',
+      ];
+      for (var i = 1; i < order.length; i++) {
+        expect(y(order[i]), greaterThan(y(order[i - 1])), reason: order[i]);
+      }
+      expect(find.byKey(const Key('tonight.status')), findsOneWidget);
+      expect(find.byKey(const Key('tonight.planState')), findsOneWidget);
+      expect(find.byKey(const Key('tonight.openPlanner')), findsOneWidget);
+      expect(find.byKey(const Key('tonight.start')), findsNothing);
+      // Tonight's own status words are gone ("Draft", S5.3's baseline).
+      expect(find.text('Draft'), findsNothing);
+    });
+
+    testWidgets('without a target: Choose a target and What can I image '
+        'tonight?', (tester) async {
+      await start(tester, firstRunDone: false);
+      final plan = find.byKey(const Key('tonight.plan'));
+      expect(
+        find.descendant(of: plan, matching: find.text(AppWords.needsTarget)),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('tonight.chooseTarget')), findsOneWidget);
+      expect(find.byKey(const Key('tonight.planCandidates')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('tonight.chooseTarget')));
+      await settle(tester);
+      expect(find.text('Select Target'), findsWidgets);
+    });
+
+    testWidgets("the night picker changes the plan's night, and the plan "
+        'autosaves', (tester) async {
+      await start(tester, lightFrames: 10);
+      expect(vm.plan.eveningDate, CalendarDate(2026, 12, 15));
+      await tester.tap(find.byKey(const Key('context.night')));
+      await settle(tester);
+      expect(find.text('Choose a night'), findsOneWidget);
+      await tester.tap(find.text('20'));
+      await tester.tap(find.text('OK'));
+      await settle(tester);
+      await tester.runAsync(() => vm.plan.idle);
+      expect(vm.plan.eveningDate, CalendarDate(2026, 12, 20));
+      final stored = await tester.runAsync(
+        () => DriftSessionRepository(database).get(vm.plan.activeSessionId!),
+      );
+      expect(stored!.eveningDate, CalendarDate(2026, 12, 20));
+    });
+
+    for (final limit in DarknessLimit.values) {
+      testWidgets('the Dark row is the dark span at the user\'s limit '
+          '(${limit.degrees.round()}°; TD-054)', (tester) async {
+        await start(tester, lightFrames: 10);
+        await tester.runAsync(
+          () => vm.setPlanningPreferences(
+            vm.planningPreferences.copyWith(darknessLimit: limit),
+          ),
+        );
+        await settle(tester);
+        final dark = vm.conditions.nightTimeline!.darkAtLimit!;
+        expect(dark.thresholdDeg, limit.degrees);
+        final ctx = tester.element(find.byKey(const Key('tonight.night')));
+        final expected = DarkText.span(
+          dark,
+          (utc) => NightTimeFormatter.instant(
+            ctx,
+            utc,
+            windowStartUtc: vm.conditions.nightTimeline!.night.startUtc,
+            zoneId: vm.site.displayZoneId,
+          ),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('tonight.night')),
+            matching: find.text(expected),
+          ),
+          findsOneWidget,
+        );
+        expect(expected, contains(QuantityText.degrees(limit.degrees)));
+      });
+    }
+
+    testWidgets('the Moon row says what the Moon does while it is dark '
+        '(UX-17)', (tester) async {
+      await start(tester, lightFrames: 10);
+      final during = vm.conditions.moonDuringDark!;
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('tonight.moon')),
+          matching: find.text(MoonText.duringDark(during)),
+        ),
+        findsOneWidget,
+      );
+      // The noon-to-noon rise/set intervals are on Night & Moon only.
+      expect(find.textContaining('from noon'), findsNothing);
+    });
+
+    testWidgets('New plan says what happened', (tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await start(tester, lightFrames: 10);
+      final button = find.byKey(const Key('tonight.newSession'));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await settle(tester);
+      // The chosen plan has unsaved changes: Discard them (S6.3).
+      await tester.tap(find.byKey(const Key('unsaved.discard')));
+      await settle(tester);
+      expect(find.text('New plan started'), findsOneWidget);
     });
   });
 

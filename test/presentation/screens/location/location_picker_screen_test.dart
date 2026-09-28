@@ -110,6 +110,36 @@ void main() {
     expect(service.locationSettingsOpened, 1);
   });
 
+  // TD-073, decided in S6.13: a failure the user can fix in settings stays
+  // until they act on it or close it; one without an action times out.
+  testWidgets('a failure with "Open settings" stays until closed; one '
+      'without times out', (tester) async {
+    await pumpPicker(tester, failure: LocationFailure.permissionDeniedForever);
+    await tapCurrentLocation(tester);
+    final fixable = find.text(
+      LocationFailureText.message(LocationFailure.permissionDeniedForever),
+    );
+    await tester.pump(const Duration(seconds: 20));
+    expect(fixable, findsOneWidget, reason: 'kept until dismissed');
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+    expect(fixable, findsNothing, reason: 'the close button dismisses it');
+  });
+
+  testWidgets('a failure without a settings action times out (TD-073)', (
+    tester,
+  ) async {
+    await pumpPicker(tester, failure: LocationFailure.permissionDenied);
+    await tapCurrentLocation(tester);
+    final plain = find.text(
+      LocationFailureText.message(LocationFailure.permissionDenied),
+    );
+    expect(plain, findsOneWidget);
+    await tester.pump(const Duration(seconds: 9));
+    await tester.pumpAndSettle();
+    expect(plain, findsNothing);
+  });
+
   testWidgets('a plain denial explains why, with no settings action', (
     tester,
   ) async {
