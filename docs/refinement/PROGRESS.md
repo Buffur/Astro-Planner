@@ -4,19 +4,35 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**Stage 7 planned**: its Task sequence is frozen; no Task done).
-> **Next:** S7.R1, the RG-11 research (camera classes and light-frame parameters).
+> **Last updated:** 2026-09-29 (**S7.R1 done**: RG-11's research; the owner's decision is next).
+> **Next:** the owner decides RG-11 (six questions, `research/RG-11_CAPTURE_PARAMETERS.md` §11).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; no Task done). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1 done). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.R1**, the RG-11 research (below, "Next allowed action") |
+| Next Task | **RG-11's owner decision**, then S7.R2 (below, "Next allowed action") |
 | Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S7.R1 done, 2026-09-29** (RG-11 research; documentation only; `research/RG-11_CAPTURE_PARAMETERS.md`):
+- **Camera classes:** phone, DSLR/mirrorless, astro camera (colour), astro camera (mono), unknown;
+  cooled and readout mode are modifiers. No metadata AstroPlan reads can tell the class.
+- **Findings:** ISO (phones, cameras) and gain with offset (astro cameras) are different controls,
+  never converted; their record is what calibration must match (RG-10). Binning is per exposure only
+  on astro cameras; on a phone it is the rig's mode. White balance is metadata in RAW files and has
+  no planning consequence. Focus has no planning value beyond ADR-009's refocus overhead. The
+  interval is already modelled once, as the per-frame overhead, but its label invites a double count
+  with the dither settle. **In-camera long-exposure noise reduction** can double a camera's time per
+  frame and is not modelled (handed to RG-10).
+- **Recommended:** C1 (a class on the rig, Unknown by default, never inferred), B1 (binning for astro
+  cameras only, a record), W1, F1, I1 (relabel, no budget change), P2 (copy the previous light
+  block). Six owner questions (§11); nothing decided.
+- **Verification:** the documentation class (references resolve; `git diff --check`). No gate input
+  changed.
 
 **Stage 7 planned, 2026-09-28** (documentation only; the owner's prompt
 `prompts/STAGE_7_PLANNING.md`; the plan's "Stage 7 — frozen Task sequence"):
@@ -97,7 +113,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | Open; research **S7.R4** (with RG-09) |
 | RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | Open; research **S7.R4** (with RG-08) |
 | RG-10 | Calibration-frame workflows and inheritance | 7 | Open; research **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D) |
-| RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | Open; research **S7.R1** (next); recorded in ADR-020 (S7.D) |
+| RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | **Researched** 2026-09-29 (S7.R1, `research/RG-11_CAPTURE_PARAMETERS.md`); the owner's decision is open; recorded in ADR-020 (S7.D) |
 | RG-12 | Licence requirements against GPL-3.0 | 9 | Open |
 | RG-13 | Settings: real-world needs and where each setting belongs | 9 | Open |
 | RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | **Decided** 2026-09-26 (DECISIONS E.1): none in Stage 2; per-format adapters later, with samples; `ExifInterface` and LibRaw rejected |
@@ -187,10 +203,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.R1 — RG-11: camera classes and light-frame parameters (research)**, in a fresh chat where
-   practical (§9.1): `POST_ROADMAP_PLAN.md`, "Stage 7 — frozen Task sequence", S7.R1. Documentation
-   only; the output is `research/RG-11_CAPTURE_PARAMETERS.md`, ending with the owner's questions.
-   Commit, then STOP. The owner then decides RG-11, and S7.R2 follows.
+1. **The owner decides RG-11:** the six questions of `research/RG-11_CAPTURE_PARAMETERS.md` §11
+   (camera class, binning, white balance, focus, interval, proposals). The answers are recorded in
+   DECISIONS E.1 (documentation only); then **S7.R2** (RG-10, calibration workflows) runs.
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.
