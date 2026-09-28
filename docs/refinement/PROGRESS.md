@@ -5,8 +5,7 @@
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-28 (**S6.8 done**: defaults and the first run; Stage 6 in progress).
-> **Next:** S6.10 (no gate), because S6.9 waits for RD-08; if the owner answers RD-08 first, S6.9
-> runs instead. RD-10 and RD-11 whenever convenient, each before its Task.
+> **Next:** S6.9 (RD-08 decided: T3). RD-10 and RD-11 whenever convenient, each before its Task.
 
 ## Current state
 
@@ -15,9 +14,17 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.8 done) |
 | Current Task | None in progress |
-| Next Task | **S6.10 — The capture plan's outputs** (no gate; S6.9 waits for RD-08) |
+| Next Task | **S6.9 — The capture plan's blocks** (RD-08 decided: T3) |
 | Code baseline | S6.8 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**RD-08 decided, 2026-09-28 (the owner, in chat): T3.** Tracking is the rig's default with a
+per-plan override; the plan changes the effective value without changing the rig; the snapshot keeps
+the effective value; Unknown stays possible; the example rig's Unknown is never made a fact
+(DECISIONS E.1, "RD-08 decided"; pointer under ADR-011 §5). Checked against the model first: the
+rig's default and the snapshot's `tracking` exist; only the plan's override needs a new nullable
+field, which Stage 7 builds with the planner's control. It unblocks S6.9, which shows the effective
+tracking and moves nothing.
 
 **S6.8 done, 2026-09-28** (P6.2, P6.1's New plan; RD-04; UX-24): nothing the user did not choose
 looks chosen. A fresh install has no target, no rig and an empty capture plan with "Start from the
@@ -195,7 +202,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | **Decided** 2026-09-27 (S4.R3; E.1): L1 (Draft internal; Save explicit), Y2, U1. The S1.6 interim stands until Stage 6 builds U1. **Clarified** 2026-09-27 (S4.V2; E.1, "S4R-01 and S4R-02 decided"): saved snapshots are immutable per night; results without Save plan; Stage 8 delivers the saved-plan transition at once |
 | RD-06 | The planner's section order; integrity text one tap away | 4 | **Decided** 2026-09-27 (S4.R4; E.1): answer first, decision order; detail one tap away |
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
-| RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work, P6.8 = S6.9) | Open; **options prepared** 2026-09-27 (plan, "Stage 6 gates"): T1 / T2 / T3 (recommended) |
+| RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work, P6.8 = S6.9) | **Decided** 2026-09-28 (owner): **T3**, the rig's default with a per-plan override; the seeded rig stays unknown (DECISIONS E.1, "RD-08 decided"). Built in Stage 7 |
 | RD-09 | Destructive interactions: confirm or undo | 5 | **Decided** 2026-09-27 (owner): **M + S1**, undo for edits inside a plan, confirm for stored records; a visible Delete with swipe as a shortcut (DECISIONS E.1, "RD-09 decided"; `IA_WIREFRAMES.md` §3 amended for plan edits). Built by S5.8 |
 | RD-10 | Ordering Tonight's candidates without a score | 6 (S6.14) | Open; **options prepared** 2026-09-27 (plan, "Stage 6 gates"): O1 (recommended) / O2 / O3 |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 (S6.15 or P9.3) | Open; **options prepared** 2026-09-27 (plan, "Stage 6 gates"): S9 (recommended) / S6 / P |
@@ -248,8 +255,8 @@ These block a release, not refinement.
     stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
-- **Stage 6 (planned 2026-09-27):** each open gate blocks only its Task: RD-08 → S6.9, RD-10 → S6.14;
-  RD-11 decides whether S6.15 exists. S4-DEF-04 was decided 2026-09-28 (R). S6.E needs the owner to
+- **Stage 6 (planned 2026-09-27):** each open gate blocks only its Task: RD-10 → S6.14; RD-11
+  decides whether S6.15 exists. S4-DEF-04 (R) and RD-08 (T3) were decided 2026-09-28. S6.E needs the owner to
   run it. The tracker stays as built until P8.4.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
@@ -259,18 +266,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.10 — The capture plan's outputs: time, what fits, storage** (P6.9; 08 §17). Frozen, no gate;
-the frozen sequence is the approval. It runs before S6.9 because S6.9 waits for RD-08 (the plan's
-rule for a gated Task); if the owner answers RD-08 first, S6.9 runs instead.
-- **Read:** S6.10, P6.9's notes and "Rules for every Stage 6 Task"; ADR-009 §2, §7; ADR-018 §4;
-  the storage trace (the plan's inputs table, case C); `CaptureBudgetSummary`,
-  `FitAnalyzer.maxFramesForBlock`, `FitResult.unplacedFramesByBlock`.
+**S6.9 — The capture plan's blocks** (P6.8; UX-09, UX-15 (1); 08 §14; RD-09). Frozen; its gate
+RD-08 is decided (T3). The frozen sequence is the approval.
+- **Read:** S6.9 and "Rules for every Stage 6 Task"; RD-08 (DECISIONS E.1); RD-09 (M + S1) and
+  `showUndo`/`DeleteButton`/`SwipeToDelete`; `CapturePlanWidget`, `capture_block_dialog.dart`,
+  `BlockBudget`, `CapabilityCalculator`/`CapabilityText`.
+- **Tracking in S6.9:** show the effective tracking (the rig's default until Stage 7 adds the
+  override) where the warning needs it; unknown tracking is a missing input. No schema change.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 
 **Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations
 in the plan's "Stage 6 gates"):
-- RD-08, tracking per rig or per plan: before S6.9;
 - RD-10, the candidates' order: before S6.14;
 - RD-11, where the gate controls live: decides whether S6.15 exists.
 

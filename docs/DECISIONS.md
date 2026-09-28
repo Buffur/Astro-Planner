@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **RD-08 decided, 2026-09-28 (Stage 6):** T3, tracking is the rig's default with a per-plan
+> override; the snapshot keeps the effective value; Unknown stays possible (E.1, "RD-08 decided").
+> Built in Stage 7; S6.9 shows the effective tracking. Pointer under ADR-011 §5. Documentation only.
 > **S4-DEF-04 decided, 2026-09-28 (Stage 6):** R, Discard reverts a Saved · changed plan to its saved
 > snapshot (E.1, "S4-DEF-04 decided"); ADR-014 §3 gains that transition, pointer under ADR-019 §3.
 > Documentation only.
@@ -1559,6 +1562,44 @@ Stage 4 revalidation is still required.
   entry or its snapshot was never an option (the invariant).
 - **Built by** S6.3 (2026-09-28). No code changed by this entry.
 
+### RD-08 decided: tracking is the rig's default with a per-plan override (Stage 6, 2026-09-28)
+
+- **Context:** the options prepared in Stage 6 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 6
+  gates", `9e40b81`): T1 per rig, T2 per plan, T3 the rig's default with a per-plan override. 08 §21:
+  the same rig is used with and without a tracking mount.
+- **Decided by:** the project owner, in chat: **T3**, the recommended option. The owner's reasons
+  and conditions:
+  - the user should not have to open the rig's settings to change tracking for one session;
+  - the rig keeps its normal (default) tracking;
+  - the planner lets the user change the **effective** tracking for the current plan without
+    changing the reusable rig;
+  - the plan (and its saved snapshot) keeps the effective value its calculations and history used;
+  - **Unknown** stays possible where the rig's default is not known;
+  - the shipped example rig's tracking is never turned into a confirmed real-world fact.
+- **T3, as it applies to the current model** (verified at `822a16d` before recording):
+  - **the default** is the rig's existing `trackingType` (`optical_rigs.tracking_state`,
+    ADR-011 §5), with `unknown` for anything not declared. ADR-011 §5 and PD-11 are unchanged. The
+    seeded rig declares none and stays `unknown` (the verified-seed policy; nothing infers tracking);
+  - **the override** belongs to the plan: absent means "the rig's default". No existing field holds
+    it. A plan's live state is kept in `session_logs` columns (night, site, target, rig) and
+    `capture_blocks`, and a plan snapshot exists only once saved, and is immutable (ADR-019 §3.1),
+    so it cannot carry a draft's choice. The smallest clean representation is **one nullable plan
+    field** (a schema change with its migration test), as the prepared option says;
+  - **the history** reuses the existing snapshot: the plan snapshot already records the rig's
+    `tracking` (`SessionSnapshotBuilder`); it will record the effective value and where it came from
+    (the rig's default or the plan), as keys of the existing JSON snapshot, not a new concept;
+  - **calculations** (`CapabilityCalculator`, NPF and the maximum sub) read the effective value.
+    Unknown keeps PD-11's "if untracked" guidance, shown as a missing input (S6.9);
+  - an override never writes to the rig, and tracking never goes into global Settings (§8 of the
+    plan); `Tracked` stays distinct from Track live.
+- **Built by:** Stage 7 (the plan field, the planner's control, the snapshot keys and the effective
+  value in the calculations), as the frozen plan already assigns a plan-level choice. **S6.9** (Stage
+  6) shows the effective tracking where the warning needs it (today the rig's default) and unknown
+  tracking as a missing input; it moves nothing.
+- **Rejected:** T1 (the rig only; the inconvenience of 08 §21 stays) and T2 (the plan only; a rig
+  that is always tracked would lose that fact, and every plan would have to answer it).
+- Documentation only. No code changed.
+
 # Part F — ADRs accepted after the Phase 0 baseline
 
 *Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*
@@ -2691,6 +2732,9 @@ The UI shows the unit next to every number (TASK 8.4 acceptance).
   than the recommendation gets a warning. **Guidance never blocks** a plan. Showing NPF
   itself is PD-11, decided in TASK 8.6. **Implemented 2026-09-23 (TASK 8.6):** as above;
   for unknown tracking NPF applies too, marked "if untracked" (PD-11).
+- **RD-08 (2026-09-28, the owner; E.1, "RD-08 decided"):** the rig's tracking type is the plan's
+  **default**; a plan may override it without changing the rig, and the plan's snapshot keeps the
+  effective value. This section is otherwise unchanged. Built in Stage 7.
 
 ### 6. Decision: existing rows are never reinterpreted (PD-10 migration policy, owner)
 

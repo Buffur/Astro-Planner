@@ -2813,7 +2813,9 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 - **S4-DEF-04** (owner): what Discard does with a Saved · changed plan. It blocks S6.3 only.
   **Decided 2026-09-28: R**, revert to the saved plan.
 - **RD-08** (owner): tracking per rig or per plan. It blocks S6.9 only. A plan-level choice, if
-  chosen, is built in Stage 7.
+  chosen, is built in Stage 7. **Decided 2026-09-28: T3**, the rig's default with a per-plan
+  override (DECISIONS E.1, "RD-08 decided"); Stage 7 builds the override, S6.9 shows the effective
+  tracking.
 - **RD-10** (owner): the candidates' default order. It blocks S6.14 only.
 - **RD-11** (owner): where the Moon and cloud gate controls live. It decides whether S6.15 exists;
   nothing else waits for it.
@@ -2872,7 +2874,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | **Done 2026-09-28** |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | **Done 2026-09-28** |
-| S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 | Frozen, gated |
+| S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | Frozen |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
@@ -3438,6 +3440,12 @@ kept as prepared.
 - **Not an option:** deleting the entry or its snapshot (the invariant).
 
 **RD-08 — tracking per rig or per plan** (blocks S6.9 only; a model change is built in Stage 7)
+
+> **Decided 2026-09-28 (the owner): T3** (DECISIONS E.1, "RD-08 decided"), with the owner's
+> conditions: the rig keeps its default; the plan changes the effective value without changing the
+> rig; the snapshot keeps the effective value; Unknown stays possible; the example rig's Unknown is
+> never made a fact. Checked against the model first: the default and the snapshot's `tracking`
+> exist; only the plan's override needs a new nullable field (Stage 7).
 
 - **Verified:** tracking is a rig field (ADR-011 §5), recorded in the snapshot. NPF guidance applies
   to untracked and unknown rigs, "if untracked" for unknown (PD-11). The seeded rig declares none:
@@ -4156,7 +4164,7 @@ any implementation Task is created.
 | RD-05 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): L1 (Draft internal; Not saved / Saved / Saved · changed; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), U1 (Save · Discard · Cancel; Discard deletes; V3 and W1 count as unsaved).** Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4. **Input from Stage 1 validation (V3, owner, 2026-09-25):** a site change on a saved plan turns the stored session into a draft ("Planned, unsaved changes", still listed) but does not count as unsaved while the app runs, so New does not ask; after a restart it does. Decide whether a site change edits a saved plan | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
-| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)** | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
+| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)**. **Decided 2026-09-28: T3** (DECISIONS E.1, "RD-08 decided"); the seeded rig stays `unknown` | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
 | RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. **Decided 2026-09-27 (owner): M + S1** (DECISIONS E.1, "RD-09 decided") | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups | 6 | S6.14 |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
