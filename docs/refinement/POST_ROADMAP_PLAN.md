@@ -79,6 +79,12 @@
 > RD-11 = S9); the validation was blocked on S6V-01 only, and its V5 revalidation passed at
 > `da4c53d` (`STAGE_6_VALIDATION.md`; same chat as S6.V1 at the owner's request, disclosed). S6.E
 > stays UNVERIFIED, a gap the owner accepted. Stage 7 planning is next.
+> **Updated 2026-09-28 (Stage 7 planning, verified at `4b0df38`; the owner's prompt
+> `prompts/STAGE_7_PLANNING.md`):** Stage 7's Task sequence is frozen ("Stage 7 — frozen Task
+> sequence"): research S7.R1–S7.R5 (RG-11, RG-10, RG-07, RG-08 with RG-09, RG-03), the decision record
+> S7.D (ADR-020), and S7.1–S7.6; S7.1 (RD-08 = T3) is ungated. RG-03 is researched again at the
+> owner's request; nothing is adopted. The storage-input area is not triggered (S6.10 found case C).
+> §3, §6.2, §7 and §8 rows updated. No other Stage changed, and no decision was taken.
 
 ## Contents
 
@@ -215,7 +221,7 @@ an overlap. Research gates may run earlier than their Stage (§4).
 | 4 | Product Flow & Information Architecture | Product/UX analysis and owner decisions | RG-04 to RG-06; RD-04 to RD-07, RD-14 | 3 |
 | 5 | Design System Foundation | Implementation | RD-09 | 4 |
 | 6 | Core Planner Redesign | Implementation | RD-06 (decided), RD-10, RD-11, S4-DEF-04; RD-08 before capture-plan work (P6.8, frozen as S6.9). Options prepared at Stage 6 planning (2026-09-27) | 4, 5 |
-| 7 | Data Entry & Automation | Research gates, then implementation | RG-07 to RG-11; RD-08 | 3, 5, 6 |
+| 7 | Data Entry & Automation | Research gates, then implementation | RG-07 to RG-11; RG-03 (researched again, 2026-09-28); RD-08 (decided T3, built by S7.1). Frozen at Stage 7 planning (2026-09-28) | 3, 5, 6 |
 | 8 | Sessions / Execution / Actuals / Logbook | Implementation after Stage 4's decisions; the tracker's retirement after an audit (2026-09-27) | RD-13 (RD-12 lapsed 2026-09-27) | 4, 6 (2 for assisted actuals) |
 | 9 | Secondary UX & Product Polish | Implementation, plus licence research | RG-12, RG-13; RD-01, RD-11; the owner's logo choice | 5 (and 4 for the Library) |
 | 10 | Performance & Application Size | Measurement first, then optimisation | RD-02 (dependency) | 6–9 |
@@ -3811,6 +3817,619 @@ Stage 6's capture-plan work. The site and rig forms adopt the glossary when this
 and P9.3 removes any contradictory ownership. Stage 7's Tasks are frozen in its own planning, from
 the areas and gates above; this amendment adds no Stage 7 Task ID.)*
 
+#### Stage 7 — frozen Task sequence (planning, 2026-09-28)
+
+Planned at `4b0df38`, right after Stage 6 closed, from the owner's Stage 7 planning prompt
+(`prompts/STAGE_7_PLANNING.md`). The application code is unchanged since `da4c53d`
+(`git diff --stat da4c53d HEAD -- . ':!docs' ':!CLAUDE.md'` is empty), so **Stage 6's closing gate
+PASS is the baseline, reused (V3)**: Encoding; Format, 439 files; Analyze; 1,491 tests, 2 expected
+skips; 2 host E2E. Planning is documentation only. No application code, test, tool, asset or
+dependency changed, and no research question is answered here.
+
+**The inputs, verified against the code at `4b0df38` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| Targets: the catalog | 164 objects from OpenNGC v20260501 (CC BY-SA 4.0): 109 Messier, 41 NGC, 10 IC, and one each of B, C, Cl and ESO. 97 have no common name. `tool/build_catalog.dart` keeps only the **first** of OpenNGC's `Common names` and does not read its `Identifiers`. The asset records each object's OpenNGC name (`openNgc`, for example a Messier object's NGC designation), but `CatalogSeeder` does not store it in `astro_targets`, so it cannot be searched | S7.R3 |
+| Targets: search | `searchTargets` is `LIKE %query%` on `catalogId` and `commonName` only. Ids are stored as "M31" and "NGC 7000", so "M 31", "NGC7000" or "NGC 0224" find nothing, and "NGC 224" does not find M31 | S7.R3 |
+| Targets: custom entry | The form asks for a name, RA (J2000) and Dec (J2000), typed and parsed by `AstroMath` (sexagesimal or decimal; a bare RA number is hours); size and magnitude are optional | S7.R3 |
+| Targets: candidates | "What can I image tonight?" evaluates every stored target (catalog and custom) through `CandidateEvaluator` in an isolate, in RD-10's O1 order (S6.14). A larger catalog makes this evaluation longer | S7.R3 (size); Stage 10 (measured on a device) |
+| Sites: elevation | `LocationProfile.elevation` is a required `double`, and `locations.elevation` is `REAL NOT NULL`; the editor refuses to save without it (−500 to 9,000 m). No calculation reads it: it is copied into the plan snapshot (`site.elevationM`) only. No GPS altitude is read (`DeviceLocation` has latitude and longitude only) | S7.R4 (RG-08) |
+| Sites: Bortle and SQM | SQM is the user's sky-quality reading (mag/arcsec², 15–23); Bortle a class 1–9. Both optional, each with source `user` and a date, unknown by default. They are shown in the site editor, the sky-darkness row and detail, and the session detail, and copied into the snapshot; **no domain calculation reads either**. No conversion between them | S7.R4 (RG-09) |
+| Sites: coordinates, name, zone | "Use current position" (GPS, asked on tap, transient) and "Pick on map" are on the Sites screen; the editor itself offers only "Pick on map". "Save as site" pre-fills the latitude, the longitude and, when the opt-in lookup is on, the place name (PD-12). A new site's zone is the device's, labelled (TASK 7.3), and unchanged here | S7.5 |
+| Sites: the map link | `LightPollutionMapLink` opens lightpollutionmap.info centred on the position; the About page names it. The owner asks for lightpollutionmap.app (08 §13) | S7.R4 (RG-09) |
+| Sites: discard (UX-21) | **Confirmed:** the site editor has no `PopScope`; back discards typed values without asking | S7.5 |
+| Rigs: the editor (UX-22) | 15 inputs and the tracking dropdown. Required: the name, the resolution, the pixel size, the focal length, and the focal ratio or the diameter. **Still true:** the pixel size is shown as two fields on one controller; rotation is asked, stored and snapshotted, and read by no calculation. The sensor size is derived and read-only | S7.6 |
+| Rigs: import and seed | "Add from a photo" (DNG, JPEG, HEIC; ADR-018) proposes the resolution, focal length and focal ratio (`reported`), the sensor size and pitch (CALC-40, `estimated`) and the RAW size (DNG only); never tracking, rotation or the maximum exposure. One verified seed, the example rig: tracking unknown, no RAW size | Kept; S7.R5 (sources) |
+| Rigs: camera class | **No camera class exists** in the model or the schema (DSLR or mirrorless, phone, dedicated astro camera; cooled or not; mono or colour). Nothing today can tell which capture parameters apply to a rig | S7.R1 (RG-11) |
+| Capture blocks | `CaptureBlock`: the frame type (light, dark, flat, bias; no dark flat), the filter (lights and flats only; a fixed list L, R, G, B, Ha, OIII, SII, OSC, None), the exposure (s, up to 3,600), the count, binning (1–4, asked on every block), `CaptureGain` (ISO, camera gain or not recorded; "for your records", SI-004, RD-03) and the calibration policy (calibration frames only; ADR-009 §3). No white balance, focus, interval or sensor-temperature field. Every block asks every field, and nothing is inherited or proposed from another block | S7.R1, S7.R2 |
+| Binning | Read by no calculation: storage ignores it (ADR-009 L6), and the pixel scale and NPF use the rig's pitch | S7.R1 |
+| The interval | One global preference, "Per-frame overhead" (Settings: "Download or interval time added to every frame"; default 5 s), added to every acquired frame (ADR-009 §4). No per-plan or per-block interval | S7.R1 |
+| Metadata | The contract (ADR-017 §2) reads the exposure time and the sensitivity (ISO with its kind), not white balance, binning, an interval or a temperature; FITS is not read. ADR-018 §4: exposure and sensitivity never map to equipment | S7.R1, S7.R2 |
+| Tracking (RD-08 = T3) | The default is the rig's `tracking_state` (`TrackingType`). The effective value is `SessionPlanViewModel.effectiveTracking`, today the rig's (S6.9); `CapabilityCalculator.evaluate` reads `rig.trackingType` itself. The snapshot writes the rig's `tracking`; `SavedPlanReader` (S6.3's revert) reads the ids and the blocks. A plan's live state is `session_logs`' columns and `capture_blocks`: no column can hold an override. The export manifest v2 carries each session's columns and its snapshots; a backup is a `VACUUM INTO` copy, restored through the migrations | S7.1 |
+| ViewModel headroom | `SessionPlanViewModel` is **300 physical lines (212 code)**, at `viewmodel_rules_test.dart`'s physical cap; `CaptureAnalysisViewModel` 283 (225); `NightConditionsViewModel` 280 (223) | S7.1, and any Task adding plan state |
+| Storage input | S6.10 traced case (C), an unknown input, not (D). Both inputs exist: the rig's RAW size and S3.8's DNG estimate | **Not triggered:** the area is conditional on (D). No Task. A new source goes through RG-03 (S7.R5) |
+| Forms generally | UX-23 (the exposure and count are typed). No editor has a discard guard. The lag (08 §22) is measured in Stage 10 | S7.2–S7.6 (each its own form) |
+
+**Automation today, and what waits for evidence:**
+
+| Area | Already automated (kept) | Waits for research | Manual or unknown until evidence exists |
+| --- | --- | --- | --- |
+| Targets | Choosing a catalog object fills its coordinates, type, size and magnitude; nothing is typed | Aliases, other common names and spellings; a larger catalog; an online resolver (S7.R3) | A custom object's RA and Dec |
+| Sites | Coordinates from GPS (on tap, with permission) or the map; the place name from the opt-in lookup; the device's zone for a new site | Elevation (S7.R4, RG-08); Bortle and SQM sources; the map link (S7.R4, RG-09) | Elevation (required today); Bortle; SQM; notes |
+| Rigs | "Add from a photo": the resolution, focal length and focal ratio, the CALC-40 estimate and the DNG RAW size, as proposals the user confirms | A specification source (S7.R5, RG-03); the camera class (S7.R1) | What a file cannot give; the tracking default, the maximum exposure, rotation and the diameter, which are the user's own |
+| Capture plan | Each block's duration, the budget and the fit (the calculators); the example plan | Each light and calibration parameter's applicability, inheritance and proposals (S7.R1, S7.R2) | ISO or gain, binning, calibration parameters: typed today |
+
+**Carried into Stage 7:** 08 §4, §6, §9, §11, §13, §15, §16, §21, §22; UX-21, UX-22, UX-23;
+SCI-08 (F-07); SI-004 and SCI-05 (RD-03); F-39 (calibration); F-33 and F-34 (sky darkness);
+RD-08 (T3); RG-03 (deferred at S3.D); Stage 6's DEFERRED items (RD-08's override, calibration,
+ISO, gain and binning, source automation). **Not Stage 7's:** TD-074 ("what fits" for several
+blocks) is not data entry, so it goes to Stage 9's planning unless the owner pulls it in (allocated,
+not decided); TD-050 is P9.3's (RD-11 = S9); the form lag is Stage 10's.
+
+**The data-entry order** for every field a Stage 7 Task touches (the Stage's automation order above,
+as the owner's Stage 7 prompt states it):
+1. known from the plan, the rig, the site, the device or the current state;
+2. reliable imported metadata (ADR-017, ADR-018);
+3. a reliable, approved external source;
+4. a safe proposal or prefill, shown as such, with its provenance;
+5. the user's input;
+6. unknown.
+
+Nothing skips from "not known locally" to a guess, and no proposal or inference is stored as a fact.
+
+**Gates** (each blocks only the Tasks named; the owner decides each right after its research, as in
+Stage 4):
+
+| Gate | Question (the register's, §7) | Research | Blocks |
+| --- | --- | --- | --- |
+| RG-11 | Capture parameters per camera type: ISO or gain, binning, white balance, focus, the interval; calculation or record; labels | S7.R1 | S7.R2, S7.2 (and S7.6's camera class, if any) |
+| RG-10 | Calibration workflows and inheritance | S7.R2 | S7.3 |
+| RG-07 | The target catalog, names and search | S7.R3 | S7.4 |
+| RG-08 | Site elevation | S7.R4 | S7.5 (elevation) |
+| RG-09 | Bortle, SQM and the map provider | S7.R4 | S7.5 (sky darkness, the link) |
+| RG-03 | Equipment specification sources. Deferred by the owner at S3.D (D2); researched in Stage 7 because the owner's Stage 7 prompt asks for it. The research adopts nothing; adoption is the owner's decision | S7.R5 | S7.6's source path only |
+| RD-08 | **Decided: T3** (DECISIONS E.1) | — | Nothing: S7.1 is ungated |
+
+**Rules for every Stage 7 Task:**
+- **The shared rules** ("Stages 6–11: shared rules") and Stage 7's rules and areas above apply.
+- **Research before forms.** A form changes only after its gate's decision. A research Task:
+  - keeps FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION apart;
+  - cites primary or technical sources, with the date each was read;
+  - asks the owner only for real product choices, never for a fact;
+  - changes no production code (throwaway probes are deleted, as in S2.R1), and commits no
+    third-party data;
+  - says so when the evidence cannot answer its question; the field then stays manual or unknown.
+- **The metadata foundation stands** (ADR-017, ADR-018): evidence → candidate → match or enrich →
+  the user confirms → stored; per-field provenance; bounded parsing; no guessed phone module; no
+  specification copied from a "similar" device; the privacy exclusions (GPS, serials, observer).
+  Stage 7 adds no second import path.
+- **No silent persistence.** A proposal, prefill, estimate or external value is shown as such, with its
+  provenance, and stored only by the user's Save. Unknown stays unknown: never 0, never a default. A
+  proposal never overwrites the user's edit.
+- **External sources.** None is assumed approved. One is adopted only by the owner's decision on its
+  gate, with its reliability, licence or terms, provenance, offline and failure behaviour, and privacy
+  settled; `docs/privacy/index.md` and `docs/COMPLIANCE.md` change in the same commit (trap 22). No
+  scraping. A lookup never blocks saving, and the offline path always works.
+- **The Capture Budget's semantics stand** (ADR-009):
+  - Integration is light exposure only;
+  - the per-frame and periodic overheads, in-window and outside-window calibration, setup and library
+    calibration keep their own lines;
+  - calibration never becomes integration, and outside-window calibration never appears to use the
+    window;
+  - a change to the budget's inputs is a DECISIONS entry (an ADR-009 amendment) with new vectors,
+    computed independently (SCIENTIFIC_INTEGRITY Part C rule 3);
+  - `CaptureBudgetCalculator` stays the only place for the arithmetic. No physical SNR and no score
+    (SI-003, ADR-013).
+- **Saved plans:** no Task changes a saved snapshot (ADR-019 §3.1). A new plan field is recorded in
+  the next snapshot as additive keys of the existing JSON (`v` 1), and an older snapshot reads
+  honestly without them.
+- **Schema changes** follow the migration workflow (`CLAUDE.md`, "After changing Drift tables"):
+  schema-equality and data-preservation tests; existing values are never reinterpreted (ADR-011 §6).
+  Export and backup stay compatible (`docs/EXPORT_MANIFEST.md`; `manifest_version` changes only for
+  an incompatible change).
+- **Contextual forms:**
+  - each form shows what is required, relevant and actionable for its camera and frame type;
+  - optional and rare fields stay discoverable, one level of local disclosure, with no modes (RG-06);
+  - a required missing value, a validation error, a mismatch that would break calibration and a
+    material warning are never hidden, and a placeholder is never the only label;
+  - units, provenance and conflict markers stay;
+  - hiding a field never deletes its stored value.
+- **The performance boundary:** a form's state stays in its own form model (the `EquipmentDraft`
+  pattern) until Save, and no Task adds a recomputation of the planner per keystroke. A new, concrete
+  lag regression found on the way goes to `TECH_DEBT.md` for Stage 10. No Task rewrites a form to fix
+  lag.
+- **ViewModel headroom:** no ViewModel crosses `viewmodel_rules_test.dart`'s cap. A Task that would,
+  splits first (S6.1's pattern); `SessionPlanViewModel` is at the cap today.
+- **Stage 5's system and the glossary:** tokens only (trap 12); `AppWords`. A form this Stage reworks
+  adopts its `DESIGN_SYSTEM.md` §9.1 row (the dialog's primary Save, `AppWords` labels) and removes
+  its retired terms (the rig editor's "Equipment profile" if S7.6 reworks it before P9.2).
+- **Tests:** every changed or new screen stays in, or joins, the accessibility sweep (trap 17); new
+  text fields are measured as `equipment_editor_fit_test.dart` does; the core-loop E2E follows any
+  renamed label (trap 19).
+- **Boundaries:**
+  - no Stage 6 presentation redesign;
+  - no result, Logbook or tracker work (Stage 8);
+  - no Settings redesign (P9.3), except where a gate's decision changes a setting's meaning, and then
+    only that setting's behaviour and wording;
+  - nothing from Stages 8–11;
+  - no planetarium, moving objects, camera or mount control, exposure optimisation, flat-exposure or
+    target-ADU guidance (unless separately approved), or theoretical RAW size.
+- **Verification** (`CLAUDE.md` V1–V3):
+  - research and decision Tasks: the documentation class;
+  - each implementation Task ends with **the full gate after its last code change** (each touches a
+    schema, the budget, the catalog tool or a form on the E2E and sweep paths), plus its probes:
+    migration tests (S7.1; S7.2–S7.5 if they change the schema), ADR-009's vectors (S7.2, S7.3), and
+    the catalog regeneration check (S7.4).
+- **Documentation:** each Task updates `FEATURE_STATUS.md`, ARCHITECTURE and DATA_MODEL Part B,
+  `TECH_DEBT.md`, `SCIENTIFIC_INTEGRITY.md` for any calculation or scientific claim, `DECISIONS.md`
+  for a decision, the privacy documents for anything that leaves the device, and `PROGRESS.md`.
+- **One Task per commit, then STOP** (§9.4). Never start the next Task automatically.
+
+| Task | Title | Kind | Size | Depends on | Gate | State |
+| --- | --- | --- | --- | --- | --- | --- |
+| S7.R1 | RG-11: camera classes and light-frame parameters | Research (docs) | M | — | RG-11 | Frozen; **next** |
+| S7.R2 | RG-10: calibration workflows and the parameter matrix | Research (docs) | M | RG-11 decided | RG-10 | Frozen |
+| S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | Frozen |
+| S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | Frozen |
+| S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | Frozen |
+| S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | Frozen |
+| S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | Frozen; ungated |
+| S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | Frozen; S7.D adds the decided rules |
+| S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | Frozen; S7.D adds the decided cells |
+| S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 | Frozen; the decision adds its source and rules |
+| S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 | Frozen; the decisions add their field rules |
+| S7.6 | The rig form | Implementation | S–M | S7.2 (if S7.D adds a camera class); RG-03 decided | RG-03 (the source path only) | Frozen |
+
+**Order:** S7.R1 → (RG-11 decided) → S7.R2 → (RG-10 decided) → S7.D → S7.R3 → (RG-07 decided) →
+S7.R4 → (RG-08, RG-09 decided) → S7.R5 → (RG-03 decided) → S7.1 → S7.2 → S7.3 → S7.4 → S7.5 →
+S7.6 → Stage 7 validation.
+- **S7.1 is ungated** and may run at any point, for example while the owner considers a gate. As in
+  Stage 6, when a Task comes up with its gate still open, the next ungated or decided Task runs first;
+  the others keep their order.
+- S7.R3, S7.R4 and S7.R5 depend on nothing earlier and may run in any order, one at a time (sessions
+  share the Git index).
+- **At each decision** (S7.D for RG-10 and RG-11; DECISIONS E.1 for RG-03, RG-07, RG-08 and RG-09)
+  its gated Tasks are confirmed, split or dropped, as S3.D did. Their frozen objective, boundaries and
+  invariant criteria below stand; the decision adds only the rule it decided (for example, which
+  camera class shows ISO). A decision that adds a schema change or changes the budget's inputs splits
+  its Task, so each change keeps one validation loop. No Task outside Stage 7's areas is added. A gate
+  the owner defers leaves its area as it is (manual or unknown), which the Stage exit allows.
+
+**The parameter matrix** (S7.R1 writes its light column, S7.R2 the rest; S7.D freezes it into
+ADR-020; S7.2 and S7.3 implement it exactly):
+- **Rows:** the exposure, the count, ISO, gain (and offset, if S7.R1 finds it relevant), binning, the
+  filter, the sensor temperature (not modelled today), white balance, focus, the interval, the
+  calibration policy, and any other current block field.
+- **Columns:** light, dark, flat, bias, and dark flat if S7.R2 finds it needed; each for every camera
+  class of S7.R1's decision, "unknown" included.
+- **Each light cell** uses RG-11's classes: required · optional · known automatically ·
+  context-dependent · not applicable, with its owner (the rig, the plan or the block).
+- **Each calibration cell** uses RG-10's classes:
+  - **inherited** (from the lights, the rig or the camera; a required match made explicit);
+  - **prefilled and overridable** (a proposal, not a measured fact);
+  - **independent**;
+  - **not applicable** (not shown).
+- **Every cell** also gives its evidence, its budget effect (which ADR-009 line, or none) and whether
+  a mismatch warning applies.
+- No cell is filled from this plan: "a dark needs only a count" (08 §16) is a hypothesis the research
+  tests, like every other cell.
+
+##### S7.R1 — RG-11: camera classes and light-frame parameters (research)
+- **Question:** which capture parameters matter to a light block for each supported camera class;
+  which feed a calculation and which are records only; who owns each (the rig, the plan or the block);
+  how each is labelled; and how the form can know which apply.
+- **Why:** S7.R2, S7.2 and S7.6 depend on it; 08 §15; SI-004; SCI-05.
+- **Evidence already available:** the inputs above (the block's fields; binning read by nothing; the
+  global per-frame overhead; no camera class; the metadata contract); RG-02's device classes
+  (`research/RG-02_EQUIPMENT_IDENTITY.md`); ADR-009 §4; ADR-011 §5; PD-11; SI-004;
+  `PRODUCT_DIRECTION.md` §2 (manual and semi-automated imagers: a DSLR, mirrorless or astro camera on
+  a tracker or a simple mount, or a phone on a tripod).
+- **Evidence still missing** (external; primary or technical sources):
+  - the camera classes AstroPlan serves, and which of them expose ISO, gain (and offset), binning,
+    white balance and an interval: camera makers' manuals (DSLR, mirrorless), astro-camera makers'
+    documentation, the Android camera API and phones' manual modes; hybrid cases (for example a
+    colour astro camera; a camera with more than one gain mode);
+  - **binning:** when the user controls it (in capture software for astro cameras; rarely on DSLRs
+    and phones), whether it changes the planner's pixel scale or storage, and whether any metadata
+    records it (FITS `XBINNING`, not readable yet);
+  - **ISO or gain:** one term per class; no equivalence between them is invented; ISO is never said to
+    collect more light (SI-004);
+  - **white balance:** whether it changes RAW data, the budget, or only in-camera JPEG and later
+    processing; whether it is a planning value at all;
+  - **focus:** what it would mean in a planner without hardware control (a value, a checklist step, a
+    note), and whether any planning quantity depends on it (ADR-009's refocus overhead already
+    exists). 08 §15's slider is a proposal only;
+  - **the interval:** what intervalometers and capture programs call a delay or an interval, how it
+    relates to the download time and to ADR-009's per-frame overhead, whether it belongs to the rig,
+    the plan or the block, and how it is counted once;
+  - **proposals:** which light values the app could propose from what it knows (the rig's recommended
+    maximum sub, CALC-31; the previous light block; a sample frame's exposure and ISO, which the
+    metadata contract already reads), and how a proposal is shown and confirmed.
+- **Options to evaluate, at least:**
+  - how the form learns the class: (C1) a camera class on the rig (a new rig field; unknown by
+    default; never inferred from a name); (C2) no class, and the plan's first choice (ISO or gain) is
+    proposed to its later blocks; (C3) evidence from metadata where it is certain (for example a FITS
+    file, once readable), with C1 or C2 as the fallback;
+  - binning: (B1) an optional field shown only for classes that control it; (B2) on every block, as
+    today; (B3) kept as a record only where no class controls it;
+  - white balance: (W1) not modelled; (W2) an optional record for the classes where it matters;
+  - focus: (F1) no field (ADR-009's refocus overhead stays the only focus concept); (F2) a reminder,
+    with no value; (F3) a recorded value, only if the research finds a planning use;
+  - the interval: (I1) the per-frame overhead stays the one interval concept, relabelled if needed;
+    (I2) a per-plan or per-block interval that replaces the overhead for those frames (an ADR-009 §4
+    amendment, counted once); (I3) the download time and the interval as two parts of the overhead.
+- **Output:** `research/RG-11_CAPTURE_PARAMETERS.md`:
+  - the camera-class taxonomy, with evidence for each class, and "unknown" as a class;
+  - the matrix's light column: for each parameter and class, **required · optional · known
+    automatically · context-dependent · not applicable** (the register's classes), its owner, whether
+    it feeds a calculation (which), its label and unit, and its source;
+  - the interval reconciled with ADR-009 §4, with a worked example that counts nothing twice;
+  - the options with their trade-offs (data-model cost included), a recommendation where the evidence
+    supports one, and the owner's questions.
+- **Owner decision:** yes, RG-11: C, B, W, F and I above are product choices once the facts are known.
+- **Frozen after the decision** (in ADR-020, at S7.D): the class rule; the light column; the labels;
+  the interval rule and any ADR-009 amendment.
+- **Out of scope:** tracking's ownership (RD-08 = T3 is decided; the research records it only); the
+  calibration columns (S7.R2); camera or mount control; exposure optimisation or an "optimal" ISO or
+  gain; any code.
+- **Acceptance:**
+  - every parameter (the exposure, the count, ISO, gain, binning, white balance, focus, the interval,
+    tracking) and every current block field has a row for every class;
+  - every cell cites its evidence, or says it is an owner preference or an implementation option;
+  - no ISO↔gain equivalence and no "sensitivity" wording (SI-004);
+  - the owner's questions are real product choices only;
+  - references resolve; `git diff --check`.
+
+##### S7.R2 — RG-10: calibration workflows and the parameter matrix (research)
+- **Question:** how manual and semi-automated imagers actually take darks, flats, bias frames and dark
+  flats with each camera class of RG-11's decision; which parameters must match the lights, which
+  commonly match, and which are independent; how it can be explained briefly, with tips that can be
+  hidden.
+- **Why:** S7.3; 08 §16; F-39; ADR-009 §3.
+- **Evidence already available:** the block model and ADR-009 §3's policies (in the window, outside
+  it, from a library); the dialog asks for a filter only on lights and flats; ADR-009's E3 (a phone's
+  darks in the window) and E4 (flats and bias outside it, darks from a library); RG-11's classes.
+- **Evidence still missing** (external), per workflow and class:
+  - **darks:** which settings must match the lights (the exposure, ISO or gain and offset, binning,
+    the sensor temperature) and why; uncooled cameras and phones (ambient temperature; in-camera
+    long-exposure noise reduction); whether a dark library is realistic for the class;
+  - **flats:** which settings match the lights (the optical train, focus, the filter, rotation,
+    binning, ISO or gain) and which are independent (the exposure, set by the light source); per
+    filter; no target-ADU guidance;
+  - **bias:** the shortest exposure; the matching ISO or gain, offset, binning and temperature; where
+    bias frames are unsuitable or replaced by dark flats; whether a class makes them optional or not
+    applicable (bias is never dropped without evidence or an owner decision);
+  - **dark flats:** when they are used, and what they match;
+  - sources: processing software's documentation (for example PixInsight, Siril, DeepSkyStacker),
+    camera makers' documentation and established astrophotography references, each dated.
+- **Options to evaluate, at least:** (L1) an inherited value copied when the block is created, then
+  kept; (L2) an inherited value that follows the lights (a link); (L3) a proposal each time; dark flats
+  as a frame type or not; a sensor-temperature field for cooled classes or not; for each class, bias
+  offered, optional or not applicable; the help shown or hidden by default.
+- **Output:** `research/RG-10_CALIBRATION_WORKFLOWS.md`: the matrix's dark, flat, bias (and dark flat)
+  columns; each cell's budget effect against ADR-009's lines; the mismatch warnings; candidate help
+  text; the options with trade-offs, a recommendation where the evidence supports one, and the owner's
+  questions. The matrix is proposed, not applied.
+- **Owner decision:** yes, RG-10: L, dark flats, temperature, bias per class and the help default are
+  product choices once the facts are known.
+- **Frozen after the decision** (in ADR-020, at S7.D): the calibration columns, their budget effects
+  and warnings, and the help.
+- **Out of scope:** flat-exposure or target-ADU guidance; exposure optimisation; changing ADR-009's
+  lines; any code.
+- **Acceptance:**
+  - every current block field and every RG-11 parameter has a cell for every frame type and class;
+  - every cell is one of the four classes, with its evidence;
+  - "a dark needs only a count" appears only where the evidence shows it;
+  - every inherited or prefilled value's budget effect is stated against ADR-009's lines;
+  - references resolve; `git diff --check`.
+
+##### S7.D — ADR-020: capture parameters and calibration (decision record)
+- Records the owner's RG-11 and RG-10 decisions as ADR-020 (accepted): the camera classes and how the
+  form learns them; the frozen matrix; the labels; any amendment of ADR-009 (the interval) or ADR-011
+  (a rig field), with its vectors; any new frame type.
+- Confirms, splits or drops S7.2 and S7.3 (the rule under "Order"), fills in only the decided rules,
+  and writes their decision-specific acceptance.
+- Documentation only; the documentation class.
+
+##### S7.R3 — RG-07: targets, names and search (research)
+- **Question:** how choosing a known object can never require looking RA and Dec up elsewhere: which
+  names and identifiers search finds; whether and how the catalog grows (sources, licences, size on
+  the device, the candidates' evaluation time); an offline catalog or an online name resolver; when
+  custom entry is still needed.
+- **Why:** S7.4; 08 §4, §9.
+- **Evidence already available:** the inputs above. The pinned OpenNGC release already holds more
+  common names and identifiers than the asset keeps, and every object's OpenNGC designation is in the
+  asset but not stored. Also: the search's gaps with spacing and leading zeros; the catalog's rules
+  (generated by the tool; `version` and `since`; deleted targets never come back; CC BY-SA 4.0 with
+  `OPENNGC_NOTICE.txt` and the About page); custom targets and their parsing.
+- **Evidence still missing** (external):
+  - which objects imagers plan that the catalog lacks (for example Sharpless, Caldwell, Barnard, LBN,
+    vdB or Abell planetaries), and which of them OpenNGC or another source covers;
+  - each candidate source's licence against GPL-3.0 and CC BY-SA 4.0 (with RG-12 in view), its
+    provenance, coordinate quality, update model and size;
+  - an online resolver (for example CDS Sesame or SIMBAD): its terms and reliability, what leaves the
+    device (the typed name), and the offline behaviour; it could only ever be optional;
+  - the alias rules (common names; Messier against NGC and IC; Caldwell numbers; spacing and leading
+    zeros), and suggestions without a score;
+  - custom entry: when it is still needed, and what it must ask.
+- **Options to evaluate, at least:** (T1) no new objects: search over every current object's
+  designations, all of OpenNGC's common names and identifiers for it, and normalised spellings;
+  (T2) T1 and a larger subset of the pinned OpenNGC, generated by the tool; (T3) T2 and another
+  catalog whose licence and provenance are acceptable; (T4) an optional online resolver for names in
+  no bundled catalog. Custom entry stays in every option.
+- **Output:** `research/RG-07_TARGET_CATALOG.md`: the coverage gaps; the source comparison; the alias
+  and normalisation rules as testable examples; each option's size and effect on the candidates'
+  evaluation time; a recommendation where the evidence supports one; the owner's questions.
+- **Owner decision:** yes, RG-07: the catalog's size and sources, and whether any online service is
+  used, are product and privacy choices.
+- **Frozen after the decision:** the source and the selection; the alias and normalisation rules;
+  the resolver, yes or no.
+- **Out of scope:** moving objects (ADR-010 §3); a planetarium or sky map; scraping; bundling new data
+  before the decision; any code.
+- **Acceptance:** every option names its source's licence and provenance, or is marked unverified;
+  the alias rules are testable examples (for example "M 31", "NGC 224" and "Andromeda" find M31);
+  nothing is assumed approved; references resolve; `git diff --check`.
+
+##### S7.R4 — RG-08 and RG-09: elevation, sky darkness and the map link (research)
+- **Questions:**
+  - **RG-08:** should elevation be retrieved automatically (its source, accuracy, licence and
+    privacy), made optional, or dropped from the form, given that no calculation uses it?
+  - **RG-09:** can Bortle or SQM be obtained reliably (a dataset or an API; the uncertainty of any
+    conversion)? Does SQM need to be a user field at all? Should the map link move to
+    lightpollutionmap.app?
+- **Why:** S7.5; 08 §6, §13; SCI-08, F-07; PD-05 (options C and D deferred); SI-007.
+- **Evidence already available:** the inputs above; PD-05; PD-12 (place names opt-in); the privacy
+  policy (a site's coordinates already go to Open-Meteo for its forecast); `SkyDarkness`.
+- **Evidence still missing** (external), per field:
+  - **elevation:** candidate sources, all unverified today: the device's GPS altitude (its datum, and
+    its accuracy on Android); a digital elevation model through an API (for example the elevation
+    Open-Meteo reports with a forecast, or its elevation endpoint); a bundled model. For each: the
+    licence or terms, the accuracy, what leaves the device, and the offline and failure behaviour.
+    Also whether any planned calculation would ever use elevation;
+  - **Bortle:** whether any source gives it directly, or only a modelled zenith brightness (for
+    example the 2016 world atlas of artificial sky brightness, or satellite radiance); its licence,
+    spatial resolution, epoch and update cadence, size on the device, and the uncertainty of
+    converting to Bortle (a visual, qualitative scale); direct data against a derived class;
+  - **SQM:** whether a normal user needs it; whether it is a primary input, an optional advanced field,
+    imported where reliable, or stored observational metadata only; what a measured SQM is worth to
+    experienced users;
+  - **the map link:** who runs lightpollutionmap.app, its data and terms, whether its link takes a
+    position, and what the link sends.
+- **Options to evaluate, at least:**
+  - elevation: (E1) proposed from an adopted source, with provenance, applied by the user; (E2)
+    optional and unknown by default; (E3) out of the form, with stored values kept. E1 may combine with
+    E2;
+  - Bortle and SQM: (S1) manual and optional, as today; (S2) proposed from an adopted source, with its
+    uncertainty; (S3) SQM as an optional advanced field; (S4) SQM stored and shown, but not asked;
+  - the link: (M1) lightpollutionmap.info, as today; (M2) lightpollutionmap.app; (M3) both.
+- **Output:** `research/RG-08_09_SITE_AUTOMATION.md`: for each field, one of obtainable reliably ·
+  proposable with provenance · manual and optional · unknown; the options with trade-offs; a
+  recommendation where the evidence supports one; the owner's questions.
+- **Owner decision:** yes, RG-08 and RG-09: a source that sends the position off the device, a field
+  kept or dropped, and the link are product and privacy choices.
+- **Frozen after the decision:** each field's rule and source; the link.
+- **Out of scope:** scraping; Bortle from coordinates without a sourced model; a Bortle↔SQM
+  conversion without a cited source; bundling or calling anything before the decision; the
+  sky-darkness screen's presentation (Stage 9); any code.
+- **Acceptance:** each field has one class with evidence; every source's licence, privacy and failure
+  behaviour is stated or marked unverified; references resolve; `git diff --check`.
+
+##### S7.R5 — RG-03: equipment specification sources (research)
+- **Question:** RG-03's: is a sourced catalog of equipment specifications needed, and which source, if
+  any, is acceptable under the verified-seed policy? S3.R2's questions stand (Stage 3, "S3.R2").
+- **Why:** 08 §11; UX-22; the owner's Stage 7 prompt asks for this research. RG-03 was deferred at
+  S3.D (D2): this research adopts nothing, and adoption is the owner's decision.
+- **Evidence already available:** RG-02's findings (what metadata gives and cannot give; phone modules
+  that share Make and Model; a camera body against its sensor modules); ADR-018 (what an import
+  proposes, its provenance, the conflict rules); the seed policy (TASK 8.5).
+- **Evidence still missing** (external), separately for official APIs, structured catalogues,
+  manufacturers' machine-readable data, third-party datasets (for example lensfun, or the camera lists
+  of raw-processing projects), metadata, and proposals the user confirms: the provenance, the licence
+  against GPL-3.0, the coverage (astro cameras, not only consumer cameras), stable identifiers, the
+  update model, the size offline, ambiguity (a body against its sensor modules), and whether a value
+  is authoritative or only a proposal.
+- **Options to evaluate, at least:** (Q1) no source: the user and metadata only; (Q2) more curated,
+  verified seeds, each citing a primary source; (Q3) a bundled open dataset, as proposals; (Q4) an
+  online source, as proposals.
+- **Output:** `research/RG-03_EQUIPMENT_SPECS.md` (the file S3.R2 named): the options, with "no
+  source" a real option; a recommendation where the evidence supports one; the owner's questions.
+- **Owner decision:** yes, RG-03 (its deferral at S3.D was the owner's).
+- **Frozen after the decision:** the source, if any, and how its values appear (proposals, their
+  provenance, the conflict rules of ADR-018 §6).
+- **Out of scope:** scraping product pages or links (rejected); bundling data before the decision; any
+  code.
+- **Acceptance:** each source class is evaluated or marked unverified; references resolve;
+  `git diff --check`.
+
+##### S7.1 — The plan's tracking (RD-08 = T3)
+- **Objective:** a plan can override its rig's tracking for its night; every calculation uses the
+  effective value; the saved plan records the value and where it came from.
+- **Why:** RD-08 = T3 (DECISIONS E.1, "RD-08 decided"); 08 §21. S6.9 shows the rig's default until
+  this Task.
+- **Scope:**
+  - **the field:** one nullable plan field, `session_logs.tracking_override` (schema v19). Null means
+    the rig's default; otherwise untracked, tracked or guided. The migration only adds the column, so
+    every existing plan reads as the rig's default (true: no override existed before);
+  - **the effective value:** the override, else the rig's `trackingType`, else unknown (no rig). One
+    pure domain function computes it; the plan's ViewModel exposes it, and `CapabilityCalculator`
+    receives it instead of reading `rig.trackingType` itself. It joins the capability's memoization
+    key (trap 16);
+  - **the planner's control,** "Tracking for this plan": the rig's default first (with its value),
+    then the three known types. It sits with the rig in the planner, and S6.9's tracking message leads
+    to it. Choosing is a plan edit (autosaved; a saved plan becomes Saved · changed); it never writes
+    to the rig;
+  - **the snapshot:** keys added to the existing JSON (`v` 1), the effective value and its source
+    (`rig` or `plan`); `rig.tracking` keeps the rig's default. An older snapshot without them reads as
+    the rig's default;
+  - **the lifecycle:** Copy to another night and Track live's copy carry the override, as they carry
+    the plan's other fields; New plan starts without one; Open reads it; Discard on a Saved · changed
+    plan restores it from the snapshot (`SavedPlanReader`; S4-DEF-04 = R); a rig change keeps it (it
+    belongs to the plan), and the control shows the new rig's default;
+  - **export and backup:** the manifest's session gains an optional `tracking_override` (additive;
+    `EXPORT_MANIFEST.md` updated; `manifest_version` unchanged unless the codec shows an
+    incompatibility). A v18 backup restores through the migration;
+  - **the rig editor:** its field reads as the default for plans. The example rig stays unknown;
+    nothing sets or infers it.
+- **Implementation choices recorded here** (within T3; the owner may change them): the override's
+  values are the three known types (unknown comes only from the default); New starts without an
+  override; Copy carries it; a rig change keeps it.
+- **Out of scope:** tracking in Settings (never, §8); the Library's presentation (P9.1, P9.3); NPF or
+  CALC-31 changes; tracking per block; the tracker.
+- **Acceptance:**
+  - the migration: schema equality v18 → v19, and data preservation (every existing plan and snapshot
+    unchanged; the override null);
+  - calculations use the effective value (domain and ViewModel tests): a guided rig overridden to
+    untracked gets NPF guidance and the block warning; an untracked rig overridden to tracked or guided
+    gets no NPF guidance, and its warning follows only the rig's maximum exposure, if set (ADR-011
+    §5); an unknown default without an override keeps PD-11's "if untracked", shown as a neutral
+    missing input (S6.9);
+  - the override never changes the rig's row (real SQLite); the example rig stays unknown;
+  - Save records the effective value and its source; Discard on Saved · changed restores the override
+    from the snapshot; Copy carries it; New starts without it; an older snapshot reads as the rig's
+    default;
+  - a later rig edit never changes a saved snapshot's tracking (ADR-019 §3.1);
+  - the export round-trips with and without the key; S6.9's tests pass unchanged, or are updated
+    deliberately with the reason in the commit;
+  - the control in the sweep at 200 % text; its message never relies on colour alone;
+  - no ViewModel over the cap (split first if needed);
+  - the full gate; DATA_MODEL and ARCHITECTURE Part B, `DECISIONS.md` (RD-08 built; ADR-011 §5's
+    pointer), `EXPORT_MANIFEST.md`, `FEATURE_STATUS.md`, `SCIENTIFIC_INTEGRITY.md` (CALC-31's input).
+
+##### S7.2 — Light-block parameters (gated on RG-11; completed at S7.D)
+- **Objective:** a light block asks only for what applies to its camera and is actionable, and every
+  value it keeps means one thing.
+- **Scope:** the block editor's light fields follow ADR-020's matrix:
+  - ISO or gain by the decided class rule (one, both, or neither), with an unknown class neutral;
+  - binning, white balance, focus and the interval as decided (shown, optional, proposed, or not
+    applicable);
+  - proposals as decided, shown as proposals;
+  - the decided labels.
+
+  If the decision adds a camera class to the rig or moves the interval, S7.D splits this Task (the
+  rule under "Order").
+- **Out of scope:** calibration blocks (S7.3); the rig form's layout (S7.6); Settings' layout (P9.3).
+- **Acceptance** (S7.D adds only the decided rules):
+  - applicability by class: a widget test for each decided class and for "unknown", at 200 % text;
+  - a stored value that a class no longer shows is kept (never deleted or rewritten), stays reachable,
+    and is still exported and snapshotted;
+  - no field that no decision approved; no ISO↔gain conversion; SI-004's wording;
+  - a proposal is shown as a proposal, and stored only when the user saves the block;
+  - ADR-009's vectors E1–E7 unchanged; if an ADR-009 amendment is decided, its new vectors pass, and
+    old vectors change only as the amendment states;
+  - the E2E, the sweep, the full gate.
+
+##### S7.3 — Calibration blocks: the matrix and the budget (gated on RG-10; completed at S7.D)
+- **Objective:** a dark, flat or bias (or dark flat) block asks only for what is independent, shows
+  what it inherits and proposes what it can, as ADR-020's matrix says; the budget receives the
+  resolved values.
+- **Scope:**
+  - **inherited** values are resolved in the domain (from the plan's lights, the rig or the camera),
+    shown with their origin, and never typed; the decision says whether they are copied at creation or
+    follow the lights;
+  - **prefilled and overridable** values are shown as proposals, and are the user's once saved;
+  - **independent** values are asked; **not applicable** ones are not shown (stored values kept);
+  - a mismatch that would break calibration stays visible, in words, not colour alone;
+  - short help for each frame type, one tap away and dismissible; hiding it never hides a warning or a
+    validation;
+  - `CaptureBudgetCalculator` receives the resolved blocks; no arithmetic in the form; ADR-009 §3's
+    policies unchanged.
+- **Out of scope:** flat-exposure or target-ADU guidance; scheduling calibration into twilight
+  (ADR-009 L5); managing a calibration library.
+- **Acceptance** (S7.D adds the decided cells):
+  - the matrix, cell for cell (a table-driven test for each frame type and class);
+  - ADR-009's vectors E1–E7 unchanged; new vectors for the inherited and prefilled cases, computed
+    independently of the implementation;
+  - calibration time never counts as integration; outside-window calibration never enters the window
+    load; library blocks take no time;
+  - existing plans and snapshots unchanged (a migration test if the schema changes);
+  - a light edit updates what follows it, and nothing the user entered as independent;
+  - the sweep, the E2E, the full gate.
+
+##### S7.4 — Targets: names, aliases and search (gated on RG-07)
+- **Objective:** choosing a known object never requires looking up RA and Dec elsewhere.
+- **Scope:**
+  - search finds an object by its designation in any common spelling, and by its common names and the
+    decided aliases;
+  - a catalog expansion, if decided, is generated by `tool/build_catalog.dart` from the decided source
+    only;
+  - custom entry stays for objects in no approved source, with its parsing;
+  - an online resolver only if the owner approves one: optional, never required, and the privacy
+    documents in the same change.
+- **Out of scope:** moving objects; a sky map; the candidates' order (RD-10); the Library's
+  presentation (P9.1).
+- **Acceptance** (the RG-07 decision adds its source and alias rules):
+  - the research's alias examples, as tests;
+  - a regenerated catalog bumps `version`, marks new entries' `since`, never brings back a deleted
+    target, keeps `OPENNGC_NOTICE.txt` and the About page in step, and is produced only by the tool;
+  - `catalogId` never changes on an edit; custom targets and plans' references unchanged (a migration
+    test if the schema changes);
+  - search works offline;
+  - the candidates list keeps its semantics; its host run time is recorded before and after (Stage 10
+    measures the device);
+  - the sweep, the E2E, the full gate.
+
+##### S7.5 — The site form (gated on RG-08 and RG-09; UX-21)
+- **Objective:** the site form asks only for what the user can reasonably know or the app cannot
+  obtain, and loses nothing typed.
+- **Scope:**
+  - coordinates only on the user's action: the editor gains "Use current position" beside "Pick on
+    map", with the existing permission and transient rules;
+  - the name from the opt-in lookup only, and editable;
+  - elevation per RG-08: if optional or out of the form, nullable, with a migration that keeps every
+    stored value exactly; if automatic, shown with its source and date, applied only by the user, and
+    stored with its provenance;
+  - Bortle and SQM per RG-09: manual or unknown unless a source is adopted; no conversion without a
+    cited source; notes kept;
+  - the map link per RG-09;
+  - leaving with unsaved changes asks (UX-21; S5.8's pattern).
+- **Out of scope:** the sky-darkness screen's presentation (Stage 9); place search (deferred); a
+  horizon profile.
+- **Acceptance** (RG-08 and RG-09 add their rules):
+  - unknown elevation is never 0 m or a default; no migration or lookup changes a stored value;
+  - an automatic value is proposed with its source, never saved without the user, and the form saves
+    offline without it;
+  - GPS only on the user's tap; a map pick or GPS fix never enters a saved site without Save (trap 2);
+  - Bortle is never inferred from coordinates without an adopted source; unknown stays unknown;
+  - back with changes asks; back without changes leaves;
+  - the privacy and compliance documents in the same commit for anything that leaves the device;
+  - a new plan snapshot records an unknown elevation as null; older snapshots unchanged;
+  - the sweep, the E2E ('Add site' and 'Save site' still work), the full gate.
+
+##### S7.6 — The rig form (UX-22)
+- **Objective:** the rig form asks once for each value, keeps rare values one tap away, and uses every
+  approved source before the user types.
+- **Scope:**
+  - the pixel size asked once (UX-22);
+  - rotation, the maximum exposure and the RAW size one tap away, with their meaning unchanged (rotation
+    stays, although nothing reads it);
+  - the camera class, if S7.D adds it, never inferred from a name;
+  - the decided specification source, if RG-03 adopts one, as proposals with provenance under
+    ADR-018 §6's conflict rules (the user confirms; a `verified` value is never replaced by default);
+  - the dialog's primary Save and `AppWords` labels; the retired "Equipment profile" title removed
+    (`DESIGN_SYSTEM.md` §9.3).
+- **Out of scope:** equipment composition (ADR-011 §2); a second import path; nullable required specs
+  (ADR-018 §4; option B rejected); scraping.
+- **Acceptance:**
+  - every value editable before stays editable; nothing stored is lost or reinterpreted;
+  - `EquipmentDraft`'s and the import review's tests pass unchanged, or are updated deliberately;
+  - the example rig's values and provenance unchanged;
+  - `equipment_editor_fit_test.dart` and the sweep at 200 % text;
+  - no recomputation per keystroke beyond today's;
+  - the full gate.
+
+##### Stage 7 validation
+A fresh-session, independent validation (V8), by `prompts/INDEPENDENT_STAGE_VALIDATION.md`. **Its
+frozen surface (V4):**
+- the acceptance criteria of S7.1–S7.6, as completed by S7.D and the gates' decisions;
+- the rules for every Stage 7 Task above;
+- the owner's decisions on RG-03 and RG-07 to RG-11, and RD-08 = T3;
+- the invariants: ADR-009, ADR-017, ADR-018, ADR-019 §3.1 and `CLAUDE.md`'s traps;
+- the Stage Exit: each area implemented after its gate, or explicitly deferred by the owner.
+
+The research and decision Tasks are judged by the bounded rule for analysis work (DECISIONS E.1,
+"Bounded validation for analysis and decision Stages").
+
 ### Stage 8 — Sessions / Execution / Actuals / Logbook
 
 - **Purpose:** refine the supporting post-plan workflows once the planning experience is stable.
@@ -4281,13 +4900,13 @@ provisional in the same way.*
 | UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8; **S4.T:** decided (ADR-019 §3) → P6.1 |
 | UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4; **2026-09-27:** closes when P8.4 retires the tracker |
 | UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9; **S4.T:** decided (ADR-019 §8) → P9.1 |
-| UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work) |
+| UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work); **decided T3**; S6.9 (unknown tracking as a neutral missing input); **S7.1** (the plan's override) |
 | UX-17 Moon wording | Partially confirmed | Stage 6 |
 | UX-18 terminology | Confirmed | C4 (IA-independent part); RD-14 (Stage 4); Stage 5 shared vocabulary (**S5.3**, with the retired-terms baseline) |
 | UX-19 formats | Confirmed | A5, C2; the chart axis in Stage 6 |
-| UX-21 site editor | Elevation documented; discard requires verification | Stage 7 (RG-08); Stage 5 form patterns (**S5.2**, styling only) |
-| UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import) |
-| UX-23 typing | Documented | Stage 7 |
+| UX-21 site editor | Elevation documented; discard requires verification | Stage 7 (RG-08); Stage 5 form patterns (**S5.2**, styling only); **2026-09-28:** the discard confirmed (no `PopScope`) → S7.R4, **S7.5** |
+| UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import); **2026-09-28:** the duplicate pixel field and the unused rotation confirmed → **S7.6** |
+| UX-23 typing | Documented | Stage 7; **2026-09-28:** fewer typed fields only through decided inheritance and proposals (S7.2, S7.3) |
 | UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
 | UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2 |
 | UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4 |
@@ -4335,15 +4954,15 @@ any implementation Task is created.
 | --- | --- | --- | --- | --- |
 | RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
 | RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Decided 2026-09-26 (S3.D, ADR-018)** after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
-| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)** |
+| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)**. *2026-09-28 (Stage 7 planning):* researched again as **S7.R5**, at the owner's request in the Stage 7 prompt (`prompts/STAGE_7_PLANNING.md` §3); the research adopts nothing, and adoption stays the owner's decision; it blocks only S7.6's source path |
 | RG-04 | **DECIDED 2026-09-27 (S4.R2; DECISIONS E.1): B, the Logbook first and the tracker optional; G2 results after the session.** *Its optional tracker is superseded (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"): the tracker leaves the target product, and P8.4 retires it.* What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): Tonight plan-first with a site · night context line; Night & Moon and Weather detail screens; no new tab.** How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): progressive disclosure (one tap away, factual summaries); no modes, no density preference for now.** Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |
-| RG-07 | How should the target catalog expand and search improve: sources and licences, common names, cross-identifiers, size on the device, suggestions; an offline catalog or an online name resolver? | 08 §4, §9 | 7 | Offline-first; CC BY-SA handling; the catalog is generated by `tool/build_catalog.dart` and versioned, never hand-edited, and deleted targets must not come back; no scraping. *2026-09-27:* the goal is that choosing a known object never requires looking up RA and Dec elsewhere; custom entry stays where it serves a real case; a large expansion is not assumed approved; no moving objects (ADR-010 §3); no unsourced object data |
-| RG-08 | Should elevation be retrieved automatically (source, accuracy, licence, privacy), made optional, or dropped, given that no calculation uses it? | 08 §6; SCI-08; UX-21; F-07 | 7 | Unknown is not 0; privacy (a position leaves the device). *2026-09-27:* no automatic source is claimed before one is found reliable; no prominence while no calculation uses elevation |
-| RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result) |
-| RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning |
-| RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented. *2026-09-27:* each light input classed (required · optional · known automatically · context-dependent · not applicable); focus's meaning settled before any control is chosen (a slider is only a proposal); the interval reconciled with ADR-009's per-frame overhead, never counted twice; FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION kept apart |
+| RG-07 | How should the target catalog expand and search improve: sources and licences, common names, cross-identifiers, size on the device, suggestions; an offline catalog or an online name resolver? | 08 §4, §9 | 7 | Offline-first; CC BY-SA handling; the catalog is generated by `tool/build_catalog.dart` and versioned, never hand-edited, and deleted targets must not come back; no scraping. *2026-09-27:* the goal is that choosing a known object never requires looking up RA and Dec elsewhere; custom entry stays where it serves a real case; a large expansion is not assumed approved; no moving objects (ADR-010 §3); no unsourced object data. *2026-09-28 (Stage 7 planning):* researched by **S7.R3**; blocks S7.4 |
+| RG-08 | Should elevation be retrieved automatically (source, accuracy, licence, privacy), made optional, or dropped, given that no calculation uses it? | 08 §6; SCI-08; UX-21; F-07 | 7 | Unknown is not 0; privacy (a position leaves the device). *2026-09-27:* no automatic source is claimed before one is found reliable; no prominence while no calculation uses elevation. *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-09); blocks S7.5's elevation |
+| RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result). *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-08); blocks S7.5's sky darkness and link |
+| RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3 |
+| RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented. *2026-09-27:* each light input classed (required · optional · known automatically · context-dependent · not applicable); focus's meaning settled before any control is chosen (a slider is only a proposal); the interval reconciled with ADR-009's per-frame overhead, never counted twice; FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION kept apart. *2026-09-28 (Stage 7 planning):* researched by **S7.R1** (next); recorded in ADR-020 (S7.D); blocks S7.R2 and S7.2 |
 | RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
 | RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |
 | RG-14 | **DECIDED 2026-09-26 (DECISIONS E.1):** none in Stage 2; per-format adapters afterwards, only with samples; `ExifInterface` and LibRaw rejected. Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
@@ -4361,7 +4980,7 @@ any implementation Task is created.
 | RD-05 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): L1 (Draft internal; Not saved / Saved / Saved · changed; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), U1 (Save · Discard · Cancel; Discard deletes; V3 and W1 count as unsaved).** Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4. **Input from Stage 1 validation (V3, owner, 2026-09-25):** a site change on a saved plan turns the stored session into a draft ("Planned, unsaved changes", still listed) but does not count as unsaved while the app runs, so New does not ask; after a restart it does. Decide whether a site change edits a saved plan | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
 | RD-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): answer first, then decision order (amends ADR-015 §2); the budget breakdown, √N help, assumptions, weather variables and rig rows one tap away (ADR-009 §2's "own line" within the budget details).** May the planner's section order change (ADR-015 §2)? May assumptions, the √N help and heuristic notes be one tap away instead of always expanded? | UX-02, UX-05, UX-06; 08 §16–§17 prefer collapsible, on-tap explanations | 4 | Stage 6 |
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
-| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)**. **Decided 2026-09-28: T3** (DECISIONS E.1, "RD-08 decided"); the seeded rig stays `unknown` | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
+| RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)**. **Decided 2026-09-28: T3** (DECISIONS E.1, "RD-08 decided"); the seeded rig stays `unknown` | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings. *2026-09-28 (Stage 7 planning):* built by **S7.1** (ungated; the plan field, the effective value, the planner's control, the snapshot keys, the export) |
 | RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. **Decided 2026-09-27 (owner): M + S1** (DECISIONS E.1, "RD-09 decided") | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups. **Decided 2026-09-28: O1** (DECISIONS E.1) | 6 | S6.14 |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner. **Decided 2026-09-28: S9** (DECISIONS E.1); no S6.15 | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |

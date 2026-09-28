@@ -7,8 +7,275 @@
 > reusable evidence and next action are in `PROGRESS.md`. **Exception, 2026-09-27 (Stage 6
 > planning):** the Stage 5, governance-correction and amendment entries were moved here verbatim,
 > because some of their facts are recorded nowhere else.
+> **Exception, 2026-09-28 (Stage 7 planning):** Stage 6's entries were moved here verbatim in the
+> same way.
 
-## Earlier "Current state" entries (newest first, up to Stage 6 planning)
+## Earlier "Current state" entries (newest first, up to Stage 7 planning)
+
+*Moved verbatim from `PROGRESS.md` on 2026-09-28 at Stage 7 planning: Stage 6's entries, from its
+planning to its closure, and the "Before this" pointer that followed them. The Stage 6 planning
+batch follows them.*
+
+**Stage 6 closed, 2026-09-28** ([report](STAGE_6_VALIDATION.md), "Revalidation of S6V-01 /
+TD-082 (V5)"): the V5 revalidation passed at `da4c53d`. Run in the chat that wrote S6.V1, at the
+owner's request, so **not independent** (disclosed). Scope: F1, S6.8's badge rule, S6.9's Delete +
+Undo, stale recovery and S6.V1's regression surface; every other PASS stands (V6). Evidence: the
+full gate and the recorded probe reused (V3); the five committed regression tests; four fresh
+adversarial probes, all PASS (a target change keeps the badge; a reorder, a second delete and Copy
+behave; temporary, not committed). No blocker; one observation (after a reorder the block returns
+at its old index, as S6.9 specifies). S6.E stays **UNVERIFIED — no independent participant
+available**, the gap the owner accepted. Verification: documentation class. The Stage 6 entries
+below stay here until Stage 7 planning moves them verbatim to `PROGRESS_HISTORY.md`, as Stage 6
+planning did for Stage 5's.
+
+**S6.V1 done, 2026-09-28** (`da4c53d`; S6V-01 / TD-082 resolved; the owner's S6.V1 prompt; the plan's
+"Stage 6 validation" table): a delete's Undo owns only the deleted block.
+- **Root cause:** `_BlockListState._delete` kept the example badge as it was at the delete, and
+  `restoreCaptureBlock` wrote it back unconditionally. Add shows no message of its own, so the
+  delete's Undo stays up after it, and tapping it relabelled the edited plan as the untouched
+  example. A plan replaced meanwhile (New, Copy, Open, Track live) would also have received the
+  old block.
+- **Fix:** Delete runs through `deleteBlockWithUndo` (`widgets/capture_plan/blocks_undo.dart`),
+  which records the delete as S6.16's `BlocksEdit`, with the session read after its autosave.
+  `SessionPlanViewModel.restoreCaptureBlock(index, block, deletion:)` puts the identical block
+  back at its index and keeps every edit made since. It restores the badge only while
+  `BlocksEdit.isCurrent` holds (nothing changed since the delete). When `BlocksEdit.inPlan` fails
+  (the plan was replaced), it is refused with S6.16's "Not undone" message. No history, no schema
+  or persistence change. The removal is still immediate; its Undo message now appears once the
+  delete's autosave has finished, as S6.16's messages do.
+- **Tests:** five in `capture_blocks_undo_test.dart` ("Delete with Undo owns only the deleted
+  block (TD-082)"): the exact sequence; a block edited since; Undo at once restores the example
+  with its badge; a replaced plan; a saved plan's snapshot unchanged. The first, second and fourth
+  fail on the old code. The recorded probe (`evidence/S6V_01_DELETE_UNDO_PROBE.patch`, applied
+  temporarily, then removed) passes. S6.9's and S6.16's tests are unchanged and pass.
+- **Verification:** class shared behaviour (a ViewModel and a shared helper). The full gate ran
+  once, after the last code change, because the Stage Exit's gate must hold on the final inputs:
+  PASS (below). Every acceptance criterion of the prompt checked. Stage 6 is **not** closed.
+
+**Stage 6 validation, 2026-09-28: BLOCKED** ([report](STAGE_6_VALIDATION.md)). S6V-01 /
+TD-082 reproduced: Delete from the example → Add a block → old Undo preserves the new block
+but falsely restores the example badge. S6.8's badge rule and stale recovery fail; the other
+technical criteria pass. S6.16's full gate reused under V3 (no changed inputs); one fresh focused
+probe fails on the uncovered sequence. No code or existing tests changed. The past Capture ends
+observation agrees with the selected whole-night contract (classification A, report C1).
+S6.E is **UNVERIFIED — no independent participant available**, explicitly accepted by the owner;
+that gap does not block closure. Stage 7 remains unstarted.
+
+**S6.E device refreshed, 2026-09-28, 22:52–22:55** (documentation only; details in
+`evidence/STAGE_6_FIVE_SECOND_TEST.md`): the separate `.s2check` app is now a debug build of
+`d7e1477` (S6.16), built in a detached worktree with the local application-id suffix (reverted,
+never committed) and installed as an update. The owner's app was not touched (last update 22:44:13
+before and after; that update came from an Android Studio `flutter run` session, not this setup). A
+new saved test plan (Test site, M31, the example rig and plan, night of Mon, Sep 28) reads "Fits: 1 h
+48 min needed of 8 h 35 min usable"; the owner's review plan stays in Sessions. Both test screens
+render; no device defect prevents the test. TD-080's two target actions are approved by the owner as
+built. The five questions still need an independent participant.
+
+**S6.16 done, 2026-09-28** (the owner's corrective pass; DECISIONS E.1, "Stage 6 corrective pass
+decided"): TD-075–TD-080 resolved; ADR-019 §6 amended and built (status → site and night → target →
+rig → capture plan → "Tonight for this target" → conditions); the core screens' finish (Tonight's
+page title, context card, "Your plan" heading, Open planner always primary, the target rows; the
+planner's status card and section headings); Undo for Fill/Trim, a saved block edit and the example
+plan (no global undo). TD-081 recorded (messages slide even with reduced motion; not fixed).
+The `.s2check` build was refreshed from S6.16's commit afterwards (above). Verification: the full gate
+after the last code change, PASS (below); every acceptance criterion checked.
+
+**Owner decisions, 2026-09-28 (in the session prompt):** the corrective pass above, the planner's
+order (ADR-019 §6 amended), the visual finish of Tonight and the planner in Stage 6 (Stage 9 keeps the
+secondary screens), TD-079 as bounded recovery, TD-080's wording, and the five-second test's rule
+(an independent participant, or UNVERIFIED and recorded by the validation; never the owner's review
+or an agent). DECISIONS E.1, "Stage 6 corrective pass decided".
+
+**Owner manual UX review, 2026-09-28** (HUMAN / OWNER MANUAL UX REVIEW, **not** a five-second
+result; `evidence/STAGE_6_FIVE_SECOND_TEST.md`): 22 observations on the `.s2check` app, each
+classified against this plan. No regression. **Current-stage issues** (small, Stage 6's own):
+TD-075 (the status's reason vs a missing-input headline), TD-076 (the stacking-gain graph does not
+label the planned point), TD-077 ("Your plan" heading in the button text role), TD-078 (Night &
+Moon repeats its summary). **New bounded follow-ups:** TD-079 (no way back from Fill/Trim, a saved
+block edit, the example plan), TD-080 (Tonight's two target actions look alike). **Owner
+decisions raised:** the planner's order (would amend ADR-019 §6); who owns the visual finish of
+Tonight and the planner. **Owned later, as planned:** Stage 7 (binning, ISO/gain, calibration
+frames: RG-10, RG-11; elevation, Bortle, SQM: RG-08, RG-09), Stage 8 (results and the export action:
+P8.1, P8.2, P8.7), Stage 9 (detail screens' presentation, typography consistency, Tonight's rows,
+Settings: P9.3). **The five-second test stays UNVERIFIED.** Verification: documentation class.
+
+**S6.E device first set up, 2026-09-28** (superseded by the refresh above): a `.s2check` build of
+`f19aef7`'s code, used by the owner's review. Found while setting up: TD-075 (since resolved by
+S6.16).
+
+**S6.E step 1 done, 2026-09-28** (S4V-02 corrected; documentation only):
+`research/S4.R1_FLOW_INVENTORY.md` §7's device rules now say that no test only looks (the plan
+autosaves; Save plan and Track live store records), how to run Test A on the owner's app without
+losing anything (Save plan, then ⋮ → New plan), and that Tests B and C belong on `.s2check`; Tests A–C
+follow the current app (an empty new plan, Save plan and Track live in the planner, the timeline).
+`evidence/STAGE_6_FIVE_SECOND_TEST.md` is prepared for the answers, not yet run. Verification: the
+documentation class (references resolve; `git diff --check`).
+
+**S6.14 done, 2026-09-28** (RD-10 = O1; UX-29): "What can I image tonight?" orders by usable time,
+then frame fill (unknown last), then the name; the header names the order. Verification: the
+Task's class, localized (targeted and candidates-screen tests, analyze, format, encoding), PASS;
+every acceptance criterion checked.
+
+**RD-10 and RD-11 decided, 2026-09-28 (the owner, in chat):** O1 (candidates by usable time, then
+frame fill, then the name; the header names the order) and S9 (the Moon and cloud gate controls in
+Stage 9's Settings, with RG-13; TD-050 stays open; S6.15 is not built). DECISIONS E.1, "RD-10 and
+RD-11 decided".
+
+**S6.13 done, 2026-09-28** (P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054 resolved; TD-073's site
+prompt decided; DEV-P9 resolved): Tonight leads with site ▾ · night ▾ (the night picker changes the
+plan's night), the run card, Your plan with the planner's verdict, then the Night, Moon and Weather
+rows and the secondary actions; no Start; the Dark row at the user's limit; the Moon row says what
+the Moon does while it is dark (CALC-43). No compact timeline (recorded why). Verification: the full
+gate after the last code change, PASS (below); every acceptance criterion checked.
+
+**S6.12 done, 2026-09-28** (P6.11; UX-08): the altitude chart is evolved into the night and
+opportunity timeline over one mapping: seamless bands with drawn edges (field mode), the windows,
+the fit's end, whole-hour times in the device's 12/24-hour format, labels outside the plot at any
+text size, a fuller text alternative, and a compact density for Tonight to consider. The inventory
+is in ARCHITECTURE B4. Verification: the full gate after the last code change, PASS (below); every
+acceptance criterion checked.
+
+**S6.11 done, 2026-09-28** (P6.10; CALC-42): each light group has a compact graph of its relative
+stacking gain from one frame to twice the planned count, the planned count marked; the figure and
+the label stay (SI-003); a text alternative gives each group's value; the points come from the
+domain. Verification: the full gate after the last code change, PASS (below); every acceptance
+criterion checked.
+
+**S6.10 done, 2026-09-28** (P6.9; 08 §17): Budget details' summary says "Time needed · Total time";
+each row says what of it fits tonight, only from the fit's own outputs (TD-074 records what the fit
+cannot answer); storage says what it rests on, or why it is unknown and how to supply it (the trace
+re-verified: an unknown input, no defect); the status and the budget summary are briefly
+highlighted when an edit changes them. No budget visual. Verification: the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
+
+**S6.9 done, 2026-09-28** (P6.8; UX-09, UX-15 (1); 08 §14; RD-09; RD-08 = T3): each capture block's
+row says what will be captured ("Ha · 60 s × 100 · 1 h 40 min"); one heading; Delete with Undo
+that restores the identical block; a known tracking's exceedance keeps its warning and names the
+tracking, while unknown tracking is a neutral missing input with a way to set it; Save is the
+dialog's primary button; a changed row is briefly highlighted. The tracking used is the rig's
+default until Stage 7 adds the plan's override. Verification: the full gate after the last code
+change, PASS (below); every acceptance criterion checked.
+
+**RD-08 decided, 2026-09-28 (the owner, in chat): T3.** Tracking is the rig's default with a
+per-plan override; the plan changes the effective value without changing the rig; the snapshot keeps
+the effective value; Unknown stays possible; the example rig's Unknown is never made a fact
+(DECISIONS E.1, "RD-08 decided"; pointer under ADR-011 §5). Checked against the model first: the
+rig's default and the snapshot's `tracking` exist; only the plan's override needs a new nullable
+field, which Stage 7 builds with the planner's control. It unblocks S6.9, which shows the effective
+tracking and moves nothing.
+
+**S6.8 done, 2026-09-28** (P6.2, P6.1's New plan; RD-04; UX-24): nothing the user did not choose
+looks chosen. A fresh install has no target, no rig and an empty capture plan with "Start from the
+example plan"; New plan keeps the site and rig and asks for a target; a stored choice is still
+restored; the shipped rig is labelled as an example where it is listed and chosen; the welcome page
+marks nothing as done that the user did not do. Tests that relied on the old defaults choose their
+plan explicitly (`PlannerHarness.choosePlan()`); the E2E chooses through the new path. **For the
+owner:** "Example rig" is new wording beside RD-04's "Start from the example plan"; both are kept
+out of `AppWords` (`DESIGN_SYSTEM.md` §7). Verification: the full gate after the last code change,
+PASS (below); every acceptance criterion checked.
+
+**S6.7 done, 2026-09-28** (P6.4; UX-05; ADR-019 §7): technical depth is one tap away behind
+factual summaries, each section's state remembered: Budget details, the √N explanation,
+Assumptions, the rig's Specifications and Sky darkness. The status, storage, the √N values, the
+weather row, the capability warnings and every unknown stay visible; the status now shows the
+integration in every state; the Conditions section names its zone once. The widened sweep (every
+section open) found the Bortle badge failing tap-target and contrast checks, fixed here (a colour
+swatch beside readable text, 48 dp). Verification: the full gate after the last code change, PASS
+(below); every acceptance criterion checked.
+
+**S6.6 done, 2026-09-28** (P6.3; UX-01 to UX-03, UX-07, UX-15 (3)): the planner answers first:
+the status (verdict with time needed and usable time, reason, capture end, integration, fill or
+trim), the context line (site ▾ · night ▾), then the target, the capture plan, the conditions and
+the rig. No empty state: a missing site, target or rig is a neutral status with a way to choose.
+**For the owner:** "Needs a site" and "Needs a rig" follow the glossary's "Needs a …" pattern but
+are kept out of `AppWords` until you confirm them (`DESIGN_SYSTEM.md` §7). Verification: the full
+gate after the last code change, PASS (below); every acceptance criterion checked.
+
+**S6.5 done, 2026-09-28** (P6.5; UX-06, UX-10; TD-051 resolved; CALC-41): two detail screens above
+the tabs, Night & Moon (`/night`: the dark span at the user's limit, the twilight names, the Moon,
+the zone once) and Weather (`/weather`: the whole forecast, nothing lost), both on `DetailScaffold`
+and in the sweep. The planner shows one factual row for each and keeps sky darkness; Tonight's
+rows open the details. `tonightCandidates()` moved into `CandidatesViewModel` to keep
+`NightConditionsViewModel` under the cap. Verification: the full gate after the last code change,
+PASS (below); every acceptance criterion checked.
+
+**S6.3 done, 2026-09-28** (P6.1's second half; U1, W1, V3, UX-12; S4-DEF-04 = R): leaving a plan
+with unsaved changes asks Save · Discard · Cancel at New plan, Copy, Tonight's New and Open. Discard
+deletes a never-saved plan and reverts a Saved · changed one to its snapshot (unchanged; nothing
+deleted; refused with a message when the snapshot cannot be restored). An untouched never-saved draft
+is deleted when replaced; a copy counts as unsaved; a site change on a saved plan is an edit. The
+S1.6 guard is gone. Tests: 48 new or mapped (reader, repository, `CurrentSession`, the UI matrix);
+four S6.2 tests changed deliberately (see the plan). Verification: the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
+
+**S4-DEF-04 decided, 2026-09-28 (the owner, in chat): R.** Discard on a Saved · changed plan reverts it
+to its saved snapshot; the snapshot is unchanged and nothing is deleted (DECISIONS E.1). It unblocks
+S6.3.
+
+**S6.4 done, 2026-09-28** (P6.7; TD-057 resolved): at the rollover (`NightClock` →
+`PlanLifecycleViewModel.followNight`, every minute and on resume, before the forecast check) and at a
+restart, a never-saved draft's night key is written through the autosave chain, not as an edit. A
+picked night still ahead is kept; one no longer ahead rolls forward when tonight moves on, and a
+past night picked meanwhile is not moved before then. A saved plan's row is never written (D1). The
+planner notifies at a new night for any plan (S6.2's identity strip follows it), and the candidates
+list re-evaluates. `night_rollover_test.dart` (8 tests). One existing test's steps are reordered
+because it relied on the unwritten key (see the plan). Verification: the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
+
+**S6.2 done, 2026-09-27** (P6.1's first half; TD-058 resolved; DEV-P9's first half): the planner is
+titled "Plan", with a strip under its app bar showing the target, the night and the plan's state
+(it wraps at 200 % text). ⋮ holds New plan, Copy to another night (`pickNight`) and, for a saved
+plan, Track live (optional), which replaces the bottom bar's Start (interim until P8.4). Save plan
+is the one primary button. Save, New plan, Copy and Open each say what happened (`showDone`).
+`CurrentSession.startNew`/`adopt` run in the autosave chain; the new tests
+(`current_session_chain_test.dart`, `plan_identity_actions_test.dart`) fail without the fix. Tests
+and the E2E follow the renamed labels; two race tests make their edit through the ViewModel
+because the closing menu covers the row (assertions unchanged). Tonight's Start and the S1.6 guard
+stay until S6.13 and S6.3. Verification: the full gate after the last code change, PASS (below);
+every acceptance criterion checked.
+
+**S6.1 done, 2026-09-27** (P6.0; ENG-16 resolved): `SessionPlanViewModel` is split, with no behaviour
+change. It keeps the plan's contents, edits, autosave and read-only state (220 lines). The new
+`PlanLifecycleViewModel` restores, opens, starts new plans, copies, saves and starts runs (167
+lines; a plain `Provider`, not a notifier). `AppViewModels` builds one `CurrentSession` for both.
+Callers moved mechanically: `StartupViewModel`, `CaptureAnalysisViewModel` (Save and Start), four
+screens and `PlannerHarness`. No test assertion changed. `CLAUDE.md` trap 11 and ARCHITECTURE B1/B4
+updated. Verification: the full gate after the last code change, PASS (below); every acceptance
+criterion checked.
+
+**Stage 6 planned, 2026-09-27** (documentation only; the plan's "Stage 6 — frozen Task sequence"):
+- **On the amended plan:** the owner started Stage 6 planning on the Stages 6–11 amendment
+  (`783a723`), which closes the "owner reviews the amendment" step.
+- **Verified against the code (§9.7):** the inputs of P6.0–P6.11, with their finding IDs. Notable:
+  - `SessionPlanViewModel` is at 300 physical lines, exactly at the cap (ENG-16's "299" is stale);
+  - the storage trace (P6.9) finds case (C), an unknown input: the seeded rig has no RAW size, and
+    "Unknown" gives no reason. No calculation or wiring defect;
+  - UX-08's 24-hour labels and labels over the curves, TD-051, TD-054, TD-057 and TD-058 are
+    confirmed as recorded;
+  - the core-loop E2E's first plan depends on the M42 default (S6.8 updates it).
+- **Frozen:** S6.1–S6.14; S6.15 only if RD-11 chooses Stage 6; S6.E, the owner-run five-second
+  test, with S4V-02's correction as its first step. P6.1 is split into S6.2 (the app bar, ⋮,
+  feedback, TD-058) and S6.3 (Save · Discard · Cancel). No P-Task was dropped; the mapping is in the
+  plan and in `DESIGN_SYSTEM.md` §9.
+- **Gates, with options prepared (nothing decided):**
+  - S4-DEF-04, Discard on Saved · changed: **R** revert to the saved plan (recommended) / K keep the
+    changes with the entry. Blocks S6.3;
+  - RD-08, tracking: T1 per rig / T2 per plan / **T3** the rig's default with a per-plan override
+    (recommended). Blocks S6.9;
+  - RD-10, the candidates' order: **O1** usable time, then frame fill (recommended) / O2 then the
+    maximum altitude / O3 groups. Blocks S6.14;
+  - RD-11, the gate controls: **S9** Settings in Stage 9 (recommended) / S6 now, as S6.15 / P the
+    planner.
+- **Allocated, not decided:** S4-DEF-01 (Save on Saved · changed) goes to Stage 8's planning, and
+  Stage 6 keeps today's Save. The owner may move it back.
+- **Verification:** the documentation class (V1): references and IDs resolve; `git diff --check`.
+  No gate input changed, so Stage 5's closing gate is reused as Stage 6's baseline (below).
+- The earlier entries (Stage 5, the governance correction, the Stages 6–11 amendment) moved verbatim
+  to `PROGRESS_HISTORY.md`.
+
+**Before this:** Stage 5 closed on 2026-09-27 at `178acbe` ([report](STAGE_5_VALIDATION.md)); its
+adoption plan is `DESIGN_SYSTEM.md` §9. The Stages 6–11 amendment is DECISIONS E.1, "Stages 6–11
+amended after Stage 5" (`783a723`). The Verification Policy is `CLAUDE.md`'s (V1–V8).
 
 *Moved verbatim from `PROGRESS.md` on 2026-09-27 at Stage 6 planning: Stage 5's entries, the
 governance correction and the Stages 6–11 amendment. Some of their facts (the owner's debug build,
