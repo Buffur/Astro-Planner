@@ -1971,7 +1971,7 @@ decides them within ADR-019 §3.1's invariant):
 | S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back* |
 | S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8 |
 | S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8 |
-| S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6. *Options prepared 2026-09-27 ("Stage 6 gates"): **R revert to the saved plan (recommended)** / K keep the changes with the entry; the owner decides before S6.3* |
+| S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6. **Decided 2026-09-28 by the owner: R**, revert to the saved plan (DECISIONS E.1, "S4-DEF-04 decided"). Built by S6.3 |
 | S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8 |
 | S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8 |
 | S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8 |
@@ -2811,6 +2811,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 
 **Gates** (options under "Stage 6 gates" below; each blocks only its own Task):
 - **S4-DEF-04** (owner): what Discard does with a Saved · changed plan. It blocks S6.3 only.
+  **Decided 2026-09-28: R**, revert to the saved plan.
 - **RD-08** (owner): tracking per rig or per plan. It blocks S6.9 only. A plan-level choice, if
   chosen, is built in Stage 7.
 - **RD-10** (owner): the candidates' default order. It blocks S6.14 only.
@@ -2865,7 +2866,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | --- | --- | --- | --- | --- | --- | --- |
 | S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | **Done 2026-09-27** |
 | S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | **Done 2026-09-27** |
-| S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 | Frozen, gated |
+| S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 (**decided: R**) | Frozen |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
@@ -3347,6 +3348,9 @@ Each is the owner's decision. The options are prepared from the verified inputs 
 decided here. The answer goes into DECISIONS E.1 and §8 (or the S4-DEF list) before its Task runs.
 
 **S4-DEF-04 — what Discard does with a Saved · changed plan's unsaved changes** (blocks S6.3 only)
+
+**Decided 2026-09-28 by the owner: R** (DECISIONS E.1, "S4-DEF-04 decided"). The options below are
+kept as prepared.
 
 - **Verified:** a Saved · changed plan is a `draft` row with `plannedAtUtc` set and its plan
   snapshot. Its working changes are in the row (the night key, references and blocks); the snapshot

@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **S4-DEF-04 decided, 2026-09-28 (Stage 6):** R, Discard reverts a Saved · changed plan to its saved
+> snapshot (E.1, "S4-DEF-04 decided"); ADR-014 §3 gains that transition, pointer under ADR-019 §3.
+> Documentation only.
 > **Stages 6–11 amended after Stage 5, 2026-09-27 (the owner's planning brief):** the dedicated
 > tracker leaves the target product; Stage 8 retires it after a dependency audit, keeping the data
 > (E.1, "Stages 6–11 amended after Stage 5"). ADR-019 (§2, §4) and ADR-016 carry pointers. RD-12
@@ -1536,6 +1539,25 @@ Stage 4 revalidation is still required.
   - the banner of `IA_WIREFRAMES_ADDENDUM.md`;
   - `refinement/PROGRESS.md`.
 - Documentation only. No code changed.
+
+### S4-DEF-04 decided: Discard reverts a changed saved plan to what was saved (Stage 6, 2026-09-28)
+
+- **Context:** the options prepared in Stage 6 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 6
+  gates", `9e40b81`). ADR-019 §3 and §3.1 left open what Discard does with a Saved · changed plan's
+  unsaved changes; the invariant says Discard never changes or removes a saved snapshot.
+- **Decided by:** the project owner, in chat: **R**, the recommended option.
+- **R:** Discard puts the entry back exactly as it was saved.
+  - Its night, site, target, rig and blocks are read from its plan snapshot, and it becomes Saved
+    (`planned`) again.
+  - The snapshot and the saved time are not touched, and nothing is deleted.
+  - If the snapshot is unreadable, or names a site, target or rig that no longer exists, nothing
+    changes and the user is told (SI-008). The user can then Save or Cancel instead.
+- **Amends** ADR-014 §3's lifecycle with one transition: Saved · changed (`draft` with
+  `plannedAtUtc`) → Saved (`planned`), by Discard, restoring the plan from the unchanged snapshot.
+  ADR-019 §3 carries the pointer.
+- **Rejected:** K (keep the changes with the entry, the button reading "Keep changes"). Deleting the
+  entry or its snapshot was never an option (the invariant).
+- **Built by** S6.3. No code changed by this entry.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
@@ -4051,6 +4073,11 @@ rule stands).
   changed plan's unsaved changes is a Stage 6 design question (S4.V3).
 - A site change on a saved plan, and a new copy, count as unsaved (W1, V3).
 - This supersedes the S1.6 interim when built.
+
+> **Decided 2026-09-28 (the owner; E.1, "S4-DEF-04 decided"):** on a Saved · changed plan, Discard
+> reverts the entry to its saved snapshot (R): it becomes Saved again, the snapshot unchanged and
+> nothing deleted; an unreadable snapshot or a reference that no longer exists changes nothing, and
+> the user is told. This adds the transition Saved · changed → Saved to ADR-014 §3.
 
 **Defaults (RD-04).**
 - Nothing is preselected on the first run: no target, no rig. The seeded rig stays in the list,
