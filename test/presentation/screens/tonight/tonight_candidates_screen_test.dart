@@ -64,6 +64,7 @@ void main() {
       clock: FixedClock(DateTime.utc(2026, 11, 10, 18)),
     );
     await vm.ready;
+    await vm.choosePlan(); // S6.8: nothing is preselected
     return vm;
   }
 

@@ -43,7 +43,13 @@ void main() {
   late PlannerHarness vm;
   late DriftSessionRepository sessions;
 
-  Future<void> start(WidgetTester tester, String location) async {
+  /// [choose]: the plan a user makes (S6.8: nothing is preselected); false
+  /// keeps the first run's untouched, empty plan.
+  Future<void> start(
+    WidgetTester tester,
+    String location, {
+    bool choose = true,
+  }) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -76,6 +82,7 @@ void main() {
         sessionRepository: sessions,
       );
       await vm.ready;
+      if (choose) await vm.choosePlan();
     });
     addTearDown(() => tester.runAsync(db.close));
     AppRouter.router.go(location);
@@ -105,7 +112,7 @@ void main() {
   );
 
   testWidgets('New on an untouched draft does not ask', (tester) async {
-    await start(tester, AppRouter.session());
+    await start(tester, AppRouter.session(), choose: false);
     final before = vm.activeSessionId;
     await planAction(tester, 'planner.newPlan');
     await settle(tester);
@@ -134,7 +141,10 @@ void main() {
     await tester.tap(_discard);
     await settle(tester);
     expect(vm.activeSessionId, isNot(before));
-    expect(vm.isExampleCapturePlan, isTrue);
+    // S6.8 (RD-04): a new plan has no target and an empty capture plan
+    // (before: the example plan).
+    expect(vm.selectedTarget, isNull);
+    expect(vm.captureBlocks, isEmpty);
   });
 
   // The accessibility sweep's three themes (S1.17): contrast is not asserted
@@ -309,6 +319,8 @@ void main() {
   Future<int> otherSavedPlan(WidgetTester tester) async {
     final saved = await tester.runAsync(() => vm.saveSession());
     await tester.runAsync(() => vm.newSession());
+    // S6.8: New asks for a target; choose one so the plan can be saved.
+    await tester.runAsync(() => vm.choosePlan());
     await settle(tester);
     return saved!.id;
   }
@@ -457,7 +469,7 @@ void main() {
   testWidgets('W1: a copy is a new plan that is not saved; leaving it asks', (
     tester,
   ) async {
-    await start(tester, AppRouter.session());
+    await start(tester, AppRouter.session(), choose: false);
     await planAction(tester, 'planner.copy');
     await settle(tester);
     expect(_discardTitle, findsNothing, reason: 'the original was untouched');

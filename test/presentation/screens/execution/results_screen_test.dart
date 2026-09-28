@@ -89,6 +89,7 @@ void main() {
         clock: clock,
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.site.setLocation(46.05, 14.5);
       while (vm.plan.captureBlocks.isNotEmpty) {
         await vm.plan.removeCaptureBlock(0);

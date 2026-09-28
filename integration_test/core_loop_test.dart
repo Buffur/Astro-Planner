@@ -232,19 +232,26 @@ Future<void> addSite(
   await tap(tester, find.byTooltip('Save site'));
 }
 
-/// Picks the target and the rig through the planner's pickers.
+/// Picks the target and the rig, then the capture plan, through the
+/// planner. S6.8 (RD-04): nothing is preselected; the status offers each
+/// missing choice in turn, and an empty capture plan offers the example.
 Future<void> chooseTargetAndRig(WidgetTester tester) async {
-  await tap(tester, find.textContaining('Target:'));
+  await scrollTo(tester, find.byKey(const Key('status.choose')));
+  expect(find.text('Choose a target'), findsWidgets);
+  await tap(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Select Target'), findsOneWidget);
   await tester.enterText(find.byType(TextField).first, 'Andromeda');
   await settle(tester);
   await tap(tester, find.textContaining('(M31)').first);
 
-  // S6.6: the rig's card is titled "Rig: …".
-  await scrollTo(tester, find.textContaining('Rig:'));
-  await tap(tester, find.textContaining('Rig:'));
+  await scrollTo(tester, find.byKey(const Key('status.choose')));
+  expect(find.text('Choose a rig'), findsWidgets);
+  await tap(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Select Equipment'), findsOneWidget);
   await tap(tester, find.textContaining('ASI2600MC').first);
+
+  await scrollTo(tester, find.byKey(const Key('capturePlan.useExample')));
+  await tap(tester, find.byKey(const Key('capturePlan.useExample')));
 }
 
 void main() {

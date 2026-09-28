@@ -154,6 +154,7 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
       captureFiles: FakeCaptureFileAccess()..file('light.jpg', _seedJpeg()),
     );
     await vm.ready;
+    await vm.choosePlan(); // S6.8: nothing is preselected
     planned = (await vm.analysis.saveSession()).id;
     running = (await vm.analysis.startSession()).id;
     await vm.execution!.open(running);
@@ -276,6 +277,16 @@ void main() {
         final open = await _audit(tester, contrast: theme != _Theme.field);
         if (open.isNotEmpty) {
           report.add('planner, sections open:\n${open.join('\n')}');
+        }
+        // S6.8: a new plan: no target, and an empty capture plan with the
+        // offer of the example.
+        await tester.runAsync(app.vm.newSession);
+        AppRouter.router.go(AppRouter.session());
+        await _settle(tester);
+        expect(find.byKey(const Key('capturePlan.useExample')), findsOneWidget);
+        final fresh = await _audit(tester, contrast: theme != _Theme.field);
+        if (fresh.isNotEmpty) {
+          report.add('planner, new plan:\n${fresh.join('\n')}');
         }
         handle.dispose();
         expect(report, isEmpty, reason: report.join('\n\n'));

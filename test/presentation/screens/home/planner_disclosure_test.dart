@@ -107,6 +107,7 @@ void main() {
         displayPreferences: store,
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.disclosure.load(); // as main.dart does before runApp
     });
     AppRouter.router.go(AppRouter.session());

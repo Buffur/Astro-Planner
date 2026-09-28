@@ -29,8 +29,8 @@ class CurrentSession {
   /// it was created, opened or saved (S1.6; interim for RD-05): replacing it
   /// would leave them in a draft no screen lists. A resumed draft counts as
   /// edited when it was remembered as edited (S1.V3: any edit — target, rig,
-  /// night or blocks), is not the untouched example plan, or is a saved plan
-  /// edited since.
+  /// night or blocks), holds blocks other than none or the untouched example
+  /// plan (S6.8: a new plan starts empty), or is a saved plan edited since.
   bool get hasUnsavedChanges => _edited;
 
   /// Called when [writeFailure] changes.
@@ -53,7 +53,7 @@ class CurrentSession {
         s.status == SessionStatus.draft &&
         (marked == s.id ||
             s.plannedAtUtc != null ||
-            !ExampleCapturePlan.matches(s.blocks));
+            !(s.blocks.isEmpty || ExampleCapturePlan.matches(s.blocks)));
     return s;
   }
 

@@ -222,6 +222,14 @@ class EquipmentProfile {
     );
   }
 
+  /// The shipped example rig (RD-04; S6.8): every optics spec still comes
+  /// from a seed (`seed:…`, TASK 8.5's illustrative refractor), so it is
+  /// labelled as an example where it is listed and chosen. Editing its
+  /// optics makes it the user's own rig.
+  bool get isExample => EquipmentSpec.values
+      .where((s) => !s.isCamera)
+      .every((s) => provenanceOf(s)?.source?.startsWith('seed:') ?? false);
+
   /// A stored focal ratio above f/32 is flagged for the user to review; it is
   /// never reinterpreted (ADR-011 §6).
   bool get needsApertureReview =>

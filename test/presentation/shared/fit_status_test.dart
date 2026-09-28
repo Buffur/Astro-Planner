@@ -88,6 +88,8 @@ void main() {
         deviceTimeZone: FakeDeviceTimeZone(),
       );
       await vm.ready;
+      // S6.8: a plan starts empty; these cases need light frames to fit.
+      await vm.plan.useExamplePlan();
     });
 
     tearDown(() => db.close());

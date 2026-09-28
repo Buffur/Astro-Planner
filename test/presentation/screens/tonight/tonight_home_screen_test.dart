@@ -6,6 +6,7 @@
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart' show AppDatabase;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
@@ -91,6 +92,8 @@ void main() {
         firstRun: firstRun,
       );
       await vm.ready;
+      // S6.8: nothing is preselected; a first run has chosen nothing yet.
+      if (firstRunDone) await vm.choosePlan();
       await vm.tonight.load();
       if (site) await vm.site.setLocation(46.05, 14.5);
       if (lightFrames != null) {
@@ -241,6 +244,37 @@ void main() {
       await tester.pageBack();
       await settle(tester);
       expect(find.text('Welcome to Astro Planner'), findsOneWidget);
+    });
+
+    // S6.8 (RD-04, UX-24): no step reads as done that the user did not do;
+    // the example rig, once chosen, says it is one.
+    testWidgets('the page shows nothing as chosen that the user did not '
+        'choose', (tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await start(tester, site: false, firstRunDone: false);
+      String status(String step) => tester
+          .widgetList<Text>(
+            find.descendant(
+              of: find.byKey(Key('welcome.$step')),
+              matching: find.byType(Text),
+            ),
+          )
+          .elementAt(1)
+          .data!;
+      expect(status('site'), 'Not set');
+      expect(status('rig'), 'Not chosen');
+      expect(status('target'), 'Not chosen');
+
+      await tester.runAsync(() async {
+        final rigs = DriftEquipmentRepository(database);
+        final id = await rigs.insertEquipment(EquipmentSeeder.defaults.first);
+        await vm.plan.setEquipment((await rigs.getEquipmentById(id))!);
+      });
+      await settle(tester);
+      expect(status('rig'), endsWith('(example rig)'));
+      expect(status('target'), 'Not chosen');
     });
 
     testWidgets('not offered when a site is already set', (tester) async {

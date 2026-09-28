@@ -46,7 +46,9 @@ void main() {
   late DriftSessionRepository sessions;
   late PlannerHarness vm;
 
-  Future<void> start(WidgetTester tester) async {
+  /// [choose]: the plan a user makes (S6.8: nothing is preselected); false
+  /// keeps the first run's untouched, empty plan.
+  Future<void> start(WidgetTester tester, {bool choose = true}) async {
     tester.view.physicalSize = const Size(800, 4000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -79,6 +81,7 @@ void main() {
         sessionRepository: sessions,
       );
       await vm.ready;
+      if (choose) await vm.choosePlan();
     });
     addTearDown(() => tester.runAsync(db.close));
     AppRouter.router.go(AppRouter.session());
@@ -185,7 +188,8 @@ void main() {
 
   testWidgets('TD-058: an edit made while New plan creates its draft lands in '
       'the new draft, not the old one', (tester) async {
-    await start(tester);
+    // S6.8: an untouched plan, as on a first run, so New asks nothing.
+    await start(tester, choose: false);
     final old = vm.activeSessionId!;
 
     await openMenu(tester);
@@ -209,7 +213,8 @@ void main() {
 
   testWidgets('TD-058: an edit made while Copy creates its draft lands in the '
       'copy, not the original', (tester) async {
-    await start(tester);
+    // S6.8: an untouched plan, as on a first run, so Copy asks nothing.
+    await start(tester, choose: false);
     final original = vm.activeSessionId!;
 
     await openMenu(tester);

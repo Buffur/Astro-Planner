@@ -2871,7 +2871,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | **Done 2026-09-28** |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | **Done 2026-09-28** |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | **Done 2026-09-28** |
-| S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | Frozen |
+| S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | **Done 2026-09-28** |
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 | Frozen, gated |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
@@ -3200,6 +3200,21 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - the welcome page shows no step as done that the user did not do;
   - a stored target and rig are still restored after a restart (test);
   - the full gate.
+- **Done 2026-09-28:** `load()` has no M42 or first-rig fallback and leaves the capture plan empty;
+  "Start from the example plan" (`useExamplePlan`) fills `ExampleCapturePlan.blocks()` with its
+  badge until the first edit; New plan keeps the site and rig, clears the target (the status's
+  "Needs a target" and its picker; the picker is not opened directly) and starts empty; a resumed
+  empty draft counts as untouched, like the untouched example. The shipped rig is recognised by its
+  seed provenance (`EquipmentProfile.isExample`) and labelled in the rig list, on the planner's rig
+  card, on the welcome page and on Tonight's plan card. Tests: `planner_defaults_test.dart` (4),
+  `equipment_example_test.dart` (4), a restore test and a welcome test; the sweep also audits a
+  new plan. Tests that relied on the defaults now choose their plan through
+  `PlannerHarness.choosePlan()` (M42, the first rig, the example: three user edits); the E2E chooses
+  through the status and the offer. Deliberate changes beyond that: the first-run, New plan and
+  bootstrap tests assert the new defaults; two bootstrap-failure tests store a chosen target (the
+  load reads the target only then); two TD-058 tests and W1's start from the untouched first-run
+  plan; the failed-Save test now also asserts the store's failure, which a plan without a target
+  would otherwise mask. Full gate PASS: 1,405 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.9 — The capture plan's blocks (P6.8; gated on RD-08)
 - **Objective:** the block list is the plan's primary surface: each row says what will be

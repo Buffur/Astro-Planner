@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.8, 2026-09-28:** B4 notes the new defaults (no preselection, an empty capture plan, New plan without a target, the example rig).
 > **S6.7, 2026-09-28:** B4 notes the planner's collapsible sections (`PlannerSections`) and where each value went.
 > **S6.6, 2026-09-28:** B4 notes the planner's answer-first structure (`PlanStatus`, the context line, the section order).
 > **S6.5, 2026-09-28:** B4 notes the Night & Moon and Weather detail routes, the dark span at the user's limit and `CandidatesViewModel`.
@@ -470,6 +471,16 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `SkyDarknessWidget`'s section (the map link moved out of `home_screen.dart`). Storage, the
 > capability warnings and every "never hidden" item stay visible; the status shows the integration
 > in every state. Summaries are pure static functions beside their widgets.
+
+> **Since S6.8 (2026-09-28; RD-04, ADR-019 §3 "Defaults")** `PlanLifecycleViewModel.load()` selects
+> only a stored target and rig (no M42 or first-rig fallback) and leaves the capture plan empty;
+> `newSession()` keeps the site and the rig, clears the target and starts with no blocks.
+> `SessionPlanViewModel.useExamplePlan()` is "Start from the example plan" (an edit; the example
+> badge until the next block edit). `CurrentSession.resume()` treats an empty draft like the
+> untouched example: not edited. `EquipmentProfile.isExample` recognises the shipped rig (every
+> optics spec's provenance still `seed:`); `ExampleText` (`presentation/shared/example_text.dart`)
+> words the examples. Tests choose their plan through `PlannerHarness.choosePlan()` (the same three
+> edits a user makes).
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

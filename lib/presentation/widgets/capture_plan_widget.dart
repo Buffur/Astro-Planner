@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../domain/models/capture_block.dart';
 import '../shared/capability_text.dart';
+import '../shared/example_text.dart';
+import '../shared/failure_feedback.dart';
 import '../viewmodels/capture_analysis_viewmodel.dart';
 import '../viewmodels/session_plan_viewmodel.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
@@ -97,7 +99,7 @@ class _BlockList extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        'Example plan',
+                        ExampleText.plan,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -117,10 +119,28 @@ class _BlockList extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
+        // RD-04 (S6.8): a plan starts empty; the example is one tap away
+        // and never looks like the user's own (TASK 4.4's badge).
         if (blocks.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: Text('No blocks added to the sequence.')),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text('No blocks yet.'),
+                OutlinedButton(
+                  key: const Key('capturePlan.useExample'),
+                  onPressed: () => runWithFeedback(
+                    context,
+                    'start from the example plan',
+                    viewModel.useExamplePlan,
+                  ),
+                  child: const Text(ExampleText.startFromExample),
+                ),
+              ],
+            ),
           )
         else
           ReorderableListView.builder(

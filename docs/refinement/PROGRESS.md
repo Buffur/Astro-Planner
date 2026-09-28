@@ -4,20 +4,30 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.7 done**: disclosure in the planner; Stage 6 in progress).
-> **Next:** S6.8 (no gate). The owner answers RD-08, RD-10 and RD-11 whenever convenient,
-> each before its Task.
+> **Last updated:** 2026-09-28 (**S6.8 done**: defaults and the first run; Stage 6 in progress).
+> **Next:** S6.10 (no gate), because S6.9 waits for RD-08; if the owner answers RD-08 first, S6.9
+> runs instead. RD-10 and RD-11 whenever convenient, each before its Task.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.7 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.8 done) |
 | Current Task | None in progress |
-| Next Task | **S6.8 — Defaults, New plan's contents and the first run** (no gate) |
-| Code baseline | S6.7 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.10 — The capture plan's outputs** (no gate; S6.9 waits for RD-08) |
+| Code baseline | S6.8 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.8 done, 2026-09-28** (P6.2, P6.1's New plan; RD-04; UX-24): nothing the user did not choose
+looks chosen. A fresh install has no target, no rig and an empty capture plan with "Start from the
+example plan"; New plan keeps the site and rig and asks for a target; a stored choice is still
+restored; the shipped rig is labelled as an example where it is listed and chosen; the welcome page
+marks nothing as done that the user did not do. Tests that relied on the old defaults choose their
+plan explicitly (`PlannerHarness.choosePlan()`); the E2E chooses through the new path. **For the
+owner:** "Example rig" is new wording beside RD-04's "Start from the example plan"; both are kept
+out of `AppWords` (`DESIGN_SYSTEM.md` §7). Verification: the full gate after the last code change,
+PASS (below); every acceptance criterion checked.
 
 **S6.7 done, 2026-09-28** (P6.4; UX-05; ADR-019 §7): technical depth is one tap away behind
 factual summaries, each section's state remembered: Budget details, the √N explanation,
@@ -128,7 +138,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (421 files, 0 changed); Analyze; 1,395 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.7's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (425 files, 0 changed); Analyze; 1,405 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.8's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -249,11 +259,12 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.8 — Defaults, New plan's contents and the first run** (P6.2, P6.1's New plan; RD-04; UX-24).
-Frozen, no gate; the frozen sequence is the approval.
-- **Read:** S6.8 and "Rules for every Stage 6 Task"; RD-04 (DECISIONS E.1); ADR-019 §3
-  ("Defaults"); `PlanLifecycleViewModel.load`/`newSession`, `ExampleCapturePlan` and TASK 4.4's
-  badge; the welcome page; the core-loop E2E's first plan (it relies on the M42 default).
+**S6.10 — The capture plan's outputs: time, what fits, storage** (P6.9; 08 §17). Frozen, no gate;
+the frozen sequence is the approval. It runs before S6.9 because S6.9 waits for RD-08 (the plan's
+rule for a gated Task); if the owner answers RD-08 first, S6.9 runs instead.
+- **Read:** S6.10, P6.9's notes and "Rules for every Stage 6 Task"; ADR-009 §2, §7; ADR-018 §4;
+  the storage trace (the plan's inputs table, case C); `CaptureBudgetSummary`,
+  `FitAnalyzer.maxFramesForBlock`, `FitResult.unplacedFramesByBlock`.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

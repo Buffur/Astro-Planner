@@ -214,6 +214,7 @@ void main() {
     'a snapshot saved 5 h after loading records the age at saving',
     () async {
       final vm = await start();
+      await vm.choosePlan(); // S6.8: Save needs a target and a rig
       clock.advance(const Duration(hours: 5));
       final saved = await vm.saveSession();
       final w = saved.planSnapshot!.json['weather'] as Map<String, Object?>;

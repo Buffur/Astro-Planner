@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../navigation/app_router.dart';
+import '../../shared/example_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
@@ -94,7 +95,7 @@ class WelcomeScreen extends StatelessWidget {
               key: const Key('welcome.rig'),
               number: 2,
               title: 'Your rig',
-              status: rig?.name ?? 'Not chosen',
+              status: rig == null ? 'Not chosen' : ExampleText.rigName(rig),
               explanation:
                   'Telescope or lens and camera: they set the field of view, '
                   'the pixel scale and the exposure guidance.',

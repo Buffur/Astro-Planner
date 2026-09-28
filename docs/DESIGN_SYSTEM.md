@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.8, 2026-09-28:** §7 notes the examples' words (`ExampleText`).
+
 > **S6.7, 2026-09-28:** §7a records the planner's five collapsible sections and the Bortle picker; §9's P6.4 rows are done.
 
 > **Status:** living, built by Stage 5 (Design System Foundation; `refinement/POST_ROADMAP_PLAN.md`,
@@ -272,6 +274,11 @@ still merges over them.
   - Stages 6, 8 and 9 remove entries as they redesign their screens, and P9.2 empties it (S5.9
     maps each entry to its Stage).
   - It reads a line at a time, so a term split across two string literals is not seen.
+
+**S6.8 (2026-09-28), the examples' words:** "Start from the example plan" is RD-04's own phrase;
+"Example plan" (TASK 4.4) and "Example rig" name the shipped examples. They live in `ExampleText`
+(`lib/presentation/shared/example_text.dart`), not in `AppWords`, which holds the owner's glossary;
+the owner may move them there.
 
 **S6.6 (2026-09-28), two status words outside `AppWords`:** the planner's status applies the
 glossary's "Needs a …" pattern (Needs a target, Needs a block) to a missing site and a missing rig:

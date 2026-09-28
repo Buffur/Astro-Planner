@@ -204,6 +204,7 @@ void main() {
     // work; the forecast says it is unavailable (never a number).
     await tester.runAsync(() async {
       await vm.site.saveSite(_ljubljana);
+      await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.plan.idle;
       await vm.conditions.idle;
     });
@@ -265,6 +266,7 @@ void main() {
     var db = AppDatabase(NativeDatabase(file));
     var vm = await _boot(db, clock: clock);
     await vm.site.saveSite(_ljubljana);
+    await vm.choosePlan(); // S6.8: nothing is preselected
     await vm.plan.idle;
     final started = await vm.analysis.startSession();
     await vm.execution!.open(started.id);
@@ -338,6 +340,7 @@ void main() {
         db = AppDatabase(NativeDatabase.memory());
         vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 18)));
         await vm.site.saveSite(_ljubljana);
+        await vm.choosePlan(); // S6.8: nothing is preselected
         await vm.plan.idle;
         run = (await vm.analysis.startSession()).id;
         await vm.execution!.open(run);
@@ -396,6 +399,7 @@ void main() {
       db = AppDatabase(NativeDatabase.memory());
       vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 20)));
       await vm.site.saveSite(_ljubljana);
+      await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.plan.idle;
       run = (await vm.analysis.startSession()).id;
       await vm.execution!.open(run);
@@ -435,6 +439,7 @@ void main() {
       db = AppDatabase(NativeDatabase.memory().interceptWith(disk));
       vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 20)));
       await vm.site.saveSite(_ljubljana);
+      await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.plan.idle;
     });
     addTearDown(() => tester.runAsync(db.close));

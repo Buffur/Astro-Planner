@@ -72,6 +72,7 @@ void main() {
       sessionRepository: DriftSessionRepository(db, clock: clock),
     );
     await vm.ready;
+    await vm.choosePlan(); // S6.8: nothing is preselected
     // A meridian flip makes the budget and the fit use the target's transit.
     await vm.settings.setPlanningPreferences(
       vm.settings.planningPreferences.withOptionalOverheads(

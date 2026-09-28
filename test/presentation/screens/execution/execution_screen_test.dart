@@ -100,6 +100,7 @@ void main() {
     await DriftTargetRepository(database).insertTarget(_m42);
     await DriftEquipmentRepository(database).insertEquipment(_rig);
     vm = await harness();
+    await vm.choosePlan(); // S6.8: nothing is preselected
     await vm.site.setLocation(46.05, 14.5);
     while (vm.plan.captureBlocks.isNotEmpty) {
       await vm.plan.removeCaptureBlock(0);

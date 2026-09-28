@@ -85,16 +85,33 @@ void main() {
     return vm;
   }
 
-  test('a first run creates one draft with the example plan; a restart '
-      'resumes it', () async {
+  // S6.8 (RD-04): before, a first run's draft held M42, the first rig and
+  // the example plan; now nothing the user did not choose.
+  test('a first run creates one draft with no target, no rig and an empty '
+      'capture plan; a restart resumes it', () async {
     final vm = await start();
     expect(vm.activeSession!.status, SessionStatus.draft);
-    expect(vm.isExampleCapturePlan, isTrue);
+    expect(vm.selectedTarget, isNull);
+    expect(vm.selectedEquipment, isNull);
+    expect(vm.captureBlocks, isEmpty);
+    expect(vm.isExampleCapturePlan, isFalse);
+    expect(vm.plan.hasUnsavedChanges, isFalse);
 
     final again = await start();
     expect(again.activeSessionId, vm.activeSessionId);
-    expect(again.isExampleCapturePlan, isTrue);
+    expect(again.captureBlocks, isEmpty);
+    expect(again.plan.hasUnsavedChanges, isFalse);
     expect(await sessions.list(), hasLength(1));
+  });
+
+  test('a stored target and rig are restored after a restart', () async {
+    final vm = await start();
+    await vm.choosePlan();
+    final again = await start();
+    expect(again.activeSessionId, vm.activeSessionId);
+    expect(again.selectedTarget!.id, vm.selectedTarget!.id);
+    expect(again.selectedEquipment!.id, vm.selectedEquipment!.id);
+    expect(again.isExampleCapturePlan, isTrue);
   });
 
   // S1.6 (RT-05 / UX-12; RD-05 interim): the planner knows when replacing
@@ -106,6 +123,7 @@ void main() {
       expect(vm.plan.hasUnsavedChanges, isFalse);
       expect((await start()).plan.hasUnsavedChanges, isFalse);
 
+      await vm.choosePlan(); // S6.8: Save needs a target and a rig
       await vm.addCaptureBlock(_light(3));
       expect(vm.plan.hasUnsavedChanges, isTrue);
       expect((await start()).plan.hasUnsavedChanges, isTrue);
@@ -130,7 +148,7 @@ void main() {
           case 'target':
             final targets = await DriftTargetRepository(db).getAllTargets();
             await vm.setTarget(
-              targets.firstWhere((t) => t.id != vm.selectedTarget!.id),
+              targets.firstWhere((t) => t.id != vm.selectedTarget?.id),
             );
           case 'rig':
             final rigs = DriftEquipmentRepository(db);
@@ -155,6 +173,7 @@ void main() {
     test('after Save, a restart has nothing unsaved; an untouched draft '
         'never has', () async {
       final vm = await start();
+      await vm.choosePlan(); // S6.8: Save needs a target and a rig
       await vm.setEveningDate(CalendarDate(2026, 11, 12));
       await vm.saveSession();
       expect((await start()).plan.hasUnsavedChanges, isFalse);
@@ -185,8 +204,14 @@ void main() {
         sessionRepository: failing,
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: else Save refuses before the store
       await vm.addCaptureBlock(_light(3));
-      await expectLater(vm.saveSession(), throwsA(isA<StateError>()));
+      await expectLater(
+        vm.saveSession(),
+        throwsA(
+          isA<StateError>().having((e) => e.message, 'message', 'disk full'),
+        ),
+      );
       expect(vm.plan.hasUnsavedChanges, isTrue);
       expect((await start()).plan.hasUnsavedChanges, isTrue, reason: 'S1.V3');
     });
@@ -216,7 +241,7 @@ void main() {
       'rebuilds the same plan', () async {
     final vm = await start();
     final targets = await DriftTargetRepository(db).getAllTargets();
-    final other = targets.firstWhere((t) => t.id != vm.selectedTarget!.id);
+    final other = targets.firstWhere((t) => t.id != vm.selectedTarget?.id);
     await vm.setTarget(other);
     await vm.addCaptureBlock(_light(42));
     await vm.setEveningDate(CalendarDate(2026, 11, 12));
@@ -290,22 +315,37 @@ void main() {
     );
   });
 
-  test('New starts a draft for tonight with the example plan', () async {
+  // S6.8 (RD-04): New keeps the site and the rig, has no target, and starts
+  // with an empty capture plan (before: the same target and the example).
+  test('New starts a draft for tonight with the site and rig, no target and '
+      'an empty capture plan', () async {
     final vm = await start();
+    await vm.choosePlan();
     await vm.addCaptureBlock(_light(3));
     await vm.setEveningDate(CalendarDate(2026, 11, 15));
     final previous = vm.activeSessionId!;
+    final rig = vm.selectedEquipment!.id;
+    final site = vm.activeSite!.id;
 
     await vm.newSession();
     expect(vm.activeSessionId, isNot(previous));
-    expect(vm.isExampleCapturePlan, isTrue);
+    expect(vm.selectedTarget, isNull);
+    expect(vm.selectedEquipment!.id, rig);
+    expect(vm.activeSite!.id, site);
+    expect(vm.captureBlocks, isEmpty);
+    expect(vm.isExampleCapturePlan, isFalse);
     expect(vm.eveningDate, CalendarDate(2026, 11, 10));
     expect((await sessions.get(previous))!.blocks.last.frameCount, 3);
+    final stored = (await sessions.get(vm.activeSessionId!))!;
+    expect(stored.targetId, isNull);
+    expect(stored.rigId, rig);
+    expect(stored.blocks, isEmpty);
   });
 
   test('editing after Save makes it a draft with unsaved changes; opening a '
       'completed session copies it into a new draft', () async {
     final vm = await start();
+    await vm.choosePlan(); // S6.8: Save needs a target and a rig
     final saved = await vm.saveSession();
     expect(saved.status, SessionStatus.planned);
 

@@ -62,6 +62,12 @@ void main() {
       await vm.ready;
 
       expect(vm.hasBootstrapError, isFalse);
+      // S6.8 (RD-04): nothing is preselected; the seeded catalog and rig are
+      // there to choose from at once. (Before S6.8 this read the M42 and
+      // first-rig defaults.)
+      expect(vm.selectedTarget, isNull);
+      expect(vm.selectedEquipment, isNull);
+      await vm.choosePlan();
       expect(vm.selectedTarget?.catalogId, 'M42');
       expect(vm.selectedEquipment, isNotNull);
     });
@@ -71,6 +77,8 @@ void main() {
     test(
       'a repository failure sets hasBootstrapError instead of hanging',
       () async {
+        // S6.8: the load reads the target only when one was chosen before.
+        SharedPreferences.setMockInitialValues({'targetId': 1});
         final flakyTargets = FlakyTargetRepository(
           DriftTargetRepository(database),
         );
@@ -99,6 +107,11 @@ void main() {
         final equipmentRepo = DriftEquipmentRepository(database);
         await CatalogSeeder(DriftTargetRepository(database)).seedIfNeeded();
         await EquipmentSeeder(equipmentRepo).seedIfNeeded();
+        // S6.8: the load reads the target only when one was chosen before;
+        // the stored choice is restored after the retry.
+        final m42 = (await DriftTargetRepository(database).searchTargets('M42'))
+            .first;
+        SharedPreferences.setMockInitialValues({'targetId': m42.id});
 
         final vm = PlannerHarness(
           flakyTargets,

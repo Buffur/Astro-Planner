@@ -261,6 +261,7 @@ void main() {
           locationService: FakeLocationService(),
         );
         await vm.ready;
+        await vm.choosePlan(); // S6.8: nothing is preselected
       });
 
       // The first screen renders without waiting on weather at all.
@@ -323,6 +324,8 @@ void main() {
         declination: -5.45,
       ),
     );
+    // S6.8: the load reads the target only when one was chosen before.
+    SharedPreferences.setMockInitialValues({'targetId': 1});
 
     late PlannerHarness vm;
     await tester.runAsync(() async {

@@ -132,6 +132,7 @@ void main() {
 
   test('a saved plan\'s row is not written at the rollover (D1)', () async {
     final vm = await boot();
+    await vm.choosePlan(); // S6.8: Save needs a target and a rig
     await vm.saveSession();
     await vm.plan.idle;
     final before = await stored(vm);
@@ -209,6 +210,7 @@ void main() {
   test('at a restart, a never-saved draft\'s rolled-forward night is stored '
       'at once; a saved plan\'s is not', () async {
     final draft = await boot();
+    await draft.choosePlan(); // S6.8: Save needs a target and a rig
     final draftId = draft.activeSessionId!;
     moveTo(11);
     final restarted = await boot();

@@ -60,6 +60,7 @@ void main() {
         clock: FixedClock(DateTime.utc(2026, 3, 1, 18)),
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: nothing is preselected
       // A plan far larger than one night: 500 x 300 s of Ha.
       // TASK 12.3: the plan is read-only outside the ViewModel.
       while (vm.captureBlocks.isNotEmpty) {

@@ -12,6 +12,7 @@ import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../widgets/planner_summary_card.dart';
 import '../../widgets/planner_sections.dart';
 import '../../shared/info_row.dart';
+import '../../shared/example_text.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../shared/collapsible_section.dart';
 import '../../widgets/plan_status.dart';
@@ -204,6 +205,9 @@ class HomeScreen extends StatelessWidget {
                         PlannerSummaryCard(
                           title: '${AppWords.rig}: ${equipment.name}',
                           data: {
+                            // RD-04 (S6.8): the example says it is one.
+                            if (equipment.isExample)
+                              'Note': ExampleText.rigNote,
                             // S6.6: the values this plan uses first,
                             // then any active capability warning
                             // (TASK 8.6, guidance). S6.7: the reference

@@ -7,6 +7,7 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
+import '../../shared/example_text.dart';
 import '../../shared/failure_feedback.dart';
 import 'equipment_editor.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
@@ -56,7 +57,8 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
 
   /// Build a concise subtitle for an equipment card.
   String _subtitle(EquipmentProfile eq) {
-    final parts = <String>[];
+    // RD-04 (S6.8): the shipped example is labelled where it is listed.
+    final parts = <String>[if (eq.isExample) ExampleText.rig];
     if (eq.manufacturer != null && eq.manufacturer!.isNotEmpty) {
       parts.add(eq.manufacturer!);
     }

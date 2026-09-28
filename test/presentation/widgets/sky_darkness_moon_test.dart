@@ -54,6 +54,7 @@ void main() {
         clock: FixedClock(DateTime.utc(2026, 3, 1, 18)),
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: nothing is preselected
     });
     addTearDown(() => tester.runAsync(database.close));
 

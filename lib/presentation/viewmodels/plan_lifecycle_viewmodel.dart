@@ -49,28 +49,26 @@ class PlanLifecycleViewModel {
   /// in preferences moves once into a new draft (ADR-014 §6); otherwise the
   /// most recent open session is resumed — a past night rolls forward to
   /// tonight (owner decision, TASK 11.4) — or a draft is created. An
-  /// unreadable saved plan is logged by the repository and dropped.
+  /// unreadable saved plan is logged by the repository and dropped. Nothing
+  /// the user did not choose is selected (RD-04, S6.8): no target or rig
+  /// unless one is stored, and an empty capture plan.
   Future<void> load() => _plan
       .restoring(() async {
         final preferencesPlan = await _stateRepository
             .loadCaptureBlocks()
             .onError<StorageFailure>((_, _) => null);
         final blocks = List.of(preferencesPlan ?? const <CaptureBlock>[]);
-        final isExample = blocks.isEmpty;
-        if (blocks.isEmpty) blocks.addAll(ExampleCapturePlan.blocks());
         AstroTarget? target = _plan.selectedTarget;
         final targetId = await _stateRepository.getSelectedTargetId();
         if (targetId != null) target = await _targets.getTargetById(targetId);
-        target ??= (await _targets.searchTargets('M42')).firstOrNull;
         EquipmentProfile? rig = _plan.selectedEquipment;
         final rigId = await _stateRepository.getSelectedEquipmentId();
         if (rigId != null) rig = await _equipment.getEquipmentById(rigId);
-        rig ??= (await _equipment.getAllEquipment()).firstOrNull;
         _plan.replaceContents(
           target: target,
           rig: rig,
           blocks: blocks,
-          isExample: isExample,
+          isExample: ExampleCapturePlan.matches(blocks),
         );
 
         final current = _current;
@@ -179,15 +177,17 @@ class PlanLifecycleViewModel {
     });
   }
 
-  /// A new draft for tonight with the example plan (owner decision).
+  /// A new draft for tonight (RD-04, S6.8): it keeps the site and the rig,
+  /// has no target, so the status asks for one, and starts with an empty
+  /// capture plan and the offer of the example.
   Future<void> newSession({bool discard = false}) async {
     if (discard) await _current?.revertSavedChanges();
     _plan.replaceNight(null);
     _plan.replaceContents(
-      target: _plan.selectedTarget,
+      target: null,
       rig: _plan.selectedEquipment,
-      blocks: ExampleCapturePlan.blocks(),
-      isExample: true,
+      blocks: const [],
+      isExample: false,
     );
     await _current?.startNew(_plan.currentPlan(), discard: discard);
     _plan.markChanged();

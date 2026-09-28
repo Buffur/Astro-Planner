@@ -9,6 +9,7 @@ import '../../../domain/models/session.dart';
 import '../../../domain/services/fit_analyzer.dart';
 import '../../navigation/app_router.dart';
 import '../../../core/utils/quantity_text.dart';
+import '../../shared/example_text.dart';
 import '../../shared/field_mode_button.dart';
 import '../../shared/location_feedback.dart';
 import '../../shared/night_text.dart';
@@ -355,7 +356,7 @@ class _SessionCard extends StatelessWidget {
                 ],
               )
             else
-              Text(rig.name),
+              Text(ExampleText.rigName(rig)), // RD-04 (S6.8)
             if (fit != null) ...[
               const SizedBox(height: 8),
               Text(

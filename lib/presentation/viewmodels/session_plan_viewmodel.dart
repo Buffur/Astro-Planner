@@ -13,6 +13,7 @@ import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
+import '../../domain/services/example_capture_plan.dart';
 import '../../domain/services/session_night_resolver.dart';
 import 'site_viewmodel.dart';
 
@@ -49,7 +50,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   AstroTarget? _target;
   EquipmentProfile? _rig;
   List<CaptureBlock> _blocks = [];
-  bool _isExample = true;
+  bool _isExample = false;
   CalendarDate? _pickedEveningDate;
   bool _loaded = false;
   Object? _siteKey;
@@ -191,6 +192,14 @@ class SessionPlanViewModel extends ChangeNotifier {
   Future<void> setEquipment(EquipmentProfile rig) async {
     _rig = rig;
     await _edited();
+  }
+
+  /// "Start from the example plan" (RD-04, S6.8): the example's blocks,
+  /// shown as the example until the first block edit (TASK 4.4).
+  Future<void> useExamplePlan() {
+    _blocks = ExampleCapturePlan.blocks();
+    _isExample = true;
+    return _edited();
   }
 
   /// Any block edit ends the example plan (TASK 4.4).

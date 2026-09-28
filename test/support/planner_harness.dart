@@ -90,7 +90,8 @@ class PlannerHarness extends ChangeNotifier {
     SessionExporter? exporter,
     BackupService? backup,
     CaptureFileAccess? captureFiles,
-  }) {
+  }) : _targetRepository = targetRepository,
+       _equipmentRepository = equipmentRepository {
     final time = clock ?? const SystemClock();
     vms = AppViewModels(
       targets: targetRepository,
@@ -130,6 +131,24 @@ class PlannerHarness extends ChangeNotifier {
   }
 
   late final AppViewModels vms;
+  final TargetRepository _targetRepository;
+  final EquipmentRepository _equipmentRepository;
+
+  /// Chooses a plan as a user does (RD-04, S6.8: nothing is preselected any
+  /// more): [target] (M42 unless given), the first rig if any, and the example
+  /// capture plan, each through the planner's own edit, then waits for the
+  /// autosave. This is what a new draft held by default before S6.8; tests
+  /// that need a plan call it after [ready]. The three choices are edits, as
+  /// they are for a user.
+  Future<void> choosePlan({String target = 'M42'}) async {
+    final t = (await _targetRepository.searchTargets(target)).first;
+    await plan.setTarget(t);
+    final rigs = await _equipmentRepository.getAllEquipment();
+    if (rigs.isNotEmpty) await plan.setEquipment(rigs.first);
+    await plan.useExamplePlan();
+    await plan.idle;
+  }
+
   SiteViewModel get site => vms.site;
   SettingsViewModel get settings => vms.settings;
   SessionPlanViewModel get plan => vms.plan;

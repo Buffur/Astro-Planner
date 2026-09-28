@@ -70,6 +70,7 @@ void main() {
         sessionRepository: sessions,
       );
       await vm.ready;
+      await vm.choosePlan(); // S6.8: nothing is preselected
     });
     addTearDown(() => tester.runAsync(db.close));
     AppRouter.router.go(AppRouter.session());
