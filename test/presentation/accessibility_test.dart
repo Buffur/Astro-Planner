@@ -245,6 +245,8 @@ void main() {
           AppRouter.results(app.running),
           AppRouter.welcome,
           AppRouter.metadata,
+          AppRouter.nightMoon, // S6.5
+          AppRouter.weather, // S6.5
         ];
         final report = <String>[];
         for (final route in routes) {
@@ -273,7 +275,8 @@ void main() {
   // forecast stopped rendering.
   testWidgets('the sweep renders a forecast', (tester) async {
     await _pumpApp(tester, theme: _Theme.light, textScale: 2.0);
-    AppRouter.router.go(AppRouter.session());
+    // S6.5: the full forecast is on the Weather detail.
+    AppRouter.router.go(AppRouter.weather);
     await _settle(tester);
     expect(find.byKey(const Key('weather.hours')), findsOneWidget);
     expect(find.byKey(const Key('weather.ranges')), findsOneWidget);

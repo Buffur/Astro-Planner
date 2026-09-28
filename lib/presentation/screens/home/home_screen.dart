@@ -25,7 +25,8 @@ import '../../shared/field_mode_button.dart';
 import '../../widgets/capture_plan_widget.dart';
 import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
-import '../../widgets/weather_forecast_widget.dart';
+import '../../shared/night_text.dart';
+import '../details/night_moon_screen.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shared/app_words.dart';
@@ -179,13 +180,33 @@ class HomeScreen extends StatelessWidget {
                                 },
                               ),
                             ),
-                            // The night's forecast needs a night (ADR-012);
-                            // without a site the location card is shown.
-                            if (planVm.sessionNight != null)
-                              WeatherForecastWidget(
-                                onTap: () => context.push(AppRouter.selectSite),
-                              )
-                            else
+                            // S6.5 (UX-06, UX-10): the night and its
+                            // forecast in full are on their detail screens;
+                            // here one factual row each. Without a site the
+                            // location card is shown (ADR-012).
+                            if (planVm.sessionNight case final night?) ...[
+                              _DetailRow(
+                                key: const Key('planner.night'),
+                                title: 'Night & Moon',
+                                onTap: () => context.push(AppRouter.nightMoon),
+                                child: NightSummary(
+                                  night: night,
+                                  conditions: conditionsVm,
+                                  zoneId: siteVm.displayZoneId,
+                                ),
+                              ),
+                              _DetailRow(
+                                key: const Key('planner.weather'),
+                                title: 'Weather',
+                                onTap: () => context.push(AppRouter.weather),
+                                child: Text(
+                                  WeatherText.summary(
+                                    conditionsVm.nightWeather,
+                                    conditionsVm.nightWeatherSummary,
+                                  ),
+                                ),
+                              ),
+                            ] else
                               PlannerSummaryCard(
                                 title:
                                     'Location: ${siteVm.locationName ?? "Custom"}',
@@ -463,6 +484,50 @@ class _DefaultLocationBanner extends StatelessWidget {
           child: const Text('Set site'),
         ),
       ],
+    );
+  }
+}
+
+/// A factual summary row that opens a detail screen (S6.5; ADR-019 §6): a
+/// title, the summary below it (wrapping at large text), and a chevron.
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    super.key,
+    required this.title,
+    required this.child,
+    required this.onTap,
+  });
+
+  final String title;
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(title, style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: AppSpacing.xs),
+                    child,
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

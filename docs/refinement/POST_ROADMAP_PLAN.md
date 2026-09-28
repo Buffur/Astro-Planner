@@ -2868,7 +2868,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | **Done 2026-09-27** |
 | S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 (**decided: R**) | **Done 2026-09-28** |
 | S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
-| S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
+| S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | **Done 2026-09-28** |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | Frozen |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | Frozen |
@@ -3075,6 +3075,15 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - the planner's summary rows show the stale, unavailable and unknown states (tests);
   - both routes pass the sweep at 100 % and 200 % text in the three themes;
   - the full gate.
+- **Done 2026-09-28:** `/night` (`NightMoonScreen`) and `/weather` (`WeatherDetailScreen`) on
+  `DetailScaffold`, in the sweep; the dark span at the user's limit is `NightTimeline.darkAtLimit`
+  (CALC-41, reference vectors in `dark_span_test.dart`); the planner keeps a Night & Moon row and a
+  Weather row, and `SkyDarknessWidget` only Bortle and SQM; Tonight's rows open the details. TD-051
+  resolved; the three retired terms left the baseline. To stay under the ViewModel cap (the Task's
+  rule), `tonightCandidates()` moved into a new `CandidatesViewModel` (no behaviour change). Tests
+  changed deliberately: the Moon test pumps `MoonSection`, the forecast sweep opens `/weather`, and
+  the planner's weather-failure test finds the retry on the Weather detail it opens (assertions
+  unchanged). Full gate PASS: 1,386 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.6 — The planner's answer-first structure (P6.3)
 - **Objective:** the planner's first screen answers Stage 6's seven questions (Purpose, above).

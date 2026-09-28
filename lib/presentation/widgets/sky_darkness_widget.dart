@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
+import '../shared/app_words.dart';
 import '../shared/night_time_formatter.dart';
 import '../../core/theme/app_palette.dart';
 import '../../../core/config/feature_scope.dart';
@@ -12,18 +13,17 @@ import '../../../domain/models/sky_darkness.dart';
 import '../shared/night_text.dart';
 import '../../core/utils/quantity_text.dart';
 
+/// The site's sky darkness in the planner (TASK 7.4): Bortle and SQM as
+/// entered, with their sources, or unknown. Since S6.5 the night's timeline
+/// and the Moon are on the Night & Moon detail ([NightTimelineSection],
+/// [MoonSection]); the planner shows a summary row for them.
 class SkyDarknessWidget extends StatelessWidget {
   const SkyDarknessWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final conditionsVm = context.watch<NightConditionsViewModel>();
     final siteVm = context.watch<SiteViewModel>();
-    final timeline = conditionsVm.nightTimeline;
     final theme = Theme.of(context);
-
-    final illum = conditionsVm.lunarIllumination;
-    final lunarIllum = illum == null ? '--' : QuantityText.percent(illum * 100);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -41,7 +41,7 @@ class SkyDarknessWidget extends StatelessWidget {
               runSpacing: 4,
               children: [
                 Text(
-                  'Sky Darkness & Timeline',
+                  'Sky darkness',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -58,37 +58,6 @@ class SkyDarknessWidget extends StatelessWidget {
                 darkness: siteVm.skyDarkness,
                 hasSite: siteVm.activeSite != null,
               ),
-            const SizedBox(height: 16),
-
-            // Moon Status
-            Row(
-              children: [
-                Icon(
-                  Icons.nightlight_round,
-                  size: 20,
-                  color: AppPalette.of(context).moon,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Moon Illumination at midnight: $lunarIllum',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-            _MoonDetails(
-              conditions: conditionsVm.moonConditions,
-              zoneId: siteVm.displayZoneId,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Night Timeline
-            _NightTimelineVisual(
-              timeline: timeline,
-              zoneId: siteVm.displayZoneId,
-            ),
           ],
         ),
       ),
@@ -213,138 +182,123 @@ class _BortleBadge extends StatelessWidget {
   }
 }
 
-class _NightTimelineVisual extends StatelessWidget {
-  final NightTimeline? timeline;
-
-  /// The site's IANA zone, or null for the device zone (TASK 7.1).
-  final String? zoneId;
-
-  const _NightTimelineVisual({required this.timeline, required this.zoneId});
+/// The night's Sun timeline for the Night & Moon detail (S6.5, TD-051):
+/// sunset, each standard twilight and sunrise — the only place their names
+/// appear (ADR-019 §10) — and the dark span at the user's darkness limit,
+/// which the imaging opportunity uses. Times are in the zone the detail's
+/// header names once.
+class NightTimelineSection extends StatelessWidget {
+  const NightTimelineSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final timeline = this.timeline;
+    final timeline = context.watch<NightConditionsViewModel>().nightTimeline;
+    final zoneId = context.watch<SiteViewModel>().displayZoneId;
+    final theme = Theme.of(context);
     if (timeline == null) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Text(
-          'Set your site to see tonight\'s timeline.',
-          style: TextStyle(color: AppPalette.of(context).muted),
-        ),
+      return Text(
+        'Set your site to see the night.',
+        style: TextStyle(color: AppPalette.of(context).textSecondary),
       );
     }
-    final windowStart = timeline.night.startUtc;
-
+    String at(DateTime utc) => NightTimeFormatter.instant(
+      context,
+      utc,
+      windowStartUtc: timeline.night.startUtc,
+      zoneId: zoneId,
+    );
     String dusk(SunThresholdResult r) => switch (r) {
-      SunCrossing(:final duskUtc?) => NightTimeFormatter.instant(
-        context,
-        duskUtc,
-        windowStartUtc: windowStart,
-        zoneId: zoneId,
-      ),
-      SunCrossing() => 'Before start',
-      SunNeverBelow() => 'N/A',
-      SunAlwaysBelow() => 'All night',
+      SunCrossing(:final duskUtc?) => at(duskUtc),
+      SunCrossing() => 'before the night starts',
+      SunNeverBelow() => 'not tonight',
+      SunAlwaysBelow() => 'all night',
     };
     String dawn(SunThresholdResult r) => switch (r) {
-      SunCrossing(:final dawnUtc?) => NightTimeFormatter.instant(
-        context,
-        dawnUtc,
-        windowStartUtc: windowStart,
-        zoneId: zoneId,
-      ),
-      SunCrossing() => 'After end',
-      SunNeverBelow() => 'N/A',
-      SunAlwaysBelow() => 'All night',
+      SunCrossing(:final dawnUtc?) => at(dawnUtc),
+      SunCrossing() => 'after the night ends',
+      SunNeverBelow() => 'not tonight',
+      SunAlwaysBelow() => 'all night',
     };
-
-    final palette = AppPalette.of(context);
+    final rows = [
+      ('Sunset', dusk(timeline.sunriseSunset)),
+      (AppWords.civilDusk, dusk(timeline.civilTwilight)),
+      (AppWords.nauticalDusk, dusk(timeline.nauticalTwilight)),
+      (AppWords.astronomicalDusk, dusk(timeline.astronomicalTwilight)),
+      (AppWords.astronomicalDawn, dawn(timeline.astronomicalTwilight)),
+      (AppWords.nauticalDawn, dawn(timeline.nauticalTwilight)),
+      (AppWords.civilDawn, dawn(timeline.civilTwilight)),
+      ('Sunrise', dawn(timeline.sunriseSunset)),
+    ];
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // TASK 15.3: four equal columns whose text wraps, so neither a
-        // narrow phone nor 200 % text overflows.
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _TimelinePoint(
-              label: 'Sunset',
-              time: dusk(timeline.sunriseSunset),
-              icon: Icons.wb_sunny_outlined,
-              color: palette.sunEvent,
+        if (timeline.darkAtLimit case final dark?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              DarkText.span(dark, at),
+              key: const Key('night.dark'),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
-            _TimelinePoint(
-              label: 'Astro Dusk',
-              time: dusk(timeline.astronomicalTwilight),
-              icon: Icons.nights_stay_outlined,
-              color: palette.twilightEvent,
+          ),
+        for (final (label, time) in rows)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            // Wraps at large text rather than overflowing (TASK 15.3).
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 8,
+              children: [
+                Text(label, style: theme.textTheme.bodyMedium),
+                Text(time, style: theme.textTheme.bodyMedium),
+              ],
             ),
-            _TimelinePoint(
-              label: 'Astro Dawn',
-              time: dawn(timeline.astronomicalTwilight),
-              icon: Icons.nights_stay,
-              color: palette.twilightEvent,
-            ),
-            _TimelinePoint(
-              label: 'Sunrise',
-              time: dawn(timeline.sunriseSunset),
-              icon: Icons.wb_sunny,
-              color: palette.sunEvent,
-            ),
-          ],
-        ),
-        // TASK 10.3 (TD-034): the decorative gradient bar is removed; the
-        // data-driven darkness bands are in "Tonight for this target".
-        const SizedBox(height: 8),
-        Text(
-          'True Night Window: ${dusk(timeline.astronomicalTwilight)} - '
-          '${dawn(timeline.astronomicalTwilight)} '
-          '(${NightTimeFormatter.zoneCaption(windowStart, zoneId: zoneId)})',
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
+          ),
       ],
     );
   }
 }
 
-class _TimelinePoint extends StatelessWidget {
-  final String label;
-  final String time;
-  final IconData icon;
-  final Color color;
-
-  const _TimelinePoint({
-    required this.label,
-    required this.time,
-    required this.icon,
-    required this.color,
-  });
+/// The Moon for the Night & Moon detail (TASK 6.4; moved here in S6.5):
+/// its illumination at midnight, when it is up, and how close it comes to
+/// the target — annotations only, never an "impact %" (ADR-010).
+class MoonSection extends StatelessWidget {
+  const MoonSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(height: 4),
-          Text(
-            time,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
-        ],
-      ),
+    final conditionsVm = context.watch<NightConditionsViewModel>();
+    final zoneId = context.watch<SiteViewModel>().displayZoneId;
+    final illum = conditionsVm.lunarIllumination;
+    final lunarIllum = illum == null ? '--' : QuantityText.percent(illum * 100);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.nightlight_round,
+              size: 20,
+              color: AppPalette.of(context).moon,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Moon Illumination at midnight: $lunarIllum',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        _MoonDetails(conditions: conditionsVm.moonConditions, zoneId: zoneId),
+      ],
     );
   }
 }
 
-/// When the Moon is up tonight and how close it comes to the target —
-/// annotations only, never an "impact %" (ADR-010, TASK 6.4).
+/// When the Moon is up tonight and how close it comes to the target.
 class _MoonDetails extends StatelessWidget {
   const _MoonDetails({required this.conditions, required this.zoneId});
 
@@ -385,10 +339,6 @@ class _MoonDetails extends StatelessWidget {
           Text(upText, key: const Key('sky.moonUp'), style: style),
           if (sepText != null)
             Text(sepText, key: const Key('sky.moonSeparation'), style: style),
-          Text(
-            'Times in ${NightTimeFormatter.zoneCaption(c.night.startUtc, zoneId: zoneId)}.',
-            style: style,
-          ),
         ],
       ),
     );

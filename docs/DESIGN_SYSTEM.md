@@ -475,7 +475,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | The planner's app bar (`home_screen.dart`: "Session planner", "+", Duplicate) | `PlanStateLabel` in the title (target · night · state); `askUnsavedChanges` instead of the S1.6 guard; `showDone` after New plan, Copy, Open and Save; `pickNight` for Copy to another night; `AppWords` (New plan, Copy to another night) | P6.1 (**S6.2 and S6.3 done**). The identity is a strip under the app bar, which wraps | Session planner (removed by S6.2) |
 | The planner's body (`home_screen.dart`: empty state, "Session Date", sections, bottom bar) | `StatusBlock` first; `ContextLine` + `pickNight` instead of the "Session Date" row; text roles and the type scale instead of explicit styles; the button hierarchy (Save plan filled, the `ElevatedButton`s gone) | P6.3 | Equipment profile (the empty state) |
 | Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 | Acquisition, Session budget (budget summary) |
-| Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 | Astro Dusk, Astro Dawn, True Night Window (with TD-051) |
+| Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 (**S6.5 done**: `/night`, `/weather`) | Astro Dusk, Astro Dawn, True Night Window (with TD-051; **removed by S6.5**) |
 | Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 | Draft (Tonight's status) |
 | The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) | — |
 | The result form and the live tracker (`results_screen.dart`, `execution_screen.dart`) | `confirmDestructive` for Abandon; `showDone` after Save result; `PlanStateLabel` | P8.2, P8.4 | — |
@@ -510,7 +510,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | `home_screen.dart`: Session planner | P6.1 (**removed by S6.2**) |
 | `home_screen.dart`: Equipment profile | P6.3 |
 | `capture_budget_summary.dart`: Acquisition, Session budget | P6.4 |
-| `sky_darkness_widget.dart`: Astro Dusk, Astro Dawn, True Night Window | P6.5 |
+| `sky_darkness_widget.dart`: Astro Dusk, Astro Dawn, True Night Window | P6.5 (**removed by S6.5**) |
 | `tonight_home_screen.dart`: Draft | P6.6 |
 | `logbook_screen.dart`: Legacy (2), Draft | P8.5 |
 | `session_detail_screen.dart`: Legacy, Window load, Session budget | P8.5 |

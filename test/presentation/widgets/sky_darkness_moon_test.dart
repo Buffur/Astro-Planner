@@ -62,7 +62,8 @@ void main() {
         providers: vm.providers,
         child: const MaterialApp(
           home: Scaffold(
-            body: SingleChildScrollView(child: SkyDarknessWidget()),
+            // S6.5: the Moon moved to the Night & Moon detail.
+            body: SingleChildScrollView(child: MoonSection()),
           ),
         ),
       ),

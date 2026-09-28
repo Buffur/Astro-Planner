@@ -261,14 +261,16 @@ void main() {
       expect(find.text('Tonight for this target'), findsOneWidget);
       expect(find.text('Max Altitude'), findsNothing);
 
-      // The list builds lazily; scroll the weather card into view.
+      // The list builds lazily; scroll the weather row into view. S6.5:
+      // the planner's row says why there is no forecast, and the retry card
+      // is on the Weather detail it opens.
       final list = find.byType(Scrollable).first;
-      await tester.scrollUntilVisible(
-        find.text("Couldn't load weather."),
-        300,
-        scrollable: list,
+      final row = find.byKey(const Key('planner.weather'));
+      await tester.scrollUntilVisible(row, 300, scrollable: list);
+      expect(
+        find.descendant(of: row, matching: find.textContaining('No forecast.')),
+        findsOneWidget,
       );
-      expect(find.text("Couldn't load weather."), findsOneWidget);
       await tester.scrollUntilVisible(
         find.byType(SkyDarknessWidget),
         300,
@@ -276,6 +278,11 @@ void main() {
       );
       expect(find.textContaining('Sky Warning'), findsNothing);
 
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      expect(find.text("Couldn't load weather."), findsOneWidget);
       await tester.ensureVisible(find.text('Retry'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Retry'));

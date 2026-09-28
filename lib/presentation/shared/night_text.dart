@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_palette.dart';
+import '../../core/utils/quantity_text.dart';
 
 import '../../domain/models/moon_conditions.dart';
 import '../../domain/models/night_weather.dart';
+import '../../domain/models/night_timeline.dart';
 import '../../domain/models/night_weather_summary.dart';
 import '../../domain/models/weather_snapshot.dart';
 import '../../domain/services/fit_analyzer.dart';
@@ -42,6 +44,38 @@ abstract final class WeatherText {
     WeatherFailure.malformed => 'The forecast could not be read.',
     WeatherFailure.outOfRange => 'Beyond the forecast horizon.',
   };
+
+  /// One line for a summary row (S6.5): the night's cloud range with the
+  /// forecast's age (and its aging or stale wording), or why there is no
+  /// forecast. Never a score or a good/bad word (ADR-012).
+  static String summary(NightWeather state, NightWeatherSummary? s) =>
+      switch (state) {
+        NightWeatherIdle() => 'Set a site to see the forecast.',
+        NightWeatherLoading() => 'Loading the forecast…',
+        NightWeatherOutOfRange() =>
+          'No forecast yet: this night is beyond the forecast horizon.',
+        NightWeatherUnavailable(:final failure) =>
+          'No forecast. ${WeatherText.failure(failure)}',
+        NightWeatherAvailable() =>
+          'Cloud ${range(s?.cloudCover, '%')} · ${freshness(state)}',
+      };
+}
+
+/// The dark span at the user's darkness limit (S6.5, TD-051): the Sun below
+/// the limit the imaging opportunity uses, labelled with it.
+abstract final class DarkText {
+  /// "Dark (Sun below −15°): 6:02 PM – 5:40 AM (+1)", or "…: not tonight",
+  /// "…: all night"; [at] formats an instant.
+  static String span(SunThresholdResult r, String Function(DateTime utc) at) {
+    final label = 'Dark (Sun below ${QuantityText.degrees(r.thresholdDeg)})';
+    return switch (r) {
+      SunCrossing(:final duskUtc, :final dawnUtc) =>
+        '$label: ${duskUtc == null ? 'from the start' : at(duskUtc)} – '
+            '${dawnUtc == null ? 'the end' : at(dawnUtc)}',
+      SunNeverBelow() => '$label: not tonight',
+      SunAlwaysBelow() => '$label: all night',
+    };
+  }
 }
 
 abstract final class MoonText {

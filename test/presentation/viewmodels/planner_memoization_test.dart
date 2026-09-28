@@ -171,7 +171,7 @@ void main() {
     expect(sw.elapsedMicroseconds / 100, lessThan(1000));
 
     final candidates = Stopwatch()..start();
-    final rows = await c.tonightCandidates();
+    final rows = await vm.tonightCandidates();
     candidates.stop();
     expect(rows, hasLength(greaterThan(100))); // the bundled catalog
     expect(candidates.elapsed, lessThan(const Duration(seconds: 1)));

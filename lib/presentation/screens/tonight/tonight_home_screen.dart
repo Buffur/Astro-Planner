@@ -217,7 +217,8 @@ class _NightCard extends StatelessWidget {
     final conditions = context.watch<NightConditionsViewModel>();
     final timeline = conditions.nightTimeline;
     final zoneId = siteVm.displayZoneId;
-    void openPlanner() => context.push(AppRouter.session());
+    // S6.5 (UX-10): each row opens its detail, not the top of the planner.
+    void openNight() => context.push(AppRouter.nightMoon);
     final moon = conditions.moonConditions;
 
     final rows = <Widget>[];
@@ -238,7 +239,7 @@ class _NightCard extends StatelessWidget {
             _span('Dark (Sun below −18°)', timeline.astronomicalTwilight, at),
             'Times in ${NightTimeFormatter.zoneCaption(timeline.night.startUtc, zoneId: zoneId)}',
           ],
-          onTap: openPlanner,
+          onTap: openNight,
         ),
       );
       if (moon != null) {
@@ -253,7 +254,7 @@ class _NightCard extends StatelessWidget {
                   'at midnight',
               MoonText.up(moon, at),
             ],
-            onTap: openPlanner,
+            onTap: openNight,
           ),
         );
       }
@@ -264,7 +265,7 @@ class _NightCard extends StatelessWidget {
         icon: Icons.cloud_outlined,
         label: 'Weather',
         lines: _weatherLines(conditions),
-        onTap: openPlanner,
+        onTap: () => context.push(AppRouter.weather),
       ),
     );
 

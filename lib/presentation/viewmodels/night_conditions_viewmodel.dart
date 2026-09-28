@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -12,8 +11,6 @@ import '../../domain/models/night_weather.dart';
 import '../../domain/models/night_weather_summary.dart';
 import '../../domain/models/session_night.dart';
 import '../../domain/models/visibility_window.dart';
-import '../../domain/repositories/target_repository.dart';
-import '../../domain/services/candidate_evaluator.dart';
 import '../../domain/services/imaging_opportunity_calculator.dart';
 import '../../domain/services/moon_calculator.dart';
 import '../../domain/services/night_weather_service.dart';
@@ -26,15 +23,15 @@ import 'site_viewmodel.dart';
 
 /// Tonight's conditions for the plan (split out of the planner ViewModel in
 /// TASK 12.3): the night timeline, the forecast (ADR-012), the Moon, the
-/// imaging opportunity (ADR-013) and tonight's candidates. The forecast
-/// reloads whenever the night or the site changes.
+/// imaging opportunity (ADR-013). Tonight's candidates moved to
+/// `CandidatesViewModel` (S6.5). The forecast reloads whenever the night or
+/// the site changes.
 class NightConditionsViewModel extends ChangeNotifier {
   NightConditionsViewModel({
     required this._site,
     required this._plan,
     required this._settings,
     required this._weatherService,
-    required this._targetRepository,
     required this._clock,
   }) {
     for (final source in [_site, _plan, _settings]) {
@@ -46,7 +43,6 @@ class NightConditionsViewModel extends ChangeNotifier {
   final SessionPlanViewModel _plan;
   final SettingsViewModel _settings;
   final NightWeatherService _weatherService;
-  final TargetRepository _targetRepository;
   final Clock _clock;
 
   NightWeather _nightWeather = const NightWeatherIdle();
@@ -134,13 +130,19 @@ class NightConditionsViewModel extends ChangeNotifier {
         notifyListeners();
       }();
 
-  /// The Sun's dusk/dawn timeline, or null without a site (ADR-007 §8-§9);
-  /// cached per night (TASK 15.2).
+  /// The Sun's dusk/dawn timeline with the dark span at the user's limit
+  /// (S6.5), or null without a site (ADR-007 §8-§9); cached per night and
+  /// limit (TASK 15.2).
   NightTimeline? get nightTimeline {
     final night = _plan.sessionNight;
     if (night == null) return null;
-    if (_timelineNight != night) {
-      _timeline = VisibilityCalculator.calculateNightTimelineForNight(night);
+    final limit = _settings.planningPreferences.darknessLimit.degrees;
+    if (_timelineNight != night ||
+        _timeline?.darkAtLimit?.thresholdDeg != limit) {
+      _timeline = VisibilityCalculator.calculateNightTimelineForNight(
+        night,
+        darknessLimitDeg: limit,
+      );
       _timelineNight = night;
     }
     return _timeline;
@@ -193,7 +195,8 @@ class NightConditionsViewModel extends ChangeNotifier {
 
   double? get lunarIllumination => moonConditions?.illuminationAtMidnight;
 
-  OpportunityWeather? _opportunityWeather() {
+  /// The forecast as the opportunity reads it (also the candidates').
+  OpportunityWeather? get opportunityWeather {
     final weather = _nightWeather;
     return weather is NightWeatherAvailable
         ? OpportunityWeather(
@@ -233,7 +236,7 @@ class NightConditionsViewModel extends ChangeNotifier {
         sunTrack: _sunTrack,
         gates: prefs.optionalGates,
         moon: moonConditions,
-        weather: _opportunityWeather(),
+        weather: opportunityWeather,
         skyDarkness: _site.skyDarkness,
       );
       _opportunityKey = key;
@@ -248,32 +251,6 @@ class NightConditionsViewModel extends ChangeNotifier {
   /// The opportunity's windows — the budget fit's input (TASK 10.2).
   List<VisibilityWindow> get visibilityWindows =>
       imagingOpportunity?.visibilityWindows ?? const [];
-
-  /// Every target evaluated like [imagingOpportunity] (TASK 10.4), on a
-  /// background isolate; null without a night.
-  Future<List<TonightCandidate>?> tonightCandidates() async {
-    final night = _plan.sessionNight;
-    if (night == null) return null;
-    final targets = await _targetRepository.getAllTargets();
-    final prefs = _settings.planningPreferences;
-    final weather = _opportunityWeather();
-    final sky = _site.skyDarkness;
-    final rig = _plan.selectedEquipment;
-    // Only plain values cross into the isolate (never `this`).
-    return Isolate.run(
-      () => CandidateEvaluator.evaluate(
-        night: night,
-        targets: targets,
-        darknessLimitDeg: prefs.darknessLimit.degrees,
-        minAltitudeDeg: prefs.minAltitudeDeg,
-        gates: prefs.optionalGates,
-        weather: weather,
-        skyDarkness: sky,
-        equipment: rig,
-        npfK: prefs.npfK,
-      ),
-    );
-  }
 
   /// The target's altitude now; null without a target or a real site.
   double? get currentAltitude {

@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/config/feature_scope.dart';
 import '../screens/about/about_screen.dart';
+import '../screens/details/night_moon_screen.dart';
+import '../screens/details/weather_detail_screen.dart';
 import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/home/session_planner_route.dart';
 import '../screens/library/library_screen.dart';
@@ -72,6 +74,11 @@ class AppRouter {
 
   /// The first-run setup (TASK 12.5).
   static const welcome = '/welcome';
+
+  /// The detail screens (S6.5; ADR-019 §9): the plan's night and its
+  /// forecast, above the tabs.
+  static const nightMoon = '/night';
+  static const weather = '/weather';
 
   static final router = GoRouter(
     navigatorKey: rootNavigatorKey,
@@ -218,6 +225,16 @@ class AppRouter {
         path: welcome,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: nightMoon,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const NightMoonScreen(),
+      ),
+      GoRoute(
+        path: weather,
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const WeatherDetailScreen(),
       ),
       // A transient position: map pick or GPS (TASK 7.1).
       GoRoute(

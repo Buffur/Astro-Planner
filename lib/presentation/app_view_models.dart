@@ -22,6 +22,7 @@ import '../domain/services/current_session.dart';
 import '../domain/services/screen_wake.dart';
 import '../domain/services/session_exporter.dart';
 import 'viewmodels/backup_viewmodel.dart';
+import 'viewmodels/candidates_viewmodel.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
 import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
@@ -100,8 +101,14 @@ class AppViewModels {
       plan: plan,
       settings: settings,
       weatherService: weather,
-      targetRepository: targets,
       clock: clock,
+    );
+    candidates = CandidatesViewModel(
+      site: site,
+      plan: plan,
+      settings: settings,
+      conditions: conditions,
+      targets: targets,
     );
     analysis = CaptureAnalysisViewModel(
       site: site,
@@ -148,6 +155,9 @@ class AppViewModels {
   /// start (S6.1).
   late final PlanLifecycleViewModel lifecycle;
   late final NightConditionsViewModel conditions;
+
+  /// "What can I image tonight?" (S6.5 split it out of [conditions]).
+  late final CandidatesViewModel candidates;
   late final CaptureAnalysisViewModel analysis;
   late final StartupViewModel startup;
   late final GearViewModel gear;
@@ -177,6 +187,7 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: plan),
     Provider.value(value: lifecycle),
     ChangeNotifierProvider.value(value: conditions),
+    Provider.value(value: candidates),
     ChangeNotifierProvider.value(value: analysis),
     ChangeNotifierProvider.value(value: startup),
     ChangeNotifierProvider.value(value: gear),

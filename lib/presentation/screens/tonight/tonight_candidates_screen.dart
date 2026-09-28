@@ -11,7 +11,7 @@ import '../../shared/opportunity_text.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../viewmodels/settings_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
-import '../../viewmodels/night_conditions_viewmodel.dart';
+import '../../viewmodels/candidates_viewmodel.dart';
 
 /// "What can I image tonight?" (TASK 10.4): every target evaluated for the
 /// chosen night with the same rules as Home's opportunity card, sorted by a
@@ -52,7 +52,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
 
   void _load() {
     _rowsNight = context.read<SessionPlanViewModel>().sessionNight;
-    _rows = context.read<NightConditionsViewModel>().tonightCandidates();
+    _rows = context.read<CandidatesViewModel>().tonightCandidates();
   }
 
   @override

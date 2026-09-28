@@ -41,9 +41,6 @@ const baseline = {
   'lib/presentation/screens/logbook/session_detail_screen.dart|Session budget':
       1,
   'lib/presentation/screens/tonight/tonight_home_screen.dart|Draft': 1,
-  'lib/presentation/widgets/sky_darkness_widget.dart|Astro Dusk': 1,
-  'lib/presentation/widgets/sky_darkness_widget.dart|Astro Dawn': 1,
-  'lib/presentation/widgets/sky_darkness_widget.dart|True Night Window': 1,
   'lib/presentation/widgets/capture_plan/capture_budget_summary.dart|Acquisition':
       1,
   'lib/presentation/widgets/capture_plan/capture_budget_summary.dart|Session budget':

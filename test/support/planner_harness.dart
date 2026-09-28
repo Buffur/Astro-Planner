@@ -247,7 +247,7 @@ class PlannerHarness extends ChangeNotifier {
   ImagingOpportunity? get imagingOpportunity => conditions.imagingOpportunity;
   List<VisibilityWindow> get visibilityWindows => conditions.visibilityWindows;
   Future<List<TonightCandidate>?> tonightCandidates() =>
-      conditions.tonightCandidates();
+      vms.candidates.tonightCandidates();
   double? get currentAltitude => conditions.currentAltitude;
   DateTime get nowUtc => conditions.nowUtc;
 

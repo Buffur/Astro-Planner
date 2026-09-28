@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.5, 2026-09-28:** B4 notes the Night & Moon and Weather detail routes, the dark span at the user's limit and `CandidatesViewModel`.
 > **S6.3, 2026-09-28:** B4 notes Save · Discard · Cancel, the replaced-draft deletion and the revert of a changed saved plan (S4-DEF-04 = R).
 > **S6.4, 2026-09-28:** B11 notes the rollover rule for a never-saved draft (`PlanLifecycleViewModel.followNight`, TD-057).
 > **S6.2, 2026-09-27:** B4 notes the planner's identity strip and ⋮ menu, and that `CurrentSession.startNew`/`adopt` run in the autosave chain (TD-058).
@@ -437,6 +438,17 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 >   longer exists;
 > - `startNew(unsaved: true)` marks a copy as unsaved (W1). `SessionPlanViewModel` writes a site
 >   change as an edit on a saved plan (V3), not on a never-saved draft.
+
+> **Since S6.5 (2026-09-28)** two detail routes sit above the tabs, `AppRouter.nightMoon` (`/night`,
+> `NightMoonScreen`) and `AppRouter.weather` (`/weather`, `WeatherDetailScreen`), both on
+> `DetailScaffold` and in the accessibility sweep. The planner's full weather card and the night and
+> Moon parts of `SkyDarknessWidget` moved there (`NightTimelineSection`, `MoonSection`,
+> `WeatherForecastWidget` unchanged); the planner keeps a summary row for each (`NightSummary`,
+> `WeatherText.summary`) and `SkyDarknessWidget` keeps only Bortle and SQM. The night timeline now
+> carries the dark span at the user's limit (`NightTimeline.darkAtLimit`, CALC-41), built by
+> `NightConditionsViewModel.nightTimeline` and cached per night and limit. **`CandidatesViewModel`**
+> (a plain `Provider`) took `tonightCandidates()` out of `NightConditionsViewModel`, which reads the
+> forecast for it through the public `opportunityWeather`; the conditions ViewModel is 274 lines.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

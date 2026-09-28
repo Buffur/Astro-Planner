@@ -173,7 +173,14 @@ class VisibilityCalculator {
   /// The Sun's dusk/dawn timeline for [night], at the four standard
   /// altitude thresholds (ADR-007 §8). Pure; samples [sampleStep] apart,
   /// anchored at `night.startUtc`, inclusive of `night.endUtc` (ADR-007 §9).
-  static NightTimeline calculateNightTimelineForNight(SessionNight night) {
+  ///
+  /// [darknessLimitDeg], when given, adds [NightTimeline.darkAtLimit]: the
+  /// span with the Sun below the user's darkness limit, from the same samples
+  /// (S6.5, TD-051).
+  static NightTimeline calculateNightTimelineForNight(
+    SessionNight night, {
+    double? darknessLimitDeg,
+  }) {
     const thresholds = [-0.833, -6.0, -12.0, -18.0];
 
     final altitudes = <double>[];
@@ -225,6 +232,9 @@ class VisibilityCalculator {
       civilTwilight: byThreshold[-6.0]!,
       nauticalTwilight: byThreshold[-12.0]!,
       astronomicalTwilight: byThreshold[-18.0]!,
+      darkAtLimit: darknessLimitDeg == null
+          ? null
+          : byThreshold[darknessLimitDeg] ?? resultFor(darknessLimitDeg),
     );
   }
 

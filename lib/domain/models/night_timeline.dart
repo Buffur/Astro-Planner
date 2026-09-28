@@ -58,6 +58,7 @@ class NightTimeline {
     required this.civilTwilight,
     required this.nauticalTwilight,
     required this.astronomicalTwilight,
+    this.darkAtLimit,
   });
 
   final SessionNight night;
@@ -75,4 +76,9 @@ class NightTimeline {
   /// product-facing darkness limit is a separate, configurable parameter
   /// (ADR-007 §14) — see `VisibilityCalculator.calculateVisibilityWindowsForNight`.
   final SunThresholdResult astronomicalTwilight;
+
+  /// The Sun below the user's darkness limit (its `thresholdDeg`; S6.5,
+  /// TD-051, CALC-41): the dark span the imaging opportunity counts as dark,
+  /// on the same grid. Null when the timeline was built without a limit.
+  final SunThresholdResult? darkAtLimit;
 }
