@@ -1,4 +1,6 @@
+import '../../domain/models/tracking_type.dart';
 import '../../domain/services/capability_calculator.dart';
+import 'app_words.dart';
 
 /// Display text for [RigCapability] (TASK 8.6). Formatting only; every
 /// figure comes from the domain [CapabilityCalculator].
@@ -43,4 +45,17 @@ abstract final class CapabilityText {
   static String subWarning(RigCapability c) =>
       'Longer than the recommended max sub '
       '(${recommendedMaxSub(c)}) — stars may trail';
+
+  /// The warning with the tracking it rests on (S6.9; RD-08): e.g.
+  /// "… — stars may trail (Tracking: Untracked (fixed tripod))".
+  static String subWarningFor(RigCapability c, TrackingType tracking) =>
+      '${subWarning(c)} (${AppWords.tracking}: ${tracking.label})';
+
+  /// Unknown tracking is a missing input, not a verdict (S6.9, UX-15 (1)):
+  /// PD-11's guidance stays conditional ("if untracked").
+  static String unknownTracking(RigCapability c) {
+    final r = c.recommendedMaxSubS;
+    return 'Tracking not set: if this rig is untracked, subs longer than '
+        '${r == null ? 'the recommended max' : _seconds(r)} may trail.';
+  }
 }

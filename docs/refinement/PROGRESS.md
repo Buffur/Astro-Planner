@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.8 done**: defaults and the first run; Stage 6 in progress).
-> **Next:** S6.9 (RD-08 decided: T3). RD-10 and RD-11 whenever convenient, each before its Task.
+> **Last updated:** 2026-09-28 (**S6.9 done**: the capture plan's blocks; Stage 6 in progress).
+> **Next:** S6.10 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.8 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.9 done) |
 | Current Task | None in progress |
-| Next Task | **S6.9 — The capture plan's blocks** (RD-08 decided: T3) |
-| Code baseline | S6.8 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.10 — The capture plan's outputs** (no gate) |
+| Code baseline | S6.9 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.9 done, 2026-09-28** (P6.8; UX-09, UX-15 (1); 08 §14; RD-09; RD-08 = T3): each capture block's
+row says what will be captured ("Ha · 60 s × 100 · 1 h 40 min"); one heading; Delete with Undo
+that restores the identical block; a known tracking's exceedance keeps its warning and names the
+tracking, while unknown tracking is a neutral missing input with a way to set it; Save is the
+dialog's primary button; a changed row is briefly highlighted. The tracking used is the rig's
+default until Stage 7 adds the plan's override. Verification: the full gate after the last code
+change, PASS (below); every acceptance criterion checked.
 
 **RD-08 decided, 2026-09-28 (the owner, in chat): T3.** Tracking is the rig's default with a
 per-plan override; the plan changes the effective value without changing the rig; the snapshot keeps
@@ -145,7 +153,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (425 files, 0 changed); Analyze; 1,405 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.8's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (427 files, 0 changed); Analyze; 1,414 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.9's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -266,13 +274,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.9 — The capture plan's blocks** (P6.8; UX-09, UX-15 (1); 08 §14; RD-09). Frozen; its gate
-RD-08 is decided (T3). The frozen sequence is the approval.
-- **Read:** S6.9 and "Rules for every Stage 6 Task"; RD-08 (DECISIONS E.1); RD-09 (M + S1) and
-  `showUndo`/`DeleteButton`/`SwipeToDelete`; `CapturePlanWidget`, `capture_block_dialog.dart`,
-  `BlockBudget`, `CapabilityCalculator`/`CapabilityText`.
-- **Tracking in S6.9:** show the effective tracking (the rig's default until Stage 7 adds the
-  override) where the warning needs it; unknown tracking is a missing input. No schema change.
+**S6.10 — The capture plan's outputs: time, what fits, storage** (P6.9; 08 §17). Frozen, no gate;
+the frozen sequence is the approval.
+- **Read:** S6.10, P6.9's notes and "Rules for every Stage 6 Task"; ADR-009 §2, §7; ADR-018 §4;
+  the storage trace (the plan's inputs table, case C); `CaptureBudgetSummary`,
+  `FitAnalyzer.maxFramesForBlock`, `FitResult.unplacedFramesByBlock`.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

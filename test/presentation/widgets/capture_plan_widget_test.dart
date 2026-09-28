@@ -89,7 +89,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.add_circle));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     // The dialog is still open (validation failed) and no block was added.
@@ -112,7 +112,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Frame Count'),
       '10',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     expect(find.text('Add Capture Block'), findsOneWidget);
@@ -132,7 +132,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Frame Count'),
       '15',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     expect(find.text('Add Capture Block'), findsNothing);
@@ -154,10 +154,10 @@ void main() {
       );
       await tester.pumpWidget(wrap());
       await tester.pumpAndSettle();
-      // S1.7 (UX-19): "60 s", not "60.0s".
-      expect(find.textContaining('30 × 60 s'), findsOneWidget);
+      // S1.7 (UX-19): "60 s", not "60.0s". S6.9: exposure × count.
+      expect(find.text('L · 60 s × 30 · 30 min'), findsOneWidget);
 
-      await tester.tap(find.text('LIGHT [L] '));
+      await tester.tap(find.text('L · 60 s × 30 · 30 min'));
       await tester.pumpAndSettle();
 
       expect(find.text('Edit Capture Block'), findsOneWidget);
@@ -168,7 +168,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Frame Count'),
         '45',
       );
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Save'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save'));
       await tester.pumpAndSettle();
 
       expect(find.text('Edit Capture Block'), findsNothing);
@@ -258,7 +258,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Frame Count'),
       '10',
     );
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Add'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Add'));
     await tester.pumpAndSettle();
 
     final b = vm.captureBlocks.single;

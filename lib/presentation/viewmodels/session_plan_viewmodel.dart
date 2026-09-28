@@ -9,6 +9,7 @@ import '../../domain/models/capture_block.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_night.dart';
+import '../../domain/models/tracking_type.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/target_repository.dart';
@@ -57,6 +58,11 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   AstroTarget? get selectedTarget => _target;
   EquipmentProfile? get selectedEquipment => _rig;
+
+  /// The tracking this plan's guidance uses (RD-08 = T3): the rig's
+  /// default, `unknown` without a rig. Stage 7 adds the plan's override.
+  TrackingType get effectiveTracking =>
+      _rig?.trackingType ?? TrackingType.unknown;
 
   /// The plan's blocks, read-only; change them through the methods below.
   List<CaptureBlock> get captureBlocks => List.unmodifiable(_blocks);
@@ -220,6 +226,18 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   Future<void> removeCaptureBlock(int index) async {
     if (_valid(index)) await _editBlocks((b) => b.removeAt(index));
+  }
+
+  /// Undo of a delete (RD-09, S6.9): [block] back at [index], and the
+  /// example badge as it was, so the plan equals the one before the delete.
+  Future<void> restoreCaptureBlock(
+    int index,
+    CaptureBlock block, {
+    required bool wasExample,
+  }) {
+    _blocks.insert(index.clamp(0, _blocks.length), block);
+    _isExample = wasExample;
+    return _edited();
   }
 
   /// [newIndex] is already adjusted for the removal (the `onReorderItem`

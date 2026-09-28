@@ -11,6 +11,10 @@ abstract final class AppMotion {
   /// Content appearing or collapsing: a section opening, a row leaving.
   static const Duration medium = Duration(milliseconds: 250);
 
+  /// A brief mark on what an edit changed, fading out (S6.9: a capture
+  /// block just added or edited). Long enough to be seen, never repeated.
+  static const Duration highlight = Duration(milliseconds: 1500);
+
   /// The one curve: fast out, gentle in.
   static const Curve curve = Curves.easeOutCubic;
 

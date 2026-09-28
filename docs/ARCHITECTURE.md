@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.9, 2026-09-28:** B4 notes the capture plan's rows (`BlockText`), Delete with Undo and the effective tracking.
 > **S6.8, 2026-09-28:** B4 notes the new defaults (no preselection, an empty capture plan, New plan without a target, the example rig).
 > **S6.7, 2026-09-28:** B4 notes the planner's collapsible sections (`PlannerSections`) and where each value went.
 > **S6.6, 2026-09-28:** B4 notes the planner's answer-first structure (`PlanStatus`, the context line, the section order).
@@ -481,6 +482,16 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > optics spec's provenance still `seed:`); `ExampleText` (`presentation/shared/example_text.dart`)
 > words the examples. Tests choose their plan through `PlannerHarness.choosePlan()` (the same three
 > edits a user makes).
+
+> **Since S6.9 (2026-09-28; RD-09 M + S1, RD-08 T3)** capture-block rows are worded by the pure
+> `BlockText` (`presentation/shared/block_text.dart`) from the block and its `BlockBudget`; Delete
+> goes through `DeleteButton` and `showUndo`, and Undo calls `SessionPlanViewModel.restoreCaptureBlock`
+> (the identical block at its index, the example badge as it was). `SessionPlanViewModel.effectiveTracking`
+> is the tracking the guidance uses: the rig's default until Stage 7 adds the plan's override; the
+> rows read unknown tracking from `RigCapability.recommendationIsConditional`. Where each value
+> went: the "Inputs", "Outputs" and "Sequence Plan" headings are gone (the planner's "Capture plan"
+> header remains); the row's frame type, filter, count, exposure and calibration placement are in
+> its text; the capability warning stays on its row.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

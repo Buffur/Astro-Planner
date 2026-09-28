@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.9, 2026-09-28:** §6.2 adds `AppMotion.highlight`; §9.1's capture-plan row is done.
+
 > **S6.8, 2026-09-28:** §7 notes the examples' words (`ExampleText`).
 
 > **S6.7, 2026-09-28:** §7a records the planner's five collapsible sections and the Bortle picker; §9's P6.4 rows are done.
@@ -192,7 +194,8 @@ still merges over them.
 
 - **Pressed:** a 16 % overlay of the foreground (`AppTheme.pressedOverlay`); Material's is 10 %.
   This answers 08 §8's weak "+" feedback. Focused 12 %, hovered 8 %.
-- **Motion (`AppMotion`):** `short` 150 ms for a state change in place, `medium` 250 ms for content
+- **Motion (`AppMotion`):** `highlight` 1500 ms for the fading mark on what an edit changed (S6.9, a
+  capture block's row; none with reduced motion); `short` 150 ms for a state change in place, `medium` 250 ms for content
   appearing or collapsing, one curve (`easeOutCubic`).
   `AppMotion.duration(context, …)` returns zero when the platform asks for less motion
   (`disableAnimations`). Every Stage 5 component animates through it. Subtle only
@@ -507,7 +510,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | Budget summary and assumptions (`capture_budget_summary.dart`, `capture_assumptions_panel.dart`), rig rows, sky-darkness detail | `CollapsibleSection` (Budget details, Assumptions instead of its `ExpansionTile`, the rig's rows, sky detail) with factual summaries; `AppWords` budget names | P6.4 (**S6.7 done**: `PlannerSections`, see §7a) | Acquisition, Session budget (budget summary; **removed by S6.7**) |
 | Sky darkness and weather detail (`sky_darkness_widget.dart`, `weather_forecast_widget.dart`) | `DetailScaffold` for Night & Moon and Weather; the twilight names from `AppWords`, on the Night & Moon detail only | P6.5 (**S6.5 done**: `/night`, `/weather`) | Astro Dusk, Astro Dawn, True Night Window (with TD-051; **removed by S6.5**) |
 | Tonight (`tonight_home_screen.dart`: site card, night rows, plan card, actions) | `ContextLine` instead of the site card; `StatusBlock` and `PlanStateLabel` in "Your plan"; rows to the P6.5 details; `showDone` for New plan | P6.6 | Draft (Tonight's status) |
-| The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) | — |
+| The capture plan (`capture_plan_widget.dart`, `capture_block_dialog.dart`) | `showUndo` for a deleted block (RD-09 M; restore tested there); `DeleteButton`; `SwipeToDelete` if block rows swipe; the §6.5 icons (reorder, delete); the dialog's Save as the primary button | Stage 6 capture-plan work (the Stage 6 table's "Capture Plan" row; RD-09) (**S6.9 done**: `DeleteButton` + `showUndo` with an exact restore; `drag_indicator`; `FilledButton` Save; rows through `BlockText`; the change mark on `AppMotion.highlight`. The rows do not swipe, so no `SwipeToDelete`) | — |
 | The result form and the live tracker (`results_screen.dart`, `execution_screen.dart`) | `confirmDestructive` for Abandon; `showDone` after Save result; `PlanStateLabel` | P8.2, P8.4 | — |
 | The Logbook and an entry (`logbook_screen.dart`, `session_detail_screen.dart`) | `PlanStateLabel` instead of `sessionStatusLabel`; `SwipeToDelete` + `DeleteButton` + `confirmDestructive` instead of the swipe-only `Dismissible`; `AppWords` (Logbook, Export as file, Old log, the budget names); `DetailScaffold` where an entry fits it | P8.5 | Legacy (×3), Draft, Window load, Session budget |
 | The Library lists (`equipment_selection_screen.dart`, `target_selection_screen.dart`, `sites_screen.dart`) | `SwipeToDelete` + `DeleteButton` + `confirmDestructive` (one wording instead of four); the button hierarchy; `AppWords` (Rig, Add rig) | P9.1 | Equipment profile (the empty rig list) |

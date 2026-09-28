@@ -2874,7 +2874,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | **Done 2026-09-28** |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | **Done 2026-09-28** |
-| S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | Frozen |
+| S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | **Done 2026-09-28** |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
@@ -3250,6 +3250,21 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - unknown tracking shows no error-coloured warning, and a known untracked exceedance still does
     (tests);
   - the sweep; the E2E; the full gate.
+- **Done 2026-09-28:** rows read "Ha · 60 s × 100 · 1 h 40 min" (`BlockText`, the duration from
+  `BlockBudget.exposureMs`; "from your library" for library calibration; a quiet line for a
+  calibration block's placement). Checked: the four frame types, no filter, an empty and a
+  32-character filter name (the model's maximum), ISO and binning (not in the row), 412 px at 200 %
+  text. The planner's header is the one heading; the card follows the theme. `DeleteButton` then
+  `showUndo`, restoring the identical block at its index (`restoreCaptureBlock`); the rows do not
+  swipe, so no `SwipeToDelete`. `drag_indicator`. A known tracking's exceedance keeps the warning
+  (`statusDoesNotFit`), naming the tracking; unknown tracking is a neutral missing input with
+  "Set the rig's tracking" (PD-11's "if untracked" kept). The dialog's Save is a `FilledButton`. A
+  new or edited row is tinted for `AppMotion.highlight` (1.5 s; none with reduced motion). The
+  tracking shown is `SessionPlanViewModel.effectiveTracking`, the rig's default until Stage 7
+  (RD-08 = T3). `capture_blocks_test.dart` (9: rows, Delete and Undo on real SQLite, a timed-out
+  Undo, three tracking cases, the dialog, the mark with and without reduced motion). Deliberate test
+  changes: `capture_plan_widget_test.dart` reads the new row text and taps the `FilledButton`s.
+  Full gate PASS: 1,414 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.10 — The capture plan's outputs: time, what fits, storage (P6.9)
 - **Objective:** the outputs lead with the practical answer, and the full calculation stays one tap

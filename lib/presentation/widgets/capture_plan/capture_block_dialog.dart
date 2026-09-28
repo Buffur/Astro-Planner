@@ -294,7 +294,9 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
+        // S6.9: the dialog's primary action (§6.1's button hierarchy).
+        FilledButton(
+          key: const Key('blockDialog.submit'),
           onPressed: _submit,
           child: Text(widget.editIndex == null ? 'Add' : 'Save'),
         ),
