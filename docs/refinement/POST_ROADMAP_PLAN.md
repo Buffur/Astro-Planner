@@ -2866,7 +2866,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.1 | Split the planner's ViewModel | P6.0; ENG-16 | S–M | — | — | **Done 2026-09-27** |
 | S6.2 | The plan's identity and actions: the app bar, ⋮, feedback, TD-058 | P6.1 (first half); UX-04; 08 §5, §8 | M | S6.1 | — | **Done 2026-09-27** |
 | S6.3 | Replacing unsaved changes: Save · Discard · Cancel | P6.1 (second half); U1, W1, V3; UX-12 | M | S6.2 | S4-DEF-04 | Frozen, gated |
-| S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | Frozen |
+| S6.4 | A never-saved draft's night at the rollover | P6.7; TD-057 | S | S6.2 | — | **Done 2026-09-28** |
 | S6.5 | The Night & Moon and Weather detail screens; the dark span at the user's limit | P6.5; UX-10; TD-051 | M | — | — | Frozen |
 | S6.6 | The planner's answer-first structure | P6.3; UX-01 to UX-03, UX-07, UX-15 (3) | M–L | S6.2, S6.5 | — | Frozen |
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | Frozen |
@@ -3012,6 +3012,16 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - an open candidates list shows the new night;
   - TD-057 resolved;
   - the full gate.
+- **Done 2026-09-28:** `PlanLifecycleViewModel.followNight()`, called by `NightClock` every minute
+  and on resume before the forecast check, and `load()` at a restart. Only a never-saved draft is
+  written (`CurrentSession.write(edit: false)`, in the autosave chain); a saved plan's row is never
+  written (D1). A picked night rolls forward only when tonight has actually moved on, so a past
+  night the user picks while the app is open is not moved before the next rollover (a case the
+  Task's text did not name; the same rule as the restart). The candidates screen re-evaluates when
+  the plan's night changes. `night_rollover_test.dart` (8 tests; the restart and candidates tests
+  fail without their fixes). One existing test (`planner_draft_session_test.dart`) went back in
+  time after a forward restart and relied on the unwritten key: its steps are reordered, and it now
+  also asserts the stored key. Full gate PASS: 1,335 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit (P6.5; TD-051)
 - **Objective:** two detail screens hold the night's and the weather's full detail, and the planner

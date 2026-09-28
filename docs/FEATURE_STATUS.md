@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S6.4, 2026-09-28 (F-40, F-51):** when the night rolls over while the app is open, or at a restart, a plan that was never saved moves to tonight and its stored night follows at once (it used to wait for the next edit); a night picked ahead is kept, and a past night picked on purpose stays until the next rollover. A saved plan is not written until Stage 8's transition (D1); the planner still shows tonight for it, as before. An open "What can I image tonight?" list is evaluated again for the new night. TD-057 resolved.
+
 > **S6.2, 2026-09-27 (the planner; F-40 lifecycle UI):** the planner is titled "Plan"; a strip under its app bar shows the target, the night and the plan's state (Not saved · Saved · Saved · changed). New plan, Copy to another night (the shared night picker) and, for a saved plan, Track live (optional) are in its ⋮ menu; Start left the bottom bar, where Save plan is now the one primary button. Save, New plan, Copy and Open (from a Logbook entry) each say what happened. An edit made while New, Copy or Open is switching the plan now lands in the new plan (TD-058 resolved). Tonight's Start is unchanged until S6.13.
 
 > **S6.1, 2026-09-27 (internal; no feature's status changed):** the planner's ViewModel is split in two, with no behaviour change: `SessionPlanViewModel` keeps the plan's contents, edits and autosave, and `PlanLifecycleViewModel` restores, opens, creates, copies and saves plans and starts runs (ARCHITECTURE B4). ENG-16 resolved.

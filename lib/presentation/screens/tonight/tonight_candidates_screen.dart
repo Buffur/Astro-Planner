@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/models/session_night.dart';
 import '../../../domain/services/candidate_evaluator.dart';
 import '../../shared/capability_text.dart';
 import '../../shared/failure_feedback.dart';
@@ -26,6 +27,9 @@ class TonightCandidatesScreen extends StatefulWidget {
 
 class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
   Future<List<TonightCandidate>?>? _rows;
+
+  /// The night [_rows] was evaluated for (S6.4; TD-057).
+  SessionNight? _rowsNight;
   CandidateSort _sort = CandidateSort.usableTime;
   bool _withWindowOnly = true;
   bool _ownOnly = false;
@@ -47,6 +51,7 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
   }
 
   void _load() {
+    _rowsNight = context.read<SessionPlanViewModel>().sessionNight;
     _rows = context.read<NightConditionsViewModel>().tonightCandidates();
   }
 
@@ -56,6 +61,8 @@ class _TonightCandidatesScreenState extends State<TonightCandidatesScreen> {
     final settingsVm = context.watch<SettingsViewModel>();
     final siteVm = context.watch<SiteViewModel>();
     final night = planVm.sessionNight;
+    // A list left open across the rollover follows the new night (S6.4).
+    if (night != null && night != _rowsNight) _load();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tonight's candidates"),

@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.4, 2026-09-28:** B11 notes the rollover rule for a never-saved draft (`PlanLifecycleViewModel.followNight`, TD-057).
 > **S6.2, 2026-09-27:** B4 notes the planner's identity strip and ⋮ menu, and that `CurrentSession.startNew`/`adopt` run in the autosave chain (TD-058).
 > **S6.1, 2026-09-27:** B1 and B4 record the split of `SessionPlanViewModel` into the plan's contents (`SessionPlanViewModel`) and its lifecycle (`PlanLifecycleViewModel`).
 > **S5.9, 2026-09-27:** B17 points to the adoption plan (DESIGN_SYSTEM §9) and the opt-in render test.
@@ -695,6 +696,19 @@ see ADR-007 for the design.)*
 | Sessions | Stored as epoch seconds, read back as local `DateTime` (unchanged schema — G11/PD-18 decide persistence of `SessionNight` itself). `loadSession`/Save Session and `LogbookScreen` now map that legacy instant to its device-local evening date via `CalendarDate.fromDateTimeFields` at the same place, instead of three divergent ad-hoc `.toLocal()` calls (ADR-007 §10 "legacy rows") |
 
 Consequence: the default night defect (SI-010 / TD-001) is **fixed** as of TASK 2.4.
+
+> **Since S6.4 (2026-09-28; TD-057; ADR-019 §3.1, D1)** the plan follows the rollover. `NightClock`
+> calls `PlanLifecycleViewModel.followNight()` every minute and on resume, before
+> `NightConditionsViewModel.checkClock()`. Only a never-saved draft (`draft`, `plannedAtUtc == null`)
+> moves. When tonight has moved on since the last check (`_tonight`, set by `load` and each check), a
+> picked night no longer ahead rolls forward to tonight (`_keptNight`, the same rule as the restore);
+> a night picked in the past meanwhile stays until then. A changed night key is written through `CurrentSession.write(edit: false)`, in the
+> autosave chain and not as an edit. `load()` writes it at a restart too. A saved plan's row is never
+> written (D1); the planner notifies its listeners whenever the night key changes, for any plan. The
+> candidates screen re-evaluates when `sessionNight` changes. **Testing:** a fake-time tick across
+> the rollover with a database-backed plan starts a Drift write that cannot finish inside the test
+> zone, and awaiting the autosave chain then hangs. Test the write by calling `followNight` in real
+> async, and the tick's wiring with a preferences-backed plan (`night_rollover_test.dart`).
 There is still no notion of the **site's** time zone anywhere (TASK 7.1); every
 displayed time is the device's.
 

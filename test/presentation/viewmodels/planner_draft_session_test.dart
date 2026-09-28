@@ -274,12 +274,20 @@ void main() {
     final vm = await start();
     await vm.setEveningDate(CalendarDate(2026, 11, 12));
 
+    final sameDay = await start();
+    expect(sameDay.eveningDate, CalendarDate(2026, 11, 12));
+
+    // S6.4 (TD-057): the rolled-forward night of a never-saved draft is
+    // stored at the restart, so a restart back on the same day (the old last
+    // step) would now read 17 Nov; the order is reversed instead.
     final nextWeek = await start(now: DateTime.utc(2026, 11, 17, 18));
     expect(nextWeek.eveningDate, CalendarDate(2026, 11, 17));
     expect(nextWeek.activeSessionId, vm.activeSessionId);
-
-    final sameDay = await start();
-    expect(sameDay.eveningDate, CalendarDate(2026, 11, 12));
+    await nextWeek.plan.idle;
+    expect(
+      (await sessions.get(vm.activeSessionId!))!.eveningDate,
+      CalendarDate(2026, 11, 17),
+    );
   });
 
   test('New starts a draft for tonight with the example plan', () async {

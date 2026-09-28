@@ -88,6 +88,21 @@ class SessionPlanViewModel extends ChangeNotifier {
   /// The plan's night key, with or without a site (S1.4).
   CalendarDate get nightKey => _night.eveningDate;
 
+  /// Tonight's key, whatever night is picked (S6.4).
+  CalendarDate get tonightKey => SessionNightResolver.resolve(
+    null,
+    _clock.nowUtc(),
+    latitude: _site.latitude,
+    longitude: _site.longitude,
+    timeContext: _site.timeContext,
+  ).eveningDate;
+
+  /// The night the user picked, or null for tonight (S6.4).
+  CalendarDate? get pickedNight => _pickedEveningDate;
+
+  /// False while the plan is being restored or opened (S6.4).
+  bool get isLoaded => _loaded;
+
   /// The plan as shown now (ADR-014 §2); its night key is [_night]'s (S1.4).
   SessionPlan currentPlan() => SessionPlan(
     eveningDate: _night.eveningDate,

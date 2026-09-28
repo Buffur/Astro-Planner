@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-27 (**S6.2 done**: the plan's identity and actions; Stage 6 in progress).
-> **Next:** S6.3 is gated on S4-DEF-04, so S6.4 (no gate) is next unless the owner decides it first. The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
+> **Last updated:** 2026-09-28 (**S6.4 done**: a never-saved draft's night follows the rollover; Stage 6 in progress).
+> **Next:** S6.3 is gated on S4-DEF-04, so S6.5 (no gate) is next unless the owner decides it first. The owner answers S4-DEF-04, RD-08, RD-10 and RD-11 whenever convenient,
 > each before its Task.
 
 ## Current state
@@ -13,11 +13,21 @@
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1, S6.2 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1, S6.2, S6.4 done) |
 | Current Task | None in progress |
-| Next Task | **S6.4 — A never-saved draft's night at the rollover** (no gate); S6.3 waits for S4-DEF-04 |
-| Code baseline | S6.2 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit** (no gate); S6.3 waits for S4-DEF-04 |
+| Code baseline | S6.4 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.4 done, 2026-09-28** (P6.7; TD-057 resolved): at the rollover (`NightClock` →
+`PlanLifecycleViewModel.followNight`, every minute and on resume, before the forecast check) and at a
+restart, a never-saved draft's night key is written through the autosave chain, not as an edit. A
+picked night still ahead is kept; one no longer ahead rolls forward when tonight moves on, and a
+past night picked meanwhile is not moved before then. A saved plan's row is never written (D1). The
+planner notifies at a new night for any plan (S6.2's identity strip follows it), and the candidates
+list re-evaluates. `night_rollover_test.dart` (8 tests). One existing test's steps are reordered
+because it relied on the unwritten key (see the plan). Verification: the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
 
 **S6.2 done, 2026-09-27** (P6.1's first half; TD-058 resolved; DEV-P9's first half): the planner is
 titled "Plan", with a strip under its app bar showing the target, the night and the plan's state
@@ -80,7 +90,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (407 files, 0 changed); Analyze; 1,327 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.2's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (408 files, 0 changed); Analyze; 1,335 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.4's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -205,13 +215,14 @@ These block a release, not refinement.
 "Stage 6 gates": R, revert to the saved plan, recommended; K, keep the changes). If the owner
 decides it, S6.3 runs next. Otherwise the next ungated Task runs first:
 
-**S6.4 — A never-saved draft's night at the rollover** (P6.7; TD-057). Frozen, no gate; the frozen
-sequence is the approval.
-- **Read:** S6.4 and "Rules for every Stage 6 Task"; TD-057; ADR-019 §3.1 and D1;
-  `PlanLifecycleViewModel.load`, `SessionPlanViewModel`, `CurrentSession`, `NightClock`, the
-  candidates screen.
-- **Verification:** the full gate after the last code change (time/night semantics and
-  persistence: high-risk).
+**S6.5 — The Night & Moon and Weather detail screens; the dark span at the user's limit** (P6.5;
+UX-10; TD-051). Frozen, no gate; the frozen sequence is the approval.
+- **Read:** S6.5 and "Rules for every Stage 6 Task"; TD-051; ADR-019 §5, §7, §9; ADR-012;
+  `sky_darkness_widget.dart`, `weather_forecast_widget.dart`, `NightTimeline` and the timeline
+  calculation, `NightConditionsViewModel` (297 lines: mind the cap), `DetailScaffold`, the router and
+  the accessibility sweep.
+- **Verification:** the full gate after the last code change (a calculation and time/night
+  semantics: high-risk), with reference vectors for the dark span.
 - Then commit and STOP.
 
 **Owner decisions, whenever convenient** (each blocks only its own Task; options and recommendations
@@ -234,7 +245,7 @@ If a gated Task comes up with its gate still open, the next ungated Task runs fi
 - TD-070's remainder (per-field snapshot provenance; snapshots saved before S3.V7): Stage 8;
 - W1 (decided with RD-05's U1): built by S6.3;
 - TD-063 (Stage 8);
-- TD-057 (S6.4) and TD-058 (S6.2);
+- TD-057 and TD-058: resolved (S6.4, S6.2);
 - RD-17 (the push is deferred);
 - the S1.5 and S1.11 device checks (Stage 11);
 - S2V-06's device checks (a non-seekable provider; a real backup's preview cancel): the next
