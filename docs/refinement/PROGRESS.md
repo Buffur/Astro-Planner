@@ -5,8 +5,7 @@
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-28 (**S6.13 done**: Tonight, plan first; Stage 6 in progress).
-> **Next:** the owner's gates. S6.14 waits for RD-10 and S6.15 for RD-11; S6.E is owner-run. No
-> ungated Stage 6 Task is left before them.
+> **Next:** S6.14 (RD-10 decided: O1). S6.15 is not built (RD-11 = S9). Then S6.E, owner-run.
 
 ## Current state
 
@@ -15,9 +14,14 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.13 done) |
 | Current Task | None in progress |
-| Next Task | **S6.14** once the owner decides RD-10; **S6.15** only if RD-11 chooses Stage 6; **S6.E** is owner-run |
+| Next Task | **S6.14 — The candidates' default order** (RD-10 decided: O1) |
 | Code baseline | S6.13 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**RD-10 and RD-11 decided, 2026-09-28 (the owner, in chat):** O1 (candidates by usable time, then
+frame fill, then the name; the header names the order) and S9 (the Moon and cloud gate controls in
+Stage 9's Settings, with RG-13; TD-050 stays open; S6.15 is not built). DECISIONS E.1, "RD-10 and
+RD-11 decided".
 
 **S6.13 done, 2026-09-28** (P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054 resolved; TD-073's site
 prompt decided; DEV-P9 resolved): Tonight leads with site ▾ · night ▾ (the night picker changes the
@@ -240,8 +244,8 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-07 | The Library's role and pickers; where Progress lives | 4 | **Decided** 2026-09-27 (S4.R5; E.1): the Library manages; choosing in context; Progress in the Logbook |
 | RD-08 | Tracking per rig or per session; the seeded rig's tracking | 7 (before Stage 6's capture-plan work, P6.8 = S6.9) | **Decided** 2026-09-28 (owner): **T3**, the rig's default with a per-plan override; the seeded rig stays unknown (DECISIONS E.1, "RD-08 decided"). Built in Stage 7 |
 | RD-09 | Destructive interactions: confirm or undo | 5 | **Decided** 2026-09-27 (owner): **M + S1**, undo for edits inside a plan, confirm for stored records; a visible Delete with swipe as a shortcut (DECISIONS E.1, "RD-09 decided"; `IA_WIREFRAMES.md` §3 amended for plan edits). Built by S5.8 |
-| RD-10 | Ordering Tonight's candidates without a score | 6 (S6.14) | Open; **options prepared** 2026-09-27 (plan, "Stage 6 gates"): O1 (recommended) / O2 / O3 |
-| RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 (S6.15 or P9.3) | Open; **options prepared** 2026-09-27 (plan, "Stage 6 gates"): S9 (recommended) / S6 / P |
+| RD-10 | Ordering Tonight's candidates without a score | 6 (S6.14) | **Decided** 2026-09-28 (owner): **O1**, usable time, then frame fill, then the name (DECISIONS E.1). Built by S6.14 |
+| RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 (S6.15 or P9.3) | **Decided** 2026-09-28 (owner): **S9**, Stage 9's Settings (P9.3, with RG-13); S6.15 not built (DECISIONS E.1) |
 | RD-12 | The resume prompt's Finish | 8 | **Lapsed** 2026-09-27: the resume prompt goes with the tracker (E.1, "Stages 6–11 amended after Stage 5"); P8.4's audit covers a run still in progress at the upgrade |
 | RD-13 | Provenance of an accepted estimate | 8 | Open; **narrowed** 2026-09-27 to existing accepted-estimate events and "reported as planned" (P8.1) |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
@@ -291,8 +295,8 @@ These block a release, not refinement.
     stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
-- **Stage 6 (planned 2026-09-27):** each open gate blocks only its Task: RD-10 → S6.14; RD-11
-  decides whether S6.15 exists. S4-DEF-04 (R) and RD-08 (T3) were decided 2026-09-28. S6.E needs the owner to
+- **Stage 6 (planned 2026-09-27):** every gate is decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1) and
+  RD-11 (S9, so no S6.15), all 2026-09-28. S6.E needs the owner to
   run it. The tracker stays as built until P8.4.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
@@ -302,14 +306,15 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**The owner's gates** (every ungated Stage 6 Task is done):
-- **RD-10**, the candidates' default order (O1 recommended / O2 / O3; the plan's "Stage 6 gates"):
-  S6.14 runs once it is decided;
-- **RD-11**, where the Moon and cloud gate controls live (S9 recommended / S6 / P): S6.15 exists
-  only if it chooses Stage 6;
-- **S6.E**, the five-second test: owner-run. Its first step, S4V-02's correction of
-  `research/S4.R1_FLOW_INVENTORY.md` §7 (documentation), can be done by an agent when asked.
-Then Stage 6 validation, in a fresh session.
+**S6.14 — The candidates' default order** (RD-10 = O1; UX-29). Frozen; the frozen sequence is the
+approval. **Class: localized** (its targeted tests, the candidates screen's tests, `flutter analyze`,
+`dart format`, the encoding check).
+- **Read:** S6.14; RD-10 (DECISIONS E.1); `CandidateList.sort` and the candidates screen's header;
+  ADR-013 §5.
+
+Then **S6.E**, the five-second test (owner-run; its first step, S4V-02's correction of
+`research/S4.R1_FLOW_INVENTORY.md` §7, is documentation an agent can do when asked), then Stage 6
+validation in a fresh session.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

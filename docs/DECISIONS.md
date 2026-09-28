@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **RD-10 and RD-11 decided, 2026-09-28 (Stage 6):** O1 (usable time, then frame fill, then the name) and S9 (the gate controls in Stage 9's Settings; no S6.15) (E.1, "RD-10 and RD-11 decided"). Documentation only.
 > **S6.13, 2026-09-28:** DEV-P9 resolved (Tonight's context line with the night picker, after S6.2 and S6.6).
 > **RD-08 decided, 2026-09-28 (Stage 6):** T3, tracking is the rig's default with a per-plan
 > override; the snapshot keeps the effective value; Unknown stays possible (E.1, "RD-08 decided").
@@ -1602,6 +1603,23 @@ Stage 4 revalidation is still required.
   tracking as a missing input; it moves nothing.
 - **Rejected:** T1 (the rig only; the inconvenience of 08 §21 stays) and T2 (the plan only; a rig
   that is always tracked would lose that fact, and every plan would have to answer it).
+- Documentation only. No code changed.
+
+### RD-10 and RD-11 decided: the candidates' order, and where the gate controls live (Stage 6, 2026-09-28)
+
+- **Context:** the options prepared in Stage 6 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 6
+  gates", `9e40b81`).
+- **Decided by:** the project owner, in chat, both the recommended options.
+- **RD-10 = O1:** "What can I image tonight?" orders its candidates by default by usable time, then
+  by frame fill (how much of the frame the target fills with the user's rig; unknown, as without a
+  rig, sorts last), then by name. A chain of measured quantities, never combined into one number
+  (ADR-013 §5: no composite score). The user's own sort choices stay, and the list header names the
+  order ("Usable time, then frame fill"). Built by S6.14.
+- **RD-11 = S9:** the Moon and cloud gate controls (ADR-013 G4/G5; TD-050) go to Settings in Stage 9
+  (P9.3), where RG-13 decides once where each setting belongs. Until then the gates stay off and
+  unreachable, and TD-050 stays open. **S6.15 does not exist.**
+- **Rejected:** RD-10's O2 (usable time, then the maximum altitude) and O3 (thresholds and groups);
+  RD-11's S6 (Settings now, as S6.15) and P (in the planner).
 - Documentation only. No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline

@@ -2816,8 +2816,10 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
   chosen, is built in Stage 7. **Decided 2026-09-28: T3**, the rig's default with a per-plan
   override (DECISIONS E.1, "RD-08 decided"); Stage 7 builds the override, S6.9 shows the effective
   tracking.
-- **RD-10** (owner): the candidates' default order. It blocks S6.14 only.
-- **RD-11** (owner): where the Moon and cloud gate controls live. It decides whether S6.15 exists;
+- **RD-10** (owner): the candidates' default order. It blocks S6.14 only. **Decided 2026-09-28:
+  O1**, usable time, then frame fill, then the name (DECISIONS E.1, "RD-10 and RD-11 decided").
+- **RD-11** (owner): where the Moon and cloud gate controls live. **Decided 2026-09-28: S9**, in
+  Stage 9's Settings (P9.3), so S6.15 does not exist. It decided whether S6.15 exists;
   nothing else waits for it.
 - **S4-DEF-01** (Save on a Saved · changed plan, including a changed night or site): **allocated to
   Stage 8's planning here, not decided.** Its answer (Save again, or a new saved plan) depends on the
@@ -2879,8 +2881,8 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | **Done 2026-09-28** |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | **Done 2026-09-28** |
-| S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 | Frozen, gated |
-| S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | Conditional |
+| S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | Frozen |
+| S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | **Not built: RD-11 = S9** (Stage 9, P9.3) |
 | S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run) |
 
 **Order:** S6.1 → S6.2 → S6.3 → S6.4 → S6.5 → S6.6 → S6.7 → S6.8 → S6.9 → S6.10 → S6.11 → S6.12 →
@@ -3528,6 +3530,8 @@ kept as prepared.
 
 **RD-10 — ordering Tonight's candidates without a score** (blocks S6.14 only)
 
+> **Decided 2026-09-28 (the owner): O1** (DECISIONS E.1, "RD-10 and RD-11 decided").
+
 - **Verified:** usable time by default, then the name for ties. On UX-29's audited night every top
   row had the whole dark window, so the top of the list was alphabetical. The other sorts exist
   (window start, max altitude, Moon separation, frame fill, name). ADR-013 §5 allows ranking by
@@ -3544,6 +3548,8 @@ kept as prepared.
   then frame fill") instead of "(no score)". The no-score rule stays in ADR-013, not in the UI.
 
 **RD-11 — where the Moon and cloud gate controls live** (TD-050; decides whether S6.15 exists)
+
+> **Decided 2026-09-28 (the owner): S9** (DECISIONS E.1): Stage 9's Settings; S6.15 is not built.
 
 - **Verified:** the gates exist in `PlanningPreferences` (off; 50 % when enabled; persisted) and the
   calculator applies them, but no screen switches them on. Settings' planning rows already hold the
@@ -4223,8 +4229,8 @@ any implementation Task is created.
 | RD-07 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): the Library manages (a tap never changes the plan; "Plan this target"); choosing happens in the planner, Tonight's context line and the first run; Progress moves to the Logbook.** The Library's role: should its lists select for the current plan (TD-053), keep target selection, and where does Progress live (08 §19)? | ADR-015 §7; TASK 14.2 | 4 | Stages 6 and 9 |
 | RD-08 | Tracking per rig (ADR-011 §5) or per plan/session (08 §21)? What does the seeded rig declare (UX-15(1))? | PD-11: NPF guidance keys on the rig's tracking. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** T1 per rig / T2 per plan / **T3 the rig's default with a per-plan override (recommended)**. **Decided 2026-09-28: T3** (DECISIONS E.1, "RD-08 decided"); the seeded rig stays `unknown` | 7, decided before Stage 6's capture-plan work | Stage 6 capture plan (P6.8, frozen as **S6.9**); Stage 7; P9.3. *2026-09-27:* `Tracked` is not Track live; a plan-level choice, if chosen, is built in Stage 7; it never goes back into global Settings |
 | RD-09 | Destructive interactions: confirm or undo, including deleting a capture block and swipe-to-delete. **Options prepared 2026-09-27 (Stage 5 planning; §5, "RD-09 — confirm or undo"):** Q1 C / **M (recommended)** / U; Q2 **S1 (recommended)** / S2. **Decided 2026-09-27 (owner): M + S1** (DECISIONS E.1, "RD-09 decided") | UX-09, UX-38; 08 §14, §20; `IA_WIREFRAMES.md` §3 (no destructive action without confirmation) | 5 | S5.8; Stages 6–9 |
-| RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups | 6 | S6.14 |
-| RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
+| RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups. **Decided 2026-09-28: O1** (DECISIONS E.1) | 6 | S6.14 |
+| RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner. **Decided 2026-09-28: S9** (DECISIONS E.1); no S6.15 | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
 | RD-12 | **LAPSED 2026-09-27** (the tracker's retirement; DECISIONS E.1, "Stages 6–11 amended after Stage 5"): the resume prompt goes with the tracker. ADR-019 §4 already expected Finish to lead to the result form; how a run still in progress at the upgrade reaches it is P8.4's audit. *(Was: should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish?)* | RT-10, UX-26; ADR-016 §11 | 8 | — |
 | RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? *Narrowed 2026-09-27:* after P8.4 no new estimate is accepted, so it covers the existing accepted-estimate events and the "reported as planned" label (P8.1) | SCI-07 | 8 | — |
 | RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
