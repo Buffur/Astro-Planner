@@ -6,8 +6,8 @@
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-28 (**S6.14 done**: the candidates' default order; Stage 6's code Tasks
 > are all done).
-> **Next:** S6.E step 2, the owner runs the five-second test (step 1, the script's correction, is
-> done); then Stage 6 validation in a fresh session.
+> **Next:** the owner's decisions on closing Stage 6 (below): S6.E's five-second test is still
+> UNVERIFIED; an owner manual UX review is recorded; four small current-stage issues are open.
 
 ## Current state
 
@@ -16,9 +16,22 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 done; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.E — The five-second test**: step 1 done; step 2 is the owner's run |
+| Next Task | **Owner decisions before Stage 6 validation** (S6.E unverified; TD-075–TD-080; the planner's order; the primary screens' visual finish) |
 | Code baseline | S6.14 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**Owner manual UX review, 2026-09-28** (HUMAN / OWNER MANUAL UX REVIEW, **not** a five-second
+result; `evidence/STAGE_6_FIVE_SECOND_TEST.md`): 22 observations on the `.s2check` app, each
+classified against this plan. No regression. **Current-stage issues** (small, Stage 6's own):
+TD-075 (the status's reason vs a missing-input headline), TD-076 (the stacking-gain graph does not
+label the planned point), TD-077 ("Your plan" heading in the button text role), TD-078 (Night &
+Moon repeats its summary). **New bounded follow-ups:** TD-079 (no way back from Fill/Trim, a saved
+block edit, the example plan), TD-080 (Tonight's two target actions look alike). **Owner
+decisions raised:** the planner's order (would amend ADR-019 §6); who owns the visual finish of
+Tonight and the planner. **Owned later, as planned:** Stage 7 (binning, ISO/gain, calibration
+frames: RG-10, RG-11; elevation, Bortle, SQM: RG-08, RG-09), Stage 8 (results and the export action:
+P8.1, P8.2, P8.7), Stage 9 (detail screens' presentation, typography consistency, Tonight's rows,
+Settings: P9.3). **The five-second test stays UNVERIFIED.** Verification: documentation class.
 
 **S6.E device set up, 2026-09-28:** the separate `.s2check` build (application code of `f19aef7`)
 is installed on the owner's phone beside the owner's app, which was not touched; a saved test plan
@@ -326,16 +339,20 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.E — The five-second test** (owner-run evidence; the plan's "S6.E"):
-1. ~~S4V-02 first~~ **done 2026-09-28**: the corrected device rules are in
-   `research/S4.R1_FLOW_INVENTORY.md` §7;
-2. **the owner runs Test A** on Tonight's and the planner's first screens, following
-   `evidence/STAGE_6_FIVE_SECOND_TEST.md` ("How to run it"): on `.s2check` (an agent installs it on
-   request, with the phone connected), or on the owner's app after Save plan and ⋮ → New plan.
-   Never reset or uninstall the owner's app;
-3. the answers go into that file (or are sent in chat for an agent to record word for word).
-If it cannot be run, the Stage 6 validation records the gap and the owner decides (V7). Then
-**Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
+**Owner decisions before Stage 6 validation** (no agent work starts until the owner chooses):
+1. **S6.E's five-second test (UNVERIFIED):** a separate, independent participant runs Test A on the
+   prepared `.s2check` app (`evidence/STAGE_6_FIVE_SECOND_TEST.md`, "How to run it"), or the owner
+   accepts the gap and the Stage 6 validation records it (V7). The owner's review does not count as
+   the test;
+2. **the current-stage issues** TD-075 to TD-078: corrected before the validation (each small; one
+   bounded corrective Task could hold them), or left for the validation to weigh;
+3. **the planner's order** (review item 5.1): keep ADR-019 §6, or amend it (then a bounded Stage 6
+   change, the status staying first);
+4. **the visual finish of Tonight and the planner** (review items 1.2, 3.2, 4.1, 6.1): a bounded
+   Stage 6 follow-up now, or an explicit line in Stage 9's scope;
+5. **the new bounded follow-ups** TD-079 (a way back for Fill/Trim, a saved block edit, the example
+   plan) and TD-080 (the two target actions' wording): now, or later.
+Then **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
 validation").
 
 **Carried:**

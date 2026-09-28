@@ -2883,7 +2883,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | **Done 2026-09-28** |
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | **Done 2026-09-28** |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | **Not built: RD-11 = S9** (Stage 9, P9.3) |
-| S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run); **step 1 done 2026-09-28** |
+| S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run); step 1 done; the device set up; **the test UNVERIFIED** (an owner manual UX review is recorded instead, 2026-09-28) |
 
 **Order:** S6.1 → S6.2 → S6.3 → S6.4 → S6.5 → S6.6 → S6.7 → S6.8 → S6.9 → S6.10 → S6.11 → S6.12 →
 S6.13 → S6.14 → (S6.15) → S6.E → Stage 6 validation. When a gated Task comes up with its gate still
@@ -3462,6 +3462,11 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
 - **Step 1 done 2026-09-28:** §7's device rules corrected (no test only looks; Test A on the owner's
   app after Save plan and ⋮ → New plan; Tests B and C on `.s2check`), and Tests A–C brought up to the
   current app. `evidence/STAGE_6_FIVE_SECOND_TEST.md` is prepared; steps 2 and 3 are the owner's.
+- **2026-09-28:** the `.s2check` app and a saved test plan are set up on the owner's phone. The owner
+  then made a **manual UX review** as someone who knows the product: recorded in the evidence file as
+  that, classified against this plan, and **not** a five-second result. The test stays UNVERIFIED.
+  Findings: TD-075–TD-078 (current-stage issues) and TD-079, TD-080 (new bounded follow-ups); the
+  rest is owned by Stages 7, 8 and 9 or is an owner preference, as the evidence file lists.
 
 ##### Stage 6 validation
 A fresh-session, independent validation (§9.8, V8; this Stage writes application code), by
