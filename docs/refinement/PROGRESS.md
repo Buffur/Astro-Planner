@@ -6,8 +6,8 @@
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-28 (**S6.14 done**: the candidates' default order; Stage 6's code Tasks
 > are all done).
-> **Next:** S6.E, the five-second test (owner-run; its first step is documentation an agent can do
-> when asked), then Stage 6 validation in a fresh session.
+> **Next:** S6.E step 2, the owner runs the five-second test (step 1, the script's correction, is
+> done); then Stage 6 validation in a fresh session.
 
 ## Current state
 
@@ -16,9 +16,17 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 done; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.E — The five-second test** (owner-run) |
+| Next Task | **S6.E — The five-second test**: step 1 done; step 2 is the owner's run |
 | Code baseline | S6.14 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.E step 1 done, 2026-09-28** (S4V-02 corrected; documentation only):
+`research/S4.R1_FLOW_INVENTORY.md` §7's device rules now say that no test only looks (the plan
+autosaves; Save plan and Track live store records), how to run Test A on the owner's app without
+losing anything (Save plan, then ⋮ → New plan), and that Tests B and C belong on `.s2check`; Tests A–C
+follow the current app (an empty new plan, Save plan and Track live in the planner, the timeline).
+`evidence/STAGE_6_FIVE_SECOND_TEST.md` is prepared for the answers, not yet run. Verification: the
+documentation class (references resolve; `git diff --check`).
 
 **S6.14 done, 2026-09-28** (RD-10 = O1; UX-29): "What can I image tonight?" orders by usable time,
 then frame fill (unknown last), then the name; the header names the order. Verification: the
@@ -294,8 +302,7 @@ These block a release, not refinement.
   - **closed 2026-09-27** (the final, bounded validation passed). Carried to Stages 6 and 8:
     S4-DEF-01 to S4-DEF-08;
   - S4.E stays optional; Stage 6 carries the five-second test as S6.E;
-  - S4V-02's script correction is non-blocking and must precede Test A or C on the owner's install;
-    it is S6.E's first step.
+  - S4V-02's script correction: **done 2026-09-28** as S6.E's first step.
 - **Stage 5 (closed 2026-09-27):** nothing blocks.
   - Carried: TD-073 (two messages with an action persist: the site prompt's in S6.13, the Start
     message's in P8.4); UX-39's field-mode card borders (Stage 11 darkness test); `CLAUDE.md`'s
@@ -314,23 +321,21 @@ These block a release, not refinement.
 ## Next allowed action
 
 **S6.E — The five-second test** (owner-run evidence; the plan's "S6.E"):
-1. **S4V-02 first** (documentation; an agent can do it when asked): correct
-   `research/S4.R1_FLOW_INVENTORY.md` §7's device rules, so Tests A and C can run without disturbing
-   the owner's data;
-2. the owner runs Test A on the planner's and Tonight's first screens (the `.s2check` package, or a
-   plan they are happy to change; never reset or uninstall the owner's app);
-3. the answers go into `evidence/STAGE_6_FIVE_SECOND_TEST.md`.
+1. ~~S4V-02 first~~ **done 2026-09-28**: the corrected device rules are in
+   `research/S4.R1_FLOW_INVENTORY.md` §7;
+2. **the owner runs Test A** on Tonight's and the planner's first screens, following
+   `evidence/STAGE_6_FIVE_SECOND_TEST.md` ("How to run it"): on `.s2check` (an agent installs it on
+   request, with the phone connected), or on the owner's app after Save plan and ⋮ → New plan.
+   Never reset or uninstall the owner's app;
+3. the answers go into that file (or are sent in chat for an agent to record word for word).
 If it cannot be run, the Stage 6 validation records the gap and the owner decides (V7). Then
 **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
 validation").
-- **Verification:** the full gate after the last code change (the Task's rule).
-- Then commit and STOP.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,
   S4-DEF-03 and S4-DEF-05 to S4-DEF-08 (Stage 8);
-- S4V-02 (correct the S4.E script before Test A or C runs on the owner's install): the first step of
-  S6.E;
+- S4V-02: done (S6.E step 1, 2026-09-28);
 - S3V-08: a device recheck of the corrected Stage 3 flow (unverified; separate);
 - TD-072 (S3S-03, deferred by the owner) with its S3F-01 addendum; S3F-02 (a note on TD-071, no
   Task proposed);

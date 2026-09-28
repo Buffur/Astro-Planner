@@ -2883,7 +2883,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | **Done 2026-09-28** |
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 (**decided: O1**) | **Done 2026-09-28** |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | **Not built: RD-11 = S9** (Stage 9, P9.3) |
-| S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run) |
+| S6.E | The five-second test (owner-run evidence) | The Stage Exit; S4.E Test A; S4V-02 | — | S6.6, S6.13 | — | Frozen (owner-run); **step 1 done 2026-09-28** |
 
 **Order:** S6.1 → S6.2 → S6.3 → S6.4 → S6.5 → S6.6 → S6.7 → S6.8 → S6.9 → S6.10 → S6.11 → S6.12 →
 S6.13 → S6.14 → (S6.15) → S6.E → Stage 6 validation. When a gated Task comes up with its gate still
@@ -3459,6 +3459,9 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   3. the answers go into `evidence/STAGE_6_FIVE_SECOND_TEST.md`: the questions, the answers and
      whether each was right. No personal data about the people who try it.
 - **If it cannot be run:** the Stage 6 validation records the gap, and the owner decides (V7).
+- **Step 1 done 2026-09-28:** §7's device rules corrected (no test only looks; Test A on the owner's
+  app after Save plan and ⋮ → New plan; Tests B and C on `.s2check`), and Tests A–C brought up to the
+  current app. `evidence/STAGE_6_FIVE_SECOND_TEST.md` is prepared; steps 2 and 3 are the owner's.
 
 ##### Stage 6 validation
 A fresh-session, independent validation (§9.8, V8; this Stage writes application code), by
