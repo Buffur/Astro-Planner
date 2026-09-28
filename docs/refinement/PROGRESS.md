@@ -4,21 +4,29 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.E device refreshed**: the `.s2check` app rebuilt from S6.16's
-> `d7e1477` and the test plan set up again; the test itself still needs a participant).
-> **Next:** S6.E's five-second test on the refreshed `.s2check` build with an independent
-> participant (or the gap recorded), then the Stage 6 validation in a fresh session (below).
+> **Last updated:** 2026-09-28 (**Stage 6 validation BLOCKED**, S6V-01 / TD-082).
+> **Next:** S6.V1, the bounded deletion-Undo correction, then V5 revalidation.
+> S6.E remains **UNVERIFIED — no independent participant available**; the owner accepts the gap.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.14 and S6.16 done; S6.15 not built, RD-11 = S9) |
+| Current Stage | **Stage 6 — Core Planner Redesign: BLOCKED** by S6V-01 / TD-082 (S6.1–S6.14 and S6.16 implemented; S6.15 not built, RD-11 = S9) |
 | Current Task | None in progress |
-| Next Task | **S6.E's run** (the five-second test, on the refreshed `.s2check`; a participant is needed), then **Stage 6 validation** |
+| Next Task | **S6.V1 — make deletion Undo stale-safe**, as bounded in `STAGE_6_VALIDATION.md`; no implementation in the validation session |
 | Code baseline | S6.16 (`d7e1477`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**Stage 6 validation, 2026-09-28: BLOCKED** ([report](STAGE_6_VALIDATION.md)). S6V-01 /
+TD-082 reproduced: Delete from the example → Add a block → old Undo preserves the new block
+but falsely restores the example badge. S6.8's badge rule and stale recovery fail; the other
+technical criteria pass. S6.16's full gate reused under V3 (no changed inputs); one fresh focused
+probe fails on the uncovered sequence. No code or existing tests changed. The past Capture ends
+observation agrees with the selected whole-night contract (classification A, report C1).
+S6.E is **UNVERIFIED — no independent participant available**, explicitly accepted by the owner;
+that gap does not block closure. Stage 7 remains unstarted.
 
 **S6.E device refreshed, 2026-09-28, 22:52–22:55** (documentation only; details in
 `evidence/STAGE_6_FIVE_SECOND_TEST.md`): the separate `.s2check` app is now a debug build of
@@ -245,6 +253,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 | **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,486 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.16's final inputs (`d7e1477`) | Nothing since: only documentation changed after `d7e1477` (`git diff --stat d7e1477 HEAD -- . ':!docs' ':!CLAUDE.md'` is empty). It supersedes S6.13's gate (S6.14's inputs included) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
+| **Focused probe FAIL**, S6V-01 / TD-082: Delete → Add → stale Undo restores the example badge incorrectly | Stage 6 validation at `6b50369` (application code `d7e1477`) | New uncovered sequence, not a rerun of the gate; reproduction in `evidence/S6V_01_DELETE_UNDO_PROBE.patch`. Recheck after S6.V1; other passing evidence remains valid |
 
 ## Stage status
 
@@ -258,7 +267,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 3 | Metadata → Equipment / Device Import | Complete | 2026-09-26 | 2026-09-27 | **Fresh-session final sign-off PASS** at `92ebf2a` (`STAGE_3_FINAL_SIGNOFF.md`; S3F-01, S3F-02 non-blocking). Before that: FAIL at `387e54b`; a same-chat technical PASS at `d5e2b60` (`STAGE_3_REVALIDATION.md`); a fresh-session FAIL at `74026ca` (`STAGE_3_SIGNOFF_VALIDATION.md`, fixed by S3.V7/S3.V8). Device recheck S3V-08 unverified |
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 6 | Core Planner Redesign | In progress | 2026-09-27 | — | — (planned 2026-09-27: S6.1–S6.15 and S6.E frozen; every gate decided; S6.16, the owner's corrective pass, added and done 2026-09-28; S6.E's test UNVERIFIED) |
+| 6 | Core Planner Redesign | In progress | 2026-09-27 | — | **BLOCKED**, S6V-01 / TD-082 ([validation](STAGE_6_VALIDATION.md)); other technical criteria PASS; S6.E UNVERIFIED, gap accepted by the owner |
 | 7 | Data Entry & Automation | Not started | — | — | — |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
@@ -351,11 +360,11 @@ These block a release, not refinement.
     stale test count.
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
-- **Stage 6 (planned 2026-09-27):** every gate is decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1) and
-  RD-11 (S9, so no S6.15), all 2026-09-28. S6.16 (the owner's corrective pass) is done. S6.E needs an
-  independent participant on the refreshed `.s2check` build (refreshed 2026-09-28), or the
-  validation records the gap (V7).
-  The tracker stays as built until P8.4. TD-081 is recorded for Stage 9 or 11.
+- **Stage 6:** S6V-01 / TD-082 is blocking: stale deletion Undo restores the example badge after
+  a newer block edit. S6.V1 is the bounded correction ([report](STAGE_6_VALIDATION.md)). All
+  product gates remain decided: S4-DEF-04 (R), RD-08 (T3), RD-10 (O1), RD-11 (S9).
+  S6.E is UNVERIFIED; the owner explicitly accepts the missing independent participant, so it is
+  not a blocker. The tracker stays until P8.4; TD-081 remains Stage 9 or 11 debt.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -364,18 +373,18 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S6.E's five-second test (UNVERIFIED):** the separate `.s2check` app is rebuilt from S6.16's
-   commit and the test plan (Test site, M31, the example rig and plan, saved) is set up for the night
-   of Mon, Sep 28 (done 2026-09-28; on a later night, prepare the plan for that night first, as the
-   evidence file says). Next, **one independent participant who has not worked on the product**
-   answers Test A's five questions, recorded word for word in `evidence/STAGE_6_FIVE_SECOND_TEST.md`.
-   The owner's review does not count, and an agent is never the participant. If no participant is
-   available, the test stays UNVERIFIED and the validation records the gap (V7).
-2. Then **Stage 6 validation**, in a fresh session (its frozen checks are in the plan, "Stage 6
-   validation", now including S6.16's criteria and the owner's corrective-pass decisions). It may
-   reuse S6.16's full gate (V3).
+1. **S6.V1 — make deletion Undo stale-safe** (S6V-01 / TD-082), exactly as bounded in
+   [STAGE_6_VALIDATION.md](STAGE_6_VALIDATION.md#blocking-finding-f1--s6v-01--td-082): guard
+   deletion recovery against newer block edits and plan replacement; retain immediate exact
+   restore, autosave, timeout, saved-snapshot integrity and reduced-motion behavior. Reuse the
+   existing bounded recovery mechanism; no global undo or product redesign.
+2. **V5 bounded revalidation:** the original failure, affected S6.8/S6.9 criteria and the
+   correction's regression surface only. Other PASS results stand. S6.E stays
+   **UNVERIFIED — no independent participant available**, with the owner's accepted gap.
 
-No other Stage 6 Task is open. Nothing from Stages 7–9 starts before Stage 6 closes.
+The correction is recorded, not implemented by the validation. Do not start Stage 7. After
+successful closure, the next Stage action is **Stage 7 planning** against the amended roadmap,
+freezing its research/decision/implementation sequence; no Stage 7 task sequence is frozen yet.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

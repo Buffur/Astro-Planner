@@ -1,0 +1,33 @@
+diff --git a/test/presentation/widgets/capture_blocks_test.dart b/test/presentation/widgets/capture_blocks_test.dart
+--- a/test/presentation/widgets/capture_blocks_test.dart
++++ b/test/presentation/widgets/capture_blocks_test.dart
+@@ -146,2 +146,29 @@
++  testWidgets('S6V probe: stale delete Undo must not relabel edited blocks as the example', (tester) async {
++    await start(tester);
++    await tester.runAsync(vm.plan.useExamplePlan);
++    await settle(tester);
++    expect(vm.plan.isExampleCapturePlan, isTrue);
++    await tester.tap(find.byTooltip('Delete block').first);
++    await settle(tester);
++    expect(vm.plan.isExampleCapturePlan, isFalse);
++    // Add is a normal UI operation with no replacement snackbar.
++    await tester.tap(find.byTooltip('Add capture block'));
++    await tester.pumpAndSettle();
++    await tester.enterText(find.widgetWithText(TextFormField, 'Exposure (seconds)'), '60');
++    await tester.enterText(find.widgetWithText(TextFormField, 'Frame Count'), '7');
++    await tester.tap(find.byKey(const Key('blockDialog.submit')));
++    await settle(tester);
++    expect(vm.captureBlocks.last.frameCount, 7);
++    expect(vm.plan.isExampleCapturePlan, isFalse);
++    expect(find.text('Undo'), findsOneWidget);
++    await tester.tap(find.text('Undo'));
++    await settle(tester);
++    expect(vm.captureBlocks.last.frameCount, 7);
++    final row = await tester.runAsync(() => sessions.get(vm.plan.activeSessionId!));
++    expect(row!.blocks.last.frameCount, 7);
++    print('S6V observed: ${vm.captureBlocks.length} blocks, last count ${vm.captureBlocks.last.frameCount}, example badge ${vm.plan.isExampleCapturePlan}');
++    expect(vm.plan.isExampleCapturePlan, isFalse, reason: 'A newer user block must not be presented as the untouched shipped example.');
++  });
++
+   testWidgets('each frame type and edge case reads as what will be '
+       'captured, at 200 % text on a phone', (tester) async {

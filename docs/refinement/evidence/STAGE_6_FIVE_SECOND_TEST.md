@@ -1,5 +1,13 @@
 # Stage 6 — the five-second test (S6.E)
 
+> **Final-validation disposition, 2026-09-28:** **UNVERIFIED — no independent participant
+> available**. The owner explicitly accepts this evidence gap for now in the validation request.
+> No participant answers have been supplied or inferred. The [Stage 6 validation](../STAGE_6_VALIDATION.md)
+> records the gap as non-blocking under the existing S6.E decision and V7; its BLOCKED result
+> concerns the separate deletion-Undo finding S6V-01 / TD-082. The past Capture ends observation
+> is classified in that report (C1) as correct selected-whole-night planning semantics.
+> The earlier setup and owner-review observations below are preserved as evidence.
+
 > **Task:** S6.E, owner-run evidence (`POST_ROADMAP_PLAN.md`, "S6.E"). It answers the Stage 6 Exit's
 > comprehension points: can a person tell, in five seconds, what the first screens say?
 > **Script:** Test A, `research/S4.R1_FLOW_INVENTORY.md` §7.1, with its device rules as corrected on
