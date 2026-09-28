@@ -3,6 +3,7 @@ import '../models/capture_block.dart';
 import '../models/planning_preferences.dart';
 import '../models/visibility_window.dart';
 import 'optical_calculator.dart';
+import 'stacking_gain_curve.dart';
 
 /// Capture overheads used by the budget (ADR-009 §4), in integer
 /// milliseconds. A null optional overhead is **off** — "not included",
@@ -101,6 +102,10 @@ class LightGroup {
   /// Relative stacking gain vs one frame of this group: √N.
   double get relativeStackingGain =>
       OpticalCalculator.calculateRelativeStackingGain(frames);
+
+  /// How that gain grows with the frame count, for the group's graph
+  /// (S6.11, CALC-42); its marked value is [relativeStackingGain].
+  StackingGainCurve get gainCurve => StackingGainCurve.of(frames);
 }
 
 /// Where a block's time is counted (ADR-009 §2–§3).

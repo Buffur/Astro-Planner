@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.11, 2026-09-28:** B4 notes the stacking-gain graph.
 > **S6.10, 2026-09-28:** B4 notes "what fits", the storage note and `ChangeMark`.
 > **S6.9, 2026-09-28:** B4 notes the capture plan's rows (`BlockText`), Delete with Undo and the effective tracking.
 > **S6.8, 2026-09-28:** B4 notes the new defaults (no preselection, an empty capture plan, New plan without a target, the example rig).
@@ -502,6 +503,10 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > Budget details' summary when their values change. The storage trace (case C, an unknown input)
 > was re-verified: the rig's RAW size reaches `CaptureBudgetCalculator` unchanged; no calculation or
 > wiring defect.
+
+> **Since S6.11 (2026-09-28; P6.10, CALC-42)** each light group's graph reads `LightGroup.gainCurve`
+> (`StackingGainCurve`, pure domain) from the ViewModel's budget; `StackingGainGraph` and its
+> `StackingGainPainter` only draw those points. No new dependency.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

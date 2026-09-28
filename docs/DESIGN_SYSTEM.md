@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.11, 2026-09-28:** §7a adds the stacking-gain graph.
+
 > **S6.10, 2026-09-28:** §7a adds the change mark (`ChangeMark`); Budget details' summary uses the glossary's words.
 
 > **S6.9, 2026-09-28:** §6.2 adds `AppMotion.highlight`; §9.1's capture-plan row is done.
@@ -319,6 +321,16 @@ The answer first (ADR-019 §6; addendum §3.1–§3.2).
 - **Partly** has a word and a tone, but no stored data expresses it until Stage 8's result form.
 - **`PlanStateLabel`:** the word in its tone (`labelMedium`), in a quiet pill outlined in `border`.
   It wraps at 200 % text and is not tappable.
+
+### The stacking-gain graph (S6.11; `widgets/capture_plan/stacking_gain_graph.dart`)
+
+One compact graph under each (filter, exposure) group's √N line: `StackingGainCurve`'s points
+(CALC-42) from one frame to twice the planned count, drawn in `chartTarget` over a `chartGrid`
+baseline, the planned count marked with `chartNow`/`chartNowCentre` (the altitude chart's "now"
+dot) and a guide line. 48 px high; the axis' ends are `Text` below it (`bodySmall`,
+`textTertiary`) so they scale and wrap. The number stays in the line above; the section's title is
+`AppWords.relativeStackingGain`. The text alternative gives the group's value and where the curve
+ends. A `CustomPaint`: no chart dependency.
 
 ### The change mark (S6.10; `lib/presentation/shared/change_mark.dart`)
 

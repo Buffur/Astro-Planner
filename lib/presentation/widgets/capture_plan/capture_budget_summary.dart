@@ -13,6 +13,7 @@ import '../../shared/collapsible_section.dart';
 import '../../shared/context_line.dart';
 import '../../shared/night_time_formatter.dart';
 import '../planner_sections.dart';
+import 'stacking_gain_graph.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
@@ -154,12 +155,21 @@ class CaptureBudgetSummary extends StatelessWidget {
         if (budget.lightGroups.isEmpty)
           Text('No light frames.', style: theme.textTheme.bodySmall)
         else
-          for (final g in budget.lightGroups)
+          for (final g in budget.lightGroups) ...[
             _Line(
               '${g.filterName ?? 'No filter'} · '
                   '${_seconds(g.exposureMs)} × ${g.frames}',
               '${g.relativeStackingGain.toStringAsFixed(1)}x',
             ),
+            // S6.11 (P6.10): how the gain grows with more frames, per group
+            // (never combined); the number stays in the line above.
+            StackingGainGraph(
+              key: Key('capturePlan.gainGraph.${g.filterName}.${g.exposureMs}'),
+              curve: g.gainCurve,
+              groupLabel:
+                  '${g.filterName ?? 'No filter'} · ${_seconds(g.exposureMs)}',
+            ),
+          ],
         const SizedBox(height: 12),
         _Line(
           'Estimated Storage',

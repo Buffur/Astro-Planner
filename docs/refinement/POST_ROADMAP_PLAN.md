@@ -2876,7 +2876,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | **Done 2026-09-28** |
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | **Done 2026-09-28** |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | **Done 2026-09-28** |
-| S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
+| S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | **Done 2026-09-28** |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | Frozen |
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 | Frozen, gated |
@@ -3321,6 +3321,12 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - the label is `AppWords.relativeStackingGain`;
   - the text alternative gives each group's value;
   - light, dark and field themes at 200 % text; the full gate.
+- **Done 2026-09-28:** `StackingGainCurve` (CALC-42: √n for n from 1 to max(4, 2N)) read as
+  `LightGroup.gainCurve`; one `StackingGainGraph` per group under its line, a 48 px `CustomPaint`
+  with the planned count marked and the axis' ends as scalable text below. Its form was chosen for
+  a 412 px width, 200 % text and field mode's chart tokens (the sweep and a three-theme test). Tests:
+  `stacking_gain_curve_test.dart` (5), `stacking_gain_graph_test.dart` (5). Full gate PASS: 1,435
+  tests, 2 expected skips; 2 host E2E.
 
 ##### S6.12 — The night and opportunity timeline (P6.11)
 - **Objective:** one timeline answers "when can I image this target, and how does the plan fit into

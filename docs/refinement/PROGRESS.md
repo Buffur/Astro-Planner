@@ -4,19 +4,25 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.10 done**: the capture plan's outputs; Stage 6 in progress).
-> **Next:** S6.11 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
+> **Last updated:** 2026-09-28 (**S6.11 done**: the relative-stacking-gain graph; Stage 6 in progress).
+> **Next:** S6.12 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.10 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.11 done) |
 | Current Task | None in progress |
-| Next Task | **S6.11 — The relative-stacking-gain graph** (no gate) |
-| Code baseline | S6.10 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.12 — The night and opportunity timeline** (no gate) |
+| Code baseline | S6.11 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.11 done, 2026-09-28** (P6.10; CALC-42): each light group has a compact graph of its relative
+stacking gain from one frame to twice the planned count, the planned count marked; the figure and
+the label stay (SI-003); a text alternative gives each group's value; the points come from the
+domain. Verification: the full gate after the last code change, PASS (below); every acceptance
+criterion checked.
 
 **S6.10 done, 2026-09-28** (P6.9; 08 §17): Budget details' summary says "Time needed · Total time";
 each row says what of it fits tonight, only from the fit's own outputs (TD-074 records what the fit
@@ -160,7 +166,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (429 files, 0 changed); Analyze; 1,425 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.10's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (433 files, 0 changed); Analyze; 1,435 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.11's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -281,11 +287,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.11 — The relative-stacking-gain graph** (P6.10). Frozen, no gate; the frozen sequence is the
-approval.
-- **Read:** S6.11 and "Rules for every Stage 6 Task"; SI-003; `CaptureBudget.lightGroups` and
-  `LightGroup.relativeStackingGain`; `OpticalCalculator.calculateRelativeStackingGain`; the altitude
-  chart's `CustomPaint` and text alternative (the pattern); `CaptureBudgetSummary`'s √N section.
+**S6.12 — The night and opportunity timeline** (P6.11; UX-08). Frozen, no gate; the frozen
+sequence is the approval.
+- **Read:** S6.12, P6.11's notes and "Rules for every Stage 6 Task"; `AltitudeChartWidget` and
+  `TonightOpportunityWidget` (inventory first, into ARCHITECTURE Part B); `ImagingOpportunity`,
+  `NightTimeline.darkAtLimit`, `FitResult` (only its end is exposed); UX-08's points.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 
