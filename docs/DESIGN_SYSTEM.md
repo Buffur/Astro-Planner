@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.12, 2026-09-28:** §7a adds the night and opportunity timeline.
+
 > **S6.11, 2026-09-28:** §7a adds the stacking-gain graph.
 
 > **S6.10, 2026-09-28:** §7a adds the change mark (`ChangeMark`); Budget details' summary uses the glossary's words.
@@ -321,6 +323,16 @@ The answer first (ADR-019 §6; addendum §3.1–§3.2).
 - **Partly** has a word and a tone, but no stored data expresses it until Stage 8's result form.
 - **`PlanStateLabel`:** the word in its tone (`labelMedium`), in a quiet pill outlined in `border`.
   It wraps at 200 % text and is not tappable.
+
+### The night and opportunity timeline (S6.12; `widgets/altitude_chart_widget.dart`)
+
+One primitive (`AltitudeChartWidget` over `TimelineData`) at two `TimelineDensity`s: `full` (200
+px; the altitude grid with its labels in a left gutter, the Moon, the legend) and `compact` (88 px;
+the bands, windows, target and time axis). Bands use `chartDay`/`chartTwilight`/`chartDark`, merged
+per run, with `chartGrid` edges; windows `chartWindow`; the target `chartTarget`; "Capture ends" a
+dashed `chartTarget` line; "now" `chartNow`/`chartNowCentre`. Labels are `labelSmall` in
+`textSecondary`, scaled with the text size, outside the plot. A chart of the same night, target
+and windows is never drawn twice.
 
 ### The stacking-gain graph (S6.11; `widgets/capture_plan/stacking_gain_graph.dart`)
 

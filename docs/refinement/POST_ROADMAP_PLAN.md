@@ -2877,7 +2877,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | **Done 2026-09-28** |
 | S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | **Done 2026-09-28** |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | **Done 2026-09-28** |
-| S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
+| S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | Frozen |
 | S6.14 | The candidates' default order | RD-10; UX-29 | S | — | RD-10 | Frozen, gated |
 | S6.15 | The Moon and cloud gate controls | TD-050 | S | — | RD-11 = Stage 6 | Conditional |
@@ -3353,6 +3353,18 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - each UX-08 point has a test or a recorded render check;
   - light, dark and field themes; 200 % text; the text alternative; the sweep;
   - the full gate.
+- **Done 2026-09-28:** the inventory is in ARCHITECTURE B4. `AltitudeChartWidget` evolved (no second
+  chart) over one mapping, `TimelineData`; `TimelinePainter` with its `geometry`; `full` and
+  `compact` densities. The planned capture is drawn as far as the fit exposes it, its end; no
+  per-window placement (the fit has no such output, so none was invented). UX-08, point by point:
+  the 12/24-hour setting and whole-hour ticks in the site's zone (tests, a half-hour zone and a DST
+  night included); labels outside the plot and never overlapping at 100 % and 200 % text (geometry
+  tests); no seams (bands merged, tested); field mode's bands kept apart by drawn edges (tested;
+  the real-darkness check stays Stage 11's); the noon-to-noon span kept as ADR-007's night (the
+  audit's trade-off). The text alternative names the windows, the usable time and the capture's
+  end. Tests: `timeline_test.dart` (13) and a planner test that the timeline's windows and end
+  equal the opportunity's and the fit's. Full gate PASS: 1,449 tests, 2 expected skips; 2 host
+  E2E.
 
 ##### S6.13 — Tonight, plan first (P6.6)
 - **Objective:** Tonight leads with the current plan and its answer, and sends detail to the detail

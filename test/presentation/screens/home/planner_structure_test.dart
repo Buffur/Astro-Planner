@@ -22,7 +22,9 @@ import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/presentation/shared/app_words.dart';
 import 'package:astroplan/presentation/shared/status_block.dart';
+import 'package:astroplan/presentation/widgets/altitude_chart_widget.dart';
 import 'package:astroplan/presentation/widgets/plan_status.dart';
+import 'package:astroplan/presentation/widgets/timeline_data.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -219,6 +221,31 @@ void main() {
     expect(vm.fitAnalysis.state, FitState.noWindow);
     expect(find.text(AppWords.noWindow), findsOneWidget);
     expect(find.text(vm.fitAnalysis.reason), findsOneWidget);
+  });
+
+  // S6.12 (P6.11): the timeline's intervals are the opportunity's, and the
+  // planned capture is drawn as far as the fit exposes it: its end.
+  testWidgets("the timeline draws the opportunity's windows and the fit's "
+      'end', (tester) async {
+    await start(tester, size: const Size(800, 3000));
+    final painter =
+        tester
+                .widget<CustomPaint>(
+                  find.descendant(
+                    of: find.byType(AltitudeChartWidget),
+                    matching: find.byType(CustomPaint),
+                  ),
+                )
+                .painter!
+            as TimelinePainter;
+    final o = vm.conditions.imagingOpportunity!;
+    expect(painter.data.windows, [
+      for (final w in o.windows) TimelineSpan(w.startUtc, w.endUtc),
+    ]);
+    final fit = vm.fitAnalysis;
+    expect(fit.state, anyOf(FitState.fits, FitState.tight));
+    expect(painter.data.captureEndUtc, fit.endUtc);
+    expect(fit.endUtc, isNotNull);
   });
 
   testWidgets('without a rig the structure stays and the status is neutral', (

@@ -4,19 +4,26 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-28 (**S6.11 done**: the relative-stacking-gain graph; Stage 6 in progress).
-> **Next:** S6.12 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
+> **Last updated:** 2026-09-28 (**S6.12 done**: the night and opportunity timeline; Stage 6 in progress).
+> **Next:** S6.13 (no gate). RD-10 and RD-11 whenever convenient, each before its Task.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.11 done) |
+| Current Stage | **Stage 6 — Core Planner Redesign: in progress** (Task sequence frozen 2026-09-27; S6.1–S6.12 done) |
 | Current Task | None in progress |
-| Next Task | **S6.12 — The night and opportunity timeline** (no gate) |
-| Code baseline | S6.11 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S6.13 — Tonight, plan first** (no gate) |
+| Code baseline | S6.12 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S6.12 done, 2026-09-28** (P6.11; UX-08): the altitude chart is evolved into the night and
+opportunity timeline over one mapping: seamless bands with drawn edges (field mode), the windows,
+the fit's end, whole-hour times in the device's 12/24-hour format, labels outside the plot at any
+text size, a fuller text alternative, and a compact density for Tonight to consider. The inventory
+is in ARCHITECTURE B4. Verification: the full gate after the last code change, PASS (below); every
+acceptance criterion checked.
 
 **S6.11 done, 2026-09-28** (P6.10; CALC-42): each light group has a compact graph of its relative
 stacking gain from one frame to twice the planned count, the planned count marked; the figure and
@@ -166,7 +173,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (433 files, 0 changed); Analyze; 1,435 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.11's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
+| **Full quality gate PASS**: Encoding; Format (435 files, 0 changed); Analyze; 1,449 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.12's final inputs (this commit) | Invalidated by the next change to `lib/`, `test/`, `integration_test/`, `tool/`, `pubspec.*`, `assets/`, `analysis_options.yaml`, `build.yaml` or platform folders |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 
@@ -287,11 +294,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-**S6.12 — The night and opportunity timeline** (P6.11; UX-08). Frozen, no gate; the frozen
-sequence is the approval.
-- **Read:** S6.12, P6.11's notes and "Rules for every Stage 6 Task"; `AltitudeChartWidget` and
-  `TonightOpportunityWidget` (inventory first, into ARCHITECTURE Part B); `ImagingOpportunity`,
-  `NightTimeline.darkAtLimit`, `FitResult` (only its end is exposed); UX-08's points.
+**S6.13 — Tonight, plan first** (P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073's site
+prompt; DEV-P9's second half). Frozen, no gate; the frozen sequence is the approval.
+- **Read:** S6.13 and "Rules for every Stage 6 Task"; ADR-019 §5; `tonight_home_screen.dart`;
+  `ContextLine`, `StatusBlock`, `PlanStateLabel`; S6.5's `DarkText`/`NightSummary`; the timeline's
+  `compact` density (use it only if it answers something the rows do not); TD-054, TD-073.
 - **Verification:** the full gate after the last code change (the Task's rule).
 - Then commit and STOP.
 

@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.12, 2026-09-28:** B4 records the timeline's inventory and its evolution (`TimelineData`, `TimelinePainter`, densities).
 > **S6.11, 2026-09-28:** B4 notes the stacking-gain graph.
 > **S6.10, 2026-09-28:** B4 notes "what fits", the storage note and `ChangeMark`.
 > **S6.9, 2026-09-28:** B4 notes the capture plan's rows (`BlockText`), Delete with Undo and the effective tracking.
@@ -507,6 +508,29 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > **Since S6.11 (2026-09-28; P6.10, CALC-42)** each light group's graph reads `LightGroup.gainCurve`
 > (`StackingGainCurve`, pure domain) from the ViewModel's budget; `StackingGainGraph` and its
 > `StackingGainPainter` only draw those points. No new dependency.
+
+> **S6.12 (2026-09-28; P6.11, UX-08): the night and opportunity timeline.**
+> *Inventory first* (the chart and window list at `ea899a6`): **kept**, because they work: one
+> `ImagingOpportunity` renders both the chart and the list, so they cannot disagree; the darkness
+> bands come from the opportunity's own Sun samples at the user's limit; the windows, the target's
+> and Moon's altitude, the minimum altitude and "now" come from the domain; there is a text
+> alternative and a legend; the window list keeps every excluded period with its reasons. **Fixed**
+> (UX-08): hand-formatted 24-hour `HH:mm` labels at odd minutes (the night starts at mean solar
+> noon); altitude and time labels painted over the curves; 288 per-sample rectangles leaving seams;
+> field mode's near-identical band reds; no sign of the planned capture. **Kept as a trade-off**:
+> the noon-to-noon span (ADR-007's night; the audit calls it context vs focus).
+> *Evolved, not joined by a second chart:* `AltitudeChartWidget` is the one primitive, over one
+> mapping, `TimelineData` (`widgets/timeline_data.dart`): the bands merged from the samples (no
+> seams) with their edges drawn (distinguishable in field mode), the windows exactly as the
+> opportunity's (no time across a gap), the fit's end (`FitResult.endUtc`, only when the fit
+> measured the plan; no per-window placement is drawn, since the fit does not expose one), "now"
+> inside the night, and whole-hour ticks on the site's wall clock (`hourTicks`, half-hour zones and
+> DST included), labelled by `NightTimeFormatter.clockTime` (the device's 12- or 24-hour setting).
+> `TimelinePainter.geometry` puts the altitude labels in a left gutter and the time labels below the
+> plot, choosing every 1, 2, 3, 4, 6 or 12 hours so they never touch, at any text size. A
+> `TimelineDensity` (`full` in the planner, `compact` for a summary; S6.13 decides whether Tonight
+> uses it). The text alternative names the windows with their times, the usable time and the
+> capture's end.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

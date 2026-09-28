@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/models/imaging_opportunity.dart';
+import '../../domain/services/fit_analyzer.dart';
 import '../shared/night_time_formatter.dart';
 import '../shared/opportunity_text.dart';
+import '../viewmodels/capture_analysis_viewmodel.dart';
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import 'altitude_chart_widget.dart';
@@ -23,6 +25,13 @@ class TonightOpportunityWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final zoneId = siteVm.displayZoneId;
     final moon = conditionsVm.moonConditions;
+    // S6.12: the planned capture, as far as the fit exposes it (its end),
+    // and only when the fit measured the plan.
+    final fit = context.watch<CaptureAnalysisViewModel>().fitAnalysis;
+    final measured =
+        fit.state == FitState.fits ||
+        fit.state == FitState.tight ||
+        fit.state == FitState.doesNotFit;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -54,6 +63,7 @@ class TonightOpportunityWidget extends StatelessWidget {
                   : [for (final s in moon.samples) s.altitudeDeg],
               zoneId: zoneId,
               nowUtc: conditionsVm.nowUtc,
+              captureEndUtc: measured ? fit.endUtc : null,
             ),
             const SizedBox(height: 12),
             OpportunityList(opportunity: o, zoneId: zoneId),
