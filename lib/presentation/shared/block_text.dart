@@ -34,6 +34,34 @@ abstract final class BlockText {
           : QuantityText.duration(Duration(milliseconds: budget.exposureMs)),
   ].join(' · ');
 
+  /// What fits of this block tonight (S6.10; P6.9), only from the fit's own
+  /// outputs: [unplaced] from `FitResult.unplacedFramesByBlock`, [upTo]
+  /// from `FitAnalyzer.maxFramesForBlock` (the last light block only) and
+  /// [spare], how many more of it still fit. Null when there is nothing to
+  /// say.
+  static String? whatFits(
+    CaptureBlock b, {
+    required int unplaced,
+    int? upTo,
+    int? spare,
+  }) {
+    if (unplaced > 0) {
+      final head = unplaced == 1
+          ? '1 frame does not fit tonight'
+          : '$unplaced frames do not fit tonight';
+      return upTo != null && upTo > 0
+          ? '$head · up to $upTo × '
+                '${QuantityText.exposure(b.exposureTimeSeconds)} fit'
+          : head;
+    }
+    if (spare != null && spare > 0) {
+      return spare == 1
+          ? '+1 frame still fits tonight'
+          : '+$spare frames still fit tonight';
+    }
+    return null;
+  }
+
   /// Where a calibration block's time goes; null for lights and library
   /// blocks (the row already says so).
   static String? placement(CaptureBlock b, BlockBudget? budget) {

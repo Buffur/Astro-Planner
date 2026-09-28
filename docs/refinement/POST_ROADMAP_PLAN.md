@@ -2875,7 +2875,7 @@ Analyze; 1,320 tests, 2 expected skips; 2 host E2E. Planning is documentation on
 | S6.7 | Disclosure in the planner | P6.4; UX-05 | M | S6.6 | — | **Done 2026-09-28** |
 | S6.8 | Defaults, New plan's contents and the first run | P6.2, P6.1 (New plan); RD-04; UX-24 | S–M | S6.6 | — | **Done 2026-09-28** |
 | S6.9 | The capture plan's blocks | P6.8; UX-09, UX-15 (1); 08 §14; RD-09 | M | S6.6 | RD-08 (**decided: T3**) | **Done 2026-09-28** |
-| S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | Frozen |
+| S6.10 | The capture plan's outputs: time, what fits, storage | P6.9; 08 §17 | M | S6.7 | — | **Done 2026-09-28** |
 | S6.11 | The relative-stacking-gain graph | P6.10 | S–M | S6.7, S6.10 | — | Frozen |
 | S6.12 | The night and opportunity timeline | P6.11; UX-08 | M | S6.6 | — | Frozen |
 | S6.13 | Tonight, plan first | P6.6; UX-10, UX-11, UX-13, UX-17, UX-24; TD-054; TD-073 (site prompt) | M | S6.2, S6.5, S6.12 | — | Frozen |
@@ -3291,6 +3291,16 @@ owner chooses Stage 6. No P-Task was dropped, and every Stage 6 adoption row of 
   - "what fits" equals the fit's outputs;
   - a kept visual matches the budget;
   - the sweep at 200 % text; the full gate.
+- **Done 2026-09-28:** Budget details' summary is "Time needed · Total time" in the glossary's words
+  (checked against ADR-009's E1; S6.7's test covers every line on E3 and E4). "What fits" on the
+  row it concerns, only from `unplacedFramesByBlock`, `maxFramesForBlock` (the last light block) and
+  their difference with the planned count (`fillWindowSpareFrames`); shown only when the fit
+  measured the plan; the limits are TD-074. Storage: the trace was re-verified (case C, no defect);
+  known values say what they rest on, including an estimated RAW size; "Unknown" says why and how
+  to supply it, with a button to the rigs. **No budget visual:** the numbers stay, since a
+  segmented bar would imply continuous time across split windows (P6.9's honesty tests). Cause and
+  effect: `ChangeMark` on the status and Budget details' summary, with S6.9's row mark. Tests:
+  `capture_outputs_test.dart` (11). Full gate PASS: 1,425 tests, 2 expected skips; 2 host E2E.
 
 ##### S6.11 — The relative-stacking-gain graph (P6.10)
 - **Objective:** a compact graph answers "how does relative √N change as the frame count grows?".

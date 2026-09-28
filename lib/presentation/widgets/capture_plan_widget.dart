@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_palette.dart';
 import '../../domain/models/capture_block.dart';
+import '../../domain/services/fit_analyzer.dart';
 import '../navigation/app_router.dart';
 import '../shared/block_text.dart';
 import '../shared/capability_text.dart';
@@ -85,6 +86,13 @@ class _BlockListState extends State<_BlockList> {
     final blocks = viewModel.captureBlocks;
     final budgets = analysis.captureBudget.blocks;
     final capability = analysis.rigCapability;
+    // S6.10: what fits, only where the fit measured the plan.
+    final fit = analysis.fitAnalysis;
+    final measured =
+        fit.state == FitState.fits ||
+        fit.state == FitState.tight ||
+        fit.state == FitState.doesNotFit;
+    final fillIndex = measured ? analysis.fillWindowBlockIndex : null;
     final fresh = _built;
     _built = true;
     return Column(
@@ -162,6 +170,19 @@ class _BlockListState extends State<_BlockList> {
               final block = blocks[index];
               final budget = index < budgets.length ? budgets[index] : null;
               final placement = BlockText.placement(block, budget);
+              final fits = measured
+                  ? BlockText.whatFits(
+                      block,
+                      unplaced: fit.unplacedFramesByBlock[index] ?? 0,
+                      upTo: index == fillIndex
+                          ? analysis.fillWindowFrameCount
+                          : null,
+                      spare: index == fillIndex
+                          ? analysis.fillWindowSpareFrames
+                          : null,
+                    )
+                  : null;
+              final unplaced = (fit.unplacedFramesByBlock[index] ?? 0) > 0;
               // TASK 8.6: guidance only — never blocks the plan.
               final exceeds =
                   block.frameType == FrameType.light &&
@@ -182,12 +203,22 @@ class _BlockListState extends State<_BlockList> {
                     initial: block,
                   ),
                   title: Text(BlockText.row(block, budget)),
-                  subtitle: placement == null && !exceeds
+                  subtitle: placement == null && !exceeds && fits == null
                       ? null
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (placement != null) Text(placement),
+                            if (fits != null)
+                              Text(
+                                fits,
+                                key: Key('capture.whatFits.$index'),
+                                style: TextStyle(
+                                  color: unplaced
+                                      ? palette.statusDoesNotFit
+                                      : palette.textSecondary,
+                                ),
+                              ),
                             // S6.9 (UX-15 (1); RD-08): a known tracking's
                             // exceedance is a warning, in words and the
                             // status colour; unknown tracking is a missing

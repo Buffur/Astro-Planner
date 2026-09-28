@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S6.10, 2026-09-28:** B4 notes "what fits", the storage note and `ChangeMark`.
 > **S6.9, 2026-09-28:** B4 notes the capture plan's rows (`BlockText`), Delete with Undo and the effective tracking.
 > **S6.8, 2026-09-28:** B4 notes the new defaults (no preselection, an empty capture plan, New plan without a target, the example rig).
 > **S6.7, 2026-09-28:** B4 notes the planner's collapsible sections (`PlannerSections`) and where each value went.
@@ -492,6 +493,15 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > went: the "Inputs", "Outputs" and "Sequence Plan" headings are gone (the planner's "Capture plan"
 > header remains); the row's frame type, filter, count, exposure and calibration placement are in
 > its text; the capability warning stays on its row.
+
+> **Since S6.10 (2026-09-28; P6.9)** "what fits" on a row comes from `FitResult.unplacedFramesByBlock`,
+> `CaptureAnalysisViewModel.fillWindowFrameCount` (`FitAnalyzer.maxFramesForBlock`) and the new
+> `fillWindowSpareFrames` (that count minus the planned one), worded by `BlockText.whatFits`; nothing
+> is shown unless the fit measured the plan. Storage's note is `CaptureBudgetSummary.storageNote`
+> (the rig, and its RAW size's per-field provenance). `ChangeMark` (shared) marks the status and
+> Budget details' summary when their values change. The storage trace (case C, an unknown input)
+> was re-verified: the rig's RAW size reaches `CaptureBudgetCalculator` unchanged; no calculation or
+> wiring defect.
 
 Two `ChangeNotifier`s exist: `PlannerViewModel` and `ThemeViewModel`
 (`isFieldMode` boolean, in memory only, not persisted). Screens also keep local

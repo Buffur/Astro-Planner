@@ -188,6 +188,15 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
     );
   }
 
+  /// How many more frames of [fillWindowBlockIndex] still fit tonight than
+  /// are planned (S6.10, "+N frames still fit"); null when none do.
+  int? get fillWindowSpareFrames {
+    final index = fillWindowBlockIndex, count = fillWindowFrameCount;
+    if (index == null || count == null) return null;
+    final spare = count - _plan.captureBlocks[index].frameCount;
+    return spare > 0 ? spare : null;
+  }
+
   /// Applies [fillWindowFrameCount]; false (no change) when nothing fits.
   Future<bool> fillWindow() async {
     final index = fillWindowBlockIndex;

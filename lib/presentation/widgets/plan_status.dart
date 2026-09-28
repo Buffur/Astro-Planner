@@ -6,6 +6,7 @@ import '../../core/utils/quantity_text.dart';
 import '../../domain/services/fit_analyzer.dart';
 import '../navigation/app_router.dart';
 import '../shared/app_words.dart';
+import '../shared/change_mark.dart';
 import '../shared/night_time_formatter.dart';
 import '../shared/status_block.dart';
 import '../viewmodels/capture_analysis_viewmodel.dart';
@@ -55,50 +56,61 @@ class PlanStatus extends StatelessWidget {
     return Card(
       key: const Key('planner.status'),
       margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: StatusBlock(
-          state: state,
-          missing: missing,
-          needed: measured ? Duration(milliseconds: fit.windowLoadMs) : null,
-          usable: measured && fit.availableMs > 0
-              ? Duration(milliseconds: fit.availableMs)
-              : null,
-          reason: missing == needsRig
-              ? 'A rig is needed to save the plan and to check exposures.'
-              : fit.reason,
-          keyNumbers: [
-            // Always (S6.7): the budget's lines are folded into Budget
-            // details, and integration needs no site, target or rig.
-            (
-              AppWords.integration,
-              QuantityText.duration(
-                Duration(milliseconds: analysis.captureBudget.integrationMs),
-              ),
-            ),
-            if (missing == null &&
-                end != null &&
-                night != null &&
-                (fit.state == FitState.fits || fit.state == FitState.tight))
+      // S6.10 (P6.9's cause and effect): an edit that changes the verdict,
+      // its numbers or the integration marks the status briefly.
+      child: ChangeMark(
+        value: (
+          state,
+          missing,
+          fit.windowLoadMs,
+          fit.availableMs,
+          analysis.captureBudget.integrationMs,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: StatusBlock(
+            state: state,
+            missing: missing,
+            needed: measured ? Duration(milliseconds: fit.windowLoadMs) : null,
+            usable: measured && fit.availableMs > 0
+                ? Duration(milliseconds: fit.availableMs)
+                : null,
+            reason: missing == needsRig
+                ? 'A rig is needed to save the plan and to check exposures.'
+                : fit.reason,
+            keyNumbers: [
+              // Always (S6.7): the budget's lines are folded into Budget
+              // details, and integration needs no site, target or rig.
               (
-                'Capture ends',
-                NightTimeFormatter.instant(
-                  context,
-                  end,
-                  windowStartUtc: night.startUtc,
-                  zoneId: site.displayZoneId,
+                AppWords.integration,
+                QuantityText.duration(
+                  Duration(milliseconds: analysis.captureBudget.integrationMs),
                 ),
               ),
-          ],
-          action: pick != null
-              ? OutlinedButton(
-                  key: const Key('status.choose'),
-                  onPressed: () => context.push(route!),
-                  child: Text(pick),
-                )
-              : measured
-              ? FillWindowAction(fit: fit)
-              : null,
+              if (missing == null &&
+                  end != null &&
+                  night != null &&
+                  (fit.state == FitState.fits || fit.state == FitState.tight))
+                (
+                  'Capture ends',
+                  NightTimeFormatter.instant(
+                    context,
+                    end,
+                    windowStartUtc: night.startUtc,
+                    zoneId: site.displayZoneId,
+                  ),
+                ),
+            ],
+            action: pick != null
+                ? OutlinedButton(
+                    key: const Key('status.choose'),
+                    onPressed: () => context.push(route!),
+                    child: Text(pick),
+                  )
+                : measured
+                ? FillWindowAction(fit: fit)
+                : null,
+          ),
         ),
       ),
     );

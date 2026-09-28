@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S6.10, 2026-09-28:** §7a adds the change mark (`ChangeMark`); Budget details' summary uses the glossary's words.
+
 > **S6.9, 2026-09-28:** §6.2 adds `AppMotion.highlight`; §9.1's capture-plan row is done.
 
 > **S6.8, 2026-09-28:** §7 notes the examples' words (`ExampleText`).
@@ -318,6 +320,14 @@ The answer first (ADR-019 §6; addendum §3.1–§3.2).
 - **`PlanStateLabel`:** the word in its tone (`labelMedium`), in a quiet pill outlined in `border`.
   It wraps at 200 % text and is not tappable.
 
+### The change mark (S6.10; `lib/presentation/shared/change_mark.dart`)
+
+Cause and effect after an edit (P6.9's notes): `ChangeMark(value:, child:)` tints its child when
+`value` (what the ViewModel already shows) changes, fading over `AppMotion.highlight`; never on the
+first build, never with reduced motion; it keeps no calculation state. Adopted by the planner's
+status and Budget details' summary. A capture block's row uses the same idea on the tile's own
+colour (S6.9), since a `ListTile` must not sit on a coloured box.
+
 ### The collapsible section (S5.5; `lib/presentation/shared/collapsible_section.dart`)
 
 Detail one tap away (ADR-019 §7; RD-06, RG-06: progressive disclosure, no modes).
@@ -344,7 +354,7 @@ Detail one tap away (ADR-019 §7; RD-06, RG-06: progressive disclosure, no modes
 
   | Section | Summary (a fact) | Content |
   | --- | --- | --- |
-  | Budget details | "2 h 5 min needed · 3 h total" | Every ADR-009 line in the glossary's words (Integration, Imaging time, Time needed, Calibration during and outside the window, Setup, Total time, Library calibration); the zone rule when the setup time is shown |
+  | Budget details | "Time needed 2 h 5 min · Total time 3 h" (S6.10: the glossary's words; marked when an edit changes it) | Every ADR-009 line in the glossary's words (Integration, Imaging time, Time needed, Calibration during and outside the window, Setup, Total time, Library calibration); the zone rule when the setup time is shown |
   | Relative stacking gain (√N vs one frame) | "Per filter and exposure, against one frame" | The √N explanation; the √N values stay visible below the section (SI-003) |
   | Assumptions | "Darkness limit −18° · minimum altitude 30° · margin 15 %" (the constraints that shape the window stay in view) | Every overhead and threshold, the placement rule, the link to Settings |
   | Specifications (the rig) | "400 mm · f/5.0 · Tracking: Guided" (the focal ratio's review flag stays in view) | Focal length, focal ratio, sensor, tracking. The values the plan uses and the capability warnings stay on the card |

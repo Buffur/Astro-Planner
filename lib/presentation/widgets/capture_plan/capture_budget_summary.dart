@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/services/capture_budget_calculator.dart';
+import '../../../domain/models/equipment_profile.dart';
+import '../../../domain/models/spec_confidence.dart';
+import '../../../domain/models/spec_provenance.dart';
+import '../../navigation/app_router.dart';
 import '../../shared/app_words.dart';
+import '../../shared/change_mark.dart';
 import '../../shared/collapsible_section.dart';
 import '../../shared/context_line.dart';
 import '../../shared/night_time_formatter.dart';
@@ -54,74 +60,79 @@ class CaptureBudgetSummary extends StatelessWidget {
       children: [
         // S6.7 (ADR-019 §7): every ADR-009 line on its own line, one tap
         // away; the status above shows the answer's numbers.
-        CollapsibleSection(
-          sectionKey: PlannerSections.budgetDetails,
-          title: AppWords.budgetDetails,
-          summary: budgetSummary(budget),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Line(
-                '${AppWords.integration} (light exposure)',
-                formatBudgetDuration(budget.integrationMs),
-                key: const Key('budget.integration'),
-              ),
-              _Line(
-                '${AppWords.imagingTime} (lights + overheads)',
-                formatBudgetDuration(budget.acquisitionMs),
-                key: const Key('budget.imagingTime'),
-              ),
-              if (budget.inWindowCalibrationMs > 0)
+        // S6.10 (P6.9): Time needed · Total time stay in view, marked
+        // briefly when an edit changes them; every line is inside.
+        ChangeMark(
+          value: budgetSummary(budget),
+          child: CollapsibleSection(
+            sectionKey: PlannerSections.budgetDetails,
+            title: AppWords.budgetDetails,
+            summary: budgetSummary(budget),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 _Line(
-                  'Calibration during the window',
-                  formatBudgetDuration(budget.inWindowCalibrationMs),
-                  key: const Key('budget.calibrationIn'),
+                  '${AppWords.integration} (light exposure)',
+                  formatBudgetDuration(budget.integrationMs),
+                  key: const Key('budget.integration'),
                 ),
-              _Line(
-                '${AppWords.timeNeeded} (in the window)',
-                fit.availableMs > 0
-                    ? '${formatBudgetDuration(budget.windowLoadMs)} of '
-                          '${formatBudgetDuration(fit.availableMs)}'
-                    : formatBudgetDuration(budget.windowLoadMs),
-                key: const Key('budget.timeNeeded'),
-                emphasis: true,
-              ),
-              _Line(
-                'Calibration outside the window',
-                budget.outsideWindowCalibrationMs > 0
-                    ? formatBudgetDuration(budget.outsideWindowCalibrationMs)
-                    : 'None',
-                key: const Key('budget.calibrationOut'),
-              ),
-              _Line(
-                'Setup',
-                budget.setupMs == null
-                    ? 'Not included'
-                    : setupStart == null
-                    ? formatBudgetDuration(budget.setupMs!)
-                    : '${formatBudgetDuration(budget.setupMs!)} — start by '
-                          '${clock(setupStart)}',
-                key: const Key('budget.setup'),
-              ),
-              _Line(
-                AppWords.totalTime,
-                formatBudgetDuration(budget.sessionBudgetMs),
-                key: const Key('budget.totalTime'),
-                emphasis: true,
-              ),
-              if (library > 0)
                 _Line(
-                  'Library calibration',
-                  '$library block${library == 1 ? '' : 's'}, no time needed',
-                  key: const Key('budget.library'),
+                  '${AppWords.imagingTime} (lights + overheads)',
+                  formatBudgetDuration(budget.acquisitionMs),
+                  key: const Key('budget.imagingTime'),
                 ),
-              // The zone rule, once for the section's one time (trap 2).
-              if (setupStart != null && night != null)
-                Text(
-                  ContextLine.zoneRule(night.startUtc, zoneId: zoneId),
-                  style: theme.textTheme.bodySmall,
+                if (budget.inWindowCalibrationMs > 0)
+                  _Line(
+                    'Calibration during the window',
+                    formatBudgetDuration(budget.inWindowCalibrationMs),
+                    key: const Key('budget.calibrationIn'),
+                  ),
+                _Line(
+                  '${AppWords.timeNeeded} (in the window)',
+                  fit.availableMs > 0
+                      ? '${formatBudgetDuration(budget.windowLoadMs)} of '
+                            '${formatBudgetDuration(fit.availableMs)}'
+                      : formatBudgetDuration(budget.windowLoadMs),
+                  key: const Key('budget.timeNeeded'),
+                  emphasis: true,
                 ),
-            ],
+                _Line(
+                  'Calibration outside the window',
+                  budget.outsideWindowCalibrationMs > 0
+                      ? formatBudgetDuration(budget.outsideWindowCalibrationMs)
+                      : 'None',
+                  key: const Key('budget.calibrationOut'),
+                ),
+                _Line(
+                  'Setup',
+                  budget.setupMs == null
+                      ? 'Not included'
+                      : setupStart == null
+                      ? formatBudgetDuration(budget.setupMs!)
+                      : '${formatBudgetDuration(budget.setupMs!)} — start by '
+                            '${clock(setupStart)}',
+                  key: const Key('budget.setup'),
+                ),
+                _Line(
+                  AppWords.totalTime,
+                  formatBudgetDuration(budget.sessionBudgetMs),
+                  key: const Key('budget.totalTime'),
+                  emphasis: true,
+                ),
+                if (library > 0)
+                  _Line(
+                    'Library calibration',
+                    '$library block${library == 1 ? '' : 's'}, no time needed',
+                    key: const Key('budget.library'),
+                  ),
+                // The zone rule, once for the section's one time (trap 2).
+                if (setupStart != null && night != null)
+                  Text(
+                    ContextLine.zoneRule(night.startUtc, zoneId: zoneId),
+                    style: theme.textTheme.bodySmall,
+                  ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -155,23 +166,48 @@ class CaptureBudgetSummary extends StatelessWidget {
           budget.storageMB != null
               ? '${budget.storageMB!.toStringAsFixed(1)} MB'
               : 'Unknown',
+          key: const Key('capturePlan.storage'),
           emphasis: true,
         ),
-        if (budget.storageMB != null)
-          Text(
-            'An estimate from the rig\'s average RAW file size; binning and '
-            'compression are ignored.',
-            style: theme.textTheme.bodySmall,
+        // S6.10 (P6.9; the trace's case C): a known value says what it
+        // rests on; an unknown one says why, and how to supply it.
+        Text(
+          storageNote(plan.selectedEquipment, known: budget.storageMB != null),
+          key: const Key('capturePlan.storageNote'),
+          style: theme.textTheme.bodySmall,
+        ),
+        if (budget.storageMB == null && plan.selectedEquipment != null)
+          TextButton(
+            key: const Key('capturePlan.setFileSize'),
+            onPressed: () => context.push(AppRouter.selectRig),
+            child: const Text('Set the RAW file size'),
           ),
       ],
     );
   }
 
-  /// Budget details' collapsed summary, a fact: "2 h 5 min needed · 3 h
-  /// total" (S6.7).
+  /// Budget details' collapsed summary, a fact in the glossary's words:
+  /// "Time needed 2 h 5 min · Total time 3 h" (S6.7; S6.10).
   static String budgetSummary(CaptureBudget budget) =>
-      '${formatBudgetDuration(budget.windowLoadMs)} needed · '
-      '${formatBudgetDuration(budget.sessionBudgetMs)} total';
+      '${AppWords.timeNeeded} ${formatBudgetDuration(budget.windowLoadMs)} · '
+      '${AppWords.totalTime} ${formatBudgetDuration(budget.sessionBudgetMs)}';
+
+  /// What the storage figure rests on, or why there is none (S6.10).
+  static String storageNote(EquipmentProfile? rig, {required bool known}) {
+    if (!known) {
+      return rig == null
+          ? 'Unknown: no rig chosen, so the file size is not known.'
+          : 'Unknown: the RAW file size is not known for this rig. Enter it '
+                "in the rig's editor, or read it from a DNG photo with "
+                '"Add from a photo".';
+    }
+    final estimated =
+        rig?.provenanceOf(EquipmentSpec.rawFileSize)?.confidence ==
+        SpecConfidence.estimated;
+    return "An estimate from the rig's average RAW file size; binning and "
+        'compression are ignored.'
+        "${estimated ? " The rig's RAW size is itself an estimate, from one file." : ''}";
+  }
 
   static String _seconds(int ms) {
     final s = ms / 1000;
