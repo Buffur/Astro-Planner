@@ -12,6 +12,9 @@ class MockTargetRepository implements TargetRepository {
   final List<AstroTarget> _targets = [];
 
   @override
+  Future<T> inOneTransaction<T>(Future<T> Function() writes) => writes();
+
+  @override
   Future<List<AstroTarget>> searchTargets(String query) async => _targets;
 
   @override

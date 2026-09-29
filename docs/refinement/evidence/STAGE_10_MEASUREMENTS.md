@@ -276,3 +276,43 @@ run 1 / run 2. "Over" counts frames above 16.7 ms.
 - **Change:** none. **Outcome: measured, no change needed.** No cache added; sampling, grids and
   calculations untouched. Large-text rendering was not profiled separately (no change was made; the
   accessibility sweep keeps covering 200 % text).
+
+## S10.5 — The Logbook, ENG-11 and ENG-12
+
+### ENG-12, first-run seeding: fixed
+
+- **Claim:** the first launch waits for the catalog seed before its first frame, and the seed is slow
+  because each of the 164 rows is its own autocommit transaction (06: "plausible on a slow phone,
+  unmeasured").
+- **Evidence (S10.2):** 14,804 and 12,950 ms on the emulator (11,882 and 13,835 ms in S10.3's runs,
+  unchanged code); about 45 ms per write transaction on this emulator's storage. `main.dart` awaits it
+  before `runApp`.
+- **Change:** `TargetRepository.inOneTransaction(writes)` (Drift: `_db.transaction`), and
+  `CatalogSeeder` runs its inserts and legacy updates inside it: one commit instead of 164. The rest is
+  unchanged: a row whose insert fails is still caught and skipped, the version is still not recorded
+  then (S1.2), the next launch still retries, and an error thrown out of the seed is still logged by
+  `main.dart` and retried. A rollback now leaves no partial rows, which the retry path already allowed.
+- **Before → after (emulator, profile; the same scenario, a new database file):**
+
+  | Run | Catalog seed |
+  | --- | ---: |
+  | Before (four runs) | 14,804 · 12,950 · 11,882 · 13,835 ms |
+  | **After (two runs)** | **2,517 · 1,730 ms** |
+
+  About 6–8× faster. What remains is the asset parse, the alias rebuild (already one transaction)
+  and 164 inserts inside the transaction. A phone's storage is faster than this emulator's, so the
+  absolute times there are expected to be lower on both sides (Stage 11).
+- **Regression check:** `catalog_seeder_transaction_test.dart` (every catalog insert inside a
+  transaction; two transactions in all, the aliases and the targets; mutation-checked: without the
+  transaction it fails); `catalog_seeder_test.dart` unchanged and passing, including the failed-insert,
+  retry, newer-catalog and pre-8.2 upgrade cases; the full gate.
+
+### ENG-11 and the Logbook: measured, no change
+
+- **ENG-11:** the Logbook's list of 300 sessions with their blocks takes 48–75 ms on the emulator (six
+  runs). The list reads rows and then all their blocks in one query (`_blocksFor`); there is no N+1
+  in today's code. **Closed as measured.**
+- **The Logbook at 300 sessions** (S10.2's runs): open, build average 4.8–6.2 ms; search, 7.0–8.1 ms
+  (p90 15.8–18.7 ms; the worst frames, 94–103 ms, are while the search field opens with the
+  keyboard); a filter, 2.4–6.2 ms; an entry, 3.1–3.5 ms. The search filters in memory over the loaded
+  list (I-9). **Practical; no change.** A phone trace is Stage 11's.

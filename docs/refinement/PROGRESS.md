@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.4 done**: the planner, the timeline and the detail screens measured; no change needed).
-> **Next:** S10.5, the Logbook, ENG-11 and ENG-12 (first-run seeding takes 13–15 s on the emulator).
+> **Last updated:** 2026-09-30 (**S10.5 done**: first-run seeding in one transaction, 13–15 s → about 2 s on the emulator; ENG-11 and the Logbook measured).
+> **Next:** S10.6, dependencies and assets (RD-02's `sqlite3_flutter_libs`).
 
 ## Current state
 
@@ -14,10 +14,21 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.5** — the Logbook, ENG-11 and ENG-12 |
-| Code baseline | **S10.3** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S10.6** — dependencies and assets |
+| Code baseline | **S10.5** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.5 done, 2026-09-30** (ENG-12 fixed; ENG-11 and the Logbook measured;
+[record](evidence/STAGE_10_MEASUREMENTS.md) §S10.5):
+- **ENG-12:** `TargetRepository.inOneTransaction`; `CatalogSeeder` seeds inside it: one commit instead
+  of 164. Emulator: 11.9–14.8 s (four runs) → **1.7–2.5 s** (two runs) before the first frame. The
+  per-row failure handling and retry (S1.2) are unchanged; `catalog_seeder_test.dart` passes unchanged;
+  `catalog_seeder_transaction_test.dart` (mutation-checked) asserts one transaction.
+- **ENG-11:** 300 sessions listed in 48–75 ms; no N+1 in today's code. **Closed as measured.** The
+  Logbook at 300 sessions is practical (build averages 2.4–8.1 ms); no change.
+- **Verification:** persistence (high-risk): the full gate after the change, **PASS** (1,838 tests,
+  2 skips; host E2E 2 + 1; Flutter 3.47.4); two emulator runs of the scenarios.
 
 **S10.4 done, 2026-09-30** (measured, no change needed; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.4):
 the planner's edits, night and target changes and the detail screens build in 1.7–6.2 ms on average
@@ -495,6 +506,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
+| **Full quality gate PASS** (S10.5): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.5's commit**, on Flutter 3.47.4 | Ran after S10.5's last code change; supersedes the S10.3 row below. Reusable while `git diff --stat <S10.5 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.3): Encoding; Format; Analyze (no issues); 1,837 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1), one step each | **S10.3's commit** (inputs as at `80dfadd` plus S10.3's editor change), on Flutter 3.47.4 | Ran after S10.3's last code change; supersedes the TD-089–TD-091 row below. Reusable while `git diff --stat <S10.3 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (TD-089–TD-091): Encoding; Format; Analyze (no issues); 1,833 tests, 2 expected skips; 2 host E2E | **`0f09608`**, on Flutter 3.47.4 | The last code change before Stage 10; supersedes the S9.9 row below. Stage 10's baseline. Reusable while `git diff --stat 0f09608 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S9.9): Encoding; Format; Analyze (no issues); 1,825 tests, 2 expected skips; 2 host E2E | **`0a0c95e`**, S9.9's final inputs, on Flutter 3.47.4 | Ran after S9.9's last code change, the last code change of S9.1–S9.9; supersedes S9.1–S9.8's gates and S8.9's below. Reused by the Stage 9 validation: `git diff --stat 0a0c95e HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `8e53479`. Reusable while that diff stays empty |
@@ -639,8 +651,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.5 — the Logbook, ENG-11 and ENG-12** (the plan's "Stage 10 — frozen Task sequence"), then
-   S10.6 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
+1. **S10.6 — dependencies and assets** (the plan's "Stage 10 — frozen Task sequence"), then S10.7, one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB

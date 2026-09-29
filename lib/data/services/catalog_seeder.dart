@@ -245,30 +245,37 @@ class CatalogSeeder {
       }
     }
 
-    if (applied != null) {
-      // A newer catalog: add only what it introduced.
-      for (final entry in catalog.entries.where((e) => e.since > applied)) {
-        await insert(entry);
-      }
-    } else if (existing.isEmpty) {
-      for (final entry in catalog.entries) {
-        await insert(entry);
-      }
-    } else {
-      // First run after a pre-8.2 install, or a retry after failed inserts.
-      for (final entry in catalog.entries) {
-        final legacy = existing
-            .where((t) => t.catalogId == entry.id && _isUntouchedLegacySeed(t))
-            .firstOrNull;
-        if (legacy != null) {
-          await _repository.updateTarget(
-            entry.toTarget(catalog.source, id: legacy.id),
-          );
-        } else {
+    // One transaction for the whole seed (S10.5, ENG-12): one commit instead
+    // of one per row, which took 13-15 s on an emulator's storage before the
+    // first frame. A failed row is still caught by [insert] and skipped.
+    await _repository.inOneTransaction(() async {
+      if (applied != null) {
+        // A newer catalog: add only what it introduced.
+        for (final entry in catalog.entries.where((e) => e.since > applied)) {
           await insert(entry);
         }
+      } else if (existing.isEmpty) {
+        for (final entry in catalog.entries) {
+          await insert(entry);
+        }
+      } else {
+        // First run after a pre-8.2 install, or a retry after failed inserts.
+        for (final entry in catalog.entries) {
+          final legacy = existing
+              .where(
+                (t) => t.catalogId == entry.id && _isUntouchedLegacySeed(t),
+              )
+              .firstOrNull;
+          if (legacy != null) {
+            await _repository.updateTarget(
+              entry.toTarget(catalog.source, id: legacy.id),
+            );
+          } else {
+            await insert(entry);
+          }
+        }
       }
-    }
+    });
     if (failures.isNotEmpty) {
       // Not recorded as applied: the next launch retries, and the rows that
       // did go in are skipped then (ENG-02, S1.2).

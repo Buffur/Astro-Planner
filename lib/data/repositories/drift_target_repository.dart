@@ -50,6 +50,10 @@ class DriftTargetRepository implements TargetRepository {
   }
 
   @override
+  Future<T> inOneTransaction<T>(Future<T> Function() writes) =>
+      _db.transaction(writes);
+
+  @override
   Future<int> insertTarget(domain.AstroTarget target) async {
     return _db
         .into(_db.astroTargets)

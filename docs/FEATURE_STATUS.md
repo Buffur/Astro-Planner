@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S10.5, 2026-09-30 (first run, F-01; the catalog, F-02; the Logbook):** the first launch seeds the target catalog in one database transaction, so it opens several times sooner (on an emulator 13–15 s → about 2 s before the first screen). Nothing else changes: the same catalog, the same retry on a failed row. The Logbook was measured at 300 sessions and needs no change.
+
 > **S10.3, 2026-09-30 (the rig editor, F-05; 08 §22):** the rig editor's form no longer rebuilds on every frame while the keyboard opens (it did through its width lookup). Same layout and values. Measured on the host and the emulator; a phone trace is Stage 11's.
 
 > **Stage 9 findings fixed, 2026-09-29 (sites F-07; export F-44):** the Library's Sites no longer offers "Use current position" or "Pick on map", and a site added from the Library is saved without becoming the site the planner uses (choose a site for planning from the planner or Tonight). An export's share text now states when it was made, with the UTC offset.

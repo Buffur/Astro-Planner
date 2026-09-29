@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S10.5, 2026-09-30:** `TargetRepository.inOneTransaction(writes)` (Drift: `_db.transaction`); `CatalogSeeder` runs the first-run seed and a newer catalog's additions inside it (ENG-12), keeping its per-row failure handling and retry.
+
 > **S10.3, 2026-09-30:** presentation reads `MediaQuery` by aspect (`sizeOf`, `paddingOf`, …), never `MediaQuery.of`, which rebuilds a subtree on every keyboard frame (test-enforced, `media_query_aspects_test.dart`). The rig editor was the only use.
 
 > **Stage 9 findings fixed, 2026-09-29:** `SiteViewModel.saveSite(site, activate:)` and `SiteEditorArgs.activate` (TD-090; the Library's `SitesScreen(mode: manage)` hides the position actions and adds sites with `activate: false`); `ShareSessionExporter.localStampWithOffset`/`shareText` (TD-091), which the backup's `shareText` reuses.
