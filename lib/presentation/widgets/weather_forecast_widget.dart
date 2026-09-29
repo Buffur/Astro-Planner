@@ -54,11 +54,14 @@ class WeatherForecastWidget extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          siteVm.locationName ?? 'Tap to set location',
-                          style: small,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        // S9.6: the place name when there is one; the
+                        // detail's header already names the site.
+                        if (siteVm.locationName case final name?)
+                          Text(
+                            name,
+                            style: small,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         // Required with a place name (TASK 7.2).
                         if (siteVm.locationName != null &&
                             siteVm.locationNameAttribution != null)
@@ -427,7 +430,9 @@ class _HourStrip extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text('Hour', style: style),
-                  for (final (icon, label) in _rows)
+                  for (final (icon, label) in _rows) ...[
+                    // S9.6: room for the hour columns' cloud bar.
+                    if (icon == Icons.cloud) SizedBox(height: _barHeight),
                     Row(
                       children: [
                         Icon(icon, size: 12),
@@ -441,6 +446,7 @@ class _HourStrip extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ],
                 ],
               ),
             ),
@@ -457,6 +463,9 @@ class _HourStrip extends StatelessWidget {
     );
   }
 }
+
+/// The cloud bar's height (S9.6).
+const double _barHeight = 20;
 
 class _HourColumn extends StatelessWidget {
   const _HourColumn({
@@ -488,6 +497,7 @@ class _HourColumn extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 time,
+                const SizedBox(height: _barHeight),
                 Text(
                   'no\nforecast',
                   textAlign: TextAlign.center,
@@ -499,21 +509,75 @@ class _HourColumn extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 time,
+                // S9.6 (08 §12): cloud cover as a bar under its number; the
+                // number is the text, so the bar is not read out.
+                _CloudBar(percent: h.cloudCoverPct),
                 Text(v(h.cloudCoverPct), style: style),
                 Text(v(h.precipitationProbabilityPct), style: style),
                 Text(v(h.windSpeedKmh), style: style),
                 Text(v(h.temperatureC), style: style),
-                Text(
-                  v(slot.dewSpreadC, digits: 1),
-                  style: slot.dewRisk == true
-                      ? style?.copyWith(
-                          color: theme.colorScheme.error,
-                          fontWeight: FontWeight.bold,
-                        )
-                      : style,
+                // S9.6: dew risk is marked by an icon too, never by colour
+                // alone (the shared rules).
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (slot.dewRisk == true)
+                      Icon(
+                        Icons.water_drop,
+                        key: Key('weather.dewRisk.${slot.timeUtc.hour}'),
+                        size: 12,
+                        color: theme.colorScheme.error,
+                        semanticLabel: 'dew risk',
+                      ),
+                    Text(
+                      v(slot.dewSpreadC, digits: 1),
+                      style: slot.dewRisk == true
+                          ? style?.copyWith(
+                              color: theme.colorScheme.error,
+                              fontWeight: FontWeight.bold,
+                            )
+                          : style,
+                    ),
+                  ],
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// One hour's total cloud cover as a bar, 0–100 % of its box (S9.6); an
+/// unknown value draws nothing, never an empty or a full bar.
+class _CloudBar extends StatelessWidget {
+  const _CloudBar({required this.percent});
+
+  final double? percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
+    final pct = percent;
+    return ExcludeSemantics(
+      child: SizedBox(
+        height: _barHeight,
+        width: 16,
+        child: pct == null
+            ? null
+            : DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(color: p.chartGrid),
+                ),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FractionallySizedBox(
+                    key: const Key('weather.cloudBar'),
+                    heightFactor: (pct / 100).clamp(0.0, 1.0),
+                    widthFactor: 1,
+                    child: ColoredBox(color: p.muted),
+                  ),
+                ),
+              ),
+      ),
     );
   }
 }

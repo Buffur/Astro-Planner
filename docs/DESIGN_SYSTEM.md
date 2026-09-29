@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S9.6, 2026-09-29:** two visualisations under the shared rules. "When is it dark tonight?": the twilight bar on Night & Moon (bands shaded from `chartTwilight` to `chartDark` by depth; the table of times is its text). "How cloudy is each hour?": a cloud bar under each hour's number on Weather (`muted` fill in a `chartGrid` frame; the number is its text). Neither computes a planning value; colour never carries the dew risk alone (an icon marks it).
+
 > **S9.4, 2026-09-29:** Settings adopts section headings (`titleMedium`, marked as headers for screen readers) each with a one-line consequence (`bodySmall`), value-first rows (the value with its unit as the trailing text), a stepper (− value +, tooltips "<label>: less/more") for bounded counts and durations, and `confirmDestructive` for Restore ("Restore at next start").
 
 > **S9.2, 2026-09-29:** the rig, target and site editors follow one form pattern: a sentence-case title from `AppWords` (Add rig / Edit rig, Add a target / Edit target, New site / Edit site), sentence-case labels, and one primary `FilledButton` labelled "Save" ("Save site" at the foot of the site editor, which loses its app-bar check). `showFailure` is the failure twin of `showDone` for a failure caught outside `runWithFeedback`. **The retired-terms baseline is empty** (§9.3), and the test now requires it.

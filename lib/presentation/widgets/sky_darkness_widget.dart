@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../shared/twilight_bands.dart';
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../shared/app_words.dart';
@@ -292,10 +293,16 @@ class NightTimelineSection extends StatelessWidget {
       (AppWords.civilDawn, dawn(timeline.civilTwilight)),
       ('Sunrise', dawn(timeline.sunriseSunset)),
     ];
+    final bands = TwilightBands.of(timeline);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionTitle(title, key: const Key('night.timelineTitle')),
+        // S9.6: the same crossings as a bar; the times below are its text.
+        if (bands != null && bands.isNotEmpty) ...[
+          TwilightBar(bands: bands),
+          const SizedBox(height: 8),
+        ],
         for (final (label, time) in rows)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
@@ -310,6 +317,46 @@ class NightTimelineSection extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The night from sunset to sunrise as the standard twilights (S9.6): each
+/// band's width is its duration and its shade its depth, from the chart's
+/// twilight to its dark token. Visual only: the table under it states the
+/// same times, so the bar is hidden from screen readers.
+class TwilightBar extends StatelessWidget {
+  const TwilightBar({super.key, required this.bands});
+
+  final List<TwilightBand> bands;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
+    return ExcludeSemantics(
+      child: ClipRRect(
+        key: const Key('night.twilightBar'),
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          height: 16,
+          child: Row(
+            children: [
+              for (final (i, b) in bands.indexed)
+                Expanded(
+                  key: Key('night.band.$i.${b.depth}'),
+                  flex: b.length.inMinutes.clamp(1, 1 << 20),
+                  child: ColoredBox(
+                    color: Color.lerp(
+                      p.chartTwilight,
+                      p.chartDark,
+                      (b.depth - 1) / 3,
+                    )!,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

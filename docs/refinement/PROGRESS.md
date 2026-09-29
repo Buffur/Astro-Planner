@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.5 done**: About: authorship, sources and attribution).
-> **Next:** S9.6 (the Weather and Night & Moon detail screens). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.6 done**: the Weather and Night & Moon detail screens).
+> **Next:** S9.7 (sky darkness made readable). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,23 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.6** (below, "Next allowed action") |
-| Code baseline | **S9.5** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.7** (below, "Next allowed action") |
+| Code baseline | **S9.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.6 done, 2026-09-29** (the detail screens' secondary presentation; 08 §12): Weather and Night & Moon.
+- Night & Moon: a twilight bar from sunset to sunrise (`TwilightBands`, pure, from the domain's
+  crossings; bands shaded by depth), above the unchanged table of times, which is its text.
+- Weather: a cloud-cover bar under each hour's number (unknown draws nothing); dew-risk hours marked
+  by an icon as well as colour; "Tap to set location" gone where nothing can be tapped. Age, stale
+  state, unknowns, units, attribution and the horizontal-visibility wording unchanged (ADR-012).
+- **Tests:** `twilight_bands_test.dart` (5: a mid-latitude night, no astronomical darkness, no
+  sunset, clipping, and the calculator's real night); `detail_screens_test.dart` +2 (cloud bars at
+  40 %, the dew icon, no "Tap to set location"; the bar's seven bands). The sweep already opens both
+  details with a full forecast.
+- **Verification:** shared behaviour (two detail screens, a shared helper): the full gate after the
+  last code change, **PASS** (1,815 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.5 done, 2026-09-29** (08 §23; D9-4): About.
 - An author block first: the app, its version, "Made by Buffur" (the owner's public handle from 08
@@ -463,8 +476,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.6 — The Weather and Night & Moon detail screens** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
-   Task sequence"). Then S9.7 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.7 — Sky darkness made readable** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen Task sequence").
+   Then S9.8 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,
