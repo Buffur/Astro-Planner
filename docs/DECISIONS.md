@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **RG-11 decided, 2026-09-29 (Stage 7):** C1 (a camera class on the rig, Unknown by default; the
+> example rig stays Unknown), B1, W1, F1, I1 (relabel only; no budget change), P2 (E.1, "RG-11
+> decided"). Recorded in ADR-020 at S7.D. Documentation only.
 > **Stage 6 corrective pass decided, 2026-09-28 (the owner):** TD-075 to TD-080 fixed before the
 > Stage 6 validation as one bounded Task (S6.16); ADR-019 §6's order amended (status, context,
 > target, rig, capture plan, then the opportunity analysis and the conditions); the visual finish
@@ -1712,6 +1715,39 @@ Stage 4 revalidation is still required.
 - **Records:** ADR-019's status line and pointers under §5 and §6; `refinement/POST_ROADMAP_PLAN.md`,
   S6.16 (its acceptance criteria), Stage 6 validation's surface and Stage 9's scope note.
 - **Built by** S6.16 (2026-09-28). No code is changed by this entry.
+
+### RG-11 decided: camera classes and light-frame parameters (Stage 7, 2026-09-29)
+
+- **Context:** S7.R1's research, `refinement/research/RG-11_CAPTURE_PARAMETERS.md` (`1fa3992`), with
+  six questions (§11).
+- **Decided by:** the project owner, in chat, choosing "accept all recommended": each question's
+  recommended option, with the example rig left Unknown.
+- **C1 — a camera class on the rig:** Phone · DSLR/mirrorless · Astro camera (colour) · Astro camera
+  (mono) · Unknown (the default). Chosen by the user in the rig editor; never inferred from a name or
+  a file; existing rigs read as Unknown. **The example rig stays Unknown** (the owner chose not to set
+  it from its cited source).
+- **B1 — binning:** offered only for the astro-camera classes and Unknown, default 1 × 1, as a record.
+  No calculation reads it (ADR-009 L6 and the rig-pitch capability stay as they are); a phone's
+  binning remains its rig's mode (RG-02 §5). Stored values on other classes are kept, not shown.
+- **W1 — white balance:** not modelled.
+- **F1 — focus:** no field; ADR-009's refocus overhead stays the only focus concept.
+- **I1 — the interval:** the per-frame overhead stays the one interval concept, relabelled "Time
+  between frames" with the definition of S7.R1 §6 (download plus any set delay; settling after a
+  dither belongs to the dither overhead, never both). **No budget change**; ADR-009 is not amended.
+  Only that Settings row's label and help change (P9.3 keeps Settings' layout).
+- **P2 — proposals:** a new light block proposes the previous light block's exposure, sensitivity
+  (kind and value) and binning, shown as a proposal and stored only by the user's Save. P1 (the rig's
+  maximum sub) and P3 (from a photo) are not adopted.
+- **Also recorded as facts (S7.R1 §9), not choices:** ISO for phones and DSLR/mirrorless, gain for
+  astro cameras, the neutral choice for Unknown; never both on one block; never required; no
+  conversion (SI-004).
+- **Handed to RG-10 (S7.R2):** an astro camera's offset; in-camera long-exposure noise reduction;
+  the cooled modifier.
+- **Consequences:** ADR-020 (S7.D) records this with RG-10's decision. By the plan's "Order" rule, C1
+  splits S7.2 into the class on the rig (a schema change) and the light-block form. No ADR-009 Task
+  is added (I1).
+- **Rejected:** C2, C3; B1+, B2, B3; W2; F2, F3; I2–I4; P1, P3.
+- Documentation only. No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
