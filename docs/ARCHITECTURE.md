@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.4, 2026-09-29:** `settings_screen.dart` rebuilt from RG-13 (`refinement/research/S9.3_SETTINGS.md` §4): sections with a consequence line, `_GateTile` (ADR-013 G4/G5 through `PlanningPreferences.copyWith`), `_OptionalOverhead` with `_Stepper`s (values within `PlanningPreferences`' ranges through `withOptionalOverheads`/`copyWith`), every write through `runWithFeedback`. `BackupSection` runs back up, stage and cancel through `runWithFeedback` and confirms Restore with `confirmDestructive`. No ViewModel or domain change.
+
 > **S9.2, 2026-09-29:** `showFailure(context, text)` in `failure_feedback.dart` (the site editor's three ad hoc SnackBars use it); `AppWords` gains the editors' words (`save`, `addTarget`, `editTarget`, `newSite`, `editSite`, `saveSite`, `noRigs`). The retired-terms baseline is empty (P9.2).
 
 > **S9.1, 2026-09-29:** `ListMode` (`presentation/shared/list_mode.dart`): `EquipmentSelectionScreen`, `TargetSelectionScreen` and `SitesScreen` take `mode`; the router builds the Library routes with `ListMode.manage` and `/select/…` with the default `ListMode.choose` (ADR-015 §7 as amended by RD-07; TD-053 resolved). `showEquipmentEditor` takes `onDelete` (a visible Delete in the dialog); deleting goes through `confirmDestructive` and `SwipeToDelete` (RD-09).

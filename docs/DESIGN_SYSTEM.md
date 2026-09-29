@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S9.4, 2026-09-29:** Settings adopts section headings (`titleMedium`, marked as headers for screen readers) each with a one-line consequence (`bodySmall`), value-first rows (the value with its unit as the trailing text), a stepper (− value +, tooltips "<label>: less/more") for bounded counts and durations, and `confirmDestructive` for Restore ("Restore at next start").
+
 > **S9.2, 2026-09-29:** the rig, target and site editors follow one form pattern: a sentence-case title from `AppWords` (Add rig / Edit rig, Add a target / Edit target, New site / Edit site), sentence-case labels, and one primary `FilledButton` labelled "Save" ("Save site" at the foot of the site editor, which loses its app-bar check). `showFailure` is the failure twin of `showDone` for a failure caught outside `runWithFeedback`. **The retired-terms baseline is empty** (§9.3), and the test now requires it.
 
 > **S9.1, 2026-09-29:** the Library lists adopt `SwipeToDelete`, `DeleteButton` (the rig and target editors, the site row) and `confirmDestructive` ("Delete this rig?", "Delete this target?", "Delete this site?", one message shape: what is deleted, that saved plans keep what they recorded, that it can't be undone), `showDone` after a delete, and `AppWords` (Rigs, Targets, Sites; Choose a rig, a target, a site; Plan this target).

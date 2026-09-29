@@ -150,7 +150,7 @@ void main() {
       AppRouter.libraryRigs: 'Rigs',
       AppRouter.libraryTargets: 'Targets',
       AppRouter.librarySites: 'Sites',
-      AppRouter.settings: 'Planning Settings',
+      AppRouter.settings: 'Settings', // S9.4
       AppRouter.about: 'About & data sources',
       AppRouter.session(): 'Plan',
       AppRouter.selectTarget: 'Choose a target',
@@ -202,7 +202,7 @@ void main() {
     await tester.tap(find.text('Sites'));
     await settle(tester);
     await tapTab(tester, 'Settings');
-    expect(title('Planning Settings'), findsOneWidget);
+    expect(title('Settings'), findsOneWidget);
     await tapTab(tester, 'Library');
     expect(title('Sites'), findsOneWidget, reason: 'the pushed page is kept');
   });

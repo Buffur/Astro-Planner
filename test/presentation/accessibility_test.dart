@@ -332,6 +332,31 @@ void main() {
             report.add('$route:\n${problems.join('\n')}');
           }
         }
+        // S9.4: Settings with every gate and overhead on, so the sweep sees
+        // their thresholds and steppers.
+        await tester.runAsync(
+          () => app.vm.settings.setPlanningPreferences(
+            app.vm.planningPreferences
+                .copyWith(moonGateEnabled: true, cloudGateEnabled: true)
+                .withOptionalOverheads(
+                  ditherEveryNFrames: (3,),
+                  refocusEveryMinutes: (60.0,),
+                  filterChangeSeconds: (30.0,),
+                  meridianFlipSeconds: (300.0,),
+                  setupMinutes: (30.0,),
+                ),
+          ),
+        );
+        AppRouter.router.go(AppRouter.settings);
+        await _settle(tester);
+        expect(find.byTooltip('Settle: more'), findsOneWidget);
+        final settingsOn = await _audit(
+          tester,
+          contrast: theme != _Theme.field,
+        );
+        if (settingsOn.isNotEmpty) {
+          report.add('settings, all on:\n${settingsOn.join('\n')}');
+        }
         // TD-087: the Saved plan's form with Not done chosen, so the sweep
         // sees the reason chips.
         AppRouter.router.go(AppRouter.results(app.ended));

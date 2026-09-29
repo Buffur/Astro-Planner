@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.3 done**: RG-13 answered).
-> **Next:** S9.4 (Settings rebuilt; the Moon and cloud gates). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.4 done**: Settings rebuilt; the Moon and cloud gates).
+> **Next:** S9.5 (About: authorship, sources and attribution). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,25 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.4** (below, "Next allowed action") |
-| Code baseline | **S9.2** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.5** (below, "Next allowed action") |
+| Code baseline | **S9.4** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.4 done, 2026-09-29** (P9.3; RD-11 = S9; TD-050 resolved; D9-3): Settings rebuilt.
+- "Settings", in RG-13's sections: Imaging window (minimum altitude, darkness limit, **Moon gate**,
+  **cloud gate**), Fit and capture time (margin, time between frames now to the model's 120 s, the
+  optional overheads with editable values), Guidance (NPF k, dew margin), Display, Privacy, Data,
+  About; each row value-first with its consequence. No default and no meaning changed.
+- Every setting write, Back up, preparing and cancelling a restore through `runWithFeedback`;
+  Restore through `confirmDestructive`; a pick error through `showFailure`.
+- **Tests:** `settings_rebuilt_test.dart` (5: the sections in order; the Moon gate at 0 % shrinks the
+  usable time on a full-Moon night and both gates persist; 120 s reached; an overhead's steppers
+  persist, change the budget and stop at the floor; a failed save says so); the sweep adds Settings
+  with every gate and overhead on; titles and dialog keys updated deliberately in the navigation,
+  settings and backup tests.
+- **Verification:** shared behaviour (Settings, preferences feeding every planner value): the full
+  gate after the last code change, **PASS** (1,806 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.3 done, 2026-09-29** (RG-13 answered; documentation only): `research/S9.3_SETTINGS.md`.
 - Every visible setting classed (A–F), with what it changes, its unit, range and default, the need
@@ -435,8 +450,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.4 — Settings rebuilt; the Moon and cloud gates (TD-050)** (`POST_ROADMAP_PLAN.md`, "Stage 9 —
-   frozen Task sequence"; the layout in `research/S9.3_SETTINGS.md` §4). Then S9.5 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.5 — About: authorship, sources and attribution** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
+   Task sequence"). Then S9.6 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

@@ -132,6 +132,6 @@ void main() {
     );
     await tester.pump();
     expect(vm.planningPreferences.ditherEveryNFrames, 3);
-    expect(find.text('Every 3 lights, 15 s each'), findsOneWidget);
+    expect(find.text('Every 3 lights, 15 s to settle each'), findsOneWidget);
   });
 }

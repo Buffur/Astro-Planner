@@ -106,7 +106,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('with 12 sessions'), findsOneWidget);
     expect(backup.staged, isFalse, reason: 'nothing before confirmation');
-    await tester.tap(find.byKey(const Key('backup.confirmRestore')));
+    await tester.tap(find.byKey(const Key('confirm.action')) /* S9.4 */);
     await tester.pumpAndSettle();
     expect(backup.stagedFile, 'backup-bytes');
     expect(find.byKey(const Key('backup.staged')), findsOneWidget);

@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/services/backup_service.dart';
+import '../../shared/confirmation_patterns.dart';
+import '../../shared/failure_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../viewmodels/backup_viewmodel.dart';
 import '../../../core/config/app_identity.dart';
 
 /// Backup and restore (TASK 14.4, owner decisions): a backup is one
 /// `.astroplan` file shared wherever the user wants it; a restore is
-/// checked, confirmed, and applied when the app next starts.
+/// checked, confirmed, and applied when the app next starts. Since S9.4
+/// every action reports a failure (trap 18) and Restore confirms through
+/// the shared destructive dialog (RD-09).
 class BackupSection extends StatelessWidget {
   const BackupSection({super.key});
 
@@ -23,43 +27,37 @@ class BackupSection extends StatelessWidget {
   };
 
   Future<void> _restore(BuildContext context, BackupViewModel vm) async {
-    final messenger = ScaffoldMessenger.of(context);
     final ({BackupPreview preview, Object file})? picked;
     try {
       picked = await vm.pick();
     } on BackupException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text(problemText(e.problem))));
+      if (context.mounted) showFailure(context, problemText(e.problem));
+      return;
+    } catch (e) {
+      if (context.mounted) {
+        showFailure(context, FailureText.message('open the backup', e));
+      }
       return;
     }
     if (picked == null || !context.mounted) return;
     final p = picked.preview;
-    final sure = await showDialog<bool>(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text('Restore this backup?'),
-        content: Text(
+    final sure = await confirmDestructive(
+      context,
+      title: 'Restore this backup?',
+      message:
           'Made ${NightTimeFormatter.deviceZoneCaption(p.createdAtUtc)} '
           'by ${AppIdentity.appName} ${p.appVersion}, with ${p.sessionCount} '
           'sessions.\n\nAll current sessions, sites, rigs, targets and '
-          'settings stored in the database are replaced when ${AppIdentity.appName} next '
-          'starts. The current data is kept as a safety copy on this device.',
-          key: const Key('backup.preview'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(c).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            key: const Key('backup.confirmRestore'),
-            onPressed: () => Navigator.of(c).pop(true),
-            child: const Text('Restore at next start'),
-          ),
-        ],
-      ),
+          'settings are replaced when ${AppIdentity.appName} next starts. '
+          'The current data is kept as a safety copy on this device.',
+      action: 'Restore at next start',
     );
-    if (sure != true) return;
-    await vm.stage(picked.file);
+    if (!sure || !context.mounted) return;
+    await runWithFeedback(
+      context,
+      'prepare the restore',
+      () => vm.stage(picked!.file),
+    );
   }
 
   @override
@@ -78,7 +76,7 @@ class BackupSection extends StatelessWidget {
             'One .astroplan file with all your data. Save it anywhere.',
           ),
           enabled: !vm.busy,
-          onTap: vm.backUp,
+          onTap: () => runWithFeedback(context, 'back up', vm.backUp),
         ),
         if (vm.restoreStaged)
           ListTile(
@@ -90,7 +88,11 @@ class BackupSection extends StatelessWidget {
             ),
             subtitle: const Text('Tap to cancel the restore.'),
             enabled: !vm.busy,
-            onTap: vm.cancelRestore,
+            onTap: () => runWithFeedback(
+              context,
+              'cancel the restore',
+              vm.cancelRestore,
+            ),
           )
         else
           ListTile(

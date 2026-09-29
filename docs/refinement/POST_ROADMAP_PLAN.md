@@ -5288,7 +5288,7 @@ GitHub identity (RD-01: the application id is permanent once published). The age
 | S9.1 | The Library manages; one delete pattern for rigs, targets and sites | P9.1; TD-053 | M | — | **Done 2026-09-29** |
 | S9.2 | Secondary forms and the vocabulary completed | P9.2 | M | S9.1 | **Done 2026-09-29** |
 | S9.3 | RG-13: what each setting is for, and where it belongs (research) | P9.3 | S | — | **Done 2026-09-29** |
-| S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | Frozen |
+| S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | **Done 2026-09-29** |
 | S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | Frozen |
 | S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | Frozen |
 | S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | Frozen |
