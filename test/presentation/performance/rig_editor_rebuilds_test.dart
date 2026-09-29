@@ -1,7 +1,9 @@
-// S10.2 (Stage 10; 08 §22): the rig editor's rebuild counts, the
+// S10.2 and S10.3 (Stage 10; 08 §22): the rig editor's rebuild counts, the
 // deterministic half of the form-lag scenario. The keyboard is simulated as
-// Android animates it: the bottom inset grows over a dozen frames. The
-// counts are recorded in docs/refinement/evidence/STAGE_10_MEASUREMENTS.md.
+// Android animates it: the bottom inset grows over a dozen frames. Before
+// S10.3 the whole form rebuilt on every one of those frames (its
+// `MediaQuery.of`); the counts are in
+// docs/refinement/evidence/STAGE_10_MEASUREMENTS.md.
 
 import 'package:astroplan/core/theme/app_theme.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
@@ -75,18 +77,17 @@ Future<void> _keyboardOpens(
 }
 
 void main() {
-  testWidgets('the keyboard opening: rebuilds of the editor per frame', (
+  testWidgets('the keyboard opening does not rebuild the form (S10.3)', (
     tester,
   ) async {
     await _open(tester);
     final counts = await _rebuilds(() => _keyboardOpens(tester));
-    // ignore: avoid_print
-    print('keyboard (12 frames): all ${counts.all}, dialog ${counts.dialog}');
+    expect(counts.dialog, 0, reason: 'the form rebuilt on a keyboard frame');
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('typing in the pixel size: rebuilds per keystroke', (
-    tester,
-  ) async {
+  testWidgets('a keystroke in the pixel size rebuilds the form once, for '
+      'the derived sensor size', (tester) async {
     await _open(tester);
     final field = find.byKey(const Key('equipmentEditor.pixelSize'));
     await tester.tap(field);
@@ -97,11 +98,12 @@ void main() {
         await tester.pump();
       }
     });
-    // ignore: avoid_print
-    print('typing (6 keys): all ${counts.all}, dialog ${counts.dialog}');
+    expect(counts.dialog, 6);
   });
 
-  testWidgets('typing in the name: rebuilds per keystroke', (tester) async {
+  testWidgets('a keystroke in the name does not rebuild the form', (
+    tester,
+  ) async {
     await _open(tester);
     final field = find.widgetWithText(TextFormField, 'Rig name');
     await tester.tap(field);
@@ -112,7 +114,6 @@ void main() {
         await tester.pump();
       }
     });
-    // ignore: avoid_print
-    print('name (6 keys): all ${counts.all}, dialog ${counts.dialog}');
+    expect(counts.dialog, 0);
   });
 }

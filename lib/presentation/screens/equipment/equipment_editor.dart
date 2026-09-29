@@ -219,9 +219,11 @@ class _EquipmentEditor {
             return AlertDialog(
               // S7.6: the glossary words; "Equipment profile" is retired.
               title: Text(isEdit ? AppWords.editRig : AppWords.addRig),
-              // Constrain width on larger screens.
+              // Constrain width on larger screens. `sizeOf`, not `of`: the
+              // form must not rebuild on every frame of the keyboard's
+              // inset animation (S10.3; 08 §22).
               content: SizedBox(
-                width: min(MediaQuery.of(context).size.width * 0.9, 480),
+                width: min(MediaQuery.sizeOf(context).width * 0.9, 480),
                 child: SingleChildScrollView(
                   child: Form(
                     key: formKey,

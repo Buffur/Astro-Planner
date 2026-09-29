@@ -202,3 +202,51 @@ run 1 / run 2. "Over" counts frames above 16.7 ms.
   edits, night and target changes (build averages 2–6 ms); the detail screens.
 - Run-to-run variation on the emulator is large (up to 2× for a worst frame), so single-run
   differences under that are not evidence.
+
+## S10.3 — Form lag
+
+- **Claim:** the rig editor's form rebuilds on every frame while the soft keyboard opens (08 §22:
+  "lags when the user taps into editable text fields … particularly … device information").
+- **Evidence:** S10.2's host count: the dialog content (about 600 elements, every field) rebuilt on
+  12 of 12 keyboard frames. Cause: `equipment_editor.dart:224` read the screen width with
+  `MediaQuery.of(context).size`, which subscribes the `StatefulBuilder` holding the whole form to
+  every MediaQuery field, the keyboard's bottom inset included. It was the only `MediaQuery.of` in
+  `lib/`. The investigation's other categories, checked:
+  - storage or network on focus or typing: none (the editor writes only on Save);
+  - validation: runs on Save, not per keystroke (no `autovalidateMode`);
+  - calculation on typing: the sensor size and the focal ratio are derived with `setDialogState` in
+    seven fields, one rebuild per keystroke. Measured cheap on the emulator (build average 0.9–1.7 ms
+    while typing in the pixel size), so it is kept: it shows the derived values as the user types;
+  - `Form` rebuilds all its fields on any change (Flutter's own behaviour; about 440 elements per
+    keystroke in the name). Measured cheap (build average 2.4–4.1 ms), so it is kept;
+  - the target, site and block editors: no `MediaQuery.of` (the only such dependency was the rig
+    editor's).
+- **Change:** `MediaQuery.sizeOf(context).width` (the same width; only the dependency changes).
+  `test/presentation/performance/media_query_aspects_test.dart` keeps `MediaQuery.of` out of `lib/`.
+- **Before → after, host (deterministic):**
+
+  | Rig editor step | Before: elements / form | After: elements / form |
+  | --- | ---: | ---: |
+  | The keyboard opens (12 frames) | 7,500 / 12 | **456 / 0** |
+  | 6 keystrokes in the pixel size | 3,696 / 6 | 3,696 / 6 (unchanged, intended) |
+  | 6 keystrokes in the name | 2,646 / 0 | 2,646 / 0 |
+
+- **Before → after, emulator (profile; the same scenario; two runs each; indicative):**
+
+  | Step | Build avg | Build p90 | Build worst | Build over 16.7 ms |
+  | --- | --- | --- | --- | --- |
+  | Focus, the keyboard opens: before | 6.8 / 4.3 | 16.0 / 7.6 | 73 / 48 | 3 / 2 |
+  | Focus, the keyboard opens: after | 5.1 / 2.7 | 13.6 / 5.5 | **35 / 11** | 3 / 0 |
+  | Tap and type the name: before | 4.1 / 2.8 | 6.8 / 4.6 | 43 / 29 | 1 / 1 |
+  | Tap and type the name: after | 2.4 / 2.4 | 3.5 / 4.6 | 23 / 17 | 1 / 1 |
+
+  The worst build frames while the keyboard opens are lower in both runs after the change. The
+  emulator's run-to-run spread is large, so the host count is the evidence. Raster times did not
+  change (the emulated GPU; not the app's work).
+- **Regression check:** `rig_editor_rebuilds_test.dart` now asserts no form rebuild on keyboard
+  frames (mutation-checked: with `MediaQuery.of` restored it fails), one per keystroke in a derived
+  field, none in the name; every existing editor test passes unchanged (the full gate, below).
+  Behaviour and saved values are unchanged (the width is the same value).
+- **On a phone** the gain is unverified until a device trace (Stage 11): the owner's lag may also have
+  come from the debug build (S10.1), which runs JIT code several times slower than a release.
+- **Verification:** the full gate after the change, **PASS** (1,837 tests, 2 skips; host E2E core_loop 2 and perf_scenarios 1; Flutter 3.47.4).

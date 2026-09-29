@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S10.3, 2026-09-30:** presentation reads `MediaQuery` by aspect (`sizeOf`, `paddingOf`, …), never `MediaQuery.of`, which rebuilds a subtree on every keyboard frame (test-enforced, `media_query_aspects_test.dart`). The rig editor was the only use.
+
 > **Stage 9 findings fixed, 2026-09-29:** `SiteViewModel.saveSite(site, activate:)` and `SiteEditorArgs.activate` (TD-090; the Library's `SitesScreen(mode: manage)` hides the position actions and adds sites with `activate: false`); `ShareSessionExporter.localStampWithOffset`/`shareText` (TD-091), which the backup's `shareText` reuses.
 
 > **S9.9, 2026-09-29:** presentation only: the secondary screens' ad hoc `TextStyle`s and numeric insets replaced by the text roles and spacing tokens; `test/presentation/secondary_consistency_test.dart` lists the covered files.
