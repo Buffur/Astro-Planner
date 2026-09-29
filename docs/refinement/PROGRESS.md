@@ -4,19 +4,35 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.D done**: RG-10 decided; ADR-020 accepted).
-> **Next:** S7.R3, the RG-07 research (targets, names and search).
+> **Last updated:** 2026-09-29 (**S7.R3 done**: RG-07's research; the owner's decision is next).
+> **Next:** the owner decides RG-07 (three questions, `research/RG-07_TARGET_CATALOG.md` §9).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1, S7.R2 and S7.D done; RG-10 and RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1, S7.R2, S7.D and S7.R3 done; RG-10 and RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.R3**, the RG-07 research (below, "Next allowed action") |
+| Next Task | **RG-07's owner decision**, then S7.R4 (below, "Next allowed action") |
 | Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S7.R3 done, 2026-09-29** (RG-07 research; documentation only; `research/RG-07_TARGET_CATALOG.md`):
+- **Counted in the pinned OpenNGC v20260501** (downloaded to scratch, deleted, nothing committed):
+  13,371 objects; **only 151 have a common name**, so none of the catalog's 97 unnamed objects can
+  be named from it; it does hold every Messier object's NGC/IC designation, Caldwell (105) and LBN
+  (94) numbers and 16 extra common names. Sharpless, vdB and most Barnard and Abell objects are not
+  in it.
+- **Search today misses** "M 31", "Messier 31", "NGC 224" (M31) and "NGC7000"; the alias rules
+  are written as testable examples (§6).
+- **Growth costs** the candidates list: ~0.58 ms per target on the desktop VM (95 ms for 164), and
+  thousands of faint galaxies would bury the showpieces.
+- **Recommended:** T1 (aliases from the pinned OpenNGC in their own table, normalised search; no new
+  objects, no network). More objects and an optional online lookup (CDS Sesame; per-dataset CDS
+  licences; rate limits unknown) are the owner's choices. Three owner questions (§9); nothing
+  decided.
+- **Verification:** the documentation class (references resolve; `git diff --check`).
 
 **S7.D done, 2026-09-29** (documentation only): **RG-10 decided** by the owner in chat, every
 recommendation (L1, D1, T0, O0, N1, H1; DECISIONS E.1, "RG-10 decided"). **ADR-020 accepted:** the
@@ -137,7 +153,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-04 | Execution's role and how actuals are captured | 4 | **Decided** 2026-09-27 (S4.R2; E.1): B, the Logbook first and the tracker optional; G2 post-session results. Its optional tracker is **superseded** 2026-09-27 (the tracker leaves the target product; P8.4) |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | **Decided** 2026-09-27 (S4.R4; E.1): Tonight plan-first with a context line; detail screens; no new tab |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | **Decided** 2026-09-27 (S4.R4; E.1): progressive disclosure; no modes |
-| RG-07 | Target catalog expansion, names and search | 7 | Open; research **S7.R3** |
+| RG-07 | Target catalog expansion, names and search | 7 | **Researched** 2026-09-29 (S7.R3, `research/RG-07_TARGET_CATALOG.md`); the owner's decision is open |
 | RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | Open; research **S7.R4** (with RG-09) |
 | RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | Open; research **S7.R4** (with RG-08) |
 | RG-10 | Calibration-frame workflows and inheritance | 7 | **Decided** 2026-09-29 (S7.R2; DECISIONS E.1, "RG-10 decided"): L1, D1, T0, O0, N1, H1; ADR-020 |
@@ -231,9 +247,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.R3 — RG-07: targets, names and search (research)**: `POST_ROADMAP_PLAN.md`, "Stage 7 —
-   frozen Task sequence", S7.R3. Documentation only; the output is `research/RG-07_TARGET_CATALOG.md`,
-   ending with the owner's questions. Commit, then STOP.
+1. **The owner decides RG-07:** the three questions of `research/RG-07_TARGET_CATALOG.md` §9 (aliases
+   and search, more objects, an online lookup). The answers go into DECISIONS E.1; then **S7.R4**
+   (RG-08 and RG-09, site automation) runs.
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.
