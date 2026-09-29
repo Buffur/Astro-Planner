@@ -109,3 +109,96 @@ phone.
 - **Size target:** none (the plan: only if the owner sets one). A release that installs in about
   28 MB is reasonable for a Flutter app with an embedded database, so no size reduction is claimed or
   required. S10.6 and S10.7 still check the few options that exist (dependencies, symbols).
+
+## S10.2 — Performance scenarios and baselines
+
+### The suite
+
+- **`integration_test/perf_scenarios_test.dart`**, one test through the real UI and a real SQLite
+  file, with a fake forecast and fake position services. On Android it records each step's frames with
+  `IntegrationTestWidgetsFlutterBinding.watchPerformance` (engine `FrameTiming`: build and raster
+  times) and times the data work with a `Stopwatch`. On the host the quality gate runs it as a smoke
+  test, with no timing and a small history (D10-6).
+- **Run on a device or emulator** (results in `build/integration_response_data.json`):
+
+  ```
+  flutter drive --profile --no-dds -d <device> --driver=test_driver/perf_driver.dart --target=integration_test/perf_scenarios_test.dart
+  ```
+
+  `--no-dds` is required: with the Dart Development Service on, the binding cannot reach the VM
+  service it uses for timings. On this machine also add
+  `--android-project-arg=kotlin.incremental=false` (see "Build notes").
+- **Scenarios**, in the plan's priority: the rig editor (open "Add rig"; tap the pixel size, which
+  opens the real soft keyboard on a device; type "3.7612"; tap the name and type "Refractor 400"); the
+  planner (open; a block through its dialog: tap it, tap Frame Count, type "36", Save; four block edits;
+  a night change; a target change; a section opened); Night & Moon; Weather; the Logbook with 300 saved
+  plans, two in three with a result (open; search "M3"; a filter; an entry); first-run seeding on a new
+  file (ENG-12); the Logbook's list query (ENG-11); tonight's candidates (TASK 10.4).
+- **`test/presentation/performance/rig_editor_rebuilds_test.dart`**, host only: the elements rebuilt
+  while the keyboard's bottom inset grows over 12 frames (as Android animates it), and per keystroke.
+  The counts are deterministic.
+
+### Host counts (deterministic; `8b62b87`)
+
+| Rig editor step | Elements rebuilt | The dialog's content rebuilt |
+| --- | ---: | ---: |
+| The keyboard opens (12 frames) | 7,500 (625 per frame) | **12 of 12 frames** |
+| 6 keystrokes in the pixel size (its `onChanged` calls `setDialogState`) | 3,696 (616 per key) | 6 of 6 |
+| 6 keystrokes in the name (no `setDialogState`) | 2,646 (441 per key) | 0 |
+
+Reading: the dialog content (about 600 elements, every field) rebuilds on **every frame of the
+keyboard animation**. The only `MediaQuery.of(context)` in `lib/` is in that builder
+(`equipment_editor.dart:224`, for the screen width), and `MediaQuery.of` depends on every
+MediaQuery field, the keyboard inset included. A keystroke in a name field still rebuilds about 440
+elements, because Flutter's `Form` rebuilds all its fields when any one changes (framework
+behaviour).
+
+### Emulator, profile mode (two runs; D10-1, indicative)
+
+`8b62b87`, the x86_64 emulator above, profile build, 60 Hz (a 16.7 ms frame). Frame times in ms,
+run 1 / run 2. "Over" counts frames above 16.7 ms.
+
+| Scenario | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster p90 | Raster over |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Rig editor: open | 11/10 | 9.3/19.1 | 11.6/65.4 | 69/105 | 1/2 | 23.2/41.2 | 42.6/71.3 | 5/5 |
+| Rig editor: focus, keyboard opens | 31/30 | 6.8/4.3 | 16.0/7.6 | 73/48 | 3/2 | 30.4/15.6 | 50.6/33.2 | 25/8 |
+| Rig editor: type in pixel size | 11/11 | 1.7/1.0 | 3.5/1.9 | 7/3 | 0/0 | 9.3/14.2 | 13.7/25.2 | 0/3 |
+| Rig editor: tap and type the name | 37/37 | 4.1/2.8 | 6.8/4.6 | 43/29 | 1/1 | 35.3/14.5 | 63.9/25.8 | 33/11 |
+| Planner: open | 19/19 | 2.5/3.3 | 2.5/5.1 | 27/37 | 1/1 | 9.4/11.4 | 13.2/13.8 | 1/2 |
+| Planner: a block through its dialog | 39/39 | 6.1/9.6 | 17.1/16.5 | 52/90 | 5/6 | 44.9/33.2 | 94.7/63.7 | 26/26 |
+| Planner: four block edits | 10/11 | 5.5/6.2 | 10.3/11.9 | 14/18 | 0/1 | 9.9/11.3 | 14.4/15.4 | 0/1 |
+| Planner: night change | 11/11 | 2.1/2.5 | 2.8/6.2 | 9/14 | 0/0 | 9.1/8.6 | 14.2/14.1 | 1/0 |
+| Planner: target change | 11/11 | 2.0/1.7 | 1.3/2.6 | 16/10 | 0/0 | 7.3/7.0 | 11.7/11.4 | 0/0 |
+| Night & Moon: open | 11/11 | 1.8/2.0 | 4.1/3.8 | 7/9 | 0/0 | 5.7/8.5 | 10.2/11.9 | 0/1 |
+| Weather: open | 12/11 | 2.8/4.0 | 2.2/3.9 | 25/30 | 1/1 | 11.7/8.4 | 26.6/14.6 | 2/1 |
+| Logbook (300): open | 14/14 | 6.2/4.8 | 8.1/9.8 | 68/43 | 1/1 | 8.4/8.4 | 15.5/16.8 | 0/2 |
+| Logbook: search "M3" | 25/25 | 8.1/7.0 | 15.8/18.7 | 103/94 | 2/3 | 29.6/36.4 | 53.3/68.6 | 13/16 |
+| Logbook: a filter | 33/33 | 2.4/6.2 | 8.4/15.7 | 14/65 | 0/3 | 21.0/43.2 | 44.5/77.2 | 14/21 |
+| Logbook: an entry | 33/33 | 3.5/3.1 | 3.5/6.8 | 60/45 | 1/1 | 21.3/17.1 | 66.1/38.0 | 10/7 |
+
+| Work (elapsed) | Run 1 | Run 2 | Note |
+| --- | ---: | ---: | --- |
+| **First-run catalog seeding (164 entries; ENG-12)** | **14,804 ms** | **12,950 ms** | Before `runApp`: the first launch shows no app for this long |
+| First-run equipment seeding | 117 ms | 60 ms | |
+| The Logbook's list of 300 sessions with their blocks (ENG-11) | 48 ms | 52 ms | Two queries (`_blocksFor`); no N+1 |
+| Tonight's candidates (TASK 10.4: under 1 s) | 313 ms | 501 ms | Within the budget |
+| Test setup: 300 saved plans (900 writes) | 41,497 ms | 40,113 ms | Not a user path; about 45 ms per write transaction on this emulator |
+
+**Reading:**
+- **Build times** (the app's work per frame) are within the frame on average for every scenario.
+  They exceed it on the first frames of a newly opened screen or dialog (the worst values, 27–105
+  ms) and during the keyboard opening. Both runs agree on where the overruns are.
+- **Raster times** (drawing) dominate the misses, above all while the keyboard animates (focus,
+  the name, the block dialog, search). This emulator renders through host GPU emulation
+  (`ro.hardware.egl=emulation`), so raster numbers say little about a phone. **Not claimed as a
+  defect** without a device trace (Stage 11).
+- **Verified bottleneck 1 — first-run seeding (ENG-12):** 13–15 s on this emulator, before the first
+  frame. Each of the 164 catalog rows is its own autocommit transaction (a sync to storage per row;
+  about 45 ms per write transaction here). On a phone's faster storage it is shorter, but it is the
+  same 164 syncs. → S10.5.
+- **Verified bottleneck 2 — the rig editor rebuilds its whole form on every keyboard frame** (host
+  count 12 of 12; device: the focus step has the editor's worst build frames). → S10.3.
+- **Not bottlenecks:** ENG-11 (48–52 ms for 300 sessions); the candidates (313–501 ms); the planner's
+  edits, night and target changes (build averages 2–6 ms); the detail screens.
+- Run-to-run variation on the emulator is large (up to 2× for a worst frame), so single-run
+  differences under that are not evidence.

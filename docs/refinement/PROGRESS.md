@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.1 done**: the size baseline; the 277 MB is consistent with a debug install).
-> **Next:** S10.2, the performance scenarios and baselines.
+> **Last updated:** 2026-09-30 (**S10.2 done**: the scenario suite and its baselines; two bottlenecks verified).
+> **Next:** S10.3, the form lag (the rig editor rebuilds on every keyboard frame).
 
 ## Current state
 
@@ -14,10 +14,27 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.2** — reproducible performance scenarios and baselines |
+| Next Task | **S10.3** — form lag |
 | Code baseline | **The TD-089–TD-091 fix** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.2 done, 2026-09-30** (the performance scenarios and their baselines;
+[`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md) §S10.2):
+- `integration_test/perf_scenarios_test.dart` (the rig editor, the planner's edits, the detail screens,
+  the Logbook with 300 sessions, first-run seeding, the list query, the candidates) with
+  `test_driver/perf_driver.dart`: frame timings and elapsed times in profile mode on a device; a smoke
+  test on the host inside the gate. `test/presentation/performance/rig_editor_rebuilds_test.dart`: the
+  editor's rebuild counts on the host. `android/.gitignore` ignores Kotlin's `.kotlin/`.
+- Two emulator runs (profile, indicative). **Verified:** (1) first-run catalog seeding takes 13–15 s
+  before the first frame (ENG-12; 164 autocommit inserts) → S10.5; (2) the rig editor's whole form
+  (about 600 elements) rebuilds on every frame of the keyboard opening (host: 12 of 12 frames; its
+  `MediaQuery.of`) → S10.3. **Not bottlenecks:** ENG-11 (300 sessions listed in 48–52 ms), the
+  candidates (313–501 ms), the planner's edits and changes, the detail screens. Raster times are
+  high while the keyboard animates, but this emulator's GPU is emulated: not claimed without a device.
+- **Verification:** test and tooling files only (the suite, the driver, a probe; `.gitignore`):
+  format, encoding and analyze clean; both new tests pass on the host; the suite passed twice on the
+  emulator. The full gate runs at S10.3's end, after its code change.
 
 **S10.1 done, 2026-09-30** (the size baseline; measurement only, no code;
 [`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md) §S10.1):
@@ -596,8 +613,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.2 — reproducible performance scenarios and baselines** (the plan's "Stage 10 — frozen Task
-   sequence"), then S10.3 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
+1. **S10.3 — form lag** (the plan's "Stage 10 — frozen Task sequence"), then S10.4 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB
