@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S7.1, 2026-09-29:** B4 notes the plan's tracking override (RD-08 = T3) and `SiteViewModel.nightAt`.
 > **S6.V1, 2026-09-28:** B4 notes that a delete's Undo owns only the deleted block (TD-082).
 > **S6.16, 2026-09-28:** B4 notes the corrective pass: the planner's amended order, Tonight's finish, the missing inputs' reasons, the √N graph's labels, Night & Moon without repetition, and the blocks' Undo (`BlocksEdit`).
 > **S6.14, 2026-09-28:** B4 notes the candidates' default order (RD-10 = O1).
@@ -499,7 +500,18 @@ interim safeguard. The normal guard and Save/Start ordering remain implemented.
 > `BlocksEdit.isCurrent` holds, and a replaced plan (`BlocksEdit.inPlan` fails) is left alone with
 > "Not undone". `SessionPlanViewModel.effectiveTracking`
 > is the tracking the guidance uses: the rig's default until Stage 7 adds the plan's override; the
-> rows read unknown tracking from `RigCapability.recommendationIsConditional`. Where each value
+> rows read unknown tracking from `RigCapability.recommendationIsConditional`. *Since S7.1
+> (RD-08 = T3)* the plan holds `trackingOverride` (a plan edit, autosaved in
+> `session_logs.tracking_override`; never written to the rig). The pure `EffectiveTracking.of`
+> (`domain/models/tracking_type.dart`) gives the effective value and its source: the override, else
+> the rig's default, else unknown. `CaptureAnalysisViewModel.rigCapability` passes it to
+> `CapabilityCalculator.evaluate(tracking:)`; the snapshot builder records it
+> (`tracking` = {effective, source}); `SavedPlanReader` restores it; `PlanLifecycleViewModel._apply`
+> reads a session's own; Copy and Track live's copy carry it; New plan starts without it. The
+> planner's `PlanTrackingRow` (under the rig card) and S6.9's "Set the tracking for this plan"
+> open `pickPlanTracking` (`widgets/plan_tracking.dart`). The night resolution moved into
+> `SiteViewModel.nightAt` (the site owns position, zone and clock) to keep `SessionPlanViewModel`
+> under its cap. Where each value
 > went: the "Inputs", "Outputs" and "Sequence Plan" headings are gone (the planner's "Capture plan"
 > header remains); the row's frame type, filter, count, exposure and calibration placement are in
 > its text; the capability warning stays on its row.

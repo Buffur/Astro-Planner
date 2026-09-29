@@ -4,19 +4,28 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.R5 done**: RG-03 researched; the owner's decision is next).
-> **Next:** the owner decides RG-03 (one question, `research/RG-03_EQUIPMENT_SPECS.md` §8).
+> **Last updated:** 2026-09-29 (**S7.1 done**: the plan's tracking override, RD-08 = T3; schema v19).
+> **Next:** S7.2a, the camera class on the rig (RG-03 stays open; it affects only S7.6).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5 and S7.D done; RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D and S7.1 done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **RG-03's owner decision**, then S7.1 (below, "Next allowed action") |
-| Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
-| Schema | v18 (S3.4) |
+| Next Task | **S7.2a**, the camera class on the rig (below, "Next allowed action") |
+| Code baseline | S7.1 (this commit). Not pushed (S1.14, RD-17) |
+| Schema | **v19** (S7.1) |
+
+**S7.1 done, 2026-09-29** (RD-08 = T3; the plan's "S7.1" for the detail): a plan can override its
+rig's tracking for its night ("Tracking for this plan", under the rig; S6.9's button opens the same
+choice). The guidance (CALC-31) reads the effective value; the rig and the example rig's Unknown are
+never changed; Save records the value and its source; Discard restores it; Copy carries it; New plan
+starts without it; the export carries it. **Schema v19** (`session_logs.tracking_override`). The
+backup and unsupported-database tests pinned to v18 were moved to v19 deliberately. Verification: the
+high-risk class (schema, snapshot, export): the full gate after the last code change, PASS (below);
+every acceptance criterion checked.
 
 **S7.R5 done, 2026-09-29** (RG-03 research; documentation only; `research/RG-03_EQUIPMENT_SPECS.md`):
 - **No official API and no machine-readable maker data found;** maker pages are HTML (scraping is
@@ -152,7 +161,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (439 files, 0 changed); Analyze (no issues); 1,491 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S6.V1's final inputs (`da4c53d`) | Valid while `git diff --stat da4c53d HEAD -- . ':!docs' ':!CLAUDE.md'` is empty (still empty at Stage 7 planning, `4b0df38`). Stage 7's baseline. It supersedes S6.16's gate at `d7e1477` |
+| **Full quality gate PASS**: Encoding; Format (443 files, 0 changed); Analyze (no issues); 1,527 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.1's final inputs (the S7.1 commit) | Valid while `git diff --stat <S7.1 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S6.V1's gate at `da4c53d` |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -282,9 +291,12 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **The owner decides RG-03:** the question of `research/RG-03_EQUIPMENT_SPECS.md` §8 (a
-   specification source, or none). The answer goes into DECISIONS E.1. Every Stage 7 gate is then
-   decided, and the implementation Tasks start with **S7.1** (RD-08's override).
+1. **S7.2a — the camera class on the rig** (`POST_ROADMAP_PLAN.md`, "S7.D — done": ADR-020 §2): a
+   camera-module field with the five classes, Unknown by default, never inferred; a schema change,
+   ending with the full gate. Implementation; commit, then STOP.
+
+RG-03 (a specification source, `research/RG-03_EQUIPMENT_SPECS.md` §8) is still the owner's to
+decide; it affects only S7.6, which comes last.
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.

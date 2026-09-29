@@ -237,6 +237,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
       rig,
       target: _plan.selectedTarget,
       npfK: _settings.planningPreferences.npfK,
+      tracking: _plan.effectiveTracking,
     );
   }
 
@@ -267,6 +268,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
       skyDarkness: _site.skyDarkness,
       target: _plan.selectedTarget,
       rig: _plan.selectedEquipment,
+      trackingOverride: _plan.trackingOverride,
       opportunity: _conditions.imagingOpportunity,
       weather: _conditions.nightWeather,
       weatherSummary: _conditions.nightWeatherSummary,

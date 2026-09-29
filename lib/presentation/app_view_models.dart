@@ -85,7 +85,6 @@ class AppViewModels {
       targetRepository: targets,
       equipmentRepository: equipment,
       stateRepository: plannerState,
-      clock: clock,
       currentSession: current,
     );
     lifecycle = PlanLifecycleViewModel(

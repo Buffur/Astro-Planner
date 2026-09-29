@@ -2,6 +2,7 @@ import 'calendar_date.dart';
 import 'capture_block.dart';
 import 'session_log.dart';
 import 'session_snapshot.dart';
+import 'tracking_type.dart';
 
 /// Where a session is in its life (ADR-014 §3).
 enum SessionStatus {
@@ -70,6 +71,7 @@ class SessionPlan {
     required this.targetLabel,
     required this.rigLabel,
     this.siteLabel,
+    this.trackingOverride,
   });
 
   final CalendarDate eveningDate;
@@ -83,6 +85,10 @@ class SessionPlan {
   final String targetLabel;
   final String rigLabel;
   final String? siteLabel;
+
+  /// The plan's tracking override (RD-08 = T3; S7.1): one of
+  /// [TrackingType.overrides], or null for the rig's default.
+  final TrackingType? trackingOverride;
 
   /// Light frames in the plan (the pre-v16 `planned_light_frames` label).
   int get lightFrameCount => blocks
@@ -127,6 +133,7 @@ class Session {
     this.siteId,
     this.targetId,
     this.rigId,
+    this.trackingOverride,
     this.createdAtUtc,
     this.updatedAtUtc,
     this.plannedAtUtc,
@@ -153,6 +160,9 @@ class Session {
   final int? siteId;
   final int? targetId;
   final int? rigId;
+
+  /// The plan's tracking override (S7.1); null = the rig's default.
+  final TrackingType? trackingOverride;
   final DateTime? createdAtUtc;
   final DateTime? updatedAtUtc;
   final DateTime? plannedAtUtc;

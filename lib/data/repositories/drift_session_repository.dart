@@ -8,6 +8,7 @@ import '../../domain/models/execution.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_log.dart' as domain;
 import '../../domain/models/session_snapshot.dart';
+import '../../domain/models/tracking_type.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/services/execution_machine.dart';
 import '../../domain/services/saved_plan_reader.dart';
@@ -49,6 +50,7 @@ class DriftSessionRepository implements SessionRepository {
               siteId: Value(plan.siteId),
               targetId: Value(plan.targetId),
               rigId: Value(plan.rigId),
+              trackingOverride: Value(plan.trackingOverride?.name),
               createdAtUtcMs: Value(now),
               updatedAtUtcMs: Value(now),
             ),
@@ -424,6 +426,7 @@ class DriftSessionRepository implements SessionRepository {
         siteId: Value(plan.siteId),
         targetId: Value(plan.targetId),
         rigId: Value(plan.rigId),
+        trackingOverride: Value(plan.trackingOverride?.name),
       ),
     );
   }
@@ -574,6 +577,20 @@ class DriftSessionRepository implements SessionRepository {
     return out;
   }
 
+  /// The stored override (S7.1); a value this app does not know is logged
+  /// and read as none, the rig's default.
+  static TrackingType? _trackingOverride(SessionLog row) {
+    final stored = row.trackingOverride;
+    final value = TrackingType.overrideFromStorage(stored);
+    if (stored != null && value == null) {
+      AppLog.warning(
+        'storage',
+        'Session ${row.id}: unknown tracking override $stored',
+      );
+    }
+    return value;
+  }
+
   static DateTime? _instant(int? ms) =>
       ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
 
@@ -615,6 +632,7 @@ class DriftSessionRepository implements SessionRepository {
       siteId: row.siteId,
       targetId: row.targetId,
       rigId: row.rigId,
+      trackingOverride: _trackingOverride(row),
       createdAtUtc: _instant(row.createdAtUtcMs),
       updatedAtUtc: _instant(row.updatedAtUtcMs),
       plannedAtUtc: _instant(row.plannedAtUtcMs),

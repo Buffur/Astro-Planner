@@ -4,6 +4,7 @@ import '../../domain/models/execution.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_log.dart';
 import '../../domain/models/session_snapshot.dart';
+import '../../domain/models/tracking_type.dart';
 import '../../domain/services/execution_machine.dart';
 import '../../domain/services/session_exporter.dart';
 
@@ -101,6 +102,8 @@ abstract final class SessionManifestCodec {
       'site_id': s.siteId,
       'target_id': s.targetId,
       'rig_id': s.rigId,
+      // S7.1: the plan's tracking override; absent or null = the rig's.
+      'tracking_override': s.trackingOverride?.name,
       'created_at_utc_ms': _ms(s.createdAtUtc),
       'updated_at_utc_ms': _ms(s.updatedAtUtc),
       'planned_at_utc_ms': _ms(s.plannedAtUtc),
@@ -221,6 +224,9 @@ abstract final class SessionManifestCodec {
       siteId: j['site_id'] as int?,
       targetId: j['target_id'] as int?,
       rigId: j['rig_id'] as int?,
+      trackingOverride: TrackingType.overrideFromStorage(
+        j['tracking_override'] as String?,
+      ),
       createdAtUtc: _instant(j['created_at_utc_ms'] as int?),
       updatedAtUtc: _instant(j['updated_at_utc_ms'] as int?),
       plannedAtUtc: _instant(j['planned_at_utc_ms'] as int?),

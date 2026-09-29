@@ -20,6 +20,7 @@ import 'package:astroplan/domain/models/planning_preferences.dart';
 import 'package:astroplan/domain/models/session.dart';
 import 'package:astroplan/domain/models/session_log.dart';
 import 'package:astroplan/domain/models/session_night.dart';
+import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/services/capture_budget_calculator.dart';
 import 'package:astroplan/domain/services/session_exporter.dart';
 import 'package:astroplan/domain/services/session_snapshot_builder.dart';
@@ -78,7 +79,7 @@ void main() {
       ),
       blocks: _blocks,
     );
-    SessionPlan plan(String target) => SessionPlan(
+    SessionPlan plan(String target, {TrackingType? tracking}) => SessionPlan(
       eveningDate: CalendarDate(2026, 12, 15),
       timeZoneId: 'Europe/Ljubljana',
       siteId: null,
@@ -88,6 +89,7 @@ void main() {
       targetLabel: target,
       rigLabel: 'Refractor 400',
       siteLabel: 'Home',
+      trackingOverride: tracking,
     );
     final run = await repo.start((await repo.create(plan('M42'))).id, snapshot);
     final light = run.blocks.first.id;
@@ -118,9 +120,11 @@ void main() {
         temperatureC: -3.5,
       ),
     );
+    // S7.1: this plan overrides its rig's tracking.
+    final m31 = plan('M31', tracking: TrackingType.untracked);
     final planned = await repo.savePlan(
-      (await repo.create(plan('M31'))).id,
-      plan('M31'),
+      (await repo.create(m31)).id,
+      m31,
       snapshot,
     );
     await db.customStatement(
@@ -190,6 +194,32 @@ void main() {
     final legacy = (m['sessions']! as List).last as Map;
     expect(legacy['legacy'], isTrue);
     expect(legacy['events'], isEmpty);
+    // S7.1: the plan's tracking override; null = the rig's default.
+    expect(run['tracking_override'], isNull);
+    final saved = (m['sessions']! as List)[1] as Map;
+    expect(saved['tracking_override'], 'untracked');
+  });
+
+  test('S7.1: the override is read back; a file without the key (before '
+      "S7.1) reads as none, the rig's default", () async {
+    final m = roundTripJson(
+      SessionManifestCodec.encode(
+        await sessions(),
+        exportedAtUtc: exportedAt,
+        appVersion: AppIdentity.version,
+      ),
+    );
+    expect(
+      SessionManifestCodec.decode(m).sessions[1].session.trackingOverride,
+      TrackingType.untracked,
+    );
+    for (final session in m['sessions']! as List) {
+      (session as Map).remove('tracking_override');
+    }
+    expect(
+      SessionManifestCodec.decode(m).sessions[1].session.trackingOverride,
+      isNull,
+    );
   });
 
   test('v1 is still read, as a legacy log at the same UTC instant', () {

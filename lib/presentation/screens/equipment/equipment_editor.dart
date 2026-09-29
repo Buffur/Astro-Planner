@@ -454,7 +454,8 @@ class _EquipmentEditor {
                           // instead of overflowing on a phone at large text.
                           isExpanded: true,
                           decoration: const InputDecoration(
-                            labelText: 'Tracking',
+                            // S7.1 (RD-08 = T3): a plan may override it.
+                            labelText: 'Tracking (default for plans)',
                           ),
                           items: [
                             for (final t in TrackingType.values)

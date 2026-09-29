@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v18), each with an
+// Later schema versions add their own groups (v11-v19), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -124,6 +124,46 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group("S7.1: v19 (the plan's tracking override, RD-08 = T3)", () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]) {
+      test('v$from -> v19 matches the v19 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 19);
+        await db.close();
+      });
+    }
+
+    test('v18 -> v19: every plan and its snapshot kept; no override, so each '
+        "plan uses its rig's default, as it did", () async {
+      final schema = await verifier.schemaAt(18);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, planned_at_utc_ms, plan_snapshot) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'planned', 0, '2026-12-15', "
+        "'Europe/Ljubljana', 1790000000000, '{\"v\":1,\"rig\":null}');",
+      );
+      raw.execute(
+        "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+        "exposure_time_seconds, frame_count, position) "
+        "VALUES (1, 1, 'light', 60.0, 10, 0);",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      final row = await db.select(db.sessionLogs).getSingle();
+      expect(row.trackingOverride, isNull);
+      expect(row.status, 'planned');
+      expect(row.eveningDate, '2026-12-15');
+      expect(row.planSnapshot, {'v': 1, 'rig': null});
+      final session = (await DriftSessionRepository(db).get(1))!;
+      expect(session.trackingOverride, isNull);
+      expect(session.blocks.single.frameCount, 10);
       await db.close();
     });
   });

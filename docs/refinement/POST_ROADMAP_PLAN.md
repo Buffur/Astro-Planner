@@ -100,6 +100,7 @@
 > **Updated 2026-09-29 (RG-08 and RG-09 decided):** E2, S3, M2 (E.1); S7.5's rules added. S7.R5 is next.
 > **Updated 2026-09-29 (S7.R5):** RG-03 researched (`research/RG-03_EQUIPMENT_SPECS.md`); the owner
 > decides it next. Nothing adopted.
+> **Updated 2026-09-29 (S7.1):** the plan's tracking override is built (RD-08 = T3; schema v19).
 
 ## Contents
 
@@ -3989,7 +3990,7 @@ Stage 4):
 | S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | **Done 2026-09-29** (`research/RG-07_TARGET_CATALOG.md`); **RG-07 decided** 2026-09-29 (E.1): T1 only |
 | S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | **Done 2026-09-29** (`research/RG-08_09_SITE_AUTOMATION.md`); **RG-08 and RG-09 decided** 2026-09-29 (E.1): E2, S3, M2 |
 | S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | **Done 2026-09-29** (`research/RG-03_EQUIPMENT_SPECS.md`); RG-03 awaits the owner |
-| S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | Frozen; ungated |
+| S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | **Done 2026-09-29** |
 | S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
 | S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | Frozen |
 | S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | Frozen |
@@ -4314,6 +4315,21 @@ ADR-020; S7.2 and S7.3 implement it exactly):
   - no ViewModel over the cap (split first if needed);
   - the full gate; DATA_MODEL and ARCHITECTURE Part B, `DECISIONS.md` (RD-08 built; ADR-011 §5's
     pointer), `EXPORT_MANIFEST.md`, `FEATURE_STATUS.md`, `SCIENTIFIC_INTEGRITY.md` (CALC-31's input).
+
+- **Done 2026-09-29:** `session_logs.tracking_override` (v19; migration tests v8–v18 → v19 and a v18
+  plan kept); `TrackingType.overrides` and `EffectiveTracking.of` (domain); `CapabilityCalculator.evaluate`
+  takes `tracking:` (the plan's effective value; the rig's default otherwise); the snapshot's
+  `tracking` {effective, source}, read back by `SavedPlanReader` (an unreadable plan override makes
+  the snapshot unreadable, never guessed); `SessionPlanViewModel.trackingOverride`/`setTrackingOverride`;
+  `PlanLifecycleViewModel._apply` reads each session's own; Copy and Track live's copy carry it, New
+  starts without it; the planner's `PlanTrackingRow` under the rig card and S6.9's "Set the tracking
+  for this plan" open `pickPlanTracking` (`widgets/plan_tracking.dart`); the export's
+  `tracking_override`; the rig editor's "Tracking (default for plans)". The night resolution moved
+  into `SiteViewModel.nightAt` to keep `SessionPlanViewModel` under its cap (293 lines). Tests:
+  `plan_tracking_test.dart` (domain, 15), `test/presentation/plan_tracking_test.dart` (8, real SQLite
+  and the row at 200 % text), the codec and migration tests. **Deliberate test changes:** the backup
+  and unsupported-database tests pinned to schema v18 now expect v19 (a newer database is v20).
+  Full gate PASS: 1,527 tests, 2 expected skips; 2 host E2E.
 
 ##### S7.2 — Light-block parameters (gated on RG-11; completed at S7.D)
 - **Objective:** a light block asks only for what applies to its camera and is actionable, and every

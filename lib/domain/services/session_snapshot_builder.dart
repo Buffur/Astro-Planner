@@ -9,6 +9,7 @@ import '../models/planning_preferences.dart';
 import '../models/session_night.dart';
 import '../models/session_snapshot.dart';
 import '../models/sky_darkness.dart';
+import '../models/tracking_type.dart';
 import 'capture_budget_calculator.dart';
 
 /// Builds a [SessionSnapshot] from domain values (ADR-014 §4; TASK 11.3).
@@ -27,6 +28,7 @@ abstract final class SessionSnapshotBuilder {
     SkyDarkness? skyDarkness,
     AstroTarget? target,
     EquipmentProfile? rig,
+    TrackingType? trackingOverride,
     ImagingOpportunity? opportunity,
     NightWeather? weather,
     NightWeatherSummary? weatherSummary,
@@ -46,6 +48,16 @@ abstract final class SessionSnapshotBuilder {
     'skyDarkness': skyDarkness == null ? null : _sky(skyDarkness),
     'target': target == null ? null : _target(target),
     'rig': rig == null ? null : _rig(rig),
+    // S7.1 (RD-08 = T3): the tracking the plan's guidance used and where it
+    // came from; `rig.tracking` stays the rig's default.
+    'tracking': rig == null
+        ? null
+        : _tracking(
+            EffectiveTracking.of(
+              override: trackingOverride,
+              rigDefault: rig.trackingType,
+            ),
+          ),
     'preferences': _preferences(preferences),
     'blocks': [for (final b in blocks) _block(b)],
     'budget': _budget(budget),
@@ -117,6 +129,11 @@ abstract final class SessionSnapshotBuilder {
       'opticsConfidence': optics?.confidence?.name,
     };
   }
+
+  static Map<String, Object?> _tracking(EffectiveTracking t) => {
+    'effective': t.type.name,
+    'source': t.source.name,
+  };
 
   static Map<String, Object?> _preferences(PlanningPreferences p) => {
     'minAltitudeDeg': p.minAltitudeDeg,

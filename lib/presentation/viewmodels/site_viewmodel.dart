@@ -7,6 +7,7 @@ import '../../core/time/clock.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/iana_time_context.dart';
 import '../../domain/models/location_profile.dart';
+import '../../domain/models/session_night.dart';
 import '../../domain/models/site_time_context.dart';
 import '../../domain/models/sky_darkness.dart';
 import '../../domain/repositories/location_repository.dart';
@@ -14,6 +15,7 @@ import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/services/device_time_zone.dart';
 import '../../domain/services/location_service.dart';
 import '../../domain/services/reverse_geocoder.dart';
+import '../../domain/services/session_night_resolver.dart';
 
 /// Where the user is observing from (TASKs 7.1–7.4; split out of the
 /// planner ViewModel in TASK 12.3): saved sites, the active one, or a
@@ -95,6 +97,16 @@ class SiteViewModel extends ChangeNotifier {
     final ctx = timeContext;
     return ctx is IanaTimeContext ? ctx.id : null;
   }
+
+  /// The night of [picked] here (null = tonight), per ADR-007: never from a
+  /// date's Y/M/D. Without a site, at the default position (S1.4).
+  SessionNight nightAt(CalendarDate? picked) => SessionNightResolver.resolve(
+    picked,
+    _clock.nowUtc(),
+    latitude: _latitude,
+    longitude: _longitude,
+    timeContext: timeContext,
+  );
 
   /// Today's UTC date from the injected clock (provenance stamps).
   CalendarDate get today => CalendarDate.fromDateTimeFields(_clock.nowUtc());

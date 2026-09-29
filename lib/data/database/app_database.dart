@@ -179,6 +179,10 @@ class SessionLogs extends Table {
       text().nullable().map(const JsonMapConverter())();
   TextColumn get executionStartSnapshot =>
       text().nullable().map(const JsonMapConverter())();
+
+  /// The plan's tracking override (RD-08 = T3; S7.1, v19): `untracked`,
+  /// `tracked` or `guided`; NULL = the rig's default.
+  TextColumn get trackingOverride => text().nullable()();
 }
 
 /// A session's run, append-only (ADR-016 §4; TASK 13.2, v17). The events
@@ -249,7 +253,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration {
@@ -523,6 +527,15 @@ class AppDatabase extends _$AppDatabase {
                 ]) {
                   await m.addColumn(rigs, column);
                 }
+              },
+              from18To19: (m, schema) async {
+                // S7.1 (RD-08 = T3): the plan's tracking override. Additive
+                // only; every existing plan keeps NULL, the rig's default,
+                // which is what it used before (no override existed).
+                await m.addColumn(
+                  schema.sessionLogs,
+                  schema.sessionLogs.trackingOverride,
+                );
               },
             ),
           );

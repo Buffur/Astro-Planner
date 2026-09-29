@@ -23,6 +23,7 @@ import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/field_mode_button.dart';
 import '../../widgets/capture_plan_widget.dart';
+import '../../widgets/plan_tracking.dart';
 import '../../widgets/tonight_opportunity_widget.dart';
 import '../../widgets/sky_darkness_widget.dart';
 import '../../shared/night_text.dart';
@@ -206,6 +207,8 @@ class HomeScreen extends StatelessWidget {
                           ),
                           onTap: () => context.push(AppRouter.selectRig),
                         ),
+                        // S7.1 (RD-08 = T3): the plan's own tracking.
+                        const PlanTrackingRow(),
                       ] else
                         _ChooseCard(
                           key: const Key('planner.noRig'),

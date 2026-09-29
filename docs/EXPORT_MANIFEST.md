@@ -38,6 +38,7 @@ shared from a session's detail (**Export file**, one session) or the Sessions ta
 | `legacy` | bool | saved before v16 (or without a night key): stored text only |
 | `evening_date`, `time_zone_id` | string? | the night key |
 | `site_id`, `target_id`, `rig_id` | int? | references on the exporting device (may be null) |
+| `tracking_override` | string? | *(S7.1, additive)* the plan's tracking override: `untracked`, `tracked` or `guided`; null or absent = the rig's default. A file written before S7.1 has no key and reads as none |
 | `created_at_utc_ms` … `completed_at_utc_ms` | int? | lifecycle instants (`created`, `updated`, `planned`, `started`, `completed`) |
 | `labels` | object | `target`, `rig`, `site`, `session_date_utc_ms` — display labels, never used to resolve references |
 | `blocks` | array | `id`, `frame_type`, `filter_name`, `exposure_s`, `frame_count`, `binning`, `gain_kind`, `gain_value`, `calibration_policy`, `confirmed_frames`, `rejected_frames` (counts replayed from `events`; null when the events do not replay) |

@@ -2,10 +2,12 @@ import '../models/calendar_date.dart';
 import '../models/capture_block.dart';
 import '../models/session.dart';
 import '../models/session_snapshot.dart';
+import '../models/tracking_type.dart';
 
 /// The plan a saved snapshot records, read back for Discard on a Saved ·
 /// changed plan (S4-DEF-04 = R; S6.3): the night key and zone, the site,
-/// target and rig references, their display labels and every block, as
+/// target and rig references, their display labels, every block and the
+/// plan's tracking override (S7.1), as
 /// `SessionSnapshotBuilder` wrote them. Pure.
 ///
 /// Returns null when any of it cannot be read — the snapshot is then
@@ -17,6 +19,12 @@ abstract final class SavedPlanReader {
     final eveningDate = _date(night?['eveningDate']);
     final blocks = _blocks(json['blocks']);
     if (night == null || eveningDate == null || blocks == null) return null;
+    final tracking = _map(json['tracking']);
+    final fromPlan = tracking?['source'] == TrackingSource.plan.name;
+    final override = fromPlan
+        ? TrackingType.overrideFromStorage(tracking?['effective'] as String?)
+        : null;
+    if (fromPlan && override == null) return null;
     final site = _map(json['site']);
     final target = _map(json['target']);
     final rig = _map(json['rig']);
@@ -34,6 +42,9 @@ abstract final class SavedPlanReader {
                 (target['catalogId'] as String? ?? '(no target)'),
       rigLabel: rig?['name'] as String? ?? '(no rig)',
       siteLabel: site?['name'] as String?,
+      // S7.1: the plan's override when the snapshot says the plan chose
+      // it; a snapshot taken before S7.1 has no `tracking` and had none.
+      trackingOverride: override,
     );
   }
 

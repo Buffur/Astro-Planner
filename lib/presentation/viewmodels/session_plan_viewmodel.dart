@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/capture_block.dart';
@@ -15,23 +14,20 @@ import '../../domain/repositories/planner_state_repository.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
 import '../../domain/services/example_capture_plan.dart';
-import '../../domain/services/session_night_resolver.dart';
 import 'blocks_edit.dart';
 import 'site_viewmodel.dart';
 
-/// The plan the planner shows (ADR-014; TASKs 11.3–11.4; split out of the
-/// planner ViewModel in TASK 12.3): its night, target, rig and capture
-/// blocks, and their edits. Every plan edit — a site change included — is
-/// autosaved into the current session before the edit call returns.
-/// Restoring, opening, starting a new plan, copying, saving and starting a
-/// run are `PlanLifecycleViewModel`'s (S6.1).
+/// The plan the planner shows (ADR-014; TASKs 11.3–11.4, 12.3): its night,
+/// target, rig, tracking and capture blocks, and their edits. Every plan
+/// edit — a site change included — is autosaved into the current session
+/// before the edit call returns. Restoring, opening, starting a new plan,
+/// copying, saving and starting a run are `PlanLifecycleViewModel`'s (S6.1).
 class SessionPlanViewModel extends ChangeNotifier {
   SessionPlanViewModel({
     required this._site,
     required TargetRepository targetRepository,
     required EquipmentRepository equipmentRepository,
     required this._stateRepository,
-    required this._clock,
     CurrentSession? currentSession,
   }) : _targets = targetRepository,
        _equipment = equipmentRepository,
@@ -44,7 +40,6 @@ class SessionPlanViewModel extends ChangeNotifier {
   final TargetRepository _targets;
   final EquipmentRepository _equipment;
   final PlannerStateRepository _stateRepository;
-  final Clock _clock;
 
   /// Null only in tests without a session repository (plan in preferences).
   final CurrentSession? _current;
@@ -53,6 +48,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   EquipmentProfile? _rig;
   List<CaptureBlock> _blocks = [];
   bool _isExample = false;
+  TrackingType? _trackingOverride; // RD-08 = T3 (S7.1); null = the rig's
   CalendarDate? _pickedEveningDate;
   bool _loaded = false;
   Object? _siteKey;
@@ -61,10 +57,14 @@ class SessionPlanViewModel extends ChangeNotifier {
   AstroTarget? get selectedTarget => _target;
   EquipmentProfile? get selectedEquipment => _rig;
 
-  /// The tracking this plan's guidance uses (RD-08 = T3): the rig's
-  /// default, `unknown` without a rig. Stage 7 adds the plan's override.
-  TrackingType get effectiveTracking =>
-      _rig?.trackingType ?? TrackingType.unknown;
+  /// The plan's tracking override (RD-08 = T3; S7.1): null = the rig's.
+  TrackingType? get trackingOverride => _trackingOverride;
+
+  /// The tracking its guidance uses: the override, else the rig's (unknown).
+  TrackingType get effectiveTracking => EffectiveTracking.of(
+    override: _trackingOverride,
+    rigDefault: _rig?.trackingType,
+  ).type;
 
   /// The plan's blocks, read-only; change them through the methods below.
   List<CaptureBlock> get captureBlocks => List.unmodifiable(_blocks);
@@ -84,13 +84,7 @@ class SessionPlanViewModel extends ChangeNotifier {
 
   /// The chosen night per ADR-007, never from a date's Y/M/D; without a site
   /// the default position's, used only as the draft's night key (S1.4).
-  SessionNight get _night => SessionNightResolver.resolve(
-    _pickedEveningDate,
-    _clock.nowUtc(),
-    latitude: _site.latitude,
-    longitude: _site.longitude,
-    timeContext: _site.timeContext,
-  );
+  SessionNight get _night => _site.nightAt(_pickedEveningDate);
 
   CalendarDate? get eveningDate => sessionNight?.eveningDate;
 
@@ -98,13 +92,7 @@ class SessionPlanViewModel extends ChangeNotifier {
   CalendarDate get nightKey => _night.eveningDate;
 
   /// Tonight's key, whatever night is picked (S6.4).
-  CalendarDate get tonightKey => SessionNightResolver.resolve(
-    null,
-    _clock.nowUtc(),
-    latitude: _site.latitude,
-    longitude: _site.longitude,
-    timeContext: _site.timeContext,
-  ).eveningDate;
+  CalendarDate get tonightKey => _site.nightAt(null).eveningDate;
 
   /// The night the user picked, or null for tonight (S6.4).
   CalendarDate? get pickedNight => _pickedEveningDate;
@@ -119,6 +107,7 @@ class SessionPlanViewModel extends ChangeNotifier {
     siteId: _site.activeSite?.id,
     targetId: _target?.id,
     rigId: _rig?.id,
+    trackingOverride: _trackingOverride,
     blocks: List.of(_blocks),
     targetLabel: _target == null
         ? '(no target)'
@@ -134,24 +123,24 @@ class SessionPlanViewModel extends ChangeNotifier {
     required EquipmentProfile? rig,
     required List<CaptureBlock> blocks,
     required bool isExample,
+    TrackingType? trackingOverride,
   }) {
     _target = target;
     _rig = rig;
+    _trackingOverride = trackingOverride;
     _blocks = List.of(blocks);
     _isExample = isExample;
     _contents++;
   }
 
-  /// Sets the picked night (null = tonight) with no autosave and no
-  /// notification (S6.1).
+  /// Sets the picked night (null = tonight); no autosave, no notice (S6.1).
   void replaceNight(CalendarDate? date) => _pickedEveningDate = date;
 
   /// Tells the listeners that the lifecycle changed the plan (S6.1).
   void markChanged() => notifyListeners();
 
   /// Runs a restore or an open (S6.1): a site change meanwhile is part of it,
-  /// not a plan edit; afterwards the plan notifies once. A failure leaves the
-  /// plan unloaded, as before the split.
+  /// not an edit; the plan then notifies once, or stays unloaded on failure.
   Future<void> restoring(Future<void> Function() body) async {
     _loaded = false;
     await body();
@@ -167,9 +156,8 @@ class SessionPlanViewModel extends ChangeNotifier {
     _site.displayZoneId,
   );
 
-  /// The night key includes the site: a site change is written into the
-  /// plan. On a saved plan it is an unsaved change (V3, S6.3): leaving the
-  /// plan then asks. On a never-saved draft it is not (S1.6).
+  /// The night key includes the site, so a site change is written into the
+  /// plan: unsaved on a saved plan (V3, S6.3), not on a new draft (S1.6).
   void _onSiteChanged() {
     notifyListeners();
     final key = _currentSiteKey();
@@ -203,6 +191,12 @@ class SessionPlanViewModel extends ChangeNotifier {
     await _edited();
   }
 
+  /// This plan's tracking (S7.1): a plan edit; the rig is never written.
+  Future<void> setTrackingOverride(TrackingType? tracking) {
+    _trackingOverride = tracking == TrackingType.unknown ? null : tracking;
+    return _edited();
+  }
+
   /// "Start from the example plan" (RD-04, S6.8): the example's blocks,
   /// shown as the example until the first block edit (TASK 4.4).
   Future<void> useExamplePlan() {
@@ -231,9 +225,9 @@ class SessionPlanViewModel extends ChangeNotifier {
     if (_valid(index)) await _editBlocks((b) => b.removeAt(index));
   }
 
-  /// Undo of [deletion] (RD-09, S6.9): [block] back at [index]. It owns that
-  /// block only (TD-082): edits since stay, and the badge returns only if
-  /// nothing changed since; refused (false) once the plan was replaced.
+  /// Undo of [deletion] (RD-09, S6.9): [block] back at [index], owning it only
+  /// (TD-082): edits since stay, the badge returns only if nothing changed
+  /// since; refused (false) once the plan was replaced.
   Future<bool> restoreCaptureBlock(
     int index,
     CaptureBlock block, {
@@ -252,9 +246,9 @@ class SessionPlanViewModel extends ChangeNotifier {
   Future<void> reorderCaptureBlocks(int oldIndex, int newIndex) =>
       _editBlocks((b) => b.insert(newIndex, b.removeAt(oldIndex)));
 
-  /// Runs [change], an edit to the blocks, and returns what it replaced, for
-  /// [undoBlocksEdit] (TD-079, S6.16); the blocks it left are taken as soon
-  /// as it has applied them, the session once its autosave has finished.
+  /// Runs [change], a blocks edit, and returns what it replaced for
+  /// [undoBlocksEdit] (TD-079, S6.16): the blocks once applied, the session
+  /// once its autosave has finished.
   Future<BlocksEdit> recordBlocksEdit(Future<Object?> Function() change) async {
     final before = List.of(_blocks), example = _isExample, gen = _contents;
     final done = change();
@@ -269,9 +263,8 @@ class SessionPlanViewModel extends ChangeNotifier {
     );
   }
 
-  /// Undo (TD-079): the blocks and badge exactly as [edit] found them,
-  /// autosaved like any edit (a saved snapshot is never touched); refused
-  /// (false) when the blocks or the plan changed since.
+  /// Undo (TD-079): the blocks and badge as [edit] found them, autosaved (a
+  /// saved snapshot is never touched); refused (false) if they changed since.
   Future<bool> undoBlocksEdit(BlocksEdit edit) async {
     if (!edit.isCurrent(_blocks, _contents, activeSessionId)) return false;
     _blocks = List.of(edit.before);

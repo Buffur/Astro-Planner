@@ -138,6 +138,7 @@ class PlanLifecycleViewModel {
   }
 
   /// [session]'s references and blocks into the plan; what it lacks stays.
+  /// Its tracking override is its own (S7.1): none means the rig's default.
   Future<void> _apply(Session session) async {
     final blocks = session.blocks.isNotEmpty
         ? session.blocks
@@ -147,6 +148,7 @@ class PlanLifecycleViewModel {
       rig: await _resolver.rig(session) ?? _plan.selectedEquipment,
       blocks: blocks,
       isExample: ExampleCapturePlan.matches(blocks),
+      trackingOverride: session.trackingOverride,
     );
   }
 
@@ -179,7 +181,8 @@ class PlanLifecycleViewModel {
 
   /// A new draft for tonight (RD-04, S6.8): it keeps the site and the rig,
   /// has no target, so the status asks for one, and starts with an empty
-  /// capture plan and the offer of the example.
+  /// capture plan and the offer of the example. It has no tracking override
+  /// (S7.1): the rig's default applies.
   Future<void> newSession({bool discard = false}) async {
     if (discard) await _current?.revertSavedChanges();
     _plan.replaceNight(null);
@@ -193,8 +196,9 @@ class PlanLifecycleViewModel {
     _plan.markChanged();
   }
 
-  /// A new draft with the current plan on [date]; the original stays. The
-  /// copy is a new plan that is not saved, so leaving it asks (W1, S6.3).
+  /// A new draft with the current plan on [date], its tracking override
+  /// included (S7.1); the original stays. The copy is a new plan that is not
+  /// saved, so leaving it asks (W1, S6.3).
   Future<void> duplicateForNight(
     CalendarDate date, {
     bool discard = false,

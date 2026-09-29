@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_palette.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/services/fit_analyzer.dart';
-import '../navigation/app_router.dart';
 import '../shared/block_text.dart';
 import '../shared/capability_text.dart';
 import '../shared/delete_patterns.dart';
@@ -20,6 +18,7 @@ import 'capture_plan/blocks_undo.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
 import 'capture_plan/capture_block_dialog.dart';
 import 'capture_plan/capture_budget_summary.dart';
+import 'plan_tracking.dart';
 
 /// The capture plan (TASK 5.6; S6.9): the blocks, then the outputs and the
 /// assumptions. Since S6.9 the planner's "Capture plan" header is its one
@@ -267,11 +266,13 @@ class _BlockListState extends State<_BlockList> {
                                 key: const Key('capture.trackingUnknown'),
                                 style: TextStyle(color: palette.statusNeutral),
                               ),
+                              // S7.1: the plan's own tracking (RD-08 = T3).
                               TextButton(
                                 key: const Key('capture.setTracking'),
-                                onPressed: () =>
-                                    context.push(AppRouter.selectRig),
-                                child: const Text("Set the rig's tracking"),
+                                onPressed: () => pickPlanTracking(context),
+                                child: const Text(
+                                  'Set the tracking for this plan',
+                                ),
                               ),
                             ],
                           ],

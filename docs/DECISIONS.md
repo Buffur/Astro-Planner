@@ -1619,6 +1619,11 @@ Stage 4 revalidation is still required.
   value in the calculations), as the frozen plan already assigns a plan-level choice. **S6.9** (Stage
   6) shows the effective tracking where the warning needs it (today the rig's default) and unknown
   tracking as a missing input; it moves nothing.
+- **Built by S7.1 (2026-09-29):** `session_logs.tracking_override` (v19), `EffectiveTracking.of`,
+  `CapabilityCalculator.evaluate(tracking:)`, the planner's "Tracking for this plan", the snapshot's
+  `tracking` {effective, source}, the lifecycle (Copy carries it, New starts without it, Discard
+  restores it), and the export's `tracking_override`. The rig editor's field reads "Tracking
+  (default for plans)".
 - **Rejected:** T1 (the rig only; the inconvenience of 08 §21 stays) and T2 (the plan only; a rig
   that is always tracked would lose that fact, and every plan would have to answer it).
 - Documentation only. No code changed.
@@ -2956,7 +2961,7 @@ The UI shows the unit next to every number (TASK 8.4 acceptance).
   for unknown tracking NPF applies too, marked "if untracked" (PD-11).
 - **RD-08 (2026-09-28, the owner; E.1, "RD-08 decided"):** the rig's tracking type is the plan's
   **default**; a plan may override it without changing the rig, and the plan's snapshot keeps the
-  effective value. This section is otherwise unchanged. Built in Stage 7.
+  effective value. This section is otherwise unchanged. Built by S7.1 (2026-09-29).
 
 ### 6. Decision: existing rows are never reinterpreted (PD-10 migration policy, owner)
 

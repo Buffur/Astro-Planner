@@ -77,11 +77,15 @@ class RigCapability {
 
 /// Capability summary and exposure guidance (TASK 8.6; PD-11 decisions).
 abstract final class CapabilityCalculator {
+  /// [tracking] is the plan's effective tracking (RD-08 = T3; S7.1); without
+  /// one, the rig's default.
   static RigCapability evaluate(
     EquipmentProfile rig, {
     AstroTarget? target,
     double npfK = 1.0,
+    TrackingType? tracking,
   }) {
+    final trackingType = tracking ?? rig.trackingType;
     final f = rig.focalLengthMm;
     final width = OpticalCalculator.calculateFOV(
       sensorDimension: rig.sensorWidthMm,
@@ -104,8 +108,8 @@ abstract final class CapabilityCalculator {
     );
 
     final npfApplies =
-        rig.trackingType == TrackingType.untracked ||
-        rig.trackingType == TrackingType.unknown;
+        trackingType == TrackingType.untracked ||
+        trackingType == TrackingType.unknown;
     NpfGuidance? npf;
     if (npfApplies && target != null) {
       final decUsed = fieldMinimumDeclinationDeg(
@@ -122,7 +126,7 @@ abstract final class CapabilityCalculator {
         ),
         k: npfK,
         declinationUsedDeg: decUsed,
-        conditional: rig.trackingType == TrackingType.unknown,
+        conditional: trackingType == TrackingType.unknown,
       );
     }
 
