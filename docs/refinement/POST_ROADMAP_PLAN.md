@@ -94,6 +94,7 @@
 > split into S7.2a, S7.2b, S7.3a and S7.3b ("S7.D — done"). S7.R3 is next.
 > **Updated 2026-09-29 (S7.R3):** RG-07's research done (`research/RG-07_TARGET_CATALOG.md`); the
 > owner decides RG-07 next. No decision taken.
+> **Updated 2026-09-29 (RG-07 decided):** T1 only (E.1); S7.4's rules added. S7.R4 is next.
 
 ## Contents
 
@@ -3980,7 +3981,7 @@ Stage 4):
 | S7.R1 | RG-11: camera classes and light-frame parameters | Research (docs) | M | — | RG-11 | **Done 2026-09-29** (`research/RG-11_CAPTURE_PARAMETERS.md`); **RG-11 decided** 2026-09-29 (E.1): C1, B1, W1, F1, I1, P2 |
 | S7.R2 | RG-10: calibration workflows and the parameter matrix | Research (docs) | M | RG-11 decided | RG-10 | **Done 2026-09-29** (`research/RG-10_CALIBRATION_WORKFLOWS.md`); **RG-10 decided** 2026-09-29 (E.1): L1, D1, T0, O0, N1, H1 |
 | S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | **Done 2026-09-29** (ADR-020 accepted; S7.2 and S7.3 split, below) |
-| S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | **Done 2026-09-29** (`research/RG-07_TARGET_CATALOG.md`); RG-07 awaits the owner |
+| S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | **Done 2026-09-29** (`research/RG-07_TARGET_CATALOG.md`); **RG-07 decided** 2026-09-29 (E.1): T1 only |
 | S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | Frozen |
 | S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | Frozen |
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | Frozen; ungated |
@@ -3990,7 +3991,7 @@ Stage 4):
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | Frozen |
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | Frozen |
-| S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 | Frozen; the decision adds its source and rules |
+| S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | Frozen; RG-07's rules added below S7.4 |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 | Frozen; the decisions add their field rules |
 | S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
 
@@ -4429,6 +4430,17 @@ calculation and a schema change)
   - the candidates list keeps its semantics; its host run time is recorded before and after (Stage 10
     measures the device);
   - the sweep, the E2E, the full gate.
+
+**RG-07 decided, 2026-09-29: T1 only** (DECISIONS E.1). S7.4's decided rules:
+- **Aliases** from the pinned OpenNGC v20260501 only: each Messier object's NGC/IC designation, every
+  OpenNGC common name, and the Caldwell and LBN numbers in `Identifiers`; written by
+  `tool/build_catalog.dart` into the asset under a new catalog `version`, with no new object.
+- **Stored** in an alias table keyed by the catalog id (a schema change with its migration test),
+  rebuilt from the asset when the catalog version rises; no user-edited row changes, and a deleted
+  target's aliases are never shown.
+- **Search:** RG-07 §6's rules and examples, as tests; ordered by match kind (exact designation,
+  prefix, name substring), then by the id; no score.
+- **Not built:** more objects, another catalog, an online lookup. The candidates list is unchanged.
 
 ##### S7.5 — The site form (gated on RG-08 and RG-09; UX-21)
 - **Objective:** the site form asks only for what the user can reasonably know or the app cannot
@@ -5019,7 +5031,7 @@ any implementation Task is created.
 | RG-04 | **DECIDED 2026-09-27 (S4.R2; DECISIONS E.1): B, the Logbook first and the tracker optional; G2 results after the session.** *Its optional tracker is superseded (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"): the tracker leaves the target product, and P8.4 retires it.* What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): Tonight plan-first with a site · night context line; Night & Moon and Weather detail screens; no new tab.** How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): progressive disclosure (one tap away, factual summaries); no modes, no density preference for now.** Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |
-| RG-07 | How should the target catalog expand and search improve: sources and licences, common names, cross-identifiers, size on the device, suggestions; an offline catalog or an online name resolver? | 08 §4, §9 | 7 | Offline-first; CC BY-SA handling; the catalog is generated by `tool/build_catalog.dart` and versioned, never hand-edited, and deleted targets must not come back; no scraping. *2026-09-27:* the goal is that choosing a known object never requires looking up RA and Dec elsewhere; custom entry stays where it serves a real case; a large expansion is not assumed approved; no moving objects (ADR-010 §3); no unsourced object data. *2026-09-28 (Stage 7 planning):* researched by **S7.R3**; blocks S7.4. *2026-09-29:* S7.R3 done (`research/RG-07_TARGET_CATALOG.md`); the owner's three questions are its §9 |
+| RG-07 | How should the target catalog expand and search improve: sources and licences, common names, cross-identifiers, size on the device, suggestions; an offline catalog or an online name resolver? | 08 §4, §9 | 7 | Offline-first; CC BY-SA handling; the catalog is generated by `tool/build_catalog.dart` and versioned, never hand-edited, and deleted targets must not come back; no scraping. *2026-09-27:* the goal is that choosing a known object never requires looking up RA and Dec elsewhere; custom entry stays where it serves a real case; a large expansion is not assumed approved; no moving objects (ADR-010 §3); no unsourced object data. *2026-09-28 (Stage 7 planning):* researched by **S7.R3**; blocks S7.4. *2026-09-29:* S7.R3 done (`research/RG-07_TARGET_CATALOG.md`); the owner's three questions are its §9. **Decided 2026-09-29 (DECISIONS E.1, "RG-07 decided"):** T1 only (aliases from the pinned OpenNGC, normalised search; no new objects, no online lookup) |
 | RG-08 | Should elevation be retrieved automatically (source, accuracy, licence, privacy), made optional, or dropped, given that no calculation uses it? | 08 §6; SCI-08; UX-21; F-07 | 7 | Unknown is not 0; privacy (a position leaves the device). *2026-09-27:* no automatic source is claimed before one is found reliable; no prominence while no calculation uses elevation. *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-09); blocks S7.5's elevation |
 | RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result). *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-08); blocks S7.5's sky darkness and link |
 | RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3. *2026-09-29:* S7.R2 done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's six questions are its §10. **Decided 2026-09-29 (DECISIONS E.1, "RG-10 decided"; ADR-020):** L1, D1, T0, O0, N1, H1 |

@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **RG-07 decided, 2026-09-29 (Stage 7):** T1 only: searchable aliases from the pinned OpenNGC in
+> their own table and a normalised search; no new objects, no online lookup (E.1, "RG-07
+> decided"). Documentation only.
 > **RG-10 decided and ADR-020 accepted, 2026-09-29 (Stage 7, S7.D):** L1, D1, T0, O0, N1, H1 (E.1,
 > "RG-10 decided"); ADR-020 records RG-10 and RG-11 (camera class on the rig, light-block fields,
 > "Time between frames", proposals, the calibration matrix, in-camera noise reduction). ADR-009 and
@@ -1771,6 +1774,26 @@ Stage 4 revalidation is still required.
   optional for every class; flats' exposure independent, with no target-level guidance.
 - **Rejected:** L2, L3; D0; T1; O1; N0, N2; H2.
 - **Recorded in** ADR-020 (Part F, S7.D, the same day), with RG-11. Documentation only.
+
+### RG-07 decided: target names and search (Stage 7, 2026-09-29)
+
+- **Context:** S7.R3's research, `refinement/research/RG-07_TARGET_CATALOG.md` (`cd248ce`), with
+  three questions (§9).
+- **Decided by:** the project owner, in chat: **T1 only**, the recommended option.
+- **T1:** the bundled objects gain searchable aliases from the pinned OpenNGC v20260501 (the same
+  source and CC BY-SA 4.0 licence): the NGC/IC designation of each Messier object, every OpenNGC
+  common name, and the Caldwell and LBN numbers in its `Identifiers`. They live in their own table
+  keyed by the catalog id and are rebuilt from the asset when the catalog version rises, so existing
+  installs gain them without any user-edited row changing and deleted targets stay deleted. Search
+  ignores case, spaces, hyphens and leading zeros in a designation's number, accepts "Messier" and
+  "Caldwell" for "M" and "C", and keeps substring matching on names; results are ordered by how the
+  query matches, then by the id, with no score (the research's §6 examples become tests).
+- **Not adopted:** more objects (no T2 subset; the candidates list keeps its 164 catalog objects), another
+  catalog (T3), and any online lookup (T4). Custom entry stays for objects in no bundled source.
+- **Consequences:** S7.4 implements T1: `tool/build_catalog.dart` writes the aliases, the catalog
+  version rises, a schema change adds the alias table; `OPENNGC_NOTICE.txt` and About say what is kept.
+  Nothing leaves the device.
+- Documentation only. No code changed.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
