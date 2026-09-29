@@ -4,19 +4,32 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**RG-07 decided**: T1 only).
-> **Next:** S7.R4, the RG-08 and RG-09 research (elevation, sky darkness, the map link).
+> **Last updated:** 2026-09-29 (**S7.R4 done**: RG-08 and RG-09 researched; the owner's decision is next).
+> **Next:** the owner decides RG-08 and RG-09 (three questions, `research/RG-08_09_SITE_AUTOMATION.md` §8).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1, S7.R2, S7.D and S7.R3 done; RG-10 and RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R4 and S7.D done; RG-07, RG-10 and RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.R4**, the RG-08 and RG-09 research (below, "Next allowed action") |
+| Next Task | **RG-08 and RG-09's owner decision**, then S7.R5 (below, "Next allowed action") |
 | Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S7.R4 done, 2026-09-29** (RG-08 and RG-09 research; documentation only;
+`research/RG-08_09_SITE_AUTOMATION.md`):
+- **Elevation:** no calculation reads it; the forecast already receives Open-Meteo's 90 m terrain
+  elevation (unread today); the Elevation API (Copernicus GLO-90, attribution required) could propose
+  it; GPS gives ellipsoid height unless the device offers sea-level altitude. **Recommended E2**
+  (optional, Unknown by default); E1 (a terrain-data proposal on tap) is the owner's preference.
+- **Bortle and SQM:** no acceptable automatic source (the 2016 atlas is CC BY-NC, 2.9 GB and about
+  2014 data; the map sites offer no data terms or API); both stay manual or unknown. **Recommended
+  S3** (both optional in one collapsed section, with a link to look them up).
+- **The map link:** lightpollutionmap.app (Stargazing Hub Team) documents a `?lat=&lng=&zoom=` link.
+  **Recommended M2.**
+- Three owner questions (§8); nothing decided. **Verification:** the documentation class.
 
 **RG-07 decided, 2026-09-29 (the owner, in chat; DECISIONS E.1, "RG-07 decided"): T1 only.**
 Searchable aliases from the pinned OpenNGC (Messier's NGC/IC numbers, common names, Caldwell, LBN)
@@ -159,8 +172,8 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | **Decided** 2026-09-27 (S4.R4; E.1): Tonight plan-first with a context line; detail screens; no new tab |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | **Decided** 2026-09-27 (S4.R4; E.1): progressive disclosure; no modes |
 | RG-07 | Target catalog expansion, names and search | 7 | **Decided** 2026-09-29 (S7.R3; DECISIONS E.1, "RG-07 decided"): T1 only |
-| RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | Open; research **S7.R4** (with RG-09) |
-| RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | Open; research **S7.R4** (with RG-08) |
+| RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | **Researched** 2026-09-29 (S7.R4, `research/RG-08_09_SITE_AUTOMATION.md`); the owner's decision is open |
+| RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | **Researched** 2026-09-29 (S7.R4, `research/RG-08_09_SITE_AUTOMATION.md`); the owner's decision is open |
 | RG-10 | Calibration-frame workflows and inheritance | 7 | **Decided** 2026-09-29 (S7.R2; DECISIONS E.1, "RG-10 decided"): L1, D1, T0, O0, N1, H1; ADR-020 |
 | RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | **Decided** 2026-09-29 (S7.R1; DECISIONS E.1, "RG-11 decided"): C1, B1, W1, F1, I1, P2; ADR-020 |
 | RG-12 | Licence requirements against GPL-3.0 | 9 | Open |
@@ -252,9 +265,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.R4 — RG-08 and RG-09: elevation, sky darkness and the map link (research)**:
-   `POST_ROADMAP_PLAN.md`, "Stage 7 — frozen Task sequence", S7.R4. Documentation only; the output
-   is `research/RG-08_09_SITE_AUTOMATION.md`, ending with the owner's questions. Commit, then STOP.
+1. **The owner decides RG-08 and RG-09:** the three questions of
+   `research/RG-08_09_SITE_AUTOMATION.md` §8 (elevation, Bortle and SQM, the map link). The answers go
+   into DECISIONS E.1; then **S7.R5** (RG-03, equipment specification sources) runs.
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.
