@@ -35,6 +35,7 @@ import '../support/fake_location_service.dart';
 import '../support/fake_reverse_geocoder.dart';
 import '../support/planner_harness.dart';
 import '../support/tiff_fixture.dart';
+import '../support/legacy_run.dart';
 
 /// Every hour of the night with every variable filled, on whole UTC hours
 /// as the provider serves them, so the sweep renders the weather card, its
@@ -156,8 +157,11 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
     await vm.ready;
     await vm.choosePlan(); // S6.8: nothing is preselected
     planned = (await vm.analysis.saveSession()).id;
-    running = (await vm.analysis.startSession()).id;
-    await vm.execution!.open(running);
+    // S8.4: an old run in progress (the tracker left); its result form.
+    running = (await startLegacyRun(
+      DriftSessionRepository(db, clock: clock),
+      (await DriftSessionRepository(db).get(planned))!,
+    )).id;
     if (theme == _Theme.field) await vm.theme.toggleFieldMode();
   });
   addTearDown(() => tester.runAsync(db.close));
@@ -243,7 +247,6 @@ void main() {
           AppRouter.about,
           AppRouter.session(),
           AppRouter.siteEdit,
-          AppRouter.run(app.running),
           AppRouter.results(app.running),
           AppRouter.welcome,
           AppRouter.metadata,

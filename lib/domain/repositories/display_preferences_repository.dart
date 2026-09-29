@@ -1,8 +1,8 @@
 import 'storage_failure.dart';
 
 /// Persistence for display preferences (TASK 12.4): field mode survives a
-/// restart; since TASK 13.3 also the opt-in keep-screen-on while tracking;
-/// since S5.5 which collapsible sections the user left open or closed.
+/// restart; since S5.5 which collapsible sections the user left open or
+/// closed. (TASK 13.3's keep-screen-on left with the tracker, S8.4.)
 ///
 /// Every method throws [StorageFailure] when the store cannot be read or
 /// written (TASK 15.1).
@@ -11,12 +11,6 @@ abstract class DisplayPreferencesRepository {
   Future<bool> loadFieldMode();
 
   Future<void> saveFieldMode(bool on);
-
-  /// Whether the screen stays on while tracking (ADR-016 §6); false (off)
-  /// when nothing is saved.
-  Future<bool> loadKeepScreenOn();
-
-  Future<void> saveKeepScreenOn(bool on);
 
   /// Every remembered section state: section key → open. Empty when none
   /// is saved (S5.5).

@@ -52,12 +52,9 @@ import 'package:astroplan/presentation/viewmodels/site_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/startup_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/disclosure_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/theme_viewmodel.dart';
-import 'package:astroplan/domain/services/screen_wake.dart';
 import 'package:astroplan/domain/services/backup_service.dart';
 import 'package:astroplan/domain/services/session_exporter.dart';
-import 'package:astroplan/presentation/viewmodels/execution_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/results_viewmodel.dart';
-import 'package:astroplan/presentation/viewmodels/resume_run_viewmodel.dart';
 import 'package:astroplan/presentation/viewmodels/tonight_viewmodel.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -86,7 +83,6 @@ class PlannerHarness extends ChangeNotifier {
     DisplayPreferencesRepository? displayPreferences,
     FirstRunRepository? firstRun,
     PrivacyPreferencesRepository? privacyPreferences,
-    ScreenWake? screenWake,
     SessionExporter? exporter,
     BackupService? backup,
     CaptureFileAccess? captureFiles,
@@ -119,7 +115,6 @@ class PlannerHarness extends ChangeNotifier {
       privacy:
           privacyPreferences ??
           InMemoryPrivacyPreferences(placeNameLookup: true),
-      screenWake: screenWake ?? FakeScreenWake(),
       exporter: exporter,
       backup: backup,
       sessions: sessionRepository,
@@ -159,8 +154,6 @@ class PlannerHarness extends ChangeNotifier {
   ThemeViewModel get theme => vms.theme;
   DisclosureViewModel get disclosure => vms.disclosure;
   TonightViewModel get tonight => vms.tonight;
-  ResumeRunViewModel? get resumeRun => vms.resumeRun;
-  ExecutionViewModel? get execution => vms.execution;
   ResultsViewModel? get results => vms.results;
 
   /// The ViewModels' providers, for a widget tree under test.

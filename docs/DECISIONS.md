@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **S8.4, 2026-09-29:** ADR-016 §13 records the live tracker's retirement (the owner's direction of
+> 2026-09-27): no run is started; events, the fold and stored runs stay; CALC-35 and CALC-36 retired.
 > **Stage 8 decisions, 2026-09-29 (Stage 8 planning; delegated by the owner in chat):** D8-1 a saved
 > night ends at dawn at its snapshot's darkness limit (S4-DEF-02); D8-2 Save again before the night
 > ends (S4-DEF-01); D8-3 RD-13 ("Reported as planned"; old estimates not relabelled); D8-4 Share
@@ -3861,6 +3863,19 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
   has ended (CALC-44), for a run in progress (`finished` then corrections, or `abandoned`) and as an
   edit of a completed or not-done entry. `session_logs.result_kind` and `not_done_reason` record how
   it was reported and why not done. The live paths of §2–§11 are unchanged until S8.4.
+
+### 13. Amendment: the live tracker retired (S8.4, 2026-09-29; the owner's direction of 2026-09-27)
+
+- **No run is started any more.** Start, the tracker screen, the resume prompt, Tonight's run card and
+  keep-screen-on (§6, and the `wakelock_plus` dependency) are removed; §2's running and paused states,
+  §3's estimate (CALC-35) and the countdowns (CALC-36) are retired with them. §5's scenarios apply only
+  to runs that already exist.
+- **Kept:** §4's events, the fold and the invariant that the counters equal the replay; every stored
+  run stays readable, exported and backed up. A run still in progress from an older version is
+  recorded through the result form (§12): Completed as planned or Partly write `finished` and
+  corrections, Not done writes `abandoned`. The repository keeps its run API for stored history.
+- **Superseded:** §2's Start and one-run refusal as a user path, §5's resume prompt, §6, §9's resume
+  prompt and §10–§11's tracker Finish. The audit is recorded in `ARCHITECTURE.md` (S8.4).
 
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 

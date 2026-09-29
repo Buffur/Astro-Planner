@@ -30,6 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../support/fake_location_service.dart';
 import '../../../support/fake_reverse_geocoder.dart';
 import '../../../support/no_snapshot_weather.dart';
+import '../../../support/legacy_run.dart';
 import '../../../support/planner_harness.dart';
 
 class _NoForecast with NoSnapshotWeather implements WeatherRepository {}
@@ -121,7 +122,8 @@ void main() {
       await vm.plan.idle;
       final Session s;
       if (kind == _Kind.run || kind == _Kind.completedRun) {
-        s = await vm.analysis.startSession();
+        // S8.4: a run the retired live mode left in progress.
+        s = await startLegacyRun(sessions, await vm.analysis.saveSession());
         await sessions.record(
           s.id,
           ExecutionEventKind.framesConfirmed,
@@ -145,7 +147,6 @@ void main() {
       }
       id = s.id;
       lightId = (await sessions.get(id))!.blocks.first.id;
-      await vm.execution!.loadActive();
       if (at != null) clock.now = at;
     });
     addTearDown(() => tester.runAsync(database.close));

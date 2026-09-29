@@ -20,7 +20,7 @@ import 'site_viewmodel.dart';
 /// Which plan the planner works on (ADR-014 §3; TASKs 11.3–11.4, 13.3;
 /// split out of [SessionPlanViewModel] in S6.1): restoring it at startup,
 /// opening a stored one, starting a new one, copying it to another night,
-/// saving it and starting a run. The plan's contents, their edits and the
+/// and saving it. The plan's contents, their edits and the
 /// autosave stay in [SessionPlanViewModel], which notifies for both.
 class PlanLifecycleViewModel {
   PlanLifecycleViewModel({
@@ -210,12 +210,18 @@ class PlanLifecycleViewModel {
   /// deleted after the switch. An untouched never-saved draft is deleted
   /// without being asked. The same holds for [newSession] and
   /// [duplicateForNight].
-  Future<void> openSession(Session session, {bool discard = false}) async {
+  Future<void> openSession(Session opened, {bool discard = false}) async {
+    // TD-063 (S8.4): decide on the stored session, never a caller's copy,
+    // which may be stale; one deleted meanwhile opens as a copy.
+    final stored = await _current?.stored(opened.id);
+    final gone = _current != null && stored == null;
+    final session = stored ?? opened;
     if (session.id == _plan.activeSessionId && session.planEditable) return;
     if (discard) await _current?.revertSavedChanges();
     // S8.3 (I-6): a saved plan whose night has ended is never made current
     // again; it opens as a copy for tonight (or its night, if still ahead).
     final ended =
+        gone ||
         session.isSavedPlan && SavedNightEnd.hasEnded(session, _clock.nowUtc());
     // Switching the site here is opening, not an edit.
     await _plan.restoring(() async {
@@ -277,15 +283,7 @@ class PlanLifecycleViewModel {
 
   /// Save (ADR-014 §3): the current open session — or a new one — becomes
   /// planned with [snapshot]. Needs a repository, a night, target and rig.
-  Future<Session> savePlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.save(_plan.currentPlan(), snapshot));
-
-  /// Start (ADR-016; owner: same requirements as Save): the plan starts
-  /// with [snapshot] and the planner continues on a fresh draft copy.
-  Future<Session> startPlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.start(_plan.currentPlan(), snapshot));
-
-  Future<Session> _commit(Future<Session> Function(CurrentSession) f) async {
+  Future<Session> savePlan(SessionSnapshot snapshot) async {
     final current = _current;
     if (current == null ||
         _plan.sessionNight == null ||
@@ -293,7 +291,7 @@ class PlanLifecycleViewModel {
         _plan.selectedEquipment == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    final result = await f(current);
+    final result = await current.save(_plan.currentPlan(), snapshot);
     _plan.markChanged();
     return result;
   }

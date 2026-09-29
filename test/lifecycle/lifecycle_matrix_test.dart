@@ -22,6 +22,8 @@ import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/execution.dart';
 import 'package:astroplan/domain/models/location_profile.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
+import 'package:astroplan/domain/models/session.dart';
+import 'package:astroplan/domain/models/session_result.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/domain/services/location_service.dart';
 import 'package:astroplan/domain/services/reverse_geocoder.dart';
@@ -42,6 +44,7 @@ import '../support/in_memory_display_preferences.dart';
 import '../support/in_memory_first_run.dart';
 import '../support/no_snapshot_weather.dart';
 import '../support/planner_harness.dart';
+import '../support/legacy_run.dart';
 
 /// No network: every forecast request fails as it does offline.
 class _Offline with NoSnapshotWeather implements WeatherRepository {}
@@ -121,8 +124,6 @@ Future<PlannerHarness> _boot(
   await vm.ready;
   await vm.theme.load();
   await vm.tonight.load();
-  await vm.resumeRun?.load();
-  await vm.execution?.loadActive();
   return vm;
 }
 
@@ -150,12 +151,6 @@ void _phone(WidgetTester tester, {bool landscape = false}) {
   addTearDown(tester.view.reset);
   addTearDown(tester.platformDispatcher.clearAllTestValues);
 }
-
-/// Every visible text, for "nothing on screen changed".
-List<String> _texts(WidgetTester tester) => [
-  for (final t in tester.widgetList<Text>(find.byType(Text)))
-    t.data ?? t.textSpan?.toPlainText() ?? '',
-];
 
 File _dbFile() {
   final dir = Directory.systemTemp.createTempSync('astroplan_lifecycle');
@@ -257,9 +252,13 @@ void main() {
     await db.close();
   });
 
-  // L4 — a kill during a run, running and then paused.
-  test('L4: a kill during a run keeps the counts; running time follows the '
-      'clock while running and stops while paused', () async {
+  // L4 — a kill around the saved night (S8.4 replaced the tracker's row: the
+  // live tracker left the product; the lifecycle is Save → the night →
+  // result). A run left in progress by an older version keeps its counts
+  // across kills and can still be recorded.
+  test('L4: a kill after the saved night keeps the saved plan on its night '
+      'and continues on one copy; an old run in progress keeps its counts '
+      'and can still be recorded', () async {
     final file = _dbFile();
     final clock = _Clock(DateTime.utc(2026, 11, 10, 18));
 
@@ -267,35 +266,43 @@ void main() {
     var vm = await _boot(db, clock: clock);
     await vm.site.saveSite(_ljubljana);
     await vm.choosePlan(); // S6.8: nothing is preselected
+    final saved = await vm.saveSession();
     await vm.plan.idle;
-    final started = await vm.analysis.startSession();
-    await vm.execution!.open(started.id);
-    final block = vm.execution!.block!.id;
-    await vm.execution!.confirm(5);
-    final running = vm.execution!.runningTime;
-    await db.close(); // killed while running
+    // An old run in progress, as the live mode left one (repository only).
+    final sessions = DriftSessionRepository(db, clock: clock);
+    final run = await startLegacyRun(sessions, saved);
+    final block = run.blocks.firstWhere((b) => b.frameType == FrameType.light);
+    await sessions.record(
+      run.id,
+      ExecutionEventKind.framesConfirmed,
+      blockId: block.id,
+      delta: 5,
+    );
+    await db.close(); // killed during the night
 
-    clock.now = clock.now.add(const Duration(minutes: 30));
+    clock.now = DateTime.utc(2026, 11, 11, 7); // after the night's dawn
     db = AppDatabase(NativeDatabase(file));
     vm = await _boot(db, clock: clock);
-    expect(vm.resumeRun!.offer, isNotNull); // the resume prompt is due
-    expect(vm.execution!.session?.id, started.id);
-    expect(vm.execution!.state!.phase, ExecutionPhase.running);
-    expect(vm.execution!.state!.completedFor(block), 5);
-    expect(vm.execution!.runningTime, running + const Duration(minutes: 30));
-    await vm.execution!.pause();
-    final paused = vm.execution!.runningTime;
-    await db.close(); // killed while paused
+    final repo = DriftSessionRepository(db, clock: clock);
+    expect((await repo.get(saved.id))!.status, SessionStatus.planned);
+    expect(vm.plan.activeSessionId, isNot(saved.id));
+    expect(
+      (await repo.execution(run.id)).completedFor(block.id),
+      5,
+      reason: 'the old run kept its counts',
+    );
+    final working = vm.plan.activeSessionId;
+    await db.close(); // killed again
 
-    clock.now = clock.now.add(const Duration(hours: 1));
     db = AppDatabase(NativeDatabase(file));
     vm = await _boot(db, clock: clock);
-    expect(vm.execution!.state!.phase, ExecutionPhase.paused);
-    expect(vm.execution!.state!.completedFor(block), 5);
-    expect(vm.execution!.runningTime, paused);
+    expect(vm.plan.activeSessionId, working, reason: 'no second copy');
+    final again = DriftSessionRepository(db, clock: clock);
+    await again.recordResult(run.id, PartlyDone({block.id: 8}));
+    expect((await again.get(run.id))!.status, SessionStatus.completed);
+    expect((await again.execution(run.id)).completedFor(block.id), 8);
     await db.close();
   });
-
   group('L5: rotation and theme changes keep the state', () {
     testWidgets('typed input survives rotation, dark mode and field mode', (
       tester,
@@ -341,9 +348,8 @@ void main() {
         vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 18)));
         await vm.site.saveSite(_ljubljana);
         await vm.choosePlan(); // S6.8: nothing is preselected
+        run = (await vm.saveSession()).id;
         await vm.plan.idle;
-        run = (await vm.analysis.startSession()).id;
-        await vm.execution!.open(run);
       });
       addTearDown(() => tester.runAsync(db.close));
       await _pumpApp(tester, vm);
@@ -361,7 +367,6 @@ void main() {
         AppRouter.about,
         AppRouter.session(),
         AppRouter.siteEdit,
-        AppRouter.run(run),
         AppRouter.results(run),
         AppRouter.welcome,
       ]) {
@@ -384,33 +389,39 @@ void main() {
     });
   });
 
-  // L6 — a time-zone change during a run. The process zone cannot change
-  // inside a test, so this covers what the app controls: the tracker uses
-  // the run's start snapshot (its zone and night) and UTC events, never
-  // the active site or the device zone.
-  testWidgets('L6: moving to another site and zone during a run changes '
-      'nothing on the tracker', (tester) async {
+  // L6 — a time-zone change after the night (S8.4 replaced the tracker's
+  // row). The process zone cannot change inside a test, so this covers what
+  // the app controls: the result form reviews the saved plan's snapshot (its
+  // zone and night) and UTC instants, never the active site or the device.
+  testWidgets('L6: moving to another site and zone changes nothing in the '
+      "result form's review of a saved night", (tester) async {
     _phone(tester);
     AppRouter.router.go(AppRouter.tonight);
     late AppDatabase db;
     late PlannerHarness vm;
-    late int run;
+    late int saved;
+    final clock = _Clock(DateTime.utc(2026, 11, 10, 20));
     await tester.runAsync(() async {
       db = AppDatabase(NativeDatabase.memory());
-      vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 20)));
+      vm = await _boot(db, clock: clock);
       await vm.site.saveSite(_ljubljana);
       await vm.choosePlan(); // S6.8: nothing is preselected
+      saved = (await vm.saveSession()).id;
       await vm.plan.idle;
-      run = (await vm.analysis.startSession()).id;
-      await vm.execution!.open(run);
-      await vm.execution!.confirm(3);
+      clock.now = DateTime.utc(2026, 11, 11, 7); // after the night's dawn
     });
     addTearDown(() => tester.runAsync(db.close));
     await _pumpApp(tester, vm);
-    AppRouter.router.go(AppRouter.run(run));
+    AppRouter.router.go(AppRouter.results(saved));
     await _settle(tester);
-    final before = _texts(tester);
-    final night = vm.execution!.session!.executionStartSnapshot!.night;
+    final review = find.byKey(const Key('results.review'));
+    List<String> texts() => [
+      for (final t in tester.widgetList<Text>(
+        find.descendant(of: review, matching: find.byType(Text)),
+      ))
+        t.data ?? '',
+    ];
+    final before = texts();
 
     await tester.runAsync(() async {
       await vm.site.saveSite(_newYork); // becomes the active site
@@ -418,26 +429,27 @@ void main() {
     });
     await _settle(tester);
     expect(vm.site.displayZoneId, 'America/New_York');
-    expect(
-      vm.execution!.session!.executionStartSnapshot!.timeZoneId,
-      'Europe/Ljubljana',
+    final entry = await tester.runAsync(
+      () => DriftSessionRepository(db).get(saved),
     );
-    expect(vm.execution!.session!.executionStartSnapshot!.night, night);
-    expect(_texts(tester), before);
+    expect(entry!.planSnapshot!.timeZoneId, 'Europe/Ljubljana');
+    expect(texts(), before);
     expect(tester.takeException(), isNull);
   });
 
-  // L8 — low storage: the disk fills up while planning and while tracking.
+  // L8 — low storage: the disk fills up while planning and while recording a
+  // result (S8.4 replaced the tracker's +1 with the result form's Save).
   testWidgets('L8: a full disk is reported, loses nothing already stored, '
       'and the app recovers when space is freed', (tester) async {
     _phone(tester);
     AppRouter.router.go(AppRouter.tonight);
     final disk = _Disk();
+    final clock = _Clock(DateTime.utc(2026, 11, 10, 20));
     late AppDatabase db;
     late PlannerHarness vm;
     await tester.runAsync(() async {
       db = AppDatabase(NativeDatabase.memory().interceptWith(disk));
-      vm = await _boot(db, clock: FixedClock(DateTime.utc(2026, 11, 10, 20)));
+      vm = await _boot(db, clock: clock);
       await vm.site.saveSite(_ljubljana);
       await vm.choosePlan(); // S6.8: nothing is preselected
       await vm.plan.idle;
@@ -480,27 +492,46 @@ void main() {
     );
     expect(stored!.blocks.length, vm.plan.captureBlocks.length);
 
-    // Tracking: a frame that cannot be stored is reported, not counted.
-    late int run;
+    // Recording the result: a write that fails is reported; nothing counts.
+    late int saved;
     await tester.runAsync(() async {
-      run = (await vm.analysis.startSession()).id;
-      await vm.execution!.open(run);
+      saved = (await vm.saveSession()).id;
+      await vm.plan.idle;
+      clock.now = DateTime.utc(2026, 11, 11, 7); // after the night's dawn
     });
-    AppRouter.router.go(AppRouter.run(run));
+    AppRouter.router.go(AppRouter.results(saved));
     await _settle(tester);
-    final counted = tester.widget<Text>(find.byKey(const Key('run.confirmed')));
+    await tester.tap(find.byKey(const Key('results.outcome.asPlanned')));
+    await _settle(tester);
     disk.full = true;
-    await tester.tap(find.byKey(const Key('run.plus')));
-    await _settle(tester);
-    expect(find.textContaining("Couldn't record that"), findsOneWidget);
-    expect(
-      tester.widget<Text>(find.byKey(const Key('run.confirmed'))).data,
-      counted.data,
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('results.save')),
+      300,
+      scrollable: find.byType(Scrollable).first,
     );
-    disk.full = false;
-    await tester.tap(find.byKey(const Key('run.plus')));
+    await tester.tap(find.byKey(const Key('results.save')));
     await _settle(tester);
-    expect(vm.execution!.state!.completedFor(vm.execution!.block!.id), 1);
+    expect(find.textContaining("Couldn't save the result"), findsOneWidget);
+    final repo = DriftSessionRepository(db);
+    expect(
+      (await tester.runAsync(() => repo.get(saved)))!.status,
+      SessionStatus.planned,
+    );
+    expect(await tester.runAsync(() => repo.events(saved)), isEmpty);
+    await tester.pump(const Duration(seconds: 10));
+    await _settle(tester);
+    disk.full = false;
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('results.save')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('results.save')));
+    await _settle(tester);
+    expect(
+      (await tester.runAsync(() => repo.get(saved)))!.status,
+      SessionStatus.completed,
+    );
     expect(tester.takeException(), isNull);
   });
 }

@@ -29,6 +29,7 @@ import '../../../support/fake_location_service.dart';
 import '../../../support/fake_reverse_geocoder.dart';
 import '../../../support/no_snapshot_weather.dart';
 import '../../../support/planner_harness.dart';
+import '../../../support/legacy_run.dart';
 
 class _NoForecast with NoSnapshotWeather implements WeatherRepository {}
 
@@ -113,7 +114,10 @@ void main() {
         ),
       );
       await vm.plan.idle;
-      final run = await vm.analysis.startSession();
+      final run = await startLegacyRun(
+        sessions,
+        await vm.analysis.saveSession(),
+      );
       completedId = run.id;
       await sessions.record(
         run.id,

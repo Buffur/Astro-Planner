@@ -2,7 +2,9 @@ import '../models/execution.dart';
 
 /// The execution state machine (ADR-016; TASK 13.2). Pure: transitions are
 /// functions of a state and an event, and a run's state is the fold of its
-/// stored events. No clock is read here — "now" is always passed in.
+/// stored events. No clock is read here — "now" is always passed in. The
+/// live tracker's running time, estimate and staleness (CALC-35) left with
+/// it (S8.4); the fold, which history and results replay, stays.
 abstract final class ExecutionMachine {
   /// The state after [events] (ordered by `seq`) for a session whose blocks
   /// are [blockIds]. Throws [ExecutionError] if the stored events are not a
@@ -156,60 +158,4 @@ abstract final class ExecutionMachine {
         return base.copyWith(phase: ExecutionPhase.finished);
     }
   }
-
-  /// Running time in the current block at [nowUtc] (ADR-016 §3). A clock
-  /// behind the running interval's start counts that interval as zero.
-  static Duration runningTime(ExecutionState state, DateTime nowUtc) {
-    var ms = state.runningMsBefore;
-    final since = state.runningSinceUtc;
-    if (state.phase == ExecutionPhase.running && since != null) {
-      final open = nowUtc.difference(since).inMilliseconds;
-      if (open > 0) ms += open;
-    }
-    return Duration(milliseconds: ms);
-  }
-
-  /// True when the phone's clock is behind the last stored event.
-  static bool clockBehind(ExecutionState state, DateTime nowUtc) {
-    final last = state.lastEventUtc;
-    return last != null && nowUtc.isBefore(last);
-  }
-
-  /// Frames probably captured in the current block and not reported yet
-  /// (ADR-016 §3): ⌊running time ÷ (exposure + per-frame overhead)⌋ minus
-  /// the frames already confirmed or rejected since the block was selected,
-  /// capped at [plannedFrames] minus the block's confirmed frames. Dither,
-  /// refocus and meridian-flip time are not subtracted, so this is an upper
-  /// bound, not a count.
-  static FrameEstimate estimate(
-    ExecutionState state,
-    DateTime nowUtc, {
-    required double exposureSeconds,
-    required double perFrameOverheadSeconds,
-    required int plannedFrames,
-  }) {
-    final block = state.blockId;
-    if (block == null) {
-      return const FrameEstimate(frames: 0, planReached: false);
-    }
-    final cycleMs = ((exposureSeconds + perFrameOverheadSeconds) * 1000)
-        .round();
-    if (cycleMs <= 0) {
-      throw ArgumentError('exposure + overhead must be positive');
-    }
-    final captured = runningTime(state, nowUtc).inMilliseconds ~/ cycleMs;
-    final unreported = captured - state.reportedInBlock;
-    final left = plannedFrames - state.completedFor(block);
-    final frames = unreported <= 0 ? 0 : unreported;
-    final cap = left <= 0 ? 0 : left;
-    return FrameEstimate(
-      frames: frames > cap ? cap : frames,
-      planReached: frames >= cap,
-    );
-  }
-
-  /// A run is stale when "now" is past the end of its night (ADR-016 §5):
-  /// the app asks, and never finishes it on its own.
-  static bool isStale(DateTime? nightEndUtc, DateTime nowUtc) =>
-      nightEndUtc != null && nowUtc.isAfter(nightEndUtc);
 }

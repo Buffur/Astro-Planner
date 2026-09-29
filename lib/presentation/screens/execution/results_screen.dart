@@ -14,7 +14,6 @@ import '../../shared/failure_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../shared/plan_state.dart';
-import '../../viewmodels/execution_viewmodel.dart';
 import '../../viewmodels/results_viewmodel.dart';
 
 /// "How did it go?" (S8.2; ADR-019 §3.1, §4): review the saved plan, then
@@ -138,7 +137,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
     if (!(_form.currentState?.validate() ?? false)) return;
     final report = _report();
     if (report == null) return;
-    final execution = context.read<ExecutionViewModel?>();
+    final loaded = vm.session?.updatedAtUtc;
     final saved = await runWithFeedback(
       context,
       'save the result',
@@ -146,12 +145,11 @@ class _ResultsScreenState extends State<ResultsScreen> {
     );
     if (!mounted) return;
     if (!saved) {
-      // A stale form was reloaded: show the entry as it is now.
-      setState(() => _filled = false);
+      // A stale form was reloaded: show the entry as it is now. After any
+      // other failure the input stays, to save again (S4-DEF-08).
+      if (vm.session?.updatedAtUtc != loaded) setState(() => _filled = false);
       return;
     }
-    await execution?.loadActive();
-    if (!mounted) return;
     showDone(context, 'Result saved.');
     context.go(AppRouter.sessions);
   }

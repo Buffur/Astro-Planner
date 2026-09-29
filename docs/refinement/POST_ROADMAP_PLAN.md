@@ -4902,7 +4902,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 | S8.1 | Results without a run: domain and data | P8.1 | M–L | — | **Done 2026-09-29** |
 | S8.2 | The result form | P8.2 | M | S8.1 | **Done 2026-09-29** |
 | S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | **Done 2026-09-29** |
-| S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | Frozen |
+| S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | **Done 2026-09-29** |
 | S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | Frozen |
 | S8.6 | An optional plan name | P8.6 | S–M | S8.5 | Frozen |
 | S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | Frozen |
@@ -5477,7 +5477,7 @@ provisional in the same way.*
 | UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09); **S4.T:** RD-09 (Stage 5) → P5.6; visuals a Stage 6 candidate; **Stage 5 planning:** the pattern is S5.8 (after RD-09); the capture plan adopts it in Stage 6; **2026-09-27:** P6.8 |
 | UX-10 drill-downs; UX-11 night picker | Partially confirmed | Stage 4, then Stage 6; **S4.T:** decided (ADR-019 §5, §9; DEV-P9) → P6.5, P6.6 |
 | UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8; **S4.T:** decided (ADR-019 §3) → P6.1 |
-| UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4; **2026-09-27:** closes when P8.4 retires the tracker |
+| UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4; **2026-09-27:** closes when P8.4 retires the tracker; **closed by S8.4 (2026-09-29)** |
 | UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9; **S4.T:** decided (ADR-019 §8) → P9.1 |
 | UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work); **decided T3**; S6.9 (unknown tracking as a neutral missing input); **S7.1** (the plan's override) |
 | UX-17 Moon wording | Partially confirmed | Stage 6 |
@@ -5488,7 +5488,7 @@ provisional in the same way.*
 | UX-23 typing | Documented | Stage 7; **2026-09-28:** fewer typed fields only through decided inheritance and proposals (S7.2, S7.3) |
 | UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
 | UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2; **resolved by S8.2 (2026-09-29)**: typed counts per light block, no ±1 |
-| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4 |
+| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4; **closed by S8.4 (2026-09-29)**: the resume prompt is gone |
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack; **2026-09-27:** the tracker retires (P8.4), and Stage 11's TalkBack covers the new flows |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |
 | UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24); **2026-09-27:** P8.5 |

@@ -365,13 +365,6 @@ class _Actions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (s.status == SessionStatus.inProgress && !s.legacy)
-          FilledButton(
-            key: const Key('detail.openTracker'),
-            onPressed: () => context.push(AppRouter.run(s.id)),
-            style: FilledButton.styleFrom(minimumSize: tall),
-            child: const Text('Open tracker'),
-          ),
         // S8.2 (I-6): Record result once the saved night has ended; Edit
         // result for a result.
         if (context.read<SessionsViewModel>().resultAction(s) case final action

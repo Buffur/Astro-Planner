@@ -1,6 +1,7 @@
-// The execution state machine (TASK 13.2, ADR-016): the transition table,
-// running time across pauses and block changes, clock jumps both ways, the
-// frame estimate, and staleness. Pure: "now" is always passed in.
+// The execution state machine (TASK 13.2, ADR-016): the transition table, a
+// replay equal to step-by-step application, and a clock set back. Pure:
+// "now" is always passed in. S8.4 retired the live tracker's running time,
+// estimate and staleness (CALC-35) and their tests; S8.1 added `reported`.
 
 import 'package:astroplan/domain/models/execution.dart';
 import 'package:astroplan/domain/services/execution_machine.dart';
@@ -270,50 +271,8 @@ void main() {
       expect(replayed.blockId, 2);
       expect(replayed.completed, s.completed);
       expect(replayed.rejected, s.rejected);
-      expect(
-        ExecutionMachine.runningTime(replayed, _at(30)),
-        ExecutionMachine.runningTime(s, _at(30)),
-      );
-    });
-  });
-
-  group('running time', () {
-    test('counts running intervals only, across a pause', () {
-      var s = _running(); // running from 0
-      s = _step(s, ExecutionEventKind.paused, 10);
-      expect(ExecutionMachine.runningTime(s, _at(50)).inMinutes, 10);
-      s = _step(s, ExecutionEventKind.resumed, 40);
-      expect(ExecutionMachine.runningTime(s, _at(55)).inMinutes, 25);
-    });
-
-    test('starts again at zero on a new block', () {
-      var s = _step(
-        _running(),
-        ExecutionEventKind.blockSelected,
-        30,
-        blockId: 2,
-      );
-      expect(ExecutionMachine.runningTime(s, _at(45)).inMinutes, 15);
-      s = _step(s, ExecutionEventKind.paused, 50);
-      s = _step(s, ExecutionEventKind.blockSelected, 55, blockId: 1);
-      expect(ExecutionMachine.runningTime(s, _at(90)), Duration.zero);
-    });
-
-    test('a restart after a kill resumes from the stored events', () {
-      // The app died at minute 20 while running; it restarts at minute 80.
-      final stored = <ExecutionEvent>[];
-      var s = _notStarted();
-      final start = ExecutionMachine.next(
-        s,
-        ExecutionEventKind.started,
-        _at(0),
-        blockId: 1,
-      );
-      stored.add(start);
-      s = ExecutionMachine.apply(s, start);
-      final restored = ExecutionMachine.fold(_blocks, stored);
-      expect(restored.phase, ExecutionPhase.running);
-      expect(ExecutionMachine.runningTime(restored, _at(80)).inMinutes, 80);
+      expect(replayed.runningMsBefore, s.runningMsBefore);
+      expect(replayed.runningSinceUtc, s.runningSinceUtc);
     });
   });
 
@@ -325,24 +284,6 @@ void main() {
       expect(e.clockAdjusted, isTrue);
       final after = ExecutionMachine.apply(s, e);
       expect(after.clockAdjusted, isTrue);
-      expect(ExecutionMachine.clockBehind(after, _at(10)), isTrue);
-    });
-
-    test('a clock behind the running start counts that interval as zero', () {
-      final s = _running(); // running since 0
-      expect(ExecutionMachine.runningTime(s, _at(-60)), Duration.zero);
-    });
-
-    test('a clock far ahead is capped by the frames left', () {
-      final e = ExecutionMachine.estimate(
-        _running(),
-        _at(60 * 24 * 7), // a week later
-        exposureSeconds: 60,
-        perFrameOverheadSeconds: 5,
-        plannedFrames: 40,
-      );
-      expect(e.frames, 40);
-      expect(e.planReached, isTrue);
     });
 
     test('a non-UTC instant is refused', () {
@@ -355,77 +296,5 @@ void main() {
         throwsArgumentError,
       );
     });
-  });
-
-  group('estimate (ADR-016 §3)', () {
-    test('floor(running time / (exposure + overhead))', () {
-      // 30 min running, 60 s + 5 s cycles: 1800 / 65 = 27.7 -> 27.
-      final e = ExecutionMachine.estimate(
-        _running(),
-        _at(30),
-        exposureSeconds: 60,
-        perFrameOverheadSeconds: 5,
-        plannedFrames: 100,
-      );
-      expect(e.frames, 27);
-      expect(e.planReached, isFalse);
-    });
-
-    test('frames already reported in this block are not counted again', () {
-      final s = _step(
-        _running(),
-        ExecutionEventKind.framesConfirmed,
-        20,
-        blockId: 1,
-        delta: 20,
-      );
-      final e = ExecutionMachine.estimate(
-        s,
-        _at(30),
-        exposureSeconds: 60,
-        perFrameOverheadSeconds: 5,
-        plannedFrames: 100,
-      );
-      expect(e.frames, 7);
-    });
-
-    test('a paused run does not grow', () {
-      final s = _paused(); // ran 10 min
-      final a = ExecutionMachine.estimate(
-        s,
-        _at(20),
-        exposureSeconds: 60,
-        perFrameOverheadSeconds: 0,
-        plannedFrames: 100,
-      );
-      final b = ExecutionMachine.estimate(
-        s,
-        _at(200),
-        exposureSeconds: 60,
-        perFrameOverheadSeconds: 0,
-        plannedFrames: 100,
-      );
-      expect(a.frames, 10);
-      expect(b.frames, 10);
-    });
-
-    test('a non-positive cycle is refused', () {
-      expect(
-        () => ExecutionMachine.estimate(
-          _running(),
-          _at(5),
-          exposureSeconds: 0,
-          perFrameOverheadSeconds: 0,
-          plannedFrames: 10,
-        ),
-        throwsArgumentError,
-      );
-    });
-  });
-
-  test('stale: only after the night ends, never without a night', () {
-    expect(ExecutionMachine.isStale(_at(60), _at(61)), isTrue);
-    expect(ExecutionMachine.isStale(_at(60), _at(59)), isFalse);
-    expect(ExecutionMachine.isStale(null, _at(59)), isFalse);
   });
 }

@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S8.3 done**: the saved-plan transition and Tonight's line).
-> **Next:** S8.4 (retire the live tracker safely; TD-063). The owner asked for the whole of Stage 8.
+> **Last updated:** 2026-09-29 (**S8.4 done**: the live tracker retired; TD-063 resolved).
+> **Next:** S8.5 (the Logbook list, search, filters and Progress). The owner asked for the whole of Stage 8.
 
 ## Current state
 
@@ -14,11 +14,30 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S8.4** (below, "Next allowed action") |
-| Code baseline | **S8.3** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S8.5** (below, "Next allowed action") |
+| Code baseline | **S8.4** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v24** (S8.1) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S8.4 done, 2026-09-29** (the owner's direction of 2026-09-27; ADR-016 §13): the live tracker retired.
+- **The audit (A–E)** is in `ARCHITECTURE.md` (S8.4). Removed (A): the tracker screen and route, its
+  ViewModel, the resume prompt, Start/Track live, Tonight's run card, the entry's Open tracker,
+  keep-screen-on and the `wakelock_plus` dependency (no Dart use; the lockfile loses two packages),
+  CALC-35 and CALC-36. Kept (B, C): the events, the fold and the counters' invariant, the
+  repository's stored-run API, every stored run, the export and the backup; no migration.
+- A run left in progress by an older version is offered on Tonight's line and in the Logbook and is
+  recorded through the result form. **TD-063 resolved:** `openSession` re-reads the session; one
+  deleted meanwhile opens as a copy (`stale_detail_open_test.dart`, fails on the old code).
+  **TD-073 resolved** (the Start message left). **UX-13 and UX-26 closed.**
+- Found and fixed on the way (S8.2's own acceptance, I-7): after a failed result write the form kept
+  no choice; it now reloads only for a stale entry and otherwise keeps the input.
+- **Tests (D, E):** retired with their reasons in the audit (the tracker's screen, prompt, outlook,
+  estimate and running-time cases, Start-then-edit, the Track live menu case); lifecycle rows L4, L6,
+  L8 replaced by the saved-night lifecycle; the E2E is Save → the night (a restart) → Tonight's line
+  → result → export, and records a result across a DST change.
+- **Verification:** a dependency change (high-risk): the full gate after the last code change,
+  **PASS** (1,750 tests, 2 skips — fewer because the tracker's tests were retired; 2 host E2E;
+  Flutter 3.47.4).
 **S8.3 done, 2026-09-29** (ADR-019 §3.1, D1 delivered; D8-1, D8-2, I-3, I-8): the saved-plan
 transition and Tonight's line.
 - Once a saved plan's night has ended (CALC-44), it stays on its night with its snapshot, and the
@@ -94,7 +113,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS** (S8.3): Encoding; Format; Analyze (no issues); 1,789 tests, 2 expected skips; 2 host E2E | **S8.3's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.3's last code change; supersedes S8.2's (1,781) and S8.1's (1,776). Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
+| **Full quality gate PASS** (S8.4): Encoding; Format (458 files, 0 changed); Analyze (no issues); 1,750 tests, 2 expected skips; 2 host E2E | **S8.4's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.4's last code change (the dependency removal included); supersedes S8.3's (1,789), S8.2's and S8.1's. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
 | **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
 | **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
@@ -228,8 +247,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S8.4 — Retire the live tracker safely; TD-063** (`POST_ROADMAP_PLAN.md`, "Stage 8 — frozen
-   Task sequence", S8.4; DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.5 … S8.9 in the frozen order and the Stage 8
+1. **S8.5 — The Logbook list, search, filters and Progress** (`POST_ROADMAP_PLAN.md`, "Stage 8 —
+   frozen Task sequence", S8.5; DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.6 … S8.9 in the frozen order and the Stage 8
    validation: the owner asked, in chat on 2026-09-29, for the whole of Stage 8,
    so each Task follows the previous one's commit without a new prompt.
 

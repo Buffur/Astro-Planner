@@ -18,7 +18,6 @@ import '../../shared/collapsible_section.dart';
 import '../../widgets/plan_status.dart';
 import '../../shared/capability_text.dart';
 import '../../shared/location_feedback.dart';
-import '../../shared/start_session.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../../domain/models/target_types.dart';
 import '../../shared/field_mode_button.dart';
@@ -311,8 +310,7 @@ class HomeScreen extends StatelessWidget {
                     horizontal: 16.0,
                     vertical: 8.0,
                   ),
-                  // S6.2 (ADR-019 §6): Save plan is the one primary action;
-                  // Track live moved into the ⋮ menu.
+                  // S6.2 (ADR-019 §6): Save plan is the one primary action.
                   child: FilledButton.icon(
                     key: const Key('planner.save'),
                     onPressed: () async {
@@ -573,23 +571,13 @@ class _NoSiteCard extends StatelessWidget {
   }
 }
 
-/// The plan's actions (S6.2; ADR-019 §6): New plan, Copy to another night
-/// and, for a saved plan, Track live — interim, until Stage 8 retires the
-/// tracker (P8.4). Each says what happened.
+/// The plan's actions (S6.2; ADR-019 §6): New plan and Copy to another
+/// night; Track live left with the tracker (S8.4). Each says what happened.
 class _PlanMenu extends StatelessWidget {
   const _PlanMenu();
 
   @override
   Widget build(BuildContext context) {
-    final plan = context.watch<SessionPlanViewModel>();
-    final session = plan.activeSession;
-    final state = session == null ? null : PlanState.of(session);
-    // Start's requirements (a site, a target, a rig), for a saved plan.
-    final canTrack =
-        (state == PlanState.saved || state == PlanState.savedChanged) &&
-        plan.sessionNight != null &&
-        plan.selectedTarget != null &&
-        plan.selectedEquipment != null;
     return PopupMenuButton<_PlanAction>(
       key: const Key('planner.menu'),
       tooltip: 'Plan actions',
@@ -597,7 +585,6 @@ class _PlanMenu extends StatelessWidget {
       onSelected: (action) => switch (action) {
         _PlanAction.newPlan => _newPlan(context),
         _PlanAction.copy => _copy(context),
-        _PlanAction.trackLive => startSessionWithFeedback(context),
       },
       itemBuilder: (context) => [
         const PopupMenuItem(
@@ -610,12 +597,6 @@ class _PlanMenu extends StatelessWidget {
           value: _PlanAction.copy,
           child: Text(AppWords.copyToAnotherNight),
         ),
-        if (canTrack)
-          const PopupMenuItem(
-            key: Key('planner.start'),
-            value: _PlanAction.trackLive,
-            child: Text(AppWords.trackLiveOptional),
-          ),
       ],
     );
   }
@@ -657,7 +638,7 @@ class _PlanMenu extends StatelessWidget {
   }
 }
 
-enum _PlanAction { newPlan, copy, trackLive }
+enum _PlanAction { newPlan, copy }
 
 /// Which plan the planner shows (S6.2; UX-04, ADR-019 §6): the target, the
 /// night and the plan's state, under the app bar. It wraps at large text.

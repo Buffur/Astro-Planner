@@ -255,22 +255,9 @@ class CurrentSession {
     });
   }
 
-  /// Start (ADR-016): [plan] is written to the current session (or a new
-  /// one), which starts with [snapshot]; the planner then continues on a
-  /// fresh draft copy, so it never edits a running session (owner
-  /// decision, TASK 13.3). Returns the started session.
-  Future<Session> start(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(() => _inChain(() => _start(plan, snapshot)));
-
-  Future<Session> _start(SessionPlan plan, SessionSnapshot snapshot) async {
-    final current = _session;
-    final id = current != null && current.planEditable
-        ? (await _repository.updatePlan(current.id, plan)).id
-        : (await _repository.create(plan)).id;
-    final started = await _repository.start(id, snapshot);
-    _session = await _repository.create(plan);
-    return started;
-  }
+  /// Session [id] as stored now (TD-063, S8.4): a caller's copy may be
+  /// stale; null when it no longer exists.
+  Future<Session?> stored(int id) => _repository.get(id);
 
   /// Save: the current open session — or a new one — becomes planned with
   /// [snapshot] (ADR-014 §3–§4).
@@ -286,7 +273,7 @@ class CurrentSession {
       );
 
   /// Runs [op] after every write queued so far and queues later writes
-  /// after it, so an edit made while Save, Start, New or Open is running
+  /// after it, so an edit made while Save, New or Open is running
   /// can never land in the middle of it — before S1.12 (Save, Start) and
   /// S6.2 (New, Open; TD-058) it could reach the session being replaced
   /// (ENG-08, RT-04). A failure of [op] reaches the

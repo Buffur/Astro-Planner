@@ -1,7 +1,7 @@
 // TASK 15.5: the end-to-end regression suite. The core loop through the
 // real UI — site → target → rig → night → opportunity → plan → save →
-// execute (with a restart) → complete → log → export — and time-zone
-// cases. The database is real (a SQLite file, closed and reopened for the
+// the night (a restart) → "How did it go?" → result → log → export — and
+// time-zone cases. Since S8.4 there is no live tracker in the loop. The database is real (a SQLite file, closed and reopened for the
 // restart); the network, GPS, the device zone and the share sheet are
 // fakes.
 //
@@ -21,7 +21,6 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
-import 'package:astroplan/domain/models/execution.dart';
 import 'package:astroplan/domain/models/iana_time_context.dart';
 import 'package:astroplan/domain/models/location_profile.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
@@ -149,8 +148,6 @@ class _Device {
       await vm.ready;
       await vm.theme.load();
       await vm.tonight.load();
-      await vm.resumeRun?.load();
-      await vm.execution?.loadActive();
     });
     await tester.pumpWidget(
       MultiProvider(providers: vm.providers, child: const AstroPlanApp()),
@@ -186,12 +183,6 @@ Future<void> tap(WidgetTester tester, Finder finder) async {
   await tester.pump();
   await tester.tap(finder);
   await settle(tester);
-}
-
-/// Track live, from the plan's ⋮ menu (S6.2; interim until P8.4).
-Future<void> trackLive(WidgetTester tester) async {
-  await tap(tester, find.byKey(const Key('planner.menu')));
-  await tap(tester, find.byKey(const Key('planner.start')));
 }
 
 /// Scrolls the page's main list from the top until [finder] is visible.
@@ -258,8 +249,8 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  testWidgets('the core loop: site to export, with a restart during the '
-      'run', (tester) async {
+  testWidgets('the core loop: site to export, with a restart after the '
+      'night', (tester) async {
     tester.view.physicalSize = const Size(412, 915);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -305,41 +296,27 @@ void main() {
     await tap(tester, find.text('Save plan'));
     expect(find.text('Plan saved'), findsOneWidget);
 
-    // Execute: Track live (the plan's ⋮ menu since S6.2), three frames.
-    await trackLive(tester);
-    expect(find.byKey(const Key('run.confirmed')), findsOneWidget);
-    for (var i = 0; i < 3; i++) {
-      await tap(tester, find.byKey(const Key('run.plus')));
-    }
-    expect(
-      tester.widget<Text>(find.byKey(const Key('run.confirmed'))).data,
-      startsWith('3 of '),
-    );
-    final runId = device.vm.execution!.session!.id;
+    final savedId = vm.plan.activeSessionId!;
 
-    // The process dies mid-run; 45 minutes later the app is opened again.
+    // The night: nothing to do in the app (S8.4: the tracker left). The
+    // process dies; the next morning the app is opened again.
     await device.kill(tester);
-    device.clock.now = device.clock.now.add(const Duration(minutes: 45));
+    device.clock.now = DateTime.utc(2026, 11, 11, 7); // after the dawn
     await device.boot(tester);
-    expect(find.byKey(const Key('resumeRun.keepGoing')), findsOneWidget);
-    await tap(tester, find.byKey(const Key('resumeRun.keepGoing')));
-    expect(
-      tester.widget<Text>(find.byKey(const Key('run.confirmed'))).data,
-      startsWith('3 of '),
-    );
-    expect(device.vm.execution!.state!.phase, ExecutionPhase.running);
+    // The saved plan stays on its night; the planner is on a copy (S8.3).
+    expect(device.vm.plan.activeSessionId, isNot(savedId));
 
-    // Complete: Finish opens "How did it go?" (S8.2), Partly pre-filled
-    // from the confirmed counts; Save result completes the run.
-    await tap(tester, find.byKey(const Key('run.more')));
-    await tap(tester, find.byKey(const Key('run.finish')));
-    expect(find.text('How did it go?'), findsWidgets);
+    // "Last night: … How did it go?" opens the result form (S8.2, S8.3).
+    await tap(tester, find.byKey(const Key('tonight.resultDue')));
+    expect(find.byKey(const Key('results.review')), findsOneWidget);
+    await tap(tester, find.byKey(const Key('results.outcome.asPlanned')));
     await scrollTo(tester, find.byKey(const Key('results.save')));
     await tap(tester, find.byKey(const Key('results.save')));
     expect(find.text('Result saved.'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6)); // the message goes
     await settle(tester);
-
+    expect(find.byKey(const Key('tonight.resultDue')), findsNothing);
+    final runId = savedId;
     // Log: the Sessions list and the detail.
     expect(find.text('Sessions'), findsWidgets);
     final stored = await tester.runAsync(
@@ -378,14 +355,15 @@ void main() {
       for (final b in (session['blocks'] as List).cast<Map>())
         if (b['frame_type'] == 'light') b,
     ];
-    expect(lights.first['confirmed_frames'], 3);
+    expect(lights.first['confirmed_frames'], lights.first['frame_count']);
+    expect((session['results'] as Map)['result_kind'], 'asPlanned');
     final back = SessionManifestCodec.decode(json);
     expect(back.sessions.single.session.id, runId);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('time zones: a site in another zone than the device, and a '
-      'run across a DST change', (tester) async {
+      'result recorded across a DST change', (tester) async {
     tester.view.physicalSize = const Size(412, 915);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -428,32 +406,37 @@ void main() {
     expect(vm.plan.sessionNight, expected);
     expect(vm.plan.eveningDate, CalendarDate(2026, 10, 31));
 
-    // A run from 01:30 EDT to 01:30 EST: two hours of running time
-    // across the change, never one or three.
+    // A plan saved at 01:30 EDT, its result recorded the next morning
+    // (after the DST change at 02:00): the night stays the site's civil
+    // evening (31 Oct), in the site's zone, with UTC instants.
     AppRouter.router.go(AppRouter.session());
     await settle(tester);
     await chooseTargetAndRig(tester);
     device.clock.now = DateTime.utc(2026, 11, 1, 5, 30); // 01:30 EDT
-    // Since S6.2 Track live is offered for a saved plan.
     await tap(tester, find.text('Save plan'));
-    await trackLive(tester);
-    final run = vm.execution!.session!;
-    expect(run.executionStartSnapshot!.timeZoneId, 'America/New_York');
-    device.clock.now = DateTime.utc(2026, 11, 1, 7, 30); // 01:30 EST
+    final savedId = vm.plan.activeSessionId!;
+
+    // The next morning, after the change to EST and the night's dawn.
+    await device.kill(tester);
+    device.clock.now = DateTime.utc(2026, 11, 1, 12); // 07:00 EST
+    await device.boot(tester);
+    AppRouter.router.go(AppRouter.results(savedId));
     await settle(tester);
-    expect(vm.execution!.runningTime, const Duration(hours: 2));
+    await tap(tester, find.byKey(const Key('results.outcome.asPlanned')));
+    await scrollTo(tester, find.byKey(const Key('results.save')));
+    await tap(tester, find.byKey(const Key('results.save')));
 
     // Exported instants are UTC; the zone travels with them.
-    await device.kill(tester);
-    await device.boot(tester);
     final all = await tester.runAsync(
       () => DriftSessionRepository(device.db!).list(),
     );
-    final started = all!.firstWhere((s) => s.id == run.id);
-    expect(started.startedAtUtc!.isUtc, isTrue);
-    expect(started.startedAtUtc, DateTime.utc(2026, 11, 1, 5, 30));
-    expect(started.timeZoneId, 'America/New_York');
-    expect(started.eveningDate, CalendarDate(2026, 10, 31));
+    final done = all!.firstWhere((s) => s.id == savedId);
+    expect(done.status, SessionStatus.completed);
+    expect(done.completedAtUtc!.isUtc, isTrue);
+    expect(done.completedAtUtc, DateTime.utc(2026, 11, 1, 12));
+    expect(done.timeZoneId, 'America/New_York');
+    expect(done.planSnapshot!.timeZoneId, 'America/New_York');
+    expect(done.eveningDate, CalendarDate(2026, 10, 31));
     expect(tester.takeException(), isNull);
   });
 }

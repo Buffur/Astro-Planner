@@ -1,9 +1,7 @@
-// S1.12 (ENG-08 = RT-04): an edit tapped right after Save or Start, before
-// their database work has finished, must not be lost or mixed into the
-// saved or started session. Driven through the planner's own buttons with
-// the real database — no injected delays.
-
-import 'dart:async';
+// S1.12 (ENG-08 = RT-04): an edit tapped right after Save, before its
+// database work has finished, must not be lost or mixed into the saved
+// session. (The Start case left with the tracker, S8.4.) Driven through the
+// planner's own buttons with the real database — no injected delays.
 
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart' show AppDatabase;
@@ -103,39 +101,6 @@ void main() {
     expect(stored.plannedAtUtc, isNotNull, reason: 'it was saved');
     expect(stored.planSnapshot!.json['blocks'], hasLength(before));
     expect(vm.plan.hasUnsavedChanges, isTrue);
-  });
-
-  testWidgets('Start, then an edit: the run keeps the plan it started with; '
-      'the edit goes to the planner\'s copy', (tester) async {
-    await start(tester);
-    await tester.ensureVisible(deleteBlock.first);
-    final before = vm.captureBlocks.length;
-    // S6.2: Track live is in the ⋮ menu, for a saved plan.
-    await tester.tap(find.text('Save plan'));
-    await settle(tester);
-    final original = vm.activeSessionId!;
-    await tester.tap(find.byKey(const Key('planner.menu')));
-    await settle(tester);
-
-    await tester.tap(find.byKey(const Key('planner.start')));
-    // Before Start has finished. The closing menu still covers the row's
-    // Delete for its exit animation, so the edit is the call that button
-    // makes (S6.2 moved Start into the menu).
-    unawaited(vm.plan.removeCaptureBlock(0));
-    await settle(tester);
-    await tester.runAsync(() => vm.plan.idle);
-
-    final run = (await tester.runAsync(() => sessions.get(original)))!;
-    expect(run.status, SessionStatus.inProgress);
-    expect(run.blocks, hasLength(before), reason: 'as started');
-    expect(run.executionStartSnapshot!.json['blocks'], hasLength(before));
-
-    expect(vm.activeSessionId, isNot(original));
-    expect(vm.captureBlocks, hasLength(before - 1));
-    final copy = (await tester.runAsync(
-      () => sessions.get(vm.activeSessionId!),
-    ))!;
-    expect(copy.blocks, hasLength(before - 1), reason: 'the edit is kept');
   });
 }
 

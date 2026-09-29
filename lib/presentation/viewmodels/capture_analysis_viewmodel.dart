@@ -259,11 +259,6 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   /// snapshot of its whole context.
   Future<Session> saveSession() => _lifecycle.savePlan(_snapshot());
 
-  /// Start (ADR-016; owner: same requirements as Save): the session starts
-  /// with its execution-start snapshot; the planner goes on with a copy.
-  /// Refused while another session is in progress (SessionStateError).
-  Future<Session> startSession() => _lifecycle.startPlan(_snapshot());
-
   SessionSnapshot _snapshot() {
     // The forecast's age as of now, not as of its last tick (S1.3).
     _conditions.checkClock();

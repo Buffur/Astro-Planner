@@ -168,16 +168,3 @@ class ExecutionState {
         : lastInterruption(),
   );
 }
-
-/// The frames a block has probably captured so far (ADR-016 §3): shown as
-/// "about N (estimated)", never stored unless the user accepts it.
-class FrameEstimate {
-  const FrameEstimate({required this.frames, required this.planReached});
-
-  /// Frames probably captured in the current block but not reported yet,
-  /// capped at the frames left in the plan.
-  final int frames;
-
-  /// The uncapped estimate reached or passed the frames left.
-  final bool planReached;
-}

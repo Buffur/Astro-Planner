@@ -43,11 +43,9 @@ abstract final class AppWords {
   static const notDone = 'Not done';
   static const oldLog = 'Old log';
 
-  // Recording the outcome and the optional live mode (RG-04).
+  // Recording the outcome (RG-04; the live mode left in S8.4).
   static const recordResult = 'Record result';
   static const editResult = 'Edit result';
-  static const trackLive = 'Track live';
-  static const trackLiveOptional = 'Track live (optional)';
   static const completedAsPlanned = 'Completed as planned';
 
   /// Tonight's line after a saved night (ADR-019 §4).
