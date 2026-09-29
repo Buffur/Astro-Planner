@@ -226,6 +226,61 @@ void main() {
     expect(find.text('Site saved'), findsOneWidget);
   });
 
+  // TD-089: the target and site deletes' cancelled swipes and messages.
+  testWidgets('deleting a target: a cancelled swipe keeps it; the editor\'s '
+      'Delete confirms, deletes and says so', (tester) async {
+    await start(tester, AppRouter.libraryTargets);
+    await tester.enterText(find.byType(TextField).first, 'M31');
+    await settle(tester);
+    final row = find.widgetWithText(ListTile, 'Andromeda Galaxy (M31)');
+    await tester.drag(row, const Offset(-500, 0));
+    await settle(tester);
+    expect(find.text('Delete this target?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirm.cancel')));
+    await settle(tester);
+    expect(row, findsOneWidget, reason: 'the row springs back');
+
+    await tester.tap(row);
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('targetEditor.delete')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('confirm.action')));
+    await settle(tester);
+    expect(find.text('Target deleted'), findsOneWidget);
+    expect(row, findsNothing);
+  });
+
+  testWidgets('a cancelled swipe on a site keeps it', (tester) async {
+    await start(tester, AppRouter.librarySites);
+    await tester.drag(find.text('Dark site'), const Offset(-500, 0));
+    await settle(tester);
+    expect(find.text('Delete this site?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirm.cancel')));
+    await settle(tester);
+    expect(find.text('Dark site'), findsOneWidget);
+    expect(vm.site.sites, hasLength(2));
+  });
+
+  // TD-090 (S9V-02; D9-1): the Library manages sites; choosing the position
+  // used for planning happens only where a site is chosen.
+  testWidgets('the Library\'s Sites offer no position actions, and a site '
+      'added there does not become the active one', (tester) async {
+    await start(tester, AppRouter.librarySites);
+    expect(find.text('Use current position'), findsNothing);
+    expect(find.text('Pick on map'), findsNothing);
+    await tester.tap(find.text('Add site'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextFormField, 'Name'), 'Hill');
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
+    await settle(tester);
+    expect(vm.site.sites.map((s) => s.name), contains('Hill'));
+    expect(vm.site.activeSite!.id, homeId, reason: 'the planning site stays');
+
+    AppRouter.router.go(AppRouter.selectSite);
+    await settle(tester);
+    expect(find.text('Use current position'), findsOneWidget);
+  });
+
   testWidgets('deleting a site confirms through the shared dialog', (
     tester,
   ) async {

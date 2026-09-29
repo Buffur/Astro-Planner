@@ -198,13 +198,16 @@ Future<void> scrollTo(WidgetTester tester, Finder finder) async {
 }
 
 /// Adds a site through the Sites screen and its editor, as a user types it.
+/// It opens the list to choose a site for planning (Tonight's "Set site"),
+/// where a new site becomes the active one; since TD-090 a site added from
+/// the Library's list is saved without being made active.
 Future<void> addSite(
   WidgetTester tester, {
   required String name,
   required String latitude,
   required String longitude,
 }) async {
-  AppRouter.router.go(AppRouter.librarySites);
+  AppRouter.router.go(AppRouter.selectSite);
   await settle(tester);
   await tap(tester, find.text('Add site'));
   await tester.enterText(find.widgetWithText(TextFormField, 'Name'), name);

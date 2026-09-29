@@ -33,10 +33,18 @@ import '../../../support/planner_harness.dart';
 /// A whole-night forecast on whole UTC hours, as the provider serves it; or,
 /// with [fail], no forecast at all.
 class _Weather implements WeatherRepository {
-  _Weather(this.clock, {this.fail = false, this.dew = false});
+  _Weather(
+    this.clock, {
+    this.fail = false,
+    this.dew = false,
+    this.unknownCloudAt,
+  });
 
   final Clock clock;
   final bool fail;
+
+  /// TD-089: the hour whose total cloud is unknown (null), if any.
+  final int? unknownCloudAt;
 
   /// S9.6: a dew point 0.5 °C under the air (within the 2 °C margin).
   final bool dew;
@@ -70,7 +78,7 @@ class _Weather implements WeatherRepository {
           )
             WeatherHour(
               timeUtc: t,
-              cloudCoverPct: 40,
+              cloudCoverPct: t.hour == unknownCloudAt ? null : 40,
               cloudCoverLowPct: 10,
               cloudCoverMidPct: 20,
               cloudCoverHighPct: 40,
@@ -97,6 +105,9 @@ void main() {
     String location, {
     bool fail = false,
     bool dew = false,
+    int? unknownCloudAt,
+    domain.LocationProfile? site,
+    DateTime? now,
   }) async {
     tester.view.physicalSize = const Size(800, 3000);
     tester.view.devicePixelRatio = 1.0;
@@ -106,21 +117,22 @@ void main() {
       await CatalogSeeder(DriftTargetRepository(db)).seedIfNeeded();
       await EquipmentSeeder(DriftEquipmentRepository(db)).seedIfNeeded();
       final siteId = await DriftLocationRepository(db).insertLocation(
-        domain.LocationProfile(
-          id: 0,
-          name: 'Ljubljana',
-          latitude: 46.05,
-          longitude: 14.51,
-          elevation: 300,
-          timeZoneId: 'Europe/Ljubljana',
-        ),
+        site ??
+            domain.LocationProfile(
+              id: 0,
+              name: 'Ljubljana',
+              latitude: 46.05,
+              longitude: 14.51,
+              elevation: 300,
+              timeZoneId: 'Europe/Ljubljana',
+            ),
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': siteId});
-      final clock = FixedClock(DateTime.utc(2026, 11, 10, 16));
+      final clock = FixedClock(now ?? DateTime.utc(2026, 11, 10, 16));
       vm = PlannerHarness(
         DriftTargetRepository(db),
         DriftEquipmentRepository(db),
-        _Weather(clock, fail: fail, dew: dew),
+        _Weather(clock, fail: fail, dew: dew, unknownCloudAt: unknownCloudAt),
         DriftLocationRepository(db),
         locationService: FakeLocationService(),
         reverseGeocoder: FakeReverseGeocoder(),
@@ -286,6 +298,36 @@ void main() {
       expect(find.byKey(Key('night.band.$i.$depth')), findsOneWidget);
     }
     expect(find.text(AppWords.astronomicalDusk), findsOneWidget);
+  });
+
+  // TD-089 (S9V-01): the visuals' unknown and empty states.
+  testWidgets('Weather: an hour with unknown cloud draws no bar, never an '
+      'empty or a full one', (tester) async {
+    await start(tester, AppRouter.weather, unknownCloudAt: 22);
+    final slots = vm.conditions.nightWeatherSummary!.slots;
+    final known = slots.where((s) => s.hour?.cloudCoverPct != null).length;
+    expect(known, lessThan(slots.length), reason: 'one hour is unknown');
+    expect(find.byKey(const Key('weather.cloudBar')), findsNWidgets(known));
+  });
+
+  testWidgets('Night & Moon: a night the Sun never leaves has no twilight '
+      'bar; the table still says so', (tester) async {
+    await start(
+      tester,
+      AppRouter.nightMoon,
+      site: domain.LocationProfile(
+        id: 0,
+        name: 'Tromsø',
+        latitude: 69.65,
+        longitude: 18.96,
+        elevation: 10,
+        timeZoneId: 'Europe/Oslo',
+      ),
+      now: DateTime.utc(2026, 6, 21, 12),
+    );
+    expect(find.byKey(const Key('night.twilightBar')), findsNothing);
+    expect(find.byKey(const Key('night.timelineTitle')), findsOneWidget);
+    expect(find.text('not tonight'), findsWidgets);
   });
 
   testWidgets("Tonight's Night, Moon and Weather rows open the details", (

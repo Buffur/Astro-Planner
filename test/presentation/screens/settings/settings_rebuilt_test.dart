@@ -4,6 +4,7 @@
 // editable within the model's ranges; the per-frame range the model's; a
 // failed save reported.
 
+import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
@@ -30,6 +31,45 @@ import '../../../support/planner_harness.dart';
 
 class _NoWeather with NoSnapshotWeather implements WeatherRepository {}
 
+/// TD-089: a whole-night forecast at 80 % cloud, on whole UTC hours.
+class _Cloudy implements WeatherRepository {
+  _Cloudy(this.clock);
+
+  final Clock clock;
+
+  @override
+  Future<WeatherFetch> fetchSnapshot({
+    required double latitude,
+    required double longitude,
+    required DateTime startUtc,
+    required DateTime endUtc,
+  }) async {
+    final first = DateTime.utc(
+      startUtc.year,
+      startUtc.month,
+      startUtc.day,
+      startUtc.hour,
+    );
+    return WeatherFetched(
+      WeatherSnapshot(
+        provider: 'open-meteo',
+        model: 'best_match',
+        fetchedAtUtc: clock.nowUtc(),
+        latitude: latitude,
+        longitude: longitude,
+        hours: [
+          for (
+            var t = first;
+            t.isBefore(endUtc);
+            t = t.add(const Duration(hours: 1))
+          )
+            WeatherHour(timeUtc: t, cloudCoverPct: 80),
+        ],
+      ),
+    );
+  }
+}
+
 /// A store that cannot be written (a full disk).
 class _Broken implements PlanningPreferencesRepository {
   @override
@@ -51,6 +91,7 @@ void main() {
   Future<void> build(
     WidgetTester tester, {
     PlanningPreferencesRepository? preferences,
+    bool cloudy = false,
   }) async {
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
@@ -67,14 +108,15 @@ void main() {
         ),
       );
       SharedPreferences.setMockInitialValues({'activeLocationId': id});
+      final clock = FixedClock(DateTime.utc(2026, 11, 24, 16));
       vm = PlannerHarness(
         DriftTargetRepository(database),
         DriftEquipmentRepository(database),
-        _NoWeather(),
+        cloudy ? _Cloudy(clock) : _NoWeather(),
         sites,
         locationService: FakeLocationService(),
         deviceTimeZone: FakeDeviceTimeZone(),
-        clock: FixedClock(DateTime.utc(2026, 11, 24, 16)),
+        clock: clock,
         preferencesRepository: preferences,
       );
       await vm.ready;
@@ -150,6 +192,29 @@ void main() {
       expect(prefs.getBool('moonGateEnabled'), isTrue);
       expect(prefs.getBool('cloudGateEnabled'), isTrue);
     });
+  });
+
+  testWidgets('TD-089: the cloud gate at a threshold changes the window '
+      'against the forecast; at 100 % it excludes nothing', (tester) async {
+    await build(tester, cloudy: true);
+    await tester.runAsync(() => vm.conditions.idle);
+    await tester.pump();
+    final before = vm.imagingOpportunity!.usableTime;
+    expect(before, greaterThan(Duration.zero));
+    await tester.tap(inTile('settings.cloudGate', Switch));
+    await tester.pump();
+    expect(
+      vm.imagingOpportunity!.usableTime,
+      Duration.zero,
+      reason: '80 % cloud is above the 50 % gate every forecast hour',
+    );
+    await tester.drag(
+      inTile('settings.cloudGate', Slider),
+      const Offset(3000, 0),
+    );
+    await tester.pump();
+    expect(vm.planningPreferences.cloudGateMaxPct, 100);
+    expect(vm.imagingOpportunity!.usableTime, before);
   });
 
   testWidgets('the time between frames reaches the model\'s 120 s', (

@@ -118,16 +118,10 @@ class FileBackupService implements BackupService {
       'astroplan-backup-${ShareSessionExporter.localFileStamp(nowUtc)}.astroplan';
 
   /// The share sheet's text, with the local time and its offset (S9.8).
-  static String shareText(DateTime nowUtc) {
-    final local = nowUtc.toLocal();
-    final offset = local.timeZoneOffset;
-    final sign = offset.isNegative ? '−' : '+';
-    final h = offset.inHours.abs().toString().padLeft(2, '0');
-    final m = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
-    final stamp = ShareSessionExporter.localFileStamp(nowUtc);
-    return '${AppIdentity.appName} backup, $stamp (UTC$sign$h:$m). Keep this '
-        'file to restore.';
-  }
+  static String shareText(DateTime nowUtc) =>
+      '${AppIdentity.appName} backup, '
+      '${ShareSessionExporter.localStampWithOffset(nowUtc)}. Keep this file '
+      'to restore.';
 
   /// Checks backup [bytes] against this app (the testable part of [pick]).
   CheckedBackup check(Uint8List bytes) => BackupArchive.read(

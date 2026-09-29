@@ -97,41 +97,46 @@ class SitesScreen extends StatelessWidget {
               ),
             )
           else if (siteVm.isDefaultLocation)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md,
                 AppSpacing.md,
                 AppSpacing.md,
                 0,
               ),
               child: Text(
-                'No site yet. Use your current position, pick a point on the '
-                'map, or add a site.',
+                choosing
+                    ? 'No site yet. Use your current position, pick a point on '
+                          'the map, or add a site.'
+                    : 'No site yet. Add one with "Add site".',
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+          // Choosing the position used for planning: only when choosing
+          // (TD-090, D9-1); the Library manages the saved sites.
+          if (choosing)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        useCurrentPositionWithFeedback(context, siteVm),
+                    icon: const Icon(Icons.my_location),
+                    label: const Text('Use current position'),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () => context.push(AppRouter.position),
+                    icon: const Icon(Icons.map_outlined),
+                    label: const Text('Pick on map'),
+                  ),
+                ],
+              ),
             ),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () =>
-                      useCurrentPositionWithFeedback(context, siteVm),
-                  icon: const Icon(Icons.my_location),
-                  label: const Text('Use current position'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => context.push(AppRouter.position),
-                  icon: const Icon(Icons.map_outlined),
-                  label: const Text('Pick on map'),
-                ),
-              ],
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
@@ -197,13 +202,15 @@ class SitesScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        // TD-090: a site added from the Library is saved, not made active.
         onPressed: () => context.push(
           AppRouter.siteEdit,
           extra: siteVm.isDefaultLocation
-              ? const SiteEditorArgs()
+              ? SiteEditorArgs(activate: choosing)
               : SiteEditorArgs(
                   latitude: siteVm.latitude,
                   longitude: siteVm.longitude,
+                  activate: choosing,
                 ),
         ),
         icon: const Icon(Icons.add_location_alt_outlined),

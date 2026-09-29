@@ -110,4 +110,19 @@ void main() {
     final bands = TwilightBands.of(timeline)!;
     expect(bands.map((b) => b.depth), [1, 2, 3, 4, 3, 2, 1]);
   });
+
+  test('a real June night at 59.9° N: civil and nautical only (TD-089)', () {
+    final june = SessionNight(
+      eveningDate: CalendarDate(2026, 6, 21),
+      startUtc: DateTime.utc(2026, 6, 21, 11),
+      endUtc: DateTime.utc(2026, 6, 22, 11),
+      latitude: 59.9,
+      longitude: 10.75,
+      timeContextId: 'Europe/Oslo',
+    );
+    final bands = TwilightBands.of(
+      VisibilityCalculator.calculateNightTimelineForNight(june),
+    )!;
+    expect(bands.map((b) => b.depth), [1, 2, 1]);
+  });
 }

@@ -33,7 +33,7 @@ class ShareSessionExporter implements SessionExporter {
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/json')],
-        text: summary(sessions),
+        text: shareText(sessions, now),
       ),
     );
   }
@@ -51,6 +51,20 @@ class ShareSessionExporter implements SessionExporter {
     String two(int n) => n.toString().padLeft(2, '0');
     return '${t.year}-${two(t.month)}-${two(t.day)}-${two(t.hour)}${two(t.minute)}';
   }
+
+  /// "2026-09-29-2130 (UTC+02:00)": the file's stamp with the device's
+  /// offset, so a reader elsewhere knows its zone (S9.8, TD-091).
+  static String localStampWithOffset(DateTime utc) {
+    final offset = utc.toLocal().timeZoneOffset;
+    final sign = offset.isNegative ? '−' : '+';
+    final h = offset.inHours.abs().toString().padLeft(2, '0');
+    final m = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+    return '${localFileStamp(utc)} (UTC$sign$h:$m)';
+  }
+
+  /// The share sheet's text: the summary and when it was exported.
+  static String shareText(List<ExportedSession> sessions, DateTime nowUtc) =>
+      '${summary(sessions)} Exported ${localStampWithOffset(nowUtc)}.';
 
   /// "Astro Planner export: 3 sessions (M42, M31, …)".
   static String summary(List<ExportedSession> sessions) {

@@ -155,9 +155,10 @@ class SiteViewModel extends ChangeNotifier {
   }
 
   /// Saves an explicit user edit of a site (TASK 7.3): `id == 0` inserts a
-  /// new site, which becomes active; an edit of the active site applies at
-  /// once. Returns the site's id.
-  Future<int> saveSite(LocationProfile site) async {
+  /// new site, which becomes active unless [activate] is false (a site added
+  /// from the Library, S9.1's manage mode: TD-090, D9-1); an edit of the
+  /// active site applies at once. Returns the site's id.
+  Future<int> saveSite(LocationProfile site, {bool activate = true}) async {
     final int id;
     if (site.id == 0) {
       id = await _locationRepository.insertLocation(site);
@@ -166,7 +167,7 @@ class SiteViewModel extends ChangeNotifier {
       await _locationRepository.updateLocation(site);
     }
     _sites = await _locationRepository.getLocations();
-    if (site.id == 0 || _activeSite?.id == id) {
+    if ((site.id == 0 && activate) || _activeSite?.id == id) {
       await selectSite(id);
     } else {
       notifyListeners();

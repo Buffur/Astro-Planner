@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **Stage 9 findings fixed, 2026-09-29 (sites F-07; export F-44):** the Library's Sites no longer offers "Use current position" or "Pick on map", and a site added from the Library is saved without becoming the site the planner uses (choose a site for planning from the planner or Tonight). An export's share text now states when it was made, with the UTC offset.
+
 > **S9.8, 2026-09-29 (feedback; the export F-44; backup and restore):** a short message now confirms a rig, target or site saved, a name saved or removed, an export or a backup file created, a restore prepared ("it runs when you reopen the app") or cancelled. Messages no longer slide when the device asks for less motion (TD-081). Files are named in the device's local date and time: `astroplan-entry-…json` or `astroplan-logbook-…json`, `astroplan-backup-…astroplan`, and the backup's share text states the time with its UTC offset. "Export all as file" is a labelled item in the Logbook's menu.
 
 > **S9.7, 2026-09-29 (sky darkness, F-33; the map link, F-34; 08 §13):** the planner's sky-darkness detail puts each value first ("Bortle 4", "SQM 21.30 mag/arcsec²") with its source and a readable date under it ("Source: meter · Aug 1, 2026"), says "Unknown" with the way to set it, and says when a value is not saved; the map link names the external site ("Look it up on lightpollutionmap.app") and what to do there. The site editor's captions use the same date. No inferred Bortle and no Bortle ↔ SQM conversion.

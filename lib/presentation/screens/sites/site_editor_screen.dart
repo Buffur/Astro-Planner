@@ -29,12 +29,22 @@ import '../../navigation/app_router.dart';
 /// site pre-filled with [latitude]/[longitude]/[name] (e.g. "save the
 /// current position as a site").
 class SiteEditorArgs {
-  const SiteEditorArgs({this.site, this.latitude, this.longitude, this.name});
+  const SiteEditorArgs({
+    this.site,
+    this.latitude,
+    this.longitude,
+    this.name,
+    this.activate = true,
+  });
 
   final LocationProfile? site;
   final double? latitude;
   final double? longitude;
   final String? name;
+
+  /// Whether a new site becomes the active one; false when it is added from
+  /// the Library, which never changes the site used for planning (TD-090).
+  final bool activate;
 }
 
 /// Creates or edits a saved site (TASK 7.3). Saving is the explicit user
@@ -277,7 +287,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     final saved = await runWithFeedback(
       context,
       'save the site',
-      () => siteVm.saveSite(site),
+      () => siteVm.saveSite(site, activate: widget.args.activate),
     );
     if (!mounted) return;
     if (saved) {

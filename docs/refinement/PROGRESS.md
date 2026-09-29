@@ -4,7 +4,7 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**Stage 9 validation of S9.1–S9.9: PASS**, no blocker; TD-089 to TD-091 recorded; [report](STAGE_9_VALIDATION.md)).
+> **Last updated:** 2026-09-29 (**TD-089 to TD-091 fixed**, every Stage 9 validation finding, at the owner's standing request; S9.1–S9.9 validated).
 > **Next:** the owner's three decisions (S9.10 the logo, S9.11 the licence, S9.12 the identity), or their deferral; Stage 9 closes then.
 
 ## Current state
@@ -15,9 +15,21 @@
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29): S9.1–S9.9 built and **validated (PASS, [report](STAGE_9_VALIDATION.md))**; S9.10–S9.12 await the owner. Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
 | Next Task | None for the agent: the owner's decisions on S9.10–S9.12 (below, "Next allowed action") |
-| Code baseline | **S9.9** (`0a0c95e`; later commits are documentation only). Not pushed: the owner asked for commits only (2026-09-29) |
+| Code baseline | **The TD-089–TD-091 fix** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**TD-089 to TD-091 fixed, 2026-09-29** (the Stage 9 validation's findings; the owner asked in chat
+to fix every finding): TD-089's four checks are committed tests (the cloud gate against a forecast;
+the cloud bar's unknown hour; no twilight bar without a sunset and a 59.9° N June night; the target's
+delete and the site's cancelled swipe); **TD-090** (decided under D9-1): the Library's Sites hides the
+position actions and adds sites without making them active, `/select/site` unchanged; **TD-091**: the
+export's share text states its local time and offset. TD-088 stays for RD-01.
+- The core-loop E2E now adds its first site where a site is chosen for planning (`/select/site`,
+  Tonight's "Set site") instead of the Library, whose added sites no longer become active (trap 19;
+  the gate's first run caught it).
+- **Verification:** shared behaviour (the site list and editor, the exporter): the full gate after the
+  last code change, **PASS** (1,833 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **Stage 9 validation of S9.1–S9.9, 2026-09-29: PASS** (fresh session, independent;
 [report](STAGE_9_VALIDATION.md); verified at `8e53479`, application code as at `0a0c95e`):

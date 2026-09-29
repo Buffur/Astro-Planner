@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **Stage 9 findings fixed, 2026-09-29:** `SiteViewModel.saveSite(site, activate:)` and `SiteEditorArgs.activate` (TD-090; the Library's `SitesScreen(mode: manage)` hides the position actions and adds sites with `activate: false`); `ShareSessionExporter.localStampWithOffset`/`shareText` (TD-091), which the backup's `shareText` reuses.
+
 > **S9.9, 2026-09-29:** presentation only: the secondary screens' ad hoc `TextStyle`s and numeric insets replaced by the text roles and spacing tokens; `test/presentation/secondary_consistency_test.dart` lists the covered files.
 
 > **S9.8, 2026-09-29:** `AppMessages.showMessage` (an extension on `ScaffoldMessengerState`) is the only way to show a `SnackBar` (TD-081; a test enforces it). `ShareSessionExporter.fileName`/`localFileStamp` and `FileBackupService.fileName`/`shareText` name files in local time. The Logbook's "Export all" moved into a `PopupMenuButton` (`logbook.menu`, item `logbook.exportAll`).

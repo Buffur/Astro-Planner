@@ -46,6 +46,12 @@ void main() {
     );
   });
 
+  test('TD-091: an export\'s share text states its local time and offset', () {
+    final text = ShareSessionExporter.shareText([_one(1)], now);
+    expect(text, startsWith('Astro Planner export: 1 session'));
+    expect(text, contains('Exported $stamp (UTC'));
+  });
+
   test('a backup: its name and a share text with the local time and '
       'offset', () {
     expect(
