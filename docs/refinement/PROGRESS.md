@@ -4,21 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.V2 done**: TD-084 resolved; both Stage 7 blockers corrected).
-> **Next:** bounded V5 revalidation of Stage 7 (S7V-01, S7V-02), preferably in a fresh session; then STOP.
+> **Last updated:** 2026-09-29 (**Stage 7 CLOSED**: V5 revalidation PASS after S7.V1/S7.V2).
+> **Next:** Stage 8 planning (targeted; documentation only), then STOP.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In validation**. Original Tasks committed; independent validation at `d13fdab` found two blockers ([report](STAGE_7_VALIDATION.md)); corrections S7.V1 and S7.V2 done; bounded V5 revalidation next. All Stage 7 research/owner gates decided. Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: Complete** (closed 2026-09-29; [report](STAGE_7_VALIDATION.md)). **Stage 8 — Sessions / Execution / Actuals / Logbook: Not started** (planning next) |
 | Current Task | None in progress |
-| Next Task | **Stage 7 bounded V5 revalidation** (below, "Next allowed action") |
-| Code baseline | **S7.V2** (on S7.V1, `46e7688`). Not pushed (S1.14, RD-17) |
+| Next Task | **Stage 8 planning** (below, "Next allowed action") |
+| Code baseline | **`d28f5a8` (S7.V2)**; `21e9cb1` changed README only. Not pushed (S1.14, RD-17) |
 | Schema | **v23** (S7.5) |
 
-**S7.V2 done, 2026-09-29** (S7V-02 / TD-084 resolved): the site editor rebuilds its back guard
+**Stage 7 V5 revalidation, 2026-09-29: PASS; Stage 7 CLOSED** at `21e9cb1` ([report](STAGE_7_VALIDATION.md),
+same chat at the owner's request, disclosed): the original six probes, replayed unchanged on the
+validation-time test files against the corrected code, pass; six fresh adversarial probes pass;
+the corrections' diffs change nothing else. S7.V2's gate reused (V3: only README changed since).
+One observation, no finding. Documentation only.
+
+**S7.V2 done, 2026-09-29** (`d28f5a8`; S7V-02 / TD-084 resolved): the site editor rebuilds its back guard
 when name, elevation or notes start or stop differing from the opened form (a flip-only
 listener), so Back (app bar or system) asks about an edit to any one field; a reverted edit and
 a new site with only the device zone leave without asking. 15 new tests (13 fail on the
@@ -244,9 +250,9 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **S7.V2**'s final inputs (the S7.V2 commit) | Ran after S7.V2's last code change; covers both corrections. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
+| **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
-| **Six focused probes FAIL**: three calibration input-preservation cases, three single-field site-guard cases | Stage 7 validation at `d13fdab` | `evidence/S7V_01_CALIBRATION_PROBE.patch` and `S7V_02_SITE_GUARD_PROBE.patch`, unapplied; report records exact expected/actual results. All six are now passing tests (S7.V1, S7.V2) and are covered by the gate above |
+| **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -264,7 +270,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
-| 7 | Data Entry & Automation | In validation | 2026-09-28 | — | **BLOCKED** at `d13fdab`, fresh-session independent validation: S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`, TD-083) and S7.V2 (TD-084) done; V5 revalidation next ([report](STAGE_7_VALIDATION.md)) |
+| 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
 | 10 | Performance & Application Size | Not started | — | — | — |
@@ -364,8 +370,10 @@ These block a release, not refinement.
     P9.3); TD-081 (Stage 9 or 11); the validation's DEFERRED items (Stage 7's are now in its frozen
     sequence; Stage 8: saved-plan working copy and results, P8.1–P8.4, P8.7; Stage 9: richer detail
     screens).
-- **Stage 7 (in validation):** both blockers corrected (S7V-01 / TD-083 by S7.V1, S7V-02 /
-  TD-084 by S7.V2); the bounded V5 revalidation remains. All Stage 7 research
+- **Stage 7 (closed 2026-09-29):** nothing blocks. S7V-01 / TD-083 and S7V-02 / TD-084 were
+  resolved by S7.V1/S7.V2 and the V5 revalidation passed ([report](STAGE_7_VALIDATION.md)).
+  Carried: TD-074 (Stage 9 planning); RG-03 = Q1 with lensfun as the RG-12 candidate (Stage 9);
+  the device and real-sample gaps listed under "Carried". All Stage 7 research
   and owner gates are decided; no new decision blocks these corrections. Other criteria retain PASS.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
@@ -375,15 +383,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 7 bounded V5 revalidation** (CLAUDE.md V5; V8: a fresh session where practical).
-   Check only: S7V-01 and S7V-02 (the two probe patches' cases, now committed tests); the
-   acceptance criteria S7.V1/S7.V2 touch (T3a independent edits, T5 discard guard); and
-   regressions plausibly caused by the two correction diffs. Reuse the S7.V2 gate under V3 unless
-   an input changed. All other PASS results stand unless V6 applies. Validation only: record the
-   result in `STAGE_7_VALIDATION.md`; on PASS close Stage 7 and set Stage 8 planning as next; on
-   a surviving blocker, freeze a focused corrective Task. Then **STOP**.
-
-Stage 8 remains unstarted.
+1. **Stage 8 planning** (Sessions / Execution / Actuals / Logbook; `POST_ROADMAP_PLAN.md`,
+   "Stage 8", with its amended P8.1–P8.4 and P8.7 and the inputs it lists: TD-063, TD-070's
+   remainder, TD-056/ENG-14, S4-DEF-01..03 and 05..08, UX-25, RD-12, RD-13). Targeted planning:
+   verify those inputs against the current code, identify research and owner-decision gates,
+   and freeze a Task sequence with scope, out-of-scope, acceptance criteria and required
+   validation; update the plan and this file; commit; then **STOP** before any application code
+   unless the planning itself records an ungated first Task as authorised.
 
 RG-03 is decided (Q1, no specification source): S7.6 has no source path.
 

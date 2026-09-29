@@ -140,3 +140,95 @@ Documentation drift corrected: PROGRESS's Stage 7 blockers still said research/d
 pending despite its current state recording them all decided; the S7.R5 table row also still
 said RG-03 awaited the owner. Git and DECISIONS E.1 confirm Q1 in `9363ff5` before S7.6.
 These stale handoff lines were corrected, with no reopening of the decisions.
+
+## Revalidation of S7V-01 / TD-083 and S7V-02 / TD-084 (V5), 2026-09-29
+
+Checkout `21e9cb1` (S7.V1 `46e7688`, S7.V2 `d28f5a8`, then a README-only commit from another
+session), working tree clean. Validation only; nothing was fixed here.
+
+- **Disclosure:** run in the same chat that wrote S7.V1 and S7.V2, at the owner's request (the
+  owner chose this over a fresh session). It is **not independent** (V8's "where practical"), as
+  the Stage 5 and Stage 6 revalidations were not.
+- **Scope (V5), frozen before any check:**
+  - the original findings S7V-01 / TD-083 and S7V-02 / TD-084;
+  - the criteria they touch: T3a "independent edits" (S7.3a, ADR-020 §6, RG-10 = L1, the Stage
+    rule "a proposal never overwrites the user's edit") and T5 "back with changes asks; back
+    without changes leaves" (S7.5, UX-21), with S7.V1's and S7.V2's own acceptance lists;
+  - the corrections' regression surfaces: their diffs (`calibration_match.dart`,
+    `capture_block_dialog.dart`; `site_editor_screen.dart`) at their V1 classes.
+
+  Every other row of the matrix above keeps its PASS (V6).
+
+### Evidence
+
+- **Gate, reused (V3):** full quality gate PASS on S7.V2's final inputs: Encoding; Format (461
+  files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips; 2 host E2E.
+  `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` is empty; the only
+  later change is `README.md` (the documentation class).
+- **The original failures, replayed unchanged:** the two probe patches no longer apply to the
+  current test files (the correction tests sit at the same place), so the test files were put
+  back to their validation-time state (`099531b`), both patches applied unchanged, and the six
+  "S7V probe" tests run against the corrected `lib/`: **6/6 PASS** (all six failed at `d13fdab`).
+  The test files were restored to `HEAD` afterwards.
+- **Committed regressions:** S7.V1 adds nine tests (`calibration_blocks_test.dart` eight,
+  `calibration_match_test.dart` one); against the pre-fix dialog six fail, and the two that pass
+  guard behaviour that must not change (an untouched flat proposal follows the source; dark-flat
+  unlock shows the flat's values). S7.V2 adds fifteen (`sites_screen_test.dart`); against the
+  pre-fix editor thirteen fail, and the two that pass guard behaviour that must not change (a
+  reverted edit and a device-zone-only new site leave without asking). No existing test line was
+  removed or changed (`git diff 099531b HEAD -- test` has no deleted lines).
+- **Fresh adversarial probes (this revalidation; temporary tests, run, removed; not committed):**
+  all PASS.
+
+  | Probe | Sequence | Observed | Expected by |
+  | --- | --- | --- | --- |
+  | V5-P1 | new bias, exposure 0.001 s, choose OIII (gain 120), Use other values, Add | the gain field shows 120; submitted 0.001 s, gain 120, 2 × 2 | a bias takes the ISO or gain and binning; its exposure is its own |
+  | V5-P2 | new flat, exposure 3 s, untouched gain, choose OIII, Use other values, Add | 3 s, gain 120, filter OIII, count 25 | an untouched proposal may follow the source; the exposure and count are the user's |
+  | V5-P3 | new flat, gain 5, choose OIII then Ha, Use other values, Add | gain 5, filter Ha | an edited gain survives several source changes and the unlock |
+  | V5-P4 | existing site, name edited then typed back, then notes edited, Back | the prompt | a later single-field edit after a revert is still guarded |
+  | V5-P5 | existing site, name-only edit, Save in the app bar | leaves without a prompt; name stored | Save still marks the page as leaving |
+  | V5-P6 | existing site, elevation "abc" only, system Back, Save in the prompt | stays on the editor; stored elevation still 300 | Save in the prompt uses the existing validation |
+
+- **Code inspection of the diffs:**
+  - `CalibrationMatch.takesExposure`/`takesSensitivity` reproduce `matched`'s previous
+    conditions for every frame type (a light returns early), so `matched`, the one-tap fix and
+    the budget inputs are unchanged; `_typesExposure` and `takesGain` are equivalent to before,
+    since a light never has a source;
+  - the dialog's only behavioural changes are the intended ones: "Use other values" copies the
+    exposure only for darks and dark flats and the ISO or gain only for darks, dark flats and
+    bias; a flat's proposal stops once `_gainEdited` is set by typing, clearing or re-kinding;
+  - nothing is written before Add (the dialog returns a block; the caller adds it);
+  - the site editor keeps its state local: a flip-only listener on name, elevation and notes;
+    Bortle, the zone, the map pick and GPS already rebuild through `setState` or the coordinate
+    listener; the device-zone prefill sets no field in the change set; no ViewModel or
+    repository call was added, so nothing recomputes per keystroke;
+  - no schema, persistence, snapshot, export, formula or vector changed.
+
+### Criteria
+
+| Criterion | Result |
+| --- | --- |
+| S7V-01 / TD-083: the three probe cases (flat and bias exposure after unlock, edited flat gain after a source change) | **PASS** (original probes; committed tests) |
+| S7.V1: unlocking a flat keeps its edited ISO/gain; a source change keeps an edited or cleared one; an untouched proposal follows the source | **PASS** (committed tests; V5-P2, V5-P3) |
+| S7.V1: dark and dark-flat unlock still shows the inherited values; bias keeps its exposure; count and policy kept | **PASS** (committed tests; V5-P1) |
+| S7.V1: matrix, hidden values, warnings, Undo, 200 % layout, ADR-009/020 vectors unchanged | **PASS** (the existing tests, unchanged, in the gate) |
+| S7V-02 / TD-084: the three probe cases (name, elevation, notes only) | **PASS** (original probes; committed tests) |
+| S7.V2: each field alone guarded on existing and new sites, app-bar and system Back; untouched and reverted leave | **PASS** (committed tests; V5-P4) |
+| S7.V2: Cancel keeps, Discard stores nothing, Save validates and stores; device zone alone is no edit; GPS/map form-only; no recomputation per keystroke | **PASS** (committed tests; V5-P5, V5-P6; inspection) |
+| Regression surfaces: the calibration and site suites, the accessibility sweep, the E2E, the gate | **PASS** (the gate) |
+
+### Findings
+
+- **No blocker.**
+- **Observation, not a finding:** `_gainEdited` is set by any edit of the ISO or gain field in the
+  dialog, including one typed while the frame type was still Light; if the user then switches to
+  Flat, the typed value is kept rather than replaced by the light's proposal. This follows the
+  Stage rule that a proposal never overwrites the user's edit; it is recorded only so that a later
+  Task does not rediscover it.
+
+### Verdict
+
+**S7V-01 / TD-083: PASS. S7V-02 / TD-084: PASS.** No V4 blocker remains, so **Stage 7 closes**
+(V7), with the carried items in `PROGRESS.md`. Stage 8 is not started: its planning is the next
+allowed action. This revalidation changed documentation only; verification: references resolve,
+`git diff --check`.

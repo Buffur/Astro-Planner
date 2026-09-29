@@ -1,5 +1,6 @@
 # AstroPlan Technical Debt Register
 
+> **Stage 7 V5 revalidation, 2026-09-29:** TD-083 and TD-084 confirmed resolved (original probes and six fresh probes pass); Stage 7 closed; see `refinement/STAGE_7_VALIDATION.md`.
 > **S7.V2, 2026-09-29:** TD-084 / S7V-02 resolved (the site editor asks before leaving with an edit to any one field, name, elevation and notes included; commit recorded in `refinement/PROGRESS.md`). Both Stage 7 blockers are corrected; bounded V5 revalidation next.
 > **S7.V1, 2026-09-29:** TD-083 / S7V-01 resolved (calibration unlock and source changes keep what the user owns: a flat's or bias's exposure, an edited or cleared flat ISO/gain; commit recorded in `refinement/PROGRESS.md`). TD-084 / S7V-02 open (S7.V2 next).
 > **Stage 7 validation, 2026-09-29, verified at `d13fdab`:** TD-083 / S7V-01 (calibration controls overwrite independent input) and TD-084 / S7V-02 (site guard misses single-field edits) reproduced by six widget probes. BLOCKERS; bounded corrections S7.V1/S7.V2. No code fixed; see `refinement/STAGE_7_VALIDATION.md`.

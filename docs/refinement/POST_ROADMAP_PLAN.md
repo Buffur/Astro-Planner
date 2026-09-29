@@ -109,7 +109,7 @@
 > **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 > **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
-> **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed. **S7.V1 done 2026-09-29** (TD-083 resolved); **S7.V2 done 2026-09-29** (TD-084 resolved); bounded V5 revalidation is next.
+> **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed. **S7.V1 done 2026-09-29** (TD-083 resolved); **S7.V2 done 2026-09-29** (TD-084 resolved). **V5 revalidation PASS 2026-09-29; Stage 7 closed** (same chat at the owner's request, disclosed). Stage 8 planning is next.
 
 ## Contents
 
@@ -4646,6 +4646,8 @@ The research and decision Tasks are judged by the bounded rule for analysis work
 ([report](STAGE_7_VALIDATION.md)). Six targeted widget probes reproduce independent calibration
 input being overwritten and site edits leaving without a prompt. Other criteria retain the report's
 PASS. No application fixes in validation; the following corrections restore the existing contract.
+**V5 revalidation 2026-09-29 at `21e9cb1`: PASS** (both findings, the touched criteria and the
+corrections' regression surfaces; same chat at the owner's request, disclosed); **Stage 7 closed**.
 
 ##### S7.V1 — Preserve independent calibration input (S7V-01 / TD-083)
 
