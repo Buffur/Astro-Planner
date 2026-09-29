@@ -130,7 +130,7 @@ void main() {
     expect(title('Tonight'), findsOneWidget);
     final bar = find.byType(NavigationBar);
     expect(bar, findsOneWidget);
-    for (final tab in ['Tonight', 'Sessions', 'Library', 'Settings']) {
+    for (final tab in ['Tonight', 'Logbook', 'Library', 'Settings']) {
       expect(
         find.descendant(of: bar, matching: find.text(tab)),
         findsOneWidget,
@@ -144,7 +144,8 @@ void main() {
     final expected = {
       AppRouter.tonight: 'Open planner',
       AppRouter.candidates: "Tonight's candidates",
-      AppRouter.sessions: 'Sessions',
+      AppRouter.sessions: 'Logbook',
+      AppRouter.logbookProgress: 'Progress by target', // S8.5
       AppRouter.library: 'Library',
       AppRouter.libraryRigs: 'Select Equipment',
       AppRouter.libraryTargets: 'Select Target',

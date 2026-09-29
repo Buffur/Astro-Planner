@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/services/target_progress.dart';
+import '../../shared/app_words.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/failure_feedback.dart';
 
-/// Integration so far per target, across nights (TASK 14.2, CALC-38):
-/// completed sessions only, confirmed light frames × exposure, per filter,
-/// last imaged night and the number of sessions. No goals (out of scope).
+/// Progress by target (TASK 14.2, CALC-38; in the Logbook since S8.5, RD-07):
+/// integration so far across nights, from logged results only (completed
+/// entries: their light frames × exposure), per filter, the last night and
+/// the number of entries. One progress concept: no goals, no Project.
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
@@ -25,7 +27,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Progress')),
+      appBar: AppBar(title: const Text(AppWords.progressByTarget)),
       body: FutureBuilder<List<TargetProgress>>(
         future: _progress,
         builder: (context, snapshot) {
@@ -41,8 +43,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'No completed sessions yet. Integration adds up here once '
-                  'you complete a tracked session.',
+                  'No results yet. Integration adds up here once you record '
+                  'how a saved plan went.',
                   key: Key('progress.empty'),
                   textAlign: TextAlign.center,
                 ),

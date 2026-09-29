@@ -158,13 +158,16 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('the Completed chip filters the list in the query', (
-    tester,
-  ) async {
+  testWidgets('the Completed filter (in the panel, S8.5) filters the list in '
+      'the query', (tester) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
     expect(find.byKey(Key('logbook.status.$plannedId')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('logbook.filters')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.filter.completed')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('logbook.filters.done')));
     await settle(tester);
     expect(find.byKey(Key('logbook.status.$completedId')), findsOneWidget);
     expect(find.byKey(const Key('logbook.status.$legacyId')), findsOneWidget);
@@ -179,21 +182,31 @@ void main() {
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
+    await tester.tap(find.byKey(const Key('logbook.filters')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.filter.target')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.pick.1')));
     await settle(tester);
+    expect(find.text('Orion Nebula'), findsOneWidget, reason: 'the panel');
+    await tester.tap(find.byKey(const Key('logbook.filters.done')));
+    await settle(tester);
     expect(find.byKey(Key('logbook.status.$completedId')), findsOneWidget);
     expect(find.byKey(const Key('logbook.status.$legacyId')), findsNothing);
-    expect(find.textContaining('Target: Orion Nebula'), findsOneWidget);
   });
 
-  testWidgets('the legacy row carries a badge; a tap opens the detail', (
+  testWidgets('the legacy row reads Old log (S8.5); a tap opens the detail', (
     tester,
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
-    expect(find.byKey(const Key('logbook.legacy.$legacyId')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('logbook.status.$legacyId')),
+        matching: find.text('Old log'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.textContaining('M31'));
     await settle(tester);
     expect(find.byKey(const Key('detail.legacy')), findsOneWidget);
@@ -301,7 +314,7 @@ void main() {
     expect(find.text('This target so far'), findsOneWidget);
     expect(find.text('50 min over 1 session'), findsOneWidget);
     expect(find.text('L: 50 min'), findsOneWidget);
-    AppRouter.router.go(AppRouter.libraryProgress);
+    AppRouter.router.go(AppRouter.logbookProgress);
     await settle(tester);
     expect(find.byKey(const Key('progress.1')), findsOneWidget);
     expect(find.text('Orion Nebula'), findsWidgets);
@@ -312,7 +325,7 @@ void main() {
   ) async {
     await seed(tester);
     await tester.runAsync(() => sessions.delete(completedId));
-    await pumpAt(tester, AppRouter.libraryProgress);
+    await pumpAt(tester, AppRouter.logbookProgress);
     expect(find.byKey(const Key('progress.empty')), findsOneWidget);
   });
 

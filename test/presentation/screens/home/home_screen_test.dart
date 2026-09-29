@@ -589,7 +589,7 @@ void main() {
 
     // Stays visible per PD-06 (on the core path): since TASK 12.2 it is
     // the Sessions tab (ADR-015).
-    expect(AppShell.destinations.map((d) => d.label), contains('Sessions'));
+    expect(AppShell.destinations.map((d) => d.label), contains('Logbook'));
     expect(allRoutePaths(), contains(AppRouter.sessions));
   });
 }

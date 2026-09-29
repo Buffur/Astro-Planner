@@ -242,7 +242,7 @@ void main() {
           AppRouter.libraryRigs,
           AppRouter.libraryTargets,
           AppRouter.librarySites,
-          AppRouter.libraryProgress,
+          AppRouter.logbookProgress,
           AppRouter.settings,
           AppRouter.about,
           AppRouter.session(),

@@ -4903,7 +4903,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 | S8.2 | The result form | P8.2 | M | S8.1 | **Done 2026-09-29** |
 | S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | **Done 2026-09-29** |
 | S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | **Done 2026-09-29** |
-| S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | Frozen |
+| S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | **Done 2026-09-29** |
 | S8.6 | An optional plan name | P8.6 | S–M | S8.5 | Frozen |
 | S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | Frozen |
 | S8.8 | Per-field provenance in new snapshots (TD-070's remainder) | Input | S | — | Frozen |
@@ -5491,7 +5491,7 @@ provisional in the same way.*
 | UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4; **closed by S8.4 (2026-09-29)**: the resume prompt is gone |
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack; **2026-09-27:** the tracker retires (P8.4), and Stage 11's TalkBack covers the new flows |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |
-| UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24); **2026-09-27:** P8.5 |
+| UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24); **2026-09-27:** P8.5; **done by S8.5 (2026-09-29)**: one Filters panel |
 | UX-34 button hierarchy; UX-38 swipe-only delete | Requires verification | Stage 5 (RD-09); Stage 11. **Stage 5 planning:** mechanisms verified at `38925dd`. UX-34's primary action is decided by ADR-019 §6 (Save plan); the visual hierarchy is S5.2, applied by P6.3. UX-38 is RD-09's Q2, then S5.8 |
 | UX-39 red-mode outlines and bands | Documented; requires verification | Stage 5 constraints; Stage 11 darkness test. **Stage 5 planning:** S5.2 records the field-mode control-boundary token; the bands stay Stage 6/11 |
 | ENG-04 planner tests on the preferences path | Partially confirmed | E4 (optional) |

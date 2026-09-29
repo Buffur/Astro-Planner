@@ -10,7 +10,7 @@ import '../screens/equipment/equipment_selection_screen.dart';
 import '../screens/home/session_planner_route.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/location/location_picker_screen.dart';
-import '../screens/library/progress_screen.dart';
+import '../screens/logbook/progress_screen.dart';
 import '../screens/logbook/logbook_screen.dart';
 import '../screens/logbook/session_detail_screen.dart';
 import '../screens/metadata/metadata_import_screen.dart';
@@ -40,13 +40,15 @@ class AppRouter {
 
   /// A saved session's detail (TASK 14.1).
   static String sessionDetail(int id) => '/sessions/$id';
+
+  /// Progress by target (TASK 14.2; in the Logbook since S8.5, RD-07,
+  /// ADR-019 §9).
+  static const logbookProgress = '/sessions/progress';
   static const library = '/library';
   static const libraryRigs = '/library/rigs';
   static const libraryTargets = '/library/targets';
   static const librarySites = '/library/sites';
 
-  /// Integration so far per target (TASK 14.2).
-  static const libraryProgress = '/library/progress';
   static const settings = '/settings';
   static const about = '/settings/about';
 
@@ -107,6 +109,11 @@ class AppRouter {
                   path: sessions,
                   builder: (context, state) => const LogbookScreen(),
                   routes: [
+                    // S8.5: before ':id', so the literal path wins.
+                    GoRoute(
+                      path: 'progress',
+                      builder: (context, state) => const ProgressScreen(),
+                    ),
                     // TASK 14.1: a session's detail, from its snapshots.
                     GoRoute(
                       path: ':id',
@@ -136,10 +143,6 @@ class AppRouter {
                   GoRoute(
                     path: 'sites',
                     builder: (context, state) => const SitesScreen(),
-                  ),
-                  GoRoute(
-                    path: 'progress',
-                    builder: (context, state) => const ProgressScreen(),
                   ),
                 ],
               ),

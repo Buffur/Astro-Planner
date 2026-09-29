@@ -31,8 +31,6 @@ const retiredTerms = [
 const baseline = {
   'lib/presentation/screens/equipment/equipment_selection_screen.dart|Equipment profile':
       1,
-  'lib/presentation/screens/logbook/logbook_screen.dart|Legacy': 2,
-  'lib/presentation/screens/logbook/logbook_screen.dart|Draft': 1,
   'lib/presentation/screens/logbook/session_detail_screen.dart|Legacy': 1,
   'lib/presentation/screens/logbook/session_detail_screen.dart|Window load': 1,
   'lib/presentation/screens/logbook/session_detail_screen.dart|Session budget':

@@ -166,7 +166,7 @@ void main() {
     await tester.drag(listFinder, const Offset(0, 2000));
     await tester.pumpAndSettle();
 
-    // TASK 12.2: the logbook is the Sessions tab.
+    // TASK 12.2: the logbook is the second tab (labelled Logbook since S8.5).
     AppRouter.router.go(AppRouter.sessions);
     await tester.pump();
     await tester.runAsync(
@@ -174,16 +174,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Sessions'), findsWidgets);
+    expect(find.text('Logbook'), findsWidgets); // S8.5
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
-    // TASK 11.3: Save stores a planned session with a plan snapshot.
-    // The row's status (TASK 14.1 added a "Planned" filter chip).
+    // TASK 11.3: Save stores a planned session with a plan snapshot; S8.5
+    // shows its state as the plan-state label.
     expect(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Planned'),
-      ),
+      find.descendant(of: find.byType(ListTile), matching: find.text('Saved')),
       findsOneWidget,
     );
   });

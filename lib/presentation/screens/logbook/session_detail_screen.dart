@@ -9,6 +9,8 @@ import '../../../domain/models/session_snapshot.dart';
 import '../../../domain/services/result_action.dart';
 import '../../../domain/services/session_reconciliation.dart';
 import '../../shared/app_words.dart';
+import '../../shared/delete_patterns.dart';
+import '../../shared/plan_state.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
@@ -17,7 +19,7 @@ import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
-import '../library/progress_screen.dart';
+import 'progress_screen.dart';
 import 'logbook_screen.dart';
 import '../../shared/unsaved_plan_prompt.dart';
 import '../../../core/utils/quantity_text.dart';
@@ -81,7 +83,21 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         }
         final s = data.session;
         return Scaffold(
-          appBar: AppBar(title: Text(s.record.targetName)),
+          appBar: AppBar(
+            title: Text(s.record.targetName),
+            actions: [
+              // S8.5 (S5.8, RD-09 S1): the entry's visible Delete.
+              DeleteButton(
+                key: const Key('detail.delete'),
+                tooltip: 'Delete entry',
+                onPressed: () async {
+                  if (await deleteEntry(context, s) && context.mounted) {
+                    context.pop();
+                  }
+                },
+              ),
+            ],
+          ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
@@ -131,9 +147,9 @@ class _Header extends StatelessWidget {
                 : 'Night of ${NightTimeFormatter.eveningDate(evening)}',
             style: theme.textTheme.titleMedium,
           ),
-          Chip(
+          PlanStateLabel(
+            PlanState.of(session),
             key: const Key('detail.status'),
-            label: Text(sessionStatusLabel(session)),
           ),
           if (session.legacy)
             const Chip(

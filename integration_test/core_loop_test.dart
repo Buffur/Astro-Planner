@@ -318,7 +318,7 @@ void main() {
     expect(find.byKey(const Key('tonight.resultDue')), findsNothing);
     final runId = savedId;
     // Log: the Sessions list and the detail.
-    expect(find.text('Sessions'), findsWidgets);
+    expect(find.text('Logbook'), findsWidgets);
     final stored = await tester.runAsync(
       () => DriftSessionRepository(device.db!).get(runId),
     );
