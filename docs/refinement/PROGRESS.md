@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S8.7 done**: the Logbook entry, Share and Export as file).
-> **Next:** S8.8 (per-field provenance in new snapshots). Paused at the owner's request after S8.7. The owner asked for the whole of Stage 8.
+> **Last updated:** 2026-09-29 (**S8.8 done**: per-field provenance in new snapshots).
+> **Next:** S8.9 (preferences in the backup; stale ids). The owner resumed the run after the S8.7 pause and asked for the whole of Stage 8.
 
 ## Current state
 
@@ -14,11 +14,22 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S8.8** (below, "Next allowed action") |
-| Code baseline | **S8.7** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S8.9** (below, "Next allowed action") |
+| Code baseline | **S8.8** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S8.8 done, 2026-09-29** (TD-070 resolved; ADR-018 §5): per-field provenance in new snapshots.
+- `SessionSnapshotBuilder` adds `rig.provenance`: each valued spec (`EquipmentSpec` name; the RAW
+  size only when set) → `{source, confidence}` from `provenanceOf`, or null when unknown. The group
+  pairs (S3.V7) stay; `v` stays 1; an older snapshot has no key and reads as stored. Nothing is
+  recorded as `user` unless it was typed; an explicitly unknown field stays null. The export embeds
+  snapshots as stored (manifest unchanged). No screen change.
+- **Tests:** `session_snapshot_builder_test.dart` +3 (an imported rig's estimates and file values; a
+  typed rig per field with one explicitly unknown field; a snapshot without the key still reads,
+  `SavedPlanReader` included); the legacy case now pins every field null.
+- **Verification:** high-risk (snapshot, provenance): the full gate after the last code change,
+  **PASS** (1,778 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 **S8.7 done, 2026-09-29** (P8.7; D8-4, I-6; 08 §24): the Logbook entry, Share and Export as file.
 - The entry is a `DetailScaffold`: the identity (name, or target · night) with the site and zone;
   the result first (state, how it was reported, planned against actual, or when a result can be
@@ -157,7 +168,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS** (S8.7): Encoding; Format (462 files, 0 changed); Analyze (no issues); 1,775 tests, 2 expected skips; 2 host E2E | **S8.7's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.7's last code change; supersedes S8.1–S8.6's gates. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
+| **Full quality gate PASS** (S8.8): Encoding; Format (462 files, 0 changed); Analyze (no issues); 1,778 tests, 2 expected skips; 2 host E2E | **S8.8's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.8's last code change; supersedes S8.1–S8.7's gates. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
 | **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
 | **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
@@ -291,11 +302,10 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S8.8 — Per-field provenance in new snapshots (TD-070's remainder)** (`POST_ROADMAP_PLAN.md`,
-   "Stage 8 — frozen Task sequence", S8.8). Ungated. Then S8.9 and the Stage 8 validation. The
-   owner paused the run after S8.7 (2026-09-29): resume only on the owner's word in the frozen order and the Stage 8
-   validation: the owner asked, in chat on 2026-09-29, for the whole of Stage 8,
-   so each Task follows the previous one's commit without a new prompt.
+1. **S8.9 — Preferences in the backup; stale ids (TD-056, ENG-14)** (`POST_ROADMAP_PLAN.md`,
+   "Stage 8 — frozen Task sequence", S8.9). Ungated. Then the Stage 8 validation. The owner paused
+   the run after S8.7 and resumed it (2026-09-29): the owner asked, in chat on 2026-09-29, for the
+   whole of Stage 8, so each Task follows the previous one's commit without a new prompt.
 
 No Stage 8 gate is open.
 
@@ -306,7 +316,7 @@ No Stage 8 gate is open.
 - S3V-08: a device recheck of the corrected Stage 3 flow (unverified; separate);
 - TD-072 (S3S-03, deferred by the owner) with its S3F-01 addendum; S3F-02 (a note on TD-071, no
   Task proposed);
-- TD-070's remainder (per-field snapshot provenance; snapshots saved before S3.V7): Stage 8;
+- TD-070: resolved (S8.8); snapshots saved before S8.8 keep their group pairs and are read as stored;
 - W1 (decided with RD-05's U1): built by S6.3;
 - TD-063 (Stage 8);
 - TD-057 and TD-058: resolved (S6.4, S6.2);

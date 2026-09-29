@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **S8.8, 2026-09-29:** an implementation note under ADR-018 §5 (after S3.V7's) records per-field
+> provenance in new session snapshots (TD-070 resolved; additive, `v` stays 1).
 > **S8.4, 2026-09-29:** ADR-016 §13 records the live tracker's retirement (the owner's direction of
 > 2026-09-27): no run is started; events, the fold and stored runs stay; CALC-35 and CALC-36 retired.
 > **Stage 8 decisions, 2026-09-29 (Stage 8 planning; delegated by the owner in chat):** D8-1 a saved
@@ -4140,6 +4142,15 @@ unchanged. **Implementation:** §3 done (S3.1, 2026-09-26); §4 done as pure dom
 - Per-field snapshot provenance, and snapshots already saved (which hold the group pair, `user`
   for a rig imported before this change), are Stage 8's (owner, E.1). No screen reads a
   snapshot's provenance; the export embeds snapshots as stored.
+
+**Implementation note (S8.8, 2026-09-29; TD-070 resolved):** a new session snapshot's rig records
+each spec's own provenance.
+- `rig.provenance` maps each valued spec (`EquipmentSpec` name; the RAW size only when set) to
+  `{source, confidence}` as `provenanceOf` reads it, or null when unknown. An explicitly unknown
+  field is null whatever its group says, and nothing becomes `user` that was not typed.
+- Additive: `"v": 1` is kept, and the group pairs (S3.V7's shared provenance) stay beside it. A
+  snapshot saved earlier has no `provenance` key; it is read as stored and never rewritten. The
+  export embeds snapshots as stored, so `manifest_version` is unchanged. No screen change.
 
 **Implementation note (S3.V4, 2026-09-27; S3V-05):** §3's dimensions have a sanity bound. A side over **65,535 px** is unparseable in every container (DNG IFD0 and DefaultCropSize, JPEG and HEIC EXIF), as S3.1's acceptance required. 65,535 is JPEG's own format limit and several times any camera sensor's long side. It is a metadata bound, deliberately wider than `EquipmentLimits.resolutionPx` (30,000), which the candidate applies later.
 
