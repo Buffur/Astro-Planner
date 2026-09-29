@@ -4,20 +4,30 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**TD-089 to TD-091 fixed**, every Stage 9 validation finding, at the owner's standing request; S9.1–S9.9 validated).
-> **Next:** the owner's three decisions (S9.10 the logo, S9.11 the licence, S9.12 the identity), or their deferral; Stage 9 closes then.
+> **Last updated:** 2026-09-30 (**Stage 9 closed**: the owner deferred S9.10–S9.12 in chat).
+> **Next:** Stage 10 planning (Performance & Application Size).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29): S9.1–S9.9 built and **validated (PASS, [report](STAGE_9_VALIDATION.md))**; S9.10–S9.12 await the owner. Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
+| Current Stage | **Stage 10 — Performance & Application Size: Not started** (planning is next). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | None for the agent: the owner's decisions on S9.10–S9.12 (below, "Next allowed action") |
+| Next Task | Stage 10 planning (below, "Next allowed action") |
 | Code baseline | **The TD-089–TD-091 fix** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Stage 9 closed, 2026-09-30** (the owner, in chat: "defer all three decisions, move on to Stage 10"):
+- **S9.10** (the logo), **S9.11** (RG-12, the licence) and **S9.12** (RD-01, the identity) are
+  **deferred by the owner**. Their research stays as prepared; nothing was built from them. Today's
+  icon, GPL-3.0 and the `chacha12` identity stay as they are.
+- The Stage's exit ("done or deferred by the owner; Stage 9 validation passes") is met: S9.1–S9.9
+  PASS ([report](STAGE_9_VALIDATION.md)) and every finding fixed (TD-089 to TD-091).
+- **Carried:** TD-088 (the 404 source and policy links) stays open with RD-01; both block a store
+  upload, not refinement (Stage 11's release checks). RG-12 stays open for the owner.
+- **Verification:** the documentation class (V1): references resolve; `git diff --check`.
 
 **TD-089 to TD-091 fixed, 2026-09-29** (the Stage 9 validation's findings; the owner asked in chat
 to fix every finding): TD-089's four checks are committed tests (the cloud gate against a forecast;
@@ -439,7 +449,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
-| 9 | Secondary UX & Product Polish | In progress (S9.1–S9.9 validated; S9.10–S9.12 await the owner) | 2026-09-29 | — | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091. The Stage closes when the owner decides or defers S9.10–S9.12 |
+| 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
 | 10 | Performance & Application Size | Not started | — | — | — |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
@@ -460,7 +470,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | **Decided** 2026-09-29 (S7.R4; DECISIONS E.1): S3 (manual, optional, collapsed), M2 (lightpollutionmap.app) |
 | RG-10 | Calibration-frame workflows and inheritance | 7 | **Decided** 2026-09-29 (S7.R2; DECISIONS E.1, "RG-10 decided"): L1, D1, T0, O0, N1, H1; ADR-020 |
 | RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | **Decided** 2026-09-29 (S7.R1; DECISIONS E.1, "RG-11 decided"): C1, B1, W1, F1, I1, P2; ADR-020 |
-| RG-12 | Licence requirements against GPL-3.0 | 9 | **Researched** 2026-09-29 (S9.11, `research/S9.11_LICENCE.md`); **the owner decides** (P9.5 implements) |
+| RG-12 | Licence requirements against GPL-3.0 | 9 | **Researched** 2026-09-29 (S9.11, `research/S9.11_LICENCE.md`); **deferred by the owner** 2026-09-30 (GPL-3.0 stays; P9.5 waits for a decision) |
 | RG-13 | Settings: real-world needs and where each setting belongs | 9 | **Answered** 2026-09-29 (S9.3, `research/S9.3_SETTINGS.md`; DECISIONS E.1, D9-3); built by S9.4 |
 | RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | **Decided** 2026-09-26 (DECISIONS E.1): none in Stage 2; per-format adapters later, with samples; `ExifInterface` and LibRaw rejected |
 
@@ -470,7 +480,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 
 | ID | Decision | Stage | Status |
 | --- | --- | --- | --- |
-| RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open (the author's own links do not wait for it, 2026-09-27). **Options prepared** 2026-09-29 (S9.12, `research/S9.12_PROJECT_IDENTITY.md`; TD-088) |
+| RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open (the author's own links do not wait for it, 2026-09-27). **Options prepared** 2026-09-29 (S9.12, `research/S9.12_PROJECT_IDENTITY.md`; TD-088); **deferred by the owner** 2026-09-30 (before any upload; Stage 11) |
 | RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
 | RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
 | RD-04 | New-draft defaults and the example plan | 4 | **Decided** 2026-09-27 (S4.R3; E.1): nothing preselected on the first run; New keeps the site and rig; an empty plan with "Start from the example plan" |
@@ -544,9 +554,9 @@ These block a release, not refinement.
   and owner gates are decided; no new decision blocks these corrections. Other criteria retain PASS.
 - **Stage 8 (closed 2026-09-29):** nothing blocks. Validation PASS ([report](STAGE_8_VALIDATION.md)).
   Carried: TD-085, TD-086, TD-087 (non-blocking follow-ups); the lifecycle device rows L1–L8 (Stage 11).
-- **Stage 9 (open):** nothing blocks the built part: S9.1–S9.9 PASS ([report](STAGE_9_VALIDATION.md)).
-  The exit waits for the owner's decisions on S9.10–S9.12. Carried: TD-088 (with RD-01), TD-089 to
-  TD-091 (non-blocking follow-ups), TD-074 (after Stage 11, D9-6).
+- **Stage 9 (closed 2026-09-30):** nothing blocks. S9.1–S9.9 PASS ([report](STAGE_9_VALIDATION.md));
+  TD-089 to TD-091 fixed; S9.10–S9.12 deferred by the owner. Carried: TD-088 (with RD-01, before any
+  upload), RG-12 (the owner), the logo (P9.4, the owner), TD-074 (after Stage 11, D9-6).
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -555,19 +565,13 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **The owner's decisions** (owner gates; the agent implements nothing that depends on them):
-   - **S9.10** — choose a logo option (A–D in `research/S9.10_LOGO.md`) or defer;
-   - **S9.11** — RG-12, the licence (G, N, S or P in `research/S9.11_LICENCE.md`) or defer;
-   - **S9.12** — RD-01, the identity (C, B or B′ in `research/S9.12_PROJECT_IDENTITY.md`; TD-088) or
-     defer.
-   Optionally, confirm About's author name ("Buffur"; `STAGE_9_VALIDATION.md` N2).
-2. **Then** one implementing Task per decision (the mark everywhere, trap 20; the licence text, About
-   and `COMPLIANCE.md`; `AppIdentity`, the policy URL and the remote), each verified at its own V1
-   class and revalidated per V5 (S9.1–S9.9 keep their PASS). If the owner defers all three, Stage 9
-   closes on the validation report and the next allowed action is **Stage 10 planning**.
-
-S9.1–S9.9 need no corrective Task. TD-089 to TD-091 are follow-ups for any later Task that touches
-those screens.
+1. **Stage 10 planning** (documentation only): verify Stage 10's inputs against the code and the
+   machine (§9.7; the plan's "Stage 10 — Performance & Application Size" and its 2026-09-27
+   amendment), then freeze its Task sequence. Measurement comes first; no optimisation without a
+   recorded baseline.
+2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
+   P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
+   must be settled before any store upload (Stage 11).
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 decided

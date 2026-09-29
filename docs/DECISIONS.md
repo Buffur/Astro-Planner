@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **Stage 9 closed, 2026-09-30:** the owner deferred the logo (P9.4), the licence (RG-12) and the identity (RD-01); recorded under E.1 "Stage 9 decisions". Documentation only.
 > **Stage 9 planning, 2026-09-29:** E.1 "Stage 9 decisions (delegated by the owner)": D9-1 to D9-6;
 > the logo, the licence (RG-12) and the project identity (RD-01) stay the owner's. Documentation only.
 > **TD-086 fix, 2026-09-29:** D8-1's conservative end for an unreadable snapshot uses the later of the row's night key and the night the snapshot still names (CALC-44); an implementation note follows D8-1.
@@ -1900,6 +1901,9 @@ Stage 4 revalidation is still required.
   not polish). TD-074 stays recorded, deferred to after Stage 11; the current wording stays honest.
 - **Consequences:** S9.1–S9.9 build D9-1 to D9-5; S9.10–S9.12 wait for the owner. Documentation
   only.
+- **Owner, 2026-09-30 (in chat):** the logo (S9.10), the licence (S9.11, RG-12) and the identity
+  (S9.12, RD-01) are **deferred**. Today's icon, GPL-3.0 and the `chacha12` identity stay; the prepared
+  research stands. RD-01 (with TD-088) must still be settled before any store upload.
 
 ### Stage 8 decisions (delegated by the owner, Stage 8 planning, 2026-09-29)
 

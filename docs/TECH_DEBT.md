@@ -1,5 +1,6 @@
 # AstroPlan Technical Debt Register
 
+> **Stage 9 closed, 2026-09-30:** RD-01 deferred by the owner; TD-088 stays open, due before any store upload (Stage 11). No item added.
 > **Stage 9 findings fixed, 2026-09-29:** TD-089, TD-090 and TD-091 resolved (every Stage 9 validation finding). TD-088 stays open for RD-01. No item added.
 > **Stage 9 validation (S9.1–S9.9), 2026-09-29, verified at `8e53479` (code as at `0a0c95e`):** PASS, no blocker. TD-089 (four acceptance checks established by validation probes, not committed tests), TD-090 (the Library's Sites still has actions that change the active site) and TD-091 (an export's share text does not state its stamp's zone) recorded, not fixed; see `refinement/STAGE_9_VALIDATION.md`.
 > **S9.12 preparation, 2026-09-29:** TD-088 recorded (the app's source and privacy-policy links return 404); not fixed, it waits for RD-01.
