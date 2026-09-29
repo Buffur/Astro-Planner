@@ -1885,6 +1885,11 @@ Stage 4 revalidation is still required.
 - **D9-3 Settings:** RG-13 is answered by research (S9.3) and its placements are recorded here when
   S9.3 lands; the Moon and cloud gates go into Settings (RD-11 = S9) as a switch and a threshold each;
   the optional overheads' values become editable within the model's ranges; no default changes.
+  *RG-13 answered by S9.3 (2026-09-29; `refinement/research/S9.3_SETTINGS.md` §4):* the title
+  "Settings"; sections Imaging window (minimum altitude, darkness limit, Moon gate, cloud gate), Fit
+  and capture time (feasibility margin, time between frames, the optional overheads), Guidance (NPF
+  k, dew margin), Display, Privacy, Data, About; each row its value, unit and consequence; nothing
+  collapsed; nothing moves out of Settings (every planning preference applies to every plan).
 - **D9-4 About:** the author block (name, Reddit first, GitHub profile) at the top, apart from
   third-party credit; the source, project and policy links stay until RD-01.
 - **D9-5 feedback:** a short `showDone` after a save, delete, backup, staged or cancelled restore,

@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.2 done**: secondary forms; the retired-terms baseline empty).
-> **Next:** S9.3 (RG-13: the settings research). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.3 done**: RG-13 answered).
+> **Next:** S9.4 (Settings rebuilt; the Moon and cloud gates). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,19 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.3** (below, "Next allowed action") |
+| Next Task | **S9.4** (below, "Next allowed action") |
 | Code baseline | **S9.2** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.3 done, 2026-09-29** (RG-13 answered; documentation only): `research/S9.3_SETTINGS.md`.
+- Every visible setting classed (A–F), with what it changes, its unit, range and default, the need
+  (N.I.N.A. and PHD2 documentation for dithering, refocus and meridian-flip practice; CALC-17 for
+  NPF; the twilight definitions), and where it belongs. The Moon and cloud gates are placed in
+  Settings (RD-11 = S9). Decisions for S9.4 recorded in E.1 (D9-3).
+- Found: the "Time between frames" slider stops at 60 s while the model allows 120 s (fixed in S9.4).
+- **Verification:** the documentation class (V1): references resolve; `git diff --check`. The S9.2
+  gate stays the baseline (V3).
 
 **S9.2 done, 2026-09-29** (P9.2): secondary forms and the vocabulary completed.
 - The rig, target and site editors: sentence-case titles and labels from `AppWords`, one primary
@@ -426,8 +435,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.3 — RG-13: what each setting is for, and where it belongs (research)** (`POST_ROADMAP_PLAN.md`,
-   "Stage 9 — frozen Task sequence"). Then S9.4 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.4 — Settings rebuilt; the Moon and cloud gates (TD-050)** (`POST_ROADMAP_PLAN.md`, "Stage 9 —
+   frozen Task sequence"; the layout in `research/S9.3_SETTINGS.md` §4). Then S9.5 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,
