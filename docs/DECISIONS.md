@@ -1,5 +1,10 @@
 # AstroPlan Decisions
 
+> **Stage 8 decisions, 2026-09-29 (Stage 8 planning; delegated by the owner in chat):** D8-1 a saved
+> night ends at dawn at its snapshot's darkness limit (S4-DEF-02); D8-2 Save again before the night
+> ends (S4-DEF-01); D8-3 RD-13 ("Reported as planned"; old estimates not relabelled); D8-4 Share
+> without notes or coordinates; implementation decisions I-1 to I-10 (E.1, "Stage 8 decisions").
+> Documentation only.
 > **RG-03 decided, 2026-09-29 (Stage 7):** Q1: no equipment specification source for now; lensfun
 > crop factors recorded as the candidate to revisit with RG-12 in Stage 9 (E.1, "RG-03 decided").
 > S7.6 has no source path. Documentation only.
@@ -1852,6 +1857,79 @@ Stage 4 revalidation is still required.
   source exists with an API and terms).
 - **Consequences:** S7.6 has no source path; its other scope is unchanged. RG-03 stays open only as
   the recorded candidate. Documentation only.
+
+### Stage 8 decisions (delegated by the owner, Stage 8 planning, 2026-09-29)
+
+- **Context:** Stage 8 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 8 — frozen Task sequence"),
+  verified at `836bbdf`. Stage 4 left S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 to Stage 8's
+  design, and RD-13 to Stage 8.
+- **Decided by:** the agent, **under the owner's explicit delegation in chat** (2026-09-29: "do not
+  ask me anything; make the decisions yourself; choose the best solutions"), after the owner dismissed
+  the four questions the agent had prepared. Each decision is the option the agent had recommended,
+  within ADR-019 §3.1's invariant and the Stage's constraints. The owner may revisit any of them.
+- **D8-1 — when a saved night ends (S4-DEF-02):** at the **dawn** of the saved night's dark span at the
+  darkness limit recorded in its plan snapshot (the Sun back above the limit, CALC-41's span computed
+  from the snapshot's night and site). With no dawn inside the night (no darkness that night, darkness
+  to the window's end, polar night) it ends at the SessionNight's end (the next mean solar noon); with
+  no readable snapshot, at a conservative end of its night key (CALC-44). From that instant a result
+  may be recorded, and the planner stops treating the plan as current (the transition). *Rejected:* the
+  SessionNight end (noon) for everything: simpler, but a result could not be recorded after imaging
+  until about midday.
+- **D8-2 — Save on a saved plan (S4-DEF-01):** before its night ends, Save replaces the snapshot, a
+  changed night or site included (ADR-014's "Save again": the plan is rescheduled; nothing has been
+  recorded against it). After its night ends a saved plan is never the planner's plan (D8-1), so Save
+  only ever writes the working copy. *Rejected:* a changed night or site creates a second saved plan
+  (the first would then wait for a result the user never meant to give).
+- **D8-3 — RD-13:** counts from **Completed as planned** are labelled "Reported as planned"; Partly's
+  counts are the user's typed numbers; both are user statements, as every confirmed count is (CALC-37,
+  "not verified against files"). Accepted estimates in existing live-run events carry no flag and
+  cannot be told apart from counted frames, so they are not relabelled; CALC-37 and CALC-38 say so.
+  SCI-07 is closed as documented. *Rejected:* labelling every past live-run count "may include accepted
+  estimates" (it would cast doubt on counts the user did confirm one by one).
+- **D8-4 — Share:** an entry's Share is structured, human-readable text with the identity, the night,
+  the site's name, the target, the rig, the result, planned against actual and the stored conditions.
+  **Notes and precise coordinates are never shared** (private by default); Export as file stays the
+  complete manifest v2. *Rejected:* sharing the conditions notes; an "Include notes" switch (an extra
+  choice for little gain; notes can be copied).
+- **Implementation decisions** (within ADR-019 §3.1 and §4):
+  - **I-1 events and storage:** a result without a run appends a new event kind **`reported`** (not
+    started → finished), then one `framesConfirmed` per light block (the existing post-finish rule), so
+    the counters equal the replay. `session_logs` gains `result_kind` (`asPlanned`, `partly`; null for
+    older rows and live runs) and `not_done_reason` (clouds, wind, dew, equipment, other; null when not
+    given). Schema v24. The export adds the keys and the kind additively; `manifest_version` stays 2.
+  - **I-2 results for runs:** a run still in progress (the live mode, until the upgrade) is finished
+    through the same form: `finished`, then corrections to the reported counts; Not done abandons it
+    with the reason. A completed entry's counts change only by correction events; Completed as planned
+    and Partly may be exchanged; completed and Not done never are (ADR-014 §3).
+  - **I-3 the working copy (S4-DEF-03):** when a Saved plan's night ends, the planner continues on a
+    new never-saved draft with its site, target, rig, blocks and tracking override, untouched; a Saved
+    · changed plan is **settled** in one transaction: its working state moves to a new never-saved
+    draft (counted as unsaved, U1) and the row returns to its snapshot. The copy's night is the working
+    night if still ahead, else tonight. Idempotent and serialized in the autosave chain; resume never
+    makes an ended saved plan current.
+  - **I-4 unreadable snapshots (S4-DEF-06):** a Saved row's blocks equal its snapshot's (every plan
+    edit makes it a draft), so every outcome can be recorded; the review shows the saved context as
+    unavailable. A Saved · changed row whose snapshot cannot be read is left as it is (only the copy is
+    made) and can only be recorded as Not done (SI-008).
+  - **I-5 counts against the snapshot (S4-DEF-05):** events reference the row's blocks once they equal
+    the snapshot's (Saved, or settled). No migration step splits existing rows: settlement happens when
+    a night ends or a result is recorded, so nothing is lost and no copy is made for a row nobody uses.
+  - **I-6 an entry's actions (S4-DEF-07):** a saved plan before its night ends: Open in planner, Copy to
+    another night; ended and awaiting: Record result, Copy; with a result: Edit result, Copy; Old log:
+    Share and Export as file. An entry is listed under its row's night key, which is the saved night
+    once settled.
+  - **I-7 stale and failed result forms (S4-DEF-08):** the form carries the entry's `updated_at` from
+    when it opened; Save result refuses a changed entry and writes nothing; Back writes nothing; a
+    failed write is one rolled-back transaction, reported, with the form's input kept.
+  - **I-8 Tonight's line:** the most recent saved plan (or run in progress) whose night has ended and
+    has no result; "Last night: …" when its night is the one before tonight's, else with its date.
+  - **I-9 the Logbook:** Upcoming and Past; search over the name, target, site and notes in memory;
+    filters in one panel held by the ViewModel; Progress by target moves in from the Library.
+  - **I-10 the backup (TD-056, ENG-14):** archive `format_version` 2 adds `preferences.json` (planning
+    and display preferences, the active site, the first-run flag; never the transient position or plan
+    ids); restore and reset clear the plan ids.
+- **Consequences:** S8.1–S8.9 build them. RD-13 decided. ADR-014 §3, ADR-016 and ADR-019 §3.1 gain
+  implementation notes when S8.1–S8.4 land. Documentation only.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

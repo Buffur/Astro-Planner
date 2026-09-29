@@ -110,6 +110,12 @@
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 > **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
 > **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed. **S7.V1 done 2026-09-29** (TD-083 resolved); **S7.V2 done 2026-09-29** (TD-084 resolved). **V5 revalidation PASS 2026-09-29; Stage 7 closed** (same chat at the owner's request, disclosed). Stage 8 planning is next.
+> **Updated 2026-09-29 (Stage 8 planning, verified at `836bbdf`):** Stage 8's Task sequence is frozen
+> ("Stage 8 — frozen Task sequence"): S8.1–S8.9. The owner delegated every Stage 8 decision to the
+> agent in chat; D8-1 to D8-4 (S4-DEF-02 = dawn, S4-DEF-01 = Save again, RD-13, Share) and the
+> implementation decisions (S4-DEF-03, 05–08, the event and storage model) are recorded in DECISIONS
+> E.1, "Stage 8 decisions (delegated by the owner)". §8 and the S4-DEF list updated. No other Stage
+> changed.
 
 ## Contents
 
@@ -2006,14 +2012,14 @@ decides them within ADR-019 §3.1's invariant):
 
 | ID | Question | Decided in |
 | --- | --- | --- |
-| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back* |
-| S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8 |
-| S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8 |
+| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back.* **Decided 2026-09-29 (Stage 8 planning, delegated; E.1, "Stage 8 decisions", D8-2): Save again** before the night ends, a changed night or site included; S8.3 |
+| S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8. **Decided 2026-09-29 (D8-1): at dawn** at the snapshot's darkness limit, else the night's end (CALC-44); S8.1, S8.3 |
+| S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8. **Decided 2026-09-29 (I-3):** S8.1's `settleSavedPlan`, S8.3 |
 | S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6. **Decided 2026-09-28 by the owner: R**, revert to the saved plan (DECISIONS E.1, "S4-DEF-04 decided"). Built by S6.3 |
-| S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8 |
-| S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8 |
-| S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8 |
-| S4-DEF-08 | A result form left open while its entry changes; a cancelled or failed result write | Stage 8 |
+| S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8. **Decided 2026-09-29 (I-5):** events on the settled row's blocks; rows settled lazily, no migration step; S8.1 |
+| S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8. **Decided 2026-09-29 (I-4)**; S8.1–S8.3 |
+| S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8. **Decided 2026-09-29 (I-6)**; S8.3, S8.7 |
+| S4-DEF-08 | A result form left open while its entry changes; a cancelled or failed result write | Stage 8. **Decided 2026-09-29 (I-7)**; S8.1, S8.2 |
 
 **S4.V3 — Bounded final validation** (the owner). The next independent validation is the final
 Stage 4 validation. It answers only whether:
@@ -4831,6 +4837,313 @@ and are provisional in the same way.*
     are updated where something changes;
   - a dependency left unused is removed only with evidence (Stage 10 reviews the rest).
 
+#### Stage 8 — frozen Task sequence (planning, 2026-09-29)
+
+Planned at `836bbdf`, right after Stage 7 closed. The application code is unchanged since `d28f5a8`
+(`git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` is empty), so **S7.V2's
+full-gate PASS is Stage 8's baseline, reused (V3)**: Encoding; Format, 461 files; Analyze; 1,734
+tests, 2 expected skips; 2 host E2E. Planning is documentation only.
+
+**Decisions.** The owner delegated every Stage 8 decision to the agent in chat on 2026-09-29 ("do not
+ask me anything; decide yourself and choose the best solutions"). The four product decisions and the
+implementation decisions below are recorded in DECISIONS E.1, "Stage 8 decisions (delegated by the
+owner)". Each follows ADR-019 §3.1's invariant and the Stage's constraints; the owner may revisit any
+of them. **No gate is left open**, so every Task below is authorised in order.
+
+**The inputs, verified against the code at `836bbdf` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| Recording a result | Only through the tracker: `SessionRepository.complete` accepts `inProgress` only; `abandon` writes status only, with no reason and no time; `updateResults` accepts any non-legacy status. `/session/:id/results` (`ResultsViewModel`) edits counts with ±1 buttons per block (UX-25 confirmed) and is reached only from the tracker's Finish or "Edit results". A planned session cannot be completed | S8.1, S8.2 |
+| Result states | No `Partly`, no Not done reason and no name column exist. `PlanState.partly` exists in presentation only and `PlanState.from` never returns it | S8.1 |
+| Events | Nine kinds, a CHECK on `session_events.kind`; `ExecutionMachine` accepts confirm/reject while active or finished, nothing after `abandoned`; counters are a projection written in the same transaction and equal the replay (tested) | S8.1 |
+| Snapshot blocks | `SessionSnapshotBuilder` writes blocks without id or position; `_writePlan` re-inserts `capture_blocks` on every plan write, so block ids are not stable. A `planned` row's blocks equal its snapshot's (every plan edit sets `draft`); `revertToSaved` restores them (S6.3) | S8.1 (counts against the row's blocks once they equal the snapshot) |
+| The saved night | A snapshot's `night` is the SessionNight window (mean solar noon to noon) with the site and time context; its preferences hold the darkness limit. `VisibilityCalculator.calculateNightTimelineForNight(night, darknessLimitDeg:)` gives the dark span (CALC-41) | S8.1 (CALC-44) |
+| Rollover | `PlanLifecycleViewModel.load` and `followNight` move only never-saved drafts; a saved plan keeps a past `eveningDate` in the row while the planner shows tonight in memory (D1, "until Stage 8") | S8.3 |
+| Tonight | No result line; the slot is `tonight_home_screen.dart`'s comment at the plan card; `AppWords.howDidItGo` is defined and unused | S8.3 |
+| The tracker | Files only for live tracking: `execution_screen.dart`, `execution_viewmodel.dart`, `resume_run_viewmodel.dart`, `resume_run_dialog.dart`, `start_session.dart`, `execution_outlook.dart` (CALC-36), `screen_wake.dart`, `wakelock_screen_wake.dart`; the planner's ⋮ "Track live (optional)", Tonight's run card, the detail's "Open tracker", keep-screen-on in `DisplayPreferencesRepository`; `wakelock_plus` 1.8.0. `ExecutionMachine`'s estimate, running time and stale check are tracker-only; its fold is used by results, the export and progress. No `FeatureScope` flag | S8.4 |
+| TD-063 | **Still reproducible by its mechanism:** the detail screen caches its `Session`; `openSession` passes it to `CurrentSession.adopt`, which trusts `planEditable` without re-reading (`current_session.dart:172-180`) | S8.4 |
+| The Logbook list | Tab and app bar say "Sessions"; one flat list; filters are seven chips in widget state; swipe-only delete with a dialog; `sessionStatusLabel` with "Legacy log", "Draft", "Planned, unsaved changes"; no search; each row has a share icon | S8.5 |
+| Progress | `/library/progress` (`ProgressScreen`, `TargetProgress`, CALC-38), completed non-legacy sessions only, counts from the event fold | S8.5 |
+| The entry | `session_detail_screen.dart`: snapshot sections, "Window load", "Session budget", "Legacy", "Open tracker", "Export file" (the download icon: `ShareSessionExporter` writes a manifest v2 JSON and shares it); share text `SessionLog.toShareableText` includes both notes and legacy values, no coordinates | S8.7 |
+| TD-070's remainder | A snapshot's rig records a group's provenance only when every spec shares it; per-field provenance is not recorded | S8.8 |
+| TD-056 / ENG-14 | The backup archive holds the database and the manifest only; restore and reset keep every preference, including the ids `activeLocationId`, `targetId`, `equipmentId` and `editedSessionId` | S8.9 |
+| ViewModel headroom | `viewmodel_rules_test.dart`: 300 physical lines; every Task that grows a ViewModel checks it and splits first if needed | All |
+
+**Rules for every Stage 8 Task:**
+- **The shared rules** ("Stages 6–11: shared rules"), the Stage 8 constraints above and ADR-019 §3.1's
+  invariant apply: a snapshot never changes; an actual is only what the user reports (or confirms); a
+  passed night never marks a plan done; no new status.
+- **Events are the source of counts** (trap 14): every count a result writes is an event in the same
+  transaction as its counters, and the counters equal the replay.
+- **Schema changes** follow the migration workflow (`CLAUDE.md`, "After changing Drift tables"), with
+  schema-equality and data-preservation tests; nothing stored is reinterpreted. The export stays
+  manifest v2 with additive keys (the S7.3a precedent: an older app refuses a file holding a value it
+  does not know, whole); `manifest_version` changes only for an incompatible change.
+- **Words:** `AppWords` and the glossary; a Task that touches a screen removes its retired terms and
+  lowers the baseline in `retired_terms_test.dart`.
+- **Design system** (`DESIGN_SYSTEM.md` §9, as amended for Stage 8 above): `PlanStateLabel`, `showDone`,
+  `SwipeToDelete`, `DeleteButton`, `confirmDestructive`, `DetailScaffold` where the Task's screen fits.
+  The entry's items that §9.1/§9.3 still list under P8.5 belong to S8.7 (the amendment above moved them
+  to P8.7).
+- **Tests:** every changed or new screen stays in, or joins, the accessibility sweep (trap 17); the
+  core-loop E2E follows every renamed key or label (trap 19).
+- **Verification** (`CLAUDE.md` V1–V3): every Task below touches a schema, the night semantics, a
+  dependency, a backup or export format, or a screen on the E2E path, so each ends with **the full
+  gate after its last code change**, plus the migration tests of S8.1 and S8.6.
+- **Documentation:** each Task updates `FEATURE_STATUS.md`, ARCHITECTURE and DATA_MODEL Part B,
+  `TECH_DEBT.md`, `SCIENTIFIC_INTEGRITY.md` for a calculation, `DECISIONS.md` where a decision is
+  built, `EXPORT_MANIFEST.md` for the export, the privacy documents if anything leaving the device
+  changes, and `PROGRESS.md`.
+- **One Task per commit**, in the order below.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S8.1 | Results without a run: domain and data | P8.1 | M–L | — | Frozen |
+| S8.2 | The result form | P8.2 | M | S8.1 | Frozen |
+| S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | Frozen |
+| S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | Frozen |
+| S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | Frozen |
+| S8.6 | An optional plan name | P8.6 | S–M | S8.5 | Frozen |
+| S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | Frozen |
+| S8.8 | Per-field provenance in new snapshots (TD-070's remainder) | Input | S | — | Frozen |
+| S8.9 | Preferences in the backup; stale ids (TD-056, ENG-14) | Input | S–M | — | Frozen |
+
+**Order:** S8.1 → S8.2 → S8.3 → S8.4 → S8.5 → S8.6 → S8.7 → S8.8 → S8.9 → Stage 8 validation. S8.8 and
+S8.9 depend on nothing and may run earlier. No other Task is added; the old TASK 17.3
+(metadata-assisted actuals) stays a later candidate (the result model can take a proposal later).
+
+##### S8.1 — Results without a run: domain and data
+- **Objective:** a saved plan whose night has ended can be recorded as Completed as planned, Partly or
+  Not done without a run and without Save plan; a run in progress at the upgrade can be finished the
+  same way; counts are events against the saved blocks.
+- **Scope:**
+  - **CALC-44 `SavedNightEnd`** (pure domain, D8-1): the instant a saved night ends, from the plan
+    snapshot: the dawn of the dark span at the snapshot's darkness limit (CALC-41's
+    `darkAtLimit`) inside the snapshot's night; no dawn in the window (no darkness that night,
+    darkness to the window's end, polar night) → the night's end (the next mean solar noon); an
+    unreadable or missing snapshot → the end of the night key's SessionNight computed conservatively
+    from the row's evening date and zone (documented in CALC-44). Registered in
+    `SCIENTIFIC_INTEGRITY.md` with tests (mid-latitude, a no-darkness summer night, polar night, an
+    unreadable snapshot).
+  - **Schema v24:** `session_logs.result_kind` (nullable; `asPlanned` or `partly`) and
+    `session_logs.not_done_reason` (nullable; clouds, wind, dew, equipment, other);
+    `session_events.kind` gains **`reported`** (the table is rebuilt with `alterTable`, every event
+    kept). Existing rows read as before: a live-run completion is Completed, an abandoned row Not done
+    without a reason.
+  - **`ExecutionMachine`:** `reported` is accepted only from not started and ends it (phase
+    finished); the existing post-finish confirm/reject rule then carries the counts. Nothing else
+    changes.
+  - **`SessionRepository.recordResult(id, report, {expectedUpdatedAtUtc})`**, one transaction:
+    - a Saved (`planned`) entry whose night has ended (CALC-44 against the injected clock): Completed
+      as planned writes `reported` and one `framesConfirmed` per light block with its planned count
+      (blocks with 0 skipped); Partly writes `reported` and the entered counts (0 or more, per light
+      block; above the plan allowed); Not done sets `abandoned` with the optional reason; results,
+      notes and conditions in the same write; `completed_at_utc_ms` set for a completion;
+    - an `inProgress` run (legacy live mode): `finished`, then corrections to the reported counts, or
+      Not done through the existing abandon path with the reason;
+    - a completed or Not done entry: an edit. Counts change by correction events (completed only);
+      Completed as planned ↔ Partly may change; completed ↔ Not done never does (ADR-014 §3);
+    - refused, with nothing written: legacy rows; drafts (a Saved · changed row is settled first,
+      below); a night that has not ended; an `expectedUpdatedAtUtc` that differs from the stored one
+      (`StaleResultForm`, S4-DEF-08); Completed or Partly for a Saved · changed row whose snapshot
+      cannot be read (S4-DEF-06);
+    - the result totals (`actual_light_frames`, `rejected_frames`) come from the replay, as today.
+  - **`SessionRepository.settleSavedPlan(id)`**, one transaction (S4-DEF-03, S4-DEF-05): for a Saved
+    · changed row, a new never-saved draft receives the row's working plan (its night, references,
+    blocks and tracking override) and the row goes back to its snapshot (`planned`, S6.3's revert
+    semantics); for an unreadable snapshot the row is left as it is and only the copy is made; for a
+    Saved row nothing is written. It returns the copy, if any. Idempotent.
+  - **Export:** `results.result_kind`, `results.not_done_reason` and the event kind `reported`,
+    additive; `EXPORT_MANIFEST.md` updated; `manifest_version` stays 2.
+  - **RD-13 (D8-3):** CALC-37 and CALC-38 note that counts are the user's statements: "Reported as
+    planned" for Completed as planned; existing accepted estimates cannot be told apart from counted
+    frames and are not relabelled (SCI-07 closed as documented).
+  - **Domain values** for the result (`ResultOutcome`, `ResultReport`, `NotDoneReason`), with
+    `Session.resultKind` and `notDoneReason`.
+- **Out of scope:** the form (S8.2); the planner's transition (S8.3); removing anything of the tracker
+  (S8.4); names (S8.6).
+- **Acceptance:**
+  1. a Saved entry after its night ends is completed as planned, partly (0, fewer, more) and Not done
+     (with and without a reason) with no run; its snapshot bytes are unchanged; replay equals counters;
+  2. before its night ends every outcome is refused and nothing is written;
+  3. a Saved · changed row settles into an unchanged saved entry plus a draft holding every working
+     edit; a second settle does nothing; an unreadable snapshot keeps the row and still makes the copy;
+  4. a run in progress is finished with reported counts, or Not done with a reason; its earlier events
+     are kept;
+  5. a stale `expectedUpdatedAtUtc` is refused with nothing written;
+  6. v23 → v24 keeps every row, event and counter (a data-preservation test with sessions in every
+     status, events and legacy rows); the schema-equality test passes;
+  7. the export round-trips the new keys and `reported`; a pre-S8.1 file still reads;
+  8. CALC-44's tests pass; CALC-37/38 unchanged in value.
+
+##### S8.2 — The result form
+- **Objective:** `/session/:id/results` becomes "How did it go?", the one form for every result.
+- **Scope:**
+  - **Review saved plan:** the night, target, site and rig, and the planned light blocks, from the
+    plan snapshot (the execution-start snapshot for a legacy run), never from the planner; what the
+    snapshot lacks is shown as unavailable (SI-008).
+  - **The outcome:** Completed as planned (one choice) · Partly (a number field per light block,
+    pre-filled from the plan, or from a run's confirmed counts; not ±1; UX-25) · Not done (optional
+    reason chips: clouds, wind, dew, equipment, other). Rejected counts are not asked; stored ones are
+    shown read-only.
+  - Optional notes ("Conditions and events", processing notes) and conditions (temperature, humidity,
+    cloud; empty = unknown), as today.
+  - **Save result** (the primary action; `showDone`); Back writes nothing. No Save plan and no Save ·
+    Discard · Cancel (U1) about the planner's working copy.
+  - **Saved · changed entries:** before the form opens, the entry is settled
+    (`CurrentSession.settle`, in the autosave chain); if it is the planner's current plan, the planner
+    continues on the copy; the form then reviews the saved plan.
+  - **Stale and failed writes (S4-DEF-08):** a stale form is refused with "This entry changed since you
+    opened it." and reloads; a storage failure is reported through `runWithFeedback`, the form keeps
+    its input.
+  - **Not ended yet:** the form is not offered; opened by route it says when the result can be
+    recorded (CALC-44's instant, in the site's zone) and offers nothing to save.
+  - **Entry points:** the tracker's Finish (until S8.4), the Logbook's "Edit results" → "Edit result"
+    and a new "Record result" (list rows and the entry) for an ended saved plan; Tonight's line (S8.3).
+  - `PlanStateLabel` for the entry's state; `AppWords` (Record result, Edit result, Completed as
+    planned, Partly, Not done, How did it go?). The retired ±1 editor and "Complete session" go.
+- **Out of scope:** the transition (S8.3); removing the tracker (S8.4); the list's redesign (S8.5).
+- **Acceptance:**
+  1. each outcome is recorded from the form for an ended Saved entry and for an ended Saved · changed
+     entry (whose working copy survives as the planner's plan);
+  2. the review shows the snapshot's plan even after the planner was edited;
+  3. Partly takes typed numbers per light block; Completed as planned needs no number;
+  4. Back writes nothing; a stale form and a failed write change nothing and say so;
+  5. an entry whose night has not ended offers no result;
+  6. the form joins the accessibility sweep (light, dark, field; 100 % and 200 %);
+  7. the core-loop E2E still passes (its Finish → result path now uses the new form's keys).
+
+##### S8.3 — The saved-plan transition and Tonight's line
+- **Objective:** ADR-019 §3.1's next day, delivered at once (D1).
+- **Scope:**
+  - **At restore and while the app runs** (`PlanLifecycleViewModel.load` and `followNight`, which
+    `NightClock` calls every minute and on resume): when the current plan is a saved plan whose night
+    has ended (CALC-44), the planner continues on a working copy for tonight, in the autosave chain:
+    - Saved: a new never-saved draft with the same site, target, rig, blocks and tracking override,
+      untouched (replacing it later asks nothing; the saved plan stays in the Logbook);
+    - Saved · changed: `settleSavedPlan`; the copy holds the working edits and counts as unsaved (U1);
+    - the copy's night: the working night if still ahead, else tonight (the roll-forward rule);
+    - a never-saved draft keeps its roll-forward; a run in progress keeps its copy rule.
+  - **Resume** never makes an ended saved plan current; `openSession` on an ended saved plan opens a
+    copy (S4-DEF-07).
+  - **Save (D8-2):** Save on a saved plan whose night has not ended replaces its snapshot, including
+    a changed night or site (ADR-014's Save again, unchanged and now tested).
+  - **Tonight's line** (ADR-019 §5, item 3): the most recent saved plan (or run in progress) whose
+    night has ended and has no result: "Last night: M42. How did it go?" when its night is the one
+    before tonight's, else "M42 · Sat 27 Sep: how did it go?"; it opens the result form; gone once a
+    result is recorded. No notification.
+- **Out of scope:** removing the tracker (S8.4); the Logbook (S8.5).
+- **Acceptance:**
+  1. Save Friday, then Friday's dawn passes with the app open and after a restart: Friday's entry is
+     Saved on Friday with its snapshot unchanged, and exactly one working copy is current;
+  2. Save Friday, move the working plan to Saturday and edit, then Friday ends: Friday's entry and
+     snapshot are unchanged, the Saturday edits are in the copy on Saturday;
+  3. a restart repeated after the transition creates no second copy; a storage failure at the
+     transition loses nothing and retries on the next check;
+  4. a never-saved past draft still rolls forward; a run in progress still gets its copy;
+  5. Save before the night ends replaces the snapshot, including a changed night;
+  6. Tonight's line appears only when due and opens the form; after Save result it is gone.
+
+##### S8.4 — Retire the live tracker safely; TD-063
+- **Objective:** the tracker leaves the product (the owner, 2026-09-27) with no data lost.
+- **Scope:**
+  - **The audit (A–E, "Notes on P8.4")** recorded in the commit and `ARCHITECTURE.md` Part B.
+  - **Removed (A):** the tracker screen and route, `ExecutionViewModel`, the resume prompt and its
+    ViewModel, `start_session.dart` (TD-073's last message), "Track live (optional)", Tonight's run
+    card, the detail's "Open tracker", keep-screen-on (`ScreenWake`, its preference methods) and the
+    `wakelock_plus` dependency once `grep` shows no use; `ExecutionOutlook` (CALC-36) and the
+    estimate and running-time functions (CALC-35) if nothing else uses them.
+  - **Kept (B, C):** the events, the fold and its invariant, `SessionRepository.start` only if a test
+    or migration still needs it (else removed from the interface), every stored run, event and
+    snapshot, the export and backup.
+  - **A run in progress at the upgrade:** listed as Tracking, offered on Tonight's line and in the
+    Logbook, finished or marked Not done through S8.2's form (S8.1's in-progress path). The planner's
+    copy rule for it stays.
+  - **TD-063:** `openSession` re-reads the session by id before deciding (S1.V5's fix), so a stale
+    detail never adopts a frozen entry; a UI-driven regression test (a detail cached, then the entry
+    gets a result from Tonight's line, then Open in planner).
+  - **Tests (D, E):** each removed test is listed with its reason; the core-loop E2E becomes Save →
+    (night ends) → result; `TEST_PLAN.md` L4–L6 and L8's tracker parts are replaced by the new
+    lifecycle (host rows re-pointed).
+  - **Documents:** ADR-016 amendment; CALC-35 and CALC-36 marked retired (history kept); UX-13,
+    UX-26 and TD-073 closed; TD-063 resolved; FEATURE_STATUS; the licence list and COMPLIANCE if the
+    dependency leaves.
+- **Out of scope:** the Logbook's redesign (S8.5, S8.7).
+- **Acceptance:**
+  1. no screen, route, menu item or card offers live tracking;
+  2. a database with a run in progress, one completed live run with corrections and one abandoned run
+     opens, lists, exports and backs up as before; the in-progress run can be recorded both ways;
+  3. the TD-063 regression test passes and fails on the old `openSession`;
+  4. the E2E covers Save → result; the full gate passes without the dependency.
+
+##### S8.5 — The Logbook list, search, filters and Progress
+- **Objective:** the tab labelled Logbook becomes a useful history (ADR-019 §2, §8, §10; 08 §24).
+- **Scope:**
+  - The tab and the screen are **Logbook**; **Upcoming** (saved plans whose night has not ended) and
+    **Past** (the rest, newest night first); rows show the identity (target · night; the name from
+    S8.6), `PlanStateLabel`, the integration when a result exists, and **Record result** when due.
+  - **Search** (the app bar): case-insensitive over the target, the site and both notes (and the name
+    from S8.6), in memory over the loaded list; no full-text dependency.
+  - **Filters in a panel** (UX-30): one Filters button with the number active, a sheet with today's
+    status, target, site and nights semantics, Clear; the state lives in `SessionsViewModel` and
+    survives navigation; search and filters combine (AND).
+  - **Delete:** `SwipeToDelete`, a visible `DeleteButton` on the entry, `confirmDestructive`.
+  - **Progress by target** moves to the Logbook (a row at the top of the list, route
+    `AppRouter.logbookProgress`), the Library's entry and `/library/progress` go (RD-07, ADR-019 §9);
+    CALC-38 unchanged.
+  - Retired terms out of `logbook_screen.dart` (the baseline lowered); "Export all as file".
+- **Out of scope:** the entry (S8.7); names (S8.6).
+- **Acceptance:** the groups, search, filters (together and cleared), delete with confirm, Progress's
+  new place, the retired terms, the sweep, and the E2E's tab label.
+
+##### S8.6 — An optional plan name
+- **Scope:** `session_logs.name` (nullable, schema v25); "Name (optional)" on the entry (trimmed, empty
+  = none, up to 80 characters); never asked at Save plan; not copied by Copy; not part of the snapshot;
+  the Logbook shows the name, else target · night; search includes it; the export's `name` key
+  (additive); backup carries it (the database).
+- **Acceptance:** migration tests (v24 → v25); a named and an unnamed plan list, search, export and
+  survive backup and restore; the id never changes.
+
+##### S8.7 — The Logbook entry, Share and Export as file
+- **Scope:**
+  - The entry, in order (P8.7): the identity; the night, target, site and rig from the snapshots; the
+    result; planned against actual (CALC-37); the blocks; notes; conditions; then Share and **Export
+    as file**. Older and legacy rows degrade honestly ("Old log — stored text only"); nothing is filled
+    from today's rig or site; "Time needed" and "Total time" replace "Window load" and "Session
+    budget"; `DetailScaffold` where it fits.
+  - **Actions (S4-DEF-07):** a saved plan whose night has not ended: Open in planner, Copy to another
+    night; ended and awaiting: Record result, Copy to another night; with a result: Edit result, Copy
+    to another night; Old log: Share and Export as file only. Never the tracker.
+  - **Share (D8-4):** structured, human-readable text with only the fields the entry holds: the
+    identity, the night (date and zone label), the site's name (no coordinates), the target, the rig,
+    the result, planned against actual per filter and exposure, the stored conditions. **No notes and
+    no coordinates.**
+  - **Export as file:** the download action classified (it is the manifest v2 export of one session:
+    renamed "Export as file", kept distinct from Share); no download history.
+- **Acceptance:** the order; each state's actions; Share's text for a completed, a Partly, a Not done,
+  a planned and an Old log entry (no notes, no coordinates); Export as file unchanged in content; the
+  retired terms; the sweep.
+
+##### S8.8 — Per-field provenance in new snapshots (TD-070's remainder)
+- **Scope:** a new snapshot's `rig` records each specification's own provenance
+  (`provenance: {field: {source, confidence}}`) beside the group pair; older snapshots keep their
+  group pair and are read as they are; nothing invents `user`; `v` stays 1 (additive keys); the export
+  embeds snapshots as stored. No screen change.
+- **Acceptance:** an imported rig's snapshot records its estimated and file-sourced fields as such;
+  an old snapshot still reads; TD-070 resolved.
+
+##### S8.9 — Preferences in the backup; stale ids (TD-056, ENG-14)
+- **Scope:** first a host probe that reproduces ENG-14 (a restore with other site ids keeps a stale
+  `activeLocationId`). Then: the archive gains `preferences.json` (`format_version` 2): the planning
+  preferences, the display preferences, the active site id and the first-run flag; not the transient
+  position, the catalog seed marker or the plan ids. Restore applies it; the plan ids
+  (`targetId`, `equipmentId`, `editedSessionId`) are cleared on restore and on a database reset; a
+  version 1 archive still restores. The privacy documents are checked (the backup stays a local file
+  the user shares).
+- **Acceptance:** the probe fails before and passes after; a round trip restores the preferences; a
+  version 1 archive restores; a reset leaves no stale id.
+
 ### Stage 9 — Secondary UX & Product Polish
 
 - **Scope:**
@@ -5251,7 +5564,7 @@ any implementation Task is created.
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups. **Decided 2026-09-28: O1** (DECISIONS E.1) | 6 | S6.14 |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner. **Decided 2026-09-28: S9** (DECISIONS E.1); no S6.15 | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
 | RD-12 | **LAPSED 2026-09-27** (the tracker's retirement; DECISIONS E.1, "Stages 6–11 amended after Stage 5"): the resume prompt goes with the tracker. ADR-019 §4 already expected Finish to lead to the result form; how a run still in progress at the upgrade reaches it is P8.4's audit. *(Was: should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish?)* | RT-10, UX-26; ADR-016 §11 | 8 | — |
-| RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? *Narrowed 2026-09-27:* after P8.4 no new estimate is accepted, so it covers the existing accepted-estimate events and the "reported as planned" label (P8.1) | SCI-07 | 8 | — |
+| RD-13 | **DECIDED 2026-09-29 (Stage 8 planning; delegated by the owner; DECISIONS E.1, "Stage 8 decisions", D8-3):** "Reported as planned" labels Completed-as-planned counts; existing accepted estimates cannot be told apart and are not relabelled; CALC-37/38 note that counts are the user's statements. Built by S8.1. *(Was: should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? Narrowed 2026-09-27 to the existing accepted-estimate events and the "reported as planned" label.)* | SCI-07 | 8 | — |
 | RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
 | RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | **RESOLVED (owner, 2026-09-26, S3.D; ADR-018 §7):** visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. Earlier: **resolved for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |

@@ -4,245 +4,41 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**Stage 7 CLOSED**: V5 revalidation PASS after S7.V1/S7.V2).
-> **Next:** Stage 8 planning (targeted; documentation only), then STOP.
+> **Last updated:** 2026-09-29 (**Stage 8 planned**: S8.1–S8.9 frozen; decisions delegated by the owner).
+> **Next:** S8.1 (results without a run: domain and data). The owner asked for the whole of Stage 8.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: Complete** (closed 2026-09-29; [report](STAGE_7_VALIDATION.md)). **Stage 8 — Sessions / Execution / Actuals / Logbook: Not started** (planning next) |
+| Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **Stage 8 planning** (below, "Next allowed action") |
+| Next Task | **S8.1** (below, "Next allowed action") |
 | Code baseline | **`d28f5a8` (S7.V2)**; `21e9cb1` changed README only. Not pushed (S1.14, RD-17) |
 | Schema | **v23** (S7.5) |
 
-**Stage 7 V5 revalidation, 2026-09-29: PASS; Stage 7 CLOSED** at `21e9cb1` ([report](STAGE_7_VALIDATION.md),
-same chat at the owner's request, disclosed): the original six probes, replayed unchanged on the
-validation-time test files against the corrected code, pass; six fresh adversarial probes pass;
-the corrections' diffs change nothing else. S7.V2's gate reused (V3: only README changed since).
-One observation, no finding. Documentation only.
-
-**S7.V2 done, 2026-09-29** (`d28f5a8`; S7V-02 / TD-084 resolved): the site editor rebuilds its back guard
-when name, elevation or notes start or stop differing from the opened form (a flip-only
-listener), so Back (app bar or system) asks about an edit to any one field; a reverted edit and
-a new site with only the device zone leave without asking. 15 new tests (13 fail on the
-`d13fdab` editor). Verification: localized code change (one screen, local state), Task
-completion under Stage 7's frozen rule: the full gate after the last code change, PASS (below).
-
-**S7.V1 done, 2026-09-29** (`46e7688`; S7V-01 / TD-083 resolved): "Use other values" copies only what the
-frame type still takes from its source (`CalibrationMatch.takesExposure`/`takesSensitivity`),
-so a flat's or bias's exposure and a flat's ISO or gain stay the user's; a source change no
-longer replaces a flat ISO/gain the user typed, cleared or re-kinded. The probe's three cases
-plus six more are permanent tests (six fail on the `d13fdab` dialog). Verification: shared
-behaviour, Task completion under Stage 7's frozen rule: the full gate after the last code
-change, PASS (below). No schema, formula or vector change.
-
-**Stage 7 independent validation, 2026-09-29: BLOCKED** at `d13fdab`
-([report](STAGE_7_VALIDATION.md)): S7V-01 / TD-083 (calibration unlock/source changes overwrite
-independent exposure or edited gain), S7V-02 / TD-084 (name/elevation/notes-only site edits leave
-without the discard prompt). Six focused widget probes failed; retained as unapplied patches in
-`evidence/`. Other frozen criteria PASS. S7.6's recorded gate reused (unchanged inputs); pinned
-catalog regeneration matched. No application fixes. Corrections S7.V1 → S7.V2 → bounded V5
-revalidation; each is a separate cycle. No new owner decision.
-
-**S7.6 done, 2026-09-29** (UX-22; RG-03 = Q1): the rig form asks the pixel size once and keeps the
-maximum exposure, the RAW size and the rotation one tap away in "More (optional)" (open when an import
-pre-fills the RAW size); "Add rig"/"Edit rig", Save primary; nothing stored lost or reinterpreted.
-Verification: shared behaviour (`CollapsibleSection` gains a controlled use; the editor several
-screens open): the full gate after the last code change, PASS (below).
-
-**RG-03 decided, 2026-09-29: Q1** (DECISIONS E.1): no equipment specification source; lensfun
-crop factors recorded as the candidate to revisit with RG-12 in Stage 9. S7.6 has no source path.
-Documentation only.
-
-**S7.5 done, 2026-09-29** (RG-08 = E2, RG-09 = S3/M2, UX-21): the site editor gains "Use current
-position" (GPS on the tap only; the fix fills the form until Save); elevation is optional and unknown
-when empty (schema v23: nullable, every stored value kept); Bortle and SQM sit in a collapsed,
-remembered "Sky darkness (optional)" section with the map link at the typed coordinates; the map is
-lightpollutionmap.app (About, privacy policy, COMPLIANCE); back with changes asks Cancel · Discard ·
-Save. Verification: high-risk (a migration): the full gate after the last code change, PASS (below).
-
-**S7.4 done, 2026-09-29** (RG-07 = T1): search finds a bundled object by any common spelling of its
-designation, by its NGC/IC, Caldwell and LBN aliases and by every OpenNGC common name, offline,
-ordered by match kind then id, with no score. Catalog version 3 adds aliases and no object (every
-`since` stays 2, so no deleted target returns); schema v22 adds `target_aliases`, rebuilt by the
-seeder when its version differs. The candidates list is unchanged (host, median of 7: 53.4 ms before,
-52.7 ms after; 164 targets). Verification: high-risk (a migration and the catalog): the full gate
-after the last code change, PASS (below).
-
-**S7.3b done, 2026-09-29** (ADR-020 §8; RG-10 = N1): a DSLR/mirrorless or Unknown rig can state
-in-camera noise reduction (off by default, never inferred; schema v21). When on, each light is
-followed by a dark of its exposure inside the light's fit event, counted as in-window calibration;
-integration, imaging time and √N are unchanged; E8, E8b and E8c are reproduced to the millisecond;
-E1–E7 unchanged. Phones and astro cameras keep a stored value and ignore it. The assumptions list
-it, Budget details names the darks, a matching dark block is warned as "Darks twice", and the
-snapshot records it. Verification: high-risk (a calculation and a migration): the full gate after
-the last code change, PASS (below).
-
-**S7.3a done, 2026-09-29** (ADR-020 §6–§7; RG-10 = L1, D1, H1): a new calibration block takes what
-it must match from a chosen light (a flat, for a dark flat), shown with its origin, until "Use other
-values"; calibration blocks follow the camera type's ISO/gain and binning like lights; rows warn in
-words with a one-tap "Match the lights"/"Match the flats" and Undo, and name light filters without
-flats; warnings never block, unknown never fails. The dark flat is a fifth frame type through the
-store, the snapshot, the export and every screen. Tips: one line, "More", "Hide tips" remembered;
-hiding them hides no warning. No schema change. The "darks twice" check waits for S7.3b's switch.
-Verification: shared behaviour plus a stored enum value (the planner's dialog, the export): the full
-gate after the last code change, PASS (below).
-
-**S7.2b done, 2026-09-29** (ADR-020 §3–§5; RG-11 = C1, B1, W1, F1, I1, P2): a light block shows ISO
-for phones and cameras, gain for astro cameras, the choice for Unknown; binning only for astro
-cameras and Unknown; values a class hides are kept and named, never converted. A new light block
-starts from the last one, marked as a proposal. "Time between frames" replaces "Per-frame
-overhead" in Settings and the assumptions panel, with the no-double-count help; the budget is
-unchanged. The block dialog's dropdowns now wrap at 200 % text. Verification: shared behaviour (the
-planner's dialog, Settings): the full gate after the last code change, PASS (below).
-
-**S7.2a done, 2026-09-29** (ADR-020 §2; RG-11 = C1): a rig has a camera type (Phone · DSLR or
-mirrorless · Astro camera (colour) · Astro camera (mono) · Unknown), chosen in the rig editor, Unknown
-by default and for the example rig; "Add from a photo" never proposes one, even from a saved rig with
-the same camera; a new snapshot records it; the Library shows it once chosen. **Schema v20**
-(`camera_modules.camera_class`). Deliberate test changes: the v19 pins move to v20; one editor test's
-finder names the tracking dropdown. Verification: high-risk (schema): the full gate after the last
-code change, PASS (below); every acceptance criterion checked.
-
-**S7.1 done, 2026-09-29** (RD-08 = T3; the plan's "S7.1" for the detail): a plan can override its
-rig's tracking for its night ("Tracking for this plan", under the rig; S6.9's button opens the same
-choice). The guidance (CALC-31) reads the effective value; the rig and the example rig's Unknown are
-never changed; Save records the value and its source; Discard restores it; Copy carries it; New plan
-starts without it; the export carries it. **Schema v19** (`session_logs.tracking_override`). The
-backup and unsupported-database tests pinned to v18 were moved to v19 deliberately. Verification: the
-high-risk class (schema, snapshot, export): the full gate after the last code change, PASS (below);
-every acceptance criterion checked.
-
-**S7.R5 done, 2026-09-29** (RG-03 research; documentation only; `research/RG-03_EQUIPMENT_SPECS.md`):
-- **No official API and no machine-readable maker data found;** maker pages are HTML (scraping is
-  rejected).
-- **Open datasets inspected** (downloaded to scratch, deleted): openMVG (MIT; 3,633 consumer cameras to
-  about 2016; no EOS R, no astro cameras, no current phones; nominal small-sensor sizes); lensfun (CC
-  BY-SA 3.0; current bodies, but a crop factor only); open-product-data (no licence found);
-  pixel-pitch lists built by scraping (excluded).
-- **Recommended Q1:** no source in Stage 7; lensfun's crop factor recorded as the candidate CALC-40
-  input for DSLR and mirrorless files without f35, to revisit with RG-12 in Stage 9; FITS (S2.6) as
-  the astro-camera path. One owner question (§8); nothing adopted.
-- **Verification:** the documentation class.
-
-**RG-08 and RG-09 decided, 2026-09-29 (the owner, in chat; DECISIONS E.1):** E2 (elevation optional,
-Unknown by default; no automatic source), S3 (Bortle and SQM manual and optional in one collapsed
-section, with a map link), M2 (the map link to lightpollutionmap.app). S7.5's rules are in the plan.
-Documentation only.
-
-**S7.R4 done, 2026-09-29** (RG-08 and RG-09 research; documentation only;
-`research/RG-08_09_SITE_AUTOMATION.md`):
-- **Elevation:** no calculation reads it; the forecast already receives Open-Meteo's 90 m terrain
-  elevation (unread today); the Elevation API (Copernicus GLO-90, attribution required) could propose
-  it; GPS gives ellipsoid height unless the device offers sea-level altitude. **Recommended E2**
-  (optional, Unknown by default); E1 (a terrain-data proposal on tap) is the owner's preference.
-- **Bortle and SQM:** no acceptable automatic source (the 2016 atlas is CC BY-NC, 2.9 GB and about
-  2014 data; the map sites offer no data terms or API); both stay manual or unknown. **Recommended
-  S3** (both optional in one collapsed section, with a link to look them up).
-- **The map link:** lightpollutionmap.app (Stargazing Hub Team) documents a `?lat=&lng=&zoom=` link.
-  **Recommended M2.**
-- Three owner questions (§8); nothing decided. **Verification:** the documentation class.
-
-**RG-07 decided, 2026-09-29 (the owner, in chat; DECISIONS E.1, "RG-07 decided"): T1 only.**
-Searchable aliases from the pinned OpenNGC (Messier's NGC/IC numbers, common names, Caldwell, LBN)
-in their own table, and a normalised search; no new objects and no online lookup. S7.4's rules are
-in the plan. Documentation only.
-
-**S7.R3 done, 2026-09-29** (RG-07 research; documentation only; `research/RG-07_TARGET_CATALOG.md`):
-- **Counted in the pinned OpenNGC v20260501** (downloaded to scratch, deleted, nothing committed):
-  13,371 objects; **only 151 have a common name**, so none of the catalog's 97 unnamed objects can
-  be named from it; it does hold every Messier object's NGC/IC designation, Caldwell (105) and LBN
-  (94) numbers and 16 extra common names. Sharpless, vdB and most Barnard and Abell objects are not
-  in it.
-- **Search today misses** "M 31", "Messier 31", "NGC 224" (M31) and "NGC7000"; the alias rules
-  are written as testable examples (§6).
-- **Growth costs** the candidates list: ~0.58 ms per target on the desktop VM (95 ms for 164), and
-  thousands of faint galaxies would bury the showpieces.
-- **Recommended:** T1 (aliases from the pinned OpenNGC in their own table, normalised search; no new
-  objects, no network). More objects and an optional online lookup (CDS Sesame; per-dataset CDS
-  licences; rate limits unknown) are the owner's choices. Three owner questions (§9); nothing
-  decided.
-- **Verification:** the documentation class (references resolve; `git diff --check`).
-
-**S7.D done, 2026-09-29** (documentation only): **RG-10 decided** by the owner in chat, every
-recommendation (L1, D1, T0, O0, N1, H1; DECISIONS E.1, "RG-10 decided"). **ADR-020 accepted:** the
-camera class on the rig, the light-block fields by class, "Time between frames", proposals, the
-calibration matrix and its match checks, dark flats, tips, and in-camera noise reduction as
-in-window calibration with new vectors E8–E8c (amends ADR-009; ADR-011 gains two camera fields).
-S7.2 split into **S7.2a** (the class on the rig) and **S7.2b** (the light-block form); S7.3 into
-**S7.3a** (calibration blocks) and **S7.3b** (noise reduction in the budget and the fit).
-
-**S7.R2 done, 2026-09-29** (RG-10 research; documentation only; `research/RG-10_CALIBRATION_WORKFLOWS.md`):
-- **From the sources** (Siril read directly; DeepSkyStacker and Canon through search results;
-  PixInsight and ZWO-community guidance secondary): darks match the lights' exposure, ISO or gain,
-  binning and temperature; flats keep the optical train, focus and filter, with their own exposure
-  (no target-level guidance); bias is the shortest exposure at the lights' ISO or gain, temperature
-  unimportant, optional for every class (dark flats the alternative on some CMOS cameras); dark flats
-  match the flats.
-- **The matrix's calibration columns** (§4) keep every budget effect inside ADR-009's existing lines;
-  "a dark needs only a count" holds for typed fields only if inheritance is built.
-- **Recommended:** L1 (copy when created, a mismatch warning, a one-tap fix), D1 (a "Dark flat" frame
-  type), T0, O0, **N1** (in-camera noise reduction as a rig switch, counted as in-window calibration;
-  an ADR-009 amendment), H1 (hideable one-line tips). Six owner questions (§10); nothing decided.
-- **Verification:** the documentation class (references resolve; `git diff --check`).
-
-**RG-11 decided, 2026-09-29 (the owner, in chat; DECISIONS E.1, "RG-11 decided"):** every
-recommendation of S7.R1: C1 (a camera class on the rig, Unknown by default, never inferred; the
-example rig stays Unknown), B1 (binning for astro cameras only, a record), W1, F1, I1 (the per-frame
-overhead relabelled "Time between frames"; no budget change), P2 (copy the previous light block).
-C1 splits S7.2 at S7.D. Documentation only.
-
-**S7.R1 done, 2026-09-29** (RG-11 research; documentation only; `research/RG-11_CAPTURE_PARAMETERS.md`):
-- **Camera classes:** phone, DSLR/mirrorless, astro camera (colour), astro camera (mono), unknown;
-  cooled and readout mode are modifiers. No metadata AstroPlan reads can tell the class.
-- **Findings:** ISO (phones, cameras) and gain with offset (astro cameras) are different controls,
-  never converted; their record is what calibration must match (RG-10). Binning is per exposure only
-  on astro cameras; on a phone it is the rig's mode. White balance is metadata in RAW files and has
-  no planning consequence. Focus has no planning value beyond ADR-009's refocus overhead. The
-  interval is already modelled once, as the per-frame overhead, but its label invites a double count
-  with the dither settle. **In-camera long-exposure noise reduction** can double a camera's time per
-  frame and is not modelled (handed to RG-10).
-- **Recommended:** C1 (a class on the rig, Unknown by default, never inferred), B1 (binning for astro
-  cameras only, a record), W1, F1, I1 (relabel, no budget change), P2 (copy the previous light
-  block). Six owner questions (§11); nothing decided.
-- **Verification:** the documentation class (references resolve; `git diff --check`). No gate input
-  changed.
-
-**Stage 7 planned, 2026-09-28** (documentation only; the owner's prompt
-`prompts/STAGE_7_PLANNING.md`; the plan's "Stage 7 — frozen Task sequence"):
-- **Verified against the code at `4b0df38` (§9.7).** Notable:
-  - no camera class exists in the model, so nothing can tell which capture parameters apply (RG-11);
-  - elevation is required (`REAL NOT NULL`) yet read by no calculation, and no GPS altitude is read;
-    Bortle and SQM are read by no calculation either;
-  - the catalog build keeps only OpenNGC's first common name and stores no cross-identifier, and
-    "M 31", "NGC7000" or "NGC 224" find nothing;
-  - the site editor has no discard guard (UX-21 confirmed); the rig editor still shows the pixel size
-    twice and asks for a rotation nothing reads (UX-22);
-  - binning is read by no calculation; the interval is the global per-frame overhead;
-  - `SessionPlanViewModel` is at the 300-line physical cap again.
-- **Frozen:** S7.R1 (RG-11) → S7.R2 (RG-10) → S7.D (ADR-020) → S7.R3 (RG-07) → S7.R4 (RG-08,
-  RG-09) → S7.R5 (RG-03) → S7.1 → S7.2 (light blocks) → S7.3 (calibration and the budget) → S7.4
-  (targets) → S7.5 (sites) → S7.6 (rigs) → Stage 7 validation. The parameter matrix's shape is
-  fixed; no cell is filled. Each gated Task keeps its frozen criteria; its decision adds only the
-  rule it decided.
-- **RD-08 = T3's placement: S7.1**, ungated, which may run at any point: the nullable
-  `session_logs.tracking_override` (v19), the effective value passed to `CapabilityCalculator`, the
-  planner's control, the snapshot's value and source, Copy, New, Open and Discard, the export key,
-  and the tests.
-- **Not triggered:** the storage-input area (S6.10 found case C). **Allocated, not decided:** TD-074
-  to Stage 9's planning (not data entry).
-- **RG-03** is researched again (S7.R5), as the owner's prompt asks; adoption stays the owner's.
-- **No owner decision is needed now:** each gate's choices wait for its research.
-- Stage 6's "Current state" entries moved verbatim to `PROGRESS_HISTORY.md`.
+**Stage 8 planned, 2026-09-29** (documentation only; the plan's "Stage 8 — frozen Task sequence"):
+- **Verified against the code at `836bbdf` (§9.7).** Notable: a result can be recorded only through the
+  tracker (`complete` accepts `inProgress` only); no Partly, Not done reason or name is stored; snapshot
+  blocks have no ids and `capture_blocks` are re-inserted on every plan write, but a Saved row's blocks
+  equal its snapshot's; saved plans keep a past night in the row while the planner shows tonight (D1);
+  TD-063's mechanism is still present; the backup holds no preferences.
+- **Decisions:** the owner delegated them to the agent in chat ("do not ask me; decide yourself").
+  D8-1 (S4-DEF-02): a saved night ends at dawn at its snapshot's darkness limit, else at the night's end
+  (CALC-44). D8-2 (S4-DEF-01): Save again before the night ends. D8-3 (RD-13): "Reported as planned";
+  old estimates not relabelled. D8-4: Share without notes or coordinates. I-1 to I-10: the `reported`
+  event, `result_kind` and `not_done_reason` (v24), results for legacy runs, settlement of Saved ·
+  changed rows, unreadable snapshots, entry actions, stale forms, Tonight's line, the Logbook, the
+  backup (DECISIONS E.1, "Stage 8 decisions").
+- **Frozen:** S8.1 → S8.2 → S8.3 → S8.4 → S8.5 → S8.6 → S8.7 → S8.8 → S8.9 → Stage 8 validation. No
+  gate is open.
+- Stage 7's "Current state" entries moved verbatim to `PROGRESS_HISTORY.md`.
 - **Verification:** the documentation class (V1): references and IDs resolve; `git diff --check`. No
-  gate input changed, so S6.V1's gate is Stage 7's baseline (below).
+  gate input changed, so S7.V2's gate is Stage 8's baseline (below).
 
-**Before this:** Stage 6 closed on 2026-09-28 at `da4c53d` ([report](STAGE_6_VALIDATION.md)); its
-entries, from its planning to its closure, are in `PROGRESS_HISTORY.md`. S6.E stays **UNVERIFIED —
-no independent participant available**, a gap the owner accepted.
+**Before this:** Stage 7 closed on 2026-09-29 at `21e9cb1` ([report](STAGE_7_VALIDATION.md)); its
+entries, from its planning to its closure, are in `PROGRESS_HISTORY.md`.
 
 ## Reusable validation evidence
 
@@ -271,7 +67,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
+| 8 | Sessions / Execution / Actuals / Logbook | In progress | 2026-09-29 | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
 | 10 | Performance & Application Size | Not started | — | — | — |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
@@ -315,7 +111,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-10 | Ordering Tonight's candidates without a score | 6 (S6.14) | **Decided** 2026-09-28 (owner): **O1**, usable time, then frame fill, then the name (DECISIONS E.1). Built by S6.14 |
 | RD-11 | Where the Moon and cloud gate controls live (TD-050) | 6 or 9 (S6.15 or P9.3) | **Decided** 2026-09-28 (owner): **S9**, Stage 9's Settings (P9.3, with RG-13); S6.15 not built (DECISIONS E.1) |
 | RD-12 | The resume prompt's Finish | 8 | **Lapsed** 2026-09-27: the resume prompt goes with the tracker (E.1, "Stages 6–11 amended after Stage 5"); P8.4's audit covers a run still in progress at the upgrade |
-| RD-13 | Provenance of an accepted estimate | 8 | Open; **narrowed** 2026-09-27 to existing accepted-estimate events and "reported as planned" (P8.1) |
+| RD-13 | Provenance of an accepted estimate | 8 | **Decided** 2026-09-29 (Stage 8 planning, delegated by the owner; E.1, "Stage 8 decisions", D8-3): "Reported as planned"; old estimates not relabelled. Built by S8.1 |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
 | RD-15 | A local diagnostics export for the beta | 11 | Open |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
@@ -383,21 +179,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 8 planning** (Sessions / Execution / Actuals / Logbook; `POST_ROADMAP_PLAN.md`,
-   "Stage 8", with its amended P8.1–P8.4 and P8.7 and the inputs it lists: TD-063, TD-070's
-   remainder, TD-056/ENG-14, S4-DEF-01..03 and 05..08, UX-25, RD-12, RD-13). Targeted planning:
-   verify those inputs against the current code, identify research and owner-decision gates,
-   and freeze a Task sequence with scope, out-of-scope, acceptance criteria and required
-   validation; update the plan and this file; commit; then **STOP** before any application code
-   unless the planning itself records an ungated first Task as authorised.
+1. **S8.1 — Results without a run: domain and data** (`POST_ROADMAP_PLAN.md`, "Stage 8 — frozen
+   Task sequence", S8.1; DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.2 … S8.9 in the frozen
+   order and the Stage 8 validation: the owner asked, in chat on 2026-09-29, for the whole of Stage 8,
+   so each Task follows the previous one's commit without a new prompt.
 
-RG-03 is decided (Q1, no specification source): S7.6 has no source path.
-
-No gated Task runs before its gate's decision.
+No Stage 8 gate is open.
 
 **Carried:**
-- S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,
-  S4-DEF-03 and S4-DEF-05 to S4-DEF-08 (Stage 8);
+- S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 decided
+  at Stage 8 planning (E.1, "Stage 8 decisions") and built by S8.1–S8.7;
 - S4V-02: done (S6.E step 1, 2026-09-28);
 - S3V-08: a device recheck of the corrected Stage 3 flow (unverified; separate);
 - TD-072 (S3S-03, deferred by the owner) with its S3F-01 addendum; S3F-02 (a note on TD-071, no
