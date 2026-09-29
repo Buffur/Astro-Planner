@@ -263,6 +263,30 @@ void main() {
       expect(flat.gain, CaptureGain.gain(0), reason: 'a flat keeps its gain');
     });
 
+    test('what each type takes from its source (S7.V1, TD-083)', () {
+      final exposure = {
+        for (final t in FrameType.values) t: CalibrationMatch.takesExposure(t),
+      };
+      final sensitivity = {
+        for (final t in FrameType.values)
+          t: CalibrationMatch.takesSensitivity(t),
+      };
+      expect(exposure, {
+        FrameType.light: false,
+        FrameType.dark: true,
+        FrameType.flat: false,
+        FrameType.bias: false,
+        FrameType.darkFlat: true,
+      });
+      expect(sensitivity, {
+        FrameType.light: false,
+        FrameType.dark: true,
+        FrameType.flat: false,
+        FrameType.bias: true,
+        FrameType.darkFlat: true,
+      });
+    });
+
     test('a flat matches a light filter that has no flat yet', () {
       final flatHa = _b(FrameType.flat, filter: 'Ha', exposure: 2, binning: 2);
       final stray = _b(FrameType.flat, filter: 'SII', exposure: 2, binning: 2);

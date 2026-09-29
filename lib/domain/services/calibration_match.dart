@@ -161,6 +161,20 @@ abstract final class CalibrationMatch {
     return sources.first;
   }
 
+  /// Whether a calibration block of [type] takes its exposure from its
+  /// source (ADR-020 §6): darks and dark flats; a flat's and a bias's
+  /// exposure is their own.
+  static bool takesExposure(FrameType type) =>
+      type == FrameType.dark || type == FrameType.darkFlat;
+
+  /// Whether a calibration block of [type] takes its ISO or gain from its
+  /// source (ADR-020 §6): darks, dark flats and bias; a flat's is only
+  /// proposed from it.
+  static bool takesSensitivity(FrameType type) =>
+      type == FrameType.dark ||
+      type == FrameType.darkFlat ||
+      type == FrameType.bias;
+
   /// [block] with what it inherits copied from [source] (ADR-020 §6, L1):
   /// darks and dark flats the exposure, ISO or gain and binning; bias the ISO
   /// or gain and binning; flats the filter and binning. Everything else (the
@@ -168,18 +182,17 @@ abstract final class CalibrationMatch {
   static CaptureBlock matched(CaptureBlock block, CaptureBlock source) {
     final type = block.frameType;
     if (type == FrameType.light) return block;
-    final takesExposure = type == FrameType.dark || type == FrameType.darkFlat;
     return CaptureBlock(
       id: block.id,
       sessionLogId: block.sessionLogId,
       frameType: type,
       filterName: type == FrameType.flat ? source.filterName : null,
-      exposureTimeSeconds: takesExposure
+      exposureTimeSeconds: takesExposure(type)
           ? source.exposureTimeSeconds
           : block.exposureTimeSeconds,
       frameCount: block.frameCount,
       binning: source.binning,
-      gain: type == FrameType.flat ? block.gain : source.gain,
+      gain: takesSensitivity(type) ? source.gain : block.gain,
       calibrationPolicy: block.calibrationPolicy,
     );
   }

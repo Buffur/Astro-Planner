@@ -114,6 +114,156 @@ void main() {
       await tester.pumpAndSettle();
     }
 
+    Future<void> useOther(WidgetTester tester) async {
+      final unlock = find.byKey(const Key('blockDialog.useOther'));
+      await tester.ensureVisible(unlock);
+      await tester.tap(unlock);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> chooseSource(WidgetTester tester, String row) async {
+      final source = find.byKey(const Key('blockDialog.source'));
+      await tester.ensureVisible(source);
+      await tester.tap(source);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(row).last);
+      await tester.pumpAndSettle();
+    }
+
+    // S7V-01 / TD-083 (S7.V1): changing inheritance never replaces a value
+    // the user owns.
+    for (final item in [('FLAT', '2'), ('BIAS', '0.001')]) {
+      testWidgets('"Use other values" keeps a ${item.$1} block\'s own '
+          'exposure, count and policy', (tester) async {
+        final result = <CaptureBlock?>[];
+        await open(tester, result, blocks: [_ha]);
+        await pickType(tester, item.$1);
+        await enter(tester, 'Exposure (seconds)', item.$2);
+        await enter(tester, 'Frame Count', '20');
+        final policy = find.byKey(const Key('blockDialog.policy'));
+        await tester.ensureVisible(policy);
+        await tester.tap(policy);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('During the window').last);
+        await tester.pumpAndSettle();
+        await useOther(tester);
+        expect(tester.takeException(), isNull, reason: 'no overflow');
+        await submit(tester);
+        final b = result.single!;
+        expect(b.exposureTimeSeconds, double.parse(item.$2));
+        expect(b.frameCount, 20);
+        expect(b.calibrationPolicy, CalibrationPolicy.inWindow);
+        expect(b.binning, 2, reason: 'binning still comes from the light');
+        if (item.$1 == 'BIAS') {
+          expect(b.gain, CaptureGain.gain(100), reason: 'inherited, shown');
+        } else {
+          expect(b.filterName, 'Ha');
+        }
+      });
+    }
+
+    testWidgets('a source change keeps an edited flat gain', (tester) async {
+      final result = <CaptureBlock?>[];
+      await open(tester, result, blocks: [_ha, _oiii]);
+      await pickType(tester, 'FLAT');
+      await enter(tester, 'Exposure (seconds)', '2');
+      await enter(tester, 'Frame Count', '20');
+      await enter(tester, 'Gain (for your records)', '77');
+      await chooseSource(tester, 'OIII · 180 s × 20');
+      await submit(tester);
+      expect(result.single!.gain, CaptureGain.gain(77));
+      expect(result.single!.filterName, 'OIII');
+    });
+
+    testWidgets('a source change keeps a cleared flat gain', (tester) async {
+      final result = <CaptureBlock?>[];
+      await open(tester, result, blocks: [_ha, _oiii]);
+      await pickType(tester, 'FLAT');
+      await enter(tester, 'Exposure (seconds)', '2');
+      await enter(tester, 'Frame Count', '20');
+      await enter(tester, 'Gain (for your records)', '');
+      await chooseSource(tester, 'OIII · 180 s × 20');
+      await submit(tester);
+      expect(result.single!.gain, CaptureGain.none);
+    });
+
+    testWidgets('an untouched flat gain follows the chosen source', (
+      tester,
+    ) async {
+      final result = <CaptureBlock?>[];
+      await open(tester, result, blocks: [_ha, _oiii]);
+      await pickType(tester, 'FLAT');
+      await enter(tester, 'Exposure (seconds)', '2');
+      await enter(tester, 'Frame Count', '20');
+      await chooseSource(tester, 'OIII · 180 s × 20');
+      await submit(tester);
+      expect(result.single!.gain, CaptureGain.gain(120));
+    });
+
+    testWidgets('"Use other values" keeps an edited flat gain', (tester) async {
+      final result = <CaptureBlock?>[];
+      await open(tester, result, blocks: [_ha]);
+      await pickType(tester, 'FLAT');
+      await enter(tester, 'Exposure (seconds)', '2');
+      await enter(tester, 'Frame Count', '20');
+      await enter(tester, 'Gain (for your records)', '77');
+      await useOther(tester);
+      await submit(tester);
+      final f = result.single!;
+      expect((f.gain, f.exposureTimeSeconds), (CaptureGain.gain(77), 2.0));
+    });
+
+    testWidgets('an edited flat ISO survives a source change for an Unknown '
+        'camera', (tester) async {
+      final result = <CaptureBlock?>[];
+      await open(
+        tester,
+        result,
+        blocks: [_ha, _oiii],
+        cameraClass: CameraClass.unknown,
+      );
+      await pickType(tester, 'FLAT');
+      await enter(tester, 'Exposure (seconds)', '2');
+      await enter(tester, 'Frame Count', '20');
+      final kind = find.byKey(const Key('blockDialog.gainKind'));
+      await tester.ensureVisible(kind);
+      await tester.tap(kind);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('ISO').last);
+      await tester.pumpAndSettle();
+      await enter(tester, 'ISO', '800');
+      await chooseSource(tester, 'OIII · 180 s × 20');
+      await submit(tester);
+      expect(result.single!.gain, CaptureGain.iso(800));
+    });
+
+    testWidgets('"Use other values" on a dark flat shows the flat\'s values', (
+      tester,
+    ) async {
+      final flat = CaptureBlock(
+        frameType: FrameType.flat,
+        filterName: 'Ha',
+        exposureTimeSeconds: 2.5,
+        frameCount: 20,
+        binning: 2,
+        gain: CaptureGain.gain(100),
+        calibrationPolicy: CalibrationPolicy.outsideWindow,
+      );
+      final result = <CaptureBlock?>[];
+      await open(tester, result, blocks: [_ha, flat]);
+      await pickType(tester, 'DARK FLAT');
+      await useOther(tester);
+      final exposure = find.widgetWithText(TextFormField, 'Exposure (seconds)');
+      expect(tester.widget<TextFormField>(exposure).controller!.text, '2.5');
+      await enter(tester, 'Frame Count', '20');
+      await submit(tester);
+      final d = result.single!;
+      expect(
+        (d.exposureTimeSeconds, d.gain, d.binning),
+        (2.5, CaptureGain.gain(100), 2),
+      );
+    });
+
     testWidgets('a new dark takes the exposure, gain and binning of the first '
         'light, shown with its origin, at 200 % text', (tester) async {
       final result = <CaptureBlock?>[];

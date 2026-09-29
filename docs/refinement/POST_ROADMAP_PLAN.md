@@ -109,7 +109,7 @@
 > **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 > **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
-> **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed; S7.V1 is next.
+> **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed. **S7.V1 done 2026-09-29** (TD-083 resolved); S7.V2 is next.
 
 ## Contents
 
@@ -4669,6 +4669,8 @@ PASS. No application fixes in validation; the following corrections restore the 
   scientific vector or migration is required because neither contract changes.
 - **Completion:** update the finding/report state, relevant actual-state documentation and PROGRESS;
   one logical commit, then STOP. The next Task is S7.V2, not Stage 8.
+- **Done 2026-09-29:** every acceptance case holds (nine new tests; full gate PASS, 1,719
+  tests); commit recorded in `PROGRESS.md`.
 
 ##### S7.V2 — Keep the site discard guard current (S7V-02 / TD-084)
 

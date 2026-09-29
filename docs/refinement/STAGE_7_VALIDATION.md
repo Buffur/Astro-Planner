@@ -84,6 +84,8 @@ and dark unlocking, but not flat/bias unlocking after independent entry or edite
 Evidence: [`S7V_01_CALIBRATION_PROBE.patch`](evidence/S7V_01_CALIBRATION_PROBE.patch),
 three failing cases. Correction: **S7.V1** in the plan.
 
+**Correction state (S7.V1, 2026-09-29):** implemented; the three cases pass as permanent tests in `calibration_blocks_test.dart` (they fail on the `d13fdab` dialog); full gate PASS with 1,719 tests. Awaits the bounded V5 revalidation after S7.V2; this report's judgment is not changed by the correction itself.
+
 ### S7V-02 / TD-084 — Site guard misses edits to three fields
 
 **BLOCKER (V4 A/B), priority P2.** Contradicts S7.5's "back with changes asks; back without

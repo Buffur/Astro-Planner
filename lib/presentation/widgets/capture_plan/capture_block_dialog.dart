@@ -88,6 +88,10 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
   int _sourceIndex = 0;
   bool _inherit = true;
 
+  /// S7.V1 (TD-083): whether the user has typed, cleared or re-kinded the
+  /// ISO or gain; a source then no longer proposes a flat's.
+  bool _gainEdited = false;
+
   List<CaptureBlock> get _sources =>
       CalibrationMatch.sourcesFor(_type, widget.blocks);
 
@@ -200,10 +204,11 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
   }
 
   /// A new flat's ISO or gain is proposed from its light block (RG-10 §4:
-  /// prefilled and overridable); its binning is taken from it.
+  /// prefilled and overridable), until the user edits it (S7.V1); its
+  /// binning is taken from it.
   void _prefillFlatGain() {
     final from = _inheritFrom;
-    if (_type != FrameType.flat || from == null) return;
+    if (_type != FrameType.flat || from == null || _gainEdited) return;
     _copyGain(from.gain);
   }
 
@@ -217,20 +222,22 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
 
   /// Whether the exposure is the user's to type (not taken from a source).
   bool get _typesExposure =>
-      _inheritFrom == null ||
-      _type == FrameType.flat ||
-      _type == FrameType.bias;
+      _inheritFrom == null || !CalibrationMatch.takesExposure(_type);
 
-  /// "Use other values" (ADR-020 §6): the source's values become the
-  /// fields', which are the user's from now on.
+  /// "Use other values" (ADR-020 §6): the values still taken from the source
+  /// become the fields', which are the user's from now on. What was already
+  /// the user's (a flat's or bias's exposure, a flat's ISO or gain) is kept
+  /// (S7.V1, TD-083).
   void _useOtherValues() {
     final from = _inheritFrom;
     if (from == null) return;
     setState(() {
       _inherit = false;
-      _exposure.text = _trimZeros(from.exposureTimeSeconds);
+      if (CalibrationMatch.takesExposure(_type)) {
+        _exposure.text = _trimZeros(from.exposureTimeSeconds);
+      }
       _binning = from.binning;
-      _copyGain(from.gain);
+      if (CalibrationMatch.takesSensitivity(_type)) _copyGain(from.gain);
       final filter = from.filterName ?? 'None';
       if (_type == FrameType.flat) {
         _filter = _filters.contains(filter) ? filter : 'None';
@@ -303,7 +310,7 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
     final sources = _sources;
     final tip = CalibrationText.tip(_type);
     // What the source gives is not typed while it is taken (ADR-020 §6).
-    final takesGain = from != null && _type != FrameType.flat;
+    final takesGain = from != null && CalibrationMatch.takesSensitivity(_type);
     final takesBinning = from != null;
     final takesFilter = from != null && _type == FrameType.flat;
     return AlertDialog(
@@ -543,7 +550,12 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
                     ),
                   ],
                   onChanged: (v) {
-                    if (v != null) setState(() => _gainKind = v);
+                    if (v != null) {
+                      setState(() {
+                        _gainKind = v;
+                        _gainEdited = true;
+                      });
+                    }
                   },
                 ),
               if (_kind != GainKind.unknown && !takesGain)
@@ -566,6 +578,7 @@ class _CaptureBlockDialogState extends State<_CaptureBlockDialog> {
                     decimal: true,
                   ),
                   validator: _validateGain,
+                  onChanged: (_) => _gainEdited = true,
                 ),
               if (kept.isNotEmpty)
                 Padding(
