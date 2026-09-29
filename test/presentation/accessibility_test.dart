@@ -16,7 +16,13 @@ import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
+import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
+import 'package:astroplan/domain/models/planning_preferences.dart';
+import 'package:astroplan/domain/models/session.dart';
+import 'package:astroplan/domain/models/session_night.dart';
+import 'package:astroplan/domain/services/capture_budget_calculator.dart';
+import 'package:astroplan/domain/services/session_snapshot_builder.dart';
 import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/presentation/widgets/planner_sections.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
@@ -107,7 +113,7 @@ Future<void> _settle(WidgetTester tester) async {
 /// (a phone) and tall enough for a whole page: a node half scrolled under an
 /// app bar reports a clipped size to the tap-target guideline, which would
 /// be a false failure.
-Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
+Future<({PlannerHarness vm, int running, int planned, int ended})> _pumpApp(
   WidgetTester tester, {
   required _Theme theme,
   required double textScale,
@@ -123,7 +129,7 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
   AppRouter.router.go(AppRouter.tonight);
   late AppDatabase db;
   late PlannerHarness vm;
-  late int running, planned;
+  late int running, planned, ended;
   await tester.runAsync(() async {
     db = AppDatabase(NativeDatabase.memory());
     await CatalogSeeder(DriftTargetRepository(db)).seedIfNeeded();
@@ -162,6 +168,12 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
       DriftSessionRepository(db, clock: clock),
       (await DriftSessionRepository(db).get(planned))!,
     )).id;
+    // TD-087: a Saved plan whose night (9 Nov) has ended, awaiting its
+    // result, so the sweep sees the Saved-plan result form too.
+    ended = (await _savedEndedPlan(
+      DriftSessionRepository(db, clock: clock),
+      (await DriftSessionRepository(db).get(planned))!,
+    )).id;
     if (theme == _Theme.field) await vm.theme.toggleFieldMode();
   });
   addTearDown(() => tester.runAsync(db.close));
@@ -169,7 +181,52 @@ Future<({PlannerHarness vm, int running, int planned})> _pumpApp(
     MultiProvider(providers: vm.providers, child: const AstroPlanApp()),
   );
   await _settle(tester);
-  return (vm: vm, running: running, planned: planned);
+  return (vm: vm, running: running, planned: planned, ended: ended);
+}
+
+/// A copy of [saved]'s plan saved for 9 Nov, whose night has ended by the
+/// sweep's clock (10 Nov, 18:00 UTC).
+Future<Session> _savedEndedPlan(
+  DriftSessionRepository repo,
+  Session saved,
+) async {
+  final night = CalendarDate(2026, 11, 9);
+  final plan = SessionPlan(
+    eveningDate: night,
+    timeZoneId: 'Europe/Ljubljana',
+    siteId: saved.siteId,
+    targetId: saved.targetId,
+    rigId: saved.rigId,
+    blocks: saved.blocks,
+    targetLabel: saved.record.targetName,
+    rigLabel: saved.record.equipmentName,
+    siteLabel: saved.record.locationName,
+  );
+  final prefs = PlanningPreferences();
+  final row = await repo.create(plan);
+  return repo.savePlan(
+    row.id,
+    plan,
+    SessionSnapshotBuilder.build(
+      takenAtUtc: DateTime.utc(2026, 11, 9, 18),
+      night: SessionNight(
+        eveningDate: night,
+        startUtc: DateTime.utc(2026, 11, 9, 11),
+        endUtc: DateTime.utc(2026, 11, 10, 11),
+        latitude: 46.05,
+        longitude: 14.51,
+        timeContextId: 'Europe/Ljubljana',
+      ),
+      timeZoneId: 'Europe/Ljubljana',
+      preferences: prefs,
+      budget: CaptureBudgetCalculator.calculate(
+        blocks: saved.blocks,
+        overheads: CaptureOverheads.fromPreferences(prefs),
+        targetTransitsInWindow: false,
+      ),
+      blocks: saved.blocks,
+    ),
+  );
 }
 
 /// Checks the page; one taller than the view is scrolled a screen at a time
@@ -248,6 +305,8 @@ void main() {
           AppRouter.session(),
           AppRouter.siteEdit,
           AppRouter.results(app.running),
+          AppRouter.results(app.planned), // TD-087: its night not ended yet
+          AppRouter.results(app.ended), // TD-087: no outcome chosen yet
           AppRouter.welcome,
           AppRouter.metadata,
           AppRouter.nightMoon, // S6.5
@@ -269,6 +328,19 @@ void main() {
           if (problems.isNotEmpty) {
             report.add('$route:\n${problems.join('\n')}');
           }
+        }
+        // TD-087: the Saved plan's form with Not done chosen, so the sweep
+        // sees the reason chips.
+        AppRouter.router.go(AppRouter.results(app.ended));
+        await _settle(tester);
+        final notDone = find.byKey(const Key('results.outcome.notDone'));
+        await tester.ensureVisible(notDone);
+        await tester.tap(notDone);
+        await _settle(tester);
+        expect(find.byKey(const Key('results.reason.clouds')), findsOneWidget);
+        final reasons = await _audit(tester, contrast: theme != _Theme.field);
+        if (reasons.isNotEmpty) {
+          report.add('result form, Not done:\n${reasons.join('\n')}');
         }
         // S6.7: the planner again with every section open, so the sweep
         // sees the detail that is one tap away too.

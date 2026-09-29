@@ -4,7 +4,7 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**TD-085 and TD-086 fixed** at the owner's request, after the Stage 8 validation PASS; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
+> **Last updated:** 2026-09-29 (**TD-085 to TD-087 fixed**, every Stage 8 validation finding, at the owner's request; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
 > **Next:** Stage 9 planning.
 
 ## Current state
@@ -15,9 +15,20 @@
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: Complete** (validation PASS 2026-09-29, [report](STAGE_8_VALIDATION.md)). Stage 9 not started |
 | Current Task | None in progress |
 | Next Task | **Stage 9 planning** (below, "Next allowed action") |
-| Code baseline | **TD-086's fix** (its commit, after TD-085's). Not pushed: the owner asked for commits only (2026-09-29) |
+| Code baseline | **TD-087's fix** (its commit; after the TD-085 and TD-086 fixes). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**TD-087 fixed, 2026-09-29** (S8V-03; tests only): the three Stage 8 acceptance checks the
+validation established by probes are committed tests.
+- S8.1 acceptance 6: `schema_migration_test.dart`'s v23 → v24 test adds a never-saved draft, a
+  Saved and a Saved · changed plan with blocks.
+- S8.4 acceptance 2: `live_runs_survive_test.dart` (new; the shape of the validation's P2).
+- S8.2 and trap 17: the accessibility sweep opens the Saved plan's result form before its night
+  ends, after it with no outcome chosen, and with Not done's reason chips (all three themes, 100 %
+  and 200 %).
+- **Verification:** test code only: the full gate after the change, **PASS** (1,791 tests, 2
+  skips; 2 host E2E; Flutter 3.47.4).
 
 **TD-086 fixed, 2026-09-29** (S8V-02; the owner asked in chat to fix every Stage 8 finding; I-4,
 CALC-44, SI-008): the unreadable Saved · changed path.

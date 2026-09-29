@@ -39,7 +39,8 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/database/json_map_converter.dart';
 import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/models/camera_class.dart';
-import 'package:astroplan/domain/models/session.dart' show SessionResults;
+import 'package:astroplan/domain/models/session.dart'
+    show SessionResults, SessionStatus;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
@@ -181,8 +182,9 @@ void main() {
       });
     }
 
-    test('v23 -> v24: every session, block, event and counter kept; no '
-        'result kind or reason is invented; `reported` can now be '
+    test('v23 -> v24: every session (every status: a never-saved draft, a '
+        'Saved and a Saved · changed plan too), block, event and counter '
+        'kept; no result kind or reason is invented; `reported` can now be '
         'stored', () async {
       final schema = await verifier.schemaAt(23);
       final raw = schema.rawDatabase;
@@ -200,11 +202,26 @@ void main() {
         "(4, 'Old', 'Old rig', 1690000000, 7, 'completed', 1, NULL, "
         "NULL, NULL, NULL, 7, 0, 'legacy');",
       );
+      // TD-087 (S8V-03): the plans a v23 user has open, in every status.
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, planned_at_utc_ms, plan_snapshot) VALUES "
+        "(5, 'M1', 'Rig', 1790000000, 4, 'draft', 0, '2026-12-18', "
+        "'Europe/Ljubljana', NULL, NULL), "
+        "(6, 'M8', 'Rig', 1790000000, 6, 'planned', 0, '2026-12-19', "
+        "'Europe/Ljubljana', 1790000000000, '{\"v\":1,\"takenAtUtcMs\":1}'), "
+        "(7, 'M13', 'Rig', 1790000000, 8, 'draft', 0, '2026-12-21', "
+        "'Europe/Ljubljana', 1790000100000, '{\"v\":1,\"takenAtUtcMs\":2}');",
+      );
       raw.execute(
         "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
         "exposure_time_seconds, frame_count, position, completed_frames, "
         "rejected_frames) VALUES (1, 1, 'light', 60.0, 10, 0, 3, 1), "
-        "(2, 3, 'light', 120.0, 5, 0, 2, 0);",
+        "(2, 3, 'light', 120.0, 5, 0, 2, 0), "
+        "(3, 5, 'light', 30.0, 4, 0, 0, 0), "
+        "(4, 6, 'light', 90.0, 6, 0, 0, 0), "
+        "(5, 7, 'light', 45.0, 8, 0, 0, 0);",
       );
       raw.execute(
         "INSERT INTO session_events (id, session_log_id, seq, at_utc_ms, "
@@ -228,9 +245,32 @@ void main() {
         'abandoned',
         'inProgress',
         'completed',
+        'draft',
+        'planned',
+        'draft',
       ]);
       expect(rows.map((r) => (r.resultKind, r.notDoneReason)), [
-        for (var i = 0; i < 4; i++) (null, null),
+        for (var i = 0; i < 7; i++) (null, null),
+      ]);
+      expect(rows.skip(4).map((r) => (r.eveningDate, r.plannedAtUtcMs)), [
+        ('2026-12-18', null),
+        ('2026-12-19', 1790000000000),
+        ('2026-12-21', 1790000100000),
+      ]);
+      expect(rows.skip(4).map((r) => r.planSnapshot), [
+        null,
+        {'v': 1, 'takenAtUtcMs': 1},
+        {'v': 1, 'takenAtUtcMs': 2},
+      ]);
+      final open = await DriftSessionRepository(db).list(
+        statuses: {SessionStatus.draft, SessionStatus.planned},
+        includeLegacy: false,
+      );
+      open.sort((a, b) => a.id.compareTo(b.id));
+      expect(open.map((x) => (x.id, x.isSavedPlan, x.isSavedChanged)), [
+        (5, false, false),
+        (6, true, false),
+        (7, true, true),
       ]);
       expect((rows[0].actualLightFrames, rows[0].rejectedFrames), (3, 1));
       expect(rows[0].environmentalNotes, 'Dew');
@@ -255,9 +295,16 @@ void main() {
       final blocks = await (db.select(
         db.captureBlocks,
       )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(
+        blocks.map((b) => (b.sessionLogId, b.frameCount, b.completedFrames)),
+        [(1, 10, 3), (3, 5, 2), (5, 4, 0), (6, 6, 0), (7, 8, 0)],
+      );
       expect(blocks.map((b) => (b.completedFrames, b.rejectedFrames)), [
         (3, 1),
         (2, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
       ]);
       final repo = DriftSessionRepository(db);
       final replay = await repo.execution(1);
