@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **RG-08 and RG-09 decided, 2026-09-29 (Stage 7):** E2 (elevation optional, Unknown by default), S3
+> (Bortle and SQM optional in one collapsed section; no automatic source), M2 (the map link to
+> lightpollutionmap.app) (E.1, "RG-08 and RG-09 decided"). Documentation only.
 > **RG-07 decided, 2026-09-29 (Stage 7):** T1 only: searchable aliases from the pinned OpenNGC in
 > their own table and a normalised search; no new objects, no online lookup (E.1, "RG-07
 > decided"). Documentation only.
@@ -1794,6 +1797,26 @@ Stage 4 revalidation is still required.
   version rises, a schema change adds the alias table; `OPENNGC_NOTICE.txt` and About say what is kept.
   Nothing leaves the device.
 - Documentation only. No code changed.
+
+### RG-08 and RG-09 decided: the site form (Stage 7, 2026-09-29)
+
+- **Context:** S7.R4's research, `refinement/research/RG-08_09_SITE_AUTOMATION.md` (`3c70ac5`), with
+  three questions (§8).
+- **Decided by:** the project owner, in chat, choosing every recommended option.
+- **E2 — elevation (RG-08):** optional and **Unknown by default**. The column becomes nullable; every
+  stored value is kept exactly (ADR-011 §6's rule); a snapshot records null when unknown. It stays
+  editable without prominence. No automatic source (E1 not adopted), no GPS altitude, never 0 m as a
+  default.
+- **S3 — Bortle and SQM (RG-09):** both stay manual, optional and Unknown by default, in one collapsed
+  "Sky darkness (optional)" section of the site form, with its source and date shown when stored, and a
+  link to look the value up on the light-pollution map at the site. No automatic source (none is
+  acceptable: S7.R4 §4.2); no Bortle↔SQM conversion (PD-05 unchanged).
+- **M2 — the map link (RG-09):** `lightpollutionmap.app`, opened at the site with its documented
+  `?lat=…&lng=…&zoom=…` link; About's source line follows. Nothing is fetched; the coordinates leave
+  the device only in the link the user taps, as today; the privacy policy's wording is checked.
+- **Rejected:** E1, E1b, E3; S1, S4; M1, M3.
+- **Consequences:** S7.5 implements them with its frozen scope (the editor's "Use current position",
+  the discard guard). Documentation only.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
