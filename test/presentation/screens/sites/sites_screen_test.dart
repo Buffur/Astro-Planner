@@ -424,6 +424,119 @@ void main() {
       expect(lat.controller!.text, isEmpty);
     });
 
+    // S7V-02 / TD-084 (S7.V2): Back asks about an edit to any one field.
+    Future<void> editOnly(
+      WidgetTester tester,
+      String label,
+      String text,
+    ) async {
+      final field = find.widgetWithText(TextFormField, label);
+      await tester.ensureVisible(field);
+      await tester.enterText(field, text);
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> back(WidgetTester tester, {required bool system}) async {
+      if (system) {
+        await tester.binding.handlePopRoute();
+      } else {
+        await tester.pageBack();
+      }
+      await tester.pumpAndSettle();
+    }
+
+    const edits = [
+      ('Name', 'Changed name'),
+      ('Elevation (m)', '450'),
+      ('Notes', 'Private note'),
+    ];
+    for (final existing in [true, false]) {
+      for (final system in [false, true]) {
+        for (final item in edits) {
+          testWidgets('back guards a ${item.$1}-only edit '
+              '(${existing ? 'existing' : 'new'} site, '
+              '${system ? 'system' : 'app bar'} Back)', (tester) async {
+            await build(
+              tester,
+              sites: existing ? [site('Original', 46, 14)] : const [],
+            );
+            await pump(
+              tester,
+              at: AppRouter.siteEdit,
+              extra: existing ? SiteEditorArgs(site: vm.sites.single) : null,
+            );
+            await editOnly(tester, item.$1, item.$2);
+            await back(tester, system: system);
+            expect(find.text('Unsaved changes'), findsOneWidget);
+            expect(find.byType(SiteEditorScreen), findsOneWidget);
+          });
+        }
+      }
+    }
+
+    testWidgets('an edit typed back to the original leaves without asking', (
+      tester,
+    ) async {
+      await build(tester, sites: [site('Original', 46, 14)]);
+      await pump(
+        tester,
+        at: AppRouter.siteEdit,
+        extra: SiteEditorArgs(site: vm.sites.single),
+      );
+      await editOnly(tester, 'Name', 'Changed name');
+      await editOnly(tester, 'Name', 'Original');
+      await editOnly(tester, 'Elevation (m)', '450');
+      await editOnly(tester, 'Elevation (m)', '300');
+      await back(tester, system: false);
+      expect(find.text('Unsaved changes'), findsNothing);
+      expect(find.byType(SiteEditorScreen), findsNothing);
+    });
+
+    testWidgets('a new site with only the device zone filled in leaves '
+        'without asking', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      expect(find.text('Europe/Ljubljana (device zone)'), findsOneWidget);
+      await back(tester, system: true);
+      expect(find.text('Unsaved changes'), findsNothing);
+      expect(find.byType(SiteEditorScreen), findsNothing);
+    });
+
+    testWidgets('a name-only edit: Cancel keeps it, Discard stores nothing, '
+        'Save stores it', (tester) async {
+      await build(tester, sites: [site('Original', 46, 14)]);
+      await pump(
+        tester,
+        at: AppRouter.siteEdit,
+        extra: SiteEditorArgs(site: vm.sites.single),
+      );
+      await editOnly(tester, 'Name', 'Changed name');
+      await back(tester, system: false);
+      await tester.tap(find.byKey(const Key('unsaved.cancel')));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, 'Changed name'), findsOne);
+
+      await back(tester, system: false);
+      await tester.tap(find.byKey(const Key('unsaved.discard')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SiteEditorScreen), findsNothing);
+      expect(vm.sites.single.name, 'Original');
+
+      await pump(
+        tester,
+        at: AppRouter.siteEdit,
+        extra: SiteEditorArgs(site: vm.sites.single),
+      );
+      await editOnly(tester, 'Notes', 'Private note');
+      await back(tester, system: false);
+      await tester.tap(find.byKey(const Key('unsaved.save')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(find.byType(SiteEditorScreen), findsNothing);
+      expect(vm.sites.single.notes, 'Private note');
+      expect(vm.sites.single.name, 'Original');
+    });
+
     testWidgets('back without changes leaves; with changes it asks: Cancel '
         'stays, Discard leaves without saving', (tester) async {
       await build(tester);

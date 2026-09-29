@@ -101,6 +101,11 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
 
   bool get _changed => _values() != _opened;
 
+  /// Whether the last build saw a change, so [PopScope.canPop] is rebuilt
+  /// when a field that does not otherwise rebuild the form (name,
+  /// elevation, notes) starts or stops differing (S7.V2, TD-084).
+  bool _builtChanged = false;
+
   static String _coordinate(double? value) => value?.toStringAsFixed(5) ?? '';
 
   static String _trim(double value) =>
@@ -117,10 +122,18 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     for (final c in [_latitude, _longitude, _sqm]) {
       c.addListener(_refresh);
     }
+    // The back guard follows every field (S7.V2); only a flip rebuilds.
+    for (final c in [_name, _elevation, _notes]) {
+      c.addListener(_guardChanged);
+    }
   }
 
   void _refresh() {
     if (mounted) setState(() {});
+  }
+
+  void _guardChanged() {
+    if (mounted && _changed != _builtChanged) setState(() {});
   }
 
   /// A new site's zone defaults to the device zone (owner decision, TASK
@@ -281,8 +294,9 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
       signed: true,
       decimal: true,
     );
+    _builtChanged = _changed;
     return PopScope(
-      canPop: _leaving || !_changed,
+      canPop: _leaving || !_builtChanged,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _onBack();
       },

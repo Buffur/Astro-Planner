@@ -104,6 +104,8 @@ masks this defect. No device-specific assumption is needed for this reproduced A
 Evidence: [`S7V_02_SITE_GUARD_PROBE.patch`](evidence/S7V_02_SITE_GUARD_PROBE.patch),
 three failing cases. Correction: **S7.V2** in the plan.
 
+**Correction state (S7.V2, 2026-09-29):** implemented; the three cases pass as permanent tests in `sites_screen_test.dart`, for existing and new sites and app-bar and system Back (they fail on the `d13fdab` editor); full gate PASS with 1,734 tests. Awaits the bounded V5 revalidation; this report's judgment is not changed by the correction itself.
+
 ### Fresh checks and probe reproduction
 
 On `d13fdab`, apply both patches, then run:
