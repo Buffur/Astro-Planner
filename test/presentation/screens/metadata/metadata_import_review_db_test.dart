@@ -239,7 +239,7 @@ void main() {
 
     await t.tap(find.byKey(Key('import.open.${rig.id}')));
     await _settle(t);
-    await _tapText(t, 'Save Changes');
+    await _tapText(t, 'Save');
     expect(await app.counts(t), [1, 1, 1], reason: 'no duplicate');
   });
 
@@ -252,7 +252,7 @@ void main() {
 
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
-    await _tapText(t, 'Save Changes');
+    await _tapText(t, 'Save');
     var rig = (await app.rigs(t)).single;
     expect(rig.pixelPitchUm, 2.4);
     expect(
@@ -264,7 +264,7 @@ void main() {
     await _settle(t);
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
-    await _tapText(t, 'Save Changes');
+    await _tapText(t, 'Save');
     rig = (await app.rigs(t)).single;
     expect(rig.pixelPitchUm, 2.414);
     expect(

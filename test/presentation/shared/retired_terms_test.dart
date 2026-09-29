@@ -3,8 +3,8 @@
 // `Key`/`ValueKey` values, comments and code identifiers are exempt) and
 // compares what it finds with an explicit baseline of the occurrences left
 // at 38925dd. A new occurrence fails; so does a baseline entry that no
-// longer occurs, so the baseline only shrinks. Stages 6, 8 and 9 remove the
-// entries as they redesign the screens, and P9.2 empties it. The scanner
+// longer occurs, so the baseline only shrinks. Stages 6, 8 and 9 removed the
+// entries as they redesigned the screens, and P9.2 (S9.2) emptied it. The scanner
 // reads one line at a time: a term split across two literals is not seen.
 
 import 'dart:io';
@@ -28,10 +28,7 @@ const retiredTerms = [
 
 /// What is left, per file and term: `path|term` → count. Remove an entry
 /// (or lower its count) when its screen stops using the term; never add one.
-const baseline = {
-  'lib/presentation/screens/equipment/equipment_selection_screen.dart|Equipment profile':
-      1,
-};
+const baseline = <String, int>{}; // emptied by P9.2 (S9.2)
 
 final _literal = RegExp(r'''('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*")''');
 final _directive = RegExp(r'^(import|export|part)\b');
@@ -91,6 +88,11 @@ void main() {
   test('lib/presentation holds no retired term beyond the baseline, and '
       'the baseline holds nothing that is gone', () {
     expect(baselineProblems(_scanPresentation(), baseline), isEmpty);
+  });
+
+  test('P9.2 (S9.2): the baseline is empty; no retired term is left', () {
+    expect(baseline, isEmpty);
+    expect(_scanPresentation(), isEmpty);
   });
 
   group('the scanner', () {

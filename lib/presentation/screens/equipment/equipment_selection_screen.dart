@@ -17,6 +17,7 @@ import '../../shared/list_mode.dart';
 import 'equipment_editor.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_spacing.dart';
 
 /// The rigs (ADR-015; S9.1, D9-1): managed in the Library, chosen for the
 /// plan from `/select/rig`. Deleting confirms (RD-09 = M + S1).
@@ -164,9 +165,9 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               onRetry: _loadEquipment,
             )
           : _equipment.isEmpty
-          ? const Center(child: Text('No equipment profiles found.'))
+          ? const Center(child: Text(AppWords.noRigs))
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               itemCount: _equipment.length,
               itemBuilder: (context, index) {
                 final eq = _equipment[index];
@@ -176,7 +177,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                     choosing && eq.id == planVm.selectedEquipment?.id;
 
                 final card = Card(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                       color: isSelected

@@ -1,3 +1,6 @@
+import '../../../core/theme/app_spacing.dart';
+import '../../shared/app_words.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -199,9 +202,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     } catch (e) {
       AppLog.error('location', 'Could not get the position', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(FailureText.message('get your position', e))),
-        );
+        showFailure(context, FailureText.message('get your position', e));
       }
     } finally {
       if (mounted) setState(() => _locating = false);
@@ -216,9 +217,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     } catch (e) {
       AppLog.error('sites', 'Could not open the light-pollution map', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(FailureText.message('open the map', e))),
-        );
+        showFailure(context, FailureText.message('open the map', e));
       }
     }
   }
@@ -227,7 +226,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   /// Save saves and leaves when it succeeds.
   Future<void> _onBack() async {
     final label = _name.text.trim().isEmpty
-        ? (_isNew ? 'New site' : _original!.name)
+        ? (_isNew ? AppWords.newSite : _original!.name)
         : _name.text.trim();
     final choice = await askUnsavedChanges(context, plan: label);
     if (!mounted) return;
@@ -269,8 +268,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
         today: siteVm.today,
       );
     } on ArgumentError catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Invalid site: ${e.message}')));
+      showFailure(context, 'Invalid site: ${e.message}');
       return;
     }
     setState(() => _saving = true);
@@ -307,19 +305,23 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   Widget _form(BuildContext context, TextInputType numberKeyboard) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New site' : 'Edit site'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            tooltip: 'Save site',
+        title: Text(_isNew ? AppWords.newSite : AppWords.editSite),
+      ),
+      // S9.2: one primary Save, always in reach (DESIGN_SYSTEM §9).
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: FilledButton(
+            key: const Key('siteEditor.save'),
             onPressed: _saving ? null : _save,
+            child: const Text(AppWords.saveSite),
           ),
-        ],
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             TextFormField(
               controller: _name,

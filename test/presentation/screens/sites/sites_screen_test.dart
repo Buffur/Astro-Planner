@@ -118,7 +118,7 @@ void main() {
   }
 
   Future<void> save(WidgetTester tester) async {
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
   }
@@ -191,7 +191,7 @@ void main() {
     await build(tester);
     await pump(tester, at: AppRouter.siteEdit);
 
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.pumpAndSettle();
     expect(find.text('Name is required'), findsOneWidget);
     expect(find.text('Latitude is required'), findsOneWidget);
@@ -202,7 +202,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Latitude (°)'),
       '91',
     );
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.pumpAndSettle();
     expect(find.text('Latitude must be between -90 and 90'), findsOneWidget);
     expect(vm.sites, isEmpty);
@@ -231,7 +231,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Elevation (m)'),
       '295',
     );
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 
@@ -271,7 +271,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Name'),
       'Garden',
     );
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 
@@ -305,7 +305,7 @@ void main() {
       find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
       '20.4',
     );
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 
@@ -328,7 +328,7 @@ void main() {
       find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
       '30',
     );
-    await tester.tap(find.byTooltip('Save site'));
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
     await tester.pumpAndSettle();
     expect(find.text('SQM must be between 15 and 23'), findsOneWidget);
   });

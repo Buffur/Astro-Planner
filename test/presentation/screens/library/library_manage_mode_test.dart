@@ -120,7 +120,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.widgetWithText(ListTile, 'Andromeda Galaxy (M31)'));
     await settle(tester);
-    expect(find.text('Edit Target'), findsOneWidget);
+    expect(find.text('Edit target'), findsOneWidget);
     expect(
       vm.plan.selectedTarget!.id,
       m42.id,

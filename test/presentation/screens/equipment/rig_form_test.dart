@@ -124,7 +124,7 @@ void main() {
     await tapMore(tester);
     for (final label in [
       'Maximum sub-exposure (s)',
-      'Average RAW File Size (MB)',
+      'Average RAW file size (MB)',
       'Rotation (°)',
     ]) {
       expect(find.widgetWithText(TextFormField, label), findsOneWidget);

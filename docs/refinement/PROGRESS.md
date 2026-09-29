@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.1 done**: the Library manages).
-> **Next:** S9.2 (secondary forms and the vocabulary). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.2 done**: secondary forms; the retired-terms baseline empty).
+> **Next:** S9.3 (RG-13: the settings research). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,22 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.2** (below, "Next allowed action") |
-| Code baseline | **S9.1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.3** (below, "Next allowed action") |
+| Code baseline | **S9.2** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.2 done, 2026-09-29** (P9.2): secondary forms and the vocabulary completed.
+- The rig, target and site editors: sentence-case titles and labels from `AppWords`, one primary
+  `FilledButton` Save (the target editor's `ElevatedButton` replaced; the site editor's app-bar check
+  replaced by "Save site" at its foot); `AppSpacing` in the lists and the site form; the site editor's
+  ad hoc SnackBars through the new `showFailure`. "No equipment profiles found." → "No rigs yet."
+- **The retired-terms baseline is empty**, and a test now requires it (P9.2's acceptance).
+- **Tests:** `secondary_forms_test.dart` (3); labels updated deliberately in the rig, target, site,
+  metadata, camera-class and noise-reduction tests and the E2E ("Save Changes" → "Save", "Target Name *"
+  → "Name *", the site editor's Save by key `siteEditor.save`).
+- **Verification:** shared behaviour (three editors, a shared helper): the full gate after the last
+  code change, **PASS** (1,801 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.1 done, 2026-09-29** (P9.1; RD-07, TD-053 resolved; D9-1, D9-2): the Library manages.
 - `ListMode` (manage in the Library, choose from `/select/…`): a Library tap opens the rig, target or
@@ -414,8 +426,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.2 — Secondary forms and the vocabulary completed** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
-   Task sequence"). Then S9.3 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.3 — RG-13: what each setting is for, and where it belongs (research)** (`POST_ROADMAP_PLAN.md`,
+   "Stage 9 — frozen Task sequence"). Then S9.4 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

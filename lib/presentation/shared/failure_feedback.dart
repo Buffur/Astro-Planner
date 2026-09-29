@@ -61,6 +61,15 @@ void showDone(BuildContext context, String message) {
     );
 }
 
+/// Shows why an action failed (S9.2): the failure twin of [showDone], for a
+/// failure caught outside [runWithFeedback]. [text] comes from
+/// [FailureText] or is a validation message; never the raw error.
+void showFailure(BuildContext context, String text) {
+  ScaffoldMessenger.maybeOf(context)
+    ?..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(text)));
+}
+
 /// A list or page that could not be loaded (TASK 15.1): says so, instead of
 /// looking empty, and offers to try again.
 class LoadFailureView extends StatelessWidget {

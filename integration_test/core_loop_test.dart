@@ -220,7 +220,7 @@ Future<void> addSite(
     find.widgetWithText(TextFormField, 'Elevation (m)'),
     '300',
   );
-  await tap(tester, find.byTooltip('Save site'));
+  await tap(tester, find.byKey(const Key('siteEditor.save')));
 }
 
 /// Picks the target and the rig, then the capture plan, through the

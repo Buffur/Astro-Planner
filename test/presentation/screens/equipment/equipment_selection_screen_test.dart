@@ -176,7 +176,7 @@ void main() {
     final sensorH = find.widgetWithText(TextFormField, '15.70');
     final focal = find.widgetWithText(
       TextFormField,
-      'Effective Focal Length (mm)',
+      'Effective focal length (mm)',
     );
     // TASK 8.4 relabelled the f/ field (ADR-011 §3: unit-explicit names).
     final aperture = find.widgetWithText(TextFormField, 'Focal ratio (f/)');
@@ -263,7 +263,7 @@ void main() {
 
   final focalField = find.widgetWithText(
     TextFormField,
-    'Effective Focal Length (mm)',
+    'Effective focal length (mm)',
   );
   final ratioField = find.widgetWithText(TextFormField, 'Focal ratio (f/)');
   final diameterField = find.widgetWithText(
@@ -386,7 +386,7 @@ void main() {
     // The user fixes it by entering the diameter.
     await tester.enterText(diameterField, '72');
     await tester.pump();
-    await tester.tap(find.text('Save Changes'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     final fixed = repo.updated.single;
     expect(fixed.focalRatio, closeTo(400 / 72, 1e-9));
@@ -406,11 +406,11 @@ void main() {
       'px',
       'Pixel size (µm)',
       'mm',
-      'Effective Focal Length (mm)',
+      'Effective focal length (mm)',
       'Focal ratio (f/)',
       'Aperture diameter (mm)',
       'Maximum sub-exposure (s)',
-      'Average RAW File Size (MB)',
+      'Average RAW file size (MB)',
       'Rotation (°)',
     ]) {
       expect(find.text(label), findsWidgets, reason: label);
@@ -450,7 +450,7 @@ void main() {
     expect(find.textContaining('Camera specs: verified'), findsOneWidget);
     expect(find.textContaining('Optics: estimated'), findsOneWidget);
 
-    await tester.tap(find.text('Save Changes'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     final saved = repo.updated.single;
     expect(saved.cameraConfidence, SpecConfidence.verified);

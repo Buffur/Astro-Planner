@@ -17,6 +17,7 @@ import '../../shared/unsaved_plan_prompt.dart';
 import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../core/theme/app_spacing.dart';
 
 /// The targets (ADR-015; S9.1, D9-1): managed in the Library, where "Plan
 /// this target" starts a new plan; chosen for the plan from
@@ -181,7 +182,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(isEdit ? 'Edit Target' : 'Add Custom Target'),
+              title: Text(isEdit ? AppWords.editTarget : AppWords.addTarget),
               content: SingleChildScrollView(
                 child: Form(
                   key: formKey,
@@ -196,7 +197,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       TextFormField(
                         controller: nameCtrl,
                         decoration: const InputDecoration(
-                          labelText: 'Target Name *',
+                          labelText: 'Name *',
                           hintText: 'e.g. Andromeda Galaxy',
                         ),
                         validator: (v) =>
@@ -206,7 +207,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       DropdownButtonFormField<String>(
                         initialValue: selectedType,
                         decoration: const InputDecoration(
-                          labelText: 'Object Type',
+                          labelText: 'Object type',
                         ),
                         items: types
                             .map(
@@ -228,7 +229,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       TextFormField(
                         controller: raCtrl,
                         decoration: const InputDecoration(
-                          labelText: 'Right Ascension (J2000) *',
+                          labelText: 'Right ascension (J2000) *',
                           hintText: '05h35m17s, 5:35:17 or 5.588 h',
                         ),
                         validator: TargetFormInput.validateRightAscension,
@@ -295,7 +296,8 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
-                ElevatedButton(
+                // S9.2: Save is the primary button, as in the rig editor.
+                FilledButton(
                   onPressed: () async {
                     if (!formKey.currentState!.validate()) return;
                     final name = nameCtrl.text.trim();
@@ -324,7 +326,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     );
                     if (saved && context.mounted) Navigator.of(context).pop();
                   },
-                  child: Text(isEdit ? 'Save Changes' : 'Save'),
+                  child: const Text(AppWords.save),
                 ),
               ],
             );
@@ -390,7 +392,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               itemCount: _targets.length,
               itemBuilder: (context, index) {
                 final target = _targets[index];
@@ -400,7 +402,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     choosing && target.id == planVm.selectedTarget?.id;
 
                 final card = Card(
-                  margin: const EdgeInsets.only(bottom: 8),
+                  margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   shape: RoundedRectangleBorder(
                     side: BorderSide(
                       color: isSelected
@@ -455,7 +457,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'Add target',
+        tooltip: AppWords.addTarget,
         onPressed: () => _showTargetDialog(),
         child: const Icon(Icons.add),
       ),

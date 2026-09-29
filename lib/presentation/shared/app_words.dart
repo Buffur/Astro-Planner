@@ -11,11 +11,14 @@ abstract final class AppWords {
   static const addRig = 'Add rig';
   static const editRig = 'Edit rig';
   static const chooseRig = 'Choose a rig';
+  static const noRigs = 'No rigs yet.';
 
   // What the plan images (S9.1).
   static const targets = 'Targets';
   static const chooseTarget = 'Choose a target';
   static const planThisTarget = 'Plan this target';
+  static const addTarget = 'Add a target';
+  static const editTarget = 'Edit target';
 
   // What the user makes and saves in the planner.
   static const plan = 'Plan';
@@ -104,6 +107,12 @@ abstract final class AppWords {
   static const site = 'Site';
   static const sites = 'Sites';
   static const chooseSite = 'Choose a site';
+  static const newSite = 'New site';
+  static const editSite = 'Edit site';
+  static const saveSite = 'Save site';
+
+  // Forms (S9.2): one primary Save in every editor.
+  static const save = 'Save';
   static const library = 'Library';
   static const progressByTarget = 'Progress by target';
 

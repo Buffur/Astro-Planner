@@ -304,7 +304,7 @@ class _EquipmentEditor {
                         const SizedBox(height: 20),
                         // ── Sensor Section (Stellarium layout) ──────────
                         Text(
-                          'Camera Sensor',
+                          'Camera sensor',
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
@@ -369,7 +369,7 @@ class _EquipmentEditor {
                         prefillNote(context, EquipmentSpec.pixelPitch),
                         // Sensor Size W × H mm — auto-calculated
                         _StellariumRow(
-                          label: 'Sensor Size',
+                          label: 'Sensor size',
                           unit: 'mm',
                           fieldW: TextFormField(
                             controller: sensorWCtrl,
@@ -449,7 +449,7 @@ class _EquipmentEditor {
                           keyboardType: _decimal,
                           onChanged: (_) => setDialogState(deriveFocalRatio),
                           decoration: const InputDecoration(
-                            labelText: 'Effective Focal Length (mm)',
+                            labelText: 'Effective focal length (mm)',
                           ),
                           validator: EquipmentFormInput.required(
                             EquipmentLimits.focalLengthMm,
@@ -574,7 +574,7 @@ class _EquipmentEditor {
                                   onChanged: (_) => setDialogState(() {}),
                                   keyboardType: _decimal,
                                   decoration: const InputDecoration(
-                                    labelText: 'Average RAW File Size (MB)',
+                                    labelText: 'Average RAW file size (MB)',
                                     hintText: 'e.g. 50.0',
                                   ),
                                   validator: EquipmentFormInput.optional(
@@ -661,7 +661,7 @@ class _EquipmentEditor {
                     );
                     if (saved && context.mounted) Navigator.of(context).pop();
                   },
-                  child: Text(isEdit ? 'Save Changes' : 'Save'),
+                  child: const Text(AppWords.save),
                 ),
               ],
             );

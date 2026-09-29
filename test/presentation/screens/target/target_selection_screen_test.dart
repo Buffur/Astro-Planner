@@ -98,7 +98,7 @@ void main() {
   // valid input saves) in the new format.
   final raField = find.widgetWithText(
     TextFormField,
-    'Right Ascension (J2000) *',
+    'Right ascension (J2000) *',
   );
   final decField = find.widgetWithText(TextFormField, 'Declination (J2000) *');
   const raError = 'Use hours: 05h35m17s, 5:35:17 or 5.588 (or degrees: 83.82°)';
@@ -113,7 +113,7 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Target Name *'),
+      find.widgetWithText(TextFormField, 'Name *'),
       'Test Target',
     );
   }
@@ -208,10 +208,10 @@ void main() {
     expect(find.widgetWithText(TextFormField, '05h35m17.0s'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, '−05°23′28″'), findsOneWidget);
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Target Name *'),
+      find.widgetWithText(TextFormField, 'Name *'),
       'Renamed',
     );
-    await tester.tap(find.text('Save Changes'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     final edited = repo.updated.single;
@@ -240,10 +240,10 @@ void main() {
     await tester.tap(find.byTooltip('Edit target'));
     await tester.pumpAndSettle();
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Target Name *'),
+      find.widgetWithText(TextFormField, 'Name *'),
       'Great Orion Nebula',
     );
-    await tester.tap(find.text('Save Changes'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
     final edited = repo.updated.single;
