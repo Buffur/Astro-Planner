@@ -21,6 +21,7 @@ import '../../shared/status_block.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../../domain/models/execution.dart';
 import '../../viewmodels/execution_viewmodel.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
 import '../../viewmodels/resume_run_viewmodel.dart';
 import '../../widgets/plan_status.dart';
@@ -93,7 +94,7 @@ class TonightHomeScreen extends StatelessWidget {
           _Title(),
           _Context(),
           _RunCard(),
-          // Stage 8 (P8.3) adds "Last night: … How did it go?" here.
+          _ResultDue(),
           _PlanCard(),
           _NightCard(),
           SizedBox(height: 8),
@@ -203,6 +204,41 @@ class _RunCard extends StatelessWidget {
         ),
         trailing: const Text('Open tracker'),
         onTap: () => context.push(AppRouter.run(session.id)),
+      ),
+    );
+  }
+}
+
+/// "Last night: M42. How did it go?" (S8.3; ADR-019 §4–§5, I-8): the saved
+/// plan (or run in progress) whose night has ended most recently without a
+/// result; it opens the result form. Quiet, and gone once recorded; no
+/// notification.
+class _ResultDue extends StatelessWidget {
+  const _ResultDue();
+
+  @override
+  Widget build(BuildContext context) {
+    final s = context.watch<SessionsViewModel?>()?.dueResult;
+    final night = s?.eveningDate;
+    if (s == null || night == null) return const SizedBox.shrink();
+    final tonight = context.watch<SessionPlanViewModel>().tonightKey;
+    final lastNight = night == tonight || night.addDays(1) == tonight;
+    final target = s.record.targetName;
+    return Card(
+      key: const Key('tonight.resultDue'),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: const Icon(Icons.edit_note_outlined),
+        title: Text(
+          lastNight
+              ? AppWords.howDidItGo(target)
+              : AppWords.howDidItGoOn(
+                  target,
+                  NightTimeFormatter.eveningDate(night),
+                ),
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRouter.results(s.id)),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/diagnostics/app_log.dart';
 import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/calendar_date.dart';
@@ -124,6 +125,44 @@ class SessionsViewModel extends ChangeNotifier {
   /// or nothing.
   ResultAction resultAction(Session s) => ResultAction.of(s, _clock.nowUtc());
 
+  /// Tonight's line (S8.3; ADR-019 §4, I-8): the saved plan (or run in
+  /// progress) whose night has ended most recently and still has no result;
+  /// null when none is due. Refreshed by [refreshDue].
+  Session? get dueResult => _due;
+  Session? _due;
+
+  /// Looks again for the entry [dueResult] names; notifies when it changes.
+  /// A store that cannot be read leaves the line as it was (logged).
+  Future<void> refreshDue() async {
+    Session? due;
+    try {
+      for (final s in await _repository.list(
+        statuses: {
+          SessionStatus.draft,
+          SessionStatus.planned,
+          SessionStatus.inProgress,
+        },
+        includeLegacy: false,
+      )) {
+        if (resultAction(s) != ResultAction.record) continue;
+        if (due == null || s.eveningDate!.compareTo(due.eveningDate!) > 0) {
+          due = s;
+        }
+      }
+    } catch (e, st) {
+      AppLog.warning(
+        'sessions',
+        'Result line not refreshed',
+        error: e,
+        stackTrace: st,
+      );
+      return;
+    }
+    if (due?.id == _due?.id && due?.updatedAtUtc == _due?.updatedAtUtc) return;
+    _due = due;
+    notifyListeners();
+  }
+
   /// Null in tests that do not export.
   final SessionExporter? _exporter;
 
@@ -234,5 +273,6 @@ class SessionsViewModel extends ChangeNotifier {
   Future<void> delete(int id) async {
     await _repository.delete(id);
     notifyListeners();
+    await refreshDue();
   }
 }

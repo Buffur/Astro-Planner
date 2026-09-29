@@ -54,6 +54,11 @@ abstract final class AppWords {
   static String howDidItGo(String target) =>
       'Last night: $target. How did it go?';
 
+  /// The same line for an earlier night (S8.3): "M42 · Sat, Sep 27: how
+  /// did it go?". [night] comes formatted (`NightTimeFormatter`).
+  static String howDidItGoOn(String target, String night) =>
+      '$target · $night: how did it go?';
+
   // The verdict (RD-06): the status headline's first word.
   static const fits = 'Fits';
   static const tight = 'Tight';

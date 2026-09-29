@@ -17,7 +17,12 @@ import '../../domain/services/session_reconciliation.dart';
 /// first (its working copy keeps the edits); the form never asks about the
 /// planner's plan.
 class ResultsViewModel extends ChangeNotifier {
-  ResultsViewModel(this._sessions, this._clock, {this._settle});
+  ResultsViewModel(
+    this._sessions,
+    this._clock, {
+    this._settle,
+    this._onRecorded,
+  });
 
   final SessionRepository _sessions;
   final Clock _clock;
@@ -26,6 +31,9 @@ class ResultsViewModel extends ChangeNotifier {
   /// (`PlanLifecycleViewModel.settle`), so the planner moves to the copy
   /// when the entry was its plan. Null in tests without a planner.
   final Future<void> Function(int id)? _settle;
+
+  /// Called after a result is recorded (Tonight's line refreshes, S8.3).
+  final Future<void> Function()? _onRecorded;
 
   Session? _session;
   ExecutionState? _state;
@@ -129,6 +137,7 @@ class ResultsViewModel extends ChangeNotifier {
       rethrow;
     }
     await load(s.id);
+    await _onRecorded?.call();
   }
 }
 

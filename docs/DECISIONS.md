@@ -4518,6 +4518,12 @@ with `plannedAtUtc`). A never-saved draft is `draft` without `plannedAtUtc`.
   - until then, saved plans keep today's behaviour. There is no intermediate state in which a saved
     plan stops rolling forward while no working copy exists.
 
+> **Built by S8.2–S8.3 (2026-09-29; E.1, "Stage 8 decisions", D8-1, I-3):** a saved night ends at
+> dawn at its snapshot's darkness limit (CALC-44). From then the entry is never resumed as current:
+> the planner continues on one working copy (`CurrentSession.leaveEndedSavedPlan`), both sides at
+> once; a Saved · changed entry is settled (its edits in the copy, the entry back to its snapshot).
+> Results are recorded without Save plan through the result form (S8.2).
+
 **Recording a result (R2):** saved plan → **Review saved plan** → report outcome → **Save
 result**.
 - **The review** is based on the saved snapshot for that completed night, never the planner's

@@ -94,6 +94,7 @@ class AppViewModels {
       equipmentRepository: equipment,
       stateRepository: plannerState,
       currentSession: current,
+      clock: clock,
     );
     conditions = NightConditionsViewModel(
       site: site,
@@ -128,6 +129,8 @@ class AppViewModels {
     sessionList = sessions == null
         ? null
         : SessionsViewModel(sessions, exporter: exporter, clock: clock);
+    // S8.3: a night check or a recorded result may change Tonight's line.
+    lifecycle.onNightChecked = sessionList?.refreshDue;
     resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
     this.backup = backup == null ? null : BackupViewModel(backup);
     execution = sessions == null
@@ -135,7 +138,12 @@ class AppViewModels {
         : ExecutionViewModel(sessions, clock, display, screenWake);
     results = sessions == null
         ? null
-        : ResultsViewModel(sessions, clock, settle: lifecycle.settle);
+        : ResultsViewModel(
+            sessions,
+            clock,
+            settle: lifecycle.settle,
+            onRecorded: sessionList?.refreshDue,
+          );
     theme = ThemeViewModel(display);
     disclosure = DisclosureViewModel(display);
     metadataImport = captureFiles == null
@@ -194,6 +202,8 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: gear),
     ChangeNotifierProvider.value(value: targetList),
     if (sessionList case final s?) ChangeNotifierProvider.value(value: s),
+    // S8.3: Tonight's result line reads it where there may be none (tests).
+    ChangeNotifierProvider<SessionsViewModel?>.value(value: sessionList),
     ChangeNotifierProvider.value(value: theme),
     ChangeNotifierProvider.value(value: disclosure),
     ChangeNotifierProvider.value(value: tonight),

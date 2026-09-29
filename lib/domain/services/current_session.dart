@@ -4,6 +4,7 @@ import '../models/session_snapshot.dart';
 import '../repositories/planner_state_repository.dart';
 import '../repositories/session_repository.dart';
 import 'example_capture_plan.dart';
+import 'saved_night_end.dart';
 
 /// The session the planner works on and its autosave (ADR-014 §3; TASK
 /// 11.4; moved out of the planner ViewModel in TASK 12.3). Writes are
@@ -166,6 +167,37 @@ class CurrentSession {
     return true;
   });
 
+  /// The next day for a saved plan (S8.3; ADR-019 §3.1, D1; D8-1, I-3), in
+  /// the autosave chain: when the current session is a saved plan whose
+  /// night has ended at [nowUtc] (CALC-44), it stays on its night, awaiting
+  /// its result, and the planner continues on a working copy. A Saved plan
+  /// gets an untouched copy of [copy] (replacing it later asks nothing; the
+  /// saved plan stays in the Logbook); a Saved · changed one is settled, and
+  /// its copy holds the edits and counts as unsaved (U1). Returns whether it
+  /// moved; a repeat does nothing. A failure leaves everything as it was,
+  /// and the next check retries.
+  Future<bool> leaveEndedSavedPlan(
+    DateTime nowUtc,
+    SessionPlan Function() copy,
+  ) => _inChain(() async {
+    final s = _session;
+    if (s == null || !s.isSavedPlan || !SavedNightEnd.hasEnded(s, nowUtc)) {
+      return false;
+    }
+    if (s.isSavedChanged) {
+      final settled = await _repository.settleSavedPlan(s.id);
+      if (settled == null) return false;
+      _session = settled;
+      _edited = true;
+      await _mark(settled.id);
+    } else {
+      _session = await _repository.create(copy());
+      _edited = false;
+      await _mark(null);
+    }
+    return true;
+  });
+
   /// Runs an operation after which the plan counts as unedited; if it
   /// fails, the changes still count as unsaved (S1.6).
   Future<T> _replacing<T>(Future<T> Function() run) async {
@@ -189,9 +221,11 @@ class CurrentSession {
     Session session,
     SessionPlan Function() copy, {
     bool discard = false,
+    bool asCopy = false,
   }) => _switch(
-    () async =>
-        session.planEditable ? session : await _repository.create(copy()),
+    () async => session.planEditable && !asCopy
+        ? session
+        : await _repository.create(copy()),
     discard: discard,
   );
 
