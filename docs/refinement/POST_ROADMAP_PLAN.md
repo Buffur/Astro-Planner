@@ -98,6 +98,8 @@
 > **Updated 2026-09-29 (S7.R4):** RG-08 and RG-09 researched (`research/RG-08_09_SITE_AUTOMATION.md`);
 > the owner decides them next. No decision taken.
 > **Updated 2026-09-29 (RG-08 and RG-09 decided):** E2, S3, M2 (E.1); S7.5's rules added. S7.R5 is next.
+> **Updated 2026-09-29 (S7.R5):** RG-03 researched (`research/RG-03_EQUIPMENT_SPECS.md`); the owner
+> decides it next. Nothing adopted.
 
 ## Contents
 
@@ -3986,7 +3988,7 @@ Stage 4):
 | S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | **Done 2026-09-29** (ADR-020 accepted; S7.2 and S7.3 split, below) |
 | S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | **Done 2026-09-29** (`research/RG-07_TARGET_CATALOG.md`); **RG-07 decided** 2026-09-29 (E.1): T1 only |
 | S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | **Done 2026-09-29** (`research/RG-08_09_SITE_AUTOMATION.md`); **RG-08 and RG-09 decided** 2026-09-29 (E.1): E2, S3, M2 |
-| S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | Frozen |
+| S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | **Done 2026-09-29** (`research/RG-03_EQUIPMENT_SPECS.md`); RG-03 awaits the owner |
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | Frozen; ungated |
 | S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
 | S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | Frozen |
@@ -5041,7 +5043,7 @@ any implementation Task is created.
 | --- | --- | --- | --- | --- |
 | RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
 | RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Decided 2026-09-26 (S3.D, ADR-018)** after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
-| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)**. *2026-09-28 (Stage 7 planning):* researched again as **S7.R5**, at the owner's request in the Stage 7 prompt (`prompts/STAGE_7_PLANNING.md` §3); the research adopts nothing, and adoption stays the owner's decision; it blocks only S7.6's source path |
+| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)**. *2026-09-28 (Stage 7 planning):* researched again as **S7.R5**, at the owner's request in the Stage 7 prompt (`prompts/STAGE_7_PLANNING.md` §3); the research adopts nothing, and adoption stays the owner's decision; it blocks only S7.6's source path. *2026-09-29:* S7.R5 done (`research/RG-03_EQUIPMENT_SPECS.md`; one owner question, §8) |
 | RG-04 | **DECIDED 2026-09-27 (S4.R2; DECISIONS E.1): B, the Logbook first and the tracker optional; G2 results after the session.** *Its optional tracker is superseded (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"): the tracker leaves the target product, and P8.4 retires it.* What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): Tonight plan-first with a site · night context line; Night & Moon and Weather detail screens; no new tab.** How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): progressive disclosure (one tap away, factual summaries); no modes, no density preference for now.** Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |

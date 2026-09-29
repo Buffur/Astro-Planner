@@ -4,19 +4,31 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**RG-08 and RG-09 decided**: E2, S3, M2).
-> **Next:** S7.R5, the RG-03 research (equipment specification sources).
+> **Last updated:** 2026-09-29 (**S7.R5 done**: RG-03 researched; the owner's decision is next).
+> **Next:** the owner decides RG-03 (one question, `research/RG-03_EQUIPMENT_SPECS.md` §8).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R4 and S7.D done; RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5 and S7.D done; RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.R5**, the RG-03 research (below, "Next allowed action") |
+| Next Task | **RG-03's owner decision**, then S7.1 (below, "Next allowed action") |
 | Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S7.R5 done, 2026-09-29** (RG-03 research; documentation only; `research/RG-03_EQUIPMENT_SPECS.md`):
+- **No official API and no machine-readable maker data found;** maker pages are HTML (scraping is
+  rejected).
+- **Open datasets inspected** (downloaded to scratch, deleted): openMVG (MIT; 3,633 consumer cameras to
+  about 2016; no EOS R, no astro cameras, no current phones; nominal small-sensor sizes); lensfun (CC
+  BY-SA 3.0; current bodies, but a crop factor only); open-product-data (no licence found);
+  pixel-pitch lists built by scraping (excluded).
+- **Recommended Q1:** no source in Stage 7; lensfun's crop factor recorded as the candidate CALC-40
+  input for DSLR and mirrorless files without f35, to revisit with RG-12 in Stage 9; FITS (S2.6) as
+  the astro-camera path. One owner question (§8); nothing adopted.
+- **Verification:** the documentation class.
 
 **RG-08 and RG-09 decided, 2026-09-29 (the owner, in chat; DECISIONS E.1):** E2 (elevation optional,
 Unknown by default; no automatic source), S3 (Bortle and SQM manual and optional in one collapsed
@@ -172,7 +184,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | --- | --- | --- | --- |
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
-| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3. **Researched again as S7.R5** (the owner's Stage 7 prompt, 2026-09-28); adoption stays the owner's decision |
+| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3. **Researched** 2026-09-29 (S7.R5, `research/RG-03_EQUIPMENT_SPECS.md`); the owner's decision is open |
 | RG-04 | Execution's role and how actuals are captured | 4 | **Decided** 2026-09-27 (S4.R2; E.1): B, the Logbook first and the tracker optional; G2 post-session results. Its optional tracker is **superseded** 2026-09-27 (the tracker leaves the target product; P8.4) |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | **Decided** 2026-09-27 (S4.R4; E.1): Tonight plan-first with a context line; detail screens; no new tab |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | **Decided** 2026-09-27 (S4.R4; E.1): progressive disclosure; no modes |
@@ -270,9 +282,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.R5 — RG-03: equipment specification sources (research)**: `POST_ROADMAP_PLAN.md`, "Stage 7 —
-   frozen Task sequence", S7.R5. Documentation only; the output is `research/RG-03_EQUIPMENT_SPECS.md`,
-   ending with the owner's questions. Commit, then STOP.
+1. **The owner decides RG-03:** the question of `research/RG-03_EQUIPMENT_SPECS.md` §8 (a
+   specification source, or none). The answer goes into DECISIONS E.1. Every Stage 7 gate is then
+   decided, and the implementation Tasks start with **S7.1** (RD-08's override).
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.
