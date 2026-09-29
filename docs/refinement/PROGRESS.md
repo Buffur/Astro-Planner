@@ -35,6 +35,10 @@
 - **Verification:** test and tooling files only (the suite, the driver, a probe; `.gitignore`):
   format, encoding and analyze clean; both new tests pass on the host; the suite passed twice on the
   emulator. The full gate runs at S10.3's end, after its code change.
+- *Correction (found by that gate, 2026-09-30):* with two files in one host E2E run, flutter-tester
+  cannot start the second app ("The log reader failed unexpectedly"), so the gate failed from
+  `c93ecd9`. `tool/check.dart` now runs each `integration_test` file as its own step; the full gate
+  then passed (1,837 tests, 2 skips; host E2E: `core_loop_test.dart` 2, `perf_scenarios_test.dart` 1).
 
 **S10.1 done, 2026-09-30** (the size baseline; measurement only, no code;
 [`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md) §S10.1):
