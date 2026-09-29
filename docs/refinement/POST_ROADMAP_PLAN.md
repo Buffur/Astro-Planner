@@ -4899,7 +4899,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 
 | Task | Title | From | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S8.1 | Results without a run: domain and data | P8.1 | M–L | — | Frozen |
+| S8.1 | Results without a run: domain and data | P8.1 | M–L | — | **Done 2026-09-29** |
 | S8.2 | The result form | P8.2 | M | S8.1 | Frozen |
 | S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | Frozen |
 | S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | Frozen |

@@ -183,6 +183,14 @@ class SessionLogs extends Table {
   /// The plan's tracking override (RD-08 = T3; S7.1, v19): `untracked`,
   /// `tracked` or `guided`; NULL = the rig's default.
   TextColumn get trackingOverride => text().nullable()();
+
+  /// How a completed session's counts were reported (S8.1, v24; I-1):
+  /// `asPlanned` or `partly`; NULL for rows completed live or before v24.
+  TextColumn get resultKind => text().nullable()();
+
+  /// Why an abandoned session was not done (S8.1, v24): clouds, wind, dew,
+  /// equipment or other; NULL when not given.
+  TextColumn get notDoneReason => text().nullable()();
 }
 
 /// A session's run, append-only (ADR-016 §4; TASK 13.2, v17). The events
@@ -215,6 +223,7 @@ class SessionEvents extends Table {
       'framesRejected',
       'finished',
       'abandoned',
+      'reported', // S8.1, v24: a result recorded without a run
     ]),
   )();
 
@@ -254,7 +263,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   @override
   MigrationStrategy get migration {
@@ -569,6 +578,24 @@ class AppDatabase extends _$AppDatabase {
                 // stays 0). Foreign keys are still off here, so the plans'
                 // site references are kept.
                 await m.alterTable(TableMigration(schema.locationProfiles));
+              },
+              from23To24: (m, schema) async {
+                // S8.1 (ADR-019 §4, I-1): results without a run. Two
+                // additive session columns (NULL for every existing row, so
+                // a live completion stays Completed and an abandoned row Not
+                // done without a reason), and the `reported` event kind:
+                // SQLite cannot change a CHECK in place, so session_events is
+                // rebuilt against the v24 shape with every event copied as it
+                // is. Foreign keys are still off here.
+                await m.addColumn(
+                  schema.sessionLogs,
+                  schema.sessionLogs.resultKind,
+                );
+                await m.addColumn(
+                  schema.sessionLogs,
+                  schema.sessionLogs.notDoneReason,
+                );
+                await m.alterTable(TableMigration(schema.sessionEvents));
               },
             ),
           );

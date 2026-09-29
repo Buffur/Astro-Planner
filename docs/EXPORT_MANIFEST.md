@@ -3,6 +3,7 @@
 > **Verification stamp:** written 2026-09-24 for TASK 14.3 (commit recorded in
 > `docs/ROADMAP.md`), against `lib/data/export/session_manifest_codec.dart`.
 > The codec is the source of truth; this document describes it.
+> **Updated 2026-09-29 (S8.1):** the result keys and the `reported` event kind, additive; still version 2.
 
 A manifest is a UTF-8 JSON file (`astroplan-sessions-<UTC date and time>.json`)
 shared from a session's detail (**Export file**, one session) or the Sessions tab
@@ -42,10 +43,10 @@ shared from a session's detail (**Export file**, one session) or the Sessions ta
 | `created_at_utc_ms` … `completed_at_utc_ms` | int? | lifecycle instants (`created`, `updated`, `planned`, `started`, `completed`) |
 | `labels` | object | `target`, `rig`, `site`, `session_date_utc_ms` — display labels, never used to resolve references |
 | `blocks` | array | `id`, `frame_type` (`light`, `dark`, `flat`, `bias`; *(S7.3a, additive)* `darkFlat`: an app before S7.3a refuses a file that holds one, whole, and imports nothing from it), `filter_name`, `exposure_s`, `frame_count`, `binning`, `gain_kind`, `gain_value`, `calibration_policy`, `confirmed_frames`, `rejected_frames` (counts replayed from `events`; null when the events do not replay) |
-| `results` | object | `planned_light_frames`, `actual_light_frames`, `rejected_frames`, `environmental_notes`, `processing_notes`, `temperature_c`, `humidity_pct`, `cloud_cover_pct` |
+| `results` | object | `planned_light_frames`, `actual_light_frames`, `rejected_frames`, `environmental_notes`, `processing_notes`, `temperature_c`, `humidity_pct`, `cloud_cover_pct`; *(S8.1, additive)* `result_kind` (`asPlanned` = Completed as planned, reported by the user; `partly`; null for a session completed live or before S8.1) and `not_done_reason` (`clouds`, `wind`, `dew`, `equipment`, `other`; null when not given). A file without them reads as none |
 | `legacy_values` | object | pre-v16 columns kept for legacy logs: `bortle_scale`, `focal_length_mm`, `aperture_f` (focal ratio), `integration_time_s`, `planned_dark_frames`, `planned_flat_frames`, `planned_bias_frames` |
 | `plan_snapshot`, `execution_start_snapshot` | object? | the stored snapshots |
-| `events` | array | the run's append-only events (ADR-016 §4), by `seq`: `seq`, `at_utc_ms`, `kind`, `block_id`, `delta`, `reason`, `clock_adjusted` |
+| `events` | array | the run's append-only events (ADR-016 §4), by `seq`: `seq`, `at_utc_ms`, `kind`, `block_id`, `delta`, `reason`, `clock_adjusted`. *(S8.1, additive)* kind `reported`: a result recorded after the night without a run, followed by its counts as `framesConfirmed`; an app before S8.1 refuses a file that holds one, whole, and imports nothing from it |
 
 ## Versions
 

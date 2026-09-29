@@ -42,10 +42,49 @@ ExecutionState _finished() => ExecutionMachine.apply(
 );
 
 void main() {
+  group('a result without a run (S8.1)', () {
+    test('reported ends a run that never started; the counts follow as '
+        'corrections, and nothing else is accepted', () {
+      var s = _step(_notStarted(), ExecutionEventKind.reported, 600);
+      expect(s.phase, ExecutionPhase.finished);
+      expect(s.blockId, isNull);
+      s = _step(
+        s,
+        ExecutionEventKind.framesConfirmed,
+        601,
+        blockId: 2,
+        delta: 20,
+      );
+      expect(s.completedFor(2), 20);
+      for (final kind in [
+        ExecutionEventKind.started,
+        ExecutionEventKind.reported,
+        ExecutionEventKind.resumed,
+        ExecutionEventKind.finished,
+      ]) {
+        expect(
+          () => _step(s, kind, 602, blockId: 1),
+          throwsA(isA<ExecutionError>()),
+        );
+      }
+    });
+
+    test('reported after a start is refused', () {
+      expect(
+        () => _step(_running(), ExecutionEventKind.reported, 5),
+        throwsA(isA<ExecutionError>()),
+      );
+    });
+  });
+
   group('transition table', () {
     // What each phase allows; every other (phase, kind) pair is refused.
     final allowed = <ExecutionPhase, Set<ExecutionEventKind>>{
-      ExecutionPhase.notStarted: {ExecutionEventKind.started},
+      // S8.1: a result without a run ends a run that never started.
+      ExecutionPhase.notStarted: {
+        ExecutionEventKind.started,
+        ExecutionEventKind.reported,
+      },
       ExecutionPhase.running: {
         ExecutionEventKind.blockSelected,
         ExecutionEventKind.paused,

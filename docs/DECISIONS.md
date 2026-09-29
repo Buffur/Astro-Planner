@@ -3852,6 +3852,16 @@ The session status stays ADR-014's. Inside `inProgress`, the execution state is
 - **Status:** ADR-016 is implemented (TASKs 13.2–13.4); device checks are listed in
   `docs/TEST_PLAN.md`.
 
+### 12. Implementation notes (S8.1, 2026-09-29; ADR-019 §4; E.1, "Stage 8 decisions")
+
+- **A new kind, `reported`** (schema v24): a result recorded after the saved night without a run. It
+  is accepted only before any start and ends the run (phase finished); the counts follow as
+  `framesConfirmed` events under §11's post-finish rule, so the counters still equal the replay.
+- **`SessionRepository.recordResult`** writes a result in one transaction for a Saved plan whose night
+  has ended (CALC-44), for a run in progress (`finished` then corrections, or `abandoned`) and as an
+  edit of a completed or not-done entry. `session_logs.result_kind` and `not_done_reason` record how
+  it was reported and why not done. The live paths of §2–§11 are unchanged until S8.4.
+
 ## ADR-017: Image metadata reading (Stage 2 foundation)
 
 **Amended by ADR-018 §3 (2026-09-26, S3.D):** the contract (§2) gains image width and height (px). **Implemented 2026-09-26 (S3.1).**

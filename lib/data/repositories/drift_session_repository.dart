@@ -7,10 +7,12 @@ import '../../domain/models/capture_block.dart' as domain;
 import '../../domain/models/execution.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_log.dart' as domain;
+import '../../domain/models/session_result.dart';
 import '../../domain/models/session_snapshot.dart';
 import '../../domain/models/tracking_type.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/services/execution_machine.dart';
+import '../../domain/services/saved_night_end.dart';
 import '../../domain/services/saved_plan_reader.dart';
 import '../../domain/services/session_reconciliation.dart';
 import '../database/app_database.dart';
@@ -338,6 +340,177 @@ class DriftSessionRepository implements SessionRepository {
     );
   });
 
+  @override
+  Future<Session> recordResult(
+    int id,
+    ResultReport report, {
+    DateTime? expectedUpdatedAtUtc,
+  }) => _change(id, (s) async {
+    if (s.legacy) throw SessionStateError('A legacy session is read-only.');
+    if (expectedUpdatedAtUtc != null &&
+        s.updatedAtUtc?.millisecondsSinceEpoch !=
+            expectedUpdatedAtUtc.millisecondsSinceEpoch) {
+      throw StaleResultForm('Session $id changed since the form opened.');
+    }
+    final notDone = report is NotDone;
+    switch (s.status) {
+      case SessionStatus.draft:
+        throw SessionStateError(
+          'Session $id is not a saved plan; a changed one is settled first.',
+        );
+      case SessionStatus.planned:
+        if (!SavedNightEnd.hasEnded(s, _clock.nowUtc())) {
+          throw NightNotEnded('The night of session $id has not ended.');
+        }
+        if (notDone) break;
+        final after = await _appendEvent(s, ExecutionEventKind.reported);
+        await _reportCounts(s, after, report);
+      case SessionStatus.inProgress:
+        // A run from the live mode (I-2): the user's Finish ends it.
+        if (notDone) {
+          await _appendEvent(s, ExecutionEventKind.abandoned);
+          break;
+        }
+        final after = await _appendEvent(s, ExecutionEventKind.finished);
+        await _reportCounts(s, after, report);
+      case SessionStatus.completed:
+        if (notDone) {
+          throw SessionStateError(
+            'A completed session cannot become not done.',
+          );
+        }
+        await _reportCounts(s, await _fold(s), report);
+      case SessionStatus.abandoned:
+        if (!notDone) {
+          throw SessionStateError('A session not done cannot be completed.');
+        }
+    }
+    final notes = report.notes;
+    await _writeRow(
+      id,
+      SessionLogsCompanion(
+        environmentalNotes: Value(notes.environmentalNotes),
+        processingNotes: Value(notes.processingNotes),
+        temperature: Value(notes.temperatureC),
+        humidity: Value(notes.humidityPct),
+        cloudCover: Value(notes.cloudCoverPct),
+        status: Value(notDone ? 'abandoned' : 'completed'),
+        resultKind: Value(switch (report) {
+          CompletedAsPlanned() => ResultKind.asPlanned.name,
+          PartlyDone() => ResultKind.partly.name,
+          NotDone() => null,
+        }),
+        notDoneReason: Value(report is NotDone ? report.reason?.name : null),
+        completedAtUtcMs: s.status == SessionStatus.completed
+            ? const Value.absent()
+            : Value(
+                notDone ? s.completedAtUtc?.millisecondsSinceEpoch : _nowMs,
+              ),
+      ),
+    );
+  });
+
+  /// Brings each light block's confirmed count to what [report] states,
+  /// through correction events (the post-finish rule), then writes the result
+  /// totals from the replay. Runs inside the caller's transaction.
+  Future<void> _reportCounts(
+    Session s,
+    ExecutionState state,
+    ResultReport report,
+  ) async {
+    var after = state;
+    for (final b in s.blocks) {
+      if (b.frameType != domain.FrameType.light) continue;
+      final target = switch (report) {
+        CompletedAsPlanned() => b.frameCount,
+        PartlyDone(:final lightFrames) =>
+          lightFrames[b.id] ?? after.completedFor(b.id),
+        NotDone() => after.completedFor(b.id),
+      };
+      final delta = target - after.completedFor(b.id);
+      if (delta == 0) continue;
+      after = await _appendEvent(
+        s,
+        ExecutionEventKind.framesConfirmed,
+        blockId: b.id,
+        delta: delta,
+      );
+    }
+    await _writeRow(s.id, _totals(s, after));
+  }
+
+  @override
+  Future<Session?> settleSavedPlan(int id) async {
+    final copyId = await _db.transaction(() async {
+      final s = await get(id);
+      if (s == null || !s.isSavedChanged) return null;
+      final working = SessionPlan(
+        eveningDate: s.eveningDate!,
+        timeZoneId: s.timeZoneId,
+        siteId: s.siteId,
+        targetId: s.targetId,
+        rigId: s.rigId,
+        blocks: s.blocks,
+        targetLabel: s.record.targetName,
+        rigLabel: s.record.equipmentName,
+        siteLabel: s.record.locationName,
+        trackingOverride: s.trackingOverride,
+      );
+      final copy = await create(working);
+      final snapshot = s.planSnapshot;
+      final saved = snapshot == null ? null : SavedPlanReader.read(snapshot);
+      if (saved != null) {
+        await _writePlan(
+          id,
+          await _existingReferences(saved),
+          const SessionLogsCompanion(status: Value('planned')),
+        );
+      }
+      return copy.id;
+    });
+    return copyId == null ? null : get(copyId);
+  }
+
+  /// [plan] without a site, target or rig that no longer exists: deleting
+  /// one clears a session's reference (ADR-014 §2), so settling does too.
+  Future<SessionPlan> _existingReferences(SessionPlan plan) async {
+    Future<int?> keep(
+      int? id,
+      TableInfo table,
+      GeneratedColumn<int> col,
+    ) async {
+      if (id == null) return null;
+      final found =
+          await (_db.selectOnly(table)
+                ..addColumns([countAll()])
+                ..where(col.equals(id)))
+              .map((r) => r.read(countAll())!)
+              .getSingle();
+      return found > 0 ? id : null;
+    }
+
+    return SessionPlan(
+      eveningDate: plan.eveningDate,
+      timeZoneId: plan.timeZoneId,
+      siteId: await keep(
+        plan.siteId,
+        _db.locationProfiles,
+        _db.locationProfiles.id,
+      ),
+      targetId: await keep(
+        plan.targetId,
+        _db.astroTargets,
+        _db.astroTargets.id,
+      ),
+      rigId: await keep(plan.rigId, _db.opticalRigs, _db.opticalRigs.id),
+      blocks: plan.blocks,
+      targetLabel: plan.targetLabel,
+      rigLabel: plan.rigLabel,
+      siteLabel: plan.siteLabel,
+      trackingOverride: plan.trackingOverride,
+    );
+  }
+
   /// A restored plan's site, target and rig must still exist (S6.3): a
   /// deleted one is never silently dropped from it (SI-008).
   Future<void> _requireReferences(SessionPlan plan) async {
@@ -643,6 +816,8 @@ class DriftSessionRepository implements SessionRepository {
       hasUnreadableSnapshot:
           (row.planSnapshot != null && plan == null) ||
           (row.executionStartSnapshot != null && start == null),
+      resultKind: ResultKind.tryParse(row.resultKind),
+      notDoneReason: NotDoneReason.tryParse(row.notDoneReason),
     );
   }
 

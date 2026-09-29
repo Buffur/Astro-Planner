@@ -1,6 +1,7 @@
 import '../models/calendar_date.dart';
 import '../models/execution.dart';
 import '../models/session.dart';
+import '../models/session_result.dart';
 import '../models/session_snapshot.dart';
 import 'storage_failure.dart';
 
@@ -99,4 +100,36 @@ abstract class SessionRepository {
   /// a site, target or rig that no longer exists, and [SessionStateError]
   /// for any other session; nothing changes then.
   Future<Session> revertToSaved(int id);
+
+  /// Records [report] for session [id] after its night (ADR-019 §3.1, §4;
+  /// S8.1), in one transaction, with its notes and conditions:
+  /// - a Saved (`planned`) plan whose saved night has ended (CALC-44): no
+  ///   run and no Save plan. Completed as planned and Partly append a
+  ///   `reported` event and one `framesConfirmed` per light block with a
+  ///   count; Not done abandons it with the optional reason;
+  /// - a run in progress (the legacy live mode): `finished` and corrections
+  ///   to the reported counts, or Not done through abandon;
+  /// - a completed entry: counts change by correction events, and Completed
+  ///   as planned and Partly may be exchanged; a Not done entry: its reason
+  ///   and notes.
+  ///
+  /// The snapshot never changes, and the result totals come from the replay.
+  /// Refused, with nothing written: a legacy row, a draft (a Saved · changed
+  /// plan is settled first, [settleSavedPlan]), a night that has not ended
+  /// ([NightNotEnded]), completed ↔ Not done, and an [expectedUpdatedAtUtc]
+  /// other than the stored one ([StaleResultForm]).
+  Future<Session> recordResult(
+    int id,
+    ResultReport report, {
+    DateTime? expectedUpdatedAtUtc,
+  });
+
+  /// Settles a Saved · changed plan (S8.1; S4-DEF-03, I-3), in one
+  /// transaction: a new never-saved draft receives its working plan, and it
+  /// goes back to what was saved (Saved). A reference its snapshot names that
+  /// no longer exists is cleared, as deleting it would have done. When the
+  /// snapshot cannot be read the plan is left as it is and only the copy is
+  /// made (S4-DEF-06). Returns the copy, or null when [id] is not Saved ·
+  /// changed (nothing written; so a repeat does nothing).
+  Future<Session?> settleSavedPlan(int id);
 }

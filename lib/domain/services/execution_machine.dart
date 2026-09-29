@@ -150,6 +150,10 @@ abstract final class ExecutionMachine {
           runningSinceUtc: () => null,
           runningMsBefore: state.runningMsBefore + closedMs(),
         );
+      case ExecutionEventKind.reported:
+        // A result without a run (S8.1): the counts follow as corrections.
+        require(phase == ExecutionPhase.notStarted, 'already started');
+        return base.copyWith(phase: ExecutionPhase.finished);
     }
   }
 

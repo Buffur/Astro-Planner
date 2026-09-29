@@ -20,6 +20,7 @@ import 'package:astroplan/domain/models/planning_preferences.dart';
 import 'package:astroplan/domain/models/session.dart';
 import 'package:astroplan/domain/models/session_log.dart';
 import 'package:astroplan/domain/models/session_night.dart';
+import 'package:astroplan/domain/models/session_result.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/services/capture_budget_calculator.dart';
 import 'package:astroplan/domain/services/session_exporter.dart';
@@ -220,6 +221,82 @@ void main() {
       SessionManifestCodec.decode(m).sessions[1].session.trackingOverride,
       isNull,
     );
+  });
+
+  test('S8.1: a result without a run round-trips: its `reported` event, '
+      'the result kind and the not-done reason; a file without the keys '
+      '(before S8.1) reads as none', () async {
+    final all = await sessions();
+    final morning = DriftSessionRepository(
+      db,
+      clock: FixedClock(DateTime.utc(2026, 12, 16, 8)),
+    );
+    final done = all[1].session; // the saved M31 plan
+    await morning.recordResult(done.id, PartlyDone({done.blocks.first.id: 20}));
+    final other = await morning.create(
+      SessionPlan(
+        eveningDate: CalendarDate(2026, 12, 15),
+        timeZoneId: null,
+        siteId: null,
+        targetId: null,
+        rigId: null,
+        blocks: _blocks,
+        targetLabel: 'M1',
+        rigLabel: 'Rig',
+      ),
+    );
+    await morning.savePlan(
+      other.id,
+      SessionPlan(
+        eveningDate: CalendarDate(2026, 12, 15),
+        timeZoneId: null,
+        siteId: null,
+        targetId: null,
+        rigId: null,
+        blocks: _blocks,
+        targetLabel: 'M1',
+        rigLabel: 'Rig',
+      ),
+      done.planSnapshot!,
+    );
+    await morning.recordResult(
+      other.id,
+      const NotDone(reason: NotDoneReason.wind),
+    );
+    final exported = [
+      for (final id in [done.id, other.id])
+        ExportedSession((await repo.get(id))!, await repo.events(id)),
+    ];
+    final m = roundTripJson(
+      SessionManifestCodec.encode(
+        exported,
+        exportedAtUtc: exportedAt,
+        appVersion: AppIdentity.version,
+      ),
+    );
+    final json = m['sessions']! as List;
+    final partly = json[0] as Map;
+    expect((partly['results'] as Map)['result_kind'], 'partly');
+    expect(
+      [for (final e in partly['events'] as List) (e as Map)['kind']],
+      ['reported', 'framesConfirmed'],
+    );
+    expect(((partly['blocks'] as List).first as Map)['confirmed_frames'], 20);
+    expect(((json[1] as Map)['results'] as Map)['not_done_reason'], 'wind');
+
+    final read = SessionManifestCodec.decode(m).sessions;
+    expect(read[0].session.resultKind, ResultKind.partly);
+    expect(read[0].events.first.kind, ExecutionEventKind.reported);
+    expect(read[1].session.notDoneReason, NotDoneReason.wind);
+
+    for (final s in json) {
+      ((s as Map)['results'] as Map)
+        ..remove('result_kind')
+        ..remove('not_done_reason');
+    }
+    final old = SessionManifestCodec.decode(m).sessions;
+    expect(old[0].session.resultKind, isNull);
+    expect(old[1].session.notDoneReason, isNull);
   });
 
   test('v1 is still read, as a legacy log at the same UTC instant', () {

@@ -11,7 +11,12 @@ enum ExecutionEventKind {
   framesConfirmed,
   framesRejected,
   finished,
-  abandoned;
+  abandoned,
+
+  /// A result recorded after the night without a run (S8.1; ADR-019 §4,
+  /// I-1): it ends a run that never started, and the reported counts
+  /// follow as `framesConfirmed` events.
+  reported;
 
   static ExecutionEventKind? tryParse(String? stored) {
     for (final k in values) {
