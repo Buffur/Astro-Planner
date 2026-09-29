@@ -368,5 +368,6 @@ class _BlockCounts extends StatelessWidget {
     FrameType.dark => 'Darks',
     FrameType.flat => 'Flats',
     FrameType.bias => 'Bias',
+    FrameType.darkFlat => 'Dark flats',
   };
 }

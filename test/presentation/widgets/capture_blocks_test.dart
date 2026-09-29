@@ -187,9 +187,22 @@ void main() {
     expect(find.text('Light · 30 s × 10 · 5 min'), findsNWidgets(2));
     expect(find.text('During the imaging window'), findsOneWidget);
     expect(find.text('Outside the imaging window'), findsOneWidget);
-    // Camera values live in the block's editor, not in the row.
-    expect(find.textContaining('ISO'), findsNothing);
-    expect(find.textContaining('bin'), findsNothing);
+    // Camera values live in the block's editor, not in the row. The dark
+    // matches no light (S7.3a), which is named in words: fields, no values.
+    expect(
+      find.byKey(const Key('capture.mismatch.4.matchesNoLight')),
+      findsOneWidget,
+    );
+    bool warning(Widget w) =>
+        w.key is ValueKey<String> &&
+        (w.key! as ValueKey<String>).value.startsWith('capture.mismatch.');
+    final rowTexts = [
+      for (final t in tester.widgetList<Text>(find.byType(Text)))
+        if (!warning(t)) t.data ?? '',
+    ];
+    expect(rowTexts.where((t) => t.contains('ISO')), isEmpty);
+    expect(rowTexts.where((t) => t.contains('bin')), isEmpty);
+    expect(find.textContaining('800'), findsNothing);
     // One heading: the planner's; none of the old four.
     for (final old in ['Inputs', 'Outputs', 'Sequence Plan']) {
       expect(find.text(old), findsNothing, reason: old);

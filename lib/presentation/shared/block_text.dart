@@ -18,6 +18,7 @@ abstract final class BlockText {
       FrameType.dark => 'Dark',
       FrameType.flat => 'Flat',
       FrameType.bias => 'Bias',
+      FrameType.darkFlat => 'Dark flat',
     };
     if (b.frameType == FrameType.light) return filter ?? type;
     return filter == null ? type : '$type ($filter)';

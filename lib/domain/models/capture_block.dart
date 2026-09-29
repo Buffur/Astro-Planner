@@ -1,4 +1,6 @@
-enum FrameType { light, dark, flat, bias }
+/// A block's frame type. [darkFlat] (S7.3a, ADR-020 §6, RG-10 = D1): darks
+/// taken at the flats' exposure and ISO or gain.
+enum FrameType { light, dark, flat, bias, darkFlat }
 
 /// Where a calibration block's time is spent (ADR-009 §3). Lights have none:
 /// they are always taken inside the imaging window.
@@ -229,7 +231,7 @@ class CaptureBlock {
   static FrameType? tryParseFrameType(String? text) {
     final t = text?.trim().toLowerCase();
     for (final f in FrameType.values) {
-      if (f.name == t) return f;
+      if (f.name.toLowerCase() == t) return f; // `darkFlat` too (S7.3a)
     }
     return null;
   }

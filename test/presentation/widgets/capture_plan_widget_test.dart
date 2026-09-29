@@ -241,6 +241,9 @@ void main() {
     await tester.tap(find.text('During the window').last);
     await tester.pumpAndSettle();
 
+    // The calibration tip (S7.3a) sits above the fields.
+    await tester.ensureVisible(find.byKey(const Key('blockDialog.gainKind')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('blockDialog.gainKind')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('ISO').last);

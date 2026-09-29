@@ -41,7 +41,7 @@ shared from a session's detail (**Export file**, one session) or the Sessions ta
 | `tracking_override` | string? | *(S7.1, additive)* the plan's tracking override: `untracked`, `tracked` or `guided`; null or absent = the rig's default. A file written before S7.1 has no key and reads as none |
 | `created_at_utc_ms` … `completed_at_utc_ms` | int? | lifecycle instants (`created`, `updated`, `planned`, `started`, `completed`) |
 | `labels` | object | `target`, `rig`, `site`, `session_date_utc_ms` — display labels, never used to resolve references |
-| `blocks` | array | `id`, `frame_type`, `filter_name`, `exposure_s`, `frame_count`, `binning`, `gain_kind`, `gain_value`, `calibration_policy`, `confirmed_frames`, `rejected_frames` (counts replayed from `events`; null when the events do not replay) |
+| `blocks` | array | `id`, `frame_type` (`light`, `dark`, `flat`, `bias`; *(S7.3a, additive)* `darkFlat`: an app before S7.3a refuses a file that holds one, whole, and imports nothing from it), `filter_name`, `exposure_s`, `frame_count`, `binning`, `gain_kind`, `gain_value`, `calibration_policy`, `confirmed_frames`, `rejected_frames` (counts replayed from `events`; null when the events do not replay) |
 | `results` | object | `planned_light_frames`, `actual_light_frames`, `rejected_frames`, `environmental_notes`, `processing_notes`, `temperature_c`, `humidity_pct`, `cloud_cover_pct` |
 | `legacy_values` | object | pre-v16 columns kept for legacy logs: `bortle_scale`, `focal_length_mm`, `aperture_f` (focal ratio), `integration_time_s`, `planned_dark_frames`, `planned_flat_frames`, `planned_bias_frames` |
 | `plan_snapshot`, `execution_start_snapshot` | object? | the stored snapshots |

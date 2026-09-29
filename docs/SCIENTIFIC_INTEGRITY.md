@@ -1,5 +1,7 @@
 # AstroPlan — Scientific Integrity Register
 
+> **S7.3a (2026-09-29):** calibration match checks (ADR-020 §6) are pure and warn only: exposures compare in ADR-009's integer milliseconds; an ISO or gain not recorded on either side, and binning where the class does not show it, never fail. SI-004 holds: a value of the kind a class does not record is never relabelled as the other kind. The dark flat is calibration on its policy's line; ADR-009's E1–E7 unchanged (a dark-flat vector is in `calibration_match_test.dart`). No formula changed.
+
 > **S7.2b (2026-09-29):** SI-004 holds: ISO and gain stay records, never converted into each other, never called "sensitivity"; a class shows one of them (ADR-020 §3). The per-frame overhead is relabelled "Time between frames" (ADR-020 §4); no formula, input or vector changed (ADR-009 E1–E7 unchanged).
 
 > **S7.1 (2026-09-29; RD-08 = T3):** CALC-31's tracking input is the plan's effective tracking (the plan's override, else the rig's default, else unknown). An input-source change decided by RD-08; no formula changed (DECISIONS E.1, "RD-08 decided").

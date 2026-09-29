@@ -4,19 +4,29 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.2b done**: the light-block form by camera class).
-> **Next:** S7.3a, calibration blocks (RG-03 stays open; it affects only S7.6).
+> **Last updated:** 2026-09-29 (**S7.3a done**: calibration blocks and the dark flat).
+> **Next:** S7.3b, in-camera noise reduction (RG-03 stays open; it affects only S7.6).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a and S7.2b done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b and S7.3a done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.3a**, calibration blocks (below, "Next allowed action") |
-| Code baseline | S7.2b (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S7.3b**, in-camera noise reduction in the budget and the fit (below, "Next allowed action") |
+| Code baseline | S7.3a (this commit). Not pushed (S1.14, RD-17) |
 | Schema | **v20** (S7.2a) |
+
+**S7.3a done, 2026-09-29** (ADR-020 §6–§7; RG-10 = L1, D1, H1): a new calibration block takes what
+it must match from a chosen light (a flat, for a dark flat), shown with its origin, until "Use other
+values"; calibration blocks follow the camera type's ISO/gain and binning like lights; rows warn in
+words with a one-tap "Match the lights"/"Match the flats" and Undo, and name light filters without
+flats; warnings never block, unknown never fails. The dark flat is a fifth frame type through the
+store, the snapshot, the export and every screen. Tips: one line, "More", "Hide tips" remembered;
+hiding them hides no warning. No schema change. The "darks twice" check waits for S7.3b's switch.
+Verification: shared behaviour plus a stored enum value (the planner's dialog, the export): the full
+gate after the last code change, PASS (below).
 
 **S7.2b done, 2026-09-29** (ADR-020 §3–§5; RG-11 = C1, B1, W1, F1, I1, P2): a light block shows ISO
 for phones and cameras, gain for astro cameras, the choice for Unknown; binning only for astro
@@ -177,7 +187,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (447 files, 0 changed); Analyze (no issues); 1,559 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.2b's final inputs (the S7.2b commit) | Valid while `git diff --stat <S7.2b commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.2a's gate (`59aff50`) |
+| **Full quality gate PASS**: Encoding; Format (451 files, 0 changed); Analyze (no issues); 1,605 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.3a's final inputs (the S7.3a commit) | Valid while `git diff --stat <S7.3a commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.2b's gate (`14b079d`) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -307,15 +317,15 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.3a — calibration blocks** (`POST_ROADMAP_PLAN.md`, "S7.D — done": ADR-020 §6–§7): darks,
-   flats, bias and the new dark flats per RG-10's matrix (copied from a light group, the match checks,
-   hideable tips). Implementation; the full gate; commit, then STOP.
+1. **S7.3b — in-camera noise reduction in the budget and the fit** (`POST_ROADMAP_PLAN.md`, "S7.D —
+   done": ADR-020 §8; high-risk: a calculation and schema v21): the camera-module switch, its time as
+   in-window calibration and in each light's atomic event, vectors E8–E8c, and the "darks twice"
+   check. Implementation; the full gate; commit, then STOP.
 
 RG-03 (a specification source, `research/RG-03_EQUIPMENT_SPECS.md` §8) is still the owner's to
 decide; it affects only S7.6, which comes last.
 
-S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
-runs before its gate's decision.
+No gated Task runs before its gate's decision.
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 (allocated to Stage 8 at Stage 6 planning), S4-DEF-02,

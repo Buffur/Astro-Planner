@@ -188,6 +188,7 @@ String _typeLabel(FrameType t) => switch (t) {
   FrameType.dark => 'Darks',
   FrameType.flat => 'Flats',
   FrameType.bias => 'Bias',
+  FrameType.darkFlat => 'Dark flats',
 };
 
 String _reasonLabel(InterruptionReason r) => switch (r) {

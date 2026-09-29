@@ -103,6 +103,7 @@
 > **Updated 2026-09-29 (S7.1):** the plan's tracking override is built (RD-08 = T3; schema v19).
 > **Updated 2026-09-29 (S7.2a):** the camera class on the rig is built (ADR-020 §2; schema v20).
 > **Updated 2026-09-29 (S7.2b):** the light-block form by camera class is built (ADR-020 §3–§5).
+> **Updated 2026-09-29 (S7.3a):** calibration blocks and the dark-flat frame type are built (ADR-020 §6–§7).
 
 ## Contents
 
@@ -3997,7 +3998,7 @@ Stage 4):
 | S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | **Done 2026-09-29** |
 | S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
-| S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | Frozen |
+| S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | **Done 2026-09-29** |
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | Frozen |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | Frozen; RG-07's rules added below S7.4 |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | Frozen; the decided rules added below S7.5 |
@@ -4439,6 +4440,22 @@ decided rules. Every part ends with the full gate after its last code change.
   with a positive and a negative case, and unknown never failing; a dark flat round-trips through the
   store, the snapshot and the export; hiding tips hides no warning; ADR-009's E1–E7 unchanged, and
   calibration blocks stay on their policy's line.
+
+- **Done 2026-09-29:** `FrameType.darkFlat` through every reader (the exhaustive frame-type labels of
+  the block row, the run, the results and the logbook; the store, the snapshot and the export, which
+  parse case-insensitively); the pure `CalibrationMatch` (the checks of ADR-020 §6 except "darks
+  twice", which needs S7.3b's switch; the default source; the one-tap `matched`); the block dialog
+  copies what a new calibration block must match from a chosen light (a flat, for a dark flat), shows
+  it with its origin, and "Use other values" hands the fields to the user; calibration blocks take the
+  class's ISO/gain kind and binning like lights (RG-10 §4: binning not applicable for phones and
+  cameras), and a value of the other kind is never relabelled (SI-004); warnings on each row with
+  "Match the lights"/"Match the flats" and Undo, and "No flats for: …"; tips (one line, "More", "Hide
+  tips" as a remembered disclosure key). Tests: `calibration_match_test.dart` (13, including a
+  dark-flat budget vector), `calibration_blocks_test.dart` (33: 20 matrix cells, one per class and
+  calibration type). Deliberate test changes: `capture_blocks_test.dart` (its fixture's dark now
+  matches no light, which is warned; the no-camera-values check skips the warning lines) and
+  `capture_plan_widget_test.dart` (scrolls past the tip). ADR-009's vectors unchanged. Full gate
+  PASS: 1,605 tests, 2 expected skips; 2 host E2E.
 
 **S7.3b — In-camera noise reduction in the budget and the fit** (ADR-020 §8; S–M; high-risk: a
 calculation and a schema change)

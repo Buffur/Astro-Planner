@@ -7,13 +7,16 @@ import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_palette.dart';
 import '../../domain/models/camera_class.dart';
 import '../../domain/models/capture_block.dart';
+import '../../domain/services/calibration_match.dart';
 import '../../domain/services/fit_analyzer.dart';
 import '../shared/block_text.dart';
+import '../shared/calibration_text.dart';
 import '../shared/capability_text.dart';
 import '../shared/delete_patterns.dart';
 import '../shared/example_text.dart';
 import '../shared/failure_feedback.dart';
 import '../viewmodels/capture_analysis_viewmodel.dart';
+import '../viewmodels/disclosure_viewmodel.dart';
 import '../viewmodels/session_plan_viewmodel.dart';
 import 'capture_plan/blocks_undo.dart';
 import 'capture_plan/capture_assumptions_panel.dart';
@@ -73,6 +76,35 @@ class _BlockListState extends State<_BlockList> {
     ),
   );
 
+  /// Calibration tips (S7.3a, H1): shown until hidden, remembered on the
+  /// device.
+  bool get _tipsShown => context.read<DisclosureViewModel>().isOpen(
+    CalibrationText.tipsKey,
+    initiallyOpen: true,
+  );
+
+  void _setTipsShown(bool shown) => unawaited(
+    context.read<DisclosureViewModel>().setOpen(CalibrationText.tipsKey, shown),
+  );
+
+  /// "Match the lights" (or flats; ADR-020 §6): the values the block must
+  /// match, copied from the default source, with Undo.
+  Future<void> _match(int index, CaptureBlock block) async {
+    final plan = context.read<SessionPlanViewModel>();
+    final source = CalibrationMatch.defaultSource(block, plan.captureBlocks);
+    if (source == null) return;
+    final matched = CalibrationMatch.matched(block, source);
+    await runWithFeedback(
+      context,
+      'match the block',
+      () => editBlocksWithUndo(
+        context,
+        message: 'Matched: ${BlockText.row(matched, null)}',
+        change: () => plan.updateCaptureBlock(index, matched),
+      ),
+    );
+  }
+
   /// The rig's camera class, which decides a light block's fields (S7.2b).
   CameraClass get _cameraClass =>
       context.read<SessionPlanViewModel>().selectedEquipment?.cameraClass ??
@@ -85,6 +117,9 @@ class _BlockListState extends State<_BlockList> {
       context,
       cameraClass: _cameraClass,
       proposal: context.read<SessionPlanViewModel>().lightProposal,
+      blocks: context.read<SessionPlanViewModel>().captureBlocks,
+      tipsShown: _tipsShown,
+      onTipsShown: _setTipsShown,
     );
     if (block == null || !mounted) return;
     final plan = context.read<SessionPlanViewModel>();
@@ -102,6 +137,9 @@ class _BlockListState extends State<_BlockList> {
       context,
       initial: block,
       cameraClass: _cameraClass,
+      blocks: context.read<SessionPlanViewModel>().captureBlocks,
+      tipsShown: _tipsShown,
+      onTipsShown: _setTipsShown,
     );
     if (edited == null || !mounted) return;
     final plan = context.read<SessionPlanViewModel>();
@@ -132,6 +170,9 @@ class _BlockListState extends State<_BlockList> {
         fit.state == FitState.tight ||
         fit.state == FitState.doesNotFit;
     final fillIndex = measured ? analysis.fillWindowBlockIndex : null;
+    // S7.3a (ADR-020 §6): warnings in words; they never block the plan.
+    final mismatches = analysis.calibrationMismatches;
+    final flatsMissing = analysis.lightFiltersWithoutFlats;
     final fresh = _built;
     _built = true;
     return Column(
@@ -227,6 +268,9 @@ class _BlockListState extends State<_BlockList> {
                     )
                   : null;
               final unplaced = (fit.unplacedFramesByBlock[index] ?? 0) > 0;
+              final mismatch = index < mismatches.length
+                  ? mismatches[index]
+                  : const <CalibrationMismatch>[];
               // TASK 8.6: guidance only — never blocks the plan.
               final exceeds =
                   block.frameType == FrameType.light &&
@@ -242,7 +286,11 @@ class _BlockListState extends State<_BlockList> {
                   contentPadding: EdgeInsets.zero,
                   onTap: () => _edit(index, block),
                   title: Text(BlockText.row(block, budget)),
-                  subtitle: placement == null && !exceeds && fits == null
+                  subtitle:
+                      placement == null &&
+                          !exceeds &&
+                          fits == null &&
+                          mismatch.isEmpty
                       ? null
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,6 +338,22 @@ class _BlockListState extends State<_BlockList> {
                                 ),
                               ),
                             ],
+                            for (final m in mismatch)
+                              Text(
+                                CalibrationText.mismatch(m, block.frameType),
+                                key: Key('capture.mismatch.$index.${m.name}'),
+                                style: TextStyle(color: palette.statusTight),
+                              ),
+                            if (mismatch.isNotEmpty &&
+                                CalibrationMatch.defaultSource(block, blocks) !=
+                                    null)
+                              TextButton(
+                                key: Key('capture.match.$index'),
+                                onPressed: () => _match(index, block),
+                                child: Text(
+                                  CalibrationText.match(block.frameType),
+                                ),
+                              ),
                           ],
                         ),
                   trailing: Row(
@@ -305,6 +369,15 @@ class _BlockListState extends State<_BlockList> {
                 ),
               );
             },
+          ),
+        if (flatsMissing.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              CalibrationText.flatsMissing(flatsMissing),
+              key: const Key('capture.flatsMissing'),
+              style: TextStyle(color: palette.statusTight),
+            ),
           ),
       ],
     );

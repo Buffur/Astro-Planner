@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/time/clock.dart';
+import '../../domain/models/camera_class.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/models/imaging_opportunity.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_snapshot.dart';
+import '../../domain/services/calibration_match.dart';
 import '../../domain/services/capability_calculator.dart';
 import '../../domain/services/capture_budget_calculator.dart';
 import '../../domain/services/fit_analyzer.dart';
@@ -155,6 +157,18 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
       inputMissing: _plan.sessionNight == null || _plan.selectedTarget == null,
     );
   }
+
+  /// Each block's calibration mismatches with the plan (S7.3a; ADR-020 §6),
+  /// in block order; empty for lights and matching blocks.
+  List<List<CalibrationMismatch>> get calibrationMismatches {
+    final blocks = _plan.captureBlocks;
+    final c = _plan.selectedEquipment?.cameraClass ?? CameraClass.unknown;
+    return [for (final b in blocks) CalibrationMatch.of(b, blocks, c)];
+  }
+
+  /// The light filters no flat covers, when the plan has flats (S7.3a).
+  List<String?> get lightFiltersWithoutFlats =>
+      CalibrationMatch.lightFiltersWithoutFlats(_plan.captureBlocks);
 
   /// The light block "Fill tonight's window" adjusts: the last one.
   int? get fillWindowBlockIndex {
