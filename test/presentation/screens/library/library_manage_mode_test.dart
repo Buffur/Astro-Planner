@@ -196,6 +196,36 @@ void main() {
     expect(after, hasLength(before.length - 1));
   });
 
+  // S9.8 (D9-5): a save says so.
+  testWidgets('saving a rig, a target and a site says so', (tester) async {
+    await start(tester, AppRouter.libraryRigs);
+    await tester.tap(
+      find.widgetWithText(ListTile, vm.plan.selectedEquipment!.name),
+    );
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await settle(tester);
+    expect(find.text('Rig saved'), findsOneWidget);
+
+    AppRouter.router.go(AppRouter.libraryTargets);
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).first, 'M31');
+    await settle(tester);
+    await tester.tap(find.widgetWithText(ListTile, 'Andromeda Galaxy (M31)'));
+    await settle(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await settle(tester);
+    expect(find.text('Target saved'), findsOneWidget);
+
+    AppRouter.router.go(AppRouter.librarySites);
+    await settle(tester);
+    await tester.tap(find.text('Dark site'));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('siteEditor.save')));
+    await settle(tester);
+    expect(find.text('Site saved'), findsOneWidget);
+  });
+
   testWidgets('deleting a site confirms through the shared dialog', (
     tester,
   ) async {

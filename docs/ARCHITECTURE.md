@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.8, 2026-09-29:** `AppMessages.showMessage` (an extension on `ScaffoldMessengerState`) is the only way to show a `SnackBar` (TD-081; a test enforces it). `ShareSessionExporter.fileName`/`localFileStamp` and `FileBackupService.fileName`/`shareText` name files in local time. The Logbook's "Export all" moved into a `PopupMenuButton` (`logbook.menu`, item `logbook.exportAll`).
+
 > **S9.7, 2026-09-29:** `NightTimeFormatter.recordedDate(CalendarDate)` ("Aug 1, 2026") for recorded dates; `_SkyDarknessLine` shows one keyed reading per value (`sky.bortle`, `sky.sqm`) and `sky.unknown`; `_MapLink` uses the text roles. No ISO date is shown in the planner's sky detail or the site editor.
 
 > **S9.6, 2026-09-29:** `TwilightBands` (`presentation/shared/twilight_bands.dart`, pure): the bands between the `NightTimeline` crossings (which standard twilights enclose each stretch), drawn by `TwilightBar` in `NightTimelineSection`; no Sun computation outside the domain. `WeatherForecastWidget`'s hour columns add `_CloudBar` (value → height; unknown draws nothing) and a dew-risk icon. Both visuals are excluded from semantics: the times and numbers beside them are their text.

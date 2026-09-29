@@ -98,6 +98,7 @@ void main() {
     await tester.tap(find.byKey(const Key('backup.backUp')));
     await tester.pumpAndSettle();
     expect(backup.backups, 1);
+    expect(find.text('Backup file created'), findsOneWidget); // S9.8
   });
 
   testWidgets('restore: the preview is confirmed, then staged', (tester) async {
@@ -110,10 +111,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(backup.stagedFile, 'backup-bytes');
     expect(find.byKey(const Key('backup.staged')), findsOneWidget);
+    expect(
+      find.text('Restore ready: it runs when you reopen the app'),
+      findsOneWidget,
+    ); // S9.8
 
     await tester.tap(find.byKey(const Key('backup.staged'))); // cancel
     await tester.pumpAndSettle();
     expect(backup.staged, isFalse);
+    expect(find.text('Restore cancelled'), findsOneWidget); // S9.8
     expect(find.byKey(const Key('backup.restore')), findsOneWidget);
   });
 

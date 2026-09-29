@@ -12,6 +12,7 @@ import '../../shared/coordinate_input.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
+import '../../shared/app_messages.dart';
 
 class LocationPickerScreen extends StatefulWidget {
   /// With [pickOnly], confirming returns the point to the caller (the site
@@ -55,7 +56,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     } catch (e) {
       AppLog.error('location', 'Could not get the position', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showMessage(
           SnackBar(content: Text(FailureText.message('get your position', e))),
         );
       }

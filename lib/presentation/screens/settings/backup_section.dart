@@ -53,11 +53,15 @@ class BackupSection extends StatelessWidget {
       action: 'Restore at next start',
     );
     if (!sure || !context.mounted) return;
-    await runWithFeedback(
+    final staged = await runWithFeedback(
       context,
       'prepare the restore',
       () => vm.stage(picked!.file),
     );
+    // S9.8 (D9-5): what happens next.
+    if (staged && context.mounted) {
+      showDone(context, 'Restore ready: it runs when you reopen the app');
+    }
   }
 
   @override
@@ -76,7 +80,12 @@ class BackupSection extends StatelessWidget {
             'One .astroplan file with all your data. Save it anywhere.',
           ),
           enabled: !vm.busy,
-          onTap: () => runWithFeedback(context, 'back up', vm.backUp),
+          onTap: () async {
+            final done = await runWithFeedback(context, 'back up', vm.backUp);
+            if (done && context.mounted) {
+              showDone(context, 'Backup file created');
+            }
+          },
         ),
         if (vm.restoreStaged)
           ListTile(
@@ -88,11 +97,16 @@ class BackupSection extends StatelessWidget {
             ),
             subtitle: const Text('Tap to cancel the restore.'),
             enabled: !vm.busy,
-            onTap: () => runWithFeedback(
-              context,
-              'cancel the restore',
-              vm.cancelRestore,
-            ),
+            onTap: () async {
+              final done = await runWithFeedback(
+                context,
+                'cancel the restore',
+                vm.cancelRestore,
+              );
+              if (done && context.mounted) {
+                showDone(context, 'Restore cancelled');
+              }
+            },
           )
         else
           ListTile(

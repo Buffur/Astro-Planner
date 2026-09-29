@@ -174,14 +174,32 @@ class _LogbookScreenState extends State<LogbookScreen> {
               onChanged: _setFilter,
             ),
           ),
-          // TASK 14.3 (owner): every saved entry in one manifest file.
+          // TASK 14.3 (owner): every saved entry in one manifest file. S9.8:
+          // a labelled item in the Logbook's menu, not an icon alone.
           if (vm.canExport)
-            IconButton(
-              key: const Key('logbook.exportAll'),
-              tooltip: AppWords.exportAllAsFile,
-              icon: const Icon(Icons.file_download_outlined),
-              onPressed: () =>
-                  runWithFeedback(context, 'export the Logbook', vm.exportAll),
+            PopupMenuButton<void>(
+              key: const Key('logbook.menu'),
+              tooltip: 'More',
+              itemBuilder: (_) => [
+                PopupMenuItem<void>(
+                  key: const Key('logbook.exportAll'),
+                  onTap: () async {
+                    final done = await runWithFeedback(
+                      context,
+                      'export the Logbook',
+                      vm.exportAll,
+                    );
+                    if (done && context.mounted) {
+                      showDone(context, 'Export file created');
+                    }
+                  },
+                  child: const ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.file_download_outlined),
+                    title: Text(AppWords.exportAllAsFile),
+                  ),
+                ),
+              ],
             ),
         ],
       ),

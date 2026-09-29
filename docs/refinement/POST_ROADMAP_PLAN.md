@@ -5292,7 +5292,7 @@ GitHub identity (RD-01: the application id is permanent once published). The age
 | S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | **Done 2026-09-29** |
 | S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | **Done 2026-09-29** |
 | S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | **Done 2026-09-29** |
-| S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | Frozen |
+| S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | **Done 2026-09-29** |
 | S9.9 | Final visual consistency on secondary screens | Stage 9 scope | M | S9.1–S9.8 | Frozen |
 | S9.10 | The logo and the splash: analysis and alternatives | P9.4 | S | — | **Owner gate** (the owner chooses) |
 | S9.11 | RG-12: the licence (research) | RG-12; P9.5 | S | — | **Owner gate** (the owner decides) |

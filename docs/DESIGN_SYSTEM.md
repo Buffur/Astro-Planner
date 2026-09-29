@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S9.8, 2026-09-29:** messages: every `SnackBar` through `AppMessages.showMessage` (motion from `AppMotion`, none under reduced motion; TD-081). `showDone` after a save, delete, rename, export, backup, or a restore prepared or cancelled; none for a setting whose effect shows on the same screen (D9-5).
+
 > **S9.6, 2026-09-29:** two visualisations under the shared rules. "When is it dark tonight?": the twilight bar on Night & Moon (bands shaded from `chartTwilight` to `chartDark` by depth; the table of times is its text). "How cloudy is each hour?": a cloud bar under each hour's number on Weather (`muted` fill in a `chartGrid` frame; the number is its text). Neither computes a planning value; colour never carries the dew risk alone (an icon marks it).
 
 > **S9.4, 2026-09-29:** Settings adopts section headings (`titleMedium`, marked as headers for screen readers) each with a one-line consequence (`bodySmall`), value-first rows (the value with its unit as the trailing text), a stepper (− value +, tooltips "<label>: less/more") for bounded counts and durations, and `confirmDestructive` for Restore ("Restore at next start").

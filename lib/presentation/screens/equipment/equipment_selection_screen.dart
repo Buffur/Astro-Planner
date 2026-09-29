@@ -132,11 +132,13 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
   }
 
   Future<void> _showEquipmentDialog({EquipmentProfile? existing}) async {
-    await showEquipmentEditor(
+    final saved = await showEquipmentEditor(
       context,
       existing: existing,
       onDelete: existing == null ? null : () => _delete(existing),
     );
+    // S9.8 (D9-5): a save says so.
+    if (saved && mounted) showDone(context, 'Rig saved');
     // Always refresh list after dialog closes.
     _loadEquipment();
     // TD-028: pick up an edit to the currently selected equipment instead of

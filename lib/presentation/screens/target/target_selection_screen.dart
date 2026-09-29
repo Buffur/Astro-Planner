@@ -324,7 +324,11 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       () =>
                           isEdit ? targets.update(target) : targets.add(target),
                     );
-                    if (saved && context.mounted) Navigator.of(context).pop();
+                    if (saved && context.mounted) {
+                      // S9.8 (D9-5): a save says so.
+                      showDone(context, 'Target saved');
+                      Navigator.of(context).pop();
+                    }
                   },
                   child: const Text(AppWords.save),
                 ),

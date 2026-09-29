@@ -15,6 +15,7 @@ import '../../domain/services/backup_service.dart';
 import '../../domain/services/session_exporter.dart';
 import '../database/app_database.dart';
 import '../export/session_manifest_codec.dart';
+import '../export/share_session_exporter.dart';
 import 'backup_archive.dart';
 import 'backup_preferences.dart';
 import 'backup_staging.dart';
@@ -100,22 +101,32 @@ class FileBackupService implements BackupService {
   @override
   Future<void> backUpAndShare() async {
     final bytes = await createBackup();
-    final stamp = _clock
-        .nowUtc()
-        .toIso8601String()
-        .substring(0, 16)
-        .replaceAll(':', '');
-    final file = File(
-      p.join((await _tempDir()).path, 'astroplan-backup-$stamp.astroplan'),
-    );
+    final now = _clock.nowUtc();
+    final file = File(p.join((await _tempDir()).path, fileName(now)));
     await file.writeAsBytes(bytes, flush: true);
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path, mimeType: 'application/zip')],
-        text:
-            '${AppIdentity.appName} backup ($stamp UTC). Keep this file to restore.',
+        text: shareText(now),
       ),
     );
+  }
+
+  /// The backup's file name in the device's local date and time (S9.8):
+  /// `astroplan-backup-2026-09-29-2130.astroplan`.
+  static String fileName(DateTime nowUtc) =>
+      'astroplan-backup-${ShareSessionExporter.localFileStamp(nowUtc)}.astroplan';
+
+  /// The share sheet's text, with the local time and its offset (S9.8).
+  static String shareText(DateTime nowUtc) {
+    final local = nowUtc.toLocal();
+    final offset = local.timeZoneOffset;
+    final sign = offset.isNegative ? '−' : '+';
+    final h = offset.inHours.abs().toString().padLeft(2, '0');
+    final m = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+    final stamp = ShareSessionExporter.localFileStamp(nowUtc);
+    return '${AppIdentity.appName} backup, $stamp (UTC$sign$h:$m). Keep this '
+        'file to restore.';
   }
 
   /// Checks backup [bytes] against this app (the testable part of [pick]).

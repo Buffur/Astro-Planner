@@ -552,11 +552,17 @@ class _Actions extends StatelessWidget {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             key: const Key('detail.export'),
-            onPressed: () => runWithFeedback(
-              context,
-              'export the entry',
-              () => sessions.exportOne(s.id),
-            ),
+            onPressed: () async {
+              final done = await runWithFeedback(
+                context,
+                'export the entry',
+                () => sessions.exportOne(s.id),
+              );
+              // S9.8 (D9-5): after the share sheet returns.
+              if (done && context.mounted) {
+                showDone(context, 'Export file created');
+              }
+            },
             icon: const Icon(Icons.file_download_outlined),
             label: const Text(AppWords.exportAsFile),
             style: OutlinedButton.styleFrom(minimumSize: tall),
@@ -637,7 +643,12 @@ class _NameTile extends StatelessWidget {
       'save the name',
       () => sessions.rename(session.id, name),
     );
-    if (saved) onChanged();
+    if (!saved) return;
+    // S9.8 (D9-5): a rename says so.
+    if (context.mounted) {
+      showDone(context, name.trim().isEmpty ? 'Name removed' : 'Name saved');
+    }
+    onChanged();
   }
 
   @override

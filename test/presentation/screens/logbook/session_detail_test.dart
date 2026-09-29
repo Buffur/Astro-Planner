@@ -227,6 +227,7 @@ void main() {
     await tester.tap(find.byKey(const Key('detail.nameSave')));
     await settle(tester);
     expect(find.text('Orion, first light'), findsWidgets);
+    expect(find.text('Name saved'), findsOneWidget); // S9.8
 
     AppRouter.router.go(AppRouter.sessions);
     await settle(tester);
@@ -250,6 +251,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('detail.nameField')), '');
     await tester.tap(find.byKey(const Key('detail.nameSave')));
     await settle(tester);
+    expect(find.text('Name removed'), findsOneWidget); // S9.8
     AppRouter.router.go(AppRouter.sessions);
     await settle(tester);
     final title = tester
@@ -390,6 +392,7 @@ void main() {
     await pumpAt(tester, AppRouter.sessionDetail(completedId));
     await tester.tap(find.byKey(const Key('detail.export')));
     await settle(tester);
+    expect(find.text('Export file created'), findsOneWidget); // S9.8
     final shared = exporter.shared.single.single;
     expect(shared.session.id, completedId);
     expect(shared.events.first.kind, ExecutionEventKind.started);
@@ -401,10 +404,15 @@ void main() {
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
+    // S9.8: a labelled item in the Logbook's menu; it says it is done.
+    await tester.tap(find.byKey(const Key('logbook.menu')));
+    await settle(tester);
+    expect(find.text('Export all as file'), findsOneWidget);
     await tester.tap(find.byKey(const Key('logbook.exportAll')));
     await settle(tester);
     final ids = {for (final e in exporter.shared.single) e.session.id};
     expect(ids, {completedId, plannedId, legacyId, noSnapshotId});
+    expect(find.text('Export file created'), findsOneWidget);
   });
 
   testWidgets('no overflow at 200 % text on a 360 × 640 dp phone', (

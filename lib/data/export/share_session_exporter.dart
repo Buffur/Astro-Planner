@@ -27,9 +27,8 @@ class ShareSessionExporter implements SessionExporter {
         appVersion: AppIdentity.version,
       ),
     );
-    final stamp = now.toIso8601String().substring(0, 16).replaceAll(':', '');
     final dir = await getTemporaryDirectory();
-    final file = File(p.join(dir.path, 'astroplan-sessions-$stamp.json'));
+    final file = File(p.join(dir.path, fileName(sessions, now)));
     await file.writeAsString(json);
     await SharePlus.instance.share(
       ShareParams(
@@ -37,6 +36,20 @@ class ShareSessionExporter implements SessionExporter {
         text: summary(sessions),
       ),
     );
+  }
+
+  /// The file's name (S9.8), in the device's local date and time: the whole
+  /// Logbook `astroplan-logbook-2026-09-29-2130.json`, one entry
+  /// `astroplan-entry-2026-09-29-2130.json`.
+  static String fileName(List<ExportedSession> sessions, DateTime nowUtc) =>
+      'astroplan-${sessions.length == 1 ? 'entry' : 'logbook'}-'
+      '${localFileStamp(nowUtc)}.json';
+
+  /// "2026-09-29-2130": [utc] on the device's clock, sortable (S9.8).
+  static String localFileStamp(DateTime utc) {
+    final t = utc.toLocal();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${t.year}-${two(t.month)}-${two(t.day)}-${two(t.hour)}${two(t.minute)}';
   }
 
   /// "Astro Planner export: 3 sessions (M42, M31, …)".

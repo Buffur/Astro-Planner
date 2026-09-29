@@ -12,6 +12,7 @@ import '../../shared/metadata_text.dart';
 import '../../viewmodels/metadata_import_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../equipment/equipment_editor.dart';
+import '../../shared/app_messages.dart';
 
 /// Reads the metadata contract from one capture file (F-45; ADR-017) and
 /// proposes equipment from it (S3.6, ADR-018): the match against the saved
@@ -181,7 +182,7 @@ class _EquipmentCard extends StatelessWidget {
     if (!read || !context.mounted) return;
     final current = draft;
     if (current == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showMessage(
         const SnackBar(
           content: Text(
             'That rig has changed or was removed. The review now shows '

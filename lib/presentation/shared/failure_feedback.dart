@@ -4,6 +4,7 @@ import '../../core/diagnostics/app_log.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_result.dart';
 import '../../domain/repositories/storage_failure.dart';
+import 'app_messages.dart';
 
 /// User-facing wording for a failed action (TASK 15.1). The error itself
 /// goes to the log ([AppLog]), never onto the screen.
@@ -42,7 +43,7 @@ Future<bool> runWithFeedback(
     return true;
   } catch (e, s) {
     AppLog.error('ui', 'Could not $action', error: e, stackTrace: s);
-    messenger.showSnackBar(
+    messenger.showMessage(
       SnackBar(content: Text(FailureText.message(action, e))),
     );
     return false;
@@ -56,7 +57,7 @@ Future<bool> runWithFeedback(
 void showDone(BuildContext context, String message) {
   ScaffoldMessenger.maybeOf(context)
     ?..hideCurrentSnackBar()
-    ..showSnackBar(
+    ..showMessage(
       SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
     );
 }
@@ -67,7 +68,7 @@ void showDone(BuildContext context, String message) {
 void showFailure(BuildContext context, String text) {
   ScaffoldMessenger.maybeOf(context)
     ?..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(text)));
+    ..showMessage(SnackBar(content: Text(text)));
 }
 
 /// A list or page that could not be loaded (TASK 15.1): says so, instead of

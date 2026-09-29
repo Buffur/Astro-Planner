@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.7 done**: sky darkness made readable).
-> **Next:** S9.8 (feedback, messages and export polish). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.8 done**: feedback, messages (TD-081) and export polish).
+> **Next:** S9.9 (final visual consistency on secondary screens). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,23 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.8** (below, "Next allowed action") |
-| Code baseline | **S9.7** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.9** (below, "Next allowed action") |
+| Code baseline | **S9.8** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.8 done, 2026-09-29** (D9-5; TD-081 resolved): feedback, messages and export polish.
+- `showDone` after a rig, target or site saved, a name saved or removed, an export or backup file
+  created, a restore prepared or cancelled (deletes since S9.1). None for settings (visible in place).
+- **TD-081:** every message through `AppMessages.showMessage` with `AppMotion`'s style; none slides
+  under reduced motion. A test keeps `showSnackBar` out of the rest of `lib/presentation`.
+- File names in local time (`astroplan-entry-…`, `astroplan-logbook-…`, `astroplan-backup-…`), the
+  backup's share text with its UTC offset; "Export all as file" a labelled item in the Logbook's menu.
+- **Tests:** `app_messages_test.dart` (3; the reduced-motion case mutation-checked),
+  `file_names_test.dart` (3), the new messages in the library, detail and backup tests; the Export
+  all test goes through the menu.
+- **Verification:** shared behaviour (every message, two data-layer file names): the full gate after
+  the last code change, **PASS** (1,823 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.7 done, 2026-09-29** (08 §13): sky darkness made readable.
 - Each value first, its source and a readable date under it (`NightTimeFormatter.recordedDate`,
@@ -487,8 +500,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.8 — Feedback, messages (TD-081) and export polish** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
-   Task sequence"). Then S9.9 and the Stage 9 validation: the owner
+1. **S9.9 — Final visual consistency on secondary screens** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
+   Task sequence"). Then the Stage 9 validation (S9.10–S9.12 wait for the owner) and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

@@ -282,6 +282,8 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     if (!mounted) return;
     if (saved) {
       setState(() => _leaving = true);
+      // S9.8 (D9-5): a save says so; the message outlives this page.
+      showDone(context, 'Site saved');
       context.pop();
     } else {
       setState(() => _saving = false);
