@@ -4,20 +4,32 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**Stage 9 closed**: the owner deferred S9.10–S9.12 in chat).
-> **Next:** Stage 10 planning (Performance & Application Size).
+> **Last updated:** 2026-09-30 (**Stage 10 planned**; Stage 9 closed with S9.10–S9.12 deferred by the owner).
+> **Next:** S10.1, the size baseline.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 10 — Performance & Application Size: Not started** (planning is next). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
+| Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | Stage 10 planning (below, "Next allowed action") |
+| Next Task | **S10.1** — the size baseline |
 | Code baseline | **The TD-089–TD-091 fix** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Stage 10 planned, 2026-09-30** (documentation only; the plan's "Stage 10 — frozen Task sequence"):
+- Inputs verified at `1aeee63` (§9.7). Most important: the 277 MB has no recorded build type (the only
+  builds recorded on the owner's phone are debug); **an Android emulator now exists on this machine**
+  (Android 16, x86_64, 2 GB); the rig editor rebuilds its whole dialog on each keystroke in seven of its fourteen fields (a candidate,
+  not a verified cause); first-run seeding still inserts entry by entry (ENG-12).
+- **Frozen:** S10.1 → S10.7, then the Stage 10 validation. Decisions D10-1 to D10-6 (DECISIONS E.1,
+  "Stage 10 decisions (delegated by the owner)"): emulator numbers are indicative, device evidence stays
+  Stage 11's; no new budgets; the user-relevant size is the arm64-v8a split and its install; one
+  measurement record (`evidence/STAGE_10_MEASUREMENTS.md`).
+- **Verification:** the documentation class (V1): references and IDs resolve; `git diff --check`.
+  The TD-089–TD-091 gate (`0f09608`) is Stage 10's baseline (V3).
 
 **Stage 9 closed, 2026-09-30** (the owner, in chat: "defer all three decisions, move on to Stage 10"):
 - **S9.10** (the logo), **S9.11** (RG-12, the licence) and **S9.12** (RD-01, the identity) are
@@ -423,6 +435,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
+| **Full quality gate PASS** (TD-089–TD-091): Encoding; Format; Analyze (no issues); 1,833 tests, 2 expected skips; 2 host E2E | **`0f09608`**, on Flutter 3.47.4 | The last code change before Stage 10; supersedes the S9.9 row below. Stage 10's baseline. Reusable while `git diff --stat 0f09608 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S9.9): Encoding; Format; Analyze (no issues); 1,825 tests, 2 expected skips; 2 host E2E | **`0a0c95e`**, S9.9's final inputs, on Flutter 3.47.4 | Ran after S9.9's last code change, the last code change of S9.1–S9.9; supersedes S9.1–S9.8's gates and S8.9's below. Reused by the Stage 9 validation: `git diff --stat 0a0c95e HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `8e53479`. Reusable while that diff stays empty |
 | **Stage 9 validation probes PASS**: P1 (target and site delete paths, "Target deleted"), P2 (the cloud gate's threshold changes the usable time), P3 (an unknown cloud hour draws no bar), P4 and P5 (Night & Moon without sunset, without astronomical darkness) | Stage 9 validation, application code `0a0c95e` | Temporary, deleted; application code unchanged since. TD-089 asks for them as committed tests |
 | **Full quality gate PASS** (S8.9): Encoding; Format (463 files, 0 changed); Analyze (no issues); 1,785 tests, 2 expected skips; 2 host E2E | **`690b94a`**, S8.9's final inputs, on Flutter 3.47.4 | Ran after S8.9's last code change, the last code change of Stage 8; supersedes S8.1–S8.8's gates. Reused by the Stage 8 validation: `git diff --stat 690b94a HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty. Reusable while that diff stays empty. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
@@ -450,7 +463,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
-| 10 | Performance & Application Size | Not started | — | — | — |
+| 10 | Performance & Application Size | In progress (planned; S10.1–S10.7 frozen) | 2026-09-30 | — | — |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
 ## Open research gates
@@ -565,13 +578,12 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 10 planning** (documentation only): verify Stage 10's inputs against the code and the
-   machine (§9.7; the plan's "Stage 10 — Performance & Application Size" and its 2026-09-27
-   amendment), then freeze its Task sequence. Measurement comes first; no optimisation without a
-   recorded baseline.
+1. **S10.1 — the size baseline** (the plan's "Stage 10 — frozen Task sequence"), then S10.2 → S10.7 in
+   order, one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
-   must be settled before any store upload (Stage 11).
+   must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB
+   was read (S10.1 classifies it either way).
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 decided

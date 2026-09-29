@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **Stage 10 planning, 2026-09-30:** E.1 "Stage 10 decisions (delegated by the owner)": D10-1 to D10-6. Documentation only.
 > **Stage 9 closed, 2026-09-30:** the owner deferred the logo (P9.4), the licence (RG-12) and the identity (RD-01); recorded under E.1 "Stage 9 decisions". Documentation only.
 > **Stage 9 planning, 2026-09-29:** E.1 "Stage 9 decisions (delegated by the owner)": D9-1 to D9-6;
 > the logo, the licence (RG-12) and the project identity (RD-01) stay the owner's. Documentation only.
@@ -1866,6 +1867,33 @@ Stage 4 revalidation is still required.
   source exists with an API and terms).
 - **Consequences:** S7.6 has no source path; its other scope is unchanged. RG-03 stays open only as
   the recorded candidate. Documentation only.
+
+### Stage 10 decisions (delegated by the owner, Stage 10 planning, 2026-09-30)
+
+- **Context:** Stage 10 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 10 — frozen Task
+  sequence"), verified at `1aeee63`.
+- **Decided by:** the agent, under the owner's standing delegation in chat (2026-09-29: "do not ask me
+  anything; decide yourself and choose the best solutions"; 2026-09-30: "move on to Stage 10"). The
+  owner may revisit any of them.
+- **D10-1 environments and evidence levels:** measurements run on the development machine's Android
+  emulator (Android 16, x86_64, 6 vCPU, 2 GB) and the host. Emulator numbers are **RUNTIME VERIFIED,
+  indicative**: an emulator is not representative low-end hardware, so "responsive on representative
+  hardware" stays **UNVERIFIED** until a physical device run (the owner's phone, Stage 11). Unlike
+  environments are never compared.
+- **D10-2 thresholds:** no new numeric budget. The existing one stands (TASK 10.4: candidates under
+  1 s). Frame times are reported against the display's frame interval (16.7 ms at 60 Hz) as a
+  reference, not as a pass/fail threshold.
+- **D10-3 the user-relevant size:** the size a user downloads and installs from a release: the
+  per-device APK split from the release AAB for the phone's ABI (arm64-v8a), and its installed
+  footprint. The AAB's total (all ABIs) is recorded but is not what a user receives.
+- **D10-4 the record:** `refinement/evidence/STAGE_10_MEASUREMENTS.md` holds every measurement
+  (claim, evidence, change, before, after, regression check), created by S10.1.
+- **D10-5 RD-02's dependency part:** decided in S10.6 on evidence (its actual role in the current
+  `sqlite3`/`drift` packaging, a build and an emulator run); the ADK skill, `skills-lock.json` and
+  `docs/archive/` parts stay open (not Stage 10's).
+- **D10-6 the scenario suite:** kept in the repository and compiled by the quality gate, which never
+  asserts on timing; timing runs are manual (the emulator or a device).
+- **Consequences:** S10.1–S10.7 follow them. Documentation only.
 
 ### Stage 9 decisions (delegated by the owner, Stage 9 planning, 2026-09-29)
 

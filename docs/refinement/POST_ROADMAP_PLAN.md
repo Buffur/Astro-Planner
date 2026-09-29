@@ -5566,6 +5566,136 @@ chat; Stage 9 closed on its validation report (`PROGRESS.md`).
   - the timeline and the Logbook stay responsive on representative hardware;
   - no visualisation or animation dependency was added without need.
 
+#### Stage 10 — frozen Task sequence (planning, 2026-09-30)
+
+Planned at `1aeee63`, after Stage 9 closed (S9.10–S9.12 deferred by the owner). **The TD-089–TD-091
+fix's full-gate PASS (`0f09608`) is Stage 10's baseline, reused (V3)**: Encoding; Format; Analyze;
+1,833 tests, 2 expected skips; 2 host E2E; Flutter 3.47.4. Planning is documentation only.
+
+**Decisions.** The owner's standing delegation (2026-09-29: "do not ask me anything; decide yourself";
+2026-09-30: "move on to Stage 10") covers Stage 10's engineering decisions, recorded in DECISIONS E.1,
+"Stage 10 decisions (delegated by the owner)" (D10-1 to D10-6). None of Stage 10's scope is named as
+the owner's, except a size target (the plan: "no size target unless the owner sets one"), which is
+not set.
+
+**The inputs, verified against the code and this machine at `1aeee63` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| The 277 MB (08 §26) | The dogfooding report says only "the application currently takes up approximately 277 MB": no build type, no screen, no date. The only builds recorded on the owner's phone (Xiaomi 14T Pro, Android 16) are debug builds (`PROGRESS_HISTORY.md`, M1–M4); the owner's own install's build type is unrecorded. The one release measurement is the TASK 16.2 AAB, 66.5 MB with three ABIs (`RELEASE.md`) | S10.1 |
+| Measurement environments | **An Android emulator now exists on the development machine** (AVD `Medium_Phone_API_36.1`: Android 16, x86_64 with arm64 translation, 6 vCPU, 2 GB RAM); it booted and answered `adb` on 2026-09-30. The owner's phone is not connected. No low-end device. TASK 15.2's profile traces were never taken | D10-1; S10.1, S10.2 |
+| Packaged content | Two Flutter assets: `catalog_v2.json` (57 KB) and `OPENNGC_NOTICE.txt` (1.6 KB); `assets/branding/icon_512.png` (21.6 KB) is not a Flutter asset. No bundled fonts (Material Icons only, tree-shaken in release). 17 direct runtime dependencies, including `flutter_map` + `latlong2` (the map pick), `geolocator`, `file_picker`, `share_plus`, `archive`, `sqlite3_flutter_libs ^0.6.0+eol` (RD-02) | S10.1, S10.6 |
+| Form lag (08 §22) | The rig editor (`equipment_editor.dart`, 720 lines) is a dialog built by one `StatefulBuilder`; seven of its fourteen text fields call `setDialogState` on every change, so each keystroke in them rebuilds the whole dialog. That is a candidate, **not a verified cause** (no measurement exists) | S10.2, S10.3 |
+| Planner recalculation | Trap 16's memoization (`planner_memoization_test.dart`: invalidation cases and a tolerant host benchmark, a cached frame under 1 ms and the candidates under 1 s) | S10.2, S10.4 |
+| Timeline and detail screens | P6.11's timeline, S9.6's twilight and cloud bars; no profile of either | S10.2, S10.4 |
+| Logbook and Sessions | `DriftSessionRepository.list` loads rows, then blocks for all rows in one query (`_blocksFor`); in-memory search and filters (I-9). ENG-11's N+1 was measured on the host only (198 ms for 200 sessions, 04/P4) | S10.2, S10.5 |
+| First-run seeding (ENG-12) | `CatalogSeeder` inserts each catalog entry with its own autocommit `insertTarget` (no transaction); aliases are one transaction (`replaceAliases`). Host first run 885 ms (04/P2); never measured on Android | S10.2, S10.5 |
+| Release configuration | `RELEASE.md`: AAB with R8 on, symbols in `BUNDLE-METADATA`, 16 KB alignment checked by `tool/check_bundle.dart`; no `--split-debug-info` or `--obfuscate`; the upload key does not exist (owner) | S10.7 |
+
+**Rules for every Task** (with "Stages 6–11: shared rules"):
+- **Claim → evidence → change → before → after → regression check** for every optimisation, in the
+  Stage's record, `refinement/evidence/STAGE_10_MEASUREMENTS.md` (created by S10.1; each Task adds its
+  section). Unlike measurements are never compared (build mode, ABI, device and data volume stated).
+- No change without a measured problem; no architecture rewrite; no new dependency for drawing or
+  animation; scientific sampling and time grids unchanged; no function lost (the plan's list).
+- Regression tests only where deterministic (structure, rebuild counts, query counts); no timing
+  thresholds except the existing ones (TASK 10.4's candidates under 1 s on the host benchmark).
+- The owner's signing material is never touched (trap 21); a release build on this machine is
+  debug-signed and is used for measurement only.
+- Documents in the same change: `FEATURE_STATUS.md` where behaviour is visible, `ARCHITECTURE.md`
+  Part B, `TECH_DEBT.md`, `RELEASE.md` for any build change, `PROGRESS.md`.
+- **One Task per commit**, in the order below; verification at the Task's V1 class. S10.1 and S10.2's
+  measurements are documentation plus tooling; a Task that changes no code ends with the
+  documentation class.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S10.1 | The size baseline: the 277 MB classified, the release artifact and the installed footprint broken down | 08 §26; Stage 10 scope | S–M | — | Not started |
+| S10.2 | Reproducible performance scenarios and baselines | Stage 10 scope (measurement first) | M | — | Not started |
+| S10.3 | Form lag: investigate from S10.2's scenario and fix the verified bottleneck | 08 §22 | M | S10.2 | Not started |
+| S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | Not started |
+| S10.5 | The Logbook at a realistic volume; ENG-11 and ENG-12 on Android | ENG-11; ENG-12 | S–M | S10.2 | Not started |
+| S10.6 | Dependencies and assets by verified use (RD-02's `sqlite3_flutter_libs`) | RD-02; Stage 10 scope | S–M | S10.1 | Not started |
+| S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | Not started |
+
+**Order:** S10.1 → S10.2 → S10.3 → S10.4 → S10.5 → S10.6 → S10.7, then the Stage 10 validation (a
+fresh session). S10.4, S10.5 and S10.7 may end with "measured, no change needed": that is a valid
+outcome, recorded with its evidence.
+
+##### S10.1 — The size baseline
+- **Objective:** know what the app's size is, per measurement type, and what makes it up.
+- **Scope:** on this machine and the emulator, at one commit: the release AAB (as `RELEASE.md` builds
+  it); the per-device APK a phone would receive (arm64-v8a, the owner's phone's ABI, and x86_64 for the
+  emulator); `flutter build apk --analyze-size` for arm64-v8a (Dart code, native libraries, assets,
+  resources); a debug APK; the installed footprint of a debug and a release build on the emulator (code,
+  data, cache, as Android reports them). The 277 MB is classified against these (for example a debug
+  install's total) or recorded as the owner's unreproduced observation; the owner may confirm later
+  where it was read. No code change.
+- **Acceptance:** `STAGE_10_MEASUREMENTS.md` §Size: each measurement with its command, build mode, ABI
+  and device; the main contributors measured; the 277 MB classified or recorded as unreproduced; the
+  release baseline stated. Nothing called large without a number.
+
+##### S10.2 — Reproducible performance scenarios and baselines
+- **Objective:** a scenario suite that anyone can rerun, and its first numbers.
+- **Scope:** scenarios in the plan's priority: (1) the rig editor: open, focus a field, type (the
+  owner's lag); (2) the planner: open, edit a block's count and exposure, change the night and the
+  target, open a section; (3) Night & Moon and Weather; (4) the Logbook: open, search, filter, open an
+  entry, at a realistic volume; (5) first-run seeding; (6) the candidates. Each records the device,
+  build mode, steps and metric (frame build and raster times, or elapsed time for work). Tooling: a
+  profile-mode driver on the emulator where Flutter supports it, plus host counts (rebuilds, queries)
+  where they are deterministic. The scenario code lives where the quality gate still compiles it and
+  never makes the gate depend on timing.
+- **Acceptance:** the suite committed with instructions; `STAGE_10_MEASUREMENTS.md` §Baselines has
+  each scenario's first numbers with its environment; the gate passes.
+
+##### S10.3 — Form lag
+- **Objective:** find why focusing and typing in a form lags (08 §22), and fix what is verified.
+- **Scope:** the investigation categories of the plan (focus time, keyboard, input response, rebuild
+  scope and frequency, synchronous work on focus or typing, validation, state propagation, layout,
+  storage on the path), from S10.2's rig-editor scenario, then the other editors (target, site, block)
+  if the same pattern is present. A fix keeps the editor's behaviour, validation and saved values the
+  same (its existing tests pass unchanged). A deterministic rebuild-scope test where one is possible.
+- **Acceptance:** the cause stated with evidence; the scenario repeated after the fix with the same
+  setup, compared; behaviour and data unchanged; or, if nothing is found, the measurements recorded and
+  the finding documented for a device run (Stage 11).
+
+##### S10.4 — The planner, the timeline and the detail screens
+- **Objective:** keep what is fast, fix only what S10.2 shows to be slow.
+- **Scope:** reuse trap 16's memoization before any new cache; repaint and rebuild scope of the
+  timeline and the detail screens' bars; no change to sampling, grids or calculations.
+- **Acceptance:** each scenario's before and after, or "measured, no change needed"; the memoization
+  tests still pass; a new cache, if any, keyed on every input with an invalidation test.
+
+##### S10.5 — The Logbook, ENG-11 and ENG-12
+- **Objective:** the Logbook stays practical at a realistic volume; the two engineering risks are
+  measured on Android.
+- **Scope:** the Logbook's list, search, filters and an entry with a realistic local history (a few
+  hundred saved plans and results); ENG-11 (the session list's queries) and ENG-12 (first-run seeding)
+  timed on the emulator in release or profile mode. A fix only for a measured problem; seeding in one
+  transaction only with a migration-safe test (the seeder's idempotence and the catalog version rules
+  kept). History and snapshot semantics unchanged.
+- **Acceptance:** the numbers recorded; ENG-11 and ENG-12 closed as measured or fixed with before and
+  after; no semantic change (the seeder and session tests pass unchanged).
+
+##### S10.6 — Dependencies and assets
+- **Objective:** everything shipped is used.
+- **Scope:** each runtime dependency checked against its actual use (runtime, platform integration,
+  build, generated code, migration, export, backup, tests), including what the tracker's retirement
+  left; RD-02's `sqlite3_flutter_libs ^0.6.0+eol` against the current `sqlite3`/`drift` packaging, with
+  a build and a run on the emulator; assets against their references. Nothing removed on a name search
+  alone; no stable dependency replaced by custom code.
+- **Acceptance:** a table of dependencies and assets with the evidence; any removal measured before
+  and after (S10.1's method) and checked on the emulator; RD-02's dependency part decided (D10-5).
+
+##### S10.7 — Build and release options
+- **Objective:** apply only measured, safe release-size options.
+- **Scope:** options that fit the current workflow (`RELEASE.md`), for example
+  `--split-debug-info` (with the symbols kept for crash reports) or `--obfuscate`, each measured with
+  S10.1's method and checked for startup, plugins and the bundle check; the owner's signing untouched.
+  An option with no material gain, or a support cost that outweighs it, is recorded and not applied.
+- **Acceptance:** before and after for each option tried; `RELEASE.md` updated for any adopted
+  change; the Stage's size record final.
+
 ### Stage 11 — Full Validation & Beta Readiness
 
 - **Purpose:** independent final validation. **No release claim without the required
