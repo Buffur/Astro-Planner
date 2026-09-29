@@ -107,6 +107,7 @@
 > **Updated 2026-09-29 (S7.3b):** in-camera noise reduction is built (ADR-020 §8; schema v21).
 > **Updated 2026-09-29 (S7.4):** target aliases and search are built (RG-07 = T1; schema v22, catalog version 3).
 > **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
+> **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 
 ## Contents
 
@@ -4005,7 +4006,7 @@ Stage 4):
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | **Done 2026-09-29** |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | **Done 2026-09-29** |
-| S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
+| S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (**decided: Q1**, no source path) | Frozen |
 
 **Order:** S7.R1 → (RG-11 decided) → S7.R2 → (RG-10 decided) → S7.D → S7.R3 → (RG-07 decided) →
 S7.R4 → (RG-08, RG-09 decided) → S7.R5 → (RG-03 decided) → S7.1 → S7.2 → S7.3 → S7.4 → S7.5 →
@@ -4601,7 +4602,8 @@ calculation and a schema change)
     stays, although nothing reads it);
   - the camera class, if S7.D adds it, never inferred from a name;
   - the decided specification source, if RG-03 adopts one, as proposals with provenance under
-    ADR-018 §6's conflict rules (the user confirms; a `verified` value is never replaced by default);
+    ADR-018 §6's conflict rules (the user confirms; a `verified` value is never replaced by default)
+    — *RG-03 decided Q1 (2026-09-29): no source, so no source path;*
   - the dialog's primary Save and `AppWords` labels; the retired "Equipment profile" title removed
     (`DESIGN_SYSTEM.md` §9.3).
 - **Out of scope:** equipment composition (ADR-011 §2); a second import path; nullable required specs
@@ -5150,7 +5152,7 @@ any implementation Task is created.
 | --- | --- | --- | --- | --- |
 | RG-01 | **DECIDED 2026-09-26 (S2.R1; ADR-017; DECISIONS E.1).** Which metadata formats are supported, with which libraries and which file-selection path, verified on which real samples? (Resolves PD-21) | TD-018, F-45; MASTER_ROADMAP 17.1–17.2; Stage 0 prompt §7 | 2 (entry) | Header-only, bounded reads; I/O in the data layer; library licences; owner samples only |
 | RG-02 | Which metadata identifies the camera, device and optics reliably; what cannot be derived; how are candidates matched to existing equipment, with provenance, confidence and conflict rules? | 08 §11; Stage 0 prompt §7 and §11 | 3 (entry) | No silent writes; unknown stays unknown; ADR-011, ADR-008 §6. **Decided 2026-09-26 (S3.D, ADR-018)** after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
-| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)**. *2026-09-28 (Stage 7 planning):* researched again as **S7.R5**, at the owner's request in the Stage 7 prompt (`prompts/STAGE_7_PLANNING.md` §3); the research adopts nothing, and adoption stays the owner's decision; it blocks only S7.6's source path. *2026-09-29:* S7.R5 done (`research/RG-03_EQUIPMENT_SPECS.md`; one owner question, §8) |
+| RG-03 | Is a sourced catalog of equipment specifications needed, and which source is acceptable (licence, provenance, offline size) under the verified-seed policy? | 08 §11 ("only ZWO"; from the device name or links); UX-22; 05 R13/P8; TASK 8.5 | 3 (informs 7) | No scraping; "reported" provenance; licence terms. **Deferred by the owner 2026-09-26 (S3.D, D2; ADR-018 §8)**. *2026-09-28 (Stage 7 planning):* researched again as **S7.R5**, at the owner's request in the Stage 7 prompt (`prompts/STAGE_7_PLANNING.md` §3); the research adopts nothing, and adoption stays the owner's decision; it blocks only S7.6's source path. *2026-09-29:* S7.R5 done (`research/RG-03_EQUIPMENT_SPECS.md`; one owner question, §8). **Decided 2026-09-29: Q1** (no source; lensfun crop factors the candidate with RG-12 in Stage 9; DECISIONS E.1, "RG-03 decided") |
 | RG-04 | **DECIDED 2026-09-27 (S4.R2; DECISIONS E.1): B, the Logbook first and the tracker optional; G2 results after the session.** *Its optional tracker is superseded (owner, 2026-09-27; E.1, "Stages 6–11 amended after Stage 5"): the tracker leaves the target product, and P8.4 retires it.* What role should Execution play (primary, optional, simplified or post-session only), and how are actuals captured without frame-by-frame reporting? | 08 §3, §19, §24; UX-25, UX-27; ADR-016; CALC-37 and CALC-38 | 4 | Keep data and event history; nothing removed before the decision; Android constraints (ADR-016) |
 | RG-05 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): Tonight plan-first with a site · night context line; Night & Moon and Weather detail screens; no new tab.** How should Home/Tonight be ordered, where should the Night, Moon and Weather drill-downs lead, and is a separate "Analytics" destination warranted? | 08 §2; UX-10, UX-11; 05 P1/P4 | 4 | PD-14 (no customisable dashboard); no score |
 | RG-06 | **DECIDED 2026-09-27 (S4.R4; DECISIONS E.1): progressive disclosure (one tap away, factual summaries); no modes, no density preference for now.** Are separate Basic/Advanced modes needed, or does progressive disclosure suffice? | 05 P6/P7 and §8 decision 1; 07 §10; Stage 0 prompt §8 | 4 | Integrity text reachable in every mode; experts keep access |

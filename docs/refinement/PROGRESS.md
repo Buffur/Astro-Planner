@@ -5,18 +5,22 @@
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-09-29 (**S7.5 done**: the site form; schema v23).
-> **Next:** the owner's RG-03 decision, then S7.6, the rig form (the last Stage 7 Task).
+> **Next:** S7.6, the rig form (the last Stage 7 Task). RG-03 decided 2026-09-29: Q1.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b, S7.4 and S7.5 done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b, S7.4 and S7.5 done; RG-03 and RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **RG-03** (the owner's decision), then **S7.6**, the rig form (below, "Next allowed action") |
+| Next Task | **S7.6**, the rig form (below, "Next allowed action") |
 | Code baseline | S7.5 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | **v23** (S7.5) |
+
+**RG-03 decided, 2026-09-29: Q1** (DECISIONS E.1): no equipment specification source; lensfun
+crop factors recorded as the candidate to revisit with RG-12 in Stage 9. S7.6 has no source path.
+Documentation only.
 
 **S7.5 done, 2026-09-29** (RG-08 = E2, RG-09 = S3/M2, UX-21): the site editor gains "Use current
 position" (GPS on the tap only; the fix fills the form until Save); elevation is optional and unknown
@@ -243,7 +247,7 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | --- | --- | --- | --- |
 | RG-01 | Metadata formats, libraries, file selection and samples (resolves PD-21) | 2 | **Decided** 2026-09-26 (ADR-017), **amended** the same day (the owner's priorities, ADR-017 §13). JPEG and HEIC samples exist (S2.8, S2.9); FITS, PNG and proprietary RAW still need samples, and are out of Stage 2 |
 | RG-02 | Metadata → equipment identity, derivability, matching, provenance and conflicts | 3 | **Decided** 2026-09-26 (S3.D; ADR-018), after S3.R1 (`research/RG-02_EQUIPMENT_IDENTITY.md`) |
-| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3. **Researched** 2026-09-29 (S7.R5, `research/RG-03_EQUIPMENT_SPECS.md`); the owner's decision is open |
+| RG-03 | Sourcing equipment specifications (catalog or none; licence; the verified-seed policy) | 3 (7) | **Deferred by the owner** 2026-09-26 (S3.D, D2): no source in Stage 3. **Researched** 2026-09-29 (S7.R5, `research/RG-03_EQUIPMENT_SPECS.md`); **decided 2026-09-29: Q1** (no source; lensfun crop factors the candidate with RG-12, Stage 9) |
 | RG-04 | Execution's role and how actuals are captured | 4 | **Decided** 2026-09-27 (S4.R2; E.1): B, the Logbook first and the tracker optional; G2 post-session results. Its optional tracker is **superseded** 2026-09-27 (the tracker leaves the target product; P8.4) |
 | RG-05 | Home/Tonight hierarchy, drill-downs and a possible Analytics destination | 4 | **Decided** 2026-09-27 (S4.R4; E.1): Tonight plan-first with a context line; detail screens; no new tab |
 | RG-06 | Basic/Advanced modes against progressive disclosure | 4 | **Decided** 2026-09-27 (S4.R4; E.1): progressive disclosure; no modes |
@@ -341,14 +345,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **RG-03 — the owner's decision** (`research/RG-03_EQUIPMENT_SPECS.md` §8; Q1, no specification
-   source, is recommended). It gates only S7.6's source path.
-2. **S7.6 — the rig form** (`POST_ROADMAP_PLAN.md`, S7.6; UX-22): the pixel size asked once, rare
+1. **S7.6 — the rig form** (`POST_ROADMAP_PLAN.md`, S7.6; UX-22): the pixel size asked once, rare
    values one tap away, the approved sources before typing. Implementation; the full gate; commit,
    then STOP. Then Stage 7's validation, in a fresh session.
 
-RG-03 (a specification source, `research/RG-03_EQUIPMENT_SPECS.md` §8) is still the owner's to
-decide; it affects only S7.6, which comes last.
+RG-03 is decided (Q1, no specification source): S7.6 has no source path.
 
 No gated Task runs before its gate's decision.
 

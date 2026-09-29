@@ -1,5 +1,8 @@
 # AstroPlan Decisions
 
+> **RG-03 decided, 2026-09-29 (Stage 7):** Q1: no equipment specification source for now; lensfun
+> crop factors recorded as the candidate to revisit with RG-12 in Stage 9 (E.1, "RG-03 decided").
+> S7.6 has no source path. Documentation only.
 > **RG-08 and RG-09 decided, 2026-09-29 (Stage 7):** E2 (elevation optional, Unknown by default), S3
 > (Bortle and SQM optional in one collapsed section; no automatic source), M2 (the map link to
 > lightpollutionmap.app) (E.1, "RG-08 and RG-09 decided"). Documentation only.
@@ -1833,6 +1836,22 @@ Stage 4 revalidation is still required.
   within the decided rules: elevation sits below the time zone; the fix from "Use current position"
   fills only the form (the transient position is not changed); a Save with an out-of-range SQM in
   the closed section opens it to show the message; no new place-name lookup was added.
+
+### RG-03 decided: equipment specification sources (Stage 7, 2026-09-29)
+
+- **Context:** S7.R5's research, `refinement/research/RG-03_EQUIPMENT_SPECS.md`, with one question
+  (§8). RG-03 had been deferred at S3.D (D2) and was researched again at the owner's request.
+- **Decided by:** the project owner, in chat: **Q1**, the recommended option.
+- **Q1 — no source:** specifications come from the user, a photo's metadata (with CALC-40's
+  estimate) and the verified example rig, as today; unknown values stay unknown; FITS remains the path
+  for astro cameras when a sample exists (S2.6). Nothing to maintain.
+- **Recorded as the candidate to revisit:** lensfun crop factors as a CALC-40 input for DSLR and
+  mirrorless files without f₃₅ (Q3a), together with RG-12 (its CC BY-SA 3.0 licence) in Stage 9, or
+  when a DSLR or mirrorless sample shows the gap in practice.
+- **Not adopted:** Q2 (more curated seeds), Q3a now, Q3b (openMVG sensor sizes), Q4 (no online
+  source exists with an API and terms).
+- **Consequences:** S7.6 has no source path; its other scope is unchanged. RG-03 stays open only as
+  the recorded candidate. Documentation only.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 
