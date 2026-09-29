@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.9 done**: S9.1–S9.9 built; the owner gates S9.10–S9.12 prepared next).
-> **Next:** the Stage 9 validation, once the owner gates are prepared (S9.10–S9.12 are documents). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.10–S9.12 prepared**: the logo, the licence and the identity await the owner).
+> **Next:** the Stage 9 validation of S9.1–S9.9; the owner's three decisions (S9.10–S9.12). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -18,6 +18,23 @@
 | Code baseline | **S9.9** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.10–S9.12 prepared, 2026-09-29** (owner gates; documentation only):
+- **S9.10** (`research/S9.10_LOGO.md`): where the icon appears; five problems with today's execution
+  (the star floats above the arc, three stroke weights, the themed icon is the colour drawing tinted,
+  the mark sits high, error red); four alternatives that keep the concept (A corrected, B the window as
+  an area, C minimal, D today's with its defects fixed), each checked against the 66 dp safe zone; a
+  dedicated themed layer; a splash proposal that never delays startup. **The owner chooses.**
+- **S9.11** (`research/S9.11_LICENCE.md`, RG-12): from the GPL FAQ, the Open Source Definition, the
+  CC BY-SA 4.0 legal code and the PolyForm texts: GPL-3.0 meets "free" but not "no monetisation" or
+  "no modification without permission", and no open-source licence can; the options (keep GPL; PolyForm
+  Noncommercial; PolyForm Strict; all rights reserved), and what follows (earlier copies stay GPL, every
+  copyright holder must agree, the catalog stays CC BY-SA 4.0, the dependencies are permissive). Not
+  legal advice. **The owner decides.**
+- **S9.12** (`research/S9.12_PROJECT_IDENTITY.md`, RD-01): the app's source and privacy-policy links
+  (`chacha12`) return 404 while the public repository is `Buffur/Astro-Planner`; recorded as **TD-088**
+  (a blocker for any store upload, not for Stage 9). Options C, B and B′. **The owner decides.**
+- **Verification:** the documentation class (V1): references resolve; `git diff --check`.
 
 **S9.9 done, 2026-09-29** (final visual consistency): the secondary screens use the text roles and
 spacing tokens only (list titles `titleSmall`, "Saved sites" a header, every numeric inset a token;
@@ -508,8 +525,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.9 — Final visual consistency on secondary screens** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
-   Task sequence"). Then the Stage 9 validation (S9.10–S9.12 wait for the owner) and the Stage 9 validation: the owner
+1. **Stage 9 validation of S9.1–S9.9** against the frozen Stage 9 acceptance and D9-1 to D9-6, in a
+   separate agent (reuse the S9.9 gate, V3). The Stage closes only when S9.10–S9.12 are decided and
+   built, or deferred by the owner (the Stage's exit).
+2. **The owner's decisions:** S9.10 (choose a logo option), S9.11 (RG-12: the licence), S9.12 (RD-01:
+   the identity; TD-088). and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,
