@@ -12,6 +12,7 @@ import '../../navigation/app_router.dart';
 import '../../shared/app_words.dart';
 import '../../shared/confirmation_patterns.dart';
 import '../../shared/delete_patterns.dart';
+import '../../shared/entry_share_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/plan_state.dart';
@@ -316,7 +317,12 @@ class _LogbookScreenState extends State<LogbookScreen> {
             icon: const Icon(Icons.share),
             tooltip: 'Share',
             onPressed: () => SharePlus.instance.share(
-              ShareParams(text: log.toShareableText()),
+              ShareParams(
+                text: EntryShareText.of(
+                  session,
+                  reconciliation: _results[session.id],
+                ),
+              ),
             ),
           ),
         ),

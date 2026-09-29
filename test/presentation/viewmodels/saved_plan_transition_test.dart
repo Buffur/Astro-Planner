@@ -256,6 +256,25 @@ void main() {
     expect((await sessions.get(saved.id))!.updatedAtUtc, entry.updatedAtUtc);
   });
 
+  test('S8.7: Copy to another night makes a new, unsaved plan on that night '
+      'from the entry; the entry stays as it was', () async {
+    final vm = await boot();
+    final saved = await savedFriday(vm);
+    afterDawn();
+    await vm.lifecycle.followNight();
+    await vm.plan.idle;
+    final entry = (await sessions.get(saved.id))!;
+    await vm.lifecycle.openSession(entry, copyTo: nov12);
+    await vm.plan.idle;
+    final copy = (await sessions.get(vm.activeSessionId!))!;
+    expect(copy.id, isNot(saved.id));
+    expect((copy.status, copy.plannedAtUtc), (SessionStatus.draft, null));
+    expect(copy.eveningDate, nov12);
+    expect(copy.blocks.length, entry.blocks.length);
+    expect(vm.plan.hasUnsavedChanges, isTrue, reason: 'W1: a copy');
+    expect((await sessions.get(saved.id))!.updatedAtUtc, entry.updatedAtUtc);
+  });
+
   test('Tonight\'s line names the entry once its night has ended, and is '
       'gone once its result is recorded', () async {
     final vm = await boot();

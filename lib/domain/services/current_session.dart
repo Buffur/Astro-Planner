@@ -222,11 +222,13 @@ class CurrentSession {
     SessionPlan Function() copy, {
     bool discard = false,
     bool asCopy = false,
+    bool unsaved = false,
   }) => _switch(
     () async => session.planEditable && !asCopy
         ? session
         : await _repository.create(copy()),
     discard: discard,
+    unsaved: unsaved,
   );
 
   /// Autosaves [plan] into the current session (a planned one returns to

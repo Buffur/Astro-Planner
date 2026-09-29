@@ -330,8 +330,16 @@ void main() {
   });
 
   group('the Logbook', () {
-    testWidgets('an ended Saved plan offers Record result', (tester) async {
+    testWidgets('an ended Saved plan offers Record result, on its row and '
+        'on the entry, with Copy to another night and no Open', (tester) async {
       await open(tester, _Kind.saved, at: _morning, route: false);
+      AppRouter.router.go(AppRouter.sessionDetail(id));
+      await settle(tester);
+      expect(find.byKey(const Key('detail.recordResult')), findsOneWidget);
+      expect(find.byKey(const Key('detail.copy')), findsOneWidget);
+      expect(find.byKey(const Key('detail.openInPlanner')), findsNothing);
+      AppRouter.router.go(AppRouter.sessions);
+      await settle(tester);
       await tap(tester, 'logbook.recordResult.$id');
       expect(find.byKey(const Key('results.review')), findsOneWidget);
     });

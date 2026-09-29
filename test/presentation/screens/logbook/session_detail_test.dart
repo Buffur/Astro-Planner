@@ -272,12 +272,13 @@ void main() {
       find.textContaining('L · 300 s: 10 of 24', findRichText: true),
       findsOneWidget,
     );
+    // S8.7: once in the result summary, once in planned against actual.
     expect(
       find.textContaining(
         'Integration: 50 min of 2 h planned',
         findRichText: true,
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.textContaining('Wind after 23:00', findRichText: true),
@@ -288,7 +289,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('detail.editResults')), findsOneWidget);
-    expect(find.text('Plan again (copy)'), findsOneWidget);
+    // S8.7 (I-6): a result offers Edit result and Copy to another night.
+    expect(find.text('Copy to another night'), findsOneWidget);
+    expect(find.byKey(const Key('detail.openInPlanner')), findsNothing);
     // S1.7 (UX-19): RA/Dec as in the target editor; typographic minus.
     expect(
       find.textContaining('05h35m16.8s, −05°23′24″', findRichText: true),
@@ -318,7 +321,8 @@ void main() {
       find.textContaining('Focal ratio: f/5.0', findRichText: true),
       findsOneWidget,
     );
-    expect(find.text('None recorded.'), findsOneWidget);
+    // S8.7: the notes and the conditions are two sections.
+    expect(find.text('None recorded.'), findsNWidgets(2));
     expect(find.textContaining('Notes: ', findRichText: true), findsNothing);
     expect(
       find.textContaining('Night span: ', findRichText: true),
@@ -343,6 +347,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('unknown'), findsWidgets);
+    // S8.7 (I-6): an old log offers Share and Export as file only.
+    expect(find.byKey(const Key('detail.copy')), findsNothing);
+    expect(find.byKey(const Key('detail.openInPlanner')), findsNothing);
+    expect(find.byKey(const Key('detail.share')), findsOneWidget);
   });
 
   testWidgets('a session without a snapshot says so, never zeros', (

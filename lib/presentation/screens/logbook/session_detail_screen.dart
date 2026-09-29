@@ -3,14 +3,19 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/session.dart';
 import '../../../domain/models/session_snapshot.dart';
 import '../../../domain/repositories/session_repository.dart';
 import '../../../domain/services/result_action.dart';
+import '../../../domain/services/saved_night_end.dart';
 import '../../../domain/services/session_reconciliation.dart';
 import '../../shared/app_words.dart';
+import '../../shared/context_line.dart';
 import '../../shared/delete_patterns.dart';
+import '../../shared/detail_scaffold.dart';
+import '../../shared/entry_share_text.dart';
 import '../../shared/plan_state.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/night_time_formatter.dart';
@@ -26,10 +31,14 @@ import '../../shared/unsaved_plan_prompt.dart';
 import '../../../core/utils/quantity_text.dart';
 import '../../../core/utils/astro_math.dart';
 
-/// One saved session (TASK 14.1): read-only, from its snapshot — history
-/// never reads live sites, targets or rigs (ADR-014 §4). A started session
-/// shows its execution-start snapshot, a planned one its plan snapshot
-/// (owner decision). Legacy logs show their stored text only.
+/// A Logbook entry (TASK 14.1; S8.7, P8.7, ADR-019 §8, §10): read-only
+/// history from its snapshots — never today's site, target or rig (ADR-014
+/// §4). In order: the identity (the name, or target · night) and its state;
+/// the result; the night, site, target and rig; planned against actual
+/// (CALC-37) per block; the notes; the conditions; then the actions its
+/// state allows (I-6), Share (D8-4: no notes, no coordinates) and Export as
+/// file (the portable manifest v2). An old log shows its stored text only.
+/// It never opens a live tracker.
 class SessionDetailScreen extends StatefulWidget {
   const SessionDetailScreen({super.key, required this.sessionId});
 
@@ -48,7 +57,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     _detail = context.read<SessionsViewModel>().detail(widget.sessionId);
   }
 
-  /// Re-reads the session after an action (for example Edit results).
+  /// Re-reads the entry after an action (a result, a name).
   void _load() {
     final sessions = context.read<SessionsViewModel>();
     setState(() {
@@ -64,9 +73,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         final data = snapshot.data;
         if (snapshot.error case final error?) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Session')),
+            appBar: AppBar(title: const Text(AppWords.logbook)),
             body: LoadFailureView(
-              action: 'load the session',
+              action: 'load the entry',
               error: error,
               onRetry: _load,
             ),
@@ -74,92 +83,132 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         }
         if (data == null) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Session')),
+            appBar: AppBar(title: const Text(AppWords.logbook)),
             body: Center(
               child: snapshot.connectionState == ConnectionState.done
-                  ? const Text('This session no longer exists.')
+                  ? const Text('This entry no longer exists.')
                   : const CircularProgressIndicator(),
             ),
           );
         }
         final s = data.session;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(s.record.targetName),
-            actions: [
-              // S8.5 (S5.8, RD-09 S1): the entry's visible Delete.
-              DeleteButton(
-                key: const Key('detail.delete'),
-                tooltip: 'Delete entry',
-                onPressed: () async {
-                  if (await deleteEntry(context, s) && context.mounted) {
-                    context.pop();
-                  }
-                },
-              ),
-            ],
-          ),
-          body: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              _Header(session: s),
-              if (!s.legacy) _NameTile(session: s, onChanged: _load),
-              if (!s.legacy) _SnapshotSections(session: s),
-              _PlanVsActual(session: s, reconciliation: data.reconciliation),
-              _Notes(session: s),
-              if (data.progress case final p?) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'This target so far',
-                  style: Theme.of(context).textTheme.titleMedium,
+        final snap = s.executionStartSnapshot ?? s.planSnapshot;
+        final site = snap?.siteName ?? s.record.locationName;
+        final night = s.eveningDate;
+        return DetailScaffold(
+          title: entryTitle(s),
+          context: [
+            if (s.name != null) targetAndNight(s),
+            ?site,
+          ].join(' · ').ifEmpty,
+          zoneRule: s.legacy || night == null
+              ? null
+              : ContextLine.zoneRule(
+                  snap?.night?.startUtc ?? s.record.sessionDate,
+                  zoneId: s.timeZoneId ?? snap?.timeZoneId,
                 ),
-                TargetProgressCard(progress: p),
-              ],
-              const SizedBox(height: 12),
-              _Actions(session: s, onBack: _load),
-            ],
-          ),
+          actions: [
+            // S8.5 (S5.8, RD-09 S1): the entry's visible Delete.
+            DeleteButton(
+              key: const Key('detail.delete'),
+              tooltip: 'Delete entry',
+              onPressed: () async {
+                if (await deleteEntry(context, s) && context.mounted) {
+                  context.pop();
+                }
+              },
+            ),
+          ],
+          summary: _Result(session: s, reconciliation: data.reconciliation),
+          sections: [
+            if (!s.legacy) _NameTile(session: s, onChanged: _load),
+            if (!s.legacy) _SnapshotSections(session: s),
+            _PlanVsActual(session: s, reconciliation: data.reconciliation),
+            _Notes(session: s),
+            _Conditions(session: s),
+            if (data.progress case final p?)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'This target so far',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  TargetProgressCard(progress: p),
+                ],
+              ),
+            _Actions(
+              session: s,
+              reconciliation: data.reconciliation,
+              onBack: _load,
+            ),
+          ],
         );
       },
     );
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.session});
+extension on String {
+  /// Null for an empty string (an optional caption).
+  String? get ifEmpty => isEmpty ? null : this;
+}
+
+/// The result first (ADR-019 §4): the state, how it was reported, planned
+/// against actual when counted, or when a result can be recorded.
+class _Result extends StatelessWidget {
+  const _Result({required this.session, required this.reconciliation});
 
   final Session session;
+  final SessionReconciliation? reconciliation;
 
   @override
   Widget build(BuildContext context) {
+    final s = session;
+    final r = reconciliation;
     final theme = Theme.of(context);
-    final evening = session.eveningDate;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
+    final end = SavedNightEnd.of(s);
+    final zone = s.timeZoneId ?? s.planSnapshot?.timeZoneId;
+    final counted =
+        s.status == SessionStatus.completed ||
+        s.status == SessionStatus.inProgress;
+    final upcoming =
+        s.isSavedPlan &&
+        context.read<SessionsViewModel>().resultAction(s) == ResultAction.none;
+    return Column(
+      key: const Key('detail.result'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            PlanStateLabel(PlanState.of(s), key: const Key('detail.status')),
+            if (s.legacy)
+              const Text(
+                '${AppWords.oldLog} — stored text only',
+                key: Key('detail.legacy'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          EntryShareText.result(s),
+          key: const Key('detail.resultText'),
+          style: theme.textTheme.titleSmall,
+        ),
+        if (counted && r != null)
+          Text(ResultsText.integration(r), key: const Key('detail.summary')),
+        if (upcoming && end != null)
           Text(
-            evening == null
-                ? NightTimeFormatter.deviceZoneCaption(
-                    session.record.sessionDate.toUtc(),
-                  )
-                : 'Night of ${NightTimeFormatter.eveningDate(evening)}',
-            style: theme.textTheme.titleMedium,
+            'A result can be recorded after the night: from '
+            '${NightTimeFormatter.eveningDate(CalendarDate.fromDateTimeFields(NightTimeFormatter.wallClock(end, zoneId: zone)))}, '
+            '${NightTimeFormatter.clockTime(context, end, zoneId: zone)}.',
+            key: const Key('detail.resultWhen'),
+            style: theme.textTheme.bodySmall,
           ),
-          PlanStateLabel(
-            PlanState.of(session),
-            key: const Key('detail.status'),
-          ),
-          if (session.legacy)
-            const Chip(
-              key: Key('detail.legacy'),
-              label: Text('Legacy log — stored text only'),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -267,9 +316,9 @@ class _SnapshotSections extends StatelessWidget {
           key: const Key('detail.budget'),
           title: 'Budget',
           rows: {
-            'Integration': dur(snap.integration),
-            'Window load': dur(snap.windowLoad),
-            'Session budget': dur(snap.sessionBudget),
+            AppWords.integration: dur(snap.integration),
+            AppWords.timeNeeded: dur(snap.windowLoad),
+            AppWords.totalTime: dur(snap.sessionBudget),
           },
         ),
         _Section(
@@ -306,7 +355,7 @@ class _PlanVsActual extends StatelessWidget {
     final r = reconciliation;
     final log = session.record;
     if (r == null) {
-      // Legacy: the stored totals only (ADR-014 §7).
+      // An old log: the stored totals only (ADR-014 §7).
       return _Section(
         key: const Key('detail.planVsActual'),
         title: 'Plan vs actual',
@@ -318,17 +367,21 @@ class _PlanVsActual extends StatelessWidget {
         },
       );
     }
-    final started = session.startedAtUtc != null;
+    // Counts exist once a result was recorded, or a run was started.
+    final counted =
+        session.status == SessionStatus.completed ||
+        session.status == SessionStatus.inProgress ||
+        session.startedAtUtc != null;
     return _Section(
       key: const Key('detail.planVsActual'),
       title: 'Plan vs actual',
       rows: {
         for (final b in r.blocks)
-          _label(b.block): started
+          _label(b.block): counted
               ? '${b.confirmed} of ${b.planned}'
                     '${b.rejected > 0 ? ' · ${b.rejected} rejected' : ''}'
               : '${b.planned} planned',
-        if (started) 'Integration': ResultsText.integrationValue(r),
+        if (counted) AppWords.integration: ResultsText.integrationValue(r),
       },
     );
   }
@@ -351,42 +404,101 @@ class _Notes extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final log = session.record;
-    final rows = {
-      if (log.environmentalNotes case final n? when n.isNotEmpty)
-        'Conditions and events': n,
-      if (log.processingNotes case final n? when n.isNotEmpty)
-        'Processing notes': n,
-      if (log.temperature case final t?)
-        'Temperature': '${QuantityText.signed(t, digits: 1)} °C',
-      if (log.humidity case final h?) 'Humidity': '$h %',
-      if (log.cloudCover case final c?) 'Cloud cover': '$c %',
-    };
     return _Section(
       key: const Key('detail.notes'),
       title: 'Notes',
-      rows: rows,
+      rows: {
+        if (log.environmentalNotes case final n? when n.isNotEmpty)
+          'Conditions and events': n,
+        if (log.processingNotes case final n? when n.isNotEmpty)
+          'Processing notes': n,
+      },
       empty: 'None recorded.',
     );
   }
 }
 
-class _Actions extends StatelessWidget {
-  const _Actions({required this.session, required this.onBack});
+class _Conditions extends StatelessWidget {
+  const _Conditions({required this.session});
 
   final Session session;
+
+  @override
+  Widget build(BuildContext context) {
+    final log = session.record;
+    return _Section(
+      key: const Key('detail.conditions'),
+      title: 'Conditions',
+      rows: {
+        if (log.temperature case final t?)
+          'Temperature': '${QuantityText.signed(t, digits: 1)} °C',
+        if (log.humidity case final h?) 'Humidity': '$h %',
+        if (log.cloudCover case final c?) 'Cloud cover': '$c %',
+      },
+      empty: 'None recorded.',
+    );
+  }
+}
+
+/// What the entry offers (I-6): a saved plan before its night ends — Open in
+/// planner; after it — Record result; with a result — Edit result; each
+/// but an old log — Copy to another night; then Share and Export as file.
+class _Actions extends StatelessWidget {
+  const _Actions({
+    required this.session,
+    required this.reconciliation,
+    required this.onBack,
+  });
+
+  final Session session;
+  final SessionReconciliation? reconciliation;
   final VoidCallback onBack;
+
+  Future<void> _open(BuildContext context, {bool copy = false}) async {
+    final s = session;
+    final plan = context.read<SessionPlanViewModel>();
+    final lifecycle = context.read<PlanLifecycleViewModel>();
+    final night = copy
+        ? await pickNight(context, initial: plan.tonightKey)
+        : null;
+    if (copy && night == null) return;
+    if (!context.mounted) return;
+    // S6.3 (U1): Save · Discard · Cancel, unless it is the plan already open.
+    final leaving = !copy && s.id == plan.activeSessionId
+        ? LeavingPlan.keep
+        : await askBeforeLeavingPlan(context);
+    if (leaving == null || !context.mounted) return;
+    final opened = await runWithFeedback(
+      context,
+      copy ? 'copy the plan' : 'open the plan',
+      () => lifecycle.openSession(
+        s,
+        discard: leaving == LeavingPlan.discard,
+        copyTo: night,
+      ),
+    );
+    if (opened && context.mounted) {
+      showDone(
+        context,
+        copy
+            ? 'Copied to ${NightTimeFormatter.eveningDate(night!)}'
+            : 'Plan opened',
+      );
+      context.push(AppRouter.session());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = session;
     const tall = Size.fromHeight(48);
+    final sessions = context.read<SessionsViewModel>();
+    final action = sessions.resultAction(s);
+    final upcoming = s.isSavedPlan && action == ResultAction.none && !s.legacy;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // S8.2 (I-6): Record result once the saved night has ended; Edit
-        // result for a result.
-        if (context.read<SessionsViewModel>().resultAction(s) case final action
-            when action != ResultAction.none)
+        if (action != ResultAction.none)
           FilledButton(
             key: Key(
               action == ResultAction.record
@@ -404,62 +516,49 @@ class _Actions extends StatelessWidget {
                   : AppWords.editResult,
             ),
           ),
-        const SizedBox(height: 8),
-        OutlinedButton(
-          key: const Key('detail.openInPlanner'),
-          onPressed: () async {
-            // A frozen session opens as a copy in a new draft (TASK 11.4).
-            // Leaving another plan's unsaved changes asks first (S6.3).
-            final plan = context.read<SessionPlanViewModel>();
-            final lifecycle = context.read<PlanLifecycleViewModel>();
-            // S6.3 (U1): Save · Discard · Cancel, unless it is the plan
-            // already open.
-            final leaving = s.id == plan.activeSessionId
-                ? LeavingPlan.keep
-                : await askBeforeLeavingPlan(context);
-            if (leaving == null || !context.mounted) return;
-            final opened = await runWithFeedback(
-              context,
-              'open the session',
-              () => lifecycle.openSession(
-                s,
-                discard: leaving == LeavingPlan.discard,
-              ),
-            );
-            if (opened && context.mounted) {
-              // S6.2: say what happened; a frozen session opens as a copy.
-              showDone(
-                context,
-                s.planEditable ? 'Plan opened' : 'Opened as a new copy',
-              );
-              context.push(AppRouter.session());
-            }
-          },
-          style: OutlinedButton.styleFrom(minimumSize: tall),
-          child: Text(s.planEditable ? 'Open in planner' : 'Plan again (copy)'),
-        ),
+        if (upcoming) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(
+            key: const Key('detail.openInPlanner'),
+            onPressed: () => _open(context),
+            style: OutlinedButton.styleFrom(minimumSize: tall),
+            child: const Text('Open in planner'),
+          ),
+        ],
+        if (!s.legacy) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(
+            key: const Key('detail.copy'),
+            onPressed: () => _open(context, copy: true),
+            style: OutlinedButton.styleFrom(minimumSize: tall),
+            child: const Text(AppWords.copyToAnotherNight),
+          ),
+        ],
         const SizedBox(height: 8),
         OutlinedButton.icon(
           key: const Key('detail.share'),
           onPressed: () => SharePlus.instance.share(
-            ShareParams(text: s.record.toShareableText()),
+            ShareParams(
+              text: EntryShareText.of(s, reconciliation: reconciliation),
+            ),
           ),
           icon: const Icon(Icons.share),
           label: const Text('Share'),
           style: OutlinedButton.styleFrom(minimumSize: tall),
         ),
-        // TASK 14.3: the portable manifest v2 file (with the event log).
-        if (context.read<SessionsViewModel>().canExport) ...[
+        // TASK 14.3; S8.7: the portable manifest v2 file with the event log,
+        // distinct from Share (the download icon, now named for what it is).
+        if (sessions.canExport) ...[
           const SizedBox(height: 8),
           OutlinedButton.icon(
             key: const Key('detail.export'),
             onPressed: () => runWithFeedback(
               context,
-              'export the session',
-              () => context.read<SessionsViewModel>().exportOne(s.id),
+              'export the entry',
+              () => sessions.exportOne(s.id),
             ),
             icon: const Icon(Icons.file_download_outlined),
-            label: const Text('Export file'),
+            label: const Text(AppWords.exportAsFile),
             style: OutlinedButton.styleFrom(minimumSize: tall),
           ),
         ],

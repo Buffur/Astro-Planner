@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S8.6 done**: an optional plan name; schema v25).
-> **Next:** S8.7 (the Logbook entry, Share and Export as file). The owner asked for the whole of Stage 8.
+> **Last updated:** 2026-09-29 (**S8.7 done**: the Logbook entry, Share and Export as file).
+> **Next:** S8.8 (per-field provenance in new snapshots). Paused at the owner's request after S8.7. The owner asked for the whole of Stage 8.
 
 ## Current state
 
@@ -14,11 +14,28 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S8.7** (below, "Next allowed action") |
-| Code baseline | **S8.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S8.8** (below, "Next allowed action") |
+| Code baseline | **S8.7** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S8.7 done, 2026-09-29** (P8.7; D8-4, I-6; 08 §24): the Logbook entry, Share and Export as file.
+- The entry is a `DetailScaffold`: the identity (name, or target · night) with the site and zone;
+  the result first (state, how it was reported, planned against actual, or when a result can be
+  recorded); the name; the night, site, target and rig from the snapshot (budget words: Integration,
+  Time needed, Total time); planned against actual per block; notes; conditions; then the actions
+  its state allows (Open in planner before the night ends; Record result after it; Edit result with
+  a result; Copy to another night for all but an old log), Share and Export as file. An old log
+  offers Share and Export only. No tracker anywhere.
+- Share (`EntryShareText`, pure; entry and list row): structured, only what the entry holds, never
+  the notes or the coordinates. The download action is the one-entry manifest v2 export, kept and
+  named Export as file. `SessionLog.toShareableText` removed with its two tests.
+- The entry's retired terms are gone (the baseline lowered).
+- **Tests:** `entry_share_text_test.dart` (3); Copy to another night (VM); the entry's actions by
+  state; two detail assertions updated deliberately (the result summary repeats the integration;
+  notes and conditions are two sections; Copy replaces ""Plan again (copy)"").
+- **Verification:** shared behaviour (the entry, the list, a ViewModel): the full gate after the
+  last code change, **PASS** (1,775 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 **S8.6 done, 2026-09-29** (08 §24; P8.6): an optional plan name.
 - Schema v25: `session_logs.name` (nullable). `SessionRepository.rename` (trimmed, up to 80
   characters, empty removes it; legacy refused; the plan, status and snapshot never change). Never
@@ -140,7 +157,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS** (S8.6): Encoding; Format (460 files, 0 changed); Analyze (no issues); 1,773 tests, 2 expected skips; 2 host E2E | **S8.6's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.6's last change; supersedes S8.1–S8.5's gates. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
+| **Full quality gate PASS** (S8.7): Encoding; Format (462 files, 0 changed); Analyze (no issues); 1,775 tests, 2 expected skips; 2 host E2E | **S8.7's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.7's last code change; supersedes S8.1–S8.6's gates. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
 | **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
 | **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
@@ -274,8 +291,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S8.7 — The Logbook entry, Share and Export as file** (`POST_ROADMAP_PLAN.md`, "Stage 8 —
-   frozen Task sequence", S8.7; DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.8, S8.9 in the frozen order and the Stage 8
+1. **S8.8 — Per-field provenance in new snapshots (TD-070's remainder)** (`POST_ROADMAP_PLAN.md`,
+   "Stage 8 — frozen Task sequence", S8.8). Ungated. Then S8.9 and the Stage 8 validation. The
+   owner paused the run after S8.7 (2026-09-29): resume only on the owner's word in the frozen order and the Stage 8
    validation: the owner asked, in chat on 2026-09-29, for the whole of Stage 8,
    so each Task follows the previous one's commit without a new prompt.
 
