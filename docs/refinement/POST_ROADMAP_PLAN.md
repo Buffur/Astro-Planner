@@ -106,6 +106,7 @@
 > **Updated 2026-09-29 (S7.3a):** calibration blocks and the dark-flat frame type are built (ADR-020 §6–§7).
 > **Updated 2026-09-29 (S7.3b):** in-camera noise reduction is built (ADR-020 §8; schema v21).
 > **Updated 2026-09-29 (S7.4):** target aliases and search are built (RG-07 = T1; schema v22, catalog version 3).
+> **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
 
 ## Contents
 
@@ -4003,7 +4004,7 @@ Stage 4):
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | **Done 2026-09-29** |
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | **Done 2026-09-29** |
-| S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | Frozen; the decided rules added below S7.5 |
+| S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | **Done 2026-09-29** |
 | S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
 
 **Order:** S7.R1 → (RG-11 decided) → S7.R2 → (RG-10 decided) → S7.D → S7.R3 → (RG-07 decided) →
@@ -4574,6 +4575,22 @@ calculation and a schema change)
   opens the link at the typed coordinates; Unknown by default; no conversion.
 - **The link (M2):** `LightPollutionMapLink` targets `https://lightpollutionmap.app/?lat=…&lng=…&zoom=…`;
   About's source line and the privacy policy's wording follow; a test pins the URL format.
+
+- **Done 2026-09-29:** schema v23 (`location_profiles.elevation` nullable, rebuilt through
+  `alterTable`, every value and the plans' site references kept); `LocationProfile.elevation`
+  `double?`, optional in the editor below the time zone, the snapshot's `elevationM` null when
+  unknown; "Use current position" in the editor (GPS on the tap only; the fix fills the form, not the
+  transient position, and is stored only by Save); the collapsed, remembered "Sky darkness
+  (optional)" section with a factual summary and "Look it up on the light-pollution map" at the
+  typed coordinates (`SiteFormInput.mapLink`); `LightPollutionMapLink` → lightpollutionmap.app, with
+  About, `docs/privacy/index.md` and `COMPLIANCE.md` in the same commit; back with changes asks
+  S5.8's Cancel · Discard · Save. The name comes from typing or the existing opt-in lookup only (no
+  new lookup). Tests: the site form (8 new: unknown elevation new and edited, GPS on tap, a GPS
+  failure, back with and without changes, Save in the prompt, the section and link, a hidden invalid
+  SQM), the link format, `SiteFormInput`, v23 migrations, the snapshot, `userEdit`. Deliberate test
+  changes: "Elevation is required" is gone (E2); the Bortle/SQM tests open the section first; About
+  names lightpollutionmap.app; the backup and unsupported-database pins (v23, v24). Full gate PASS:
+  1,702 tests, 2 expected skips; 2 host E2E.
 
 ##### S7.6 — The rig form (UX-22)
 - **Objective:** the rig form asks once for each value, keeps rare values one tap away, and uses every

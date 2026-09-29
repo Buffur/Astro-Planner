@@ -254,7 +254,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration {
@@ -561,6 +561,14 @@ class AppDatabase extends _$AppDatabase {
                 // table; the catalog seeder fills it from the asset on the
                 // next launch. No target row is touched.
                 await m.createTable(schema.targetAliases);
+              },
+              from22To23: (m, schema) async {
+                // S7.5 (RG-08 = E2): elevation becomes nullable (unknown).
+                // SQLite cannot drop NOT NULL in place: the table is rebuilt
+                // against the v23 shape, every value copied as it is (a 0
+                // stays 0). Foreign keys are still off here, so the plans'
+                // site references are kept.
+                await m.alterTable(TableMigration(schema.locationProfiles));
               },
             ),
           );

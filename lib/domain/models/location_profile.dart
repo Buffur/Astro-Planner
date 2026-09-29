@@ -13,7 +13,7 @@ class LocationProfile {
     required String name,
     required double latitude,
     required double longitude,
-    required double elevation,
+    double? elevation,
     int? bortleClass,
     String? bortleSource,
     CalendarDate? bortleDate,
@@ -33,7 +33,8 @@ class LocationProfile {
         'must be in [-180, 180]',
       );
     }
-    if (!elevation.isFinite || elevation < -500 || elevation > 9000) {
+    if (elevation != null &&
+        (!elevation.isFinite || elevation < -500 || elevation > 9000)) {
       throw ArgumentError.value(elevation, 'elevation', 'metres, -500..9000');
     }
     if (bortleClass != null && (bortleClass < 1 || bortleClass > 9)) {
@@ -84,8 +85,10 @@ class LocationProfile {
   /// Degrees, east positive.
   final double longitude;
 
-  /// Metres above mean sea level.
-  final double elevation;
+  /// Metres above mean sea level, or null when unknown (RG-08 = E2, S7.5):
+  /// never 0 or a default. No calculation reads it; the plan snapshot
+  /// records it.
+  final double? elevation;
 
   /// Bortle class 1–9, or null when unknown.
   final int? bortleClass;
@@ -115,7 +118,7 @@ class LocationProfile {
     required String name,
     required double latitude,
     required double longitude,
-    required double elevation,
+    double? elevation,
     String? timeZoneId,
     String? notes,
     int? bortleClass,

@@ -74,7 +74,11 @@ final _blocks = [
   ),
 ];
 
-SessionSnapshot _build({bool full = true, EquipmentProfile? rig}) {
+SessionSnapshot _build({
+  bool full = true,
+  EquipmentProfile? rig,
+  LocationProfile? site,
+}) {
   final prefs = PlanningPreferences();
   final opportunity = ImagingOpportunityCalculator.calculate(
     night: _night,
@@ -111,7 +115,7 @@ SessionSnapshot _build({bool full = true, EquipmentProfile? rig}) {
       targetTransitsInWindow: false,
     ),
     blocks: _blocks,
-    site: full ? _site : null,
+    site: full ? site ?? _site : null,
     target: full ? _target : null,
     rig: full ? rig ?? _rig : null,
     opportunity: full ? opportunity : null,
@@ -139,6 +143,28 @@ void main() {
     expect(back.json, a.json);
     expect(back.takenAtUtc, DateTime.utc(2026, 12, 15, 11));
     expect(back.eveningDate, CalendarDate(2026, 12, 15));
+  });
+
+  test('an unknown elevation is recorded as null, never 0 (S7.5, RG-08 = '
+      'E2); an older snapshot with a value reads it unchanged', () {
+    final unknown = LocationProfile(
+      id: 3,
+      name: 'Hill',
+      latitude: 46.05,
+      longitude: 14.51,
+      timeZoneId: 'Europe/Ljubljana',
+    );
+    final s = _build(site: unknown);
+    final site = s.json['site']! as Map;
+    expect(site.containsKey('elevationM'), isTrue);
+    expect(site['elevationM'], isNull);
+    expect(s.siteElevationM, isNull);
+
+    final older = Map<String, Object?>.from(_build().json);
+    final back = SessionSnapshot.tryRead(
+      (jsonDecode(jsonEncode(older)) as Map).cast<String, Object?>(),
+    )!;
+    expect(back.siteElevationM, 300);
   });
 
   test('context is copied with units: site, target, rig, windows, weather', () {

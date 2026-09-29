@@ -2847,9 +2847,9 @@ class $LocationProfilesTable extends LocationProfiles
   late final GeneratedColumn<double> elevation = GeneratedColumn<double>(
     'elevation',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _bortleClassMeta = const VerificationMeta(
     'bortleClass',
@@ -2995,8 +2995,6 @@ class $LocationProfilesTable extends LocationProfiles
         _elevationMeta,
         elevation.isAcceptableOrUnknown(data['elevation']!, _elevationMeta),
       );
-    } else if (isInserting) {
-      context.missing(_elevationMeta);
     }
     if (data.containsKey('bortle_class')) {
       context.handle(
@@ -3080,7 +3078,7 @@ class $LocationProfilesTable extends LocationProfiles
       elevation: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}elevation'],
-      )!,
+      ),
       bortleClass: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}bortle_class'],
@@ -3132,9 +3130,11 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
   /// Degrees, east positive.
   final double longitude;
 
-  /// Metres above mean sea level. Rows created before v12 by the old
-  /// "current location" path hold 0, which may mean "not measured".
-  final double elevation;
+  /// Metres above mean sea level, or NULL when unknown (RG-08 = E2; S7.5,
+  /// v23: nullable, every stored value kept). Rows created before v12 by
+  /// the old "current location" path hold 0, which may mean "not
+  /// measured"; no migration changes them.
+  final double? elevation;
 
   /// Bortle class 1–9, or NULL when unknown (SI-007). Nullable since v12:
   /// the old default 4 was cleared by the v11→v12 migration (owner).
@@ -3160,7 +3160,7 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     required this.name,
     required this.latitude,
     required this.longitude,
-    required this.elevation,
+    this.elevation,
     this.bortleClass,
     this.bortleSource,
     this.bortleDate,
@@ -3177,7 +3177,9 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     map['name'] = Variable<String>(name);
     map['latitude'] = Variable<double>(latitude);
     map['longitude'] = Variable<double>(longitude);
-    map['elevation'] = Variable<double>(elevation);
+    if (!nullToAbsent || elevation != null) {
+      map['elevation'] = Variable<double>(elevation);
+    }
     if (!nullToAbsent || bortleClass != null) {
       map['bortle_class'] = Variable<int>(bortleClass);
     }
@@ -3211,7 +3213,9 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       name: Value(name),
       latitude: Value(latitude),
       longitude: Value(longitude),
-      elevation: Value(elevation),
+      elevation: elevation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(elevation),
       bortleClass: bortleClass == null && nullToAbsent
           ? const Value.absent()
           : Value(bortleClass),
@@ -3247,7 +3251,7 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       name: serializer.fromJson<String>(json['name']),
       latitude: serializer.fromJson<double>(json['latitude']),
       longitude: serializer.fromJson<double>(json['longitude']),
-      elevation: serializer.fromJson<double>(json['elevation']),
+      elevation: serializer.fromJson<double?>(json['elevation']),
       bortleClass: serializer.fromJson<int?>(json['bortleClass']),
       bortleSource: serializer.fromJson<String?>(json['bortleSource']),
       bortleDate: serializer.fromJson<String?>(json['bortleDate']),
@@ -3266,7 +3270,7 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
       'name': serializer.toJson<String>(name),
       'latitude': serializer.toJson<double>(latitude),
       'longitude': serializer.toJson<double>(longitude),
-      'elevation': serializer.toJson<double>(elevation),
+      'elevation': serializer.toJson<double?>(elevation),
       'bortleClass': serializer.toJson<int?>(bortleClass),
       'bortleSource': serializer.toJson<String?>(bortleSource),
       'bortleDate': serializer.toJson<String?>(bortleDate),
@@ -3283,7 +3287,7 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     String? name,
     double? latitude,
     double? longitude,
-    double? elevation,
+    Value<double?> elevation = const Value.absent(),
     Value<int?> bortleClass = const Value.absent(),
     Value<String?> bortleSource = const Value.absent(),
     Value<String?> bortleDate = const Value.absent(),
@@ -3297,7 +3301,7 @@ class LocationProfile extends DataClass implements Insertable<LocationProfile> {
     name: name ?? this.name,
     latitude: latitude ?? this.latitude,
     longitude: longitude ?? this.longitude,
-    elevation: elevation ?? this.elevation,
+    elevation: elevation.present ? elevation.value : this.elevation,
     bortleClass: bortleClass.present ? bortleClass.value : this.bortleClass,
     bortleSource: bortleSource.present ? bortleSource.value : this.bortleSource,
     bortleDate: bortleDate.present ? bortleDate.value : this.bortleDate,
@@ -3391,7 +3395,7 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
   final Value<String> name;
   final Value<double> latitude;
   final Value<double> longitude;
-  final Value<double> elevation;
+  final Value<double?> elevation;
   final Value<int?> bortleClass;
   final Value<String?> bortleSource;
   final Value<String?> bortleDate;
@@ -3420,7 +3424,7 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     required String name,
     required double latitude,
     required double longitude,
-    required double elevation,
+    this.elevation = const Value.absent(),
     this.bortleClass = const Value.absent(),
     this.bortleSource = const Value.absent(),
     this.bortleDate = const Value.absent(),
@@ -3431,8 +3435,7 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     this.notes = const Value.absent(),
   }) : name = Value(name),
        latitude = Value(latitude),
-       longitude = Value(longitude),
-       elevation = Value(elevation);
+       longitude = Value(longitude);
   static Insertable<LocationProfile> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -3470,7 +3473,7 @@ class LocationProfilesCompanion extends UpdateCompanion<LocationProfile> {
     Value<String>? name,
     Value<double>? latitude,
     Value<double>? longitude,
-    Value<double>? elevation,
+    Value<double?>? elevation,
     Value<int?>? bortleClass,
     Value<String?>? bortleSource,
     Value<String?>? bortleDate,
@@ -9791,7 +9794,7 @@ typedef $$LocationProfilesTableCreateCompanionBuilder =
       required String name,
       required double latitude,
       required double longitude,
-      required double elevation,
+      Value<double?> elevation,
       Value<int?> bortleClass,
       Value<String?> bortleSource,
       Value<String?> bortleDate,
@@ -9807,7 +9810,7 @@ typedef $$LocationProfilesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<double> latitude,
       Value<double> longitude,
-      Value<double> elevation,
+      Value<double?> elevation,
       Value<int?> bortleClass,
       Value<String?> bortleSource,
       Value<String?> bortleDate,
@@ -10135,7 +10138,7 @@ class $$LocationProfilesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<double> latitude = const Value.absent(),
                 Value<double> longitude = const Value.absent(),
-                Value<double> elevation = const Value.absent(),
+                Value<double?> elevation = const Value.absent(),
                 Value<int?> bortleClass = const Value.absent(),
                 Value<String?> bortleSource = const Value.absent(),
                 Value<String?> bortleDate = const Value.absent(),
@@ -10165,7 +10168,7 @@ class $$LocationProfilesTableTableManager
                 required String name,
                 required double latitude,
                 required double longitude,
-                required double elevation,
+                Value<double?> elevation = const Value.absent(),
                 Value<int?> bortleClass = const Value.absent(),
                 Value<String?> bortleSource = const Value.absent(),
                 Value<String?> bortleDate = const Value.absent(),

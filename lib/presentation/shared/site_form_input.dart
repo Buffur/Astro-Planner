@@ -1,4 +1,5 @@
 import 'coordinate_input.dart';
+import 'light_pollution_map_link.dart';
 
 /// Parsing and validation for the site editor's non-coordinate fields
 /// (TASK 7.3), usable as `TextFormField` validators. Ranges match
@@ -7,10 +8,10 @@ abstract final class SiteFormInput {
   static String? validateName(String? text) =>
       (text == null || text.trim().isEmpty) ? 'Name is required' : null;
 
-  /// Metres above mean sea level, -500..9000. Required: the model has no
-  /// "unknown" elevation.
+  /// Metres above mean sea level, -500..9000; empty means unknown (RG-08 =
+  /// E2, S7.5), never 0.
   static String? validateElevation(String? text) {
-    if (text == null || text.trim().isEmpty) return 'Elevation is required';
+    if (text == null || text.trim().isEmpty) return null;
     final value = CoordinateInput.parse(text);
     if (value == null) return 'Enter metres, e.g. 295';
     if (value < -500 || value > 9000) {
@@ -26,6 +27,19 @@ abstract final class SiteFormInput {
     if (value == null) return 'Enter mag/arcsec², e.g. 21.2';
     if (value < 15 || value > 23) return 'SQM must be between 15 and 23';
     return null;
+  }
+
+  /// The light-pollution map at the typed coordinates (RG-09 = M2, S7.5),
+  /// or null until both are valid.
+  static Uri? mapLink(String latitude, String longitude) {
+    if (CoordinateInput.validateLatitude(latitude) != null ||
+        CoordinateInput.validateLongitude(longitude) != null) {
+      return null;
+    }
+    return LightPollutionMapLink.at(
+      CoordinateInput.parse(latitude)!,
+      CoordinateInput.parse(longitude)!,
+    );
   }
 
   /// The trimmed text, or null when empty.

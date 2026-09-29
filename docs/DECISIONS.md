@@ -1829,6 +1829,10 @@ Stage 4 revalidation is still required.
 - **Rejected:** E1, E1b, E3; S1, S4; M1, M3.
 - **Consequences:** S7.5 implements them with its frozen scope (the editor's "Use current position",
   the discard guard). Documentation only.
+- **Built by S7.5 (2026-09-29):** schema v23; the site editor; the link. Implementation decisions
+  within the decided rules: elevation sits below the time zone; the fix from "Use current position"
+  fills only the form (the transient position is not changed); a Save with an out-of-range SQM in
+  the closed section opens it to show the message; no new place-name lookup was added.
 
 # Part F — ADRs accepted after the Phase 0 baseline
 

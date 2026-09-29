@@ -1,6 +1,9 @@
 // Widget tests for the sites list and editor (TASK 7.3): the active site is
 // marked and switchable; deleting the active site keeps the position; the
-// editor validates, pre-fills the device zone, and saves.
+// editor validates, pre-fills the device zone, and saves. S7.5 (RG-08 = E2,
+// RG-09 = S3/M2, UX-21): elevation optional and unknown when empty; "Use
+// current position" fills the form only; Bortle and SQM in a collapsed,
+// remembered section with the map link; back with changes asks.
 
 import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -8,6 +11,7 @@ import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/location_profile.dart' as domain;
+import 'package:astroplan/domain/services/location_service.dart';
 import 'package:astroplan/domain/repositories/weather_repository.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/presentation/screens/sites/site_editor_screen.dart';
@@ -36,10 +40,14 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  late FakeLocationService gps;
+
   Future<void> build(
     WidgetTester tester, {
     List<domain.LocationProfile> sites = const [],
+    FakeLocationService? locationService,
   }) async {
+    gps = locationService ?? FakeLocationService();
     await tester.runAsync(() async {
       database = AppDatabase(NativeDatabase.memory());
       locations = DriftLocationRepository(database);
@@ -51,7 +59,7 @@ void main() {
         DriftEquipmentRepository(database),
         _NoWeather(),
         locations,
-        locationService: FakeLocationService(),
+        locationService: gps,
         reverseGeocoder: FakeReverseGeocoder(),
         deviceTimeZone: FakeDeviceTimeZone('Europe/Ljubljana'),
         clock: FixedClock(DateTime.utc(2026, 9, 23, 12)),
@@ -101,6 +109,34 @@ void main() {
         elevation: 300,
         timeZoneId: 'Europe/Ljubljana',
       );
+
+  Future<void> openSkyDarkness(WidgetTester tester) async {
+    await tester.tap(
+      find.byKey(const Key('section.${SiteEditorScreen.skyDarknessSection}')),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> save(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('Save site'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> typeSite(WidgetTester tester) async {
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Name'),
+      'Backyard',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Latitude (°)'),
+      '46.05',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Longitude (°)'),
+      '14.51',
+    );
+  }
 
   IconData? leadingIcon(WidgetTester tester, int id) {
     final tile = tester.widget<ListTile>(find.byKey(ValueKey('site-$id')));
@@ -159,7 +195,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Name is required'), findsOneWidget);
     expect(find.text('Latitude is required'), findsOneWidget);
-    expect(find.text('Elevation is required'), findsOneWidget);
+    // S7.5 (RG-08 = E2): elevation is optional; empty is unknown.
+    expect(find.text('Elevation is required'), findsNothing);
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Latitude (°)'),
@@ -257,6 +294,7 @@ void main() {
 
     await tester.tap(find.byTooltip('Edit site'));
     await tester.pumpAndSettle();
+    await openSkyDarkness(tester); // S7.5: collapsed by default
     await tester.tap(
       find.widgetWithText(DropdownButtonFormField<int?>, 'Unknown'),
     );
@@ -284,6 +322,7 @@ void main() {
   testWidgets('an out-of-range SQM is rejected', (tester) async {
     await build(tester);
     await pump(tester, at: AppRouter.siteEdit);
+    await openSkyDarkness(tester); // S7.5: collapsed by default
 
     await tester.enterText(
       find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
@@ -292,5 +331,199 @@ void main() {
     await tester.tap(find.byTooltip('Save site'));
     await tester.pumpAndSettle();
     expect(find.text('SQM must be between 15 and 23'), findsOneWidget);
+  });
+
+  group('S7.5: the site form', () {
+    testWidgets('an empty elevation is saved as unknown, never 0; a stored '
+        'one is kept', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      await typeSite(tester);
+      await save(tester);
+      final saved = vm.sites.single;
+      expect(saved.elevation, isNull);
+      expect(saved.name, 'Backyard');
+    });
+
+    testWidgets('an edited site with an unknown elevation shows it empty and '
+        'keeps it unknown', (tester) async {
+      await build(
+        tester,
+        sites: [
+          domain.LocationProfile(
+            id: 0,
+            name: 'Hill',
+            latitude: 46.1,
+            longitude: 14.6,
+            timeZoneId: 'Europe/Ljubljana',
+          ),
+        ],
+      );
+      await tester.runAsync(() => vm.selectSite(1));
+      await pump(
+        tester,
+        at: AppRouter.siteEdit,
+        extra: SiteEditorArgs(site: vm.sites.single),
+      );
+      final field = tester.widget<TextFormField>(
+        find.widgetWithText(TextFormField, 'Elevation (m)'),
+      );
+      expect(field.controller!.text, isEmpty);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Name'),
+        'Hilltop',
+      );
+      await save(tester);
+      expect(vm.sites.single.elevation, isNull);
+      expect(vm.sites.single.name, 'Hilltop');
+    });
+
+    testWidgets('"Use current position" asks only on the tap, fills the '
+        'coordinates, and stores nothing until Save', (tester) async {
+      await build(
+        tester,
+        locationService: FakeLocationService(
+          location: const DeviceLocation(latitude: 45.8123, longitude: 15.9771),
+        ),
+      );
+      await pump(tester, at: AppRouter.siteEdit);
+      expect(gps.calls, 0);
+      final before = (vm.site.latitude, vm.site.longitude);
+
+      await tester.tap(find.byKey(const Key('siteEditor.useCurrentPosition')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(gps.calls, 1);
+      expect(find.widgetWithText(TextFormField, '45.81230'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, '15.97710'), findsOneWidget);
+      expect(vm.sites, isEmpty, reason: 'nothing saved');
+      expect(
+        (vm.site.latitude, vm.site.longitude),
+        before,
+        reason: 'the fix only fills the form (trap 2)',
+      );
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Name'),
+        'Field',
+      );
+      await save(tester);
+      expect(vm.sites.single.latitude, 45.8123);
+    });
+
+    testWidgets('a GPS failure says why and changes no field', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      await tester.tap(find.byKey(const Key('siteEditor.useCurrentPosition')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsOneWidget);
+      final lat = tester.widget<TextFormField>(
+        find.widgetWithText(TextFormField, 'Latitude (°)'),
+      );
+      expect(lat.controller!.text, isEmpty);
+    });
+
+    testWidgets('back without changes leaves; with changes it asks: Cancel '
+        'stays, Discard leaves without saving', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SiteEditorScreen), findsNothing);
+
+      await pump(tester, at: AppRouter.siteEdit);
+      await typeSite(tester);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Unsaved changes'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('unsaved.cancel')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SiteEditorScreen), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Backyard'), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('unsaved.discard')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SiteEditorScreen), findsNothing);
+      expect(vm.sites, isEmpty);
+    });
+
+    testWidgets('Save in the prompt saves and leaves', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      await typeSite(tester);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('unsaved.save')));
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(vm.sites.single.name, 'Backyard');
+      expect(find.byType(SiteEditorScreen), findsNothing);
+    });
+
+    testWidgets('sky darkness: collapsed, its summary states what is '
+        'stored, remembered; the map link needs valid coordinates', (
+      tester,
+    ) async {
+      await build(
+        tester,
+        sites: [
+          domain.LocationProfile(
+            id: 0,
+            name: 'Home',
+            latitude: 46.05,
+            longitude: 14.51,
+            bortleClass: 4,
+            bortleSource: 'user',
+            timeZoneId: 'Europe/Ljubljana',
+          ),
+        ],
+      );
+      await tester.runAsync(() => vm.selectSite(1));
+      await pump(
+        tester,
+        at: AppRouter.siteEdit,
+        extra: SiteEditorArgs(site: vm.sites.single),
+      );
+      expect(find.text('Sky darkness (optional)'), findsOneWidget);
+      expect(find.text('Bortle 4'), findsOneWidget, reason: 'the summary');
+      expect(find.text('SQM (mag/arcsec²)'), findsNothing, reason: 'closed');
+
+      await openSkyDarkness(tester);
+      expect(
+        vm.disclosure.isOpen(SiteEditorScreen.skyDarknessSection),
+        isTrue,
+        reason: 'remembered like the planner sections',
+      );
+      TextButton link() => tester.widget<TextButton>(
+        find.byKey(const Key('siteEditor.mapLink')),
+      );
+      expect(link().onPressed, isNotNull);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Latitude (°)'),
+        '95',
+      );
+      await tester.pump();
+      expect(link().onPressed, isNull);
+    });
+
+    testWidgets('a new site: sky darkness Unknown; an out-of-range SQM in the '
+        'closed section opens it and shows the message', (tester) async {
+      await build(tester);
+      await pump(tester, at: AppRouter.siteEdit);
+      expect(find.text('Unknown'), findsOneWidget, reason: 'the summary');
+      await openSkyDarkness(tester);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'SQM (mag/arcsec²)'),
+        '30',
+      );
+      await openSkyDarkness(tester); // closes it again
+      await typeSite(tester);
+      await save(tester);
+      expect(find.text('SQM must be between 15 and 23'), findsOneWidget);
+      expect(vm.sites, isEmpty);
+    });
   });
 }

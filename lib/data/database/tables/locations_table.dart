@@ -11,9 +11,11 @@ class LocationProfiles extends Table {
   /// Degrees, east positive.
   RealColumn get longitude => real()();
 
-  /// Metres above mean sea level. Rows created before v12 by the old
-  /// "current location" path hold 0, which may mean "not measured".
-  RealColumn get elevation => real()();
+  /// Metres above mean sea level, or NULL when unknown (RG-08 = E2; S7.5,
+  /// v23: nullable, every stored value kept). Rows created before v12 by
+  /// the old "current location" path hold 0, which may mean "not
+  /// measured"; no migration changes them.
+  RealColumn get elevation => real().nullable()();
 
   /// Bortle class 1–9, or NULL when unknown (SI-007). Nullable since v12:
   /// the old default 4 was cleared by the v11→v12 migration (owner).

@@ -35,6 +35,28 @@ void main() {
         today: today,
       );
 
+  test('elevation unknown is null, never 0 (S7.5, RG-08 = E2); a known one is '
+      'still range-checked', () {
+    final site = LocationProfile.userEdit(
+      name: 'Field',
+      latitude: 46.2,
+      longitude: 14.1,
+      today: today,
+    );
+    expect(site.elevation, isNull);
+    expect(
+      () => LocationProfile(
+        id: 0,
+        name: 'x',
+        latitude: 0,
+        longitude: 0,
+        elevation: 9500,
+      ),
+      throwsArgumentError,
+    );
+    expect(legacy.withUserBortle(5, today).elevation, 1200);
+  });
+
   test('a new site gets id 0 and user-sourced sky values dated today', () {
     final site = edit(bortle: 4, sqm: 20.5);
     expect(site.id, 0);

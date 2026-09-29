@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v22), each with an
+// Later schema versions add their own groups (v11-v23), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -41,7 +41,9 @@ import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/models/camera_class.dart';
 import 'package:astroplan/domain/models/session.dart' show SessionResults;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
+import 'package:astroplan/domain/models/location_profile.dart' as domain;
 import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/domain/models/spec_provenance.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
@@ -126,6 +128,69 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('S7.5: v23 (elevation nullable, RG-08 = E2)', () {
+    for (final from in [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, //
+    ]) {
+      test('v$from -> v23 matches the v23 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 23);
+        await db.close();
+      });
+    }
+
+    test('v22 -> v23: every site value kept exactly (a legacy 0 stays 0), '
+        "the plans' site references kept; unknown can now be stored", () async {
+      final schema = await verifier.schemaAt(22);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO location_profiles (id, name, latitude, longitude, "
+        "elevation, bortle_class, bortle_source, bortle_date, sqm, "
+        "sqm_source, sqm_date, time_zone, notes) VALUES "
+        "(1, 'Home', 46.05, 14.51, 295.5, 4, 'user', '2026-09-01', 20.8, "
+        "'meter', '2026-08-30', 'Europe/Ljubljana', 'Gate code 12'), "
+        "(2, 'Old GPS fix', 45.0, 13.0, 0.0, NULL, NULL, NULL, NULL, NULL, "
+        "NULL, NULL, NULL);",
+      );
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, site_id, planned_at_utc_ms) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'planned', 0, '2026-12-15', "
+        "'Europe/Ljubljana', 1, 1790000000000);",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      final sites = DriftLocationRepository(db);
+      final all = await sites.getLocations();
+      final home = all.firstWhere((s) => s.id == 1);
+      expect(
+        (home.name, home.latitude, home.longitude, home.elevation),
+        ('Home', 46.05, 14.51, 295.5),
+      );
+      expect((home.bortleClass, home.bortleSource), (4, 'user'));
+      expect((home.sqm, home.sqmSource), (20.8, 'meter'));
+      expect(
+        (home.timeZoneId, home.notes),
+        ('Europe/Ljubljana', 'Gate code 12'),
+      );
+      expect(all.firstWhere((s) => s.id == 2).elevation, 0.0);
+      expect((await db.select(db.sessionLogs).getSingle()).siteId, 1);
+
+      final id = await sites.insertLocation(
+        domain.LocationProfile(
+          id: 0,
+          name: 'Unknown height',
+          latitude: 1,
+          longitude: 2,
+        ),
+      );
+      expect((await sites.getLocationById(id))!.elevation, isNull);
       await db.close();
     });
   });
@@ -589,7 +654,7 @@ void main() {
                 name: 'Home',
                 latitude: 46.05,
                 longitude: 14.51,
-                elevation: 300,
+                elevation: const Value(300),
               ),
             );
         final targetId = await db

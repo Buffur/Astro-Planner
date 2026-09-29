@@ -48,8 +48,9 @@ any internet request does.
 | **OpenStreetMap tile servers** (tile.openstreetmap.org), map images | while you look at the map to pick a position | the map tiles for the area on screen ([policy](https://operations.osmfoundation.org/policies/tiles/), [privacy](https://osmfoundation.org/wiki/Privacy_Policy)) |
 | **OpenStreetMap Nominatim** (nominatim.openstreetmap.org), place names | **only if you switch on "Look up place names" in Settings** (off by default) | the chosen position, rounded to about 1 km ([policy](https://operations.osmfoundation.org/policies/nominatim/), [privacy](https://osmfoundation.org/wiki/Privacy_Policy)) |
 
-Links you open yourself (the light-pollution map, the data sources' pages, this policy)
-open in your browser; the site you visit then receives what your browser sends.
+Links you open yourself (the light-pollution map at lightpollutionmap.app, which receives the
+site's or the typed coordinates in the link; the data sources' pages; this policy) open in your
+browser; the site you visit then receives what your browser sends.
 
 Requests identify the app by name and version (its "user agent"), as these services ask.
 They carry no account, advertising or device identifier.

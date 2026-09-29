@@ -32,7 +32,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('CC BY 4.0'), findsOneWidget);
-    expect(find.textContaining('lightpollutionmap.info'), findsOneWidget);
+    expect(find.textContaining('lightpollutionmap.app'), findsOneWidget);
     expect(find.text('Open-source licences'), findsOneWidget);
   });
 

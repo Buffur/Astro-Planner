@@ -56,7 +56,7 @@ class AboutScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Light-pollution map: lightpollutionmap.info (opened in your '
+            'Light-pollution map: lightpollutionmap.app (opened in your '
             'browser; nothing is fetched by the app).',
           ),
           const Divider(height: 32),
