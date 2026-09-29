@@ -9,11 +9,17 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/spec_confidence.dart';
 import '../../../domain/models/spec_provenance.dart';
 import '../../../domain/models/tracking_type.dart';
+import '../../shared/app_words.dart';
+import '../../shared/collapsible_section.dart';
 import '../../shared/equipment_draft.dart';
 import '../../shared/equipment_form_input.dart';
 import '../../shared/equipment_import_text.dart';
 import '../../shared/failure_feedback.dart';
 import '../../viewmodels/library_viewmodels.dart';
+
+/// The rig editor's "More (optional)" section key (S7.6); its open state
+/// lives in the dialog and is not remembered.
+const rigEditorMoreSection = 'rigEditor.more';
 
 /// The rig editor (S3.5): Add, Edit, or a draft pre-filled from a metadata
 /// import (ADR-018 §2). Every value is built by [EquipmentDraft]; this dialog
@@ -66,6 +72,18 @@ class _EquipmentEditor {
   }
 
   static final _decimal = const TextInputType.numberWithOptions(decimal: true);
+
+  /// The "More (optional)" summary: what is set, in words (S7.6).
+  static String _moreSummary(String maxExposure, String raw, String rotation) {
+    final set = [
+      if (maxExposure.trim().isNotEmpty) 'maximum ${maxExposure.trim()} s',
+      if (raw.trim().isNotEmpty) 'RAW ${raw.trim()} MB',
+      if (rotation.trim().isNotEmpty) 'rotation ${rotation.trim()}°',
+    ];
+    return set.isEmpty
+        ? 'Maximum exposure, RAW size, rotation: not set'
+        : set.join(' · ');
+  }
 
   /// ADR-011 §6: a stored focal ratio above f/32 is shown for review, never
   /// converted. The f/ field's own bounds make the user fix it on save.
@@ -145,6 +163,25 @@ class _EquipmentEditor {
       );
     }
 
+    /// Whether a value in the "More" section is invalid (S7.6): a closed
+    /// section's fields are not validated by the form, so Save opens it.
+    bool moreInvalid() =>
+        EquipmentFormInput.optional(EquipmentLimits.maxExposureS, 's')(
+              maxExposureCtrl.text,
+            ) !=
+            null ||
+        EquipmentFormInput.optional(EquipmentLimits.rawFileSizeMB, 'MB')(
+              averageRawFileSizeMBCtrl.text,
+            ) !=
+            null ||
+        EquipmentFormInput.optional(EquipmentLimits.rotationDeg, '°')(
+              rotationCtrl.text,
+            ) !=
+            null;
+    // Open when the draft pre-fills a value in it (the RAW size from a
+    // DNG), so the value and its origin show (ADR-018 §4, §7).
+    var moreOpen = form.prefilled.containsKey(EquipmentSpec.rawFileSize);
+
     /// With a diameter, the focal ratio is derived: N = f / D (ADR-011 §4).
     void deriveFocalRatio() {
       final focal = EquipmentFormInput.parse(focalCtrl.text);
@@ -173,7 +210,8 @@ class _EquipmentEditor {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(isEdit ? 'Edit Equipment' : 'Add Equipment Profile'),
+              // S7.6: the glossary words; "Equipment profile" is retired.
+              title: Text(isEdit ? AppWords.editRig : AppWords.addRig),
               // Constrain width on larger screens.
               content: SizedBox(
                 width: min(MediaQuery.of(context).size.width * 0.9, 480),
@@ -188,8 +226,8 @@ class _EquipmentEditor {
                         TextFormField(
                           controller: nameCtrl,
                           decoration: const InputDecoration(
-                            labelText: 'Profile Name',
-                            hintText: 'e.g. ZWO ASI2600MC + 400mm Refractor',
+                            labelText: 'Rig name',
+                            hintText: 'e.g. ASI2600MC + 400 mm refractor',
                           ),
                           validator: (v) =>
                               v == null || v.trim().isEmpty ? 'Required' : null,
@@ -291,42 +329,22 @@ class _EquipmentEditor {
                         ),
                         prefillNote(context, EquipmentSpec.resolution),
                         const SizedBox(height: 8),
-                        // Pixel Size W × H µm
-                        _StellariumRow(
-                          label: 'Pixel Size',
-                          unit: 'µm',
-                          fieldW: TextFormField(
-                            controller: pixelCtrl,
-                            keyboardType: _decimal,
-                            textAlign: TextAlign.center,
-                            onChanged: (_) => setDialogState(autoSensorSize),
-                            decoration: const InputDecoration(hintText: '3.76'),
-                            validator: EquipmentFormInput.required(
-                              EquipmentLimits.pixelPitchUm,
-                              'µm',
-                            ),
+                        // S7.6 (UX-22): the pixel size is asked once (square
+                        // pixels); it was two fields on one controller.
+                        TextFormField(
+                          key: const Key('equipmentEditor.pixelSize'),
+                          controller: pixelCtrl,
+                          keyboardType: _decimal,
+                          onChanged: (_) => setDialogState(autoSensorSize),
+                          decoration: const InputDecoration(
+                            labelText: 'Pixel size (µm)',
+                            hintText: '3.76',
+                            helperText: 'Square pixels: one value',
                           ),
-                          // Pixel size is square — show same value label for H
-                          fieldH: TextFormField(
-                            controller: pixelCtrl,
-                            keyboardType: _decimal,
-                            textAlign: TextAlign.center,
-                            onChanged: (_) => setDialogState(autoSensorSize),
-                            decoration: const InputDecoration(hintText: '3.76'),
-                            validator: EquipmentFormInput.required(
-                              EquipmentLimits.pixelPitchUm,
-                              'µm',
-                            ),
+                          validator: EquipmentFormInput.required(
+                            EquipmentLimits.pixelPitchUm,
+                            'µm',
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Square pixels assumed (W = H)',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface
-                                    .withAlpha(128),
-                              ),
                         ),
                         const SizedBox(height: 8),
                         // S3.V8: a saved rig's pixel size of another
@@ -507,58 +525,78 @@ class _EquipmentEditor {
                           },
                         ),
                         const SizedBox(height: 12),
-                        TextFormField(
-                          controller: maxExposureCtrl,
-                          keyboardType: _decimal,
-                          decoration: const InputDecoration(
-                            labelText: 'Maximum sub-exposure (s)',
-                            hintText: 'Optional — your mount/guiding limit',
-                          ),
-                          validator: EquipmentFormInput.optional(
-                            EquipmentLimits.maxExposureS,
-                            's',
+                        // S7.6 (UX-22): the rare values one tap away, their
+                        // meaning unchanged; the summary states what is set
+                        // (rebuilt only by these three fields' typing).
+                        ListenableBuilder(
+                          listenable: Listenable.merge([
+                            maxExposureCtrl,
+                            averageRawFileSizeMBCtrl,
+                            rotationCtrl,
+                          ]),
+                          builder: (context, _) => CollapsibleSection(
+                            sectionKey: rigEditorMoreSection,
+                            open: moreOpen,
+                            onToggle: () =>
+                                setDialogState(() => moreOpen = !moreOpen),
+                            title: 'More (optional)',
+                            summary: _moreSummary(
+                              maxExposureCtrl.text,
+                              averageRawFileSizeMBCtrl.text,
+                              rotationCtrl.text,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  controller: maxExposureCtrl,
+                                  keyboardType: _decimal,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Maximum sub-exposure (s)',
+                                    hintText:
+                                        'Optional — your mount/guiding limit',
+                                  ),
+                                  validator: EquipmentFormInput.optional(
+                                    EquipmentLimits.maxExposureS,
+                                    's',
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: averageRawFileSizeMBCtrl,
+                                  onChanged: (_) => setDialogState(() {}),
+                                  keyboardType: _decimal,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Average RAW File Size (MB)',
+                                    hintText: 'e.g. 50.0',
+                                  ),
+                                  validator: EquipmentFormInput.optional(
+                                    EquipmentLimits.rawFileSizeMB,
+                                    'MB',
+                                  ),
+                                ),
+                                prefillNote(context, EquipmentSpec.rawFileSize),
+                                const SizedBox(height: 12),
+                                TextFormField(
+                                  controller: rotationCtrl,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                        signed: true,
+                                      ),
+                                  decoration: const InputDecoration(
+                                    labelText: 'Rotation (°)',
+                                    hintText: 'Optional',
+                                  ),
+                                  validator: EquipmentFormInput.optional(
+                                    EquipmentLimits.rotationDeg,
+                                    '°',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: averageRawFileSizeMBCtrl,
-                                onChanged: (_) => setDialogState(() {}),
-                                keyboardType: _decimal,
-                                decoration: const InputDecoration(
-                                  labelText: 'Average RAW File Size (MB)',
-                                  hintText: 'e.g. 50.0',
-                                ),
-                                validator: EquipmentFormInput.optional(
-                                  EquipmentLimits.rawFileSizeMB,
-                                  'MB',
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextFormField(
-                                controller: rotationCtrl,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                      signed: true,
-                                    ),
-                                decoration: const InputDecoration(
-                                  labelText: 'Rotation (°)',
-                                  hintText: 'Optional',
-                                ),
-                                validator: EquipmentFormInput.optional(
-                                  EquipmentLimits.rotationDeg,
-                                  '°',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        prefillNote(context, EquipmentSpec.rawFileSize),
                       ],
                     ),
                   ),
@@ -569,8 +607,14 @@ class _EquipmentEditor {
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
-                ElevatedButton(
+                // S7.6 (DESIGN_SYSTEM §9): Save is the primary button.
+                FilledButton(
                   onPressed: () async {
+                    if (!moreOpen && moreInvalid()) {
+                      setDialogState(() => moreOpen = true);
+                      await WidgetsBinding.instance.endOfFrame;
+                      if (!context.mounted) return;
+                    }
                     if (!formKey.currentState!.validate()) return;
                     final name = nameCtrl.text.trim();
                     if (name.isEmpty) return;

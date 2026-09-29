@@ -122,6 +122,15 @@ Future<_App> _start(WidgetTester t) async {
   return _App(repo, router);
 }
 
+/// Opens the rig editor's "More (optional)" section (S7.6).
+Future<void> _openMore(WidgetTester t) async {
+  final header = find.byKey(const Key('section.rigEditor.more'));
+  await t.ensureVisible(header);
+  await _settle(t);
+  await t.tap(header);
+  await _settle(t);
+}
+
 /// Edits the rig through the Equipment screen's own editor.
 Future<void> _editElsewhere(
   WidgetTester t,
@@ -133,6 +142,10 @@ Future<void> _editElsewhere(
   await _settle(t);
   await t.tap(find.byTooltip('Edit'));
   await _settle(t);
+  // S7.6: the RAW size is one tap away, in "More (optional)".
+  if (find.widgetWithText(TextFormField, from).evaluate().isEmpty) {
+    await _openMore(t);
+  }
   await t.enterText(find.widgetWithText(TextFormField, from).first, to);
   await t.pump();
   await t.tap(find.text('Save Changes'));
@@ -150,6 +163,7 @@ void main() {
     await _settle(t);
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
+    await _openMore(t); // S7.6: the rig's own RAW size, one tap away
     expect(find.widgetWithText(TextFormField, '45'), findsOneWidget);
     await t.tap(find.text('Save Changes'));
     await _settle(t);
@@ -232,7 +246,7 @@ void main() {
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
 
-    expect(find.text('Edit Equipment'), findsNothing);
+    expect(find.text('Edit rig'), findsNothing);
     expect(find.text('No saved rig has this camera.'), findsOneWidget);
     expect(find.byKey(const Key('import.open.1')), findsNothing);
     expect(await t.runAsync(() => app.repo.getAllEquipment()), isEmpty);

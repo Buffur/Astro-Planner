@@ -9,6 +9,7 @@ abstract final class AppWords {
   static const rig = 'Rig';
   static const rigs = 'Rigs';
   static const addRig = 'Add rig';
+  static const editRig = 'Edit rig';
   static const chooseRig = 'Choose a rig';
 
   // What the user makes and saves in the planner.

@@ -119,7 +119,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('import.new')));
     await tester.pumpAndSettle();
-    expect(find.text('Add Equipment Profile'), findsOneWidget);
+    expect(find.text('Add rig'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, '6.57'), findsOneWidget);
     await _save(tester);
 
@@ -152,7 +152,7 @@ void main() {
 
     await tester.tap(find.byKey(const Key('import.open.1')));
     await tester.pumpAndSettle();
-    expect(find.text('Edit Equipment'), findsOneWidget);
+    expect(find.text('Edit rig'), findsOneWidget);
     await _save(tester, edit: true);
 
     final saved = s.repo.updated.single;

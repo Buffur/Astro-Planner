@@ -22,6 +22,8 @@ class CollapsibleSection extends StatelessWidget {
     required this.child,
     this.summary,
     this.initiallyOpen = false,
+    this.open,
+    this.onToggle,
   });
 
   /// Stable and unique, e.g. `planner.budgetDetails`; it names the stored
@@ -34,13 +36,21 @@ class CollapsibleSection extends StatelessWidget {
   /// The state before the user has opened or closed it.
   final bool initiallyOpen;
 
+  /// Controlled use (S7.6): the caller holds the state, e.g. a dialog whose
+  /// section need not be remembered. With both set, the section reads no
+  /// [DisclosureViewModel] and [initiallyOpen] is unused.
+  final bool? open;
+  final VoidCallback? onToggle;
+
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<DisclosureViewModel>();
-    final open = vm.isOpen(sectionKey, initiallyOpen: initiallyOpen);
+    final controlled = this.open != null && onToggle != null;
+    final vm = controlled ? null : context.watch<DisclosureViewModel>();
+    final open =
+        this.open ?? vm!.isOpen(sectionKey, initiallyOpen: initiallyOpen);
     final p = AppPalette.of(context);
     final text = Theme.of(context).textTheme;
-    void toggle() => vm.setOpen(sectionKey, !open);
+    void toggle() => controlled ? onToggle!() : vm!.setOpen(sectionKey, !open);
     final resize = AppMotion.duration(context, AppMotion.medium);
     final Widget body = open
         ? Padding(

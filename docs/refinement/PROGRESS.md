@@ -4,19 +4,25 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.5 done**: the site form; schema v23).
-> **Next:** S7.6, the rig form (the last Stage 7 Task). RG-03 decided 2026-09-29: Q1.
+> **Last updated:** 2026-09-29 (**S7.6 done**: the rig form; every Stage 7 Task done).
+> **Next:** Stage 7 validation, in a fresh session (`prompts/INDEPENDENT_STAGE_VALIDATION.md`).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b, S7.4 and S7.5 done; RG-03 and RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b, S7.4, S7.5 and S7.6 done — every Task; RG-03 and RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.6**, the rig form (below, "Next allowed action") |
-| Code baseline | S7.5 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **Stage 7 validation** (below, "Next allowed action") |
+| Code baseline | S7.6 (this commit). Not pushed (S1.14, RD-17) |
 | Schema | **v23** (S7.5) |
+
+**S7.6 done, 2026-09-29** (UX-22; RG-03 = Q1): the rig form asks the pixel size once and keeps the
+maximum exposure, the RAW size and the rotation one tap away in "More (optional)" (open when an import
+pre-fills the RAW size); "Add rig"/"Edit rig", Save primary; nothing stored lost or reinterpreted.
+Verification: shared behaviour (`CollapsibleSection` gains a controlled use; the editor several
+screens open): the full gate after the last code change, PASS (below).
 
 **RG-03 decided, 2026-09-29: Q1** (DECISIONS E.1): no equipment specification source; lensfun
 crop factors recorded as the candidate to revisit with RG-12 in Stage 9. S7.6 has no source path.
@@ -215,7 +221,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (460 files, 0 changed); Analyze (no issues); 1,702 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.5's final inputs (the S7.5 commit) | Valid while `git diff --stat <S7.5 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.4's gate (`037f687`) |
+| **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,710 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.6's final inputs (the S7.6 commit) | Valid while `git diff --stat <S7.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.5's gate (`3d54a4c`) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -345,9 +351,10 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.6 — the rig form** (`POST_ROADMAP_PLAN.md`, S7.6; UX-22): the pixel size asked once, rare
-   values one tap away, the approved sources before typing. Implementation; the full gate; commit,
-   then STOP. Then Stage 7's validation, in a fresh session.
+1. **Stage 7 validation** — independent, in a fresh session (V8), by
+   `prompts/INDEPENDENT_STAGE_VALIDATION.md`, against the frozen surface in `POST_ROADMAP_PLAN.md`
+   ("Stage 7 validation"): S7.1–S7.6's criteria as completed by S7.D and the gates, the owner's
+   decisions (RG-03, RG-07 to RG-11, RD-08), the invariants. Validation only; no fixes.
 
 RG-03 is decided (Q1, no specification source): S7.6 has no source path.
 

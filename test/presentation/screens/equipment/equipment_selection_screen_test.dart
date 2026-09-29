@@ -58,6 +58,15 @@ class MockSessionPlanViewModel extends ChangeNotifier
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Opens the rig editor's "More (optional)" section (S7.6).
+Future<void> openMore(WidgetTester tester) async {
+  final header = find.byKey(const Key('section.rigEditor.more'));
+  await tester.ensureVisible(header);
+  await tester.pumpAndSettle();
+  await tester.tap(header);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   Widget createTestWidget(
     EquipmentRepository repo,
@@ -104,7 +113,7 @@ void main() {
 
     // Enter valid name
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Profile Name'),
+      find.widgetWithText(TextFormField, 'Rig name'),
       'Test Profile',
     );
 
@@ -129,7 +138,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Profile Name'),
+      find.widgetWithText(TextFormField, 'Rig name'),
       'Test Profile',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '6248'), '0');
@@ -154,15 +163,15 @@ void main() {
 
     // We must enter all required fields because they now validate
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Profile Name'),
+      find.widgetWithText(TextFormField, 'Rig name'),
       'Valid Rig',
     );
 
     // Find inputs by hint text to target specific Stellarium rows
     final resW = find.widgetWithText(TextFormField, '6248');
     final resH = find.widgetWithText(TextFormField, '4176');
-    final pixelW = find.widgetWithText(TextFormField, '3.76').first;
-    final pixelH = find.widgetWithText(TextFormField, '3.76').last;
+    // S7.6 (UX-22): the pixel size is one field.
+    final pixel = find.widgetWithText(TextFormField, 'Pixel size (µm)');
     final sensorW = find.widgetWithText(TextFormField, '23.50');
     final sensorH = find.widgetWithText(TextFormField, '15.70');
     final focal = find.widgetWithText(
@@ -174,8 +183,7 @@ void main() {
 
     await tester.enterText(resW, '6000');
     await tester.enterText(resH, '4000');
-    await tester.enterText(pixelW, '3.76');
-    await tester.enterText(pixelH, '3.76');
+    await tester.enterText(pixel, '3.76');
     await tester.enterText(sensorW, '23.5');
     await tester.enterText(sensorH, '15.7');
     await tester.enterText(focal, '400');
@@ -225,8 +233,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.edit_outlined));
       await tester.pumpAndSettle();
 
-      // The "Pixel Size" row's unit label, and the "Rotation (°)" field.
-      expect(find.text('µm'), findsOneWidget);
+      // The pixel size's label (S7.6: one field), and the "Rotation (°)"
+      // field, one tap away in "More (optional)".
+      expect(find.text('Pixel size (µm)'), findsOneWidget);
+      await openMore(tester);
       expect(find.text('Rotation (°)'), findsOneWidget);
     },
   );
@@ -240,13 +250,13 @@ void main() {
 
   Future<void> fillSensor(WidgetTester tester) async {
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Profile Name'),
+      find.widgetWithText(TextFormField, 'Rig name'),
       'Refractor',
     );
     await tester.enterText(find.widgetWithText(TextFormField, '6248'), '6248');
     await tester.enterText(find.widgetWithText(TextFormField, '4176'), '4176');
     await tester.enterText(
-      find.widgetWithText(TextFormField, '3.76').first,
+      find.widgetWithText(TextFormField, 'Pixel size (µm)'),
       '3.76',
     );
   }
@@ -300,6 +310,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Guided').last);
     await tester.pumpAndSettle();
+    await openMore(tester); // S7.6: one tap away
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Maximum sub-exposure (s)'),
       '300',
@@ -390,9 +401,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Add rig'));
     await tester.pumpAndSettle();
+    await openMore(tester); // S7.6: the rare values, one tap away
     for (final label in [
       'px',
-      'µm',
+      'Pixel size (µm)',
       'mm',
       'Effective Focal Length (mm)',
       'Focal ratio (f/)',

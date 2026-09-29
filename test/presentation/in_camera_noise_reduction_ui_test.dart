@@ -148,7 +148,7 @@ void main() {
       expect(tester.widget<SwitchListTile>(find.byKey(toggle)).value, isTrue);
       await chooseClass(tester, 'Astro camera (mono)');
       expect(find.byKey(toggle), findsNothing);
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Save Changes'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save Changes'));
       await tester.pumpAndSettle();
       final saved = repo.updated.single;
       expect(saved.cameraClass, CameraClass.astroMono);

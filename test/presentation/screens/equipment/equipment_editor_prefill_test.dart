@@ -68,7 +68,7 @@ void main() {
   testWidgets('pre-filled values show their origin; the diameter, tracking '
       'and limits are left to the user', (tester) async {
     await _open(tester, EquipmentDraft.fromCandidate(phoneCandidate()));
-    expect(find.text('Add Equipment Profile'), findsOneWidget);
+    expect(find.text('Add rig'), findsOneWidget);
     expect(_note(tester, EquipmentSpec.focalLength), 'From the file (JPEG)');
     expect(_note(tester, EquipmentSpec.resolution), 'From the file (JPEG)');
     expect(
@@ -112,7 +112,7 @@ void main() {
     );
     expect(p.metadataModel, 'TestMake TestPhone');
     expect(p.apertureDiameterMm, isNull);
-    expect(find.text('Add Equipment Profile'), findsNothing);
+    expect(find.text('Add rig'), findsNothing);
   });
 
   testWidgets('editing the pixel size makes it (and the sensor size derived '

@@ -29,8 +29,6 @@ const retiredTerms = [
 /// What is left, per file and term: `path|term` → count. Remove an entry
 /// (or lower its count) when its screen stops using the term; never add one.
 const baseline = {
-  'lib/presentation/screens/equipment/equipment_editor.dart|Equipment profile':
-      1,
   'lib/presentation/screens/equipment/equipment_selection_screen.dart|Equipment profile':
       1,
   'lib/presentation/screens/logbook/logbook_screen.dart|Legacy': 2,

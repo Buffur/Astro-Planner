@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S7.6, 2026-09-29:** `CollapsibleSection` gains a controlled use (`open` + `onToggle`): the caller holds the state and no `DisclosureViewModel` is read (the rig editor's "More (optional)", not remembered). The rig editor's "Equipment profile" title is gone (§9.3), with `AppWords.addRig`/`editRig` and Save as the primary (`FilledButton`). The site editor (S7.5) uses the remembered form for "Sky darkness (optional)".
+
 > **S6.16, 2026-09-28:** §3 records the page title's headline role (Tonight); §7a the status block's key numbers and the planner's status edge, the framed context line, the √N graph's labels, and Undo for one-tap block changes; §9.1's Tonight and planner rows note the core screens' finish.
 
 > **S6.13, 2026-09-28:** §9's Tonight and site-prompt rows are done; "Draft" left the baseline.
@@ -571,7 +573,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | The result form and the live tracker (`results_screen.dart`, `execution_screen.dart`) | `confirmDestructive` for Abandon; `showDone` after Save result; `PlanStateLabel` | P8.2, P8.4 | — |
 | The Logbook and an entry (`logbook_screen.dart`, `session_detail_screen.dart`) | `PlanStateLabel` instead of `sessionStatusLabel`; `SwipeToDelete` + `DeleteButton` + `confirmDestructive` instead of the swipe-only `Dismissible`; `AppWords` (Logbook, Export as file, Old log, the budget names); `DetailScaffold` where an entry fits it | P8.5 | Legacy (×3), Draft, Window load, Session budget |
 | The Library lists (`equipment_selection_screen.dart`, `target_selection_screen.dart`, `sites_screen.dart`) | `SwipeToDelete` + `DeleteButton` + `confirmDestructive` (one wording instead of four); the button hierarchy; `AppWords` (Rig, Add rig) | P9.1 | Equipment profile (the empty rig list) |
-| The rig editor and the other editors (`equipment_editor.dart`, site and target forms) | The field look is already themed (§6.3); `AppWords` titles and labels; the dialog's Save as the primary button | P9.2 (with Stage 7 when it reworks the forms) | Equipment profile (the editor's title) |
+| The rig editor and the other editors (`equipment_editor.dart`, site and target forms) | The field look is already themed (§6.3); `AppWords` titles and labels; the dialog's Save as the primary button | P9.2 (with Stage 7 when it reworks the forms) (**rig editor: S7.6 done**: "Add rig"/"Edit rig", "Rig name", `FilledButton` Save, the pixel size once, "More (optional)"; **site editor: S7.5**: "Sky darkness (optional)") | Equipment profile (the editor's title; **removed by S7.6**) |
 | Settings and About (`settings_screen.dart`, `backup_section.dart`, `about_screen.dart`) | `confirmDestructive` for Restore; text roles; `CollapsibleSection` where RG-13 keeps advanced settings | Stage 9 (Settings, after RG-13) and P9.2 | — |
 | Messages with an action (`location_feedback.dart`, `start_session.dart`; TD-073) | A decision per message: keep until dismissed, or `persist: false` | P6.6 (the site prompt: **S6.13, kept until dismissed, with a close button**), P8.4 (Track live replaces Start) | — |
 | Shared rows (`info_row.dart`, `planner_summary_card.dart`) | Text roles instead of `colorScheme.primary`/`secondary` for values and labels | With the screens that show them (P6.3, P6.4) | — |
@@ -605,7 +607,7 @@ item was dropped. Where the tables below say P6.x, read the S-Task.
 | `logbook_screen.dart`: Legacy (2), Draft | P8.5 |
 | `session_detail_screen.dart`: Legacy, Window load, Session budget | P8.5 |
 | `equipment_selection_screen.dart`: Equipment profile | P9.1 |
-| `equipment_editor.dart`: Equipment profile | P9.2 (or Stage 7 if it reworks the rig form first) |
+| `equipment_editor.dart`: Equipment profile | P9.2 (or Stage 7 if it reworks the rig form first) (**removed by S7.6**) |
 
 After P9.2 the baseline is empty (S5.3; ADR-019 §10).
 

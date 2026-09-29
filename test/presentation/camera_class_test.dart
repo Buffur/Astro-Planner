@@ -265,7 +265,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull, reason: 'no overflow');
 
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Save Changes'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Save Changes'));
     await tester.pumpAndSettle();
     expect(repo.updated.single.cameraClass, CameraClass.dslrMirrorless);
   });

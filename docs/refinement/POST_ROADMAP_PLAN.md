@@ -108,6 +108,7 @@
 > **Updated 2026-09-29 (S7.4):** target aliases and search are built (RG-07 = T1; schema v22, catalog version 3).
 > **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
+> **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
 
 ## Contents
 
@@ -4006,7 +4007,7 @@ Stage 4):
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | **Done 2026-09-29** |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | **Done 2026-09-29** |
-| S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (**decided: Q1**, no source path) | Frozen |
+| S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (**decided: Q1**, no source path) | **Done 2026-09-29** |
 
 **Order:** S7.R1 → (RG-11 decided) → S7.R2 → (RG-10 decided) → S7.D → S7.R3 → (RG-07 decided) →
 S7.R4 → (RG-08, RG-09 decided) → S7.R5 → (RG-03 decided) → S7.1 → S7.2 → S7.3 → S7.4 → S7.5 →
@@ -4615,6 +4616,18 @@ calculation and a schema change)
   - `equipment_editor_fit_test.dart` and the sweep at 200 % text;
   - no recomputation per keystroke beyond today's;
   - the full gate.
+
+- **Done 2026-09-29:** the pixel size is one field; the maximum exposure, the RAW size and the
+  rotation sit in "More (optional)" (a `CollapsibleSection` in a new controlled use: the dialog holds
+  the state, not remembered; open when the draft pre-fills the RAW size, so its origin shows, ADR-018
+  §4/§7; a Save with an invalid value there opens it); its summary is rebuilt only by those three
+  fields; "Add rig"/"Edit rig", "Rig name", Save as `FilledButton`; the retired-terms baseline loses
+  the editor's entry. The camera class stays the user's choice (S7.2a); no source path (RG-03 = Q1).
+  `EquipmentDraft` unchanged; the example rig's values and provenance unchanged (its test passes).
+  Tests: `rig_form_test.dart` (8). Deliberate test changes: the titles, "Rig name", one pixel field
+  and "More" opened first (`equipment_selection_screen_test`, the editor prefill and metadata review
+  tests), `FilledButton` Save finders, the retired-terms baseline. Full gate PASS: 1,710 tests,
+  2 expected skips; 2 host E2E.
 
 ##### Stage 7 validation
 A fresh-session, independent validation (V8), by `prompts/INDEPENDENT_STAGE_VALIDATION.md`. **Its
