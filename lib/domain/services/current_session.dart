@@ -150,6 +150,22 @@ class CurrentSession {
     _session = await _repository.revertToSaved(s.id);
   });
 
+  /// Settles the Saved · changed plan [id] (S8.1–S8.2; I-3), in the autosave
+  /// chain: it goes back to what was saved and its working edits move to a
+  /// never-saved copy. When [id] is the current session, the copy becomes
+  /// current and counts as unsaved (it holds the user's edits). Returns
+  /// whether anything was settled.
+  Future<bool> settle(int id) => _inChain(() async {
+    final copy = await _repository.settleSavedPlan(id);
+    if (copy == null) return false;
+    if (_session?.id == id) {
+      _session = copy;
+      _edited = true;
+      await _mark(copy.id);
+    }
+    return true;
+  });
+
   /// Runs an operation after which the plan counts as unedited; if it
   /// fails, the changes still count as unsaved (S1.6).
   Future<T> _replacing<T>(Future<T> Function() run) async {

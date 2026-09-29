@@ -127,13 +127,15 @@ class AppViewModels {
     targetList = TargetsViewModel(targets);
     sessionList = sessions == null
         ? null
-        : SessionsViewModel(sessions, exporter: exporter);
+        : SessionsViewModel(sessions, exporter: exporter, clock: clock);
     resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
     this.backup = backup == null ? null : BackupViewModel(backup);
     execution = sessions == null
         ? null
         : ExecutionViewModel(sessions, clock, display, screenWake);
-    results = sessions == null ? null : ResultsViewModel(sessions);
+    results = sessions == null
+        ? null
+        : ResultsViewModel(sessions, clock, settle: lifecycle.settle);
     theme = ThemeViewModel(display);
     disclosure = DisclosureViewModel(display);
     metadataImport = captureFiles == null

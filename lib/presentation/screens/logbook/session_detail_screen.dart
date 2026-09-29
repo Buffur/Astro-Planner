@@ -6,7 +6,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/session.dart';
 import '../../../domain/models/session_snapshot.dart';
+import '../../../domain/services/result_action.dart';
 import '../../../domain/services/session_reconciliation.dart';
+import '../../shared/app_words.dart';
 import '../../navigation/app_router.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/opportunity_text.dart';
@@ -370,15 +372,26 @@ class _Actions extends StatelessWidget {
             style: FilledButton.styleFrom(minimumSize: tall),
             child: const Text('Open tracker'),
           ),
-        if (s.status == SessionStatus.completed && !s.legacy)
+        // S8.2 (I-6): Record result once the saved night has ended; Edit
+        // result for a result.
+        if (context.read<SessionsViewModel>().resultAction(s) case final action
+            when action != ResultAction.none)
           FilledButton(
-            key: const Key('detail.editResults'),
+            key: Key(
+              action == ResultAction.record
+                  ? 'detail.recordResult'
+                  : 'detail.editResults',
+            ),
             onPressed: () async {
               await context.push(AppRouter.results(s.id));
               onBack();
             },
             style: FilledButton.styleFrom(minimumSize: tall),
-            child: const Text('Edit results'),
+            child: Text(
+              action == ResultAction.record
+                  ? AppWords.recordResult
+                  : AppWords.editResult,
+            ),
           ),
         const SizedBox(height: 8),
         OutlinedButton(

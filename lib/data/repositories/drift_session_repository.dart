@@ -355,9 +355,17 @@ class DriftSessionRepository implements SessionRepository {
     final notDone = report is NotDone;
     switch (s.status) {
       case SessionStatus.draft:
-        throw SessionStateError(
-          'Session $id is not a saved plan; a changed one is settled first.',
-        );
+        // I-4: a changed saved plan whose snapshot cannot be read cannot be
+        // settled; its night over, it can still be recorded as not done.
+        final unreadable = s.isSavedChanged && s.planSnapshot == null;
+        if (!unreadable || !notDone) {
+          throw SessionStateError(
+            'Session $id is not a saved plan; a changed one is settled first.',
+          );
+        }
+        if (!SavedNightEnd.hasEnded(s, _clock.nowUtc())) {
+          throw NightNotEnded('The night of session $id has not ended.');
+        }
       case SessionStatus.planned:
         if (!SavedNightEnd.hasEnded(s, _clock.nowUtc())) {
           throw NightNotEnded('The night of session $id has not ended.');

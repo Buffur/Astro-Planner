@@ -179,6 +179,13 @@ class PlanLifecycleViewModel {
     });
   }
 
+  /// Settles the Saved · changed entry [id] before its result is recorded
+  /// (S8.2; I-3): the entry goes back to what was saved; when it is the
+  /// planner's plan, the planner continues on the copy holding its edits.
+  Future<void> settle(int id) async {
+    if (await _current?.settle(id) ?? false) _plan.markChanged();
+  }
+
   /// A new draft for tonight (RD-04, S6.8): it keeps the site and the rig,
   /// has no target, so the status asks for one, and starts with an empty
   /// capture plan and the offer of the example. It has no tracking override

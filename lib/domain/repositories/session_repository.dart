@@ -115,7 +115,8 @@ abstract class SessionRepository {
   ///
   /// The snapshot never changes, and the result totals come from the replay.
   /// Refused, with nothing written: a legacy row, a draft (a Saved · changed
-  /// plan is settled first, [settleSavedPlan]), a night that has not ended
+  /// plan is settled first, [settleSavedPlan]; one whose snapshot cannot be
+  /// read takes only Not done, S4-DEF-06), a night that has not ended
   /// ([NightNotEnded]), completed ↔ Not done, and an [expectedUpdatedAtUtc]
   /// other than the stored one ([StaleResultForm]).
   Future<Session> recordResult(

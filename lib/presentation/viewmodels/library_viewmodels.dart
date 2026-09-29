@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/equipment_profile.dart';
@@ -7,6 +8,7 @@ import '../../domain/models/session.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/target_repository.dart';
+import '../../domain/services/result_action.dart';
 import '../../domain/services/session_exporter.dart';
 import '../../domain/services/session_reconciliation.dart';
 import '../../domain/services/target_progress.dart';
@@ -112,9 +114,15 @@ typedef SessionDetail = ({
 /// logbook lists — every non-draft session, a draft saved before
 /// ("unsaved changes"), and the legacy logs (owner decisions).
 class SessionsViewModel extends ChangeNotifier {
-  SessionsViewModel(this._repository, {this._exporter});
+  SessionsViewModel(this._repository, {this._exporter, Clock? clock})
+    : _clock = clock ?? const SystemClock();
 
   final SessionRepository _repository;
+  final Clock _clock;
+
+  /// What [s] offers for its result now (S8.2): Record result, Edit result
+  /// or nothing.
+  ResultAction resultAction(Session s) => ResultAction.of(s, _clock.nowUtc());
 
   /// Null in tests that do not export.
   final SessionExporter? _exporter;

@@ -4900,7 +4900,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 | Task | Title | From | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
 | S8.1 | Results without a run: domain and data | P8.1 | M–L | — | **Done 2026-09-29** |
-| S8.2 | The result form | P8.2 | M | S8.1 | Frozen |
+| S8.2 | The result form | P8.2 | M | S8.1 | **Done 2026-09-29** |
 | S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | Frozen |
 | S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | Frozen |
 | S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | Frozen |
@@ -5487,7 +5487,7 @@ provisional in the same way.*
 | UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import); **2026-09-28:** the duplicate pixel field and the unused rotation confirmed → **S7.6** |
 | UX-23 typing | Documented | Stage 7; **2026-09-28:** fewer typed fields only through decided inheritance and proposals (S7.2, S7.3) |
 | UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
-| UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2 |
+| UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2; **resolved by S8.2 (2026-09-29)**: typed counts per light block, no ±1 |
 | UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4 |
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack; **2026-09-27:** the tracker retires (P8.4), and Stage 11's TalkBack covers the new flows |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |

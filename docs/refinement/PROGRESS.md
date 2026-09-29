@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S8.1 done**: results without a run, domain and data; schema v24).
-> **Next:** S8.2 (the result form). The owner asked for the whole of Stage 8.
+> **Last updated:** 2026-09-29 (**S8.2 done**: the result form "How did it go?").
+> **Next:** S8.3 (the saved-plan transition and Tonight's line). The owner asked for the whole of Stage 8.
 
 ## Current state
 
@@ -14,11 +14,26 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S8.2** (below, "Next allowed action") |
-| Code baseline | **S8.1** (this commit). Pushed only when the environment's GitHub access allows (the owner asked for a push per Task, 2026-09-29) |
+| Next Task | **S8.3** (below, "Next allowed action") |
+| Code baseline | **S8.2** (its commit). Pushed only when the environment's GitHub access allows (the owner asked for a push per Task, 2026-09-29) |
 | Schema | **v24** (S8.1) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S8.2 done, 2026-09-29** (ADR-019 §3.1, §4; UX-25 resolved; I-6, I-7): the result form.
+- `/session/:id/results` is ""How did it go?"": the saved plan's review (snapshot night, target, site,
+  rig, planned light blocks), Completed as planned · Partly (typed counts per light block) · Not done
+  (optional reason), notes, conditions, Save result (`showDone`). Nothing preselected for a new
+  result; a tracker run opens as Partly with its confirmed counts; an edit opens with its outcome.
+- Back writes nothing; a stale form is refused and reloaded; a night not yet ended offers no result
+  and says when it can. A Saved · changed entry is settled first (`CurrentSession.settle`); the
+  planner keeps its edits on the copy with no prompt.
+- The Logbook row and entry offer Record result (`ResultAction`, CALC-44) and Edit result. The
+  tracker's Abandon became Not done in the form. `PlanState` shows Partly.
+- **Tests:** `results_screen_test.dart` rewritten (11: run, checks, Not done, not yet, as planned,
+  Partly with 0, Back, stale, Saved · changed, Record result, Edit result); the E2E's Finish step now
+  saves through the form (""Result saved."").
+- **Verification:** shared behaviour on the E2E path: the full gate after the last code change,
+  **PASS** (1,781 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 **S8.1 done, 2026-09-29** (ADR-019 §3.1, §4; D8-1, D8-3, I-1 to I-5, I-7): results without a run,
 domain and data.
 - **CALC-44** `SavedNightEnd`: a saved night ends at dawn at its snapshot's darkness limit, else at
@@ -64,7 +79,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS** (S8.1): Encoding; Format (465 files, 0 changed); Analyze (no issues); 1,776 tests, 2 expected skips; 2 host E2E | **S8.1's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.1's last code change. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
+| **Full quality gate PASS** (S8.2): Encoding; Format (466 files, 0 changed); Analyze (no issues); 1,781 tests, 2 expected skips; 2 host E2E | **S8.2's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.2's last code change; supersedes S8.1's (1,776). Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
 | **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
 | **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
@@ -198,8 +213,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S8.2 — The result form** (`POST_ROADMAP_PLAN.md`, "Stage 8 — frozen Task sequence", S8.2;
-   DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.3 … S8.9 in the frozen order and the Stage 8
+1. **S8.3 — The saved-plan transition and Tonight's line** (`POST_ROADMAP_PLAN.md`, "Stage 8 —
+   frozen Task sequence", S8.3; DECISIONS E.1, "Stage 8 decisions"). Ungated. Then S8.4 … S8.9 in the frozen order and the Stage 8
    validation: the owner asked, in chat on 2026-09-29, for the whole of Stage 8,
    so each Task follows the previous one's commit without a new prompt.
 

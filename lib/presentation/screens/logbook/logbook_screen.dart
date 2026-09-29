@@ -8,7 +8,9 @@ import '../../../domain/models/session.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../navigation/app_router.dart';
+import '../../../domain/services/result_action.dart';
 import '../../../domain/services/session_reconciliation.dart';
+import '../../shared/app_words.dart';
 import '../../shared/failure_feedback.dart';
 import '../execution/results_screen.dart';
 
@@ -137,6 +139,27 @@ class _LogbookScreenState extends State<LogbookScreen> {
     );
   }
 
+  /// Record result or Edit result for [session], or null (S8.2, I-6).
+  Widget? _resultButton(Session session) {
+    final action = context.read<SessionsViewModel>().resultAction(session);
+    if (action == ResultAction.none) return null;
+    final record = action == ResultAction.record;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton(
+        key: Key(
+          '${record ? 'logbook.recordResult' : 'logbook.editResults'}'
+          '.${session.id}',
+        ),
+        onPressed: () async {
+          await context.push(AppRouter.results(session.id));
+          if (mounted) _refresh();
+        },
+        child: Text(record ? AppWords.recordResult : AppWords.editResult),
+      ),
+    );
+  }
+
   Widget _row(BuildContext context, Session session) {
     final log = session.record;
     // The night key; a legacy instant maps to its device-local calendar
@@ -226,23 +249,14 @@ class _LogbookScreenState extends State<LogbookScreen> {
                 Text('Actual Frames: ${log.actualLightFrames}'),
               // TASK 13.4 (owner): planned vs actual integration and
               // corrections for a completed session.
-              if (_results[session.id] case final r?) ...[
+              if (_results[session.id] case final r?)
                 Text(
                   ResultsText.integration(r),
                   key: Key('logbook.integration.${session.id}'),
                 ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    key: Key('logbook.editResults.${session.id}'),
-                    onPressed: () async {
-                      await context.push(AppRouter.results(session.id));
-                      if (mounted) _refresh();
-                    },
-                    child: const Text('Edit results'),
-                  ),
-                ),
-              ],
+              // S8.2: Record result once the saved night has ended; Edit
+              // result for a result (ADR-019 §3.1, I-6).
+              ?_resultButton(session),
               if (log.rejectedFrames != null && log.rejectedFrames! > 0)
                 Text(
                   'Rejected Frames: ${log.rejectedFrames}',

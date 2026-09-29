@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/diagnostics/app_log.dart';
 import '../../domain/models/session.dart';
+import '../../domain/models/session_result.dart';
 import '../../domain/repositories/storage_failure.dart';
 
 /// User-facing wording for a failed action (TASK 15.1). The error itself
@@ -14,6 +15,13 @@ abstract final class FailureText {
       "Couldn't discard the changes: the saved plan can't be restored "
           '(it cannot be read, or its site, target or rig was deleted). '
           'Nothing was changed. Save the plan or cancel instead.',
+    // S8.2 (S4-DEF-08): nothing was written; the form was reloaded.
+    StaleResultForm() =>
+      'This entry changed since you opened it. Nothing was saved; check it '
+          'and save again.',
+    NightNotEnded() =>
+      "This night hasn't ended yet. Nothing was saved; record the result "
+          'after it.',
     StorageFailure() =>
       "Couldn't $action: the app's data on this device could not be read "
           'or written. Please try again.',

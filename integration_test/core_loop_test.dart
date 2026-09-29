@@ -329,13 +329,14 @@ void main() {
     );
     expect(device.vm.execution!.state!.phase, ExecutionPhase.running);
 
-    // Complete: Finish opens the results; Complete completes.
+    // Complete: Finish opens "How did it go?" (S8.2), Partly pre-filled
+    // from the confirmed counts; Save result completes the run.
     await tap(tester, find.byKey(const Key('run.more')));
     await tap(tester, find.byKey(const Key('run.finish')));
-    expect(find.textContaining('Results · '), findsOneWidget);
+    expect(find.text('How did it go?'), findsWidgets);
     await scrollTo(tester, find.byKey(const Key('results.save')));
     await tap(tester, find.byKey(const Key('results.save')));
-    expect(find.text('Session completed.'), findsOneWidget);
+    expect(find.text('Result saved.'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6)); // the message goes
     await settle(tester);
 

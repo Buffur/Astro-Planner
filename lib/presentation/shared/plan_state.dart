@@ -4,6 +4,7 @@ import '../../core/theme/app_palette.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../domain/models/session.dart';
+import '../../domain/models/session_result.dart';
 import 'app_words.dart';
 
 /// A plan's state as the user sees it (S5.4; ADR-019 §3, RD-05, RG-04).
@@ -15,26 +16,27 @@ enum PlanState {
   tracking,
   completed,
 
-  /// A partial result. Stage 8's result form stores one; today's data holds
-  /// none, so [from] never returns it yet.
+  /// A partial result, recorded through the result form (S8.1–S8.2).
   partly,
   notDone,
   oldLog;
 
-  /// The state today's stored fields express: the status, whether the plan
-  /// was ever saved (`plannedAtUtc != null`), and whether it is a legacy
-  /// log. Pure.
+  /// The state the stored fields express: the status, whether the plan was
+  /// ever saved (`plannedAtUtc != null`), whether it is a legacy log, and how
+  /// a completed result was reported (S8.1). Pure.
   static PlanState from({
     required SessionStatus status,
     required bool savedBefore,
     required bool legacy,
+    ResultKind? resultKind,
   }) {
     if (legacy) return oldLog;
     return switch (status) {
       SessionStatus.draft => savedBefore ? savedChanged : notSaved,
       SessionStatus.planned => saved,
       SessionStatus.inProgress => tracking,
-      SessionStatus.completed => completed,
+      SessionStatus.completed =>
+        resultKind == ResultKind.partly ? partly : completed,
       SessionStatus.abandoned => notDone,
     };
   }
@@ -43,6 +45,7 @@ enum PlanState {
     status: s.status,
     savedBefore: s.plannedAtUtc != null,
     legacy: s.legacy,
+    resultKind: s.resultKind,
   );
 
   String get word => switch (this) {
