@@ -53,6 +53,12 @@ class CameraModules extends Table {
   /// `dslrMirrorless`, `astroColour`, `astroMono` or `unknown` (the
   /// default). Chosen by the user; never inferred.
   TextColumn get cameraClass => text().withDefault(const Constant('unknown'))();
+
+  /// In-camera long-exposure noise reduction (ADR-020 §8; S7.3b, v21): the
+  /// user's statement of a camera setting, off by default. Counted only for
+  /// the DSLR/mirrorless and Unknown classes; kept, and ignored, otherwise.
+  BoolColumn get inCameraNoiseReduction =>
+      boolean().withDefault(const Constant(false))();
 }
 
 class OpticalRigs extends Table {

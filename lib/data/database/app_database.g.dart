@@ -620,6 +620,21 @@ class $CameraModulesTable extends CameraModules
     requiredDuringInsert: false,
     defaultValue: const Constant('unknown'),
   );
+  static const VerificationMeta _inCameraNoiseReductionMeta =
+      const VerificationMeta('inCameraNoiseReduction');
+  @override
+  late final GeneratedColumn<bool> inCameraNoiseReduction =
+      GeneratedColumn<bool>(
+        'in_camera_noise_reduction',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("in_camera_noise_reduction" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -646,6 +661,7 @@ class $CameraModulesTable extends CameraModules
     metadataMake,
     metadataModel,
     cameraClass,
+    inCameraNoiseReduction,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -868,6 +884,15 @@ class $CameraModulesTable extends CameraModules
         ),
       );
     }
+    if (data.containsKey('in_camera_noise_reduction')) {
+      context.handle(
+        _inCameraNoiseReductionMeta,
+        inCameraNoiseReduction.isAcceptableOrUnknown(
+          data['in_camera_noise_reduction']!,
+          _inCameraNoiseReductionMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -973,6 +998,10 @@ class $CameraModulesTable extends CameraModules
         DriftSqlType.string,
         data['${effectivePrefix}camera_class'],
       )!,
+      inCameraNoiseReduction: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}in_camera_noise_reduction'],
+      )!,
     );
   }
 
@@ -1019,6 +1048,11 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
   /// `dslrMirrorless`, `astroColour`, `astroMono` or `unknown` (the
   /// default). Chosen by the user; never inferred.
   final String cameraClass;
+
+  /// In-camera long-exposure noise reduction (ADR-020 §8; S7.3b, v21): the
+  /// user's statement of a camera setting, off by default. Counted only for
+  /// the DSLR/mirrorless and Unknown classes; kept, and ignored, otherwise.
+  final bool inCameraNoiseReduction;
   const CameraModule({
     required this.id,
     required this.deviceId,
@@ -1044,6 +1078,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     this.metadataMake,
     this.metadataModel,
     required this.cameraClass,
+    required this.inCameraNoiseReduction,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1102,6 +1137,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       map['metadata_model'] = Variable<String>(metadataModel);
     }
     map['camera_class'] = Variable<String>(cameraClass);
+    map['in_camera_noise_reduction'] = Variable<bool>(inCameraNoiseReduction);
     return map;
   }
 
@@ -1161,6 +1197,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ? const Value.absent()
           : Value(metadataModel),
       cameraClass: Value(cameraClass),
+      inCameraNoiseReduction: Value(inCameraNoiseReduction),
     );
   }
 
@@ -1206,6 +1243,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       metadataMake: serializer.fromJson<String?>(json['metadataMake']),
       metadataModel: serializer.fromJson<String?>(json['metadataModel']),
       cameraClass: serializer.fromJson<String>(json['cameraClass']),
+      inCameraNoiseReduction: serializer.fromJson<bool>(
+        json['inCameraNoiseReduction'],
+      ),
     );
   }
   @override
@@ -1238,6 +1278,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       'metadataMake': serializer.toJson<String?>(metadataMake),
       'metadataModel': serializer.toJson<String?>(metadataModel),
       'cameraClass': serializer.toJson<String>(cameraClass),
+      'inCameraNoiseReduction': serializer.toJson<bool>(inCameraNoiseReduction),
     };
   }
 
@@ -1266,6 +1307,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     Value<String?> metadataMake = const Value.absent(),
     Value<String?> metadataModel = const Value.absent(),
     String? cameraClass,
+    bool? inCameraNoiseReduction,
   }) => CameraModule(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -1311,6 +1353,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
         ? metadataModel.value
         : this.metadataModel,
     cameraClass: cameraClass ?? this.cameraClass,
+    inCameraNoiseReduction:
+        inCameraNoiseReduction ?? this.inCameraNoiseReduction,
   );
   CameraModule copyWithCompanion(CameraModulesCompanion data) {
     return CameraModule(
@@ -1376,6 +1420,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       cameraClass: data.cameraClass.present
           ? data.cameraClass.value
           : this.cameraClass,
+      inCameraNoiseReduction: data.inCameraNoiseReduction.present
+          ? data.inCameraNoiseReduction.value
+          : this.inCameraNoiseReduction,
     );
   }
 
@@ -1405,7 +1452,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
           ..write('metadataMake: $metadataMake, ')
           ..write('metadataModel: $metadataModel, ')
-          ..write('cameraClass: $cameraClass')
+          ..write('cameraClass: $cameraClass, ')
+          ..write('inCameraNoiseReduction: $inCameraNoiseReduction')
           ..write(')'))
         .toString();
   }
@@ -1436,6 +1484,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     metadataMake,
     metadataModel,
     cameraClass,
+    inCameraNoiseReduction,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1464,7 +1513,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           other.rawFileSizeConfidence == this.rawFileSizeConfidence &&
           other.metadataMake == this.metadataMake &&
           other.metadataModel == this.metadataModel &&
-          other.cameraClass == this.cameraClass);
+          other.cameraClass == this.cameraClass &&
+          other.inCameraNoiseReduction == this.inCameraNoiseReduction);
 }
 
 class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
@@ -1492,6 +1542,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
   final Value<String?> metadataMake;
   final Value<String?> metadataModel;
   final Value<String> cameraClass;
+  final Value<bool> inCameraNoiseReduction;
   const CameraModulesCompanion({
     this.id = const Value.absent(),
     this.deviceId = const Value.absent(),
@@ -1517,6 +1568,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.metadataMake = const Value.absent(),
     this.metadataModel = const Value.absent(),
     this.cameraClass = const Value.absent(),
+    this.inCameraNoiseReduction = const Value.absent(),
   });
   CameraModulesCompanion.insert({
     this.id = const Value.absent(),
@@ -1543,6 +1595,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.metadataMake = const Value.absent(),
     this.metadataModel = const Value.absent(),
     this.cameraClass = const Value.absent(),
+    this.inCameraNoiseReduction = const Value.absent(),
   }) : deviceId = Value(deviceId),
        name = Value(name),
        sensorWidthMm = Value(sensorWidthMm),
@@ -1575,6 +1628,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Expression<String>? metadataMake,
     Expression<String>? metadataModel,
     Expression<String>? cameraClass,
+    Expression<bool>? inCameraNoiseReduction,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1607,6 +1661,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       if (metadataMake != null) 'metadata_make': metadataMake,
       if (metadataModel != null) 'metadata_model': metadataModel,
       if (cameraClass != null) 'camera_class': cameraClass,
+      if (inCameraNoiseReduction != null)
+        'in_camera_noise_reduction': inCameraNoiseReduction,
     });
   }
 
@@ -1635,6 +1691,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Value<String?>? metadataMake,
     Value<String?>? metadataModel,
     Value<String>? cameraClass,
+    Value<bool>? inCameraNoiseReduction,
   }) {
     return CameraModulesCompanion(
       id: id ?? this.id,
@@ -1662,6 +1719,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
       metadataMake: metadataMake ?? this.metadataMake,
       metadataModel: metadataModel ?? this.metadataModel,
       cameraClass: cameraClass ?? this.cameraClass,
+      inCameraNoiseReduction:
+          inCameraNoiseReduction ?? this.inCameraNoiseReduction,
     );
   }
 
@@ -1750,6 +1809,11 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     if (cameraClass.present) {
       map['camera_class'] = Variable<String>(cameraClass.value);
     }
+    if (inCameraNoiseReduction.present) {
+      map['in_camera_noise_reduction'] = Variable<bool>(
+        inCameraNoiseReduction.value,
+      );
+    }
     return map;
   }
 
@@ -1779,7 +1843,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
           ..write('metadataMake: $metadataMake, ')
           ..write('metadataModel: $metadataModel, ')
-          ..write('cameraClass: $cameraClass')
+          ..write('cameraClass: $cameraClass, ')
+          ..write('inCameraNoiseReduction: $inCameraNoiseReduction')
           ..write(')'))
         .toString();
   }
@@ -7951,6 +8016,7 @@ typedef $$CameraModulesTableCreateCompanionBuilder =
       Value<String?> metadataMake,
       Value<String?> metadataModel,
       Value<String> cameraClass,
+      Value<bool> inCameraNoiseReduction,
     });
 typedef $$CameraModulesTableUpdateCompanionBuilder =
     CameraModulesCompanion Function({
@@ -7978,6 +8044,7 @@ typedef $$CameraModulesTableUpdateCompanionBuilder =
       Value<String?> metadataMake,
       Value<String?> metadataModel,
       Value<String> cameraClass,
+      Value<bool> inCameraNoiseReduction,
     });
 
 final class $$CameraModulesTableReferences
@@ -8145,6 +8212,11 @@ class $$CameraModulesTableFilterComposer
 
   ColumnFilters<String> get cameraClass => $composableBuilder(
     column: $table.cameraClass,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get inCameraNoiseReduction => $composableBuilder(
+    column: $table.inCameraNoiseReduction,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8321,6 +8393,11 @@ class $$CameraModulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get inCameraNoiseReduction => $composableBuilder(
+    column: $table.inCameraNoiseReduction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DevicesTableOrderingComposer get deviceId {
     final $$DevicesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -8461,6 +8538,11 @@ class $$CameraModulesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get inCameraNoiseReduction => $composableBuilder(
+    column: $table.inCameraNoiseReduction,
+    builder: (column) => column,
+  );
+
   $$DevicesTableAnnotationComposer get deviceId {
     final $$DevicesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -8562,6 +8644,7 @@ class $$CameraModulesTableTableManager
                 Value<String?> metadataMake = const Value.absent(),
                 Value<String?> metadataModel = const Value.absent(),
                 Value<String> cameraClass = const Value.absent(),
+                Value<bool> inCameraNoiseReduction = const Value.absent(),
               }) => CameraModulesCompanion(
                 id: id,
                 deviceId: deviceId,
@@ -8587,6 +8670,7 @@ class $$CameraModulesTableTableManager
                 metadataMake: metadataMake,
                 metadataModel: metadataModel,
                 cameraClass: cameraClass,
+                inCameraNoiseReduction: inCameraNoiseReduction,
               ),
           createCompanionCallback:
               ({
@@ -8614,6 +8698,7 @@ class $$CameraModulesTableTableManager
                 Value<String?> metadataMake = const Value.absent(),
                 Value<String?> metadataModel = const Value.absent(),
                 Value<String> cameraClass = const Value.absent(),
+                Value<bool> inCameraNoiseReduction = const Value.absent(),
               }) => CameraModulesCompanion.insert(
                 id: id,
                 deviceId: deviceId,
@@ -8639,6 +8724,7 @@ class $$CameraModulesTableTableManager
                 metadataMake: metadataMake,
                 metadataModel: metadataModel,
                 cameraClass: cameraClass,
+                inCameraNoiseReduction: inCameraNoiseReduction,
               ),
           withReferenceMapper: (p0) => p0
               .map(

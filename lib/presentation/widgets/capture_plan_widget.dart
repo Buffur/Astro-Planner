@@ -344,7 +344,7 @@ class _BlockListState extends State<_BlockList> {
                                 key: Key('capture.mismatch.$index.${m.name}'),
                                 style: TextStyle(color: palette.statusTight),
                               ),
-                            if (mismatch.isNotEmpty &&
+                            if (mismatch.any((m) => m.fixable) &&
                                 CalibrationMatch.defaultSource(block, blocks) !=
                                     null)
                               TextButton(

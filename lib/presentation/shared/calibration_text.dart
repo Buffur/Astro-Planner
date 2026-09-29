@@ -20,6 +20,9 @@ abstract final class CalibrationText {
       'Its binning matches no light block',
     CalibrationMismatch.matchesNoFlat =>
       'Matches no flat block (exposure, ISO or gain, binning)',
+    CalibrationMismatch.darksTwice =>
+      "Darks twice: the camera's noise reduction already takes a dark after "
+          'each light',
   };
 
   /// The one-tap fix's label.

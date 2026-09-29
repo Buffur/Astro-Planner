@@ -110,6 +110,7 @@ class _EquipmentEditor {
     final maxExposureCtrl = TextEditingController(text: t.maxExposure);
     var trackingType = form.trackingType;
     var cameraClass = form.cameraClass;
+    var noiseReduction = form.inCameraNoiseReduction;
     String? apertureError;
     var saved = false;
 
@@ -232,9 +233,29 @@ class _EquipmentEditor {
                               DropdownMenuItem(value: c, child: Text(c.label)),
                           ],
                           onChanged: (c) {
-                            if (c != null) cameraClass = c;
+                            if (c != null) {
+                              setDialogState(() => cameraClass = c);
+                            }
                           },
                         ),
+                        // S7.3b (ADR-020 §8): the user's statement of a
+                        // camera setting, off by default; offered only where
+                        // a camera takes a dark per frame. A stored value is
+                        // kept for other types, and ignored.
+                        if (cameraClass.offersInCameraNoiseReduction)
+                          SwitchListTile(
+                            key: const Key('equipmentEditor.noiseReduction'),
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('In-camera noise reduction'),
+                            subtitle: const Text(
+                              'Long-exposure noise reduction: the camera '
+                              'takes a dark as long as each light. The plan '
+                              'counts that time.',
+                            ),
+                            value: noiseReduction,
+                            onChanged: (v) =>
+                                setDialogState(() => noiseReduction = v),
+                          ),
                         const SizedBox(height: 20),
                         // ── Sensor Section (Stellarium layout) ──────────
                         Text(
@@ -560,6 +581,7 @@ class _EquipmentEditor {
                       currentTexts(),
                       trackingType,
                       cameraClass: cameraClass,
+                      inCameraNoiseReduction: noiseReduction,
                     );
                     final recorded = result.profile;
                     if (recorded == null) {

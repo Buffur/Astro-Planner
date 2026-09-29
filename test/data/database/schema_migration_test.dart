@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v20), each with an
+// Later schema versions add their own groups (v11-v21), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -125,6 +125,45 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('S7.3b: v21 (in-camera noise reduction, ADR-020 §8)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]) {
+      test('v$from -> v21 matches the v21 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 21);
+        await db.close();
+      });
+    }
+
+    test('v20 -> v21: every camera and rig kept, its class too; noise '
+        'reduction off, never inferred', () async {
+      final schema = await verifier.schemaAt(20);
+      final raw = schema.rawDatabase;
+      raw.execute("INSERT INTO devices (id, name) VALUES (1, 'Rig');");
+      raw.execute(
+        "INSERT INTO camera_modules (id, device_id, name, manufacturer, "
+        "model, sensor_width_mm, sensor_height_mm, resolution_width_px, "
+        "resolution_height_px, pixel_pitch_um, source, confidence, "
+        "camera_class) VALUES (1, 1, 'Rig Camera', 'Canon', 'EOS R6', 35.9, "
+        "23.9, 5472, 3648, 6.56, 'user', 'reported', 'dslrMirrorless');",
+      );
+      raw.execute(
+        "INSERT INTO optical_rigs (id, name, camera_module_id, "
+        "focal_length_mm, aperture, tracking_state) VALUES (1, 'Rig', 1, "
+        "135.0, 2.8, 'tracked');",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final p = (await DriftEquipmentRepository(db).getAllEquipment()).single;
+      expect(p.inCameraNoiseReduction, isFalse);
+      expect(p.noiseReductionApplies, isFalse);
+      expect(p.cameraClass, CameraClass.dslrMirrorless);
+      expect(p.cameraModel, 'EOS R6');
+      expect(p.pixelPitchUm, 6.56);
+      expect(p.trackingType, TrackingType.tracked);
       await db.close();
     });
   });

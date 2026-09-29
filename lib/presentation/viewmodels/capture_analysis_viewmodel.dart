@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 
 import '../../core/time/clock.dart';
-import '../../domain/models/camera_class.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/models/imaging_opportunity.dart';
 import '../../domain/models/session.dart';
@@ -79,9 +78,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
   }
 
   CaptureBudget _computeBudget() {
-    final overheads = CaptureOverheads.fromPreferences(
-      _settings.planningPreferences,
-    );
+    final overheads = _overheads;
     final transit = overheads.meridianFlipMs == null ? null : _transitUtc;
     return CaptureBudgetCalculator.calculate(
       blocks: _plan.captureBlocks,
@@ -94,6 +91,14 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
       averageRawFileSizeMB: _plan.selectedEquipment?.averageRawFileSizeMB,
     );
   }
+
+  /// The settings' overheads, with the rig's in-camera noise reduction when
+  /// it applies (ADR-020 §8); a rig edit notifies through the plan.
+  CaptureOverheads get _overheads => CaptureOverheads.fromPreferences(
+    _settings.planningPreferences,
+    inCameraNoiseReduction:
+        _plan.selectedEquipment?.noiseReductionApplies ?? false,
+  );
 
   /// The target's upper transit tonight, or null (5-minute resolution);
   /// cached per night and target position.
@@ -158,13 +163,10 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
     );
   }
 
-  /// Each block's calibration mismatches with the plan (S7.3a; ADR-020 §6),
-  /// in block order; empty for lights and matching blocks.
-  List<List<CalibrationMismatch>> get calibrationMismatches {
-    final blocks = _plan.captureBlocks;
-    final c = _plan.selectedEquipment?.cameraClass ?? CameraClass.unknown;
-    return [for (final b in blocks) CalibrationMatch.of(b, blocks, c)];
-  }
+  /// Each block's calibration mismatches with the plan (S7.3a, S7.3b;
+  /// ADR-020 §6), in block order; empty for lights and matching blocks.
+  List<List<CalibrationMismatch>> get calibrationMismatches =>
+      CalibrationMatch.ofPlan(_plan.captureBlocks, _plan.selectedEquipment);
 
   /// The light filters no flat covers, when the plan has flats (S7.3a).
   List<String?> get lightFiltersWithoutFlats =>
@@ -194,9 +196,7 @@ class CaptureAnalysisViewModel extends ChangeNotifier {
       blocks: _plan.captureBlocks,
       blockIndex: index,
       windows: _conditions.visibilityWindows,
-      overheads: CaptureOverheads.fromPreferences(
-        _settings.planningPreferences,
-      ),
+      overheads: _overheads,
       targetTransitsInWindow: flip,
       transitUtc: flip ? _transitUtc : null,
     );

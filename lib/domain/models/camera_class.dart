@@ -31,6 +31,12 @@ enum CameraClass {
   /// binning is its rig's mode; cameras offer none.
   bool get offersLightBinning =>
       this == astroColour || this == astroMono || this == unknown;
+
+  /// Whether the rig editor offers in-camera long-exposure noise reduction
+  /// (ADR-020 §8): cameras and Unknown. Phones and astro cameras do not take
+  /// an automatic dark per frame.
+  bool get offersInCameraNoiseReduction =>
+      this == dslrMirrorless || this == unknown;
 }
 
 /// The sensitivity field a light block shows (ADR-020 §3).

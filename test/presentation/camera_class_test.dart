@@ -149,6 +149,36 @@ void main() {
       }
     });
 
+    test('an import never proposes in-camera noise reduction (S7.3b)', () {
+      final d = EquipmentDraft.fromCandidate(phoneCandidate());
+      expect(d.inCameraNoiseReduction, isFalse);
+      expect(
+        d
+            .build(d.initial, TrackingType.unknown)
+            .profile!
+            .inCameraNoiseReduction,
+        isFalse,
+      );
+      const saved = EquipmentProfile(
+        id: 3,
+        name: 'Tripod camera',
+        cameraClass: CameraClass.dslrMirrorless,
+        inCameraNoiseReduction: true,
+        sensorWidthMm: 35.9,
+        sensorHeightMm: 23.9,
+        pixelPitchUm: 6.56,
+        resolutionWidthPx: 5472,
+        resolutionHeightPx: 3648,
+        focalLengthMm: 24,
+        focalRatio: 2.8,
+      );
+      expect(
+        EquipmentDraft.forRig(saved, const {}).inCameraNoiseReduction,
+        isTrue,
+      );
+      expect(EquipmentDraft.fromProfile(saved).inCameraNoiseReduction, isTrue);
+    });
+
     test('opening a saved rig with a file\'s values keeps the rig\'s own '
         'class', () {
       final saved = _withClass(_rig, CameraClass.dslrMirrorless);

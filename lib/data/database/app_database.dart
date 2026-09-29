@@ -253,7 +253,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration {
@@ -544,6 +544,15 @@ class AppDatabase extends _$AppDatabase {
                 await m.addColumn(
                   schema.cameraModules,
                   schema.cameraModules.cameraClass,
+                );
+              },
+              from20To21: (m, schema) async {
+                // S7.3b (ADR-020 §8): in-camera noise reduction. Additive
+                // only; off for every existing camera (the column's default),
+                // since it is the user's statement, never inferred.
+                await m.addColumn(
+                  schema.cameraModules,
+                  schema.cameraModules.inCameraNoiseReduction,
                 );
               },
             ),

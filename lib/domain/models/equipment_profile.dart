@@ -17,6 +17,11 @@ class EquipmentProfile {
   /// inferred; [CameraClass.unknown] until chosen.
   final CameraClass cameraClass;
 
+  /// In-camera long-exposure noise reduction (ADR-020 §8; S7.3b): the
+  /// user's statement of a camera setting, never inferred; off by default.
+  /// Stored for every class, counted only where [noiseReductionApplies].
+  final bool inCameraNoiseReduction;
+
   /// Sensor size, mm. Dictates the field of view.
   final double sensorWidthMm;
   final double sensorHeightMm;
@@ -74,6 +79,7 @@ class EquipmentProfile {
     this.manufacturer,
     this.cameraModel,
     this.cameraClass = CameraClass.unknown,
+    this.inCameraNoiseReduction = false,
     required this.sensorWidthMm,
     required this.sensorHeightMm,
     required this.pixelPitchUm,
@@ -94,6 +100,11 @@ class EquipmentProfile {
     this.metadataMake,
     this.metadataModel,
   });
+
+  /// Whether the budget and the fit count an in-camera dark after each light
+  /// (ADR-020 §8): the switch is on and the class offers it.
+  bool get noiseReductionApplies =>
+      inCameraNoiseReduction && cameraClass.offersInCameraNoiseReduction;
 
   /// Where [spec]'s value came from: its own pair, else its group's, else
   /// null (unknown; never guessed, ADR-008 §6). An own pair marked
@@ -203,6 +214,7 @@ class EquipmentProfile {
       manufacturer: manufacturer,
       cameraModel: cameraModel,
       cameraClass: cameraClass,
+      inCameraNoiseReduction: inCameraNoiseReduction,
       sensorWidthMm: sensorWidthMm,
       sensorHeightMm: sensorHeightMm,
       pixelPitchUm: pixelPitchUm,

@@ -6,6 +6,7 @@ import '../../../core/utils/quantity_text.dart';
 import '../../../domain/models/planning_preferences.dart';
 import '../../shared/app_words.dart';
 import '../../shared/collapsible_section.dart';
+import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/settings_viewmodel.dart';
 import '../../navigation/app_router.dart';
 import '../planner_sections.dart';
@@ -27,6 +28,7 @@ class CaptureAssumptionsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.watch<SettingsViewModel>().planningPreferences;
+    final rig = context.watch<SessionPlanViewModel>().selectedEquipment;
     String secs(double s) => '${s.round()} s';
     String minutes(double m) => '${m.round()} min';
     final rows = <(String, String)>[
@@ -62,6 +64,14 @@ class CaptureAssumptionsPanel extends StatelessWidget {
         'Setup',
         p.setupMinutes == null ? 'Not included' : minutes(p.setupMinutes!),
       ),
+      // S7.3b (ADR-020 §8): the rig's setting, for the types that have it.
+      if (rig != null && rig.cameraClass.offersInCameraNoiseReduction)
+        (
+          'In-camera noise reduction',
+          rig.inCameraNoiseReduction
+              ? "a dark as long as each light (the rig's setting)"
+              : 'Not included',
+        ),
       ('Feasibility margin', QuantityText.percent(p.feasibilityMarginPercent)),
       (AppWords.darknessLimit, QuantityText.degrees(p.darknessLimit.degrees)),
       ('Minimum target altitude', QuantityText.degrees(p.minAltitudeDeg)),

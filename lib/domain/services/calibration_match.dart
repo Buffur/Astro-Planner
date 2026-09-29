@@ -1,5 +1,6 @@
 import '../models/camera_class.dart';
 import '../models/capture_block.dart';
+import '../models/equipment_profile.dart';
 
 /// Why a calibration block may not calibrate the plan's frames (ADR-020 §6;
 /// RG-10 §4). Each is a warning in words; none blocks a plan.
@@ -15,6 +16,14 @@ enum CalibrationMismatch {
 
   /// A dark flat whose values match no flat block.
   matchesNoFlat,
+
+  /// A dark that matches a light while the rig's in-camera noise reduction
+  /// already takes a dark after each light (ADR-020 §6, §8; S7.3b).
+  darksTwice;
+
+  /// Whether "Match the lights" (or flats) fixes it; darks twice is kept or
+  /// removed by the user.
+  bool get fixable => this != darksTwice;
 }
 
 /// The calibration matrix's required matches (ADR-020 §6; RG-10 §4), pure.
@@ -55,20 +64,40 @@ abstract final class CalibrationMatch {
     };
   }
 
+  /// Each block's mismatches with [blocks], the plan, for [rig] (its class,
+  /// Unknown without one, and whether its noise reduction applies).
+  static List<List<CalibrationMismatch>> ofPlan(
+    List<CaptureBlock> blocks,
+    EquipmentProfile? rig,
+  ) => [
+    for (final b in blocks)
+      of(
+        b,
+        blocks,
+        rig?.cameraClass ?? CameraClass.unknown,
+        noiseReduction: rig?.noiseReductionApplies ?? false,
+      ),
+  ];
+
   /// [block]'s mismatches with [blocks], the plan, for a rig of class [c];
-  /// empty for a light block or a block that matches.
+  /// empty for a light block or a block that matches. [noiseReduction]: the
+  /// rig's in-camera noise reduction applies, so a dark that matches a light
+  /// repeats it.
   static List<CalibrationMismatch> of(
     CaptureBlock block,
     List<CaptureBlock> blocks,
-    CameraClass c,
-  ) {
+    CameraClass c, {
+    bool noiseReduction = false,
+  }) {
     final lights = blocks.where((b) => b.frameType == FrameType.light);
     final flats = blocks.where((b) => b.frameType == FrameType.flat);
     return switch (block.frameType) {
       FrameType.light => const [],
       FrameType.dark || FrameType.bias => [
         if (!lights.any((l) => matches(block, l, c)))
-          CalibrationMismatch.matchesNoLight,
+          CalibrationMismatch.matchesNoLight
+        else if (noiseReduction && block.frameType == FrameType.dark)
+          CalibrationMismatch.darksTwice,
       ],
       FrameType.flat => [
         if (!lights.any((l) => l.filterName == block.filterName))

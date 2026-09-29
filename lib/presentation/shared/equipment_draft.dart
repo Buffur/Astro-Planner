@@ -121,6 +121,7 @@ class EquipmentDraft {
     this.existing,
     this.trackingType = TrackingType.unknown,
     this.cameraClass = CameraClass.unknown,
+    this.inCameraNoiseReduction = false,
     this.prefilled = const {},
     this.metadataMake,
     this.metadataModel,
@@ -134,6 +135,7 @@ class EquipmentDraft {
       existing: e,
       trackingType: e?.trackingType ?? TrackingType.unknown,
       cameraClass: e?.cameraClass ?? CameraClass.unknown,
+      inCameraNoiseReduction: e?.inCameraNoiseReduction ?? false,
       initial: EquipmentFormTexts(
         name: e?.name ?? '',
         manufacturer: e?.manufacturer ?? '',
@@ -360,6 +362,7 @@ class EquipmentDraft {
       existing: rig,
       trackingType: rig.trackingType,
       cameraClass: rig.cameraClass,
+      inCameraNoiseReduction: rig.inCameraNoiseReduction,
       prefilled: prefilled,
       metadataMake: rig.metadataMake,
       metadataModel: rig.metadataModel,
@@ -411,6 +414,10 @@ class EquipmentDraft {
   /// The camera's class (ADR-020 §2): the rig's own when editing; always
   /// [CameraClass.unknown] for an import, which never proposes one.
   final CameraClass cameraClass;
+
+  /// In-camera noise reduction (ADR-020 §8): the rig's own when editing;
+  /// always off for an import, which never infers a camera setting.
+  final bool inCameraNoiseReduction;
 
   /// Pre-filled specs and their origin (empty for Add/Edit by hand).
   final Map<EquipmentSpec, PrefilledSpec> prefilled;
@@ -472,6 +479,7 @@ class EquipmentDraft {
     EquipmentFormTexts texts,
     TrackingType trackingType, {
     CameraClass? cameraClass,
+    bool? inCameraNoiseReduction,
   }) {
     // S3.V3: while a pre-filled value's texts are unchanged, its exact value
     // is saved, never the (possibly rounded) text.
@@ -506,6 +514,8 @@ class EquipmentDraft {
       manufacturer: optionalText(texts.manufacturer),
       cameraModel: optionalText(texts.cameraModel),
       cameraClass: cameraClass ?? this.cameraClass,
+      inCameraNoiseReduction:
+          inCameraNoiseReduction ?? this.inCameraNoiseReduction,
       resolutionWidthPx:
           exact(EquipmentSpec.resolution, 0)?.toInt() ??
           int.parse(texts.resolutionWidth.trim()),

@@ -4784,6 +4784,9 @@ fields, §2 and §8 below). **Implementation:** Stage 7, S7.2a, S7.2b, S7.3a and
   - **S7.2b** — the light-block form (§3, §4's label and help, §5); *done 2026-09-29*;
   - **S7.3a** — calibration blocks (§6, §7; the dark-flat frame type); *done 2026-09-29* (the "darks
     twice" check stays with S7.3b, as it needs §8's switch);
-  - **S7.3b** — in-camera noise reduction in the budget and the fit (§8; schema; E8–E8c).
+  - **S7.3b** — in-camera noise reduction in the budget and the fit (§8; schema; E8–E8c); *done
+    2026-09-29* (schema v21; E8–E8c reproduced; the "darks twice" check with it). Implementation
+    decision, not in §8: the dark's time counts toward the refocus interval, as every other in-window
+    event's elapsed time does (ADR-009 §4 counts capture time between refocuses).
 - ADR-009 and ADR-011 carry pointers to this ADR. `SCIENTIFIC_INTEGRITY.md` records §8 as a CALC-25
   and CALC-26 input change when S7.3b lands.

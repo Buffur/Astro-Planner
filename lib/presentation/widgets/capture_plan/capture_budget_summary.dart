@@ -88,6 +88,14 @@ class CaptureBudgetSummary extends StatelessWidget {
                     formatBudgetDuration(budget.inWindowCalibrationMs),
                     key: const Key('budget.calibrationIn'),
                   ),
+                // S7.3b (ADR-020 §8): the part the camera's noise reduction
+                // takes, one dark as long as each light.
+                if (budget.inCameraDarkMs > 0)
+                  _Line(
+                    'Of which in-camera darks',
+                    formatBudgetDuration(budget.inCameraDarkMs),
+                    key: const Key('budget.inCameraDarks'),
+                  ),
                 _Line(
                   '${AppWords.timeNeeded} (in the window)',
                   fit.availableMs > 0

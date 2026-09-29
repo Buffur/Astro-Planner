@@ -104,6 +104,7 @@
 > **Updated 2026-09-29 (S7.2a):** the camera class on the rig is built (ADR-020 §2; schema v20).
 > **Updated 2026-09-29 (S7.2b):** the light-block form by camera class is built (ADR-020 §3–§5).
 > **Updated 2026-09-29 (S7.3a):** calibration blocks and the dark-flat frame type are built (ADR-020 §6–§7).
+> **Updated 2026-09-29 (S7.3b):** in-camera noise reduction is built (ADR-020 §8; schema v21).
 
 ## Contents
 
@@ -3999,7 +4000,7 @@ Stage 4):
 | S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | **Done 2026-09-29** |
-| S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | Frozen |
+| S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | Frozen; RG-07's rules added below S7.4 |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | Frozen; the decided rules added below S7.5 |
 | S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
@@ -4468,6 +4469,21 @@ calculation and a schema change)
   independently of the implementation; E1–E7 unchanged; the switch ignored for Phone and astro
   classes; the migration's schema equality and data preservation; the memoization keys include it
   (trap 16); the full gate.
+
+- **Done 2026-09-29:** schema v21 (`camera_modules.in_camera_noise_reduction`, off for every
+  existing camera); `EquipmentProfile.inCameraNoiseReduction` / `noiseReductionApplies`; the rig
+  editor's switch for DSLR/mirrorless and Unknown (hidden for other types, the stored value kept);
+  `CaptureOverheads.inCameraNoiseReduction` puts each light's dark inside its frame event and in
+  in-window calibration (`CaptureBudget.inCameraDarkMs`), so the fit and "Fill tonight's window"
+  follow; the ViewModel joins the settings and the rig (`_overheads`); the assumptions row ("Not
+  included" when off) and Budget details' "Of which in-camera darks"; the snapshot's rig key; the
+  "darks twice" check (`CalibrationMatch.ofPlan`, no one-tap fix). Tests:
+  `in_camera_noise_reduction_test.dart` (E8, E8b, E8c by hand; the unsplit event; the fill count;
+  the switch per class), `in_camera_noise_reduction_ui_test.dart` (the editor per class; a rig edit
+  reaching the cached budget, fit and fill count; the snapshot; darks twice; the assumptions), v21
+  migrations, darks-twice domain cases, the draft. Deliberate pin changes: the backup and
+  unsupported-database tests (v21, v22). E1–E7 unchanged. Full gate PASS: 1,642 tests, 2 expected
+  skips; 2 host E2E.
 
 ##### S7.4 — Targets: names, aliases and search (gated on RG-07)
 - **Objective:** choosing a known object never requires looking up RA and Dec elsewhere.

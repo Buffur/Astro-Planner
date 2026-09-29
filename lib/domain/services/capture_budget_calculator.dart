@@ -20,26 +20,32 @@ class CaptureOverheads {
     this.filterChangeMs,
     this.meridianFlipMs,
     this.setupMs,
+    this.inCameraNoiseReduction = false,
   });
 
-  /// From the user's [PlanningPreferences] (TASK 5.2).
-  factory CaptureOverheads.fromPreferences(PlanningPreferences p) =>
-      CaptureOverheads(
-        perFrameMs: _ms(p.perFrameOverheadSeconds),
-        ditherEveryNFrames: p.ditherEveryNFrames,
-        ditherMs: _ms(p.ditherSettleSeconds),
-        refocusEveryMs: p.refocusEveryMinutes == null
-            ? null
-            : _ms(p.refocusEveryMinutes! * 60),
-        refocusMs: _ms(p.refocusSeconds),
-        filterChangeMs: p.filterChangeSeconds == null
-            ? null
-            : _ms(p.filterChangeSeconds!),
-        meridianFlipMs: p.meridianFlipSeconds == null
-            ? null
-            : _ms(p.meridianFlipSeconds!),
-        setupMs: p.setupMinutes == null ? null : _ms(p.setupMinutes! * 60),
-      );
+  /// From the user's [PlanningPreferences] (TASK 5.2), and whether the rig's
+  /// in-camera noise reduction applies (ADR-020 §8; the rig's
+  /// `noiseReductionApplies`).
+  factory CaptureOverheads.fromPreferences(
+    PlanningPreferences p, {
+    bool inCameraNoiseReduction = false,
+  }) => CaptureOverheads(
+    perFrameMs: _ms(p.perFrameOverheadSeconds),
+    ditherEveryNFrames: p.ditherEveryNFrames,
+    ditherMs: _ms(p.ditherSettleSeconds),
+    refocusEveryMs: p.refocusEveryMinutes == null
+        ? null
+        : _ms(p.refocusEveryMinutes! * 60),
+    refocusMs: _ms(p.refocusSeconds),
+    filterChangeMs: p.filterChangeSeconds == null
+        ? null
+        : _ms(p.filterChangeSeconds!),
+    meridianFlipMs: p.meridianFlipSeconds == null
+        ? null
+        : _ms(p.meridianFlipSeconds!),
+    setupMs: p.setupMinutes == null ? null : _ms(p.setupMinutes! * 60),
+    inCameraNoiseReduction: inCameraNoiseReduction,
+  );
 
   /// Download or interval gap added to every acquired frame.
   final int perFrameMs;
@@ -60,6 +66,13 @@ class CaptureOverheads {
 
   /// Setup before the first window; null = off.
   final int? setupMs;
+
+  /// In-camera long-exposure noise reduction (ADR-020 §8, amending ADR-009
+  /// §2 and §4): the camera takes one dark of the light's exposure after
+  /// each light frame (Canon: "may take the same amount of time as the
+  /// exposure"), with no extra per-frame overhead. Its time is in-window
+  /// calibration, inside the light's atomic event; false = not included.
+  final bool inCameraNoiseReduction;
 
   static int _ms(double seconds) => (seconds * 1000).round();
 }
@@ -153,6 +166,7 @@ class CaptureBudget {
     required this.storageMB,
     required this.libraryBlockIndexes,
     required this.lightGroups,
+    this.inCameraDarkMs = 0,
   });
 
   /// Σ light exposure — the science quantity.
@@ -161,8 +175,13 @@ class CaptureBudget {
   /// Integration + per-frame overhead on lights + in-window overhead events.
   final int acquisitionMs;
 
-  /// In-window calibration frames, exposure + per-frame overhead.
+  /// In-window calibration frames, exposure + per-frame overhead, plus
+  /// [inCameraDarkMs].
   final int inWindowCalibrationMs;
+
+  /// The part of [inWindowCalibrationMs] taken by in-camera noise reduction
+  /// (ADR-020 §8): Σ over lights of count × exposure; 0 when not included.
+  final int inCameraDarkMs;
 
   /// Calibration taken outside the window; reported, never fitted.
   final int outsideWindowCalibrationMs;
@@ -236,6 +255,7 @@ class CaptureBudgetCalculator {
 
     var integration = 0;
     var inWindowCal = 0;
+    var inCameraDarks = 0;
     var outsideCal = 0;
     var lightTotal = 0;
     for (final b in blocks) {
@@ -303,19 +323,24 @@ class CaptureBudgetCalculator {
         seenLight = true;
       }
 
+      // ADR-020 §8: a light's in-camera dark is part of its atomic event,
+      // never split from it; its time is in-window calibration.
+      final dark = isLight && overheads.inCameraNoiseReduction ? exposure : 0;
       for (var n = 0; n < b.frameCount; n++) {
         sequence.add(
           BudgetEvent(
             BudgetEventKind.frame,
-            exposure + perFrame,
+            exposure + dark + perFrame,
             blockIndex: i,
           ),
         );
-        accumulated += exposure + perFrame;
+        accumulated += exposure + dark + perFrame;
         if (!isLight) {
           inWindowCal += exposure + perFrame;
           continue;
         }
+        inWindowCal += dark;
+        inCameraDarks += dark;
         lightsDone++;
         final more = lightsDone < lightTotal;
         final ditherN = overheads.ditherEveryNFrames;
@@ -359,6 +384,7 @@ class CaptureBudgetCalculator {
       storageMB: storage,
       libraryBlockIndexes: List.unmodifiable(library),
       lightGroups: List.unmodifiable(_lightGroups(blocks)),
+      inCameraDarkMs: inCameraDarks,
     );
   }
 

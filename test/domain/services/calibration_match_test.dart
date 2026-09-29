@@ -124,6 +124,41 @@ void main() {
     });
   });
 
+  test('darks twice (S7.3b, ADR-020 §8): a matching dark while in-camera '
+      'noise reduction applies; never a bias, never without it', () {
+    final dark = _b(
+      FrameType.dark,
+      exposure: 300,
+      binning: 2,
+      gain: CaptureGain.gain(100),
+    );
+    expect(CalibrationMatch.of(dark, [ha], _dslr, noiseReduction: true), [
+      CalibrationMismatch.darksTwice,
+    ]);
+    expect(CalibrationMatch.of(dark, [ha], _dslr), isEmpty);
+    // A dark that matches no light is that warning alone.
+    expect(
+      CalibrationMatch.of(
+        _b(FrameType.dark, exposure: 240, gain: CaptureGain.gain(100)),
+        [ha],
+        _dslr,
+        noiseReduction: true,
+      ),
+      [CalibrationMismatch.matchesNoLight],
+    );
+    final bias = _b(
+      FrameType.bias,
+      exposure: 0.001,
+      gain: CaptureGain.gain(100),
+    );
+    expect(
+      CalibrationMatch.of(bias, [ha], _dslr, noiseReduction: true),
+      isEmpty,
+    );
+    expect(CalibrationMismatch.darksTwice.fixable, isFalse);
+    expect(CalibrationMismatch.matchesNoLight.fixable, isTrue);
+  });
+
   test('bias matches the ISO or gain and binning; its exposure is its own', () {
     final bias = _b(
       FrameType.bias,
