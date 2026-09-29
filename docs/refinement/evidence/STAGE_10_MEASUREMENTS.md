@@ -53,7 +53,7 @@ analyzer's, and the shares are of the APK's 24,188 KiB; native libraries are sto
 | --- | ---: | ---: |
 | `libflutter.so`, the Flutter engine | 11,473 KiB | 47 % |
 | `libapp.so`, the app's compiled Dart (AOT) | 9,729 KiB | 40 % |
-| `libsqlite3.so`, SQLite (`sqlite3_flutter_libs`) | 1,692 KiB | 7 % |
+| `libsqlite3.so`, SQLite (built by `package:sqlite3`'s build hook; see S10.6) | 1,692 KiB | 7 % |
 | `libdartjni.so` and `libdatastore_shared_counter.so` (plugins) | 135 KiB | 0.6 % |
 | Other ABIs' copies of those two plugin libraries (from the plugins' archives) | 204 KiB | 0.9 % |
 | `classes.dex` (Java/Kotlin, after R8) | 505 KiB | 2 % |
@@ -316,3 +316,59 @@ run 1 / run 2. "Over" counts frames above 16.7 ms.
   (p90 15.8–18.7 ms; the worst frames, 94–103 ms, are while the search field opens with the
   keyboard); a filter, 2.4–6.2 ms; an entry, 3.1–3.5 ms. The search filters in memory over the loaded
   list (I-9). **Practical; no change.** A phone trace is Stage 11's.
+
+## S10.6 — Dependencies and assets
+
+### The runtime dependencies, by verified use (`pubspec.yaml` at `1117e41`)
+
+Imports counted in `lib/` (files), plus the platform role where there is one.
+
+| Package | Used by | Verdict |
+| --- | --- | --- |
+| `provider` | 36 files: the ViewModels' providers (ADR-002) | Keep |
+| `go_router` | 19 files: navigation (ADR-015) | Keep |
+| `drift` | 30 files: the database (ADR-003), migrations, export and backup | Keep |
+| `sqlite3_flutter_libs ^0.6.0+eol` | **No import and no native code.** The published 0.6.0 package holds only a README, a licence and an empty library. Its README says it "no longer does anything" and should be removed after moving to `package:sqlite3` 3.x (this app resolves `sqlite3` 3.5.2, whose build hook supplies `libsqlite3.so`). No other package depends on it | **Removed** (RD-02's dependency part; D10-5) |
+| `path_provider`, `path` | 4 files each: the database file, backup staging, export | Keep |
+| `http` | 2 files: Open-Meteo, Nominatim | Keep |
+| `share_plus` | 4 files: export and backup sharing | Keep |
+| `url_launcher` | 5 files: About's links, the light-pollution map, OSM copyright | Keep |
+| `shared_preferences` | 9 files: preferences, the plan's ids, backup of settings | Keep |
+| `geolocator` | 1 file: `GeolocatorLocationService` | Keep |
+| `flutter_map`, `latlong2` | the map picker (185 KiB of Dart code) | Keep: the site editor's "Pick on map" |
+| `timezone` | `IanaTimeContext`: the zone rules (446 KiB, `latest_all` on purpose, trap 11) | Keep |
+| `flutter_timezone` | the device zone (behind `DeviceTimeZone`) | Keep |
+| `file_picker` | backup restore's file choice | Keep |
+| `archive` | the backup archive (105 KiB) | Keep |
+
+Nothing was left behind by the tracker's retirement (S8.4): keep-screen-on went through the app's own
+`ScreenWake` channel, not a package. The dev dependencies (`flutter_test`, `integration_test`,
+`flutter_lints`, `drift_dev`, `build_runner`) do not ship.
+
+### Removing `sqlite3_flutter_libs`: before and after (HEAD, arm64-v8a release APK)
+
+| | Before | After |
+| --- | ---: | ---: |
+| APK size | 24,768,842 bytes | 24,768,830 bytes |
+| Native libraries | `libflutter.so`, `libapp.so`, `libsqlite3.so` (1,732,360 bytes), `libdartjni.so`, `libdatastore_shared_counter.so` | the same, with identical sizes |
+| Other entries | — | identical except `NOTICES.Z` (−12 bytes: the package's licence line) |
+
+- **Regression check:** `pubspec.lock` loses only that package; the full gate passes (1,838 tests, 2
+  skips; host E2E 2 + 1); the scenario suite runs on the emulator in profile mode on the new build
+  (a new database, 164 catalog rows, 1,200 session writes, the Logbook), so SQLite loads and works on
+  Android without it.
+- **Size effect:** none worth claiming (12 bytes). The change is hygiene: it removes an end-of-life
+  dependency whose maintainer asks for its removal.
+
+### Assets, by verified reference
+
+| Asset | Size | Referenced by | Verdict |
+| --- | ---: | --- | --- |
+| `assets/catalog/catalog_v2.json` | 57 KB | `CatalogSeeder.assetPath` | Keep (the catalog) |
+| `assets/catalog/OPENNGC_NOTICE.txt` | 1.6 KB | the About page; CC BY-SA 4.0 attribution | Keep (required) |
+| `assets/branding/icon_512.png` | 21.6 KB | `tool/make_launcher_icons.py` (the store icon); **not** a Flutter asset, not in the APK | Keep (not shipped) |
+| Launcher icon and splash (`android/app/src/main/res`) | about 150 KiB of `res/` in the APK | the manifest | Keep (never degraded) |
+| Material Icons | 6 KiB after tree-shaking | the UI | Keep |
+| `NOTICES.Z` | 120 KiB | Flutter's licence page (generated) | Keep (required) |
+
+No bundled font, image or unused asset exists; assets are 0.6 % of the APK. Nothing to remove.

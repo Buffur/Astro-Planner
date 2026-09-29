@@ -1,5 +1,6 @@
 # AstroPlan Technical Debt Register
 
+> **S10.6, 2026-09-30:** `sqlite3_flutter_libs` removed (the cleanup list below; RD-02's dependency part). No item added.
 > **Stage 9 closed, 2026-09-30:** RD-01 deferred by the owner; TD-088 stays open, due before any store upload (Stage 11). No item added.
 > **Stage 9 findings fixed, 2026-09-29:** TD-089, TD-090 and TD-091 resolved (every Stage 9 validation finding). TD-088 stays open for RD-01. No item added.
 > **Stage 9 validation (S9.1–S9.9), 2026-09-29, verified at `8e53479` (code as at `0a0c95e`):** PASS, no blocker. TD-089 (four acceptance checks established by validation probes, not committed tests), TD-090 (the Library's Sites still has actions that change the active site) and TD-091 (an export's share text does not state its stamp's zone) recorded, not fixed; see `refinement/STAGE_9_VALIDATION.md`.
@@ -345,4 +346,4 @@ SI-005 + PD-10 ─► TD-008 ─► NPF surfaced only after TD-007
 **Done, owner-approved:** patch scripts, empty `package-lock.json` and empty `bin/`
 (`ef20670`); the `GEMINI.md` `.gitignore` entry (`714426d`, PD-13); `cupertino_icons`
 (`c8ad208`). **Not touched (need owner approval):** the Google ADK skill and its
-`skills-lock.json` entry; `docs/archive/` retention; `sqlite3_flutter_libs` (TD-031).
+`skills-lock.json` entry; `docs/archive/` retention; `sqlite3_flutter_libs` (TD-031). *(`sqlite3_flutter_libs` removed by S10.6, 2026-09-30, under the owner's delegation: RD-02's dependency part, D10-5.)*

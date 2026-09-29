@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.5 done**: first-run seeding in one transaction, 13–15 s → about 2 s on the emulator; ENG-11 and the Logbook measured).
-> **Next:** S10.6, dependencies and assets (RD-02's `sqlite3_flutter_libs`).
+> **Last updated:** 2026-09-30 (**S10.6 done**: dependencies and assets reviewed; `sqlite3_flutter_libs` removed).
+> **Next:** S10.7, the build and release options.
 
 ## Current state
 
@@ -14,10 +14,21 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.6** — dependencies and assets |
-| Code baseline | **S10.5** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S10.7** — build and release options |
+| Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.6 done, 2026-09-30** (dependencies and assets; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.6):
+- Every runtime dependency checked against its use: all used except **`sqlite3_flutter_libs
+  0.6.0+eol`**, an empty end-of-life package (its README asks for removal after `sqlite3` 3.x; this app
+  resolves 3.5.2, whose build hook supplies `libsqlite3.so`). **Removed** (RD-02's dependency part,
+  D10-5). The arm64 APK's native libraries are unchanged without it (the APK −12 bytes, in
+  `NOTICES.Z`); the scenario suite ran on the emulator on the new build.
+- Assets: the catalog, its notice, the icon and splash, Material Icons (6 KiB) and `NOTICES.Z`; all
+  referenced, 0.6 % of the APK; nothing to remove. `icon_512.png` is not shipped.
+- **Verification:** dependencies and the lockfile (high-risk): the full gate after the change,
+  **PASS** (1,838 tests, 2 skips; host E2E 2 + 1; Flutter 3.47.4); one emulator run.
 
 **S10.5 done, 2026-09-30** (ENG-12 fixed; ENG-11 and the Logbook measured;
 [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.5):
@@ -506,6 +517,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
+| **Full quality gate PASS** (S10.6): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.6's commit** (the lockfile without `sqlite3_flutter_libs`), on Flutter 3.47.4 | Ran after S10.6's last change; supersedes the S10.5 row below. Reusable while `git diff --stat <S10.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.5): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.5's commit**, on Flutter 3.47.4 | Ran after S10.5's last code change; supersedes the S10.3 row below. Reusable while `git diff --stat <S10.5 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.3): Encoding; Format; Analyze (no issues); 1,837 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1), one step each | **S10.3's commit** (inputs as at `80dfadd` plus S10.3's editor change), on Flutter 3.47.4 | Ran after S10.3's last code change; supersedes the TD-089–TD-091 row below. Reusable while `git diff --stat <S10.3 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (TD-089–TD-091): Encoding; Format; Analyze (no issues); 1,833 tests, 2 expected skips; 2 host E2E | **`0f09608`**, on Flutter 3.47.4 | The last code change before Stage 10; supersedes the S9.9 row below. Stage 10's baseline. Reusable while `git diff --stat 0f09608 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
@@ -567,7 +579,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | ID | Decision | Stage | Status |
 | --- | --- | --- | --- |
 | RD-01 | The GitHub account behind the app identity: `chacha12` or `Buffur` | Before any upload | Open (the author's own links do not wait for it, 2026-09-27). **Options prepared** 2026-09-29 (S9.12, `research/S9.12_PROJECT_IDENTITY.md`; TD-088); **deferred by the owner** 2026-09-30 (before any upload; Stage 11) |
-| RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open |
+| RD-02 | The TASK 0.3 holdovers (ADK skill, `skills-lock.json`, `docs/archive/`, `sqlite3_flutter_libs`) | 1 / 10 | Open, except the dependency: **`sqlite3_flutter_libs` removed** by S10.6 (2026-09-30, under the owner's delegation, D10-5) |
 | RD-03 | Wording rulings: the SCI-05 ISO label; the SCI-04 time-resolution caveat | 1 | **Resolved** 2026-09-25: a neutral label (S1.8); SCI-04 documented only (S1.13). DECISIONS E.1 |
 | RD-04 | New-draft defaults and the example plan | 4 | **Decided** 2026-09-27 (S4.R3; E.1): nothing preselected on the first run; New keeps the site and rig; an empty plan with "Start from the example plan" |
 | RD-05 | Drafts and "New session" semantics (Stage 1 may decide an interim safeguard) | 4 (1) | **Decided** 2026-09-27 (S4.R3; E.1): L1 (Draft internal; Save explicit), Y2, U1. The S1.6 interim stands until Stage 6 builds U1. **Clarified** 2026-09-27 (S4.V2; E.1, "S4R-01 and S4R-02 decided"): saved snapshots are immutable per night; results without Save plan; Stage 8 delivers the saved-plan transition at once |
@@ -651,7 +663,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.6 — dependencies and assets** (the plan's "Stage 10 — frozen Task sequence"), then S10.7, one Task per commit, then the Stage 10 validation in a fresh session.
+1. **S10.7 — build and release options** (the plan's "Stage 10 — frozen Task sequence"), one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB

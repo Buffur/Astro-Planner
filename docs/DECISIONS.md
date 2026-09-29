@@ -1890,7 +1890,9 @@ Stage 4 revalidation is still required.
   (claim, evidence, change, before, after, regression check), created by S10.1.
 - **D10-5 RD-02's dependency part:** decided in S10.6 on evidence (its actual role in the current
   `sqlite3`/`drift` packaging, a build and an emulator run); the ADK skill, `skills-lock.json` and
-  `docs/archive/` parts stay open (not Stage 10's).
+  `docs/archive/` parts stay open (not Stage 10's). *Decided by S10.6 (2026-09-30):* **removed**. The
+  0.6.0+eol package is empty and its README asks for removal after `sqlite3` 3.x; the APK's native
+  libraries are unchanged without it, and the app runs on the emulator.
 - **D10-6 the scenario suite:** kept in the repository and compiled by the quality gate, which never
   asserts on timing; timing runs are manual (the emulator or a device).
 - **Consequences:** S10.1–S10.7 follow them. Documentation only.
