@@ -140,7 +140,7 @@ Future<void> _editElsewhere(
 }) async {
   app.router.pop();
   await _settle(t);
-  await t.tap(find.byTooltip('Edit'));
+  await t.tap(find.byTooltip('Edit rig'));
   await _settle(t);
   // S7.6: the RAW size is one tap away, in "More (optional)".
   if (find.widgetWithText(TextFormField, from).evaluate().isEmpty) {

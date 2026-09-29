@@ -214,7 +214,7 @@ void main() {
     // Leaving the review writes nothing either.
     await t.tap(find.byTooltip('Back'));
     await _settle(t);
-    expect(find.text('Select Equipment'), findsOneWidget);
+    expect(find.text('Choose a rig'), findsOneWidget);
     expect(await app.counts(t), before);
   });
 

@@ -20,6 +20,7 @@ import '../screens/sites/sites_screen.dart';
 import '../screens/target/target_selection_screen.dart';
 import '../screens/execution/results_screen.dart';
 import '../screens/welcome/welcome_screen.dart';
+import '../shared/list_mode.dart';
 import '../screens/tonight/tonight_candidates_screen.dart';
 import '../screens/tonight/tonight_home_screen.dart';
 import 'app_shell.dart';
@@ -131,18 +132,21 @@ class AppRouter {
                 path: library,
                 builder: (context, state) => const LibraryScreen(),
                 routes: [
+                  // S9.1 (RD-07, TD-053): the Library manages; a tap opens.
                   GoRoute(
                     path: 'rigs',
                     builder: (context, state) =>
-                        const EquipmentSelectionScreen(),
+                        const EquipmentSelectionScreen(mode: ListMode.manage),
                   ),
                   GoRoute(
                     path: 'targets',
-                    builder: (context, state) => const TargetSelectionScreen(),
+                    builder: (context, state) =>
+                        const TargetSelectionScreen(mode: ListMode.manage),
                   ),
                   GoRoute(
                     path: 'sites',
-                    builder: (context, state) => const SitesScreen(),
+                    builder: (context, state) =>
+                        const SitesScreen(mode: ListMode.manage),
                   ),
                 ],
               ),

@@ -147,7 +147,7 @@ void main() {
     await tester.tap(choose);
     await tester.pumpAndSettle();
 
-    expect(find.text('Select Target'), findsOneWidget);
+    expect(find.text('Choose a target'), findsOneWidget);
   });
 
   testWidgets('a default location shows a banner that offers to set the site', (

@@ -173,8 +173,8 @@ void main() {
 
     await tester.tap(find.byTooltip('Delete site'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('This is the active site'), findsOneWidget);
-    await tester.tap(find.text('Delete'));
+    expect(find.textContaining('is the active site'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirm.action'))); // S9.1
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 

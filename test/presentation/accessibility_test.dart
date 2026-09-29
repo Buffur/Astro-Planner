@@ -299,6 +299,9 @@ void main() {
           AppRouter.libraryRigs,
           AppRouter.libraryTargets,
           AppRouter.librarySites,
+          AppRouter.selectRig, // S9.1: the same lists, choosing
+          AppRouter.selectTarget,
+          AppRouter.selectSite,
           AppRouter.logbookProgress,
           AppRouter.settings,
           AppRouter.about,

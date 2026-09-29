@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S9.1, 2026-09-29 (the Library; rigs F-23, targets F-19, sites F-07; RD-07, TD-053):** the Library **manages**: a tap on a rig, target or site opens it and never changes the plan or the active site; the planner, Tonight and the first run open the same lists to choose ("Choose a rig", "Choose a target", "Choose a site"). A target opened from the Library offers **Plan this target** (a new plan with it, after Save · Discard · Cancel when the plan has unsaved changes). Rigs, targets and sites are deleted from a visible Delete (the rig and target editors, the site row) or a swipe, both through the shared confirmation, with "Rig deleted", "Target deleted", "Site deleted" after. The Library tab describes the Library, not the plan.
+
 > **S8.9, 2026-09-29 (backup and restore):** a backup now carries the app's settings (planning thresholds, field mode and section states, the active site, the first-run flag) and a restore brings them back; the planner no longer opens on a stale site, target, rig or plan after a restore or a reset. Older backups still restore. No screen change.
 
 > **S8.8, 2026-09-29 (F-45, F-23):** a new session snapshot records where each rig spec came from (an imported rig's estimates as estimated, its file values as from the file). No screen change.

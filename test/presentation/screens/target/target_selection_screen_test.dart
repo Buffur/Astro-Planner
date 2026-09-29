@@ -202,7 +202,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('this object moves'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Edit'));
+    await tester.tap(find.byTooltip('Edit target'));
     await tester.pumpAndSettle();
     expect(find.text('Catalog ID: C/2025 X1'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, '05h35m17.0s'), findsOneWidget);
@@ -237,7 +237,7 @@ void main() {
     );
     await tester.pumpWidget(createTestWidget(repo, MockSessionPlanViewModel()));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Edit'));
+    await tester.tap(find.byTooltip('Edit target'));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Target Name *'),

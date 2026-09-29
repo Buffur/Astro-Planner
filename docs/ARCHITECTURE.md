@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.1, 2026-09-29:** `ListMode` (`presentation/shared/list_mode.dart`): `EquipmentSelectionScreen`, `TargetSelectionScreen` and `SitesScreen` take `mode`; the router builds the Library routes with `ListMode.manage` and `/select/…` with the default `ListMode.choose` (ADR-015 §7 as amended by RD-07; TD-053 resolved). `showEquipmentEditor` takes `onDelete` (a visible Delete in the dialog); deleting goes through `confirmDestructive` and `SwipeToDelete` (RD-09).
+
 > **TD-086 fix, 2026-09-29:** `ResultsViewModel.savedPlanUnreadable` (a Saved · changed entry with an unreadable plan snapshot): the result form reviews no planned blocks, night or target from its working row; `SavedNightEnd` reads `Session.unreadableSnapshotNight`.
 
 > **TD-085 fix, 2026-09-29:** `CurrentSession.save(plan, snapshot, nowUtc)` never saves over a saved plan whose night has ended (CALC-44, D8-2), whether or not the minute night check has run: decided in its chain step (a Saved · changed one is settled first), so S1.12's ordering holds.

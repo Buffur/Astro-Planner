@@ -8,14 +8,22 @@ import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../../core/config/feature_scope.dart';
 import '../../navigation/app_router.dart';
+import '../../shared/app_words.dart';
+import '../../shared/confirmation_patterns.dart';
+import '../../shared/delete_patterns.dart';
 import '../../shared/example_text.dart';
 import '../../shared/failure_feedback.dart';
+import '../../shared/list_mode.dart';
 import 'equipment_editor.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
 
+/// The rigs (ADR-015; S9.1, D9-1): managed in the Library, chosen for the
+/// plan from `/select/rig`. Deleting confirms (RD-09 = M + S1).
 class EquipmentSelectionScreen extends StatefulWidget {
-  const EquipmentSelectionScreen({super.key});
+  const EquipmentSelectionScreen({super.key, this.mode = ListMode.choose});
+
+  final ListMode mode;
 
   @override
   State<EquipmentSelectionScreen> createState() =>
@@ -95,8 +103,39 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
     }
   }
 
+  /// Deletes [eq] after the shared confirmation (a stored record, RD-09):
+  /// saved plans keep their own copy of it (ADR-014 §4). Returns whether it
+  /// was deleted.
+  Future<bool> _delete(EquipmentProfile eq) async {
+    final sure = await confirmDestructive(
+      context,
+      title: 'Delete this rig?',
+      message:
+          '"${eq.name}" is deleted from your rigs. Saved plans keep what '
+          "they recorded. This can't be undone.",
+    );
+    if (!sure || !mounted) return false;
+    final deleted = await runWithFeedback(
+      context,
+      'delete the rig',
+      () => context.read<GearViewModel>().delete(eq.id),
+    );
+    if (!mounted) return deleted;
+    if (deleted) showDone(context, 'Rig deleted');
+    await _loadEquipment();
+    // TD-028: clear the planner's selection if this was it.
+    if (mounted) {
+      await context.read<SessionPlanViewModel>().refreshSelectedEquipment();
+    }
+    return deleted;
+  }
+
   Future<void> _showEquipmentDialog({EquipmentProfile? existing}) async {
-    await showEquipmentEditor(context, existing: existing);
+    await showEquipmentEditor(
+      context,
+      existing: existing,
+      onDelete: existing == null ? null : () => _delete(existing),
+    );
     // Always refresh list after dialog closes.
     _loadEquipment();
     // TD-028: pick up an edit to the currently selected equipment instead of
@@ -109,11 +148,13 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final gear = context.read<GearViewModel>();
     final planVm = context.watch<SessionPlanViewModel>();
+    final choosing = widget.mode == ListMode.choose;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Equipment')),
+      appBar: AppBar(
+        title: Text(choosing ? AppWords.chooseRig : AppWords.rigs),
+      ),
       body: _initialLoading
           ? const Center(child: CircularProgressIndicator())
           : _loadError != null
@@ -129,7 +170,10 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               itemCount: _equipment.length,
               itemBuilder: (context, index) {
                 final eq = _equipment[index];
-                final isSelected = eq.id == planVm.selectedEquipment?.id;
+                // Only when choosing: the Library describes the rigs, not
+                // the plan (S9.1).
+                final isSelected =
+                    choosing && eq.id == planVm.selectedEquipment?.id;
 
                 final card = Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -148,79 +192,36 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(_subtitle(eq)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 20),
-                          tooltip: 'Edit',
-                          onPressed: () => _showEquipmentDialog(existing: eq),
-                        ),
-                        if (isSelected)
-                          Icon(
-                            Icons.check_circle,
-                            color: AppPalette.of(context).selected,
-                          ),
-                      ],
-                    ),
-                    onTap: () {
-                      planVm.setEquipment(eq);
-                      context.pop();
-                    },
+                    trailing: choosing
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 20),
+                                tooltip: AppWords.editRig,
+                                onPressed: () =>
+                                    _showEquipmentDialog(existing: eq),
+                              ),
+                              if (isSelected)
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppPalette.of(context).selected,
+                                ),
+                            ],
+                          )
+                        : const Icon(Icons.chevron_right),
+                    onTap: choosing
+                        ? () {
+                            planVm.setEquipment(eq);
+                            context.pop();
+                          }
+                        : () => _showEquipmentDialog(existing: eq),
                   ),
                 );
 
-                return Dismissible(
-                  key: ValueKey('eq_${eq.id}'),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 16),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Icon(
-                      Icons.delete,
-                      color: Theme.of(context).colorScheme.onError,
-                    ),
-                  ),
-                  confirmDismiss: (direction) async {
-                    return await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Equipment?'),
-                        content: Text(
-                          'Are you sure you want to delete "${eq.name}"?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  onDismissed: (direction) async {
-                    setState(
-                      () => _equipment.removeWhere((e) => e.id == eq.id),
-                    );
-                    final deleted = await runWithFeedback(
-                      context,
-                      'delete the rig',
-                      () => gear.delete(eq.id),
-                    );
-                    if (!deleted) return _loadEquipment(); // it is still there
-                    // TD-028: clear the planner's selection if this was it,
-                    // instead of leaving a reference to a deleted profile.
-                    await planVm.refreshSelectedEquipment();
-                  },
+                return SwipeToDelete(
+                  itemKey: ValueKey('eq_${eq.id}'),
+                  onDelete: () => _delete(eq),
                   child: card,
                 );
               },

@@ -12,6 +12,11 @@ abstract final class AppWords {
   static const editRig = 'Edit rig';
   static const chooseRig = 'Choose a rig';
 
+  // What the plan images (S9.1).
+  static const targets = 'Targets';
+  static const chooseTarget = 'Choose a target';
+  static const planThisTarget = 'Plan this target';
+
   // What the user makes and saves in the planner.
   static const plan = 'Plan';
   static const newPlan = 'New plan';
@@ -97,6 +102,8 @@ abstract final class AppWords {
 
   // Places, reusable things and history.
   static const site = 'Site';
+  static const sites = 'Sites';
+  static const chooseSite = 'Choose a site';
   static const library = 'Library';
   static const progressByTarget = 'Progress by target';
 

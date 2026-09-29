@@ -11,6 +11,7 @@ import '../../../domain/models/spec_provenance.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/app_words.dart';
 import '../../shared/collapsible_section.dart';
+import '../../shared/delete_patterns.dart';
 import '../../shared/equipment_draft.dart';
 import '../../shared/equipment_form_input.dart';
 import '../../shared/equipment_import_text.dart';
@@ -29,14 +30,20 @@ Future<bool> showEquipmentEditor(
   BuildContext context, {
   EquipmentProfile? existing,
   EquipmentDraft? draft,
-}) =>
-    _EquipmentEditor(draft ?? EquipmentDraft.fromProfile(existing))
-        .show(context);
+  Future<bool> Function()? onDelete,
+}) => _EquipmentEditor(
+  draft ?? EquipmentDraft.fromProfile(existing),
+  onDelete,
+).show(context);
 
 class _EquipmentEditor {
-  _EquipmentEditor(this.form);
+  _EquipmentEditor(this.form, this.onDelete);
 
   final EquipmentDraft form;
+
+  /// The visible Delete of a saved rig (S9.1; RD-09 = M + S1): confirms,
+  /// deletes, and returns whether it did; the editor then closes.
+  final Future<bool> Function()? onDelete;
 
   static String _trim(double value) =>
       value == value.roundToDouble() ? value.toInt().toString() : '$value';
@@ -603,6 +610,16 @@ class _EquipmentEditor {
                 ),
               ),
               actions: [
+                if (onDelete case final delete?)
+                  DeleteButton(
+                    key: const Key('rigEditor.delete'),
+                    tooltip: 'Delete rig',
+                    onPressed: () async {
+                      if (await delete() && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),

@@ -6,13 +6,25 @@ import '../../../core/utils/astro_math.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../../../domain/models/astro_target.dart';
 import '../../../domain/models/target_types.dart';
+import '../../navigation/app_router.dart';
+import '../../shared/app_words.dart';
+import '../../shared/confirmation_patterns.dart';
+import '../../shared/delete_patterns.dart';
 import '../../shared/failure_feedback.dart';
+import '../../shared/list_mode.dart';
 import '../../shared/target_form_input.dart';
+import '../../shared/unsaved_plan_prompt.dart';
+import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
 
+/// The targets (ADR-015; S9.1, D9-1): managed in the Library, where "Plan
+/// this target" starts a new plan; chosen for the plan from
+/// `/select/target`. Deleting confirms (RD-09 = M + S1).
 class TargetSelectionScreen extends StatefulWidget {
-  const TargetSelectionScreen({super.key});
+  const TargetSelectionScreen({super.key, this.mode = ListMode.choose});
+
+  final ListMode mode;
 
   @override
   State<TargetSelectionScreen> createState() => _TargetSelectionScreenState();
@@ -83,6 +95,55 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
     if (existing != null && !TargetTypes.selectable.contains(existing.type))
       existing.type,
   ];
+
+  static String _name(AstroTarget t) => t.commonName ?? t.catalogId;
+
+  /// Deletes [target] after the shared confirmation (a stored record,
+  /// RD-09); saved plans keep what they recorded (ADR-014 §4).
+  Future<bool> _delete(AstroTarget target) async {
+    final sure = await confirmDestructive(
+      context,
+      title: 'Delete this target?',
+      message:
+          '"${_name(target)}" is deleted from your targets. Saved plans keep '
+          "what they recorded. This can't be undone.",
+    );
+    if (!sure || !mounted) return false;
+    final deleted = await runWithFeedback(
+      context,
+      'delete the target',
+      () => context.read<TargetsViewModel>().delete(target.id),
+    );
+    if (!mounted) return deleted;
+    if (deleted) showDone(context, 'Target deleted');
+    await _loadTargets();
+    // TD-028: clear the planner's selection if this was it.
+    if (mounted) {
+      await context.read<SessionPlanViewModel>().refreshSelectedTarget();
+    }
+    return deleted;
+  }
+
+  /// "Plan this target" (S9.1, D9-1): a new plan with [target], after the
+  /// leave guard (U1), then the planner.
+  Future<void> _planThis(AstroTarget target) async {
+    final leaving = await askBeforeLeavingPlan(context);
+    if (leaving == null || !mounted) return;
+    final lifecycle = context.read<PlanLifecycleViewModel>();
+    final plan = context.read<SessionPlanViewModel>();
+    final started = await runWithFeedback(
+      context,
+      'start a new plan',
+      () async {
+        await lifecycle.newSession(discard: leaving == LeavingPlan.discard);
+        await plan.setTarget(target);
+      },
+    );
+    if (started && mounted) {
+      showDone(context, 'New plan for ${_name(target)}');
+      context.push(AppRouter.session());
+    }
+  }
 
   Future<void> _showTargetDialog({AstroTarget? existing}) async {
     final nameCtrl = TextEditingController(
@@ -211,6 +272,25 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                 ),
               ),
               actions: [
+                if (existing != null)
+                  DeleteButton(
+                    key: const Key('targetEditor.delete'),
+                    tooltip: 'Delete target',
+                    onPressed: () async {
+                      if (await _delete(existing) && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                if (existing != null && widget.mode == ListMode.manage)
+                  TextButton(
+                    key: const Key('targetEditor.plan'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _planThis(existing);
+                    },
+                    child: const Text(AppWords.planThisTarget),
+                  ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
@@ -264,12 +344,12 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final targets = context.read<TargetsViewModel>();
     final planVm = context.watch<SessionPlanViewModel>();
+    final choosing = widget.mode == ListMode.choose;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Target'),
+        title: Text(choosing ? AppWords.chooseTarget : AppWords.targets),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
@@ -314,7 +394,10 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
               itemCount: _targets.length,
               itemBuilder: (context, index) {
                 final target = _targets[index];
-                final isSelected = target.id == planVm.selectedTarget?.id;
+                // Only when choosing: the Library describes the targets,
+                // not the plan (S9.1).
+                final isSelected =
+                    choosing && target.id == planVm.selectedTarget?.id;
 
                 final card = Card(
                   margin: const EdgeInsets.only(bottom: 8),
@@ -337,80 +420,36 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                           ? '${target.type} · ${TargetTypes.movingWarning}'
                           : target.type,
                     ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit_outlined, size: 20),
-                          tooltip: 'Edit',
-                          onPressed: () => _showTargetDialog(existing: target),
-                        ),
-                        if (isSelected)
-                          Icon(
-                            Icons.check_circle,
-                            color: AppPalette.of(context).selected,
-                          ),
-                      ],
-                    ),
-                    onTap: () {
-                      planVm.setTarget(target);
-                      context.pop();
-                    },
+                    trailing: choosing
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 20),
+                                tooltip: 'Edit target',
+                                onPressed: () =>
+                                    _showTargetDialog(existing: target),
+                              ),
+                              if (isSelected)
+                                Icon(
+                                  Icons.check_circle,
+                                  color: AppPalette.of(context).selected,
+                                ),
+                            ],
+                          )
+                        : const Icon(Icons.chevron_right),
+                    onTap: choosing
+                        ? () {
+                            planVm.setTarget(target);
+                            context.pop();
+                          }
+                        : () => _showTargetDialog(existing: target),
                   ),
                 );
 
-                return Dismissible(
-                  key: ValueKey('target_${target.id}'),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 16),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Icon(
-                      Icons.delete,
-                      color: Theme.of(context).colorScheme.onError,
-                    ),
-                  ),
-                  confirmDismiss: (direction) async {
-                    return await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Target?'),
-                        content: Text(
-                          'Are you sure you want to delete ${target.commonName ?? target.catalogId}?',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  onDismissed: (direction) async {
-                    // Remove instantly from in-memory list — no flicker.
-                    setState(
-                      () => _targets.removeWhere((t) => t.id == target.id),
-                    );
-                    final deleted = await runWithFeedback(
-                      context,
-                      'delete the target',
-                      () => targets.delete(target.id),
-                    );
-                    if (!deleted) return _loadTargets(); // it is still there
-                    // TD-028: clear the planner's selection if this was it,
-                    // instead of leaving a reference to a deleted target.
-                    await planVm.refreshSelectedTarget();
-                  },
+                return SwipeToDelete(
+                  itemKey: ValueKey('target_${target.id}'),
+                  onDelete: () => _delete(target),
                   child: card,
                 );
               },

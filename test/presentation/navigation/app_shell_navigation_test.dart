@@ -147,15 +147,15 @@ void main() {
       AppRouter.sessions: 'Logbook',
       AppRouter.logbookProgress: 'Progress by target', // S8.5
       AppRouter.library: 'Library',
-      AppRouter.libraryRigs: 'Select Equipment',
-      AppRouter.libraryTargets: 'Select Target',
+      AppRouter.libraryRigs: 'Rigs',
+      AppRouter.libraryTargets: 'Targets',
       AppRouter.librarySites: 'Sites',
       AppRouter.settings: 'Planning Settings',
       AppRouter.about: 'About & data sources',
       AppRouter.session(): 'Plan',
-      AppRouter.selectTarget: 'Select Target',
-      AppRouter.selectRig: 'Select Equipment',
-      AppRouter.selectSite: 'Sites',
+      AppRouter.selectTarget: 'Choose a target',
+      AppRouter.selectRig: 'Choose a rig',
+      AppRouter.selectSite: 'Choose a site',
     };
     for (final entry in expected.entries) {
       AppRouter.router.go(entry.key);
@@ -187,10 +187,10 @@ void main() {
     await tapTab(tester, 'Library');
     await tester.tap(find.text('Rigs'));
     await settle(tester);
-    expect(title('Select Equipment'), findsOneWidget);
+    expect(title('Rigs'), findsOneWidget); // S9.1: the Library manages
 
     await back(tester);
-    expect(title('Select Equipment'), findsNothing);
+    expect(title('Rigs'), findsNothing);
     expect(title('Library'), findsOneWidget);
     await back(tester);
     expect(title('Tonight'), findsOneWidget);

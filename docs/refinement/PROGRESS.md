@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**Stage 9 planned**: S9.1–S9.12 frozen; after TD-085 to TD-087 were fixed).
-> **Next:** S9.1 (the Library manages). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.1 done**: the Library manages).
+> **Next:** S9.2 (secondary forms and the vocabulary). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,28 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.1** (below, "Next allowed action") |
-| Code baseline | **TD-087's fix** (its commit; after the TD-085 and TD-086 fixes). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.2** (below, "Next allowed action") |
+| Code baseline | **S9.1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.1 done, 2026-09-29** (P9.1; RD-07, TD-053 resolved; D9-1, D9-2): the Library manages.
+- `ListMode` (manage in the Library, choose from `/select/…`): a Library tap opens the rig, target or
+  site and never changes the plan or the active site; choosing is unchanged. Titles by mode ("Rigs",
+  "Choose a rig", …); no plan highlight in the Library; the Library tab describes itself.
+- **Plan this target** in a target opened from the Library: the leave guard, a new plan with the
+  target, "New plan for …", the planner.
+- Rigs, targets and sites: a visible Delete (rig and target editors, the site row) and a swipe, both
+  through `confirmDestructive` (one message shape), then "Rig deleted" etc. The ad hoc dialogs and raw
+  `Dismissible`s are gone. Acceptance (4)'s "refusal for a rig in use" was dropped: no such refusal
+  exists (saved plans keep their snapshots).
+- **Tests:** `library_manage_mode_test.dart` (6; mutation-checked: with the Library routes in choose
+  mode four fail); the sweep adds `/select/rig`, `/select/target`, `/select/site`; titles and tooltips
+  updated deliberately in the navigation, Tonight, planner, metadata, target, sites and E2E tests
+  ("Select Equipment" → "Choose a rig", "Select Target" → "Choose a target", "Edit" → "Edit rig" /
+  "Edit target", the site dialog's wording).
+- **Verification:** shared behaviour (three lists, the router, the editors): the full gate after the
+  last code change, **PASS** (1,797 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **Stage 9 planned, 2026-09-29** (documentation only; the plan's "Stage 9 — frozen Task sequence"):
 - Inputs verified against the code at `b378f16` (§9.7). Most important: the Library still chooses for
@@ -396,8 +414,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.1 — The Library manages; one delete pattern for rigs, targets and sites** (`POST_ROADMAP_PLAN.md`,
-   "Stage 9 — frozen Task sequence"). Then S9.2 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.2 — Secondary forms and the vocabulary completed** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
+   Task sequence"). Then S9.3 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

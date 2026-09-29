@@ -230,7 +230,7 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
   await scrollTo(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Choose a target'), findsWidgets);
   await tap(tester, find.byKey(const Key('status.choose')));
-  expect(find.text('Select Target'), findsOneWidget);
+  expect(find.text('Choose a target'), findsOneWidget);
   await tester.enterText(find.byType(TextField).first, 'Andromeda');
   await settle(tester);
   await tap(tester, find.textContaining('(M31)').first);
@@ -238,7 +238,7 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
   await scrollTo(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Choose a rig'), findsWidgets);
   await tap(tester, find.byKey(const Key('status.choose')));
-  expect(find.text('Select Equipment'), findsOneWidget);
+  expect(find.text('Choose a rig'), findsOneWidget);
   await tap(tester, find.textContaining('ASI2600MC').first);
 
   await scrollTo(tester, find.byKey(const Key('capturePlan.useExample')));

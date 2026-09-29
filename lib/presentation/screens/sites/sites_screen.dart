@@ -3,17 +3,25 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/models/location_profile.dart';
+import '../../shared/app_words.dart';
+import '../../shared/confirmation_patterns.dart';
+import '../../shared/delete_patterns.dart';
+import '../../shared/list_mode.dart';
 import '../../shared/location_feedback.dart';
 import '../../viewmodels/site_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
 import 'site_editor_screen.dart';
 import '../../navigation/app_router.dart';
 
-/// Saved sites and the current position (TASK 7.3): select, create, edit
-/// and delete sites; use the device position or a map pick as a transient
-/// position, and save it as a site.
+/// Saved sites and the current position (TASK 7.3): create, edit and delete
+/// sites; use the device position or a map pick as a transient position,
+/// and save it as a site. Since S9.1 (D9-1) the Library **manages** them (a
+/// tap opens the site) and the active site is chosen only from
+/// `/select/site` (a tap makes it active). Deleting confirms (RD-09).
 class SitesScreen extends StatelessWidget {
-  const SitesScreen({super.key});
+  const SitesScreen({super.key, this.mode = ListMode.choose});
+
+  final ListMode mode;
 
   static String _coordinates(double lat, double lon) =>
       '${lat.toStringAsFixed(4)}, ${lon.toStringAsFixed(4)}';
@@ -24,36 +32,28 @@ class SitesScreen extends StatelessWidget {
     LocationProfile site,
   ) async {
     final active = viewModel.activeSite?.id == site.id;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete ${site.name}?'),
-        content: Text(
-          active
-              ? 'This is the active site. Its position stays as your current '
-                    'position, but its time zone and sky data no longer apply.'
-              : 'This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await confirmDestructive(
+      context,
+      title: 'Delete this site?',
+      message: active
+          ? '"${site.name}" is the active site. Its position stays as your '
+                'current position, but its time zone and sky data no longer '
+                "apply. Saved plans keep what they recorded. This can't be "
+                'undone.'
+          : '"${site.name}" is deleted from your sites. Saved plans keep what '
+                "they recorded. This can't be undone.",
     );
-    if (confirmed == true && context.mounted) {
-      await runWithFeedback(
-        context,
-        'delete the site',
-        () => viewModel.deleteSite(site.id),
-      );
-    }
+    if (!confirmed || !context.mounted) return;
+    final deleted = await runWithFeedback(
+      context,
+      'delete the site',
+      () => viewModel.deleteSite(site.id),
+    );
+    if (deleted && context.mounted) showDone(context, 'Site deleted');
   }
+
+  void _open(BuildContext context, LocationProfile site) =>
+      context.push(AppRouter.siteEdit, extra: SiteEditorArgs(site: site));
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +62,11 @@ class SitesScreen extends StatelessWidget {
     final hasTransient = siteVm.activeSite == null && !siteVm.isDefaultLocation;
     final sites = siteVm.sites;
 
+    final choosing = mode == ListMode.choose;
     return Scaffold(
-      appBar: AppBar(title: const Text('Sites')),
+      appBar: AppBar(
+        title: Text(choosing ? AppWords.chooseSite : AppWords.sites),
+      ),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 88),
         children: [
@@ -131,42 +134,45 @@ class SitesScreen extends StatelessWidget {
               child: Text('No saved sites yet.'),
             ),
           for (final site in sites)
-            ListTile(
-              key: ValueKey('site-${site.id}'),
-              leading: Icon(
-                site.id == activeId
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
-                semanticLabel: site.id == activeId ? 'Active site' : null,
-              ),
-              title: Text(site.name),
-              subtitle: Text(
-                '${_coordinates(site.latitude, site.longitude)} · '
-                '${site.timeZoneId ?? 'zone unknown'}',
-              ),
-              selected: site.id == activeId,
-              onTap: () => runWithFeedback(
-                context,
-                'select the site',
-                () => siteVm.selectSite(site.id),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    tooltip: 'Edit site',
-                    onPressed: () => context.push(
-                      AppRouter.siteEdit,
-                      extra: SiteEditorArgs(site: site),
+            SwipeToDelete(
+              itemKey: ValueKey('site-swipe-${site.id}'),
+              onDelete: () => _confirmDelete(context, siteVm, site),
+              child: ListTile(
+                key: ValueKey('site-${site.id}'),
+                leading: Icon(
+                  site.id == activeId
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  semanticLabel: site.id == activeId ? 'Active site' : null,
+                ),
+                title: Text(site.name),
+                subtitle: Text(
+                  '${_coordinates(site.latitude, site.longitude)} · '
+                  '${site.timeZoneId ?? 'zone unknown'}',
+                ),
+                selected: site.id == activeId,
+                onTap: choosing
+                    ? () => runWithFeedback(
+                        context,
+                        'select the site',
+                        () => siteVm.selectSite(site.id),
+                      )
+                    : () => _open(context, site),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (choosing)
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined),
+                        tooltip: 'Edit site',
+                        onPressed: () => _open(context, site),
+                      ),
+                    DeleteButton(
+                      tooltip: 'Delete site',
+                      onPressed: () => _confirmDelete(context, siteVm, site),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Delete site',
-                    onPressed: () => _confirmDelete(context, siteVm, site),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],

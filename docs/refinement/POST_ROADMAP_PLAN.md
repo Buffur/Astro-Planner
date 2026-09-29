@@ -5285,7 +5285,7 @@ GitHub identity (RD-01: the application id is permanent once published). The age
 
 | Task | Title | From | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S9.1 | The Library manages; one delete pattern for rigs, targets and sites | P9.1; TD-053 | M | — | Frozen |
+| S9.1 | The Library manages; one delete pattern for rigs, targets and sites | P9.1; TD-053 | M | — | **Done 2026-09-29** |
 | S9.2 | Secondary forms and the vocabulary completed | P9.2 | M | S9.1 | Frozen |
 | S9.3 | RG-13: what each setting is for, and where it belongs (research) | P9.3 | S | — | Frozen |
 | S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | Frozen |
@@ -5314,21 +5314,24 @@ Stage's exit allows "deferred by the owner").
     "Targets", "Sites" in the Library; "Choose a rig", "Choose a target", "Choose a site" when choosing
     (`AppWords`).
   - The Library tab's tiles describe the Library, not the plan: counts ("3 rigs"), and for sites the
-    active site as information.
+    active site as information. *(Built by S9.1 as short descriptions instead of counts, which would
+    need an extra read on every visit; the sites tile keeps its count and active site.)*
   - **"Plan this target"** on a target's editor in manage mode: a new plan with that target, under
     the leave guard (`askBeforeLeavingPlan`, U1), then the planner.
   - **Deleting** a rig, target or site: a visible Delete in its editor (`DeleteButton`) and a swipe
     shortcut (`SwipeToDelete`) in both modes, one `confirmDestructive` wording, the existing
-    repository checks unchanged (a rig or site in use stays refused with its message; saved plans keep
-    their snapshots), and `showDone` after a delete.
+    repository checks unchanged (saved plans keep their snapshots), and `showDone` after a delete.
+    *(Corrected at S9.1: no repository refuses deleting a rig or site in use: saved plans' references
+    are set null and their snapshots keep the values, ADR-014 §4. The site keeps its visible Delete in
+    the row, RD-09's S1.)*
   - "Add from a photo" stays in both modes (ADR-018 §7).
 - **Out of scope:** the editors' own forms (S9.2); Settings.
 - **Acceptance:** (1) UI tests: tapping a rig, a target and a site in the Library opens its editor
   and leaves the plan's rig, target and the active site unchanged; (2) the same taps from `/select/…`
   still choose; (3) "Plan this target" asks when the plan has unsaved changes and starts a new plan
-  with the target; (4) each delete asks through `confirmDestructive`, a cancelled swipe returns the
-  row, and the refusal for a rig in use still shows; (5) TD-053 resolved; the sweep covers the three
-  lists in both modes.
+  with the target; (4) each delete asks through `confirmDestructive` and a cancelled swipe returns the
+  row *(the "refusal for a rig in use" clause dropped at S9.1: no such refusal exists)*; (5) TD-053
+  resolved; the sweep covers the three lists in both modes.
 
 ##### S9.2 — Secondary forms and the vocabulary completed
 - **Objective:** the rig, target and site editors follow Stage 5's form pattern and the glossary,

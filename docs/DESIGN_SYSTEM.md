@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S9.1, 2026-09-29:** the Library lists adopt `SwipeToDelete`, `DeleteButton` (the rig and target editors, the site row) and `confirmDestructive` ("Delete this rig?", "Delete this target?", "Delete this site?", one message shape: what is deleted, that saved plans keep what they recorded, that it can't be undone), `showDone` after a delete, and `AppWords` (Rigs, Targets, Sites; Choose a rig, a target, a site; Plan this target).
+
 > **S8.2, 2026-09-29:** the result form adopts `PlanStateLabel` (its review) and `showDone` ("Result saved."); its outcomes and Not done reasons are `ChoiceChip`s in a `Wrap`, its counts typed fields (no ±1). §9's P8.5 rows for the entry now point to P8.7, as the plan's Stage 8 amendment already said.
 > **S7.6, 2026-09-29:** `CollapsibleSection` gains a controlled use (`open` + `onToggle`): the caller holds the state and no `DisclosureViewModel` is read (the rig editor's "More (optional)", not remembered). The rig editor's "Equipment profile" title is gone (§9.3), with `AppWords.addRig`/`editRig` and Save as the primary (`FilledButton`). The site editor (S7.5) uses the remembered form for "Sky darkness (optional)".
 
