@@ -3,6 +3,7 @@
 > **Verification stamp:** written 2026-09-24 for TASK 14.3 (commit recorded in
 > `docs/ROADMAP.md`), against `lib/data/export/session_manifest_codec.dart`.
 > The codec is the source of truth; this document describes it.
+> **Updated 2026-09-29 (S8.6):** the `name` key, additive; still version 2.
 > **Updated 2026-09-29 (S8.1):** the result keys and the `reported` event kind, additive; still version 2.
 
 A manifest is a UTF-8 JSON file (`astroplan-sessions-<UTC date and time>.json`)
@@ -35,6 +36,7 @@ shared from a session's detail (**Export file**, one session) or the Sessions ta
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `id` | int | the session's id on the exporting device |
+| `name` | string? | *(S8.6, additive)* the plan's optional name; null or absent = none (shown as target · night) |
 | `status` | string | `draft`, `planned`, `inProgress`, `completed`, `abandoned` |
 | `legacy` | bool | saved before v16 (or without a night key): stored text only |
 | `evening_date`, `time_zone_id` | string? | the night key |

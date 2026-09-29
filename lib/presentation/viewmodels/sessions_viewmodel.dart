@@ -95,15 +95,16 @@ class SessionsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The entries in [list] whose target, site or notes contain the search
-  /// text, ignoring case (S8.5; in memory, no full-text index).
+  /// The entries in [list] whose name, target, site or notes contain the
+  /// search text, ignoring case (S8.5–S8.6; in memory, no full-text index).
   List<Session> searched(List<Session> list) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return list;
     bool has(String? text) => text != null && text.toLowerCase().contains(q);
     return [
       for (final s in list)
-        if (has(s.record.targetName) ||
+        if (has(s.name) ||
+            has(s.record.targetName) ||
             has(s.record.locationName) ||
             has(s.record.environmentalNotes) ||
             has(s.record.processingNotes))
@@ -274,9 +275,25 @@ class SessionsViewModel extends ChangeNotifier {
     return list;
   }
 
+  /// Bumped whenever an entry changes outside the list (a name, a result,
+  /// a deletion), so an open Logbook reads its entries again (S8.6).
+  int get revision => _revision;
+  int _revision = 0;
+
+  void markChanged() {
+    _revision++;
+    notifyListeners();
+  }
+
+  /// Names entry [id], or removes its name (S8.6).
+  Future<void> rename(int id, String? name) async {
+    await _repository.rename(id, name);
+    markChanged();
+  }
+
   Future<void> delete(int id) async {
     await _repository.delete(id);
-    notifyListeners();
+    markChanged();
     await refreshDue();
   }
 }

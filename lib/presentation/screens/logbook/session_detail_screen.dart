@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../domain/models/capture_block.dart';
 import '../../../domain/models/session.dart';
 import '../../../domain/models/session_snapshot.dart';
+import '../../../domain/repositories/session_repository.dart';
 import '../../../domain/services/result_action.dart';
 import '../../../domain/services/session_reconciliation.dart';
 import '../../shared/app_words.dart';
@@ -102,6 +103,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _Header(session: s),
+              if (!s.legacy) _NameTile(session: s, onChanged: _load),
               if (!s.legacy) _SnapshotSections(session: s),
               _PlanVsActual(session: s, reconciliation: data.reconciliation),
               _Notes(session: s),
@@ -514,4 +516,83 @@ class _Section extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Name (optional)" (S8.6; 08 §24): never asked at Save plan; set, changed
+/// or removed here. Without one the entry is shown as target · night.
+class _NameTile extends StatelessWidget {
+  const _NameTile({required this.session, required this.onChanged});
+
+  final Session session;
+  final VoidCallback onChanged;
+
+  Future<void> _edit(BuildContext context) async {
+    final name = await showDialog<String>(
+      context: context,
+      builder: (_) => _NameDialog(initial: session.name ?? ''),
+    );
+    if (name == null || !context.mounted) return;
+    final sessions = context.read<SessionsViewModel>();
+    final saved = await runWithFeedback(
+      context,
+      'save the name',
+      () => sessions.rename(session.id, name),
+    );
+    if (saved) onChanged();
+  }
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    key: const Key('detail.name'),
+    contentPadding: EdgeInsets.zero,
+    title: const Text(AppWords.nameOptional),
+    subtitle: Text(session.name ?? 'None · shown as target · night'),
+    trailing: const Icon(Icons.edit_outlined),
+    onTap: () => _edit(context),
+  );
+}
+
+/// The name's editor; it owns its field, which lives as long as the dialog.
+class _NameDialog extends StatefulWidget {
+  const _NameDialog({required this.initial});
+
+  final String initial;
+
+  @override
+  State<_NameDialog> createState() => _NameDialogState();
+}
+
+class _NameDialogState extends State<_NameDialog> {
+  late final _field = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _field.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text(AppWords.nameOptional),
+    content: TextField(
+      key: const Key('detail.nameField'),
+      controller: _field,
+      autofocus: true,
+      maxLength: SessionRepository.maxNameLength,
+      decoration: const InputDecoration(
+        helperText: 'Leave it empty to show target · night.',
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        key: const Key('detail.nameSave'),
+        onPressed: () => Navigator.pop(context, _field.text),
+        child: const Text('Save'),
+      ),
+    ],
+  );
 }

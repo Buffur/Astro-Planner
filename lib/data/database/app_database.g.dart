@@ -4623,6 +4623,15 @@ class $SessionLogsTable extends SessionLogs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4662,6 +4671,7 @@ class $SessionLogsTable extends SessionLogs
     trackingOverride,
     resultKind,
     notDoneReason,
+    name,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4962,6 +4972,12 @@ class $SessionLogsTable extends SessionLogs
         ),
       );
     }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
     return context;
   }
 
@@ -5125,6 +5141,10 @@ class $SessionLogsTable extends SessionLogs
         DriftSqlType.string,
         data['${effectivePrefix}not_done_reason'],
       ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
     );
   }
 
@@ -5209,6 +5229,10 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
   /// Why an abandoned session was not done (S8.1, v24): clouds, wind, dew,
   /// equipment or other; NULL when not given.
   final String? notDoneReason;
+
+  /// The plan's optional name (S8.6, v25; 08 §24): NULL = none, shown as
+  /// target · night. Not part of the snapshot; never copied.
+  final String? name;
   const SessionLog({
     required this.id,
     required this.targetName,
@@ -5247,6 +5271,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     this.trackingOverride,
     this.resultKind,
     this.notDoneReason,
+    this.name,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5356,6 +5381,9 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     if (!nullToAbsent || notDoneReason != null) {
       map['not_done_reason'] = Variable<String>(notDoneReason);
     }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
     return map;
   }
 
@@ -5458,6 +5486,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       notDoneReason: notDoneReason == null && nullToAbsent
           ? const Value.absent()
           : Value(notDoneReason),
+      name: name == null && nullToAbsent ? const Value.absent() : Value(name),
     );
   }
 
@@ -5512,6 +5541,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       trackingOverride: serializer.fromJson<String?>(json['trackingOverride']),
       resultKind: serializer.fromJson<String?>(json['resultKind']),
       notDoneReason: serializer.fromJson<String?>(json['notDoneReason']),
+      name: serializer.fromJson<String?>(json['name']),
     );
   }
   @override
@@ -5559,6 +5589,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       'trackingOverride': serializer.toJson<String?>(trackingOverride),
       'resultKind': serializer.toJson<String?>(resultKind),
       'notDoneReason': serializer.toJson<String?>(notDoneReason),
+      'name': serializer.toJson<String?>(name),
     };
   }
 
@@ -5600,6 +5631,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     Value<String?> trackingOverride = const Value.absent(),
     Value<String?> resultKind = const Value.absent(),
     Value<String?> notDoneReason = const Value.absent(),
+    Value<String?> name = const Value.absent(),
   }) => SessionLog(
     id: id ?? this.id,
     targetName: targetName ?? this.targetName,
@@ -5670,6 +5702,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     notDoneReason: notDoneReason.present
         ? notDoneReason.value
         : this.notDoneReason,
+    name: name.present ? name.value : this.name,
   );
   SessionLog copyWithCompanion(SessionLogsCompanion data) {
     return SessionLog(
@@ -5768,6 +5801,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
       notDoneReason: data.notDoneReason.present
           ? data.notDoneReason.value
           : this.notDoneReason,
+      name: data.name.present ? data.name.value : this.name,
     );
   }
 
@@ -5810,7 +5844,8 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
           ..write('executionStartSnapshot: $executionStartSnapshot, ')
           ..write('trackingOverride: $trackingOverride, ')
           ..write('resultKind: $resultKind, ')
-          ..write('notDoneReason: $notDoneReason')
+          ..write('notDoneReason: $notDoneReason, ')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }
@@ -5854,6 +5889,7 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
     trackingOverride,
     resultKind,
     notDoneReason,
+    name,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -5895,7 +5931,8 @@ class SessionLog extends DataClass implements Insertable<SessionLog> {
           other.executionStartSnapshot == this.executionStartSnapshot &&
           other.trackingOverride == this.trackingOverride &&
           other.resultKind == this.resultKind &&
-          other.notDoneReason == this.notDoneReason);
+          other.notDoneReason == this.notDoneReason &&
+          other.name == this.name);
 }
 
 class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
@@ -5936,6 +5973,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
   final Value<String?> trackingOverride;
   final Value<String?> resultKind;
   final Value<String?> notDoneReason;
+  final Value<String?> name;
   const SessionLogsCompanion({
     this.id = const Value.absent(),
     this.targetName = const Value.absent(),
@@ -5974,6 +6012,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     this.trackingOverride = const Value.absent(),
     this.resultKind = const Value.absent(),
     this.notDoneReason = const Value.absent(),
+    this.name = const Value.absent(),
   });
   SessionLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -6013,6 +6052,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     this.trackingOverride = const Value.absent(),
     this.resultKind = const Value.absent(),
     this.notDoneReason = const Value.absent(),
+    this.name = const Value.absent(),
   }) : targetName = Value(targetName),
        equipmentName = Value(equipmentName),
        sessionDate = Value(sessionDate),
@@ -6055,6 +6095,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     Expression<String>? trackingOverride,
     Expression<String>? resultKind,
     Expression<String>? notDoneReason,
+    Expression<String>? name,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -6097,6 +6138,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
       if (trackingOverride != null) 'tracking_override': trackingOverride,
       if (resultKind != null) 'result_kind': resultKind,
       if (notDoneReason != null) 'not_done_reason': notDoneReason,
+      if (name != null) 'name': name,
     });
   }
 
@@ -6138,6 +6180,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     Value<String?>? trackingOverride,
     Value<String?>? resultKind,
     Value<String?>? notDoneReason,
+    Value<String?>? name,
   }) {
     return SessionLogsCompanion(
       id: id ?? this.id,
@@ -6179,6 +6222,7 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
       trackingOverride: trackingOverride ?? this.trackingOverride,
       resultKind: resultKind ?? this.resultKind,
       notDoneReason: notDoneReason ?? this.notDoneReason,
+      name: name ?? this.name,
     );
   }
 
@@ -6304,6 +6348,9 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
     if (notDoneReason.present) {
       map['not_done_reason'] = Variable<String>(notDoneReason.value);
     }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
     return map;
   }
 
@@ -6346,7 +6393,8 @@ class SessionLogsCompanion extends UpdateCompanion<SessionLog> {
           ..write('executionStartSnapshot: $executionStartSnapshot, ')
           ..write('trackingOverride: $trackingOverride, ')
           ..write('resultKind: $resultKind, ')
-          ..write('notDoneReason: $notDoneReason')
+          ..write('notDoneReason: $notDoneReason, ')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }
@@ -10799,6 +10847,7 @@ typedef $$SessionLogsTableCreateCompanionBuilder =
       Value<String?> trackingOverride,
       Value<String?> resultKind,
       Value<String?> notDoneReason,
+      Value<String?> name,
     });
 typedef $$SessionLogsTableUpdateCompanionBuilder =
     SessionLogsCompanion Function({
@@ -10839,6 +10888,7 @@ typedef $$SessionLogsTableUpdateCompanionBuilder =
       Value<String?> trackingOverride,
       Value<String?> resultKind,
       Value<String?> notDoneReason,
+      Value<String?> name,
     });
 
 final class $$SessionLogsTableReferences
@@ -11120,6 +11170,11 @@ class $$SessionLogsTableFilterComposer
 
   ColumnFilters<String> get notDoneReason => $composableBuilder(
     column: $table.notDoneReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11422,6 +11477,11 @@ class $$SessionLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LocationProfilesTableOrderingComposer get siteId {
     final $$LocationProfilesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -11663,6 +11723,9 @@ class $$SessionLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
   $$LocationProfilesTableAnnotationComposer get siteId {
     final $$LocationProfilesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -11856,6 +11919,7 @@ class $$SessionLogsTableTableManager
                 Value<String?> trackingOverride = const Value.absent(),
                 Value<String?> resultKind = const Value.absent(),
                 Value<String?> notDoneReason = const Value.absent(),
+                Value<String?> name = const Value.absent(),
               }) => SessionLogsCompanion(
                 id: id,
                 targetName: targetName,
@@ -11894,6 +11958,7 @@ class $$SessionLogsTableTableManager
                 trackingOverride: trackingOverride,
                 resultKind: resultKind,
                 notDoneReason: notDoneReason,
+                name: name,
               ),
           createCompanionCallback:
               ({
@@ -11936,6 +12001,7 @@ class $$SessionLogsTableTableManager
                 Value<String?> trackingOverride = const Value.absent(),
                 Value<String?> resultKind = const Value.absent(),
                 Value<String?> notDoneReason = const Value.absent(),
+                Value<String?> name = const Value.absent(),
               }) => SessionLogsCompanion.insert(
                 id: id,
                 targetName: targetName,
@@ -11974,6 +12040,7 @@ class $$SessionLogsTableTableManager
                 trackingOverride: trackingOverride,
                 resultKind: resultKind,
                 notDoneReason: notDoneReason,
+                name: name,
               ),
           withReferenceMapper: (p0) => p0
               .map(

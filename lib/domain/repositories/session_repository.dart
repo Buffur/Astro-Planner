@@ -133,4 +133,12 @@ abstract class SessionRepository {
   /// made (S4-DEF-06). Returns the copy, or null when [id] is not Saved ·
   /// changed (nothing written; so a repeat does nothing).
   Future<Session?> settleSavedPlan(int id);
+
+  /// Names session [id] (S8.6; 08 §24): [name] trimmed, at most
+  /// [maxNameLength] characters; empty or null removes it. A name is a
+  /// label, not plan content: the status, the snapshot and the plan never
+  /// change. A legacy row is refused.
+  Future<Session> rename(int id, String? name);
+
+  static const maxNameLength = 80;
 }

@@ -18,9 +18,13 @@ import '../../shared/plan_state.dart';
 import '../../viewmodels/library_viewmodels.dart';
 import '../execution/results_screen.dart';
 
-/// An entry's identity (S8.5; RD-14): its target and night, "M42 · Mon,
-/// Dec 15" (the optional name joins in S8.6).
-String entryTitle(Session s) {
+/// An entry's identity (S8.5–S8.6; RD-14): its name when it has one, else
+/// its target and night, "M42 · Mon, Dec 15" ([targetAndNight]).
+String entryTitle(Session s) => s.name ?? targetAndNight(s);
+
+/// "M42 · Mon, Dec 15": the target and the night (a legacy row's stored
+/// date, on the device's calendar).
+String targetAndNight(Session s) {
   final night =
       s.eveningDate ??
       CalendarDate.fromDateTimeFields(s.record.sessionDate.toLocal());
@@ -66,6 +70,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
   late Future<List<Session>> _sessionsFuture;
   final _search = TextEditingController();
   bool _searching = false;
+
+  /// The ViewModel's [SessionsViewModel.revision] this list was read at.
+  int _seen = 0;
   ({Map<int, String> targets, Map<int, String> sites}) _options = (
     targets: const {},
     sites: const {},
@@ -80,6 +87,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
     final vm = context.read<SessionsViewModel>();
     _search.text = vm.query;
     _searching = vm.query.isNotEmpty;
+    _seen = vm.revision;
     _refresh();
   }
 
@@ -122,6 +130,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SessionsViewModel>();
+    if (vm.revision != _seen) {
+      // An entry changed elsewhere (a name, a result): read them again.
+      _seen = vm.revision;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refresh();
+      });
+    }
     final count = vm.filter.count;
     return Scaffold(
       appBar: AppBar(
@@ -131,7 +146,7 @@ class _LogbookScreenState extends State<LogbookScreen> {
                 controller: _search,
                 autofocus: true,
                 decoration: const InputDecoration(
-                  hintText: 'Search target, site or notes',
+                  hintText: 'Search name, target, site or notes',
                   border: InputBorder.none,
                 ),
                 onChanged: vm.setQuery,
@@ -239,7 +254,11 @@ class _LogbookScreenState extends State<LogbookScreen> {
     final log = session.record;
     final action = vm.resultAction(session);
     final record = action == ResultAction.record;
-    final details = [log.equipmentName, ?log.locationName].join(' · ');
+    final details = [
+      if (session.name != null) targetAndNight(session),
+      log.equipmentName,
+      ?log.locationName,
+    ].join(' · ');
     return SwipeToDelete(
       itemKey: ValueKey('logbook_${session.id}'),
       onDelete: () async {

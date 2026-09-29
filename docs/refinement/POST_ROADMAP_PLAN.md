@@ -4904,7 +4904,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 | S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | **Done 2026-09-29** |
 | S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | **Done 2026-09-29** |
 | S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | **Done 2026-09-29** |
-| S8.6 | An optional plan name | P8.6 | S–M | S8.5 | Frozen |
+| S8.6 | An optional plan name | P8.6 | S–M | S8.5 | **Done 2026-09-29** |
 | S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | Frozen |
 | S8.8 | Per-field provenance in new snapshots (TD-070's remainder) | Input | S | — | Frozen |
 | S8.9 | Preferences in the backup; stale ids (TD-056, ENG-14) | Input | S–M | — | Frozen |

@@ -448,6 +448,19 @@ class DriftSessionRepository implements SessionRepository {
   }
 
   @override
+  Future<Session> rename(int id, String? name) => _change(id, (s) {
+    if (s.legacy) throw SessionStateError('A legacy session is read-only.');
+    final trimmed = name?.trim() ?? '';
+    if (trimmed.length > SessionRepository.maxNameLength) {
+      throw ArgumentError.value(name, 'name', 'too long');
+    }
+    return _writeRow(
+      id,
+      SessionLogsCompanion(name: Value(trimmed.isEmpty ? null : trimmed)),
+    );
+  });
+
+  @override
   Future<Session?> settleSavedPlan(int id) async {
     final copyId = await _db.transaction(() async {
       final s = await get(id);
@@ -826,6 +839,7 @@ class DriftSessionRepository implements SessionRepository {
           (row.executionStartSnapshot != null && start == null),
       resultKind: ResultKind.tryParse(row.resultKind),
       notDoneReason: NotDoneReason.tryParse(row.notDoneReason),
+      name: row.name,
     );
   }
 

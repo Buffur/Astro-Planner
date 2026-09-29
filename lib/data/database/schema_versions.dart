@@ -5348,6 +5348,365 @@ i1.GeneratedColumn<String> _column_127(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NOT NULL CHECK (kind IN (\'started\', \'blockSelected\', \'paused\', \'interrupted\', \'resumed\', \'framesConfirmed\', \'framesRejected\', \'finished\', \'abandoned\', \'reported\'))',
     );
+
+final class Schema25 extends i0.VersionedSchema {
+  Schema25({required super.database}) : super(version: 25);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    devices,
+    cameraModules,
+    opticalRigs,
+    locationProfiles,
+    astroTargets,
+    sessionLogs,
+    captureBlocks,
+    sessionEvents,
+    targetAliases,
+    astroTargetsCatalogIdUnique,
+    sessionLogsStatus,
+    sessionLogsEveningDate,
+    sessionLogsTargetId,
+    sessionEventsSessionSeq,
+  ];
+  late final Shape1 devices = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'devices',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_13, _column_14],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 cameraModules = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'camera_modules',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_60,
+        _column_1,
+        _column_2,
+        _column_13,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_11,
+        _column_75,
+        _column_80,
+        _column_104,
+        _column_105,
+        _column_106,
+        _column_107,
+        _column_108,
+        _column_109,
+        _column_110,
+        _column_111,
+        _column_112,
+        _column_113,
+        _column_119,
+        _column_120,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape18 opticalRigs = Shape18(
+    source: i0.VersionedTable(
+      entityName: 'optical_rigs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_61,
+        _column_22,
+        _column_10,
+        _column_23,
+        _column_24,
+        _column_78,
+        _column_79,
+        _column_75,
+        _column_80,
+        _column_114,
+        _column_115,
+        _column_116,
+        _column_117,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 locationProfiles = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'location_profiles',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_25,
+        _column_26,
+        _column_124,
+        _column_67,
+        _column_68,
+        _column_69,
+        _column_70,
+        _column_71,
+        _column_72,
+        _column_73,
+        _column_14,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 astroTargets = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'astro_targets',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_29,
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_33,
+        _column_74,
+        _column_75,
+        _column_76,
+        _column_77,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape24 sessionLogs = Shape24(
+    source: i0.VersionedTable(
+      entityName: 'session_logs',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_34,
+        _column_35,
+        _column_36,
+        _column_37,
+        _column_38,
+        _column_39,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_43,
+        _column_44,
+        _column_45,
+        _column_46,
+        _column_47,
+        _column_48,
+        _column_49,
+        _column_50,
+        _column_51,
+        _column_52,
+        _column_81,
+        _column_82,
+        _column_83,
+        _column_84,
+        _column_85,
+        _column_86,
+        _column_87,
+        _column_88,
+        _column_89,
+        _column_90,
+        _column_91,
+        _column_92,
+        _column_93,
+        _column_94,
+        _column_118,
+        _column_125,
+        _column_126,
+        _column_128,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 captureBlocks = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'capture_blocks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_62,
+        _column_54,
+        _column_55,
+        _column_56,
+        _column_57,
+        _column_58,
+        _column_63,
+        _column_64,
+        _column_65,
+        _column_66,
+        _column_95,
+        _column_96,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape16 sessionEvents = Shape16(
+    source: i0.VersionedTable(
+      entityName: 'session_events',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_62,
+        _column_97,
+        _column_98,
+        _column_127,
+        _column_100,
+        _column_101,
+        _column_102,
+        _column_103,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape22 targetAliases = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'target_aliases',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_29, _column_121, _column_122, _column_123],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index astroTargetsCatalogIdUnique = i1.Index(
+    'astro_targets_catalog_id_unique',
+    'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
+  );
+  final i1.Index sessionLogsStatus = i1.Index(
+    'session_logs_status',
+    'CREATE INDEX session_logs_status ON session_logs (status)',
+  );
+  final i1.Index sessionLogsEveningDate = i1.Index(
+    'session_logs_evening_date',
+    'CREATE INDEX session_logs_evening_date ON session_logs (evening_date)',
+  );
+  final i1.Index sessionLogsTargetId = i1.Index(
+    'session_logs_target_id',
+    'CREATE INDEX session_logs_target_id ON session_logs (target_id)',
+  );
+  final i1.Index sessionEventsSessionSeq = i1.Index(
+    'session_events_session_seq',
+    'CREATE UNIQUE INDEX session_events_session_seq ON session_events (session_log_id, seq)',
+  );
+}
+
+class Shape24 extends i0.VersionedTable {
+  Shape24({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get targetName =>
+      columnsByName['target_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get equipmentName =>
+      columnsByName['equipment_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get sessionDate =>
+      columnsByName['session_date']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get locationName =>
+      columnsByName['location_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<double> get bortleScale =>
+      columnsByName['bortle_scale']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get plannedLightFrames =>
+      columnsByName['planned_light_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get plannedDarkFrames =>
+      columnsByName['planned_dark_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get plannedFlatFrames =>
+      columnsByName['planned_flat_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get plannedBiasFrames =>
+      columnsByName['planned_bias_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<double> get integrationTimeSeconds =>
+      columnsByName['integration_time_seconds']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get focalLength =>
+      columnsByName['focal_length']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get aperture =>
+      columnsByName['aperture']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get temperature =>
+      columnsByName['temperature']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<double> get humidity =>
+      columnsByName['humidity']! as i1.GeneratedColumn<double>;
+  i1.GeneratedColumn<int> get cloudCover =>
+      columnsByName['cloud_cover']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get actualLightFrames =>
+      columnsByName['actual_light_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get rejectedFrames =>
+      columnsByName['rejected_frames']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get environmentalNotes =>
+      columnsByName['environmental_notes']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get processingNotes =>
+      columnsByName['processing_notes']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get status =>
+      columnsByName['status']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get legacy =>
+      columnsByName['legacy']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get eveningDate =>
+      columnsByName['evening_date']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get timeZoneId =>
+      columnsByName['time_zone_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get siteId =>
+      columnsByName['site_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get targetId =>
+      columnsByName['target_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get rigId =>
+      columnsByName['rig_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get createdAtUtcMs =>
+      columnsByName['created_at_utc_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get updatedAtUtcMs =>
+      columnsByName['updated_at_utc_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get plannedAtUtcMs =>
+      columnsByName['planned_at_utc_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get startedAtUtcMs =>
+      columnsByName['started_at_utc_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get completedAtUtcMs =>
+      columnsByName['completed_at_utc_ms']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get planSnapshot =>
+      columnsByName['plan_snapshot']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get executionStartSnapshot =>
+      columnsByName['execution_start_snapshot']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get trackingOverride =>
+      columnsByName['tracking_override']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get resultKind =>
+      columnsByName['result_kind']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get notDoneReason =>
+      columnsByName['not_done_reason']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_128(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'name',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema9 schema) from8To9,
   required Future<void> Function(i1.Migrator m, Schema10 schema) from9To10,
@@ -5365,6 +5724,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema22 schema) from21To22,
   required Future<void> Function(i1.Migrator m, Schema23 schema) from22To23,
   required Future<void> Function(i1.Migrator m, Schema24 schema) from23To24,
+  required Future<void> Function(i1.Migrator m, Schema25 schema) from24To25,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -5448,6 +5808,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from23To24(migrator, schema);
         return 24;
+      case 24:
+        final schema = Schema25(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from24To25(migrator, schema);
+        return 25;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -5471,6 +5836,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema22 schema) from21To22,
   required Future<void> Function(i1.Migrator m, Schema23 schema) from22To23,
   required Future<void> Function(i1.Migrator m, Schema24 schema) from23To24,
+  required Future<void> Function(i1.Migrator m, Schema25 schema) from24To25,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from8To9: from8To9,
@@ -5489,5 +5855,6 @@ i1.OnUpgrade stepByStep({
     from21To22: from21To22,
     from22To23: from22To23,
     from23To24: from23To24,
+    from24To25: from24To25,
   ),
 );

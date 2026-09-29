@@ -96,6 +96,8 @@ abstract final class SessionManifestCodec {
     }
     return {
       'id': s.id,
+      // S8.6 (additive): the optional name; absent or null = none.
+      'name': s.name,
       'status': s.status.name,
       'legacy': s.legacy,
       'evening_date': s.eveningDate?.toIso8601String(),
@@ -240,6 +242,7 @@ abstract final class SessionManifestCodec {
       notDoneReason: NotDoneReason.tryParse(
         results['not_done_reason'] as String?,
       ),
+      name: j['name'] as String?,
       planSnapshot: plan == null
           ? null
           : SessionSnapshot.tryRead(Map<String, Object?>.from(plan as Map)),

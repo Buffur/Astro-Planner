@@ -212,6 +212,52 @@ void main() {
     expect(find.byKey(const Key('detail.legacy')), findsOneWidget);
   });
 
+  testWidgets('S8.6: a name is set on the entry, never asked at Save; the '
+      'Logbook shows it and searches it; removing it shows target · night', (
+    tester,
+  ) async {
+    await seed(tester);
+    await pumpAt(tester, AppRouter.sessionDetail(plannedId));
+    await tester.tap(find.byKey(const Key('detail.name')));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('detail.nameField')),
+      '  Orion, first light ',
+    );
+    await tester.tap(find.byKey(const Key('detail.nameSave')));
+    await settle(tester);
+    expect(find.text('Orion, first light'), findsWidgets);
+
+    AppRouter.router.go(AppRouter.sessions);
+    await settle(tester);
+    expect(
+      tester.widget<Text>(find.byKey(Key('logbook.title.$plannedId'))).data,
+      'Orion, first light',
+    );
+    await tester.tap(find.byKey(const Key('logbook.searchToggle')));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('logbook.search')), 'first l');
+    await settle(tester);
+    expect(find.byKey(Key('logbook.title.$plannedId')), findsOneWidget);
+    expect(find.byKey(Key('logbook.title.$completedId')), findsNothing);
+    await tester.tap(find.byKey(const Key('logbook.searchToggle')));
+    await settle(tester);
+
+    AppRouter.router.go(AppRouter.sessionDetail(plannedId));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('detail.name')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('detail.nameField')), '');
+    await tester.tap(find.byKey(const Key('detail.nameSave')));
+    await settle(tester);
+    AppRouter.router.go(AppRouter.sessions);
+    await settle(tester);
+    final title = tester
+        .widget<Text>(find.byKey(Key('logbook.title.$plannedId')))
+        .data;
+    expect(title, isNot('Orion, first light'));
+    expect(title, contains(' · '), reason: 'target · night');
+  });
   testWidgets('acceptance: a completed run renders from its execution-start '
       'snapshot with plan vs actual and notes', (tester) async {
     await seed(tester);

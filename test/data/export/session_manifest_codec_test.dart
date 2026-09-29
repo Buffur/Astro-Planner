@@ -299,6 +299,33 @@ void main() {
     expect(old[1].session.notDoneReason, isNull);
   });
 
+  test('S8.6: the name round-trips; a file without it reads as none', () async {
+    final all = await sessions();
+    await repo.rename(all[1].session.id, 'Andromeda test');
+    final exported = [
+      for (final e in all)
+        ExportedSession((await repo.get(e.session.id))!, e.events),
+    ];
+    final m = roundTripJson(
+      SessionManifestCodec.encode(
+        exported,
+        exportedAtUtc: exportedAt,
+        appVersion: AppIdentity.version,
+      ),
+    );
+    final json = m['sessions']! as List;
+    expect((json[1] as Map)['name'], 'Andromeda test');
+    expect((json[0] as Map)['name'], isNull);
+    expect(
+      SessionManifestCodec.decode(m).sessions[1].session.name,
+      'Andromeda test',
+    );
+    for (final s in json) {
+      (s as Map).remove('name');
+    }
+    expect(SessionManifestCodec.decode(m).sessions[1].session.name, isNull);
+  });
+
   test('v1 is still read, as a legacy log at the same UTC instant', () {
     final log = SessionLog(
       id: 5,

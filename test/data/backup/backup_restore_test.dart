@@ -77,11 +77,13 @@ Future<void> _seed(DriftSessionRepository repo, AppDatabase db) async {
     delta: 12,
   );
   await repo.complete(run.id);
-  await repo.savePlan(
+  final m31 = await repo.savePlan(
     (await repo.create(plan('M31'))).id,
     plan('M31'),
     snapshot,
   );
+  // S8.6: a named plan; the full comparison below covers its name.
+  await repo.rename(m31.id, 'Andromeda, first try');
   await db.customStatement(
     "INSERT INTO session_logs (id, target_name, equipment_name, "
     "session_date, planned_light_frames, actual_light_frames, status, "
@@ -140,7 +142,7 @@ void main() {
       // The new phone: a clean install stages the checked backup ...
       final checked = service.check(bytes);
       expect(checked.preview.sessionCount, 3);
-      expect(checked.preview.schemaVersion, 24); // the app schema (S8.1)
+      expect(checked.preview.schemaVersion, 25); // the app schema (S8.6)
       expect(checked.preview.appVersion, AppIdentity.version);
       await service.stage(checked.database);
       expect(await service.hasStagedRestore(), isTrue);
@@ -235,7 +237,7 @@ void main() {
     await db.close();
     // The archive is a ZIP; the manifest is readable without the app.
     expect(String.fromCharCodes(bytes.sublist(0, 2)), 'PK');
-    expect(BackupArchive.sqliteUserVersion(service.check(bytes).database), 24);
+    expect(BackupArchive.sqliteUserVersion(service.check(bytes).database), 25);
   });
 
   test('restoring over existing data keeps a safety copy', () async {

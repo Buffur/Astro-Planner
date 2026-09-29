@@ -400,6 +400,40 @@ void main() {
     });
   });
 
+  group('S8.6: the optional name', () {
+    test('trimmed; empty removes it; the plan, status and snapshot never '
+        'change; too long and legacy are refused', () async {
+      final s = await saved();
+      final named = await repo.rename(s.id, '  Orion, first light  ');
+      expect(named.name, 'Orion, first light');
+      expect(named.status, SessionStatus.planned, reason: 'not an edit');
+      expect(named.planSnapshot!.json, s.planSnapshot!.json);
+      expect(named.blocks.length, s.blocks.length);
+      expect((await repo.rename(s.id, '   ')).name, isNull);
+      expect((await repo.rename(s.id, null)).name, isNull);
+      await expectLater(
+        repo.rename(s.id, 'x' * 81),
+        throwsA(isA<ArgumentError>()),
+      );
+      await (db.update(db.sessionLogs)..where((t) => t.id.equals(s.id))).write(
+        const SessionLogsCompanion(legacy: Value(true)),
+      );
+      await expectLater(
+        repo.rename(s.id, 'Old'),
+        throwsA(isA<SessionStateError>()),
+      );
+    });
+
+    test('a working copy never takes the name', () async {
+      final s = await saved();
+      await repo.rename(s.id, 'Friday');
+      await repo.updatePlan(s.id, _plan(night: CalendarDate(2026, 12, 20)));
+      final copy = (await repo.settleSavedPlan(s.id))!;
+      expect(copy.name, isNull);
+      expect((await repo.get(s.id))!.name, 'Friday');
+    });
+  });
+
   group('CALC-44 (SavedNightEnd)', () {
     test('a mid-latitude winter night ends at dawn at the darkness limit, '
         'hours before the window\'s noon', () {

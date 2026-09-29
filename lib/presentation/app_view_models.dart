@@ -134,7 +134,10 @@ class AppViewModels {
             sessions,
             clock,
             settle: lifecycle.settle,
-            onRecorded: sessionList?.refreshDue,
+            onRecorded: () async {
+              sessionList?.markChanged();
+              await sessionList?.refreshDue();
+            },
           );
     theme = ThemeViewModel(display);
     disclosure = DisclosureViewModel(display);

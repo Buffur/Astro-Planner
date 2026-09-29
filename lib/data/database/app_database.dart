@@ -191,6 +191,10 @@ class SessionLogs extends Table {
   /// Why an abandoned session was not done (S8.1, v24): clouds, wind, dew,
   /// equipment or other; NULL when not given.
   TextColumn get notDoneReason => text().nullable()();
+
+  /// The plan's optional name (S8.6, v25; 08 §24): NULL = none, shown as
+  /// target · night. Not part of the snapshot; never copied.
+  TextColumn get name => text().nullable()();
 }
 
 /// A session's run, append-only (ADR-016 §4; TASK 13.2, v17). The events
@@ -263,7 +267,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 24;
+  int get schemaVersion => 25;
 
   @override
   MigrationStrategy get migration {
@@ -596,6 +600,11 @@ class AppDatabase extends _$AppDatabase {
                   schema.sessionLogs.notDoneReason,
                 );
                 await m.alterTable(TableMigration(schema.sessionEvents));
+              },
+              from24To25: (m, schema) async {
+                // S8.6: the optional plan name. Additive only; every
+                // existing plan has none (NULL), shown as target · night.
+                await m.addColumn(schema.sessionLogs, schema.sessionLogs.name);
               },
             ),
           );

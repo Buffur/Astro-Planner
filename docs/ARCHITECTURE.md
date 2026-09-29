@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S8.6, 2026-09-29:** `SessionRepository.rename` (trimmed, at most 80 characters, empty = none, legacy refused; a partial row write only); `Session.name`; `SessionsViewModel.rename` and `revision`/`markChanged` (bumped by a name, a deletion or a recorded result, which the Logbook watches to read its entries again); the entry's `_NameTile` and `_NameDialog` (the dialog owns its field). `entryTitle` is the name, else `targetAndNight`.
+
 > **S8.5, 2026-09-29:** `SessionsViewModel` moved to `sessions_viewmodel.dart` (`library_viewmodels.dart` re-exports it) and holds the Logbook's `filter` and `query` (`setFilter`, `setQuery`), `searched` and `grouped` (Upcoming/Past through CALC-44). `logbook_screen.dart` is rebuilt on them: `entryTitle`, `deleteEntry` (`confirmDestructive`; also the entry's `DeleteButton`), `SwipeToDelete`, a `_FilterPanel` bottom sheet over the ViewModel. `AppRouter.logbookProgress` (`/sessions/progress`, before `:id`) replaces `libraryProgress`; `ProgressScreen` moved to `screens/logbook/`. The entry's status is a `PlanStateLabel`; `sessionStatusLabel` is gone.
 
 > **S8.4, 2026-09-29: the live tracker retired (the owner, 2026-09-27; ADR-016 §13).** The dependency audit (P8.4's classes):

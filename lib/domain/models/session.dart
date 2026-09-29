@@ -145,6 +145,7 @@ class Session {
     this.hasUnreadableSnapshot = false,
     this.resultKind,
     this.notDoneReason,
+    this.name,
   });
 
   /// The row's labels, counts, results, notes and blocks, in the shape the
@@ -184,6 +185,9 @@ class Session {
 
   /// Why an abandoned (Not done) session was not done, when the user said.
   final NotDoneReason? notDoneReason;
+
+  /// The plan's optional name (S8.6); null = none (shown as target · night).
+  final String? name;
 
   int get id => record.id;
 

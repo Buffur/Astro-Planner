@@ -132,6 +132,43 @@ void main() {
     });
   });
 
+  group('S8.6: v25 (the optional plan name)', () {
+    for (final from in [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, //
+    ]) {
+      test('v$from -> v25 matches the v25 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 25);
+        await db.close();
+      });
+    }
+
+    test('v24 -> v25: every session kept, with no name; a name can then be '
+        'stored', () async {
+      final schema = await verifier.schemaAt(24);
+      schema.rawDatabase.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "result_kind) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'completed', 0, '2026-12-15', "
+        "'partly'), "
+        "(2, 'Old', 'Old rig', 1690000000, 7, 'completed', 1, NULL, NULL);",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.sessionLogs,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(rows.map((r) => (r.targetName, r.resultKind, r.name)), [
+        ('M42', 'partly', null),
+        ('Old', null, null),
+      ]);
+      final named = await DriftSessionRepository(db).rename(1, ' Orion ');
+      expect(named.name, 'Orion');
+      await db.close();
+    });
+  });
+
   group('S8.1: v24 (results without a run, ADR-019 §4)', () {
     for (final from in [
       8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, //
