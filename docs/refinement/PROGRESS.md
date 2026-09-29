@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**Stage 10 planned**; Stage 9 closed with S9.10–S9.12 deferred by the owner).
-> **Next:** S10.1, the size baseline.
+> **Last updated:** 2026-09-30 (**S10.1 done**: the size baseline; the 277 MB is consistent with a debug install).
+> **Next:** S10.2, the performance scenarios and baselines.
 
 ## Current state
 
@@ -14,10 +14,28 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.1** — the size baseline |
+| Next Task | **S10.2** — reproducible performance scenarios and baselines |
 | Code baseline | **The TD-089–TD-091 fix** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.1 done, 2026-09-30** (the size baseline; measurement only, no code;
+[`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md) §S10.1):
+- Built at `8b62b87` on this machine and measured on the emulator (Android 16, x86_64). Release
+  bundle 68.5 MB (three ABIs plus symbols Play keeps); **the arm64-v8a release APK 24.8 MB**; universal
+  release APK 71.9 MB; debug APK 183.6 MB.
+- The arm64 APK: the Flutter engine 47 %, compiled Dart 40 % (the app's own code 1.4 MiB), SQLite 7 %;
+  assets 0.15 MiB. No asset, font or image is a material contributor.
+- **Installed:** release **27.8 MB**; debug **314 MB** (184 MB app, 130 MB data: the debug build's
+  extracted 118 MB JIT kernel and 11.6 MB snapshot; the database 0.1 MB).
+- **The 277 MB (08 §26) is classified as consistent with a debug build's installed total**, not a
+  release size; the exact figure stays the owner's unreproduced observation. No size target (none set);
+  the release size is reasonable, so no reduction is claimed.
+- Machine notes (nothing in the repository changed): Avast's HTTPS interception blocks the JBR's
+  downloads (the first Gradle run used JDK 25 with the Windows trust store), and Kotlin's incremental
+  compiler fails across drives (`-Pkotlin.incremental=false`).
+- **Verification:** the documentation class (V1): references resolve; `git diff --check`. No gate
+  input changed.
 
 **Stage 10 planned, 2026-09-30** (documentation only; the plan's "Stage 10 — frozen Task sequence"):
 - Inputs verified at `1aeee63` (§9.7). Most important: the 277 MB has no recorded build type (the only
@@ -578,8 +596,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.1 — the size baseline** (the plan's "Stage 10 — frozen Task sequence"), then S10.2 → S10.7 in
-   order, one Task per commit, then the Stage 10 validation in a fresh session.
+1. **S10.2 — reproducible performance scenarios and baselines** (the plan's "Stage 10 — frozen Task
+   sequence"), then S10.3 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB

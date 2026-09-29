@@ -5610,7 +5610,7 @@ not set.
 
 | Task | Title | From | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S10.1 | The size baseline: the 277 MB classified, the release artifact and the installed footprint broken down | 08 §26; Stage 10 scope | S–M | — | Not started |
+| S10.1 | The size baseline: the 277 MB classified, the release artifact and the installed footprint broken down | 08 §26; Stage 10 scope | S–M | — | **Done 2026-09-30** |
 | S10.2 | Reproducible performance scenarios and baselines | Stage 10 scope (measurement first) | M | — | Not started |
 | S10.3 | Form lag: investigate from S10.2's scenario and fix the verified bottleneck | 08 §22 | M | S10.2 | Not started |
 | S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | Not started |
