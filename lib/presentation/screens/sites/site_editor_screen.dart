@@ -1,3 +1,5 @@
+import '../../shared/night_time_formatter.dart';
+import '../../../domain/models/calendar_date.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shared/app_words.dart';
 
@@ -426,7 +428,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
               key: const Key('siteEditor.mapLink'),
               onPressed: link == null ? null : _openMap,
               icon: const Icon(Icons.open_in_new),
-              label: const Text('Look it up on the light-pollution map'),
+              label: const Text('Look it up on lightpollutionmap.app'),
             ),
           ),
         ],
@@ -438,19 +440,18 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   /// unchanged on save.
   List<Widget> _skyDarknessFields() {
     final original = _original;
-    String? sourceCaption(String? source, Object? date) => source == null
+    // S9.7: the source and a readable date, never an ISO string.
+    String? sourceCaption(String? source, CalendarDate? date) => source == null
         ? null
-        : 'Source: $source${date == null ? '' : ', $date'}';
+        : 'Source: $source'
+              '${date == null ? '' : ' · ${NightTimeFormatter.recordedDate(date)}'}';
     return [
       DropdownButtonFormField<int?>(
         initialValue: _bortle,
         decoration: InputDecoration(
           labelText: 'Bortle class',
           helperText: _bortle != null && _bortle == original?.bortleClass
-              ? sourceCaption(
-                  original?.bortleSource,
-                  original?.bortleDate?.toIso8601String(),
-                )
+              ? sourceCaption(original?.bortleSource, original?.bortleDate)
               : null,
         ),
         items: [
@@ -465,10 +466,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
         decoration: InputDecoration(
           labelText: 'SQM (mag/arcsec²)',
           helperText:
-              sourceCaption(
-                original?.sqmSource,
-                original?.sqmDate?.toIso8601String(),
-              ) ??
+              sourceCaption(original?.sqmSource, original?.sqmDate) ??
               'Empty = unknown',
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),

@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.7, 2026-09-29:** `NightTimeFormatter.recordedDate(CalendarDate)` ("Aug 1, 2026") for recorded dates; `_SkyDarknessLine` shows one keyed reading per value (`sky.bortle`, `sky.sqm`) and `sky.unknown`; `_MapLink` uses the text roles. No ISO date is shown in the planner's sky detail or the site editor.
+
 > **S9.6, 2026-09-29:** `TwilightBands` (`presentation/shared/twilight_bands.dart`, pure): the bands between the `NightTimeline` crossings (which standard twilights enclose each stretch), drawn by `TwilightBar` in `NightTimelineSection`; no Sun computation outside the domain. `WeatherForecastWidget`'s hour columns add `_CloudBar` (value → height; unknown draws nothing) and a dew-risk icon. Both visuals are excluded from semantics: the times and numbers beside them are their text.
 
 > **S9.5, 2026-09-29:** `AboutScreen` gains an author block (`AboutScreen.author`, `authorReddit`, `authorGitHub`: the owner's public handle and profiles from 08 §23) and a `_Source` per data source (credit + link); `AppSpacing` replaces its raw paddings. `pubspec.yaml`'s description replaces Flutter's template text. `AppIdentity` is unchanged (RD-01).

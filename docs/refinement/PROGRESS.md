@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.6 done**: the Weather and Night & Moon detail screens).
-> **Next:** S9.7 (sky darkness made readable). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.7 done**: sky darkness made readable).
+> **Next:** S9.8 (feedback, messages and export polish). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,21 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.7** (below, "Next allowed action") |
-| Code baseline | **S9.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.8** (below, "Next allowed action") |
+| Code baseline | **S9.7** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.7 done, 2026-09-29** (08 §13): sky darkness made readable.
+- Each value first, its source and a readable date under it (`NightTimeFormatter.recordedDate`,
+  "Aug 1, 2026"); "Unknown" with the way to set it; "Not saved" for a transient position. The map
+  link names lightpollutionmap.app and what to do there, in the text roles. The site editor's captions
+  use the same date. No inference, no conversion (trap 6).
+- **Tests:** `sky_darkness_context_test.dart` updated deliberately (the new readings by key, no ISO
+  date, the link's words); the formatter's date (+1); the planner and disclosure tests' link text.
+- **Verification:** shared behaviour (the planner's sky detail, the site editor, a formatter): the
+  full gate after the last code change, **PASS** (1,816 tests, 2 skips; 2 host E2E; Flutter
+  3.47.4).
 
 **S9.6 done, 2026-09-29** (the detail screens' secondary presentation; 08 §12): Weather and Night & Moon.
 - Night & Moon: a twilight bar from sunset to sunrise (`TwilightBands`, pure, from the domain's
@@ -476,8 +487,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.7 — Sky darkness made readable** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen Task sequence").
-   Then S9.8 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.8 — Feedback, messages (TD-081) and export polish** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
+   Task sequence"). Then S9.9 and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

@@ -89,8 +89,8 @@ void main() {
     expect(
       // S1.8 (UX-20): names both entry points — the picker and the editor.
       find.text(
-        'Sky darkness unknown — pick a Bortle class above, or add Bortle '
-        'or SQM in the site editor.',
+        'Unknown — pick a Bortle class above, or add Bortle or SQM in the '
+        'site editor.',
       ),
       findsOneWidget,
     );
@@ -103,13 +103,18 @@ void main() {
     await pumpCard(tester, bortle: 4, sqm: 21.3);
     expect(find.text('Bortle 4 · SQM 21.30 mag/arcsec²'), findsOneWidget);
     await open(tester);
+    // S9.7: value first, then its source and a readable date; no ISO date.
+    Finder inReading(String key, String text) =>
+        find.descendant(of: find.byKey(Key(key)), matching: find.text(text));
+    expect(inReading('sky.bortle', 'Bortle 4'), findsOneWidget);
     expect(
-      find.text(
-        'Bortle 4 (user, 2026-09-23) · '
-        'SQM 21.30 mag/arcsec² (meter, 2026-08-01)',
-      ),
+      inReading('sky.bortle', 'Source: user · Sep 23, 2026'),
       findsOneWidget,
     );
+    expect(inReading('sky.sqm', 'SQM 21.30 mag/arcsec²'), findsOneWidget);
+    expect(inReading('sky.sqm', 'Source: meter · Aug 1, 2026'), findsOneWidget);
+    expect(find.textContaining('2026-0'), findsNothing);
+    expect(find.text('Look it up on lightpollutionmap.app'), findsOneWidget);
   });
 
   testWidgets('an SQM reading alone is not turned into a Bortle class', (
@@ -119,9 +124,13 @@ void main() {
     expect(find.text('SQM 19.00 mag/arcsec²'), findsOneWidget);
     await open(tester);
     expect(
-      find.text('SQM 19.00 mag/arcsec² (meter, 2026-08-01)'),
+      find.descendant(
+        of: find.byKey(const Key('sky.sqm')),
+        matching: find.text('Source: meter · Aug 1, 2026'),
+      ),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('sky.bortle')), findsNothing);
     expect(find.text('Bortle ?'), findsOneWidget);
   });
 }

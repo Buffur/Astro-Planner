@@ -185,7 +185,7 @@ void main() {
       'Integration (light exposure)',
       'Time between frames',
       'Focal length',
-      'Open Light Pollution Map',
+      'Look it up on lightpollutionmap.app',
     ]) {
       expect(find.text(hidden), findsNothing, reason: hidden);
     }

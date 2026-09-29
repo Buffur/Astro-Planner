@@ -1,5 +1,6 @@
 // TASK 7.1: the formatter prefers the site's IANA zone, and labels it.
 
+import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/presentation/shared/night_time_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,5 +69,18 @@ void main() {
       ),
     );
     expect(text, '01:00 (+1)');
+  });
+
+  // S9.7: a recorded date (a sky-darkness reading's) reads with its year,
+  // never as an ISO string.
+  test('a recorded date: month, day and year', () {
+    expect(
+      NightTimeFormatter.recordedDate(CalendarDate(2026, 8, 1)),
+      'Aug 1, 2026',
+    );
+    expect(
+      NightTimeFormatter.recordedDate(CalendarDate(2025, 12, 31)),
+      'Dec 31, 2025',
+    );
   });
 }

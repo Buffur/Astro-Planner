@@ -585,7 +585,7 @@ void main() {
     // S6.7: it is in the Sky darkness section, one tap away.
     await tester.tap(find.text('Sky darkness'));
     await tester.pumpAndSettle();
-    expect(find.text('Open Light Pollution Map'), findsOneWidget);
+    expect(find.text('Look it up on lightpollutionmap.app'), findsOneWidget);
 
     // Stays visible per PD-06 (on the core path): since TASK 12.2 it is
     // the Sessions tab (ADR-015).
