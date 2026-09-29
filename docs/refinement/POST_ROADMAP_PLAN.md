@@ -5613,7 +5613,7 @@ not set.
 | S10.1 | The size baseline: the 277 MB classified, the release artifact and the installed footprint broken down | 08 §26; Stage 10 scope | S–M | — | **Done 2026-09-30** |
 | S10.2 | Reproducible performance scenarios and baselines | Stage 10 scope (measurement first) | M | — | **Done 2026-09-30** |
 | S10.3 | Form lag: investigate from S10.2's scenario and fix the verified bottleneck | 08 §22 | M | S10.2 | **Done 2026-09-30** |
-| S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | Not started |
+| S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | **Done 2026-09-30** (measured; no change needed) |
 | S10.5 | The Logbook at a realistic volume; ENG-11 and ENG-12 on Android | ENG-11; ENG-12 | S–M | S10.2 | Not started |
 | S10.6 | Dependencies and assets by verified use (RD-02's `sqlite3_flutter_libs`) | RD-02; Stage 10 scope | S–M | S10.1 | Not started |
 | S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | Not started |

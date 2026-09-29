@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.3 done**: the rig editor no longer rebuilds its form on keyboard frames).
-> **Next:** S10.4, the planner, the timeline and the detail screens (verified bottlenecks only).
+> **Last updated:** 2026-09-30 (**S10.4 done**: the planner, the timeline and the detail screens measured; no change needed).
+> **Next:** S10.5, the Logbook, ENG-11 and ENG-12 (first-run seeding takes 13–15 s on the emulator).
 
 ## Current state
 
@@ -14,10 +14,18 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.4** — the planner, the timeline and the detail screens |
+| Next Task | **S10.5** — the Logbook, ENG-11 and ENG-12 |
 | Code baseline | **S10.3** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.4 done, 2026-09-30** (measured, no change needed; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.4):
+the planner's edits, night and target changes and the detail screens build in 1.7–6.2 ms on average
+on the emulator; the only overruns are a new screen's first frame. A temporary host probe (deleted)
+showed no planner section rebuilding on keyboard frames, and one block edit rebuilding only the
+sections that show the plan (1,268 elements). Trap 16's memoization holds; no cache added; sampling and
+calculations untouched.
+- **Verification:** the documentation class (V1); no code changed. S10.3's gate stays valid (V3).
 
 **S10.3 done, 2026-09-30** (form lag, 08 §22; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.3):
 - **Cause (verified):** the rig editor read the screen width with `MediaQuery.of`, so its whole form
@@ -631,8 +639,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.4 — the planner, the timeline and the detail screens** (the plan's "Stage 10 — frozen Task
-   sequence"), then S10.5 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
+1. **S10.5 — the Logbook, ENG-11 and ENG-12** (the plan's "Stage 10 — frozen Task sequence"), then
+   S10.6 → S10.7 in order, one Task per commit, then the Stage 10 validation in a fresh session.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB

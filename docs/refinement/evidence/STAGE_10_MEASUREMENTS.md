@@ -250,3 +250,29 @@ run 1 / run 2. "Over" counts frames above 16.7 ms.
 - **On a phone** the gain is unverified until a device trace (Stage 11): the owner's lag may also have
   come from the debug build (S10.1), which runs JIT code several times slower than a release.
 - **Verification:** the full gate after the change, **PASS** (1,837 tests, 2 skips; host E2E core_loop 2 and perf_scenarios 1; Flutter 3.47.4).
+
+## S10.4 — The planner, the timeline and the detail screens
+
+- **Claim checked:** Stage 6's reactive planner (block edits → budget, fit, timeline, gain graph), the
+  timeline's redraw on night and target changes, and the detail screens might do unnecessary work.
+- **Evidence (S10.2's emulator runs, profile, indicative):** build averages 1.7–6.2 ms and p90 1.3–12
+  ms for opening the planner, four block edits, a night change, a target change, Night & Moon and
+  Weather; the only frames over 16.7 ms are the first frame of a newly opened screen (27–37 ms) and one
+  block-edit frame in one run (18 ms). Raster averages 5.7–11.7 ms.
+- **Evidence (host, a temporary probe, deleted):** elements rebuilt per event, through the real app and
+  database at 412 × 915:
+
+  | Event | Elements rebuilt | What rebuilds |
+  | --- | ---: | --- |
+  | The keyboard opens over the planner (12 frames) | 432 (36 per frame) | Only the `Scaffold`, `MediaQuery` and route machinery; no planner section |
+  | The keyboard opens over the block dialog (12 frames) | 588 (49 per frame) | The same, plus the dialog's frame; no planner section |
+  | 2 keystrokes in the block dialog's Frame Count | 646 | The dialog's fields (focus and decoration) |
+  | One block edit through the ViewModel (then settled) | 1,268 | The planner sections that show the plan: the capture plan, budget, fit, status and gain graph |
+
+- **Reading:** the memoization of trap 16 holds (a block edit costs one pass over the dependent
+  sections, 5–6 ms of build on the emulator); nothing rebuilds on keyboard frames outside the dialog;
+  the timeline and the detail screens draw within the frame after their first frame. The first-frame
+  spikes of a new screen are Flutter's first build and shader warm-up, not a repeated cost.
+- **Change:** none. **Outcome: measured, no change needed.** No cache added; sampling, grids and
+  calculations untouched. Large-text rendering was not profiled separately (no change was made; the
+  accessibility sweep keeps covering 200 % text).
