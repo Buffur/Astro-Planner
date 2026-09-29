@@ -69,6 +69,10 @@ class SessionPlanViewModel extends ChangeNotifier {
   /// The plan's blocks, read-only; change them through the methods below.
   List<CaptureBlock> get captureBlocks => List.unmodifiable(_blocks);
 
+  /// The last light block, which a new block proposes (S7.2b; ADR-020 §5).
+  CaptureBlock? get lightProposal =>
+      _blocks.where((b) => b.frameType == FrameType.light).lastOrNull;
+
   /// True while the blocks are still the seeded example (TASK 4.4).
   bool get isExampleCapturePlan => _isExample;
   Session? get activeSession => _current?.session;

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_motion.dart';
 import '../../core/theme/app_palette.dart';
+import '../../domain/models/camera_class.dart';
 import '../../domain/models/capture_block.dart';
 import '../../domain/services/fit_analyzer.dart';
 import '../shared/block_text.dart';
@@ -72,9 +73,19 @@ class _BlockListState extends State<_BlockList> {
     ),
   );
 
-  /// A new block from the dialog.
+  /// The rig's camera class, which decides a light block's fields (S7.2b).
+  CameraClass get _cameraClass =>
+      context.read<SessionPlanViewModel>().selectedEquipment?.cameraClass ??
+      CameraClass.unknown;
+
+  /// A new block from the dialog, starting from the plan's last light block
+  /// as a proposal (S7.2b, ADR-020 §5).
   Future<void> _add() async {
-    final block = await showCaptureBlockDialog(context);
+    final block = await showCaptureBlockDialog(
+      context,
+      cameraClass: _cameraClass,
+      proposal: context.read<SessionPlanViewModel>().lightProposal,
+    );
     if (block == null || !mounted) return;
     final plan = context.read<SessionPlanViewModel>();
     await runWithFeedback(
@@ -87,7 +98,11 @@ class _BlockListState extends State<_BlockList> {
   /// TD-079 (S6.16): an edit saved in the dialog applies at once and says
   /// so, with Undo back to the block as it was.
   Future<void> _edit(int index, CaptureBlock block) async {
-    final edited = await showCaptureBlockDialog(context, initial: block);
+    final edited = await showCaptureBlockDialog(
+      context,
+      initial: block,
+      cameraClass: _cameraClass,
+    );
     if (edited == null || !mounted) return;
     final plan = context.read<SessionPlanViewModel>();
     await runWithFeedback(

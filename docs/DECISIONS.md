@@ -4781,7 +4781,7 @@ fields, §2 and §8 below). **Implementation:** Stage 7, S7.2a, S7.2b, S7.3a and
 
 - **Tasks** (the plan's S7.D split rule):
   - **S7.2a** — the camera class on the rig (schema, editor, import, snapshot); *done 2026-09-29*;
-  - **S7.2b** — the light-block form (§3, §4's label and help, §5);
+  - **S7.2b** — the light-block form (§3, §4's label and help, §5); *done 2026-09-29*;
   - **S7.3a** — calibration blocks (§6, §7; the dark-flat frame type);
   - **S7.3b** — in-camera noise reduction in the budget and the fit (§8; schema; E8–E8c).
 - ADR-009 and ADR-011 carry pointers to this ADR. `SCIENTIFIC_INTEGRITY.md` records §8 as a CALC-25

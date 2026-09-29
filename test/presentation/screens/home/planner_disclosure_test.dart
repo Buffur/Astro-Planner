@@ -183,7 +183,7 @@ void main() {
     // The detail itself is one tap away.
     for (final hidden in [
       'Integration (light exposure)',
-      'Per-frame overhead',
+      'Time between frames',
       'Focal length',
       'Open Light Pollution Map',
     ]) {
@@ -377,7 +377,10 @@ void main() {
     await start(tester, store: store, newDatabase: false);
     expect(identical(vm.disclosure, before), isFalse);
     expect(find.text('Integration (light exposure)'), findsOneWidget);
-    expect(find.text('Per-frame overhead'), findsNothing); // still closed
+    expect(
+      find.text('Time between frames'),
+      findsNothing,
+    ); // still closed (S7.2b's label)
   });
 }
 

@@ -113,10 +113,14 @@ class SettingsScreen extends StatelessWidget {
           ),
           _SliderTile(
             key: const Key('settings.perFrame'),
-            title: 'Per-frame overhead',
+            // S7.2b (ADR-020 §4, I1): the one interval concept, relabelled.
+            title: 'Time between frames',
             help:
-                'Download or interval time added to every frame. An '
-                'assumption — measure your rig.',
+                'From the end of one frame to the start of the next: the '
+                'download or processing, plus any delay you set. A camera '
+                'timer counted start to start gives its interval minus the '
+                'exposure. Settling after a dither is the Dither overhead, '
+                'not this. An assumption — measure your rig.',
             value: p.perFrameOverheadSeconds,
             range: (0.0, 60.0),
             divisions: 60,

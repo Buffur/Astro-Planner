@@ -30,7 +30,7 @@ class CaptureAssumptionsPanel extends StatelessWidget {
     String secs(double s) => '${s.round()} s';
     String minutes(double m) => '${m.round()} min';
     final rows = <(String, String)>[
-      ('Per-frame overhead', secs(p.perFrameOverheadSeconds)),
+      ('Time between frames', secs(p.perFrameOverheadSeconds)),
       (
         'Dither',
         p.ditherEveryNFrames == null

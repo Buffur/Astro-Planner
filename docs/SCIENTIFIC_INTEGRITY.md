@@ -1,5 +1,7 @@
 # AstroPlan — Scientific Integrity Register
 
+> **S7.2b (2026-09-29):** SI-004 holds: ISO and gain stay records, never converted into each other, never called "sensitivity"; a class shows one of them (ADR-020 §3). The per-frame overhead is relabelled "Time between frames" (ADR-020 §4); no formula, input or vector changed (ADR-009 E1–E7 unchanged).
+
 > **S7.1 (2026-09-29; RD-08 = T3):** CALC-31's tracking input is the plan's effective tracking (the plan's override, else the rig's default, else unknown). An input-source change decided by RD-08; no formula changed (DECISIONS E.1, "RD-08 decided").
 
 > **S6.16 (2026-09-28):** CALC-42's display only (TD-076): the graph names the plan's point and marks its end as a comparison, never a target. No formula, input or point changed; SI-003 holds.

@@ -1,5 +1,6 @@
 # AstroPlan Architecture
 
+> **S7.2b, 2026-09-29:** the light-block form by camera class (ADR-020 §3–§5): `CameraClass.lightSensitivity` and `offersLightBinning` (domain) decide the fields; `showCaptureBlockDialog(cameraClass:, proposal:)`; `SessionPlanViewModel.lightProposal` (the last light block); the per-frame overhead reads "Time between frames" (Settings and the assumptions panel; no arithmetic change).
 > **S7.2a, 2026-09-29:** the rig's camera class (ADR-020 §2): `CameraClass` (`domain/models/camera_class.dart`) on `EquipmentProfile`, carried by `EquipmentDraft` (`fromProfile`, `forRig`; `fromCandidate` always Unknown) and chosen in the rig editor ("Camera type"); the Library's rig list shows it once chosen. It feeds no calculation; S7.2b uses it for the light-block form.
 > **S7.1, 2026-09-29:** B4 notes the plan's tracking override (RD-08 = T3) and `SiteViewModel.nightAt`.
 > **S6.V1, 2026-09-28:** B4 notes that a delete's Undo owns only the deleted block (TD-082).

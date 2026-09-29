@@ -102,6 +102,7 @@
 > decides it next. Nothing adopted.
 > **Updated 2026-09-29 (S7.1):** the plan's tracking override is built (RD-08 = T3; schema v19).
 > **Updated 2026-09-29 (S7.2a):** the camera class on the rig is built (ADR-020 §2; schema v20).
+> **Updated 2026-09-29 (S7.2b):** the light-block form by camera class is built (ADR-020 §3–§5).
 
 ## Contents
 
@@ -3994,7 +3995,7 @@ Stage 4):
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | **Done 2026-09-29** |
 | S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
 | S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | **Done 2026-09-29** |
-| S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | Frozen |
+| S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | **Done 2026-09-29** |
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | Frozen |
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | Frozen |
@@ -4415,6 +4416,17 @@ decided rules. Every part ends with the full gate after its last code change.
   phone or DSLR rig's block keeps a stored binning or gain without showing it, and the budget, the
   snapshot and the export are unchanged by it; the proposal is marked and saved only by the user;
   ADR-009's E1–E7 unchanged; the E2E follows any renamed label.
+
+- **Done 2026-09-29:** `CameraClass.lightSensitivity` / `offersLightBinning` (domain) decide a light
+  block's fields; `showCaptureBlockDialog(cameraClass:, proposal:)` shows one ISO or gain field (the
+  choice for Unknown) and binning only where offered; a value the class does not show is kept and
+  named ("Also recorded: …"), never converted; a new light block starts from
+  `SessionPlanViewModel.lightProposal` (the last light block), marked, stored only on Add; the
+  per-frame overhead reads "Time between frames" with ADR-020 §4's help (Settings, assumptions
+  panel; no arithmetic change). The dialog's dropdowns wrap at 200 % text (the Unknown class
+  overflowed without it). Tests: `light_block_form_test.dart` (12). Deliberate test change:
+  `planner_disclosure_test.dart` follows the relabelled row. ADR-009's vectors unchanged. Full gate
+  PASS: 1,559 tests, 2 expected skips; 2 host E2E.
 
 **S7.3a — Calibration blocks** (ADR-020 §6, §7; M)
 - **Scope:** the calibration fields per RG-10 §4 as decided (L1 copy from a chosen light group, "Use
