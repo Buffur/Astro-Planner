@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.4 done**: Settings rebuilt; the Moon and cloud gates).
-> **Next:** S9.5 (About: authorship, sources and attribution). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.5 done**: About: authorship, sources and attribution).
+> **Next:** S9.6 (the Weather and Night & Moon detail screens). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -14,10 +14,23 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S9.5** (below, "Next allowed action") |
-| Code baseline | **S9.4** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S9.6** (below, "Next allowed action") |
+| Code baseline | **S9.5** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.5 done, 2026-09-29** (08 §23; D9-4): About.
+- An author block first: the app, its version, "Made by Buffur" (the owner's public handle from 08
+  §23; the git history records two author names, so no personal name is inferred), Reddit as the
+  prominent button and the GitHub profile. Then each data source's credit with its link (OpenNGC,
+  openstreetmap.org/copyright, open-meteo.com, lightpollutionmap.app), privacy, the licence.
+  Source-code and policy links unchanged pending RD-01. `pubspec.yaml`'s template description
+  replaced. `COMPLIANCE.md` noted; the privacy policy needs no change (nothing new leaves the device).
+- **Tests:** `about_screen_test.dart` +2 (the author block first with both links and the version;
+  every source linked); two counts relaxed deliberately (the catalog's credit now appears in the
+  notice and in its linked line).
+- **Verification:** localized plus `pubspec.yaml` (a gate input): the full gate, **PASS** (1,808
+  tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.4 done, 2026-09-29** (P9.3; RD-11 = S9; TD-050 resolved; D9-3): Settings rebuilt.
 - "Settings", in RG-13's sections: Imaging window (minimum altitude, darkness limit, **Moon gate**,
@@ -450,8 +463,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S9.5 — About: authorship, sources and attribution** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
-   Task sequence"). Then S9.6 → S9.9 in order and the Stage 9 validation: the owner
+1. **S9.6 — The Weather and Night & Moon detail screens** (`POST_ROADMAP_PLAN.md`, "Stage 9 — frozen
+   Task sequence"). Then S9.7 → S9.9 in order and the Stage 9 validation: the owner
    asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
    commit without a new prompt.
 2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,

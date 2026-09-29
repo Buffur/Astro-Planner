@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S9.5, 2026-09-29 (About; 08 §23):** About opens with the author: the app's name and version, "Made by Buffur", and the author's **Reddit** (the prominent button) and GitHub profile. Then the data sources, each credited as its terms ask and linked (OpenNGC, OpenStreetMap's copyright page, Open-Meteo, lightpollutionmap.app), privacy and the licence. The source-code and policy links are unchanged until RD-01 (the project's GitHub identity) is decided.
+
 > **S9.4, 2026-09-29 (Settings; the optional gates F-38; RG-13, RD-11 = S9, TD-050):** Settings is titled "Settings" and grouped by what a value changes: **Imaging window** (minimum altitude, darkness limit, **Moon gate**, **cloud gate**), **Fit and capture time** (feasibility margin, time between frames up to 120 s, the optional overheads, whose values are now editable with − / + within the model's ranges), **Guidance** (NPF k, dew margin), Display, Privacy, Data, About. Each row shows its value with its unit and its consequence. A setting that cannot be saved says so; Back up, preparing and cancelling a restore report failures; Restore confirms through the shared dialog. No default changed.
 
 > **S9.2, 2026-09-29 (rigs F-23, targets F-19, sites F-07):** the three editors read alike: sentence-case titles and labels ("Edit target", "Name *", "Effective focal length (mm)"), one primary Save ("Save site" at the foot of the site editor). An empty rig list says "No rigs yet." No stored value or validation changes.

@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.5, 2026-09-29:** `AboutScreen` gains an author block (`AboutScreen.author`, `authorReddit`, `authorGitHub`: the owner's public handle and profiles from 08 §23) and a `_Source` per data source (credit + link); `AppSpacing` replaces its raw paddings. `pubspec.yaml`'s description replaces Flutter's template text. `AppIdentity` is unchanged (RD-01).
+
 > **S9.4, 2026-09-29:** `settings_screen.dart` rebuilt from RG-13 (`refinement/research/S9.3_SETTINGS.md` §4): sections with a consequence line, `_GateTile` (ADR-013 G4/G5 through `PlanningPreferences.copyWith`), `_OptionalOverhead` with `_Stepper`s (values within `PlanningPreferences`' ranges through `withOptionalOverheads`/`copyWith`), every write through `runWithFeedback`. `BackupSection` runs back up, stage and cancel through `runWithFeedback` and confirms Restore with `confirmDestructive`. No ViewModel or domain change.
 
 > **S9.2, 2026-09-29:** `showFailure(context, text)` in `failure_feedback.dart` (the site editor's three ad hoc SnackBars use it); `AppWords` gains the editors' words (`save`, `addTarget`, `editTarget`, `newSite`, `editSite`, `saveSite`, `noRigs`). The retired-terms baseline is empty (P9.2).

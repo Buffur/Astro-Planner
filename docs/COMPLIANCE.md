@@ -1,5 +1,13 @@
 # Legal and compliance record (TASK 16.3, PD-12)
 
+> **S9.5, 2026-09-29 (checked, not re-verified against the providers' terms):** the About screen
+> now credits each source with a link: OpenNGC (its GitHub page), "© OpenStreetMap contributors"
+> with openstreetmap.org/copyright, "Weather data by Open-Meteo.com (CC BY 4.0)" (the weather
+> card's wording) with open-meteo.com, and lightpollutionmap.app. The author's own links (Reddit,
+> GitHub) are shown apart from the third-party credits. No credit was removed, and nothing new
+> leaves the device (a link opens in the browser only when tapped). The source-code, project and
+> policy URLs are unchanged pending RD-01.
+
 > Written 2026-09-24 for TASK 16.3. **Not legal advice** (out of scope by the roadmap):
 > it records what the app does, what third-party terms said on the date checked, and the
 > owner's decisions, so the owner can review them. Every terms check is date-stamped;

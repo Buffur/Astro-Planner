@@ -24,7 +24,8 @@ void main() {
 
   testWidgets('shows the OpenNGC notice and the other credits', (tester) async {
     await pumpAbout(tester);
-    expect(find.textContaining('Mattia Verga'), findsOneWidget);
+    // S9.5: the notice, and the catalog's credit with its link.
+    expect(find.textContaining('Mattia Verga'), findsWidgets);
     expect(find.textContaining('CC BY-SA 4.0'), findsWidgets);
     expect(find.textContaining('OpenStreetMap contributors'), findsOneWidget);
     expect(
@@ -32,8 +33,58 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('CC BY 4.0'), findsOneWidget);
-    expect(find.textContaining('lightpollutionmap.app'), findsOneWidget);
+    expect(find.textContaining('lightpollutionmap.app'), findsWidgets);
     expect(find.text('Open-source licences'), findsOneWidget);
+  });
+
+  // S9.5 (08 §23, D9-4): the author first, apart from third-party credit,
+  // with Reddit prominent; every source a link.
+  testWidgets('the author block comes first, with Reddit and GitHub', (
+    tester,
+  ) async {
+    await pumpAbout(tester);
+    final author = find.byKey(const Key('about.author'));
+    expect(
+      find.descendant(of: author, matching: find.text('Made by Buffur')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: author, matching: find.byType(FilledButton)),
+      findsOneWidget,
+      reason: 'Reddit is the prominent link',
+    );
+    expect(find.byKey(const Key('about.reddit')), findsOneWidget);
+    expect(find.byKey(const Key('about.github')), findsOneWidget);
+    expect(AboutScreen.authorReddit, 'https://www.reddit.com/user/Buffur/');
+    expect(AboutScreen.authorGitHub, 'https://github.com/Buffur');
+    expect(
+      tester.getTopLeft(author).dy,
+      lessThan(tester.getTopLeft(find.text('Data sources')).dy),
+    );
+    expect(
+      tester.widget<Text>(find.byKey(const Key('about.version'))).data,
+      'Version ${AppIdentity.version}',
+    );
+  });
+
+  testWidgets('every data source has its link', (tester) async {
+    await pumpAbout(tester);
+    for (final key in [
+      'about.openngc',
+      'about.osm',
+      'about.openMeteo',
+      'about.lightPollution',
+    ]) {
+      expect(
+        find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byType(TextButton),
+        ),
+        findsOneWidget,
+        reason: key,
+      );
+    }
+    expect(find.text('openstreetmap.org/copyright'), findsOneWidget);
   });
 
   testWidgets('states the GPL-3.0 licence with a link to the source', (

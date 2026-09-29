@@ -5289,7 +5289,7 @@ GitHub identity (RD-01: the application id is permanent once published). The age
 | S9.2 | Secondary forms and the vocabulary completed | P9.2 | M | S9.1 | **Done 2026-09-29** |
 | S9.3 | RG-13: what each setting is for, and where it belongs (research) | P9.3 | S | — | **Done 2026-09-29** |
 | S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | **Done 2026-09-29** |
-| S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | Frozen |
+| S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | **Done 2026-09-29** |
 | S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | Frozen |
 | S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | Frozen |
 | S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | Frozen |
@@ -5377,7 +5377,9 @@ Stage's exit allows "deferred by the owner").
 
 ##### S9.5 — About: authorship, sources and attribution
 - **Objective:** the author is visible and the sources are correct (08 §23).
-- **Scope:** an author block at the top of About: the author's name as the git history records it,
+- **Scope:** an author block at the top of About: the author's name as the git history records it
+  *(built by S9.5 as the owner's public handle, "Buffur", from 08 §23's links: the git history records
+  two author names, and a personal name is not inferred from an e-mail address)*,
   **Reddit (prominent) and GitHub profile links** (https://www.reddit.com/user/Buffur/,
   https://github.com/Buffur), kept apart from third-party credit; the version line; every source link a
   real link (OSM's copyright page, Open-Meteo, OpenNGC, lightpollutionmap.app) with the wording each
