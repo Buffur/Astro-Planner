@@ -111,6 +111,7 @@ abstract final class SessionSnapshotBuilder {
       'name': r.name,
       'manufacturer': r.manufacturer,
       'cameraModel': r.cameraModel,
+      'cameraClass': r.cameraClass.name, // S7.2a (ADR-020 §2)
       'sensorWidthMm': r.sensorWidthMm,
       'sensorHeightMm': r.sensorHeightMm,
       'pixelPitchUm': r.pixelPitchUm,

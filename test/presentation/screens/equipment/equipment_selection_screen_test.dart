@@ -290,7 +290,13 @@ void main() {
     expect(find.text('From focal length ÷ diameter'), findsOneWidget);
 
     // Open the tracking dropdown (showing "Unknown") and pick "Guided".
-    await tester.tap(find.text('Unknown'));
+    // S7.2a: the camera type also reads Unknown, so the dropdown is named.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(DropdownButtonFormField<TrackingType>),
+        matching: find.text('Unknown'),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Guided').last);
     await tester.pumpAndSettle();

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/models/camera_class.dart';
 import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/spec_confidence.dart';
@@ -108,6 +109,7 @@ class _EquipmentEditor {
     final rotationCtrl = TextEditingController(text: t.rotation);
     final maxExposureCtrl = TextEditingController(text: t.maxExposure);
     var trackingType = form.trackingType;
+    var cameraClass = form.cameraClass;
     String? apertureError;
     var saved = false;
 
@@ -214,6 +216,24 @@ class _EquipmentEditor {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        // S7.2a (ADR-020 §2): the user's choice, never
+                        // inferred; it decides the capture settings offered.
+                        DropdownButtonFormField<CameraClass>(
+                          key: const Key('equipmentEditor.cameraClass'),
+                          initialValue: cameraClass,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Camera type',
+                          ),
+                          items: [
+                            for (final c in CameraClass.values)
+                              DropdownMenuItem(value: c, child: Text(c.label)),
+                          ],
+                          onChanged: (c) {
+                            if (c != null) cameraClass = c;
+                          },
                         ),
                         const SizedBox(height: 20),
                         // ── Sensor Section (Stellarium layout) ──────────
@@ -536,7 +556,11 @@ class _EquipmentEditor {
                     final gear = context.read<GearViewModel>();
                     // S3.5: the form model builds the profile and its
                     // provenance (TASK 8.5, ADR-018 §5).
-                    final result = form.build(currentTexts(), trackingType);
+                    final result = form.build(
+                      currentTexts(),
+                      trackingType,
+                      cameraClass: cameraClass,
+                    );
                     final recorded = result.profile;
                     if (recorded == null) {
                       setDialogState(

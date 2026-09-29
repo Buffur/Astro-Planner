@@ -1,6 +1,7 @@
 import '../../domain/equipment_import/equipment_candidate.dart';
 import '../../domain/equipment_import/equipment_matcher.dart';
 import '../../domain/metadata/capture_metadata.dart';
+import '../../domain/models/camera_class.dart';
 import '../../domain/models/equipment_limits.dart';
 import '../../domain/models/equipment_profile.dart';
 import '../../domain/models/spec_confidence.dart';
@@ -119,6 +120,7 @@ class EquipmentDraft {
     required this.initial,
     this.existing,
     this.trackingType = TrackingType.unknown,
+    this.cameraClass = CameraClass.unknown,
     this.prefilled = const {},
     this.metadataMake,
     this.metadataModel,
@@ -131,6 +133,7 @@ class EquipmentDraft {
     return EquipmentDraft(
       existing: e,
       trackingType: e?.trackingType ?? TrackingType.unknown,
+      cameraClass: e?.cameraClass ?? CameraClass.unknown,
       initial: EquipmentFormTexts(
         name: e?.name ?? '',
         manufacturer: e?.manufacturer ?? '',
@@ -356,6 +359,7 @@ class EquipmentDraft {
     return EquipmentDraft(
       existing: rig,
       trackingType: rig.trackingType,
+      cameraClass: rig.cameraClass,
       prefilled: prefilled,
       metadataMake: rig.metadataMake,
       metadataModel: rig.metadataModel,
@@ -403,6 +407,10 @@ class EquipmentDraft {
   final EquipmentProfile? existing;
   final EquipmentFormTexts initial;
   final TrackingType trackingType;
+
+  /// The camera's class (ADR-020 §2): the rig's own when editing; always
+  /// [CameraClass.unknown] for an import, which never proposes one.
+  final CameraClass cameraClass;
 
   /// Pre-filled specs and their origin (empty for Add/Edit by hand).
   final Map<EquipmentSpec, PrefilledSpec> prefilled;
@@ -462,8 +470,9 @@ class EquipmentDraft {
   /// form's validators.
   EquipmentDraftResult build(
     EquipmentFormTexts texts,
-    TrackingType trackingType,
-  ) {
+    TrackingType trackingType, {
+    CameraClass? cameraClass,
+  }) {
     // S3.V3: while a pre-filled value's texts are unchanged, its exact value
     // is saved, never the (possibly rounded) text.
     num? exact(EquipmentSpec spec, int index) {
@@ -496,6 +505,7 @@ class EquipmentDraft {
       name: texts.name.trim(),
       manufacturer: optionalText(texts.manufacturer),
       cameraModel: optionalText(texts.cameraModel),
+      cameraClass: cameraClass ?? this.cameraClass,
       resolutionWidthPx:
           exact(EquipmentSpec.resolution, 0)?.toInt() ??
           int.parse(texts.resolutionWidth.trim()),

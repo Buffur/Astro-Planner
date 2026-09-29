@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../viewmodels/library_viewmodels.dart';
+import '../../../domain/models/camera_class.dart';
 import '../../../domain/models/equipment_profile.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../../core/config/feature_scope.dart';
@@ -73,6 +74,8 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
           ? 'f/${_trim(eq.focalRatio)} — please review'
           : 'f/${eq.focalRatio.toStringAsFixed(1)}',
     );
+    // S7.2a: the camera class, once the user chose one (never inferred).
+    if (eq.cameraClass != CameraClass.unknown) parts.add(eq.cameraClass.label);
     if (eq.trackingType != TrackingType.unknown) {
       parts.add(eq.trackingType.label);
     }

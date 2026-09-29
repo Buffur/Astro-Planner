@@ -1761,6 +1761,8 @@ Stage 4 revalidation is still required.
 - **Consequences:** ADR-020 (S7.D) records this with RG-10's decision. By the plan's "Order" rule, C1
   splits S7.2 into the class on the rig (a schema change) and the light-block form. No ADR-009 Task
   is added (I1).
+- **Built (C1) by S7.2a (2026-09-29):** `camera_modules.camera_class` (v20), the rig editor's "Camera
+  type", Unknown by default and for the example rig; the import never proposes one.
 - **Rejected:** C2, C3; B1+, B2, B3; W2; F2, F3; I2–I4; P1, P3.
 - Documentation only. No code changed.
 
@@ -4778,7 +4780,7 @@ fields, §2 and §8 below). **Implementation:** Stage 7, S7.2a, S7.2b, S7.3a and
 ### 11. Consequences
 
 - **Tasks** (the plan's S7.D split rule):
-  - **S7.2a** — the camera class on the rig (schema, editor, import, snapshot);
+  - **S7.2a** — the camera class on the rig (schema, editor, import, snapshot); *done 2026-09-29*;
   - **S7.2b** — the light-block form (§3, §4's label and help, §5);
   - **S7.3a** — calibration blocks (§6, §7; the dark-flat frame type);
   - **S7.3b** — in-camera noise reduction in the budget and the fit (§8; schema; E8–E8c).

@@ -48,6 +48,11 @@ class CameraModules extends Table {
   /// entered by hand.
   TextColumn get metadataMake => text().nullable()();
   TextColumn get metadataModel => text().nullable()();
+
+  /// The camera's class (ADR-020 §2; S7.2a, v20): `phone`,
+  /// `dslrMirrorless`, `astroColour`, `astroMono` or `unknown` (the
+  /// default). Chosen by the user; never inferred.
+  TextColumn get cameraClass => text().withDefault(const Constant('unknown'))();
 }
 
 class OpticalRigs extends Table {

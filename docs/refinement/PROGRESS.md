@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.1 done**: the plan's tracking override, RD-08 = T3; schema v19).
-> **Next:** S7.2a, the camera class on the rig (RG-03 stays open; it affects only S7.6).
+> **Last updated:** 2026-09-29 (**S7.2a done**: the camera class on the rig; schema v20).
+> **Next:** S7.2b, the light-block form (RG-03 stays open; it affects only S7.6).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D and S7.1 done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1 and S7.2a done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.2a**, the camera class on the rig (below, "Next allowed action") |
-| Code baseline | S7.1 (this commit). Not pushed (S1.14, RD-17) |
-| Schema | **v19** (S7.1) |
+| Next Task | **S7.2b**, the light-block form (below, "Next allowed action") |
+| Code baseline | S7.2a (this commit). Not pushed (S1.14, RD-17) |
+| Schema | **v20** (S7.2a) |
+
+**S7.2a done, 2026-09-29** (ADR-020 §2; RG-11 = C1): a rig has a camera type (Phone · DSLR or
+mirrorless · Astro camera (colour) · Astro camera (mono) · Unknown), chosen in the rig editor, Unknown
+by default and for the example rig; "Add from a photo" never proposes one, even from a saved rig with
+the same camera; a new snapshot records it; the Library shows it once chosen. **Schema v20**
+(`camera_modules.camera_class`). Deliberate test changes: the v19 pins move to v20; one editor test's
+finder names the tracking dropdown. Verification: high-risk (schema): the full gate after the last
+code change, PASS (below); every acceptance criterion checked.
 
 **S7.1 done, 2026-09-29** (RD-08 = T3; the plan's "S7.1" for the detail): a plan can override its
 rig's tracking for its night ("Tracking for this plan", under the rig; S6.9's button opens the same
@@ -161,7 +169,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (443 files, 0 changed); Analyze (no issues); 1,527 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.1's final inputs (the S7.1 commit) | Valid while `git diff --stat <S7.1 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S6.V1's gate at `da4c53d` |
+| **Full quality gate PASS**: Encoding; Format (446 files, 0 changed); Analyze (no issues); 1,547 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.2a's final inputs (the S7.2a commit) | Valid while `git diff --stat <S7.2a commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.1's gate (`99f0677`) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -291,9 +299,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.2a — the camera class on the rig** (`POST_ROADMAP_PLAN.md`, "S7.D — done": ADR-020 §2): a
-   camera-module field with the five classes, Unknown by default, never inferred; a schema change,
-   ending with the full gate. Implementation; commit, then STOP.
+1. **S7.2b — the light-block form** (`POST_ROADMAP_PLAN.md`, "S7.D — done": ADR-020 §3–§5): the
+   block editor's light fields by camera class, the previous light block's proposal, and "Time
+   between frames" (label and help only). Implementation; the full gate; commit, then STOP.
 
 RG-03 (a specification source, `research/RG-03_EQUIPMENT_SPECS.md` §8) is still the owner's to
 decide; it affects only S7.6, which comes last.

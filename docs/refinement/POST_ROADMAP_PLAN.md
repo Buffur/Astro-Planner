@@ -101,6 +101,7 @@
 > **Updated 2026-09-29 (S7.R5):** RG-03 researched (`research/RG-03_EQUIPMENT_SPECS.md`); the owner
 > decides it next. Nothing adopted.
 > **Updated 2026-09-29 (S7.1):** the plan's tracking override is built (RD-08 = T3; schema v19).
+> **Updated 2026-09-29 (S7.2a):** the camera class on the rig is built (ADR-020 §2; schema v20).
 
 ## Contents
 
@@ -3992,7 +3993,7 @@ Stage 4):
 | S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | **Done 2026-09-29** (`research/RG-03_EQUIPMENT_SPECS.md`); RG-03 awaits the owner |
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | **Done 2026-09-29** |
 | S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
-| S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | Frozen |
+| S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | **Done 2026-09-29** |
 | S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | Frozen |
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | Frozen |
@@ -4395,6 +4396,16 @@ decided rules. Every part ends with the full gate after its last code change.
 - **Acceptance:** schema equality and data preservation; the example rig reads Unknown; no code path
   sets a class from a name, a Make or Model string or a file (a test over the import flow); a class
   change never touches a saved snapshot; the editor in the sweep and the fit test at 200 % text.
+
+- **Done 2026-09-29:** `CameraClass` (`domain/models/camera_class.dart`); `camera_modules.camera_class`
+  (v20, default `unknown`; migration tests v8–v19 → v20 and a v19 camera kept); `EquipmentProfile.cameraClass`
+  (kept by `withEditProvenance`); `EquipmentDraft.cameraClass` (`fromProfile`, `forRig` the rig's own;
+  `fromCandidate` always Unknown, even with `cameraFrom`); the editor's "Camera type"
+  (`equipmentEditor.cameraClass`); the snapshot's `rig.cameraClass`; the Library list shows it once
+  chosen. Tests: `test/presentation/camera_class_test.dart` (7). **Deliberate test changes:** the
+  backup and unsupported-database pins move to v20 (a newer database is v21); one editor test found the
+  tracking dropdown by the text "Unknown", which the camera type now also shows, so its finder names
+  the dropdown (assertions unchanged). Full gate PASS: 1,547 tests, 2 expected skips; 2 host E2E.
 
 **S7.2b — The light-block form** (ADR-020 §3–§5; M)
 - **Scope:** the block editor's light fields by class (ADR-020 §3's table); the previous light block's

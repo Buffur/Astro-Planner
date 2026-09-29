@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S7.2a, 2026-09-29 (equipment, F-23; ADR-020 §2, RG-11 = C1):** a rig has a camera type (Phone · DSLR or mirrorless · Astro camera (colour) · Astro camera (mono) · Unknown), chosen in the rig editor and Unknown by default; the example rig stays Unknown; "Add from a photo" never proposes one. It feeds no calculation yet; S7.2b uses it to offer the right capture settings. Schema v20.
+
 > **S7.1, 2026-09-29 (the planner F-40, NPF guidance F-26; RD-08 = T3):** a plan can override its rig's tracking for its night ("Tracking for this plan", under the rig; S6.9's "Set the tracking for this plan" opens the same choice). The guidance uses the effective value; the rig and the example rig's Unknown are never changed; Save records the value and its source; Discard, Copy, New plan and Open handle it; the export carries it. Schema v19. The rig editor's field reads "Tracking (default for plans)".
 
 > **S6.V1, 2026-09-28 (the capture plan, F-40; S6V-01, TD-082):** Undo after deleting a block puts that block back at its place and keeps whatever was added or edited since; the "Example plan" badge comes back only when nothing else changed since the delete, so an edited plan is never shown as the example. After New plan, Copy, Open or Track live, an old delete's Undo changes nothing and says "Not undone: the capture plan was changed again since." A saved plan's snapshot is never touched.

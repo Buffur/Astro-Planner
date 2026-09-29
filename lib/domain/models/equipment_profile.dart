@@ -1,3 +1,4 @@
+import 'camera_class.dart';
 import 'equipment_limits.dart';
 import 'spec_confidence.dart';
 import 'spec_provenance.dart';
@@ -11,6 +12,10 @@ class EquipmentProfile {
   final String name;
   final String? manufacturer;
   final String? cameraModel;
+
+  /// The camera's class (ADR-020 §2; S7.2a): the user's choice, never
+  /// inferred; [CameraClass.unknown] until chosen.
+  final CameraClass cameraClass;
 
   /// Sensor size, mm. Dictates the field of view.
   final double sensorWidthMm;
@@ -68,6 +73,7 @@ class EquipmentProfile {
     required this.name,
     this.manufacturer,
     this.cameraModel,
+    this.cameraClass = CameraClass.unknown,
     required this.sensorWidthMm,
     required this.sensorHeightMm,
     required this.pixelPitchUm,
@@ -196,6 +202,7 @@ class EquipmentProfile {
       name: name,
       manufacturer: manufacturer,
       cameraModel: cameraModel,
+      cameraClass: cameraClass,
       sensorWidthMm: sensorWidthMm,
       sensorHeightMm: sensorHeightMm,
       pixelPitchUm: pixelPitchUm,

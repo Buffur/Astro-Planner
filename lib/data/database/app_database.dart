@@ -253,7 +253,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration {
@@ -535,6 +535,15 @@ class AppDatabase extends _$AppDatabase {
                 await m.addColumn(
                   schema.sessionLogs,
                   schema.sessionLogs.trackingOverride,
+                );
+              },
+              from19To20: (m, schema) async {
+                // S7.2a (ADR-020 §2): the camera class. Additive only; every
+                // existing camera reads as `unknown` (the column's default),
+                // since nothing may infer a class.
+                await m.addColumn(
+                  schema.cameraModules,
+                  schema.cameraModules.cameraClass,
                 );
               },
             ),

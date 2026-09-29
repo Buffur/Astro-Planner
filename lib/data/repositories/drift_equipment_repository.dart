@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../domain/models/camera_class.dart';
 import '../../domain/repositories/equipment_repository.dart';
 import '../../domain/models/equipment_profile.dart' as domain;
 import '../../domain/models/spec_confidence.dart';
@@ -22,6 +23,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
       name: rig.name,
       manufacturer: dev.manufacturer,
       cameraModel: cam.model,
+      cameraClass: CameraClass.fromStorage(cam.cameraClass),
       sensorWidthMm: cam.sensorWidthMm,
       sensorHeightMm: cam.sensorHeightMm,
       pixelPitchUm: cam.pixelPitchUm,
@@ -150,6 +152,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
               resolutionHeightPx: profile.resolutionHeightPx,
               pixelPitchUm: profile.pixelPitchUm,
               averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
+              cameraClass: Value(profile.cameraClass.name),
               source: Value(profile.cameraSource),
               confidence: Value(profile.cameraConfidence?.name),
               resolutionSource: _source(profile, EquipmentSpec.resolution),
@@ -306,6 +309,7 @@ class DriftEquipmentRepository implements EquipmentRepository {
             resolutionHeightPx: Value(profile.resolutionHeightPx),
             pixelPitchUm: Value(profile.pixelPitchUm),
             averageRawFileSizeMB: Value(profile.averageRawFileSizeMB),
+            cameraClass: Value(profile.cameraClass.name),
             source: Value(profile.cameraSource),
             confidence: Value(profile.cameraConfidence?.name),
             resolutionSource: _source(profile, EquipmentSpec.resolution),

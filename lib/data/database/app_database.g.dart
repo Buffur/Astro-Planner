@@ -608,6 +608,18 @@ class $CameraModulesTable extends CameraModules
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _cameraClassMeta = const VerificationMeta(
+    'cameraClass',
+  );
+  @override
+  late final GeneratedColumn<String> cameraClass = GeneratedColumn<String>(
+    'camera_class',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('unknown'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -633,6 +645,7 @@ class $CameraModulesTable extends CameraModules
     rawFileSizeConfidence,
     metadataMake,
     metadataModel,
+    cameraClass,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -846,6 +859,15 @@ class $CameraModulesTable extends CameraModules
         ),
       );
     }
+    if (data.containsKey('camera_class')) {
+      context.handle(
+        _cameraClassMeta,
+        cameraClass.isAcceptableOrUnknown(
+          data['camera_class']!,
+          _cameraClassMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -947,6 +969,10 @@ class $CameraModulesTable extends CameraModules
         DriftSqlType.string,
         data['${effectivePrefix}metadata_model'],
       ),
+      cameraClass: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}camera_class'],
+      )!,
     );
   }
 
@@ -988,6 +1014,11 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
   /// entered by hand.
   final String? metadataMake;
   final String? metadataModel;
+
+  /// The camera's class (ADR-020 §2; S7.2a, v20): `phone`,
+  /// `dslrMirrorless`, `astroColour`, `astroMono` or `unknown` (the
+  /// default). Chosen by the user; never inferred.
+  final String cameraClass;
   const CameraModule({
     required this.id,
     required this.deviceId,
@@ -1012,6 +1043,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     this.rawFileSizeConfidence,
     this.metadataMake,
     this.metadataModel,
+    required this.cameraClass,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1069,6 +1101,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     if (!nullToAbsent || metadataModel != null) {
       map['metadata_model'] = Variable<String>(metadataModel);
     }
+    map['camera_class'] = Variable<String>(cameraClass);
     return map;
   }
 
@@ -1127,6 +1160,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       metadataModel: metadataModel == null && nullToAbsent
           ? const Value.absent()
           : Value(metadataModel),
+      cameraClass: Value(cameraClass),
     );
   }
 
@@ -1171,6 +1205,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       ),
       metadataMake: serializer.fromJson<String?>(json['metadataMake']),
       metadataModel: serializer.fromJson<String?>(json['metadataModel']),
+      cameraClass: serializer.fromJson<String>(json['cameraClass']),
     );
   }
   @override
@@ -1202,6 +1237,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       ),
       'metadataMake': serializer.toJson<String?>(metadataMake),
       'metadataModel': serializer.toJson<String?>(metadataModel),
+      'cameraClass': serializer.toJson<String>(cameraClass),
     };
   }
 
@@ -1229,6 +1265,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     Value<String?> rawFileSizeConfidence = const Value.absent(),
     Value<String?> metadataMake = const Value.absent(),
     Value<String?> metadataModel = const Value.absent(),
+    String? cameraClass,
   }) => CameraModule(
     id: id ?? this.id,
     deviceId: deviceId ?? this.deviceId,
@@ -1273,6 +1310,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     metadataModel: metadataModel.present
         ? metadataModel.value
         : this.metadataModel,
+    cameraClass: cameraClass ?? this.cameraClass,
   );
   CameraModule copyWithCompanion(CameraModulesCompanion data) {
     return CameraModule(
@@ -1335,6 +1373,9 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
       metadataModel: data.metadataModel.present
           ? data.metadataModel.value
           : this.metadataModel,
+      cameraClass: data.cameraClass.present
+          ? data.cameraClass.value
+          : this.cameraClass,
     );
   }
 
@@ -1363,7 +1404,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           ..write('rawFileSizeSource: $rawFileSizeSource, ')
           ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
           ..write('metadataMake: $metadataMake, ')
-          ..write('metadataModel: $metadataModel')
+          ..write('metadataModel: $metadataModel, ')
+          ..write('cameraClass: $cameraClass')
           ..write(')'))
         .toString();
   }
@@ -1393,6 +1435,7 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
     rawFileSizeConfidence,
     metadataMake,
     metadataModel,
+    cameraClass,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1420,7 +1463,8 @@ class CameraModule extends DataClass implements Insertable<CameraModule> {
           other.rawFileSizeSource == this.rawFileSizeSource &&
           other.rawFileSizeConfidence == this.rawFileSizeConfidence &&
           other.metadataMake == this.metadataMake &&
-          other.metadataModel == this.metadataModel);
+          other.metadataModel == this.metadataModel &&
+          other.cameraClass == this.cameraClass);
 }
 
 class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
@@ -1447,6 +1491,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
   final Value<String?> rawFileSizeConfidence;
   final Value<String?> metadataMake;
   final Value<String?> metadataModel;
+  final Value<String> cameraClass;
   const CameraModulesCompanion({
     this.id = const Value.absent(),
     this.deviceId = const Value.absent(),
@@ -1471,6 +1516,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.rawFileSizeConfidence = const Value.absent(),
     this.metadataMake = const Value.absent(),
     this.metadataModel = const Value.absent(),
+    this.cameraClass = const Value.absent(),
   });
   CameraModulesCompanion.insert({
     this.id = const Value.absent(),
@@ -1496,6 +1542,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     this.rawFileSizeConfidence = const Value.absent(),
     this.metadataMake = const Value.absent(),
     this.metadataModel = const Value.absent(),
+    this.cameraClass = const Value.absent(),
   }) : deviceId = Value(deviceId),
        name = Value(name),
        sensorWidthMm = Value(sensorWidthMm),
@@ -1527,6 +1574,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Expression<String>? rawFileSizeConfidence,
     Expression<String>? metadataMake,
     Expression<String>? metadataModel,
+    Expression<String>? cameraClass,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1558,6 +1606,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
         'raw_file_size_confidence': rawFileSizeConfidence,
       if (metadataMake != null) 'metadata_make': metadataMake,
       if (metadataModel != null) 'metadata_model': metadataModel,
+      if (cameraClass != null) 'camera_class': cameraClass,
     });
   }
 
@@ -1585,6 +1634,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     Value<String?>? rawFileSizeConfidence,
     Value<String?>? metadataMake,
     Value<String?>? metadataModel,
+    Value<String>? cameraClass,
   }) {
     return CameraModulesCompanion(
       id: id ?? this.id,
@@ -1611,6 +1661,7 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           rawFileSizeConfidence ?? this.rawFileSizeConfidence,
       metadataMake: metadataMake ?? this.metadataMake,
       metadataModel: metadataModel ?? this.metadataModel,
+      cameraClass: cameraClass ?? this.cameraClass,
     );
   }
 
@@ -1696,6 +1747,9 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
     if (metadataModel.present) {
       map['metadata_model'] = Variable<String>(metadataModel.value);
     }
+    if (cameraClass.present) {
+      map['camera_class'] = Variable<String>(cameraClass.value);
+    }
     return map;
   }
 
@@ -1724,7 +1778,8 @@ class CameraModulesCompanion extends UpdateCompanion<CameraModule> {
           ..write('rawFileSizeSource: $rawFileSizeSource, ')
           ..write('rawFileSizeConfidence: $rawFileSizeConfidence, ')
           ..write('metadataMake: $metadataMake, ')
-          ..write('metadataModel: $metadataModel')
+          ..write('metadataModel: $metadataModel, ')
+          ..write('cameraClass: $cameraClass')
           ..write(')'))
         .toString();
   }
@@ -7895,6 +7950,7 @@ typedef $$CameraModulesTableCreateCompanionBuilder =
       Value<String?> rawFileSizeConfidence,
       Value<String?> metadataMake,
       Value<String?> metadataModel,
+      Value<String> cameraClass,
     });
 typedef $$CameraModulesTableUpdateCompanionBuilder =
     CameraModulesCompanion Function({
@@ -7921,6 +7977,7 @@ typedef $$CameraModulesTableUpdateCompanionBuilder =
       Value<String?> rawFileSizeConfidence,
       Value<String?> metadataMake,
       Value<String?> metadataModel,
+      Value<String> cameraClass,
     });
 
 final class $$CameraModulesTableReferences
@@ -8083,6 +8140,11 @@ class $$CameraModulesTableFilterComposer
 
   ColumnFilters<String> get metadataModel => $composableBuilder(
     column: $table.metadataModel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cameraClass => $composableBuilder(
+    column: $table.cameraClass,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8254,6 +8316,11 @@ class $$CameraModulesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get cameraClass => $composableBuilder(
+    column: $table.cameraClass,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$DevicesTableOrderingComposer get deviceId {
     final $$DevicesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -8389,6 +8456,11 @@ class $$CameraModulesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get cameraClass => $composableBuilder(
+    column: $table.cameraClass,
+    builder: (column) => column,
+  );
+
   $$DevicesTableAnnotationComposer get deviceId {
     final $$DevicesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -8489,6 +8561,7 @@ class $$CameraModulesTableTableManager
                 Value<String?> rawFileSizeConfidence = const Value.absent(),
                 Value<String?> metadataMake = const Value.absent(),
                 Value<String?> metadataModel = const Value.absent(),
+                Value<String> cameraClass = const Value.absent(),
               }) => CameraModulesCompanion(
                 id: id,
                 deviceId: deviceId,
@@ -8513,6 +8586,7 @@ class $$CameraModulesTableTableManager
                 rawFileSizeConfidence: rawFileSizeConfidence,
                 metadataMake: metadataMake,
                 metadataModel: metadataModel,
+                cameraClass: cameraClass,
               ),
           createCompanionCallback:
               ({
@@ -8539,6 +8613,7 @@ class $$CameraModulesTableTableManager
                 Value<String?> rawFileSizeConfidence = const Value.absent(),
                 Value<String?> metadataMake = const Value.absent(),
                 Value<String?> metadataModel = const Value.absent(),
+                Value<String> cameraClass = const Value.absent(),
               }) => CameraModulesCompanion.insert(
                 id: id,
                 deviceId: deviceId,
@@ -8563,6 +8638,7 @@ class $$CameraModulesTableTableManager
                 rawFileSizeConfidence: rawFileSizeConfidence,
                 metadataMake: metadataMake,
                 metadataModel: metadataModel,
+                cameraClass: cameraClass,
               ),
           withReferenceMapper: (p0) => p0
               .map(
