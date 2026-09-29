@@ -4,7 +4,7 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**TD-085 fixed** at the owner's request, after the Stage 8 validation PASS; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
+> **Last updated:** 2026-09-29 (**TD-085 and TD-086 fixed** at the owner's request, after the Stage 8 validation PASS; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
 > **Next:** Stage 9 planning.
 
 ## Current state
@@ -15,9 +15,22 @@
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: Complete** (validation PASS 2026-09-29, [report](STAGE_8_VALIDATION.md)). Stage 9 not started |
 | Current Task | None in progress |
 | Next Task | **Stage 9 planning** (below, "Next allowed action") |
-| Code baseline | **TD-085's fix** (its commit, after S8.9). Not pushed: the owner asked for commits only (2026-09-29) |
+| Code baseline | **TD-086's fix** (its commit, after TD-085's). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**TD-086 fixed, 2026-09-29** (S8V-02; the owner asked in chat to fix every Stage 8 finding; I-4,
+CALC-44, SI-008): the unreadable Saved · changed path.
+- `ResultsViewModel.savedPlanUnreadable`: the form's review lists no planned blocks and shows the
+  night and target as unknown, instead of the working row's (only Not done is offered, as before).
+- CALC-44's fallback takes the later of the row's night key and the evening date the unreadable
+  snapshot still names (`Session.unreadableSnapshotNight`, read by `DriftSessionRepository`): a
+  working night moved earlier no longer lets Not done be recorded before the saved night can have
+  ended. Only ever later; never shown. No schema change.
+- **Tests:** `results_unreadable_plan_test.dart` (new), `drift_session_results_test.dart` +2; both
+  mutation-checked (each fails without its half of the fix).
+- **Verification:** high-risk (time and night semantics, CALC-44): the full gate after the change,
+  **PASS** (1,790 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **TD-085 fixed, 2026-09-29** (S8V-01; the owner asked in chat; D8-2): Save no longer rewrites a
 saved plan whose night ended since the last night check.
@@ -363,7 +376,7 @@ These block a release, not refinement.
 1. **Stage 9 planning** (`POST_ROADMAP_PLAN.md`, "Stage 9 — Secondary UX & Product Polish", with
    the Stages 6–11 shared rules): verify its inputs against the code (§9.7), freeze its Task sequence
    and name its research and owner gates (RG-12, RG-13; TD-074, TD-050, RD-11 = S9). Planning is
-   documentation only; TD-085's fix gate (its commit) is its baseline while the code diff stays empty (V3).
+   documentation only; the last fix's gate (its commit) is its baseline while the code diff stays empty (V3).
 
 Stage 8 is closed; no Stage 8 gate is open.
 

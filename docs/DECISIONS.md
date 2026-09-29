@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **TD-086 fix, 2026-09-29:** D8-1's conservative end for an unreadable snapshot uses the later of the row's night key and the night the snapshot still names (CALC-44); an implementation note follows D8-1.
 > **S8.9, 2026-09-29:** I-10 built (E.1, "Stage 8 decisions"); its implementation note follows I-10.
 > **S8.8, 2026-09-29:** an implementation note under ADR-018 §5 (after S3.V7's) records per-field
 > provenance in new session snapshots (TD-070 resolved; additive, `v` stays 1).
@@ -1877,7 +1878,10 @@ Stage 4 revalidation is still required.
   from the snapshot's night and site). With no dawn inside the night (no darkness that night, darkness
   to the window's end, polar night) it ends at the SessionNight's end (the next mean solar noon); with
   no readable snapshot, at a conservative end of its night key (CALC-44). From that instant a result
-  may be recorded, and the planner stops treating the plan as current (the transition). *Rejected:* the
+  may be recorded, and the planner stops treating the plan as current (the transition).
+  *Implementation note (TD-086, 2026-09-29):* a Saved · changed row's night key is its working
+  night, so when its unreadable snapshot still names a later evening date, that date's conservative
+  end applies instead. The named date is used only to end the night later, never shown. *Rejected:* the
   SessionNight end (noon) for everything: simpler, but a result could not be recorded after imaging
   until about midday.
 - **D8-2 — Save on a saved plan (S4-DEF-01):** before its night ends, Save replaces the snapshot, a

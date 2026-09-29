@@ -785,6 +785,21 @@ class DriftSessionRepository implements SessionRepository {
     return value;
   }
 
+  /// The evening date a stored snapshot names, read without trusting the
+  /// rest of it (TD-086); null when it names none.
+  static CalendarDate? _nightNamedBy(Map<String, Object?>? raw) {
+    final night = raw?['night'];
+    final date = night is Map ? night['eveningDate'] : null;
+    if (date is! String) return null;
+    try {
+      return CalendarDate.parse(date);
+    } on FormatException {
+      return null;
+    } on ArgumentError {
+      return null;
+    }
+  }
+
   static DateTime? _instant(int? ms) =>
       ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
 
@@ -837,6 +852,9 @@ class DriftSessionRepository implements SessionRepository {
       hasUnreadableSnapshot:
           (row.planSnapshot != null && plan == null) ||
           (row.executionStartSnapshot != null && start == null),
+      unreadableSnapshotNight: plan == null
+          ? _nightNamedBy(row.planSnapshot)
+          : null,
       resultKind: ResultKind.tryParse(row.resultKind),
       notDoneReason: NotDoneReason.tryParse(row.notDoneReason),
       name: row.name,

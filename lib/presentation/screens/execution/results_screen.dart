@@ -296,7 +296,9 @@ class _Review extends StatelessWidget {
     final s = vm.session!;
     final snap = vm.review;
     final theme = Theme.of(context);
-    final night = snap?.eveningDate ?? s.eveningDate;
+    // TD-086: an unreadable saved plan's row holds the working edits.
+    final working = vm.savedPlanUnreadable;
+    final night = snap?.eveningDate ?? (working ? null : s.eveningDate);
     String row(String name, String? value) => '$name: ${value ?? 'unknown'}';
     return Card(
       key: const Key('results.review'),
@@ -329,7 +331,12 @@ class _Review extends StatelessWidget {
                 night == null ? null : NightTimeFormatter.eveningDate(night),
               ),
             ),
-            Text(row('Target', snap?.targetName ?? s.record.targetName)),
+            Text(
+              row(
+                'Target',
+                snap?.targetName ?? (working ? null : s.record.targetName),
+              ),
+            ),
             Text(row(AppWords.site, snap?.siteName)),
             Text(row(AppWords.rig, snap?.rigName)),
             for (final b in vm.lightBlocks)

@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **TD-086 fix, 2026-09-29:** `ResultsViewModel.savedPlanUnreadable` (a Saved · changed entry with an unreadable plan snapshot): the result form reviews no planned blocks, night or target from its working row; `SavedNightEnd` reads `Session.unreadableSnapshotNight`.
+
 > **TD-085 fix, 2026-09-29:** `CurrentSession.save(plan, snapshot, nowUtc)` never saves over a saved plan whose night has ended (CALC-44, D8-2), whether or not the minute night check has run: decided in its chain step (a Saved · changed one is settled first), so S1.12's ordering holds.
 
 > **S8.9, 2026-09-29:** `BackupPreferences` (`lib/data/backup/`) reads and restores the settings a backup carries, by the keys the SharedPreferences repositories expose (`SharedPrefsPlanningPreferencesRepository.keys`, `fieldModeKey`, `activeLocationIdKey`, `planIdKeys`, `doneKey`); `BackupArchive` (`format_version` 2) holds them as `preferences.json`; `BackupStaging.apply` restores them before the database swap (`restorePreferences`, default `BackupPreferences.restore`); `confirmDatabaseReset` calls `BackupPreferences.forgetStaleIds`. Data layer only; the backup ViewModel and screen are unchanged.

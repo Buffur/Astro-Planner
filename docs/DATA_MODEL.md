@@ -1,5 +1,7 @@
 # AstroPlan Data Model
 
+> **TD-086 fix (2026-09-29):** `Session.unreadableSnapshotNight` (domain only, no schema change): the evening date an unreadable `plan_snapshot` still names under `night.eveningDate`, read by `DriftSessionRepository` without trusting the rest; used only by CALC-44 to end a saved night later.
+
 > **S8.9 (2026-09-29; TD-056, ENG-14 resolved):** the backup archive is `format_version` 2 and adds `preferences.json` (B8a). A restore applies it before the restored database opens and clears the plan ids; a confirmed reset clears the active site and the plan ids. No schema change.
 
 > **S8.8 (2026-09-29; TD-070 resolved):** a new session snapshot's `rig` gains `provenance`: one entry per valued spec (`resolution`, `pixelPitch`, `sensorSize`, `rawFileSize` when set, `focalLength`, `focalRatio`), each `{source, confidence}` as `EquipmentProfile.provenanceOf` reads it, or null (unknown). An imported rig's estimates read `derived:calc-40/metadata:<format>` · `estimated` and its file values `metadata:<format>` · `reported`; nothing is recorded as `user` unless it is. Additive: `v` stays 1, the group pairs stay beside it, and a snapshot taken earlier has no key and reads as before. No schema change; the export embeds snapshots as stored.

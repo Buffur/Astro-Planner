@@ -19,7 +19,10 @@ import 'visibility_calculator.dart';
 /// - Without a readable snapshot, only the night key is known. It ends at the
 ///   latest instant any site's night with that evening date can end: the
 ///   mean solar noon at longitude 180° W, i.e. 00:00 UTC two days after the
-///   evening date. Never earlier than the true end.
+///   evening date. Never earlier than the true end. A Saved · changed row's
+///   key is its working night, which may be earlier than the saved one, so
+///   when the unreadable snapshot still names a later night, that one's
+///   latest end applies (TD-086).
 abstract final class SavedNightEnd {
   /// The end of [session]'s saved night, or null without a night key.
   static DateTime? of(Session session) {
@@ -29,7 +32,11 @@ abstract final class SavedNightEnd {
     final fromSnapshot = snapshot == null ? null : ofSnapshot(snapshot);
     if (fromSnapshot != null) return fromSnapshot;
     final night = snapshot?.eveningDate ?? session.eveningDate;
-    return night == null ? null : latestEnd(night);
+    if (night == null) return null;
+    final named = session.unreadableSnapshotNight;
+    return named != null && named.compareTo(night) > 0
+        ? latestEnd(named)
+        : latestEnd(night);
   }
 
   /// The end of [snapshot]'s night; null when its night cannot be read.

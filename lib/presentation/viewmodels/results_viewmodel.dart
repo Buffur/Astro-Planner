@@ -53,11 +53,21 @@ class ResultsViewModel extends ChangeNotifier {
         : SessionReconciliation.of(s.blocks, state);
   }
 
-  /// The light blocks a result counts, in plan order.
+  /// The light blocks a result counts, in plan order; none when the saved
+  /// plan cannot be read ([savedPlanUnreadable]).
   List<CaptureBlock> get lightBlocks => [
-    for (final b in _session?.blocks ?? const <CaptureBlock>[])
-      if (b.frameType == FrameType.light) b,
+    if (!savedPlanUnreadable)
+      for (final b in _session?.blocks ?? const <CaptureBlock>[])
+        if (b.frameType == FrameType.light) b,
   ];
+
+  /// A Saved · changed entry whose saved plan cannot be read (I-4): its row
+  /// holds the working edits, so its night, target and blocks are not the
+  /// saved plan's and are never shown as such (TD-086, SI-008).
+  bool get savedPlanUnreadable {
+    final s = _session;
+    return s != null && s.isSavedChanged && s.planSnapshot == null;
+  }
 
   /// Confirmed light frames of [blockId] so far.
   int confirmedFor(int blockId) => _state?.completedFor(blockId) ?? 0;
@@ -80,13 +90,8 @@ class ResultsViewModel extends ChangeNotifier {
 
   /// A Saved · changed entry whose saved plan cannot be read (I-4): only
   /// Not done can be recorded, once its night has ended.
-  bool get onlyNotDone {
-    final s = _session;
-    return s != null &&
-        s.isSavedChanged &&
-        s.planSnapshot == null &&
-        SavedNightEnd.hasEnded(s, _clock.nowUtc());
-  }
+  bool get onlyNotDone =>
+      savedPlanUnreadable && SavedNightEnd.hasEnded(_session!, _clock.nowUtc());
 
   /// The outcome already stored, for an edit; null for a new result.
   ResultOutcome? get storedOutcome => switch (_session) {

@@ -143,6 +143,7 @@ class Session {
     this.planSnapshot,
     this.executionStartSnapshot,
     this.hasUnreadableSnapshot = false,
+    this.unreadableSnapshotNight,
     this.resultKind,
     this.notDoneReason,
     this.name,
@@ -178,6 +179,11 @@ class Session {
   final SessionSnapshot? planSnapshot;
   final SessionSnapshot? executionStartSnapshot;
   final bool hasUnreadableSnapshot;
+
+  /// The evening date an unreadable plan snapshot still names, when it
+  /// does (TD-086). Only ever used to end a saved night later
+  /// (`SavedNightEnd`), never shown: the snapshot itself is not trusted.
+  final CalendarDate? unreadableSnapshotNight;
 
   /// How a completed session's counts were reported (S8.1); null for one
   /// completed live or before S8.1, and for every other status.

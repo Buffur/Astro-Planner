@@ -391,6 +391,58 @@ void main() {
       expect(entry.eveningDate, CalendarDate(2026, 12, 20));
     });
 
+    // TD-086 (S8V-02): the row's night is the working one; when the
+    // unreadable snapshot still names a later saved night, the entry ends no
+    // earlier than that night could.
+    test('TD-086: an unreadable Saved · changed plan moved to an earlier '
+        'night ends no earlier than the night its snapshot names', () async {
+      final s = await saved(); // saved for 15 Dec
+      await repo.updatePlan(s.id, _plan(night: CalendarDate(2026, 12, 10)));
+      await (db.update(db.sessionLogs)..where((t) => t.id.equals(s.id))).write(
+        const SessionLogsCompanion(
+          planSnapshot: Value({
+            'v': 99,
+            'night': {'eveningDate': '2026-12-15'},
+          }),
+        ),
+      );
+      final entry = (await repo.get(s.id))!;
+      expect(entry.planSnapshot, isNull);
+      expect(entry.unreadableSnapshotNight, CalendarDate(2026, 12, 15));
+      expect(SavedNightEnd.of(entry), DateTime.utc(2026, 12, 17));
+
+      clock.now = DateTime.utc(2026, 12, 13); // the working night is over
+      await expectLater(
+        repo.recordResult(s.id, const NotDone()),
+        throwsA(isA<NightNotEnded>()),
+      );
+      clock.now = DateTime.utc(2026, 12, 17);
+      await repo.recordResult(s.id, const NotDone());
+      expect((await repo.get(s.id))!.status, SessionStatus.abandoned);
+    });
+
+    test('TD-086: a snapshot naming no night, or an earlier one, leaves the '
+        "row's night key", () async {
+      final s = await saved();
+      await repo.updatePlan(s.id, _plan(night: CalendarDate(2026, 12, 20)));
+      for (final raw in <Map<String, Object?>>[
+        {'v': 99},
+        {
+          'v': 99,
+          'night': {'eveningDate': '2026-12-15'},
+        },
+        {
+          'v': 99,
+          'night': {'eveningDate': 'not a date'},
+        },
+      ]) {
+        await (db.update(db.sessionLogs)..where((t) => t.id.equals(s.id)))
+            .write(SessionLogsCompanion(planSnapshot: Value(raw)));
+        final entry = (await repo.get(s.id))!;
+        expect(SavedNightEnd.of(entry), DateTime.utc(2026, 12, 22));
+      }
+    });
+
     test('a Saved plan, a draft and a result are not settled', () async {
       final s = await saved();
       expect(await repo.settleSavedPlan(s.id), isNull);
