@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.6 done**: the rig form; every Stage 7 Task done).
-> **Next:** Stage 7 validation, in a fresh session (`prompts/INDEPENDENT_STAGE_VALIDATION.md`).
+> **Last updated:** 2026-09-29 (**Stage 7 validation BLOCKED**: S7V-01 / TD-083 and S7V-02 / TD-084).
+> **Next:** S7.V1 — preserve independent calibration input; one Task, then STOP.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b, S7.4, S7.5 and S7.6 done — every Task; RG-03 and RG-07 to RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In validation**. Original Tasks committed; independent validation at `d13fdab` found two blockers ([report](STAGE_7_VALIDATION.md)); corrections S7.V1 and S7.V2 frozen. All Stage 7 research/owner gates decided. Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **Stage 7 validation** (below, "Next allowed action") |
-| Code baseline | S7.6 (this commit). Not pushed (S1.14, RD-17) |
+| Next Task | **S7.V1 — Preserve independent calibration input** (below, "Next allowed action") |
+| Code baseline | **`d13fdab` (S7.6)**; validation changed documentation only. Not pushed (S1.14, RD-17) |
 | Schema | **v23** (S7.5) |
+
+**Stage 7 independent validation, 2026-09-29: BLOCKED** at `d13fdab`
+([report](STAGE_7_VALIDATION.md)): S7V-01 / TD-083 (calibration unlock/source changes overwrite
+independent exposure or edited gain), S7V-02 / TD-084 (name/elevation/notes-only site edits leave
+without the discard prompt). Six focused widget probes failed; retained as unapplied patches in
+`evidence/`. Other frozen criteria PASS. S7.6's recorded gate reused (unchanged inputs); pinned
+catalog regeneration matched. No application fixes. Corrections S7.V1 → S7.V2 → bounded V5
+revalidation; each is a separate cycle. No new owner decision.
 
 **S7.6 done, 2026-09-29** (UX-22; RG-03 = Q1): the rig form asks the pixel size once and keeps the
 maximum exposure, the RAW size and the rotation one tap away in "More (optional)" (open when an import
@@ -221,7 +229,9 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,710 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.6's final inputs (the S7.6 commit) | Valid while `git diff --stat <S7.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.5's gate (`3d54a4c`) |
+| **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,710 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d13fdab`**, S7.6's final inputs | Reused at validation: `git diff --stat d13fdab -- . ':!docs' ':!CLAUDE.md'` empty after temporary probes removed. Valid for the committed suite; new probes expose gaps, not a Stage PASS. Supersedes S7.5's gate (`3d54a4c`) |
+| **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
+| **Six focused probes FAIL**: three calibration input-preservation cases, three single-field site-guard cases | Stage 7 validation at `d13fdab` | `evidence/S7V_01_CALIBRATION_PROBE.patch` and `S7V_02_SITE_GUARD_PROBE.patch`, unapplied; report records exact expected/actual results. S7.V1/S7.V2 must turn them into passing regressions |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -239,7 +249,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 4 | Product Flow & Information Architecture | Complete | 2026-09-27 | 2026-09-27 | **Final, bounded validation PASS** at `09a7f06` (`STAGE_4_FINAL_VALIDATION.md`; the owner's seven questions; run in the authoring session at the owner's request, disclosed). Before that: **FAIL** at `adb5d95` (`STAGE_4_VALIDATION.md`, S4V-01), corrected by S4.V1. The fresh-session revalidation **FAILED** at `5ad69c4` (`STAGE_4_REVALIDATION.md`): S4R-01 and S4R-02 blocking, S4R-03 and S4R-04 low, all addressed by S4.V2 (the owner's R2 + D1). S4.V3 bounded the final validation, which then passed. S4V-02 is non-blocking and S4V-03 unverified |
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
-| 7 | Data Entry & Automation | In progress | 2026-09-28 | — | — |
+| 7 | Data Entry & Automation | In validation | 2026-09-28 | — | **BLOCKED** at `d13fdab`, fresh-session independent validation: S7V-01 / TD-083 and S7V-02 / TD-084; corrections S7.V1/S7.V2 ([report](STAGE_7_VALIDATION.md)) |
 | 8 | Sessions / Execution / Actuals / Logbook | Not started | — | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
 | 10 | Performance & Application Size | Not started | — | — | — |
@@ -339,10 +349,9 @@ These block a release, not refinement.
     P9.3); TD-081 (Stage 9 or 11); the validation's DEFERRED items (Stage 7's are now in its frozen
     sequence; Stage 8: saved-plan working copy and results, P8.1–P8.4, P8.7; Stage 9: richer detail
     screens).
-- **Stage 7 (in progress):** the gated Tasks wait for their research and the owner's decisions
-  (RG-03, RG-07 to RG-11); S7.1 is ungated. The research needs primary sources on the web, not
-  sample files. The owner's answer to "which cameras and optics besides the phone" (Owner actions)
-  would inform S7.R1's camera classes, but does not block it.
+- **Stage 7 (in validation):** S7V-01 / TD-083 (calibration input preservation) and S7V-02 /
+  TD-084 (site discard guard); frozen corrections S7.V1 and S7.V2 in the plan. All Stage 7 research
+  and owner gates are decided; no new decision blocks these corrections. Other criteria retain PASS.
 - **Device evidence:** M1 seekable providers and M2 non-backup/cancel paths were
   recorded at `79f392c`. Native streaming and real-backup preview cancellation
   remain unverified on-device. S2.V3 adds host JVM streaming tests; these do not
@@ -351,10 +360,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 7 validation** — independent, in a fresh session (V8), by
-   `prompts/INDEPENDENT_STAGE_VALIDATION.md`, against the frozen surface in `POST_ROADMAP_PLAN.md`
-   ("Stage 7 validation"): S7.1–S7.6's criteria as completed by S7.D and the gates, the owner's
-   decisions (RG-03, RG-07 to RG-11, RD-08), the invariants. Validation only; no fixes.
+1. **S7.V1 — Preserve independent calibration input** (S7V-01 / TD-083), frozen in
+   `POST_ROADMAP_PLAN.md` immediately after "Stage 7 validation". Implement the bounded
+   correction, add the regression tests, run the required final full gate, update documentation,
+   commit, then **STOP**. No further owner decision or separate Task prompt is needed.
+
+Later cycles: **S7.V2** (site discard guard), then bounded **V5 revalidation** of both findings,
+the touched criteria and correction regression surfaces. All other PASS results stand unless V6
+applies. Stage 8 remains unstarted.
 
 RG-03 is decided (Q1, no specification source): S7.6 has no source path.
 

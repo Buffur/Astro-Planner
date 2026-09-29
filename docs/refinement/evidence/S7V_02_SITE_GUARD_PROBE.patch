@@ -1,0 +1,25 @@
+diff --git a/test/presentation/screens/sites/sites_screen_test.dart b/test/presentation/screens/sites/sites_screen_test.dart
+index 2d0da5c..4227e14 100644
+--- a/test/presentation/screens/sites/sites_screen_test.dart
++++ b/test/presentation/screens/sites/sites_screen_test.dart
+@@ -424,6 +424,20 @@ void main() {
+       expect(lat.controller!.text, isEmpty);
+     });
+
++    for (final item in [('Name', 'Changed name'), ('Elevation (m)', '450'), ('Notes', 'Private note')]) {
++      testWidgets('S7V probe back guards a ${item.$1}-only edit', (tester) async {
++        await build(tester, sites: [site('Original', 46, 14)]);
++        await pump(tester, at: AppRouter.siteEdit, extra: SiteEditorArgs(site: vm.sites.single));
++        final field = find.widgetWithText(TextFormField, item.$1);
++        await tester.ensureVisible(field);
++        await tester.enterText(field, item.$2);
++        await tester.pumpAndSettle();
++        await tester.pageBack();
++        await tester.pumpAndSettle();
++        expect(find.text('Unsaved changes'), findsOneWidget);
++        expect(find.byType(SiteEditorScreen), findsOneWidget);
++      });
++    }
+     testWidgets('back without changes leaves; with changes it asks: Cancel '
+         'stays, Discard leaves without saving', (tester) async {
+       await build(tester);

@@ -109,6 +109,7 @@
 > **Updated 2026-09-29 (S7.5):** the site form is built (RG-08 = E2, RG-09 = S3/M2, UX-21; schema v23).
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 > **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
+> **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed; S7.V1 is next.
 
 ## Contents
 
@@ -3997,7 +3998,7 @@ Stage 4):
 | S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | **Done 2026-09-29** (ADR-020 accepted; S7.2 and S7.3 split, below) |
 | S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | **Done 2026-09-29** (`research/RG-07_TARGET_CATALOG.md`); **RG-07 decided** 2026-09-29 (E.1): T1 only |
 | S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | **Done 2026-09-29** (`research/RG-08_09_SITE_AUTOMATION.md`); **RG-08 and RG-09 decided** 2026-09-29 (E.1): E2, S3, M2 |
-| S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | **Done 2026-09-29** (`research/RG-03_EQUIPMENT_SPECS.md`); RG-03 awaits the owner |
+| S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | **Done 2026-09-29** (`research/RG-03_EQUIPMENT_SPECS.md`); **RG-03 decided: Q1**, no specification source (DECISIONS E.1; `9363ff5`) |
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | **Done 2026-09-29** |
 | S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
 | S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | **Done 2026-09-29** |
@@ -4640,6 +4641,54 @@ frozen surface (V4):**
 
 The research and decision Tasks are judged by the bounded rule for analysis work (DECISIONS E.1,
 "Bounded validation for analysis and decision Stages").
+
+**Validation 2026-09-29 at `d13fdab`: BLOCKED** on S7V-01 / TD-083 and S7V-02 / TD-084
+([report](STAGE_7_VALIDATION.md)). Six targeted widget probes reproduce independent calibration
+input being overwritten and site edits leaving without a prompt. Other criteria retain the report's
+PASS. No application fixes in validation; the following corrections restore the existing contract.
+
+##### S7.V1 — Preserve independent calibration input (S7V-01 / TD-083)
+
+- **Objective:** changing inheritance never replaces a value the user owns.
+- **Scope:** the calibration dialog's "Use other values" and source-selection transitions.
+  Transfer only values still inherited by that frame type; preserve a flat/bias exposure and a
+  user-edited flat ISO/gain (including an explicit clearing). A source may propose flat sensitivity
+  while the user has not edited it. Keep origin/proposal text truthful and resolve inherited values
+  through the existing domain rules.
+- **Dependencies:** completed S7.3a; existing RG-10 = L1 and ADR-020 §6. No new owner choice.
+- **Out of scope:** schema, live links to source blocks, formula/policy changes, new parameters,
+  calibration library management, unrelated dialogs.
+- **Acceptance:** the three cases in `evidence/S7V_01_CALIBRATION_PROBE.patch` pass as permanent
+  regression tests; unlocking a flat also preserves its edited sensitivity; source changes preserve
+  edited/cleared flat sensitivity while untouched proposals can follow the selected source; dark and
+  dark-flat unlocking still exposes their inherited values, bias retains its independent exposure;
+  count/policy preserved; no write before Add/Save; matrix applicability/hidden-value preservation,
+  warnings, Undo and 200% layout unchanged; existing ADR-009/020 vectors unchanged.
+- **Validation:** focused transition tests first; final full gate (Stage 7's frozen implementation
+  rule), including the dialog, calibration/domain, budget/fit, accessibility and E2E cases. No new
+  scientific vector or migration is required because neither contract changes.
+- **Completion:** update the finding/report state, relevant actual-state documentation and PROGRESS;
+  one logical commit, then STOP. The next Task is S7.V2, not Stage 8.
+
+##### S7.V2 — Keep the site discard guard current (S7V-02 / TD-084)
+
+- **Objective:** Back asks about any unsaved site edit, including edits to just one text field.
+- **Scope:** local dirty-state updates and `PopScope` in the site editor, using the existing
+  Cancel · Discard · Save flow; listener lifecycle as needed.
+- **Dependencies:** completed S7.5; scheduled after S7.V1. No new owner choice.
+- **Out of scope:** new persistence or providers, coordinate/zone semantics, other forms, planner
+  guard redesign, new product flow.
+- **Acceptance:** the three cases in `evidence/S7V_02_SITE_GUARD_PROBE.patch` pass as permanent
+  regression tests; each field alone is protected on an existing and new site; untouched and reverted
+  text changes leave without a prompt; Cancel keeps edits, Discard leaves without saving, Save uses
+  existing validation/error handling; auto-filled device zone alone does not create a user edit;
+  GPS/map remain explicit and form-only until Save; no planner recomputation on each keystroke.
+- **Validation:** focused guard tests including AppBar Back and route/system Back, then the final
+  full gate (Stage 7's frozen implementation rule); existing site validation/GPS/disclosure, sweep
+  and E2E cases unchanged. No schema change or new device gate.
+- **Completion:** update the finding/report state, relevant actual-state documentation and PROGRESS;
+  one logical commit, then STOP. Next is bounded V5 revalidation of S7V-01/S7V-02, their touched
+  criteria and correction regression surfaces. All other validation PASS results stand under V6.
 
 ### Stage 8 — Sessions / Execution / Actuals / Logbook
 
