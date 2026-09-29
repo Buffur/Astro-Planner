@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **Stage 9 planning, 2026-09-29:** E.1 "Stage 9 decisions (delegated by the owner)": D9-1 to D9-6;
+> the logo, the licence (RG-12) and the project identity (RD-01) stay the owner's. Documentation only.
 > **TD-086 fix, 2026-09-29:** D8-1's conservative end for an unreadable snapshot uses the later of the row's night key and the night the snapshot still names (CALC-44); an implementation note follows D8-1.
 > **S8.9, 2026-09-29:** I-10 built (E.1, "Stage 8 decisions"); its implementation note follows I-10.
 > **S8.8, 2026-09-29:** an implementation note under ADR-018 §5 (after S3.V7's) records per-field
@@ -1863,6 +1865,36 @@ Stage 4 revalidation is still required.
   source exists with an API and terms).
 - **Consequences:** S7.6 has no source path; its other scope is unchanged. RG-03 stays open only as
   the recorded candidate. Documentation only.
+
+### Stage 9 decisions (delegated by the owner, Stage 9 planning, 2026-09-29)
+
+- **Context:** Stage 9 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 9 — frozen Task
+  sequence"), verified at `b378f16`.
+- **Decided by:** the agent, **under the owner's delegation in chat** (2026-09-29: "once every
+  finding is fixed, take the next Stage as the goal", after "do not ask me anything; decide yourself
+  and choose the best solutions"). The owner may revisit any of them.
+- **Not delegated** (this plan names the owner): the final logo (P9.4), the licence (RG-12, P9.5)
+  and the project's GitHub identity (RD-01). S9.10–S9.12 prepare them; nothing depends on a guess.
+- **D9-1 the Library's two modes (RD-07, TD-053):** the rig, target and site lists have a manage
+  mode (the Library: a tap opens the editor) and a choose mode (`/select/…`: a tap chooses). The
+  active site is chosen only where a site is chosen for planning (the planner, Tonight's context line,
+  the first run), never by browsing. "Plan this target" starts a new plan under the leave guard.
+- **D9-2 one delete pattern for stored records (RD-09 = M + S1 applied):** rigs, targets and sites
+  have a visible Delete in their editor and a swipe shortcut, both through `confirmDestructive`, with
+  the repositories' in-use refusals unchanged.
+- **D9-3 Settings:** RG-13 is answered by research (S9.3) and its placements are recorded here when
+  S9.3 lands; the Moon and cloud gates go into Settings (RD-11 = S9) as a switch and a threshold each;
+  the optional overheads' values become editable within the model's ranges; no default changes.
+- **D9-4 About:** the author block (name, Reddit first, GitHub profile) at the top, apart from
+  third-party credit; the source, project and policy links stay until RD-01.
+- **D9-5 feedback:** a short `showDone` after a save, delete, backup, staged or cancelled restore,
+  rename or export; none for a setting whose effect shows on the same screen; messages stop sliding
+  under reduced motion (TD-081).
+- **D9-6 TD-074 ("What fits"):** not in Stage 9. The planner is Stage 6's, and answering an earlier
+  block, a joint share or a calibration block needs a new `FitAnalyzer` design (a research question,
+  not polish). TD-074 stays recorded, deferred to after Stage 11; the current wording stays honest.
+- **Consequences:** S9.1–S9.9 build D9-1 to D9-5; S9.10–S9.12 wait for the owner. Documentation
+  only.
 
 ### Stage 8 decisions (delegated by the owner, Stage 8 planning, 2026-09-29)
 

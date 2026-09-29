@@ -4,20 +4,32 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**TD-085 to TD-087 fixed**, every Stage 8 validation finding, at the owner's request; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
-> **Next:** Stage 9 planning.
+> **Last updated:** 2026-09-29 (**Stage 9 planned**: S9.1–S9.12 frozen; after TD-085 to TD-087 were fixed).
+> **Next:** S9.1 (the Library manages). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: Complete** (validation PASS 2026-09-29, [report](STAGE_8_VALIDATION.md)). Stage 9 not started |
+| Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **Stage 9 planning** (below, "Next allowed action") |
+| Next Task | **S9.1** (below, "Next allowed action") |
 | Code baseline | **TD-087's fix** (its commit; after the TD-085 and TD-086 fixes). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Stage 9 planned, 2026-09-29** (documentation only; the plan's "Stage 9 — frozen Task sequence"):
+- Inputs verified against the code at `b378f16` (§9.7). Most important: the Library still chooses for
+  the plan and the active site (TD-053); the Moon and cloud gates have no control anywhere (TD-050);
+  About has no authorship; `AppIdentity` names `chacha12` while the remote is `Buffur` (RD-01); rigs,
+  targets, sites and Restore confirm with ad hoc dialogs.
+- **Frozen:** S9.1 → S9.9, then the Stage 9 validation. S9.10 (logo), S9.11 (licence, RG-12) and S9.12
+  (identity, RD-01) are **owner gates**: the agent prepares them, the owner decides.
+- Decisions D9-1 to D9-6 (E.1, "Stage 9 decisions (delegated by the owner)"); TD-074 deferred to
+  after Stage 11 (D9-6).
+- **Verification:** the documentation class (V1): references and IDs resolve; `git diff --check`.
+  The TD-087 fix's gate is Stage 9's baseline (V3).
 
 **TD-087 fixed, 2026-09-29** (S8V-03; tests only): the three Stage 8 acceptance checks the
 validation established by probes are committed tests.
@@ -271,7 +283,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
-| 9 | Secondary UX & Product Polish | Not started | — | — | — |
+| 9 | Secondary UX & Product Polish | In progress (planned; S9.1 next) | 2026-09-29 | — | — |
 | 10 | Performance & Application Size | Not started | — | — | — |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
@@ -384,12 +396,14 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 9 planning** (`POST_ROADMAP_PLAN.md`, "Stage 9 — Secondary UX & Product Polish", with
-   the Stages 6–11 shared rules): verify its inputs against the code (§9.7), freeze its Task sequence
-   and name its research and owner gates (RG-12, RG-13; TD-074, TD-050, RD-11 = S9). Planning is
-   documentation only; the last fix's gate (its commit) is its baseline while the code diff stays empty (V3).
+1. **S9.1 — The Library manages; one delete pattern for rigs, targets and sites** (`POST_ROADMAP_PLAN.md`,
+   "Stage 9 — frozen Task sequence"). Then S9.2 → S9.9 in order and the Stage 9 validation: the owner
+   asked, in chat on 2026-09-29, for the next Stage as a whole, so each Task follows the previous one's
+   commit without a new prompt.
+2. **Owner gates, prepared by the agent:** S9.10 (the logo: the owner chooses), S9.11 (the licence,
+   RG-12: the owner decides), S9.12 (the project identity, RD-01: the owner decides).
 
-Stage 8 is closed; no Stage 8 gate is open.
+Stage 8 is closed. Stage 9's open gates: S9.10–S9.12 (the owner's).
 
 **Carried:**
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 decided

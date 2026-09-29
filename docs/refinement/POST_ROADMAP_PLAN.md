@@ -5235,6 +5235,222 @@ provisional in the same way.*
 - The deletion animations use `AppMotion` and `SwipeToDelete`.
 - See `docs/DESIGN_SYSTEM.md` §9.
 
+#### Stage 9 — frozen Task sequence (planning, 2026-09-29)
+
+Planned at `b378f16`, after Stage 8 closed and its three validation findings were fixed (TD-085 to
+TD-087). **The TD-087 commit's full-gate PASS is Stage 9's baseline, reused (V3)**: Encoding; Format,
+465 files; Analyze; 1,791 tests, 2 expected skips; 2 host E2E; Flutter 3.47.4. Planning is
+documentation only.
+
+**Decisions.** The owner delegated Stage 9's decisions to the agent in chat on 2026-09-29 ("once
+every finding is fixed, take the next Stage as the goal", after "do not ask me anything; decide
+yourself and choose the best solutions"). The decisions below are recorded in DECISIONS E.1, "Stage 9
+decisions (delegated by the owner)". **Three are not delegable and stay the owner's**, because this
+plan names the owner as the one who decides them: the final logo (P9.4: "an agent never picks the
+final mark"), the licence (RG-12, P9.5: "no change before the owner decides") and the project's
+GitHub identity (RD-01: the application id is permanent once published). The agent prepares each
+(S9.10–S9.12) and implements nothing that depends on them.
+
+**The inputs, verified against the code at `b378f16` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| The Library (TD-053, RD-07) | `/library/rigs`, `/library/targets` and `/library/sites` build the same screens as `/select/…`, titled "Select Equipment" and "Select Target". A tap sets the rig or target on the current plan and pops (`equipment_selection_screen.dart:166`, `target_selection_screen.dart:355`); a tap on a site makes it the active site (`sites_screen.dart:148`). The Library tab's tiles show the **plan's** rig and target as subtitles. No "Plan this target". Deleting: rigs and targets by a raw `Dismissible` with ad hoc dialogs ("Delete Equipment?"), sites by an icon with an ad hoc dialog; no `DeleteButton`, no `confirmDestructive`, no feedback. The Progress row is already gone (S8.5) | S9.1 |
+| Vocabulary and forms (P9.2) | The retired-terms baseline holds one entry: "No equipment profiles found." (`equipment_selection_screen.dart:126`). The rig editor is a dialog with a primary `FilledButton` ("Save Changes"/"Save" literals) and title-case labels; the target editor a dialog with an `ElevatedButton` Save and title-case labels ("Edit Target", "Target Name *"); the site editor a page whose only Save is an app-bar check icon, with raw paddings and ad hoc SnackBars | S9.2 |
+| Settings (RG-13, RD-11 = S9, TD-050) | "Planning Settings": Visibility (minimum altitude, darkness limit, dew margin, NPF k), Capture plan (feasibility margin; time between frames, a slider hard-coded 0–60 s while `PlanningPreferences.perFrameRange` is 0–120; five optional overheads whose values cannot be edited, though the text says to measure them), then, without a heading, field mode, place-name lookup, Backup and "About & data sources". **No control for the Moon and cloud gates anywhere**, while opportunity and fit messages say "your Moon gate". Slider saves have no failure handling; "Back up now", staging and cancelling a restore are not run through `runWithFeedback`; Restore confirms with an ad hoc dialog | S9.3, S9.4 |
+| About and identity (08 §23, RD-01) | "About & data sources": OpenNGC notice, OSM and Nominatim (the copyright page as text, not a link), Open-Meteo, lightpollutionmap.app, privacy, GPL-3.0, "Source code" (`AppIdentity.sourceUrl`), the licence page. **No authorship, no author links, no version line.** `AppIdentity` names `chacha12` (source, project site, policy, user agent, application id) while the git remote is `github.com/Buffur/Astro-Planner` (RD-01 open). `pubspec.yaml`'s description is still Flutter's template text | S9.5, S9.12 |
+| Detail screens | Night & Moon: a summary plus two text sections (twilight table; Moon illumination and closest approach); no graphic. Weather: the forecast card with an hourly **numeric** strip (cloud, precipitation, wind, temperature, T − Td), its header still offering "Tap to set location" with no action here | S9.6 |
+| Sky darkness | The planner's `SkyDarknessWidget`: a collapsible "Sky darkness" with a Bortle dropdown and swatch, a source line with raw ISO dates, and "Open Light Pollution Map" in a raw bold style; the site editor repeats Bortle and SQM | S9.7 |
+| Feedback and messages | `showDone` after a new plan, Save plan, Copy, Result saved and Entry deleted only. None after a rig, target or site save or delete, a setting, a backup, a staged or cancelled restore, a rename, an export (the share sheet only). TD-081: messages slide even with reduced motion | S9.8 |
+| Share and export | Backup `astroplan-backup-<UTC stamp>.astroplan`; export `astroplan-sessions-<UTC stamp>.json`; "Export all" is an icon with a tooltip only | S9.8 |
+| Consistency | Ad hoc `TextStyle`s on secondary screens (`sites_screen.dart`, `sky_darkness_widget.dart`, `equipment_selection_screen.dart`, `target_selection_screen.dart`, `about_screen.dart` paddings); the planner's (`home_screen.dart`, `capture_plan_widget.dart`) are Stage 6's and are left | S9.9 |
+| Logo and splash (P9.4) | A 108 dp vector (horizon, altitude arc, red imaging window, star) drawn twice (`ic_launcher_foreground.xml`, `tool/make_launcher_icons.py`); the adaptive monochrome layer reuses the colour foreground; the Android 12+ splash uses the same vector on #0B1230; the pre-12 launch background centres the bitmap; startup shows a bare progress indicator | S9.10 (owner gate) |
+| Licence (RG-12) | One `LICENSE` (GPL-3.0); About states GPL-3.0; the catalog is CC BY-SA 4.0 (OpenNGC); the owner's new requirements (08 §23) are free, no monetisation, no modification without permission | S9.11 (owner gate) |
+| Tonight's entry points | Each row opens its intended destination (Night and Moon → Night & Moon, Weather → Weather, the result line → the result form, Choose a target / What can I image tonight? → their pages); no "Draft" or "Analytics" left | Verified; no Task |
+| TD-074 ("What fits") | A capture-plan wording limited by `FitAnalyzer`'s API; the planner is Stage 6's and a joint-share answer needs new domain design | Deferred (E.1, D9-6); no Stage 9 Task |
+
+**Rules for every Task** (with "Stages 6–11: shared rules" and the Stage 5 system):
+- Presentation only unless a Task says otherwise: no schema change, no calculation in a widget, no
+  change to a formula; a preference whose meaning changes is recorded in `SCIENTIFIC_INTEGRITY.md`.
+- Every write a user starts goes through `runWithFeedback` (trap 18); every stored record is deleted
+  through `confirmDestructive`, with a visible Delete and a swipe shortcut (RD-09 = M + S1).
+- A new screen or state joins the accessibility sweep (trap 17); a renamed key or label updates the
+  E2E (trap 19); the retired-terms baseline only shrinks.
+- Documents in the same change: `FEATURE_STATUS.md`, `ARCHITECTURE.md` Part B, `TECH_DEBT.md`,
+  `DESIGN_SYSTEM.md` where a component or pattern is adopted or added, `COMPLIANCE.md` and the
+  privacy policy where a source, link or attribution changes, and `PROGRESS.md`.
+- **One Task per commit**, in the order below. Verification per the policy (V1): most Tasks are
+  shared behaviour and end with the full gate, because the affected screens cannot be bounded with
+  confidence.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S9.1 | The Library manages; one delete pattern for rigs, targets and sites | P9.1; TD-053 | M | — | Frozen |
+| S9.2 | Secondary forms and the vocabulary completed | P9.2 | M | S9.1 | Frozen |
+| S9.3 | RG-13: what each setting is for, and where it belongs (research) | P9.3 | S | — | Frozen |
+| S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | Frozen |
+| S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | Frozen |
+| S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | Frozen |
+| S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | Frozen |
+| S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | Frozen |
+| S9.9 | Final visual consistency on secondary screens | Stage 9 scope | M | S9.1–S9.8 | Frozen |
+| S9.10 | The logo and the splash: analysis and alternatives | P9.4 | S | — | **Owner gate** (the owner chooses) |
+| S9.11 | RG-12: the licence (research) | RG-12; P9.5 | S | — | **Owner gate** (the owner decides) |
+| S9.12 | RD-01: the project's identity (options) | RD-01 | S | — | **Owner gate** (the owner decides) |
+
+**Order:** S9.1 → S9.2 → S9.3 → S9.4 → S9.5 → S9.6 → S9.7 → S9.8 → S9.9; S9.10 to S9.12 are
+documents the agent prepares at any point and the owner answers. Their implementation (the chosen
+mark everywhere, trap 20; the licence text, About and `COMPLIANCE.md`; the identity in `AppIdentity`,
+the policy URL and the remote) is added as Tasks once the owner has decided. **The Stage 9 validation
+runs after S9.9**; S9.10–S9.12 are then either decided and built, or deferred by the owner (the
+Stage's exit allows "deferred by the owner").
+
+##### S9.1 — The Library manages; one delete pattern for rigs, targets and sites
+- **Objective:** browsing the Library never changes the plan or the active site (RD-07; TD-053).
+- **Scope:**
+  - The rig, target and site lists take a **mode**: *manage* (the Library routes) or *choose* (the
+    `/select/…` routes, reached from the planner, Tonight's context line and the first run). In manage
+    mode a tap opens the item's editor; in choose mode it chooses, as today. Titles by mode: "Rigs",
+    "Targets", "Sites" in the Library; "Choose a rig", "Choose a target", "Choose a site" when choosing
+    (`AppWords`).
+  - The Library tab's tiles describe the Library, not the plan: counts ("3 rigs"), and for sites the
+    active site as information.
+  - **"Plan this target"** on a target's editor in manage mode: a new plan with that target, under
+    the leave guard (`askBeforeLeavingPlan`, U1), then the planner.
+  - **Deleting** a rig, target or site: a visible Delete in its editor (`DeleteButton`) and a swipe
+    shortcut (`SwipeToDelete`) in both modes, one `confirmDestructive` wording, the existing
+    repository checks unchanged (a rig or site in use stays refused with its message; saved plans keep
+    their snapshots), and `showDone` after a delete.
+  - "Add from a photo" stays in both modes (ADR-018 §7).
+- **Out of scope:** the editors' own forms (S9.2); Settings.
+- **Acceptance:** (1) UI tests: tapping a rig, a target and a site in the Library opens its editor
+  and leaves the plan's rig, target and the active site unchanged; (2) the same taps from `/select/…`
+  still choose; (3) "Plan this target" asks when the plan has unsaved changes and starts a new plan
+  with the target; (4) each delete asks through `confirmDestructive`, a cancelled swipe returns the
+  row, and the refusal for a rig in use still shows; (5) TD-053 resolved; the sweep covers the three
+  lists in both modes.
+
+##### S9.2 — Secondary forms and the vocabulary completed
+- **Objective:** the rig, target and site editors follow Stage 5's form pattern and the glossary,
+  and the retired-terms baseline is empty (P9.2).
+- **Scope:** sentence-case labels and titles from `AppWords` ("Edit rig", "Add a target", "Edit
+  site"); one primary `FilledButton` Save in each editor (the site editor gains one; the app-bar check
+  stays as a shortcut or goes); the target editor's `ElevatedButton` replaced; "No equipment profiles
+  found." → the glossary's words; raw paddings → `AppSpacing`; the site editor's ad hoc SnackBars →
+  the shared feedback. Validation and saving are unchanged.
+- **Acceptance:** the retired-terms baseline is empty and the test enforces an empty baseline; the
+  editors' labels and Save buttons match in a widget test; `equipment_editor_fit_test.dart` and the
+  sweep pass; no saved value changes (the editors' existing tests unchanged in substance).
+
+##### S9.3 — RG-13: what each setting is for, and where it belongs (research)
+- **Objective:** answer RG-13 for every visible setting before Settings is rebuilt.
+- **Scope:** `refinement/research/S9.3_SETTINGS.md`: for each setting its class (A app-wide, B
+  planning preference, C one plan's choice, D a rig, target or site property, E display or
+  accessibility, F information), what it changes (a calculation, and which; or only the display), its
+  unit and range from the domain, whether a real amateur workflow needs it (with sources for
+  astrophotography facts: the NPF rule's primary source, published dithering, refocus and meridian-flip
+  practice), and where it belongs. The Moon and cloud gates (RD-11 = S9) are placed. No "recommended"
+  value without evidence; thresholds stay preferences (SI-006).
+- **Acceptance:** every setting listed in the verified inputs has a row with a class, an effect and a
+  placement; each factual claim cites a source; the owner is asked nothing (delegated), and the
+  placements are recorded in E.1's Stage 9 decisions.
+
+##### S9.4 — Settings rebuilt; the Moon and cloud gates (TD-050)
+- **Objective:** Settings shows each setting's value and consequence in sections, as S9.3 placed them,
+  and the optional gates become reachable.
+- **Scope:** sections with headings (from S9.3); each row: title, current value with its unit, a short
+  consequence ("Changes the imaging window"), detail on demand; the per-frame range from
+  `PlanningPreferences.perFrameRange`; the optional overheads' values editable within the model's
+  ranges; **the Moon and cloud gates**: a switch and a threshold each, with their consequence (ADR-013
+  G4/G5; off by default, unchanged); every write through `runWithFeedback`; Back up and the restore's
+  staging and cancelling through `runWithFeedback`, Restore through `confirmDestructive`; the screen
+  title "Settings".
+- **Out of scope:** the preferences' meanings and defaults (unchanged), the planner.
+- **Acceptance:** (1) a widget test turns each gate on, sets its threshold and sees the opportunity
+  change through the ViewModel (the calculator's tests unchanged); (2) the per-frame slider reaches
+  120 s; (3) an overhead value edited persists and changes the budget; (4) a failed save shows the
+  shared failure text; (5) Restore asks through `confirmDestructive`; (6) TD-050 resolved; the sweep
+  covers Settings with every section.
+
+##### S9.5 — About: authorship, sources and attribution
+- **Objective:** the author is visible and the sources are correct (08 §23).
+- **Scope:** an author block at the top of About: the author's name as the git history records it,
+  **Reddit (prominent) and GitHub profile links** (https://www.reddit.com/user/Buffur/,
+  https://github.com/Buffur), kept apart from third-party credit; the version line; every source link a
+  real link (OSM's copyright page, Open-Meteo, OpenNGC, lightpollutionmap.app) with the wording each
+  provider's terms require, consistent with the weather card and `COMPLIANCE.md`; the source-code,
+  project and policy links **unchanged until RD-01** (a working link is never broken, and none is
+  moved to an unverified account); `pubspec.yaml`'s template description replaced.
+- **Acceptance:** a widget test finds the author block and both profile links, and each attribution;
+  `COMPLIANCE.md` and the privacy policy checked (updated only where a wording or link changes); no
+  third-party credit removed.
+
+##### S9.6 — The Weather and Night & Moon detail screens
+- **Objective:** the detail screens' secondary presentation (Stage 9 scope, "the detail screens'
+  secondary presentation").
+- **Scope:** Weather: an hourly visual where it helps (a cloud-cover bar per hour with the value as
+  text, the dew-risk hours marked by a word or icon and not by colour alone), the numeric rows kept
+  for the other variables, a text alternative; the age, stale state, unknowns, units, attribution and
+  the horizontal-visibility wording kept (ADR-012); "Tap to set location" never shown where there is no
+  action. Night & Moon: the twilight sequence as a compact timeline from `NightTimeline` (domain
+  times only), the Moon's up-times and illumination, the dark span first; no planner duplication.
+- **Acceptance:** widget tests for the visuals' unknown, empty and available states with their text
+  alternatives; no computation in widgets (values from the ViewModels); the sweep covers both screens
+  with a full forecast.
+
+##### S9.7 — Sky darkness made readable
+- **Objective:** Bortle, SQM, source, date and unknown read clearly (08 §13).
+- **Scope:** the planner's sky-darkness section and the site editor's: the value first ("Bortle 4 ·
+  SQM 21.30 mag/arcsec²"), then its source and a local date (not an ISO string), unknown said as such
+  with the way to set it; the light-pollution map link's purpose stated ("Look it up on
+  lightpollutionmap.app", an external site) in the shared text roles; no inferred Bortle, no Bortle ↔
+  SQM conversion (trap 6).
+- **Acceptance:** widget tests for known, partly known and unknown; no raw ISO date shown; the sweep
+  passes.
+
+##### S9.8 — Feedback, messages (TD-081) and export polish
+- **Objective:** meaningful actions confirm themselves, messages honour reduced motion, and exported
+  files are named for people.
+- **Scope:** `showDone` after a rig, target or site save or delete, a restore staged or cancelled, a
+  backup shared, a rename and an export (after the share sheet returns); no message for a setting whose
+  effect is visible on the same screen. **TD-081:** one app-wide rule so messages do not slide when the
+  platform asks for less motion, with a test. File names in the device's local date
+  (`astroplan-backup-2026-09-29-2130.astroplan`, `astroplan-logbook-…json`), the stamp's zone stated
+  in the share text; "Export all" gets a visible label in the Logbook's menu.
+- **Acceptance:** tests for each new message; TD-081 resolved with a test under
+  `disableAnimations`; the file-name tests; the E2E updated if a label changes.
+
+##### S9.9 — Final visual consistency on secondary screens
+- **Objective:** the same hierarchy on every secondary screen (Stage 9 scope, "final visual
+  consistency").
+- **Scope:** the Stage 5 text roles and `AppSpacing` replace the remaining ad hoc styles on the
+  secondary screens (Library lists, sites, About, Settings, details, sky darkness, results), not the
+  planner or Tonight (Stage 6); a test forbids new raw `TextStyle(fontSize:)` and raw `EdgeInsets`
+  numbers in those files.
+- **Acceptance:** the test; the sweep in every theme at 100 % and 200 %; no screen's content
+  changes.
+
+##### S9.10 — The logo and the splash: analysis and alternatives (owner gate)
+- **Scope:** `refinement/research/S9.10_LOGO.md`: where the icon appears (launcher, adaptive and
+  monochrome layers, the Android 12+ splash, the pre-12 background, About); what does not work in its
+  execution; three or four coherent alternatives that keep the vector concept, drawn as vector
+  previews; a subtle splash proposal that never delays startup. **The owner chooses.** Then a Task
+  applies the choice in both drawings (trap 20) with a dedicated monochrome layer.
+
+##### S9.11 — RG-12: the licence (research; owner gate)
+- **Scope:** `refinement/research/S9.11_LICENCE.md`, per RG-12's steps, from authoritative sources
+  only (the licence texts and their stewards): what GPL-3.0 permits against the owner's three
+  requirements; the constraints from the bundled CC BY-SA 4.0 catalog and the dependencies' licences;
+  the options (keep GPL-3.0; a source-available non-commercial, no-derivatives licence; all rights
+  reserved with a published binary) and their consequences, including copies already shared. Not legal
+  advice; no licence chosen and no text written. **The owner decides.** P9.5 then implements it.
+
+##### S9.12 — RD-01: the project's identity (owner gate)
+- **Scope:** a short options note: `chacha12` (today's application id, policy and source URLs, user
+  agent; OD-07) or `Buffur` (the remote and the owner's links), what each changes before the first
+  upload (the application id is permanent after it), and which URLs resolve today. **The owner
+  decides**; a Task then applies it.
+
 #### Order across Stages for ADR-019 (S4.T)
 
 - **Keep a path to results at every step.** Stage 6 moves Start into ⋮ as "Track live (optional)"
@@ -5542,8 +5758,8 @@ any implementation Task is created.
 | RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result). *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-08); blocks S7.5's sky darkness and link. *2026-09-29:* S7.R4 done (`research/RG-08_09_SITE_AUTOMATION.md`, §8 questions). **Decided 2026-09-29 (E.1):** S3 (manual, optional, one collapsed section; no automatic source) and M2 (lightpollutionmap.app) |
 | RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3. *2026-09-29:* S7.R2 done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's six questions are its §10. **Decided 2026-09-29 (DECISIONS E.1, "RG-10 decided"; ADR-020):** L1, D1, T0, O0, N1, H1 |
 | RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented. *2026-09-27:* each light input classed (required · optional · known automatically · context-dependent · not applicable); focus's meaning settled before any control is chosen (a slider is only a proposal); the interval reconciled with ADR-009's per-frame overhead, never counted twice; FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION kept apart. *2026-09-28 (Stage 7 planning):* researched by **S7.R1**; recorded in ADR-020 (S7.D); blocks S7.R2 and S7.2. *2026-09-29:* S7.R1 done (`research/RG-11_CAPTURE_PARAMETERS.md`); the owner's six questions are its §11. **Decided 2026-09-29 (DECISIONS E.1, "RG-11 decided"):** C1 (a camera class on the rig; the example rig stays Unknown), B1, W1, F1, I1, P2 |
-| RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
-| RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |
+| RG-12 | *Planned 2026-09-29: S9.11 prepares the research; the owner decides; P9.5 implements.* Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
+| RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? *Planned 2026-09-29: S9.3 (research), built by S9.4.* | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |
 | RG-14 | **DECIDED 2026-09-26 (DECISIONS E.1):** none in Stage 2; per-format adapters afterwards, only with samples; `ExifInterface` and LibRaw rejected. Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
 
 ---
@@ -5552,7 +5768,7 @@ any implementation Task is created.
 
 | ID | Decision | Evidence and known options | Stage | Blocks |
 | --- | --- | --- | --- | --- |
-| RD-01 | Which GitHub account carries the project identity: `chacha12` (the application id `io.github.chacha12.astroplanner`, the `AppIdentity` source and policy URLs, the user agent, the git user) or `Buffur` (the remote `github.com/Buffur/Astro-Planner`; the owner's links in 08 §23)? | OD-07 asked for confirmation before the first upload; the application id is permanent once published | Before any store upload; before Stage 9's About and links | Upload; privacy-policy URL; About links; the CI remote. *2026-09-27:* the author's own profile links (08 §23) do not wait for it |
+| RD-01 | *Planned 2026-09-29: S9.12 prepares the options; the owner decides.* Which GitHub account carries the project identity: `chacha12` (the application id `io.github.chacha12.astroplanner`, the `AppIdentity` source and policy URLs, the user agent, the git user) or `Buffur` (the remote `github.com/Buffur/Astro-Planner`; the owner's links in 08 §23)? | OD-07 asked for confirmation before the first upload; the application id is permanent once published | Before any store upload; before Stage 9's About and links | Upload; privacy-policy URL; About links; the CI remote. *2026-09-27:* the author's own profile links (08 §23) do not wait for it |
 | RD-02 | The TASK 0.3 holdovers: the Google ADK skill and `skills-lock.json`; retaining `docs/archive/`; `sqlite3_flutter_libs ^0.6.0+eol` | 01 TASK 0.3; `TECH_DEBT.md`'s cleanup list | 1 (hygiene); 10 (the dependency, with a device check) | — |
 | RD-03 | **RESOLVED 2026-09-25 (Stage 1 planning; DECISIONS E.1).** SCI-05: neutral label "ISO / gain (for your records)" now (S1.8). SCI-04: documentation only (S1.13). *(Was: wording rulings: the ISO/gain "Sensitivity setting" label (SCI-05); a resolution caveat for times on the 5-minute grid (SCI-04).)* | 07 §6 item 8 | 1 | B7 |
 | RD-04 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): nothing preselected on the first run; New keeps the site and rig and asks for the target; an empty capture plan with "Start from the example plan".** New-draft defaults: should a new draft pre-select M42 and the first rig, and how are defaults and the "Example plan" labelled or offered? 08 §14 asks whether the example plan adds value | ENG-15, SCI-12, UX-24; TASK 4.4 | 4 | Stage 6 |

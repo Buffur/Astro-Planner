@@ -1,5 +1,6 @@
 # AstroPlan Technical Debt Register
 
+> **Stage 9 planning, 2026-09-29:** TD-050 → S9.4, TD-053 → S9.1, TD-081 → S9.8; TD-074 deferred to after Stage 11 (E.1, D9-6). No item added.
 > **TD-087 fix, 2026-09-29:** TD-087 resolved (the three Stage 8 acceptance checks are committed tests). Every Stage 8 validation finding (TD-085 to TD-087) is now resolved. No item added.
 > **TD-086 fix, 2026-09-29:** TD-086 resolved (the unreadable Saved · changed path shows no working state as saved, and ends no earlier than its named saved night). No item added.
 > **TD-085 fix, 2026-09-29:** TD-085 resolved (Save runs the night check first). No item added.
