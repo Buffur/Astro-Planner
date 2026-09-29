@@ -6,7 +6,7 @@ import 'storage_guard.dart';
 /// [DisplayPreferencesRepository] backed by SharedPreferences.
 class SharedPrefsDisplayPreferencesRepository
     implements DisplayPreferencesRepository {
-  static const _fieldMode = 'fieldMode';
+  static const fieldModeKey = 'fieldMode';
 
   /// Section states are stored one key each, under this prefix (S5.5).
   static const sectionPrefix = 'section.';
@@ -15,13 +15,14 @@ class SharedPrefsDisplayPreferencesRepository
   Future<bool> loadFieldMode() => guardStorage(
     'read the display preferences',
     () async =>
-        (await SharedPreferences.getInstance()).getBool(_fieldMode) ?? false,
+        (await SharedPreferences.getInstance()).getBool(fieldModeKey) ?? false,
   );
 
   @override
   Future<void> saveFieldMode(bool on) => guardStorage(
     'save the display preferences',
-    () async => (await SharedPreferences.getInstance()).setBool(_fieldMode, on),
+    () async =>
+        (await SharedPreferences.getInstance()).setBool(fieldModeKey, on),
   );
 
   @override

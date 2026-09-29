@@ -4,21 +4,45 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S8.8 done**: per-field provenance in new snapshots).
-> **Next:** S8.9 (preferences in the backup; stale ids). The owner resumed the run after the S8.7 pause and asked for the whole of Stage 8.
+> **Last updated:** 2026-09-29 (**S8.9 done**: preferences in the backup; stale ids). Every Stage 8 Task is done.
+> **Next:** the Stage 8 validation, in a fresh session (V8).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In progress** (planned 2026-09-29). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
+| Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: In validation** (planned 2026-09-29; S8.1–S8.9 done). Stage 7 closed 2026-09-29 ([report](STAGE_7_VALIDATION.md)) |
 | Current Task | None in progress |
-| Next Task | **S8.9** (below, "Next allowed action") |
-| Code baseline | **S8.8** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **Stage 8 validation** (below, "Next allowed action") |
+| Code baseline | **S8.9** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S8.9 done, 2026-09-29** (TD-056 and ENG-14 resolved; I-10): preferences in the backup; stale ids.
+- **Probe first:** ENG-14 reproduced on the host before any change: a staged restore applied as
+  `main.dart` runs it left `activeLocationId` 7 and the plan ids in place (FAIL). The same probe,
+  unchanged, passes after the change; it is now a committed test in `backup_restore_test.dart`.
+- The archive is `format_version` 2: `preferences.json` (`BackupPreferences`) holds the planning
+  preferences, the display preferences (field mode, section states), `activeLocationId` and
+  `firstRunDone`, grouped by type; never the transient position, the catalog seed marker, the plan
+  ids or the place-name opt-in. A version 2 file must carry readable settings; only carried keys
+  are ever read from it. Staged beside the database and applied just before the swap (redone if a
+  start is interrupted): the carried keys are replaced as a whole. A version 1 archive still
+  restores; it keeps the device's settings but drops its active site. A restore and a confirmed
+  reset clear `targetId`, `equipmentId` and `editedSessionId`; the reset drops the active site too.
+- The repositories expose their keys (`keys`, `fieldModeKey`, `activeLocationIdKey`, `planIdKeys`,
+  `doneKey`) so the backup never restates them. CLAUDE.md trap 5 notes it.
+- Privacy: the backup stays a local file the user shares; the policy now says it holds the
+  settings too. The Data Safety draft (`COMPLIANCE.md`) is unchanged: nothing leaves the device
+  except where the user sends it.
+- **Tests:** `backup_restore_test.dart` +7 (what is carried, by type; a round trip; the ENG-14
+  probe; a version 1 archive restores; staging and cancel of the settings; a version 2 without or
+  with bad settings refused; uncarried keys never applied) and the setup's in-memory preferences;
+  `unsupported_database_test.dart`: a reset leaves no stale id. Mutation-checked: without the
+  restore hook three tests fail.
+- **Verification:** high-risk (backup format, persistence): the full gate after the last code
+  change, **PASS** (1,785 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 **S8.8 done, 2026-09-29** (TD-070 resolved; ADR-018 §5): per-field provenance in new snapshots.
 - `SessionSnapshotBuilder` adds `rig.provenance`: each valued spec (`EquipmentSpec` name; the RAW
   size only when set) → `{source, confidence}` from `provenanceOf`, or null when unknown. The group
@@ -168,7 +192,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS** (S8.8): Encoding; Format (462 files, 0 changed); Analyze (no issues); 1,778 tests, 2 expected skips; 2 host E2E | **S8.8's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.8's last code change; supersedes S8.1–S8.7's gates. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
+| **Full quality gate PASS** (S8.9): Encoding; Format (463 files, 0 changed); Analyze (no issues); 1,785 tests, 2 expected skips; 2 host E2E | **S8.9's final inputs** (its commit), on Flutter 3.47.4 | Ran after S8.9's last code change, the last code change of Stage 8; supersedes S8.1–S8.8's gates. The Stage 8 validation may reuse it while `git diff --stat <S8.9 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` is empty. Supersedes S7.V2's gate at `d28f5a8` (1,734), kept below as Stage 7's closing evidence |
 | **Full quality gate PASS**: Encoding; Format (461 files, 0 changed); Analyze (no issues); 1,734 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | **`d28f5a8`**, S7.V2's final inputs | Ran after S7.V2's last code change; covers both corrections. Reused by the V5 revalidation: `git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` empty at `21e9cb1`. Supersedes S7.V1's gate at `46e7688` (1,719) and S7.6's at `d13fdab` (1,710) |
 | **Pinned catalog regeneration PASS**: 164 objects (109 Messier), output matches committed text after line-ending normalization | Stage 7 validation at `d13fdab` | Tool/asset unchanged; temporary source CSVs removed, original asset bytes restored |
 | **Six Stage 7 probes PASS** (FAIL at `d13fdab`): the two patches applied unchanged to the `099531b` test files, run against the corrected `lib/` | V5 revalidation at `21e9cb1` | Application code unchanged since `d28f5a8`; the same cases are committed tests in the gate above. Six fresh probes (V5-P1..P6) also PASS; temporary, removed |
@@ -190,7 +214,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 5 | Design System Foundation | Complete | 2026-09-27 | 2026-09-27 | **FAIL** at `8a6c5d8` on one narrow blocker, S5V-01; S5.V1 (`178acbe`); **revalidation PASS** at `178acbe` ([report](STAGE_5_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 6 | Core Planner Redesign | Complete | 2026-09-27 | 2026-09-28 | **BLOCKED** at `6b50369` on one blocker, S6V-01 / TD-082; S6.V1 (`da4c53d`); **V5 revalidation PASS** at `da4c53d` ([report](STAGE_6_VALIDATION.md); same chat at the owner's request, disclosed). S6.E UNVERIFIED, a gap the owner accepted |
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
-| 8 | Sessions / Execution / Actuals / Logbook | In progress | 2026-09-29 | — | — |
+| 8 | Sessions / Execution / Actuals / Logbook | In validation (S8.1–S8.9 done) | 2026-09-29 | — | — |
 | 9 | Secondary UX & Product Polish | Not started | — | — | — |
 | 10 | Performance & Application Size | Not started | — | — | — |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
@@ -302,10 +326,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S8.9 — Preferences in the backup; stale ids (TD-056, ENG-14)** (`POST_ROADMAP_PLAN.md`,
-   "Stage 8 — frozen Task sequence", S8.9). Ungated. Then the Stage 8 validation. The owner paused
-   the run after S8.7 and resumed it (2026-09-29): the owner asked, in chat on 2026-09-29, for the
-   whole of Stage 8, so each Task follows the previous one's commit without a new prompt.
+1. **Stage 8 validation** against the frozen Stage 8 acceptance (`POST_ROADMAP_PLAN.md`, "Stage 8
+   — frozen Task sequence", S8.1–S8.9, and the Stage's own acceptance), the Stage 8 decisions
+   (DECISIONS E.1) and the traps. Run it in a fresh session (V8): S8.1–S8.9 were built in one
+   session, so a validation there would not be independent. Reuse the S8.9 gate (V3). Validation
+   only: findings become corrective Tasks.
 
 No Stage 8 gate is open.
 
@@ -318,7 +343,7 @@ No Stage 8 gate is open.
   Task proposed);
 - TD-070: resolved (S8.8); snapshots saved before S8.8 keep their group pairs and are read as stored;
 - W1 (decided with RD-05's U1): built by S6.3;
-- TD-063 (Stage 8);
+- TD-063: resolved (S8.4);
 - TD-057 and TD-058: resolved (S6.4, S6.2);
 - TD-074: allocated to Stage 9's planning (not data entry); the owner may pull it into Stage 7;
 - RD-17 (the push is deferred);

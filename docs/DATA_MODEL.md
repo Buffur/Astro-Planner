@@ -1,5 +1,7 @@
 # AstroPlan Data Model
 
+> **S8.9 (2026-09-29; TD-056, ENG-14 resolved):** the backup archive is `format_version` 2 and adds `preferences.json` (B8a). A restore applies it before the restored database opens and clears the plan ids; a confirmed reset clears the active site and the plan ids. No schema change.
+
 > **S8.8 (2026-09-29; TD-070 resolved):** a new session snapshot's `rig` gains `provenance`: one entry per valued spec (`resolution`, `pixelPitch`, `sensorSize`, `rawFileSize` when set, `focalLength`, `focalRatio`), each `{source, confidence}` as `EquipmentProfile.provenanceOf` reads it, or null (unknown). An imported rig's estimates read `derived:calc-40/metadata:<format>` · `estimated` and its file values `metadata:<format>` · `reported`; nothing is recorded as `user` unless it is. Additive: `v` stays 1, the group pairs stay beside it, and a snapshot taken earlier has no key and reads as before. No schema change; the export embeds snapshots as stored.
 
 > **S8.6 (2026-09-29): schema v25.** `session_logs.name` (text, nullable; the plan's optional name, NULL = none). The v24→v25 step adds the column; every existing row reads as unnamed. Not in the snapshot; not copied by Copy or a working copy.
@@ -366,16 +368,29 @@ allows reuse.
 ## B8a. Backup and restore (TASK 14.4)
 
 - **Backup:** one `.astroplan` file — a ZIP with `backup.json` (format
-  `astroplan-backup`, `format_version` 1, `schema_version`, `app_version`,
+  `astroplan-backup`, `format_version` 2 since S8.9 (1 before), `schema_version`, `app_version`,
   `created_at_utc_ms`, `session_count`), `astroplan.sqlite` (a consistent copy made with
-  `VACUUM INTO`) and `manifest.json` (export manifest v2, `docs/EXPORT_MANIFEST.md`).
+  `VACUUM INTO`), `manifest.json` (export manifest v2, `docs/EXPORT_MANIFEST.md`) and, since
+  version 2, `preferences.json` (`BackupPreferences`): `{"version": 1, "bool": {...}, "int":
+  {...}, "double": {...}}` holding the planning preferences, the display preferences (field
+  mode, the `section.*` open states), `activeLocationId` and `firstRunDone`.
 - **Restore:** refused when the file is not a backup, when the header disagrees with the
   database's own `user_version`, when the schema is newer than the app's, or below the v8
   floor; otherwise confirmed, staged as `astroplan.restore.sqlite` and swapped in by
   `main.dart` before the database opens (`BackupStaging.apply`), the replaced file and its
   `-wal`/`-shm` renamed `*.before-restore-<time>.bak`, never deleted. An older supported
   schema is upgraded by the normal migrations when the database opens.
-- **Not included:** SharedPreferences (TD-056).
+- **Settings (S8.9; TD-056, ENG-14):** a version 2 archive must carry readable settings, and
+  only the keys above are ever read from it. They are staged as
+  `astroplan.restore.preferences.json` and applied just before the database swap (a restore
+  interrupted before the swap is redone at the next start): the carried keys are replaced as a
+  whole. A version 1 archive still restores; it keeps the device's settings but removes
+  `activeLocationId`, which may name another site in the restored database. Either way the plan
+  ids (`targetId`, `equipmentId`, `editedSessionId`) are removed. A confirmed reset
+  (`confirmDatabaseReset`) removes `activeLocationId` and the plan ids too.
+- **Not included:** the transient position, the catalog seed marker (it describes the device's
+  own database), the plan ids, the place-name opt-in (a consent given on each device) and the
+  weather cache. Before S8.9 no preference was included (TD-056).
 - **Android Auto Backup (documented, not changed — owner decision; unverified on a
   device):** the manifest sets no `allowBackup`/backup rules, so Android's default
   applies: for apps targeting API 23+ Auto Backup is on, and it backs up the app's files,

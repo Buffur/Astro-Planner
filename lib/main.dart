@@ -59,7 +59,8 @@ void main() async {
 /// screen resets a refused database (S1.5).
 Future<void> _start() async {
   // TASK 14.4: a restore confirmed last time replaces the database before
-  // it opens (the replaced file is kept as a safety copy).
+  // it opens (the replaced file is kept as a safety copy); since S8.9 the
+  // backup's settings come with it and no stale id survives (ENG-14).
   try {
     await BackupStaging.apply(
       await getApplicationDocumentsDirectory(),

@@ -16,6 +16,7 @@ import '../../domain/services/session_exporter.dart';
 import '../database/app_database.dart';
 import '../export/session_manifest_codec.dart';
 import 'backup_archive.dart';
+import 'backup_preferences.dart';
 import 'backup_staging.dart';
 
 /// [BackupService] on the app's database file (TASK 14.4): `VACUUM INTO`
@@ -30,7 +31,9 @@ class FileBackupService implements BackupService {
     Future<Directory> Function()? tempDir,
     Future<Uint8List?> Function()? pickBytes,
     Future<void> Function()? clearPicked,
-  }) : _dataDir = dataDir ?? getApplicationDocumentsDirectory,
+    Future<Map<String, Object?>> Function()? readPreferences,
+  }) : _readPreferences = readPreferences ?? BackupPreferences.read,
+       _dataDir = dataDir ?? getApplicationDocumentsDirectory,
        _tempDir = tempDir ?? getTemporaryDirectory,
        _pickBytes = pickBytes ?? _pickWithFilePicker,
        _clearPicked = clearPicked ?? FilePicker.clearTemporaryFiles;
@@ -40,6 +43,9 @@ class FileBackupService implements BackupService {
   final Clock _clock;
   final Future<Directory> Function() _dataDir;
   final Future<Directory> Function() _tempDir;
+
+  /// The settings a backup carries (S8.9, [BackupPreferences]).
+  final Future<Map<String, Object?>> Function() _readPreferences;
 
   /// The picked backup's bytes, or null when cancelled.
   final Future<Uint8List?> Function() _pickBytes;
@@ -81,6 +87,7 @@ class FileBackupService implements BackupService {
           appVersion: AppIdentity.version,
         ),
       ),
+      preferences: await _readPreferences(),
       preview: BackupPreview(
         createdAtUtc: now,
         schemaVersion: _db.schemaVersion,
@@ -112,12 +119,11 @@ class FileBackupService implements BackupService {
   }
 
   /// Checks backup [bytes] against this app (the testable part of [pick]).
-  ({BackupPreview preview, Uint8List database}) check(Uint8List bytes) =>
-      BackupArchive.read(
-        bytes,
-        appSchemaVersion: _db.schemaVersion,
-        minSchemaVersion: kMinSupportedSchemaVersion,
-      );
+  CheckedBackup check(Uint8List bytes) => BackupArchive.read(
+    bytes,
+    appSchemaVersion: _db.schemaVersion,
+    minSchemaVersion: kMinSupportedSchemaVersion,
+  );
 
   @override
   Future<({BackupPreview preview, Object file})?> pick() async {
@@ -125,7 +131,7 @@ class FileBackupService implements BackupService {
       final bytes = await _pickBytes();
       if (bytes == null) return null;
       final checked = check(bytes);
-      return (preview: checked.preview, file: checked.database);
+      return (preview: checked.preview, file: checked);
     } finally {
       // TD-065 (ADR-017 §6): on Android the picker copies the whole file
       // into the app's cache. This flow owns that copy and deletes it once
@@ -139,8 +145,14 @@ class FileBackupService implements BackupService {
   }
 
   @override
-  Future<void> stage(Object file) async =>
-      BackupStaging.stage(await _dataDir(), file as Uint8List);
+  Future<void> stage(Object file) async {
+    final checked = file as CheckedBackup;
+    await BackupStaging.stage(
+      await _dataDir(),
+      checked.database,
+      preferences: checked.preferences,
+    );
+  }
 
   @override
   Future<bool> hasStagedRestore() async =>

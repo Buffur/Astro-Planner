@@ -4907,7 +4907,7 @@ of them. **No gate is left open**, so every Task below is authorised in order.
 | S8.6 | An optional plan name | P8.6 | S–M | S8.5 | **Done 2026-09-29** |
 | S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | **Done 2026-09-29** |
 | S8.8 | Per-field provenance in new snapshots (TD-070's remainder) | Input | S | — | **Done 2026-09-29** |
-| S8.9 | Preferences in the backup; stale ids (TD-056, ENG-14) | Input | S–M | — | Frozen |
+| S8.9 | Preferences in the backup; stale ids (TD-056, ENG-14) | Input | S–M | — | **Done 2026-09-29** |
 
 **Order:** S8.1 → S8.2 → S8.3 → S8.4 → S8.5 → S8.6 → S8.7 → S8.8 → S8.9 → Stage 8 validation. S8.8 and
 S8.9 depend on nothing and may run earlier. No other Task is added; the old TASK 17.3

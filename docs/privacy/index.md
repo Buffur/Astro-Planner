@@ -4,7 +4,8 @@ title: Astro Planner — Privacy policy
 
 # Astro Planner — Privacy policy
 
-*Effective 24 September 2026; updated 26 September 2026 ("Add from a photo"). Applies to
+*Effective 24 September 2026; updated 26 September 2026 ("Add from a photo") and 29 September
+2026 (backups include settings). Applies to
 Astro Planner for Android
 (`io.github.chacha12.astroplanner`).*
 
@@ -19,7 +20,9 @@ notes and settings are stored **only on your device**, in the app's private stor
 developer has no server and receives none of it.
 
 - A **backup** or an **export** is created only when you ask for one, and goes only where
-  you send it (for example a file location or an app you choose in the share sheet).
+  you send it (for example a file location or an app you choose in the share sheet). A
+  backup holds your data and the app's settings (for example your planning thresholds and
+  which saved site is active), so keep it where you would keep that data.
 - Android's own device backup may include the app's data, according to your device's
   backup settings.
 - Uninstalling the app, or clearing its data in Android's settings, deletes everything it

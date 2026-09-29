@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **S8.9, 2026-09-29:** I-10 built (E.1, "Stage 8 decisions"); its implementation note follows I-10.
 > **S8.8, 2026-09-29:** an implementation note under ADR-018 §5 (after S3.V7's) records per-field
 > provenance in new session snapshots (TD-070 resolved; additive, `v` stays 1).
 > **S8.4, 2026-09-29:** ADR-016 §13 records the live tracker's retirement (the owner's direction of
@@ -1932,6 +1933,10 @@ Stage 4 revalidation is still required.
   - **I-10 the backup (TD-056, ENG-14):** archive `format_version` 2 adds `preferences.json` (planning
     and display preferences, the active site, the first-run flag; never the transient position or plan
     ids); restore and reset clear the plan ids.
+    *Built by S8.9 (2026-09-29):* the carried keys replace the device's as a whole; a version 1
+    archive keeps the device's settings but drops its active site (it may name another site); a
+    reset also drops the active site. The place-name opt-in is not carried (a consent is given on
+    each device).
 - **Consequences:** S8.1–S8.9 build them. RD-13 decided. ADR-014 §3, ADR-016 and ADR-019 §3.1 gain
   implementation notes when S8.1–S8.4 land. Documentation only.
 

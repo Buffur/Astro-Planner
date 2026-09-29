@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S8.9, 2026-09-29:** `BackupPreferences` (`lib/data/backup/`) reads and restores the settings a backup carries, by the keys the SharedPreferences repositories expose (`SharedPrefsPlanningPreferencesRepository.keys`, `fieldModeKey`, `activeLocationIdKey`, `planIdKeys`, `doneKey`); `BackupArchive` (`format_version` 2) holds them as `preferences.json`; `BackupStaging.apply` restores them before the database swap (`restorePreferences`, default `BackupPreferences.restore`); `confirmDatabaseReset` calls `BackupPreferences.forgetStaleIds`. Data layer only; the backup ViewModel and screen are unchanged.
+
 > **S8.7, 2026-09-29:** `session_detail_screen.dart` on `DetailScaffold` (`_Result` as the summary; `_Conditions` split from `_Notes`; `_Actions` by `ResultAction` and the saved night, I-6); `EntryShareText` (`presentation/shared/`, pure) is the Share text of both the entry and the Logbook row; `PlanLifecycleViewModel.openSession(copyTo:)` and `CurrentSession.adopt(unsaved:)` make Copy to another night; `SessionLog.toShareableText` removed.
 
 > **S8.6, 2026-09-29:** `SessionRepository.rename` (trimmed, at most 80 characters, empty = none, legacy refused; a partial row write only); `Session.name`; `SessionsViewModel.rename` and `revision`/`markChanged` (bumped by a name, a deletion or a recorded result, which the Logbook watches to read its entries again); the entry's `_NameTile` and `_NameDialog` (the dialog owns its field). `entryTitle` is the name, else `targetAndNight`.
