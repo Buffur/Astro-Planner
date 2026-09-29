@@ -262,17 +262,35 @@ class CurrentSession {
   Future<Session?> stored(int id) => _repository.get(id);
 
   /// Save: the current open session — or a new one — becomes planned with
-  /// [snapshot] (ADR-014 §3–§4).
-  Future<Session> save(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(
-        () => _inChain(() async {
-          final current = _session;
-          final id = current != null && current.planEditable
-              ? current.id
-              : (await _repository.create(plan)).id;
-          return _session = await _repository.savePlan(id, plan, snapshot);
-        }),
-      );
+  /// [snapshot] (ADR-014 §3–§4). A saved plan whose night has ended at
+  /// [nowUtc] (CALC-44) is never saved over, even before the night check
+  /// has moved the planner (TD-085, D8-2): it stays on its night (settled
+  /// when changed, as [leaveEndedSavedPlan] does) and the plan is saved as
+  /// its working copy. Decided inside the chain, so an edit made after the
+  /// tap still lands after the save (S1.12).
+  Future<Session> save(
+    SessionPlan plan,
+    SessionSnapshot snapshot, [
+    DateTime? nowUtc,
+  ]) => _replacing(
+    () => _inChain(() async {
+      final s = _session;
+      final ended =
+          s != null &&
+          nowUtc != null &&
+          s.isSavedPlan &&
+          SavedNightEnd.hasEnded(s, nowUtc);
+      final current = !ended
+          ? s
+          : s.isSavedChanged
+          ? await _repository.settleSavedPlan(s.id)
+          : null;
+      final id = current != null && current.planEditable
+          ? current.id
+          : (await _repository.create(plan)).id;
+      return _session = await _repository.savePlan(id, plan, snapshot);
+    }),
+  );
 
   /// Runs [op] after every write queued so far and queues later writes
   /// after it, so an edit made while Save, New or Open is running

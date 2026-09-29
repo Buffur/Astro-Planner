@@ -96,8 +96,7 @@ class PlanLifecycleViewModel {
         if (_neverSaved(open) && open.eveningDate != _plan.nightKey) {
           await current.write(_plan.currentPlan, edit: false);
         }
-        // A run in progress is tracked, never edited: plan on a copy
-        // (owner decision, TASK 13.3; TD-055).
+        // A run in progress is never edited: a copy (TASK 13.3; TD-055).
         if (!open.planEditable) await current.adopt(open, _plan.currentPlan);
         await _leaveEndedSavedPlan(current);
       })
@@ -283,7 +282,7 @@ class PlanLifecycleViewModel {
     _plan.markChanged();
   }
 
-  /// Save (ADR-014 §3): the current open session — or a new one — becomes
+  /// Save (ADR-014 §3; TD-085): the open session, or a new one, becomes
   /// planned with [snapshot]. Needs a repository, a night, target and rig.
   Future<Session> savePlan(SessionSnapshot snapshot) async {
     final current = _current;
@@ -293,7 +292,8 @@ class PlanLifecycleViewModel {
         _plan.selectedEquipment == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    final result = await current.save(_plan.currentPlan(), snapshot);
+    final now = _clock.nowUtc();
+    final result = await current.save(_plan.currentPlan(), snapshot, now);
     _plan.markChanged();
     return result;
   }

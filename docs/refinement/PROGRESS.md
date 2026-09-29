@@ -4,7 +4,7 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**Stage 8 validation PASS**; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
+> **Last updated:** 2026-09-29 (**TD-085 fixed** at the owner's request, after the Stage 8 validation PASS; Stage 8 closed, [report](STAGE_8_VALIDATION.md)).
 > **Next:** Stage 9 planning.
 
 ## Current state
@@ -15,11 +15,28 @@
 | Current Stage | **Stage 8 — Sessions / Execution / Actuals / Logbook: Complete** (validation PASS 2026-09-29, [report](STAGE_8_VALIDATION.md)). Stage 9 not started |
 | Current Task | None in progress |
 | Next Task | **Stage 9 planning** (below, "Next allowed action") |
-| Code baseline | **S8.9** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Code baseline | **TD-085's fix** (its commit, after S8.9). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
-**Stage 8 validation PASS, 2026-09-29** (fresh session, independent of S8.1–S8.9; [report](STAGE_8_VALIDATION.md)):
+**TD-085 fixed, 2026-09-29** (S8V-01; the owner asked in chat; D8-2): Save no longer rewrites a
+saved plan whose night ended since the last night check.
+- `CurrentSession.save` takes the time (`PlanLifecycleViewModel.savePlan` passes the clock) and,
+  inside its step of the autosave chain, never saves over a saved plan whose night has ended
+  (CALC-44): a Saved one stays as it was and the plan is saved as a new one; a Saved · changed one is
+  settled first (`settleSavedPlan`, as S8.3's transition does) and its copy is saved. The ended entry
+  keeps its snapshot, blocks and night. No repository or schema change.
+- A first attempt ran the night check (`followNight`) before Save; the gate's S1.12 race test
+  (`save_start_race_test.dart`) caught that an edit tapped right after Save then landed before it,
+  so the decision moved into the chain, where the snapshot and plan of the tap are kept.
+- **Tests:** `saved_plan_transition_test.dart` +2 (P5's sequence for a Saved and a Saved · changed
+  plan: after dawn, no tick, Save → the entry unchanged, a new saved plan from the working copy);
+  both failed before the fix.
+- **Verification:** shared behaviour (`CurrentSession` and a ViewModel's Save, used by the planner and the E2E):
+  the full gate after the change, **PASS** (1,787 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
+  It does not reopen the Stage 8 PASS (V6): it resolves a recorded FOLLOW-UP.
+
+**Stage 8 validation PASS, 2026-09-29** (a separate agent in the implementing session, without its context; [report](STAGE_8_VALIDATION.md)):
 - Every frozen item passes (the Stage's constraints and exit, S8.1–S8.9's acceptance, D8-1 to D8-4,
   I-1 to I-10, the traps it touches). No V4 blocker; **Stage 8 closed**.
 - Gate reused (V3): S8.9's full gate at `690b94a` (1,785 tests, 2 skips; 2 host E2E); the code diff
@@ -346,7 +363,7 @@ These block a release, not refinement.
 1. **Stage 9 planning** (`POST_ROADMAP_PLAN.md`, "Stage 9 — Secondary UX & Product Polish", with
    the Stages 6–11 shared rules): verify its inputs against the code (§9.7), freeze its Task sequence
    and name its research and owner gates (RG-12, RG-13; TD-074, TD-050, RD-11 = S9). Planning is
-   documentation only; Stage 8's gate at `690b94a` is its baseline while the code diff stays empty (V3).
+   documentation only; TD-085's fix gate (its commit) is its baseline while the code diff stays empty (V3).
 
 Stage 8 is closed; no Stage 8 gate is open.
 

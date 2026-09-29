@@ -241,6 +241,41 @@ void main() {
     expect(await open(), hasLength(1));
   });
 
+  // TD-085 (S8V-01): Save tapped after dawn but before the next night
+  // check (the minute tick) must not rewrite the ended entry (D8-2): Save
+  // runs the night check first, so it writes the working copy.
+  for (final changed in [false, true]) {
+    test('TD-085: Save after dawn, before the next check, leaves the '
+        '${changed ? 'Saved · changed' : 'Saved'} entry as it was and saves '
+        'the working copy', () async {
+      final vm = await boot();
+      final saved = await savedFriday(vm);
+      if (changed) {
+        await vm.addCaptureBlock(_extra);
+        await vm.plan.idle;
+      }
+
+      afterDawn(); // no followNight: the minute tick has not run yet
+      final result = await vm.saveSession();
+      await vm.plan.idle;
+
+      final entry = (await sessions.get(saved.id))!;
+      expect(entry.status, SessionStatus.planned);
+      expect(entry.eveningDate, nov10);
+      expect(entry.planSnapshot!.json, saved.planSnapshot!.json);
+      expect(entry.blocks.length, saved.blocks.length);
+      expect(result.id, isNot(saved.id));
+      expect(result.status, SessionStatus.planned);
+      expect(
+        result.blocks.length,
+        saved.blocks.length + (changed ? 1 : 0),
+        reason: 'the working copy holds the edits',
+      );
+      expect(vm.activeSessionId, result.id);
+      expect(await open(), hasLength(2));
+    });
+  }
+
   test('opening an ended saved plan opens a copy for tonight; the entry '
       'stays as it was', () async {
     final vm = await boot();

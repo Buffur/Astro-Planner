@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **TD-085 fix, 2026-09-29:** `CurrentSession.save(plan, snapshot, nowUtc)` never saves over a saved plan whose night has ended (CALC-44, D8-2), whether or not the minute night check has run: decided in its chain step (a Saved · changed one is settled first), so S1.12's ordering holds.
+
 > **S8.9, 2026-09-29:** `BackupPreferences` (`lib/data/backup/`) reads and restores the settings a backup carries, by the keys the SharedPreferences repositories expose (`SharedPrefsPlanningPreferencesRepository.keys`, `fieldModeKey`, `activeLocationIdKey`, `planIdKeys`, `doneKey`); `BackupArchive` (`format_version` 2) holds them as `preferences.json`; `BackupStaging.apply` restores them before the database swap (`restorePreferences`, default `BackupPreferences.restore`); `confirmDatabaseReset` calls `BackupPreferences.forgetStaleIds`. Data layer only; the backup ViewModel and screen are unchanged.
 
 > **S8.7, 2026-09-29:** `session_detail_screen.dart` on `DetailScaffold` (`_Result` as the summary; `_Conditions` split from `_Notes`; `_Actions` by `ResultAction` and the saved night, I-6); `EntryShareText` (`presentation/shared/`, pure) is the Share text of both the entry and the Logbook row; `PlanLifecycleViewModel.openSession(copyTo:)` and `CurrentSession.adopt(unsaved:)` make Copy to another night; `SessionLog.toShareableText` removed.
