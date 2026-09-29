@@ -8,7 +8,12 @@
 // Usage (download the two CSV files of that release first):
 //   dart run tool/build_catalog.dart <NGC.csv> <addendum.csv>
 // Writes assets/catalog/catalog_v2.json. The selection is fixed below; the
-// data (coordinates, size, magnitude, names) comes only from OpenNGC.
+// data (coordinates, size, magnitude, names, aliases) comes only from
+// OpenNGC.
+//
+// Catalog versions: 2 (TASK 8.2) introduced every object below; 3 (S7.4,
+// RG-07 = T1) adds aliases and no object. A new object carries, in `since`,
+// the version that adds it, so a target the user deleted never comes back.
 
 import 'dart:convert';
 import 'dart:io';
@@ -16,7 +21,10 @@ import 'dart:io';
 import 'package:astroplan/core/utils/astro_math.dart';
 
 const openNgcRelease = 'v20260501';
-const catalogVersion = 2;
+const catalogVersion = 3;
+
+/// The catalog version that introduced every object of this selection.
+const selectionSince = 2;
 
 /// Selected showpieces beyond Messier (owner-approved, TASK 8.2), by their
 /// OpenNGC names. Duplicates (`Dup`) are not selectable.
@@ -101,10 +109,13 @@ Map<String, Object?> entry(Map<String, String> row, String id) {
   if (ra == null || dec == null) {
     throw StateError('Unparseable coordinates for ${row['Name']}');
   }
-  final names = row['Common names']!.split(',').where((n) => n.isNotEmpty);
+  final names = [
+    for (final n in row['Common names']!.split(','))
+      if (n.trim().isNotEmpty) n.trim(),
+  ];
   return {
     'id': id,
-    'name': names.isEmpty ? null : names.first.trim(),
+    'name': names.isEmpty ? null : names.first,
     'type': appType(row['Type']!),
     'ra': double.parse(ra.toStringAsFixed(7)),
     'dec': double.parse(dec.toStringAsFixed(7)),
@@ -113,8 +124,33 @@ Map<String, Object?> entry(Map<String, String> row, String id) {
     'openNgc': row['Name'],
     'openNgcRa': row['RA'],
     'openNgcDec': row['Dec'],
-    'since': catalogVersion,
+    'since': selectionSince,
+    'aliasIds': aliasIds(row, id),
+    'aliasNames': names,
   };
+}
+
+/// The other designations search finds an object by (RG-07 = T1, S7.4):
+/// a Messier object's NGC/IC designations (its OpenNGC name and the `NGC`
+/// and `IC` columns), and the Caldwell and LBN numbers in `Identifiers`.
+List<String> aliasIds(Map<String, String> row, String id) {
+  final ids = <String>[
+    if (row['M']!.isNotEmpty) ...[
+      if (RegExp(r'^(NGC|IC)\d').hasMatch(row['Name']!))
+        displayId(row['Name']!),
+      for (final n in row['NGC']!.split(','))
+        if (n.trim().isNotEmpty) 'NGC ${int.parse(n.trim())}',
+      for (final n in row['IC']!.split(','))
+        if (n.trim().isNotEmpty) 'IC ${int.parse(n.trim())}',
+    ],
+    for (final i in row['Identifiers']!.split(','))
+      if (RegExp(r'^(C|LBN) (\d+)$').firstMatch(i.trim()) case final m?)
+        '${m[1]} ${int.parse(m[2]!)}',
+  ];
+  return [
+    for (final a in {...ids})
+      if (a != id) a,
+  ];
 }
 
 void main(List<String> args) {
@@ -146,6 +182,15 @@ void main(List<String> args) {
   }
   final ids = objects.map((o) => o['id']).toSet();
   if (ids.length != objects.length) throw StateError('Duplicate ids');
+  // An alias must never be another object's id, or one designation would
+  // name two objects.
+  for (final o in objects) {
+    for (final a in o['aliasIds']! as List<String>) {
+      if (ids.contains(a)) {
+        throw StateError("Alias $a of ${o['id']} is another object's id");
+      }
+    }
+  }
 
   final asset = {
     'version': catalogVersion,

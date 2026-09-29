@@ -1,4 +1,5 @@
 import 'package:astroplan/domain/models/astro_target.dart' as domain;
+import 'package:astroplan/domain/models/target_alias.dart';
 import 'package:astroplan/domain/repositories/target_repository.dart';
 
 /// Wraps a real [TargetRepository] and can be made to throw on every call.
@@ -19,6 +20,18 @@ class FlakyTargetRepository implements TargetRepository {
   Future<List<domain.AstroTarget>> searchTargets(String query) async {
     _check();
     return _delegate.searchTargets(query);
+  }
+
+  @override
+  Future<int?> aliasCatalogVersion() async {
+    _check();
+    return _delegate.aliasCatalogVersion();
+  }
+
+  @override
+  Future<void> replaceAliases(int version, List<TargetAlias> aliases) async {
+    _check();
+    return _delegate.replaceAliases(version, aliases);
   }
 
   @override

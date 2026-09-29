@@ -22,7 +22,7 @@
 //       refused
 //   M11 a failure mid-step leaves the file unchanged, because the migration
 //       runs inside one transaction
-// Later schema versions add their own groups (v11-v21), each with an
+// Later schema versions add their own groups (v11-v22), each with an
 // every-version-to-N schema test and a data-preservation test.
 // M10 (the existing repository/database suite, green with FKs on) is the
 // rest of `flutter test`, not a dedicated test here.
@@ -41,6 +41,7 @@ import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/models/camera_class.dart';
 import 'package:astroplan/domain/models/session.dart' show SessionResults;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
+import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/domain/models/spec_confidence.dart';
 import 'package:astroplan/domain/models/spec_provenance.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
@@ -125,6 +126,53 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('S7.4: v22 (the catalog aliases, RG-07 = T1)', () {
+    for (final from in [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]) {
+      test('v$from -> v22 matches the v22 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 22);
+        await db.close();
+      });
+    }
+
+    test('v21 -> v22: every target, custom and catalog, and a plan\'s '
+        'reference kept; the new alias table starts empty', () async {
+      final schema = await verifier.schemaAt(21);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO astro_targets (id, catalog_id, common_name, "
+        "right_ascension, declination, type, source) VALUES "
+        "(7, 'M31', 'My Andromeda', 10.68, 41.27, 'Galaxy', "
+        "'catalog:openngc@v20260501'), "
+        "(9, 'Backyard field', NULL, 120.5, -10.25, 'Other', 'user');",
+      );
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, target_id, planned_at_utc_ms) VALUES "
+        "(1, 'My Andromeda', 'Rig', 1790000000, 10, 'planned', 0, "
+        "'2026-12-15', 'Europe/Ljubljana', 7, 1790000000000);",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      expect(await db.select(db.targetAliases).get(), isEmpty);
+      final targets = DriftTargetRepository(db);
+      expect(await targets.aliasCatalogVersion(), isNull);
+      final all = await targets.getAllTargets();
+      expect(
+        [for (final t in all) (t.id, t.catalogId, t.commonName, t.source)],
+        [
+          (7, 'M31', 'My Andromeda', 'catalog:openngc@v20260501'),
+          (9, 'Backyard field', null, 'user'),
+        ],
+      );
+      final plan = await db.select(db.sessionLogs).getSingle();
+      expect(plan.targetId, 7);
       await db.close();
     });
   });

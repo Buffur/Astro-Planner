@@ -1804,6 +1804,11 @@ Stage 4 revalidation is still required.
   version rises, a schema change adds the alias table; `OPENNGC_NOTICE.txt` and About say what is kept.
   Nothing leaves the device.
 - Documentation only. No code changed.
+- **Built by S7.4 (2026-09-29):** schema v22 (`target_aliases`), catalog version 3, `TargetSearch`.
+  Implementation decisions within the decided rules: a Messier object's "NGC/IC designation" is its
+  OpenNGC name and the numbers in its `NGC` and `IC` columns (M76 is also NGC 651, M8 also NGC 6533);
+  the tool refuses an alias that is another object's id; the id order is reading order (M2 before
+  M10); the aliases' version is recorded in the database, so a restored database gets them too.
 
 ### RG-08 and RG-09 decided: the site form (Stage 7, 2026-09-29)
 

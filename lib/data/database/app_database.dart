@@ -243,6 +243,7 @@ class SessionEvents extends Table {
     SessionLogs,
     CaptureBlocks,
     SessionEvents,
+    TargetAliases,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -253,7 +254,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   @override
   MigrationStrategy get migration {
@@ -554,6 +555,12 @@ class AppDatabase extends _$AppDatabase {
                   schema.cameraModules,
                   schema.cameraModules.inCameraNoiseReduction,
                 );
+              },
+              from21To22: (m, schema) async {
+                // S7.4 (RG-07 = T1): the catalog's aliases. A new, empty
+                // table; the catalog seeder fills it from the asset on the
+                // next launch. No target row is touched.
+                await m.createTable(schema.targetAliases);
               },
             ),
           );

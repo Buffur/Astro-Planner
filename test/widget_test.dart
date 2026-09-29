@@ -58,12 +58,13 @@ void main() {
     final database = AppDatabase(NativeDatabase.memory());
 
     final targetRepo = DriftTargetRepository(database);
-    final targetSeeder = CatalogSeeder(targetRepo);
-    await targetSeeder.seedIfNeeded();
-
     final eqRepo = DriftEquipmentRepository(database);
-    final eqSeeder = EquipmentSeeder(eqRepo);
-    await eqSeeder.seedIfNeeded();
+    // Seeding writes through Drift, which needs the real event loop (S7.4:
+    // the catalog's aliases are one transaction).
+    await tester.runAsync(() async {
+      await CatalogSeeder(targetRepo).seedIfNeeded();
+      await EquipmentSeeder(eqRepo).seedIfNeeded();
+    });
 
     final weatherRepo = MockWeatherRepository();
     final sessionRepo = DriftSessionRepository(database);

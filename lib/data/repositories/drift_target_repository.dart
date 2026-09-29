@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/models/astro_target.dart' as domain;
+import '../../domain/models/target_alias.dart';
+import '../../domain/services/target_search.dart';
 import '../database/app_database.dart';
 
 class DriftTargetRepository implements TargetRepository {
@@ -66,18 +68,45 @@ class DriftTargetRepository implements TargetRepository {
         );
   }
 
+  /// S7.4: the pure `TargetSearch` over every target and alias (a few
+  /// hundred rows), so a query matches literally and works offline.
   @override
   Future<List<domain.AstroTarget>> searchTargets(String query) async {
-    final likeQuery = '%${escapeLike(query)}%';
-    final dbTargets =
-        await (_db.select(_db.astroTargets)..where(
-              (t) =>
-                  t.catalogId.like(likeQuery, escapeChar: _escape) |
-                  t.commonName.like(likeQuery, escapeChar: _escape),
-            ))
-            .get();
-    return dbTargets.map(_mapToDomain).toList();
+    final targets = await getAllTargets();
+    if (query.trim().isEmpty) return targets;
+    final rows = await _db.select(_db.targetAliases).get();
+    final aliases = [
+      for (final r in rows)
+        if (TargetAliasKind.fromStorage(r.kind) case final kind?)
+          TargetAlias(catalogId: r.catalogId, alias: r.alias, kind: kind),
+    ];
+    return TargetSearch.search(query, targets, aliases);
   }
+
+  @override
+  Future<int?> aliasCatalogVersion() {
+    final newest = _db.targetAliases.catalogVersion.max();
+    return (_db.selectOnly(
+      _db.targetAliases,
+    )..addColumns([newest])).map((r) => r.read(newest)).getSingle();
+  }
+
+  @override
+  Future<void> replaceAliases(int version, List<TargetAlias> aliases) =>
+      _db.transaction(() async {
+        await _db.delete(_db.targetAliases).go();
+        await _db.batch(
+          (b) => b.insertAll(_db.targetAliases, [
+            for (final a in aliases)
+              TargetAliasesCompanion.insert(
+                catalogId: a.catalogId,
+                alias: a.alias,
+                kind: a.kind.name,
+                catalogVersion: version,
+              ),
+          ]),
+        );
+      });
 
   @override
   Future<void> deleteTarget(int id) async {

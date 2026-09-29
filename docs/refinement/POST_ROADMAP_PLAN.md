@@ -105,6 +105,7 @@
 > **Updated 2026-09-29 (S7.2b):** the light-block form by camera class is built (ADR-020 §3–§5).
 > **Updated 2026-09-29 (S7.3a):** calibration blocks and the dark-flat frame type are built (ADR-020 §6–§7).
 > **Updated 2026-09-29 (S7.3b):** in-camera noise reduction is built (ADR-020 §8; schema v21).
+> **Updated 2026-09-29 (S7.4):** target aliases and search are built (RG-07 = T1; schema v22, catalog version 3).
 
 ## Contents
 
@@ -4001,7 +4002,7 @@ Stage 4):
 | S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
 | S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | **Done 2026-09-29** |
 | S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | **Done 2026-09-29** |
-| S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | Frozen; RG-07's rules added below S7.4 |
+| S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 (**decided: T1**) | **Done 2026-09-29** |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 (**decided: E2, S3, M2**) | Frozen; the decided rules added below S7.5 |
 | S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
 
@@ -4518,6 +4519,23 @@ calculation and a schema change)
 - **Search:** RG-07 §6's rules and examples, as tests; ordered by match kind (exact designation,
   prefix, name substring), then by the id; no score.
 - **Not built:** more objects, another catalog, an online lookup. The candidates list is unchanged.
+
+- **Done 2026-09-29:** `tool/build_catalog.dart` writes `aliasIds` (a Messier object's OpenNGC
+  NGC/IC name and its `NGC`/`IC` columns; Caldwell and LBN numbers from `Identifiers`) and
+  `aliasNames` (every common name) under catalog version 3, with `since` fixed at 2 for today's
+  selection (the tool had written the current version; a bump would have resurrected every deleted
+  target) and a refusal of any alias that is another object's id; every existing field is
+  byte-identical. Schema v22 (`target_aliases`); `CatalogSeeder` rebuilds it when its recorded
+  version differs; the pure `TargetSearch` replaces `LIKE`. `OPENNGC_NOTICE.txt` (shown on About)
+  says what is kept. Candidates (host, median of 7, the probe not committed): **53.4 ms before, 52.7
+  ms after**, 164 targets; one search 0.3 ms → 3.8 ms. Tests: `target_search_test.dart`,
+  `catalog_aliases_test.dart` (RG-07 §6's examples, the order, deletion, a renamed target, the
+  rebuild, a restored database, custom targets), v22 migrations. Deliberate test changes: the seeder
+  and reset tests follow catalog version 3 (the "newer catalog" cases move to 4); the backup and
+  unsupported-database pins (v22, v23); `widget_test.dart` seeds inside `runAsync` (the alias
+  rebuild is a Drift transaction, which hangs on the fake clock). `DriftTargetRepository.escapeLike`
+  is kept with its test, though search no longer uses it. Full gate PASS: 1,675 tests, 2 expected
+  skips; 2 host E2E.
 
 ##### S7.5 — The site form (gated on RG-08 and RG-09; UX-21)
 - **Objective:** the site form asks only for what the user can reasonably know or the app cannot

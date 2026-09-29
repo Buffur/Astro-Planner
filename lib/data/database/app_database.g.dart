@@ -7595,6 +7595,363 @@ class SessionEventsCompanion extends UpdateCompanion<SessionEvent> {
   }
 }
 
+class $TargetAliasesTable extends TargetAliases
+    with TableInfo<$TargetAliasesTable, TargetAliasRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TargetAliasesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _catalogIdMeta = const VerificationMeta(
+    'catalogId',
+  );
+  @override
+  late final GeneratedColumn<String> catalogId = GeneratedColumn<String>(
+    'catalog_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _aliasMeta = const VerificationMeta('alias');
+  @override
+  late final GeneratedColumn<String> alias = GeneratedColumn<String>(
+    'alias',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _catalogVersionMeta = const VerificationMeta(
+    'catalogVersion',
+  );
+  @override
+  late final GeneratedColumn<int> catalogVersion = GeneratedColumn<int>(
+    'catalog_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    catalogId,
+    alias,
+    kind,
+    catalogVersion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'target_aliases';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TargetAliasRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('catalog_id')) {
+      context.handle(
+        _catalogIdMeta,
+        catalogId.isAcceptableOrUnknown(data['catalog_id']!, _catalogIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_catalogIdMeta);
+    }
+    if (data.containsKey('alias')) {
+      context.handle(
+        _aliasMeta,
+        alias.isAcceptableOrUnknown(data['alias']!, _aliasMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_aliasMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('catalog_version')) {
+      context.handle(
+        _catalogVersionMeta,
+        catalogVersion.isAcceptableOrUnknown(
+          data['catalog_version']!,
+          _catalogVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_catalogVersionMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TargetAliasRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TargetAliasRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      catalogId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}catalog_id'],
+      )!,
+      alias: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}alias'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      catalogVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}catalog_version'],
+      )!,
+    );
+  }
+
+  @override
+  $TargetAliasesTable createAlias(String alias) {
+    return $TargetAliasesTable(attachedDatabase, alias);
+  }
+}
+
+class TargetAliasRow extends DataClass implements Insertable<TargetAliasRow> {
+  final int id;
+  final String catalogId;
+  final String alias;
+
+  /// `designation` or `name` (`TargetAliasKind`).
+  final String kind;
+
+  /// The catalog asset's version these rows were built from.
+  final int catalogVersion;
+  const TargetAliasRow({
+    required this.id,
+    required this.catalogId,
+    required this.alias,
+    required this.kind,
+    required this.catalogVersion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['catalog_id'] = Variable<String>(catalogId);
+    map['alias'] = Variable<String>(alias);
+    map['kind'] = Variable<String>(kind);
+    map['catalog_version'] = Variable<int>(catalogVersion);
+    return map;
+  }
+
+  TargetAliasesCompanion toCompanion(bool nullToAbsent) {
+    return TargetAliasesCompanion(
+      id: Value(id),
+      catalogId: Value(catalogId),
+      alias: Value(alias),
+      kind: Value(kind),
+      catalogVersion: Value(catalogVersion),
+    );
+  }
+
+  factory TargetAliasRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TargetAliasRow(
+      id: serializer.fromJson<int>(json['id']),
+      catalogId: serializer.fromJson<String>(json['catalogId']),
+      alias: serializer.fromJson<String>(json['alias']),
+      kind: serializer.fromJson<String>(json['kind']),
+      catalogVersion: serializer.fromJson<int>(json['catalogVersion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'catalogId': serializer.toJson<String>(catalogId),
+      'alias': serializer.toJson<String>(alias),
+      'kind': serializer.toJson<String>(kind),
+      'catalogVersion': serializer.toJson<int>(catalogVersion),
+    };
+  }
+
+  TargetAliasRow copyWith({
+    int? id,
+    String? catalogId,
+    String? alias,
+    String? kind,
+    int? catalogVersion,
+  }) => TargetAliasRow(
+    id: id ?? this.id,
+    catalogId: catalogId ?? this.catalogId,
+    alias: alias ?? this.alias,
+    kind: kind ?? this.kind,
+    catalogVersion: catalogVersion ?? this.catalogVersion,
+  );
+  TargetAliasRow copyWithCompanion(TargetAliasesCompanion data) {
+    return TargetAliasRow(
+      id: data.id.present ? data.id.value : this.id,
+      catalogId: data.catalogId.present ? data.catalogId.value : this.catalogId,
+      alias: data.alias.present ? data.alias.value : this.alias,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      catalogVersion: data.catalogVersion.present
+          ? data.catalogVersion.value
+          : this.catalogVersion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TargetAliasRow(')
+          ..write('id: $id, ')
+          ..write('catalogId: $catalogId, ')
+          ..write('alias: $alias, ')
+          ..write('kind: $kind, ')
+          ..write('catalogVersion: $catalogVersion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, catalogId, alias, kind, catalogVersion);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TargetAliasRow &&
+          other.id == this.id &&
+          other.catalogId == this.catalogId &&
+          other.alias == this.alias &&
+          other.kind == this.kind &&
+          other.catalogVersion == this.catalogVersion);
+}
+
+class TargetAliasesCompanion extends UpdateCompanion<TargetAliasRow> {
+  final Value<int> id;
+  final Value<String> catalogId;
+  final Value<String> alias;
+  final Value<String> kind;
+  final Value<int> catalogVersion;
+  const TargetAliasesCompanion({
+    this.id = const Value.absent(),
+    this.catalogId = const Value.absent(),
+    this.alias = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.catalogVersion = const Value.absent(),
+  });
+  TargetAliasesCompanion.insert({
+    this.id = const Value.absent(),
+    required String catalogId,
+    required String alias,
+    required String kind,
+    required int catalogVersion,
+  }) : catalogId = Value(catalogId),
+       alias = Value(alias),
+       kind = Value(kind),
+       catalogVersion = Value(catalogVersion);
+  static Insertable<TargetAliasRow> custom({
+    Expression<int>? id,
+    Expression<String>? catalogId,
+    Expression<String>? alias,
+    Expression<String>? kind,
+    Expression<int>? catalogVersion,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (catalogId != null) 'catalog_id': catalogId,
+      if (alias != null) 'alias': alias,
+      if (kind != null) 'kind': kind,
+      if (catalogVersion != null) 'catalog_version': catalogVersion,
+    });
+  }
+
+  TargetAliasesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? catalogId,
+    Value<String>? alias,
+    Value<String>? kind,
+    Value<int>? catalogVersion,
+  }) {
+    return TargetAliasesCompanion(
+      id: id ?? this.id,
+      catalogId: catalogId ?? this.catalogId,
+      alias: alias ?? this.alias,
+      kind: kind ?? this.kind,
+      catalogVersion: catalogVersion ?? this.catalogVersion,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (catalogId.present) {
+      map['catalog_id'] = Variable<String>(catalogId.value);
+    }
+    if (alias.present) {
+      map['alias'] = Variable<String>(alias.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (catalogVersion.present) {
+      map['catalog_version'] = Variable<int>(catalogVersion.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TargetAliasesCompanion(')
+          ..write('id: $id, ')
+          ..write('catalogId: $catalogId, ')
+          ..write('alias: $alias, ')
+          ..write('kind: $kind, ')
+          ..write('catalogVersion: $catalogVersion')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7608,6 +7965,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SessionLogsTable sessionLogs = $SessionLogsTable(this);
   late final $CaptureBlocksTable captureBlocks = $CaptureBlocksTable(this);
   late final $SessionEventsTable sessionEvents = $SessionEventsTable(this);
+  late final $TargetAliasesTable targetAliases = $TargetAliasesTable(this);
   late final Index astroTargetsCatalogIdUnique = Index(
     'astro_targets_catalog_id_unique',
     'CREATE UNIQUE INDEX astro_targets_catalog_id_unique ON astro_targets (catalog_id) WHERE source LIKE \'seed:%\' OR source LIKE \'catalog:%\'',
@@ -7641,6 +7999,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     sessionLogs,
     captureBlocks,
     sessionEvents,
+    targetAliases,
     astroTargetsCatalogIdUnique,
     sessionLogsStatus,
     sessionLogsEveningDate,
@@ -12650,6 +13009,211 @@ typedef $$SessionEventsTableProcessedTableManager =
       SessionEvent,
       PrefetchHooks Function({bool sessionLogId, bool blockId})
     >;
+typedef $$TargetAliasesTableCreateCompanionBuilder =
+    TargetAliasesCompanion Function({
+      Value<int> id,
+      required String catalogId,
+      required String alias,
+      required String kind,
+      required int catalogVersion,
+    });
+typedef $$TargetAliasesTableUpdateCompanionBuilder =
+    TargetAliasesCompanion Function({
+      Value<int> id,
+      Value<String> catalogId,
+      Value<String> alias,
+      Value<String> kind,
+      Value<int> catalogVersion,
+    });
+
+class $$TargetAliasesTableFilterComposer
+    extends Composer<_$AppDatabase, $TargetAliasesTable> {
+  $$TargetAliasesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get catalogId => $composableBuilder(
+    column: $table.catalogId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get alias => $composableBuilder(
+    column: $table.alias,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get catalogVersion => $composableBuilder(
+    column: $table.catalogVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TargetAliasesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TargetAliasesTable> {
+  $$TargetAliasesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get catalogId => $composableBuilder(
+    column: $table.catalogId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get alias => $composableBuilder(
+    column: $table.alias,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get catalogVersion => $composableBuilder(
+    column: $table.catalogVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TargetAliasesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TargetAliasesTable> {
+  $$TargetAliasesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get catalogId =>
+      $composableBuilder(column: $table.catalogId, builder: (column) => column);
+
+  GeneratedColumn<String> get alias =>
+      $composableBuilder(column: $table.alias, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get catalogVersion => $composableBuilder(
+    column: $table.catalogVersion,
+    builder: (column) => column,
+  );
+}
+
+class $$TargetAliasesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TargetAliasesTable,
+          TargetAliasRow,
+          $$TargetAliasesTableFilterComposer,
+          $$TargetAliasesTableOrderingComposer,
+          $$TargetAliasesTableAnnotationComposer,
+          $$TargetAliasesTableCreateCompanionBuilder,
+          $$TargetAliasesTableUpdateCompanionBuilder,
+          (
+            TargetAliasRow,
+            BaseReferences<_$AppDatabase, $TargetAliasesTable, TargetAliasRow>,
+          ),
+          TargetAliasRow,
+          PrefetchHooks Function()
+        > {
+  $$TargetAliasesTableTableManager(_$AppDatabase db, $TargetAliasesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TargetAliasesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TargetAliasesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TargetAliasesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> catalogId = const Value.absent(),
+                Value<String> alias = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<int> catalogVersion = const Value.absent(),
+              }) => TargetAliasesCompanion(
+                id: id,
+                catalogId: catalogId,
+                alias: alias,
+                kind: kind,
+                catalogVersion: catalogVersion,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String catalogId,
+                required String alias,
+                required String kind,
+                required int catalogVersion,
+              }) => TargetAliasesCompanion.insert(
+                id: id,
+                catalogId: catalogId,
+                alias: alias,
+                kind: kind,
+                catalogVersion: catalogVersion,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TargetAliasesTable, TargetAliasRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TargetAliasesTable,
+                    TargetAliasRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TargetAliasesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TargetAliasesTable,
+      TargetAliasRow,
+      $$TargetAliasesTableFilterComposer,
+      $$TargetAliasesTableOrderingComposer,
+      $$TargetAliasesTableAnnotationComposer,
+      $$TargetAliasesTableCreateCompanionBuilder,
+      $$TargetAliasesTableUpdateCompanionBuilder,
+      (
+        TargetAliasRow,
+        BaseReferences<_$AppDatabase, $TargetAliasesTable, TargetAliasRow>,
+      ),
+      TargetAliasRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12670,4 +13234,6 @@ class $AppDatabaseManager {
       $$CaptureBlocksTableTableManager(_db, _db.captureBlocks);
   $$SessionEventsTableTableManager get sessionEvents =>
       $$SessionEventsTableTableManager(_db, _db.sessionEvents);
+  $$TargetAliasesTableTableManager get targetAliases =>
+      $$TargetAliasesTableTableManager(_db, _db.targetAliases);
 }

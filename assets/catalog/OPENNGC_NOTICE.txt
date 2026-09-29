@@ -14,8 +14,10 @@ Changes made for AstroPlan: a selection of 164 objects (the Messier objects
 present in OpenNGC and a list of well-known imaging targets); coordinates
 converted from sexagesimal to decimal degrees; OpenNGC object types mapped to
 the app's target types; only the name, type, J2000 coordinates, major axis
-(arcmin), V magnitude and first common name are kept; identifiers
-reformatted (e.g. NGC0224 -> M31 or NGC 224). The adapted catalog file is
+(arcmin), V magnitude and common names are kept, with, as search aliases, the
+NGC/IC designations of the Messier objects and the Caldwell and LBN numbers
+from OpenNGC's identifiers (catalog version 3); identifiers reformatted
+(e.g. NGC0224 -> M31 or NGC 224, C 020 -> C 20). The adapted catalog file is
 licensed under CC BY-SA 4.0 as well.
 
 OpenNGC acknowledges these upstream sources:

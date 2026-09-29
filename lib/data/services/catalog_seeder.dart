@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/diagnostics/app_log.dart';
 import '../../core/utils/astro_math.dart';
 import '../../domain/models/astro_target.dart';
+import '../../domain/models/target_alias.dart';
 import '../../domain/repositories/target_repository.dart';
 
 /// One object of the bundled catalog asset (TASK 8.2).
@@ -22,6 +23,8 @@ class CatalogEntry {
     required this.openNgcName,
     required this.openNgcRa,
     required this.openNgcDec,
+    this.aliasIds = const [],
+    this.aliasNames = const [],
   });
 
   /// Catalog id shown to the user, e.g. `M31`, `NGC 7000`.
@@ -46,6 +49,17 @@ class CatalogEntry {
   final String openNgcName;
   final String openNgcRa;
   final String openNgcDec;
+
+  /// Other designations and names, from OpenNGC (catalog version 3, S7.4).
+  final List<String> aliasIds;
+  final List<String> aliasNames;
+
+  List<TargetAlias> get aliases => [
+    for (final a in aliasIds)
+      TargetAlias(catalogId: id, alias: a, kind: TargetAliasKind.designation),
+    for (final a in aliasNames)
+      TargetAlias(catalogId: id, alias: a, kind: TargetAliasKind.name),
+  ];
 
   AstroTarget toTarget(String source, {int id = 0}) => AstroTarget(
     id: id,
@@ -74,6 +88,9 @@ class TargetCatalog {
       throw const FormatException('The catalog must be J2000');
     }
     double? optional(Object? v) => (v as num?)?.toDouble();
+    List<String> strings(Object? v) => [
+      for (final s in (v as List<dynamic>?) ?? const []) s as String,
+    ];
     return TargetCatalog(
       version: data['version'] as int,
       source: data['source'] as String,
@@ -91,6 +108,8 @@ class TargetCatalog {
             openNgcName: o['openNgc'] as String,
             openNgcRa: o['openNgcRa'] as String,
             openNgcDec: o['openNgcDec'] as String,
+            aliasIds: strings(o['aliasIds']),
+            aliasNames: strings(o['aliasNames']),
           ),
       ],
     );
@@ -199,6 +218,7 @@ class CatalogSeeder {
     } catch (e) {
       AppLog.warning('seeding', 'Preferences unavailable', error: e);
     }
+    await _syncAliases(catalog);
     final applied = prefs?.getInt(versionKey);
     if (applied != null && applied >= catalog.version) return;
 
@@ -260,6 +280,21 @@ class CatalogSeeder {
       return;
     }
     await prefs?.setInt(versionKey, catalog.version);
+  }
+
+  /// Rebuilds the aliases when the asset's version differs from theirs
+  /// (S7.4). Recorded in the database itself, so a restored or reset
+  /// database gets them too. Changes no target row. A failure is logged and
+  /// retried on the next launch; search then finds ids and names only.
+  Future<void> _syncAliases(TargetCatalog catalog) async {
+    try {
+      if (await _repository.aliasCatalogVersion() == catalog.version) return;
+      await _repository.replaceAliases(catalog.version, [
+        for (final e in catalog.entries) ...e.aliases,
+      ]);
+    } catch (e) {
+      AppLog.error('seeding', 'Catalog aliases not stored', error: e);
+    }
   }
 
   static bool _isCatalogRow(AstroTarget t) =>

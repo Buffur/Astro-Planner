@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.3b done**: in-camera noise reduction; schema v21).
-> **Next:** S7.4, targets: names, aliases and search (RG-03 stays open; it affects only S7.6).
+> **Last updated:** 2026-09-29 (**S7.4 done**: target aliases and search; schema v22).
+> **Next:** S7.5, the site form (RG-03 stays open; it affects only S7.6).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a and S7.3b done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1–S7.R5, S7.D, S7.1, S7.2a, S7.2b, S7.3a, S7.3b and S7.4 done; RG-07 to RG-11 decided; RG-03 open). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **S7.4**, targets: names, aliases and search (below, "Next allowed action") |
-| Code baseline | S7.3b (this commit). Not pushed (S1.14, RD-17) |
-| Schema | **v21** (S7.3b) |
+| Next Task | **S7.5**, the site form (below, "Next allowed action") |
+| Code baseline | S7.4 (this commit). Not pushed (S1.14, RD-17) |
+| Schema | **v22** (S7.4) |
+
+**S7.4 done, 2026-09-29** (RG-07 = T1): search finds a bundled object by any common spelling of its
+designation, by its NGC/IC, Caldwell and LBN aliases and by every OpenNGC common name, offline,
+ordered by match kind then id, with no score. Catalog version 3 adds aliases and no object (every
+`since` stays 2, so no deleted target returns); schema v22 adds `target_aliases`, rebuilt by the
+seeder when its version differs. The candidates list is unchanged (host, median of 7: 53.4 ms before,
+52.7 ms after; 164 targets). Verification: high-risk (a migration and the catalog): the full gate
+after the last code change, PASS (below).
 
 **S7.3b done, 2026-09-29** (ADR-020 §8; RG-10 = N1): a DSLR/mirrorless or Unknown rig can state
 in-camera noise reduction (off by default, never inferred; schema v21). When on, each light is
@@ -196,7 +204,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS**: Encoding; Format (454 files, 0 changed); Analyze (no issues); 1,642 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.3b's final inputs (the S7.3b commit) | Valid while `git diff --stat <S7.3b commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.3a's gate (`d4dbd24`) |
+| **Full quality gate PASS**: Encoding; Format (459 files, 0 changed); Analyze (no issues); 1,675 tests, 2 expected skips (the local real samples; the opt-in S5.9 render test); 2 host E2E | S7.4's final inputs (the S7.4 commit) | Valid while `git diff --stat <S7.4 commit> HEAD -- . ':!docs' ':!CLAUDE.md'` is empty. It supersedes S7.3b's gate (`763f11c`) |
 | Local real-sample metadata test PASS (DNG, JPEG, HEIC) | After S3.V4 (`2447962`) | Metadata code unchanged since; environment-dependent (the owner's sample folder) |
 | Device checks M1–M4 PASS (owner's Xiaomi 14T Pro, `.s2check` build) | `79f392c`, `237c55f`, `2b045eb` | Device evidence; valid for the flows it covered until those flows change. S3V-08 and S2V-06's checks remain unverified |
 | **Focused probe PASS after S6.V1** (was FAIL at the validation, application code `d7e1477`): `evidence/S6V_01_DELETE_UNDO_PROBE.patch` applied unchanged, run (`--plain-name "S6V probe"`), then removed; "4 blocks, last count 7, example badge false" | S6.V1's final inputs | The same inputs as the gate above. Its sequence is also a committed test now (`capture_blocks_undo_test.dart`) |
@@ -326,9 +334,10 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S7.4 — targets: names, aliases and search** (`POST_ROADMAP_PLAN.md`, S7.4; RG-07 = T1): an
-   aliases table and normalised search over the bundled OpenNGC catalog, per the decided rules.
-   Implementation; the full gate; commit, then STOP.
+1. **S7.5 — the site form** (`POST_ROADMAP_PLAN.md`, S7.5; RG-08/RG-09 = E2, S3, M2): "Use current
+   position" in the editor, elevation nullable and Unknown by default (a schema change), Bortle and
+   SQM in a collapsed optional section, the lightpollutionmap.app link, and the discard guard (UX-21),
+   per the decided rules. Implementation; the full gate; commit, then STOP.
 
 RG-03 (a specification source, `research/RG-03_EQUIPMENT_SPECS.md` §8) is still the owner's to
 decide; it affects only S7.6, which comes last.

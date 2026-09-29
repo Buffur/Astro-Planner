@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "source": "catalog:openngc@v20260501",
  "licence": "CC BY-SA 4.0 (adapted subset of OpenNGC v20260501, by Mattia Verga; see OPENNGC_NOTICE.txt)",
  "epoch": "J2000",
@@ -15,7 +15,14 @@
    "openNgc": "NGC1952",
    "openNgcRa": "05:34:31.97",
    "openNgcDec": "+22:00:52.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1952",
+    "LBN 833"
+   ],
+   "aliasNames": [
+    "Crab Nebula"
+   ]
   },
   {
    "id": "M2",
@@ -28,7 +35,11 @@
    "openNgc": "NGC7089",
    "openNgcRa": "21:33:27.01",
    "openNgcDec": "-00:49:23.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 7089"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M3",
@@ -41,7 +52,11 @@
    "openNgc": "NGC5272",
    "openNgcRa": "13:42:11.23",
    "openNgcDec": "+28:22:31.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5272"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M4",
@@ -54,7 +69,11 @@
    "openNgc": "NGC6121",
    "openNgcRa": "16:23:35.40",
    "openNgcDec": "-26:31:31.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6121"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M5",
@@ -67,7 +86,11 @@
    "openNgc": "NGC5904",
    "openNgcRa": "15:18:33.75",
    "openNgcDec": "+02:04:57.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5904"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M6",
@@ -80,7 +103,13 @@
    "openNgc": "NGC6405",
    "openNgcRa": "17:40:20.75",
    "openNgcDec": "-32:15:15.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6405"
+   ],
+   "aliasNames": [
+    "Butterfly Cluster"
+   ]
   },
   {
    "id": "M7",
@@ -93,7 +122,13 @@
    "openNgc": "NGC6475",
    "openNgcRa": "17:53:51.18",
    "openNgcDec": "-34:47:34.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6475"
+   ],
+   "aliasNames": [
+    "Ptolemy's Cluster"
+   ]
   },
   {
    "id": "M8",
@@ -106,7 +141,15 @@
    "openNgc": "NGC6523",
    "openNgcRa": "18:03:41.27",
    "openNgcDec": "-24:22:48.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6523",
+    "NGC 6533",
+    "LBN 25"
+   ],
+   "aliasNames": [
+    "Lagoon Nebula"
+   ]
   },
   {
    "id": "M9",
@@ -119,7 +162,11 @@
    "openNgc": "NGC6333",
    "openNgcRa": "17:19:11.78",
    "openNgcDec": "-18:30:58.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6333"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M10",
@@ -132,7 +179,11 @@
    "openNgc": "NGC6254",
    "openNgcRa": "16:57:08.99",
    "openNgcDec": "-04:05:57.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6254"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M11",
@@ -145,7 +196,14 @@
    "openNgc": "NGC6705",
    "openNgcRa": "18:51:05.99",
    "openNgcDec": "-06:16:12.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6705"
+   ],
+   "aliasNames": [
+    "Amas de l'Ecu de Sobieski",
+    "Wild Duck Cluster"
+   ]
   },
   {
    "id": "M12",
@@ -158,7 +216,11 @@
    "openNgc": "NGC6218",
    "openNgcRa": "16:47:14.52",
    "openNgcDec": "-01:56:52.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6218"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M13",
@@ -171,7 +233,13 @@
    "openNgc": "NGC6205",
    "openNgcRa": "16:41:41.63",
    "openNgcDec": "+36:27:40.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6205"
+   ],
+   "aliasNames": [
+    "Hercules Globular Cluster"
+   ]
   },
   {
    "id": "M14",
@@ -184,7 +252,11 @@
    "openNgc": "NGC6402",
    "openNgcRa": "17:37:36.16",
    "openNgcDec": "-03:14:45.3",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6402"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M15",
@@ -197,7 +269,11 @@
    "openNgc": "NGC7078",
    "openNgcRa": "21:29:58.38",
    "openNgcDec": "+12:10:00.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 7078"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M16",
@@ -210,7 +286,14 @@
    "openNgc": "NGC6611",
    "openNgcRa": "18:18:48.17",
    "openNgcDec": "-13:48:26.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6611",
+    "LBN 67"
+   ],
+   "aliasNames": [
+    "Eagle Nebula"
+   ]
   },
   {
    "id": "M17",
@@ -223,7 +306,17 @@
    "openNgc": "NGC6618",
    "openNgcRa": "18:20:47.11",
    "openNgcDec": "-16:10:17.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6618",
+    "LBN 60"
+   ],
+   "aliasNames": [
+    "Checkmark Nebula",
+    "Lobster Nebula",
+    "Swan Nebula",
+    "omega Nebula"
+   ]
   },
   {
    "id": "M18",
@@ -236,7 +329,11 @@
    "openNgc": "NGC6613",
    "openNgcRa": "18:19:58.49",
    "openNgcDec": "-17:06:07.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6613"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M19",
@@ -249,7 +346,11 @@
    "openNgc": "NGC6273",
    "openNgcRa": "17:02:37.68",
    "openNgcDec": "-26:16:04.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6273"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M20",
@@ -262,7 +363,14 @@
    "openNgc": "NGC6514",
    "openNgcRa": "18:02:42.11",
    "openNgcDec": "-22:58:18.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6514",
+    "LBN 27"
+   ],
+   "aliasNames": [
+    "Trifid Nebula"
+   ]
   },
   {
    "id": "M21",
@@ -275,7 +383,11 @@
    "openNgc": "NGC6531",
    "openNgcRa": "18:04:13.45",
    "openNgcDec": "-22:29:24.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6531"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M22",
@@ -288,7 +400,11 @@
    "openNgc": "NGC6656",
    "openNgcRa": "18:36:24.20",
    "openNgcDec": "-23:54:12.3",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6656"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M23",
@@ -301,7 +417,11 @@
    "openNgc": "NGC6494",
    "openNgcRa": "17:57:04.77",
    "openNgcDec": "-18:59:07.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6494"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M24",
@@ -314,7 +434,13 @@
    "openNgc": "IC4715",
    "openNgcRa": "18:16:56.12",
    "openNgcDec": "-18:30:52.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "IC 4715"
+   ],
+   "aliasNames": [
+    "Small Sgr Star Cloud"
+   ]
   },
   {
    "id": "M25",
@@ -327,7 +453,11 @@
    "openNgc": "IC4725",
    "openNgcRa": "18:31:46.77",
    "openNgcDec": "-19:06:53.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "IC 4725"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M26",
@@ -340,7 +470,11 @@
    "openNgc": "NGC6694",
    "openNgcRa": "18:45:18.66",
    "openNgcDec": "-09:23:01.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6694"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M27",
@@ -353,7 +487,13 @@
    "openNgc": "NGC6853",
    "openNgcRa": "19:59:36.38",
    "openNgcDec": "+22:43:15.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6853"
+   ],
+   "aliasNames": [
+    "Dumbbell Nebula"
+   ]
   },
   {
    "id": "M28",
@@ -366,7 +506,11 @@
    "openNgc": "NGC6626",
    "openNgcRa": "18:24:32.89",
    "openNgcDec": "-24:52:11.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6626"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M29",
@@ -379,7 +523,11 @@
    "openNgc": "NGC6913",
    "openNgcRa": "20:23:57.77",
    "openNgcDec": "+38:30:27.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6913"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M30",
@@ -392,7 +540,11 @@
    "openNgc": "NGC7099",
    "openNgcRa": "21:40:22.02",
    "openNgcDec": "-23:10:44.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 7099"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M31",
@@ -405,7 +557,13 @@
    "openNgc": "NGC0224",
    "openNgcRa": "00:42:44.35",
    "openNgcDec": "+41:16:08.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 224"
+   ],
+   "aliasNames": [
+    "Andromeda Galaxy"
+   ]
   },
   {
    "id": "M32",
@@ -418,7 +576,11 @@
    "openNgc": "NGC0221",
    "openNgcRa": "00:42:41.83",
    "openNgcDec": "+40:51:55.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 221"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M33",
@@ -431,7 +593,14 @@
    "openNgc": "NGC0598",
    "openNgcRa": "01:33:50.89",
    "openNgcDec": "+30:39:36.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 598"
+   ],
+   "aliasNames": [
+    "Triangulum Galaxy",
+    "Triangulum Pinwheel"
+   ]
   },
   {
    "id": "M34",
@@ -444,7 +613,11 @@
    "openNgc": "NGC1039",
    "openNgcRa": "02:42:07.40",
    "openNgcDec": "+42:44:46.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1039"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M35",
@@ -457,7 +630,11 @@
    "openNgc": "NGC2168",
    "openNgcRa": "06:09:05.06",
    "openNgcDec": "+24:20:19.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2168"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M36",
@@ -470,7 +647,11 @@
    "openNgc": "NGC1960",
    "openNgcRa": "05:36:17.74",
    "openNgcDec": "+34:08:26.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1960"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M37",
@@ -483,7 +664,11 @@
    "openNgc": "NGC2099",
    "openNgcRa": "05:52:18.35",
    "openNgcDec": "+32:33:10.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2099"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M38",
@@ -496,7 +681,11 @@
    "openNgc": "NGC1912",
    "openNgcRa": "05:28:42.49",
    "openNgcDec": "+35:51:17.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1912"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M39",
@@ -509,7 +698,11 @@
    "openNgc": "NGC7092",
    "openNgcRa": "21:31:48.32",
    "openNgcDec": "+48:26:17.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 7092"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M40",
@@ -522,7 +715,9 @@
    "openNgc": "M040",
    "openNgcRa": "12:22:16.1",
    "openNgcDec": "+58:05:04",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": []
   },
   {
    "id": "M41",
@@ -535,7 +730,11 @@
    "openNgc": "NGC2287",
    "openNgcRa": "06:45:59.94",
    "openNgcDec": "-20:45:15.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2287"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M42",
@@ -548,7 +747,15 @@
    "openNgc": "NGC1976",
    "openNgcRa": "05:35:16.48",
    "openNgcDec": "-05:23:22.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1976",
+    "LBN 974"
+   ],
+   "aliasNames": [
+    "Great Orion Nebula",
+    "Orion Nebula"
+   ]
   },
   {
    "id": "M43",
@@ -561,7 +768,13 @@
    "openNgc": "NGC1982",
    "openNgcRa": "05:35:31.38",
    "openNgcDec": "-05:16:02.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1982"
+   ],
+   "aliasNames": [
+    "Mairan's Nebula"
+   ]
   },
   {
    "id": "M44",
@@ -574,7 +787,14 @@
    "openNgc": "NGC2632",
    "openNgcRa": "08:40:22.20",
    "openNgcDec": "+19:40:19.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2632"
+   ],
+   "aliasNames": [
+    "Beehive",
+    "Praesepe Cluster"
+   ]
   },
   {
    "id": "M45",
@@ -587,7 +807,11 @@
    "openNgc": "Mel022",
    "openNgcRa": "03:47:28.6",
    "openNgcDec": "+24:06:19",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "Pleiades"
+   ]
   },
   {
    "id": "M46",
@@ -600,7 +824,11 @@
    "openNgc": "NGC2437",
    "openNgcRa": "07:41:46.82",
    "openNgcDec": "-14:48:36.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2437"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M47",
@@ -613,7 +841,12 @@
    "openNgc": "NGC2422",
    "openNgcRa": "07:36:35.02",
    "openNgcDec": "-14:28:57.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2422",
+    "NGC 2478"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M48",
@@ -626,7 +859,11 @@
    "openNgc": "NGC2548",
    "openNgcRa": "08:13:43.18",
    "openNgcDec": "-05:45:01.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2548"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M49",
@@ -639,7 +876,11 @@
    "openNgc": "NGC4472",
    "openNgcRa": "12:29:46.76",
    "openNgcDec": "+08:00:01.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4472"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M50",
@@ -652,7 +893,11 @@
    "openNgc": "NGC2323",
    "openNgcRa": "07:02:40.47",
    "openNgcDec": "-08:21:50.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2323"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M51",
@@ -665,7 +910,13 @@
    "openNgc": "NGC5194",
    "openNgcRa": "13:29:52.71",
    "openNgcDec": "+47:11:42.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5194"
+   ],
+   "aliasNames": [
+    "Whirlpool Galaxy"
+   ]
   },
   {
    "id": "M52",
@@ -678,7 +929,11 @@
    "openNgc": "NGC7654",
    "openNgcRa": "23:24:48.40",
    "openNgcDec": "+61:35:35.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 7654"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M53",
@@ -691,7 +946,11 @@
    "openNgc": "NGC5024",
    "openNgcRa": "13:12:55.23",
    "openNgcDec": "+18:10:08.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5024"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M54",
@@ -704,7 +963,11 @@
    "openNgc": "NGC6715",
    "openNgcRa": "18:55:03.27",
    "openNgcDec": "-30:28:42.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6715"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M55",
@@ -717,7 +980,11 @@
    "openNgc": "NGC6809",
    "openNgcRa": "19:39:59.40",
    "openNgcDec": "-30:57:43.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6809"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M56",
@@ -730,7 +997,11 @@
    "openNgc": "NGC6779",
    "openNgcRa": "19:16:35.51",
    "openNgcDec": "+30:11:04.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6779"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M57",
@@ -743,7 +1014,13 @@
    "openNgc": "NGC6720",
    "openNgcRa": "18:53:35.01",
    "openNgcDec": "+33:01:42.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6720"
+   ],
+   "aliasNames": [
+    "Ring Nebula"
+   ]
   },
   {
    "id": "M58",
@@ -756,7 +1033,11 @@
    "openNgc": "NGC4579",
    "openNgcRa": "12:37:43.52",
    "openNgcDec": "+11:49:05.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4579"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M59",
@@ -769,7 +1050,11 @@
    "openNgc": "NGC4621",
    "openNgcRa": "12:42:02.24",
    "openNgcDec": "+11:38:49.3",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4621"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M60",
@@ -782,7 +1067,11 @@
    "openNgc": "NGC4649",
    "openNgcRa": "12:43:39.98",
    "openNgcDec": "+11:33:09.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4649"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M61",
@@ -795,7 +1084,11 @@
    "openNgc": "NGC4303",
    "openNgcRa": "12:21:54.90",
    "openNgcDec": "+04:28:25.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4303"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M62",
@@ -808,7 +1101,11 @@
    "openNgc": "NGC6266",
    "openNgcRa": "17:01:12.60",
    "openNgcDec": "-30:06:44.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6266"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M63",
@@ -821,7 +1118,13 @@
    "openNgc": "NGC5055",
    "openNgcRa": "13:15:49.33",
    "openNgcDec": "+42:01:45.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5055"
+   ],
+   "aliasNames": [
+    "Sunflower Galaxy"
+   ]
   },
   {
    "id": "M64",
@@ -834,7 +1137,14 @@
    "openNgc": "NGC4826",
    "openNgcRa": "12:56:43.64",
    "openNgcDec": "+21:40:58.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4826"
+   ],
+   "aliasNames": [
+    "Black Eye Galaxy",
+    "Evil Eye Galaxy"
+   ]
   },
   {
    "id": "M65",
@@ -847,7 +1157,11 @@
    "openNgc": "NGC3623",
    "openNgcRa": "11:18:55.92",
    "openNgcDec": "+13:05:32.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3623"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M66",
@@ -860,7 +1174,11 @@
    "openNgc": "NGC3627",
    "openNgcRa": "11:20:14.96",
    "openNgcDec": "+12:59:29.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3627"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M67",
@@ -873,7 +1191,11 @@
    "openNgc": "NGC2682",
    "openNgcRa": "08:51:20.13",
    "openNgcDec": "+11:48:43.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2682"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M68",
@@ -886,7 +1208,11 @@
    "openNgc": "NGC4590",
    "openNgcRa": "12:39:28.01",
    "openNgcDec": "-26:44:34.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4590"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M69",
@@ -899,7 +1225,12 @@
    "openNgc": "NGC6637",
    "openNgcRa": "18:31:23.23",
    "openNgcDec": "-32:20:52.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6637",
+    "NGC 6634"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M70",
@@ -912,7 +1243,11 @@
    "openNgc": "NGC6681",
    "openNgcRa": "18:43:12.64",
    "openNgcDec": "-32:17:30.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6681"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M71",
@@ -925,7 +1260,12 @@
    "openNgc": "NGC6838",
    "openNgcRa": "19:53:46.11",
    "openNgcDec": "+18:46:42.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6838",
+    "NGC 6839"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M72",
@@ -938,7 +1278,11 @@
    "openNgc": "NGC6981",
    "openNgcRa": "20:53:27.91",
    "openNgcDec": "-12:32:13.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6981"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M73",
@@ -951,7 +1295,11 @@
    "openNgc": "NGC6994",
    "openNgcRa": "20:58:55.97",
    "openNgcDec": "-12:38:07.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6994"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M74",
@@ -964,7 +1312,11 @@
    "openNgc": "NGC0628",
    "openNgcRa": "01:36:41.75",
    "openNgcDec": "+15:47:01.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 628"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M75",
@@ -977,7 +1329,11 @@
    "openNgc": "NGC6864",
    "openNgcRa": "20:06:04.84",
    "openNgcDec": "-21:55:20.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6864"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M76",
@@ -990,7 +1346,16 @@
    "openNgc": "NGC0650",
    "openNgcRa": "01:42:19.69",
    "openNgcDec": "+51:34:31.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 650",
+    "NGC 651"
+   ],
+   "aliasNames": [
+    "Barbell Nebula",
+    "Cork Nebula",
+    "Little Dumbbell Nebula"
+   ]
   },
   {
    "id": "M77",
@@ -1003,7 +1368,11 @@
    "openNgc": "NGC1068",
    "openNgcRa": "02:42:40.71",
    "openNgcDec": "-00:00:47.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1068"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M78",
@@ -1016,7 +1385,11 @@
    "openNgc": "NGC2068",
    "openNgcRa": "05:46:45.82",
    "openNgcDec": "+00:04:45.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2068"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M79",
@@ -1029,7 +1402,11 @@
    "openNgc": "NGC1904",
    "openNgcRa": "05:24:10.59",
    "openNgcDec": "-24:31:27.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 1904"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M80",
@@ -1042,7 +1419,11 @@
    "openNgc": "NGC6093",
    "openNgcRa": "16:17:02.51",
    "openNgcDec": "-22:58:30.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6093"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M81",
@@ -1055,7 +1436,13 @@
    "openNgc": "NGC3031",
    "openNgcRa": "09:55:33.17",
    "openNgcDec": "+69:03:55.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3031"
+   ],
+   "aliasNames": [
+    "Bode's Galaxy"
+   ]
   },
   {
    "id": "M82",
@@ -1068,7 +1455,13 @@
    "openNgc": "NGC3034",
    "openNgcRa": "09:55:52.73",
    "openNgcDec": "+69:40:45.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3034"
+   ],
+   "aliasNames": [
+    "Cigar Galaxy"
+   ]
   },
   {
    "id": "M83",
@@ -1081,7 +1474,13 @@
    "openNgc": "NGC5236",
    "openNgcRa": "13:37:00.95",
    "openNgcDec": "-29:51:55.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5236"
+   ],
+   "aliasNames": [
+    "Southern Pinwheel Galaxy"
+   ]
   },
   {
    "id": "M84",
@@ -1094,7 +1493,11 @@
    "openNgc": "NGC4374",
    "openNgcRa": "12:25:03.74",
    "openNgcDec": "+12:53:13.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4374"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M85",
@@ -1107,7 +1510,11 @@
    "openNgc": "NGC4382",
    "openNgcRa": "12:25:24.11",
    "openNgcDec": "+18:11:29.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4382"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M86",
@@ -1120,7 +1527,11 @@
    "openNgc": "NGC4406",
    "openNgcRa": "12:26:11.74",
    "openNgcDec": "+12:56:46.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4406"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M87",
@@ -1133,7 +1544,13 @@
    "openNgc": "NGC4486",
    "openNgcRa": "12:30:49.42",
    "openNgcDec": "+12:23:28.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4486"
+   ],
+   "aliasNames": [
+    "Virgo Galaxy"
+   ]
   },
   {
    "id": "M88",
@@ -1146,7 +1563,11 @@
    "openNgc": "NGC4501",
    "openNgcRa": "12:31:59.16",
    "openNgcDec": "+14:25:13.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4501"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M89",
@@ -1159,7 +1580,11 @@
    "openNgc": "NGC4552",
    "openNgcRa": "12:35:39.81",
    "openNgcDec": "+12:33:22.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4552"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M90",
@@ -1172,7 +1597,11 @@
    "openNgc": "NGC4569",
    "openNgcRa": "12:36:49.79",
    "openNgcDec": "+13:09:46.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4569"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M91",
@@ -1185,7 +1614,11 @@
    "openNgc": "NGC4548",
    "openNgcRa": "12:35:26.45",
    "openNgcDec": "+14:29:46.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4548"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M92",
@@ -1198,7 +1631,11 @@
    "openNgc": "NGC6341",
    "openNgcRa": "17:17:07.27",
    "openNgcDec": "+43:08:11.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6341"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M93",
@@ -1211,7 +1648,11 @@
    "openNgc": "NGC2447",
    "openNgcRa": "07:44:29.23",
    "openNgcDec": "-23:51:11.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 2447"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M94",
@@ -1224,7 +1665,11 @@
    "openNgc": "NGC4736",
    "openNgcRa": "12:50:53.06",
    "openNgcDec": "+41:07:13.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4736"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M95",
@@ -1237,7 +1682,11 @@
    "openNgc": "NGC3351",
    "openNgcRa": "10:43:57.70",
    "openNgcDec": "+11:42:13.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3351"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M96",
@@ -1250,7 +1699,11 @@
    "openNgc": "NGC3368",
    "openNgcRa": "10:46:45.74",
    "openNgcDec": "+11:49:11.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3368"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M97",
@@ -1263,7 +1716,13 @@
    "openNgc": "NGC3587",
    "openNgcRa": "11:14:47.71",
    "openNgcDec": "+55:01:08.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3587"
+   ],
+   "aliasNames": [
+    "Owl Nebula"
+   ]
   },
   {
    "id": "M98",
@@ -1276,7 +1735,11 @@
    "openNgc": "NGC4192",
    "openNgcRa": "12:13:48.29",
    "openNgcDec": "+14:54:01.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4192"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M99",
@@ -1289,7 +1752,14 @@
    "openNgc": "NGC4254",
    "openNgcRa": "12:18:49.60",
    "openNgcDec": "+14:24:59.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4254"
+   ],
+   "aliasNames": [
+    "Coma Pinwheel",
+    "Virgo Cluster Pinwheel"
+   ]
   },
   {
    "id": "M100",
@@ -1302,7 +1772,11 @@
    "openNgc": "NGC4321",
    "openNgcRa": "12:22:54.83",
    "openNgcDec": "+15:49:18.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4321"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M101",
@@ -1315,7 +1789,11 @@
    "openNgc": "NGC5457",
    "openNgcRa": "14:03:12.54",
    "openNgcDec": "+54:20:56.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 5457"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M103",
@@ -1328,7 +1806,11 @@
    "openNgc": "NGC0581",
    "openNgcRa": "01:33:21.81",
    "openNgcDec": "+60:39:28.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 581"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M104",
@@ -1341,7 +1823,13 @@
    "openNgc": "NGC4594",
    "openNgcRa": "12:39:59.43",
    "openNgcDec": "-11:37:23.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4594"
+   ],
+   "aliasNames": [
+    "Sombrero Galaxy"
+   ]
   },
   {
    "id": "M105",
@@ -1354,7 +1842,11 @@
    "openNgc": "NGC3379",
    "openNgcRa": "10:47:49.59",
    "openNgcDec": "+12:34:53.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3379"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M106",
@@ -1367,7 +1859,11 @@
    "openNgc": "NGC4258",
    "openNgcRa": "12:18:57.50",
    "openNgcDec": "+47:18:14.3",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 4258"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M107",
@@ -1380,7 +1876,11 @@
    "openNgc": "NGC6171",
    "openNgcRa": "16:32:31.92",
    "openNgcDec": "-13:03:13.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 6171"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M108",
@@ -1393,7 +1893,11 @@
    "openNgc": "NGC3556",
    "openNgcRa": "11:11:30.97",
    "openNgcDec": "+55:40:26.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3556"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M109",
@@ -1406,7 +1910,11 @@
    "openNgc": "NGC3992",
    "openNgcRa": "11:57:35.98",
    "openNgcDec": "+53:22:28.3",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 3992"
+   ],
+   "aliasNames": []
   },
   {
    "id": "M110",
@@ -1419,7 +1927,11 @@
    "openNgc": "NGC0205",
    "openNgcRa": "00:40:22.08",
    "openNgcDec": "+41:41:07.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "NGC 205"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 7000",
@@ -1432,7 +1944,14 @@
    "openNgc": "NGC7000",
    "openNgcRa": "20:59:17.14",
    "openNgcDec": "+44:31:43.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 20",
+    "LBN 373"
+   ],
+   "aliasNames": [
+    "North America Nebula"
+   ]
   },
   {
    "id": "IC 5070",
@@ -1445,7 +1964,13 @@
    "openNgc": "IC5070",
    "openNgcRa": "20:51:00.72",
    "openNgcDec": "+44:24:05.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 350"
+   ],
+   "aliasNames": [
+    "Pelican Nebula"
+   ]
   },
   {
    "id": "NGC 6960",
@@ -1458,7 +1983,16 @@
    "openNgc": "NGC6960",
    "openNgcRa": "20:45:58.18",
    "openNgcDec": "+30:35:42.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 34",
+    "LBN 191"
+   ],
+   "aliasNames": [
+    "Veil Nebula",
+    "Filamentary Nebula",
+    "Western Veil"
+   ]
   },
   {
    "id": "NGC 6992",
@@ -1471,7 +2005,14 @@
    "openNgc": "NGC6992",
    "openNgcRa": "20:56:19.07",
    "openNgcDec": "+31:44:33.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 33"
+   ],
+   "aliasNames": [
+    "Eastern Veil",
+    "Network Nebula"
+   ]
   },
   {
    "id": "NGC 6888",
@@ -1484,7 +2025,14 @@
    "openNgc": "NGC6888",
    "openNgcRa": "20:12:06.55",
    "openNgcDec": "+38:21:17.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 27",
+    "LBN 203"
+   ],
+   "aliasNames": [
+    "Crescent Nebula"
+   ]
   },
   {
    "id": "IC 1805",
@@ -1497,7 +2045,11 @@
    "openNgc": "IC1805",
    "openNgcRa": "02:32:41.51",
    "openNgcDec": "+61:27:24.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 654"
+   ],
+   "aliasNames": []
   },
   {
    "id": "IC 1848",
@@ -1510,7 +2062,11 @@
    "openNgc": "IC1848",
    "openNgcRa": "02:51:10.59",
    "openNgcDec": "+60:24:08.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 667"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 281",
@@ -1523,7 +2079,11 @@
    "openNgc": "NGC0281",
    "openNgcRa": "00:52:59.35",
    "openNgcDec": "+56:37:18.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 616"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 7635",
@@ -1536,7 +2096,14 @@
    "openNgc": "NGC7635",
    "openNgcRa": "23:20:45.60",
    "openNgcDec": "+61:12:44.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 11",
+    "LBN 548"
+   ],
+   "aliasNames": [
+    "Bubble Nebula"
+   ]
   },
   {
    "id": "IC 1396",
@@ -1549,7 +2116,12 @@
    "openNgc": "IC1396",
    "openNgcRa": "21:38:57.62",
    "openNgcDec": "+57:29:20.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 451",
+    "LBN 452"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 2237",
@@ -1562,7 +2134,11 @@
    "openNgc": "NGC2237",
    "openNgcRa": "06:30:54.61",
    "openNgcDec": "+05:02:57.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "Rosette A"
+   ]
   },
   {
    "id": "IC 434",
@@ -1575,7 +2151,14 @@
    "openNgc": "IC0434",
    "openNgcRa": "05:41:00.88",
    "openNgcDec": "-02:27:13.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 953"
+   ],
+   "aliasNames": [
+    "Flame Nebula",
+    "Orion B"
+   ]
   },
   {
    "id": "B 33",
@@ -1588,7 +2171,11 @@
    "openNgc": "B033",
    "openNgcRa": "05:40:59.0",
    "openNgcDec": "-02:27:30",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "Horsehead Nebula"
+   ]
   },
   {
    "id": "NGC 2024",
@@ -1601,7 +2188,9 @@
    "openNgc": "NGC2024",
    "openNgcRa": "05:41:42.57",
    "openNgcDec": "-01:51:22.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": []
   },
   {
    "id": "NGC 1499",
@@ -1614,7 +2203,13 @@
    "openNgc": "NGC1499",
    "openNgcRa": "04:03:14.42",
    "openNgcDec": "+36:22:02.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 756"
+   ],
+   "aliasNames": [
+    "California Nebula"
+   ]
   },
   {
    "id": "IC 405",
@@ -1627,7 +2222,14 @@
    "openNgc": "IC0405",
    "openNgcRa": "05:16:29.48",
    "openNgcDec": "+34:21:22.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 31",
+    "LBN 795"
+   ],
+   "aliasNames": [
+    "Flaming Star Nebula"
+   ]
   },
   {
    "id": "IC 410",
@@ -1640,7 +2242,11 @@
    "openNgc": "IC0410",
    "openNgcRa": "05:22:42.00",
    "openNgcDec": "+33:22:00.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 807"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 2264",
@@ -1653,7 +2259,13 @@
    "openNgc": "NGC2264",
    "openNgcRa": "06:40:58.25",
    "openNgcDec": "+09:53:43.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 911"
+   ],
+   "aliasNames": [
+    "Christmas Tree Cluster"
+   ]
   },
   {
    "id": "NGC 253",
@@ -1666,7 +2278,14 @@
    "openNgc": "NGC0253",
    "openNgcRa": "00:47:33.12",
    "openNgcDec": "-25:17:17.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 65"
+   ],
+   "aliasNames": [
+    "Sculptor Filament",
+    "Silver Coin"
+   ]
   },
   {
    "id": "NGC 891",
@@ -1679,7 +2298,11 @@
    "openNgc": "NGC0891",
    "openNgcRa": "02:22:33.41",
    "openNgcDec": "+42:20:56.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 23"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 4565",
@@ -1692,7 +2315,13 @@
    "openNgc": "NGC4565",
    "openNgcRa": "12:36:20.78",
    "openNgcDec": "+25:59:15.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 38"
+   ],
+   "aliasNames": [
+    "Needle Galaxy"
+   ]
   },
   {
    "id": "NGC 4631",
@@ -1705,7 +2334,13 @@
    "openNgc": "NGC4631",
    "openNgcRa": "12:42:08.01",
    "openNgcDec": "+32:32:29.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 32"
+   ],
+   "aliasNames": [
+    "Whale Galaxy"
+   ]
   },
   {
    "id": "NGC 2403",
@@ -1718,7 +2353,11 @@
    "openNgc": "NGC2403",
    "openNgcRa": "07:36:51.40",
    "openNgcDec": "+65:36:09.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 7"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 7331",
@@ -1731,7 +2370,11 @@
    "openNgc": "NGC7331",
    "openNgcRa": "22:37:04.01",
    "openNgcDec": "+34:24:55.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 30"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 6946",
@@ -1744,7 +2387,13 @@
    "openNgc": "NGC6946",
    "openNgcRa": "20:34:52.32",
    "openNgcDec": "+60:09:14.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 12"
+   ],
+   "aliasNames": [
+    "Fireworks Galaxy"
+   ]
   },
   {
    "id": "NGC 869",
@@ -1757,7 +2406,11 @@
    "openNgc": "NGC0869",
    "openNgcRa": "02:18:58.56",
    "openNgcDec": "+57:07:02.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "h Persei Cluster"
+   ]
   },
   {
    "id": "NGC 884",
@@ -1770,7 +2423,11 @@
    "openNgc": "NGC0884",
    "openNgcRa": "02:22:32.10",
    "openNgcDec": "+57:08:38.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "chi Persei Cluster"
+   ]
   },
   {
    "id": "NGC 7293",
@@ -1783,7 +2440,13 @@
    "openNgc": "NGC7293",
    "openNgcRa": "22:29:38.57",
    "openNgcDec": "-20:50:14.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 63"
+   ],
+   "aliasNames": [
+    "Helix Nebula"
+   ]
   },
   {
    "id": "NGC 6543",
@@ -1796,7 +2459,13 @@
    "openNgc": "NGC6543",
    "openNgcRa": "17:58:33.39",
    "openNgcDec": "+66:37:59.5",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 6"
+   ],
+   "aliasNames": [
+    "Cat's Eye Nebula"
+   ]
   },
   {
    "id": "NGC 2392",
@@ -1809,7 +2478,13 @@
    "openNgc": "NGC2392",
    "openNgcRa": "07:29:10.76",
    "openNgcDec": "+20:54:42.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 39"
+   ],
+   "aliasNames": [
+    "Eskimo Nebula"
+   ]
   },
   {
    "id": "NGC 7662",
@@ -1822,7 +2497,13 @@
    "openNgc": "NGC7662",
    "openNgcRa": "23:25:53.90",
    "openNgcDec": "+42:32:05.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 22"
+   ],
+   "aliasNames": [
+    "Copeland's Blue Snowball"
+   ]
   },
   {
    "id": "NGC 7009",
@@ -1835,7 +2516,13 @@
    "openNgc": "NGC7009",
    "openNgcRa": "21:04:10.79",
    "openNgcDec": "-11:21:47.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 55"
+   ],
+   "aliasNames": [
+    "Saturn Nebula"
+   ]
   },
   {
    "id": "NGC 3628",
@@ -1848,7 +2535,9 @@
    "openNgc": "NGC3628",
    "openNgcRa": "11:20:16.97",
    "openNgcDec": "+13:35:22.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": []
   },
   {
    "id": "NGC 2359",
@@ -1861,7 +2550,11 @@
    "openNgc": "NGC2359",
    "openNgcRa": "07:18:30.98",
    "openNgcDec": "-13:13:37.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 1041"
+   ],
+   "aliasNames": []
   },
   {
    "id": "IC 443",
@@ -1874,7 +2567,13 @@
    "openNgc": "IC0443",
    "openNgcRa": "06:16:37.41",
    "openNgcDec": "+22:31:54.0",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 844"
+   ],
+   "aliasNames": [
+    "Gem A"
+   ]
   },
   {
    "id": "NGC 7380",
@@ -1887,7 +2586,11 @@
    "openNgc": "NGC7380",
    "openNgcRa": "22:47:21.01",
    "openNgcDec": "+58:07:56.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 511"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 1333",
@@ -1900,7 +2603,11 @@
    "openNgc": "NGC1333",
    "openNgcRa": "03:28:55.2",
    "openNgcDec": "+31:22:12",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 741"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 1977",
@@ -1913,7 +2620,11 @@
    "openNgc": "NGC1977",
    "openNgcRa": "05:35:15.80",
    "openNgcDec": "-04:50:39.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "the Running Man Nebula"
+   ]
   },
   {
    "id": "IC 5146",
@@ -1926,7 +2637,14 @@
    "openNgc": "IC5146",
    "openNgcRa": "21:53:28.76",
    "openNgcDec": "+47:16:00.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 19",
+    "LBN 424"
+   ],
+   "aliasNames": [
+    "Cocoon Nebula"
+   ]
   },
   {
    "id": "NGC 7023",
@@ -1939,7 +2657,14 @@
    "openNgc": "NGC7023",
    "openNgcRa": "21:01:35.62",
    "openNgcDec": "+68:10:10.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 4",
+    "LBN 487"
+   ],
+   "aliasNames": [
+    "Iris Nebula"
+   ]
   },
   {
    "id": "NGC 5128",
@@ -1952,7 +2677,13 @@
    "openNgc": "NGC5128",
    "openNgcRa": "13:25:27.62",
    "openNgcDec": "-43:01:08.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 77"
+   ],
+   "aliasNames": [
+    "Centaurus A"
+   ]
   },
   {
    "id": "NGC 3372",
@@ -1965,7 +2696,14 @@
    "openNgc": "NGC3372",
    "openNgcRa": "10:45:08.53",
    "openNgcDec": "-59:52:00.1",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 92"
+   ],
+   "aliasNames": [
+    "Carina Nebula",
+    "eta Car Nebula"
+   ]
   },
   {
    "id": "NGC 5139",
@@ -1978,7 +2716,13 @@
    "openNgc": "NGC5139",
    "openNgcRa": "13:26:45.89",
    "openNgcDec": "-47:28:36.7",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 80"
+   ],
+   "aliasNames": [
+    "Omega Centauri"
+   ]
   },
   {
    "id": "NGC 104",
@@ -1991,7 +2735,13 @@
    "openNgc": "NGC0104",
    "openNgcRa": "00:24:05.36",
    "openNgcDec": "-72:04:53.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 106"
+   ],
+   "aliasNames": [
+    "47 Tuc Cluster"
+   ]
   },
   {
    "id": "NGC 2070",
@@ -2004,7 +2754,14 @@
    "openNgc": "NGC2070",
    "openNgcRa": "05:38:42.36",
    "openNgcDec": "-69:06:03.2",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 103"
+   ],
+   "aliasNames": [
+    "30 Dor Cluster",
+    "Tarantula Nebula"
+   ]
   },
   {
    "id": "C 9",
@@ -2017,7 +2774,13 @@
    "openNgc": "C009",
    "openNgcRa": "22:57:54.0",
    "openNgcDec": "+62:31:06",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "LBN 529"
+   ],
+   "aliasNames": [
+    "Cave Nebula"
+   ]
   },
   {
    "id": "Cl 399",
@@ -2030,7 +2793,13 @@
    "openNgc": "Cl399",
    "openNgcRa": "19:25:24.0",
    "openNgcDec": "+20:11:00",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "Brocchi's Cluster",
+    "Al Sufi's Cluster",
+    "Coathanger Asterism"
+   ]
   },
   {
    "id": "NGC 55",
@@ -2043,7 +2812,11 @@
    "openNgc": "NGC0055",
    "openNgcRa": "00:14:53.60",
    "openNgcDec": "-39:11:47.9",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 72"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 300",
@@ -2056,7 +2829,11 @@
    "openNgc": "NGC0300",
    "openNgcRa": "00:54:53.48",
    "openNgcDec": "-37:41:03.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 70"
+   ],
+   "aliasNames": []
   },
   {
    "id": "NGC 6334",
@@ -2069,7 +2846,9 @@
    "openNgc": "NGC6334",
    "openNgcRa": "17:20:49.70",
    "openNgcDec": "-36:06:09.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": []
   },
   {
    "id": "NGC 6357",
@@ -2082,7 +2861,11 @@
    "openNgc": "NGC6357",
    "openNgcRa": "17:24:43.57",
    "openNgcDec": "-34:12:04.8",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "the War and Peace Nebula"
+   ]
   },
   {
    "id": "NGC 4038",
@@ -2095,7 +2878,13 @@
    "openNgc": "NGC4038",
    "openNgcRa": "12:01:53.01",
    "openNgcDec": "-18:52:03.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 60"
+   ],
+   "aliasNames": [
+    "Antennae Galaxies"
+   ]
   },
   {
    "id": "NGC 5907",
@@ -2108,7 +2897,9 @@
    "openNgc": "NGC5907",
    "openNgcRa": "15:15:53.77",
    "openNgcDec": "+56:19:43.6",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": []
   },
   {
    "id": "IC 2944",
@@ -2121,7 +2912,13 @@
    "openNgc": "IC2944",
    "openNgcRa": "11:35:46.93",
    "openNgcDec": "-63:01:11.4",
-   "since": 2
+   "since": 2,
+   "aliasIds": [
+    "C 100"
+   ],
+   "aliasNames": [
+    "lam Cen Nebula"
+   ]
   },
   {
    "id": "ESO056-115",
@@ -2134,7 +2931,12 @@
    "openNgc": "ESO056-115",
    "openNgcRa": "05:23:34.5",
    "openNgcDec": "-69:45:22",
-   "since": 2
+   "since": 2,
+   "aliasIds": [],
+   "aliasNames": [
+    "Large Magellanic Cloud",
+    "Nubecula Major"
+   ]
   }
  ]
 }

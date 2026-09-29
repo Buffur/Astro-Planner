@@ -57,7 +57,7 @@ void main() {
     AppDatabase production() =>
         AppDatabase(openDatabaseConnection(() async => file));
 
-    for (final (version, newer) in [(7, false), (22, true)]) {
+    for (final (version, newer) in [(7, false), (23, true)]) {
       test('v$version is refused as ${newer ? 'newer' : 'below the floor'}, '
           'typed, and the file is unchanged', () async {
         await _stamp(file, version);
@@ -134,13 +134,13 @@ void main() {
         await fresh.close();
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getBool('fieldMode'), isTrue, reason: 'kept');
-        expect(prefs.getInt(CatalogSeeder.versionKey), 2, reason: 'reseeded');
+        expect(prefs.getInt(CatalogSeeder.versionKey), 3, reason: 'reseeded');
       });
     }
 
     test('a newer database is refused before anything changes', () async {
       SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
-      await _stamp(file, 22); // newer than the app (v21 since S7.3b)
+      await _stamp(file, 23); // newer than the app (v22 since S7.4)
       final before = file.readAsBytesSync();
       final db = production();
       final refused = (await refusedSchemaVersion(db))!;

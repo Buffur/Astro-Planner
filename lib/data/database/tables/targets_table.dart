@@ -30,3 +30,22 @@ class AstroTargets extends Table {
   /// Apparent magnitude; NULL = unknown.
   RealColumn get magnitude => real().nullable()();
 }
+
+/// Other designations and names of the bundled catalog's objects (RG-07 =
+/// T1, S7.4; schema v22), from the pinned OpenNGC release only. Keyed by the
+/// catalog id, not by a row: an alias applies to the catalog row with that
+/// id while one exists, so a deleted target's aliases are never shown, and
+/// no target row is ever changed by them. Rebuilt whole from the asset when
+/// the catalog version rises ([catalogVersion] records which one).
+@DataClassName('TargetAliasRow')
+class TargetAliases extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get catalogId => text()();
+  TextColumn get alias => text()();
+
+  /// `designation` or `name` (`TargetAliasKind`).
+  TextColumn get kind => text()();
+
+  /// The catalog asset's version these rows were built from.
+  IntColumn get catalogVersion => integer()();
+}

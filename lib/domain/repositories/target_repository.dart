@@ -1,4 +1,5 @@
 import '../models/astro_target.dart';
+import '../models/target_alias.dart';
 import 'storage_failure.dart';
 
 /// Abstract repository for managing astronomical targets.
@@ -6,8 +7,18 @@ import 'storage_failure.dart';
 /// Every method throws [StorageFailure] when the store cannot be read or
 /// written (TASK 15.1).
 abstract class TargetRepository {
-  /// Searches for targets by catalog ID or common name.
+  /// Targets matching [query] by designation (the catalog id and, for
+  /// catalog rows, their aliases) or name, best first (`TargetSearch`, S7.4);
+  /// every target when [query] is blank.
   Future<List<AstroTarget>> searchTargets(String query);
+
+  /// The catalog version the stored aliases were built from; null when
+  /// there are none (S7.4).
+  Future<int?> aliasCatalogVersion();
+
+  /// Replaces every stored alias with [aliases], built from catalog
+  /// [version], in one transaction (S7.4). Never changes a target row.
+  Future<void> replaceAliases(int version, List<TargetAlias> aliases);
 
   /// Retrieves all available targets.
   Future<List<AstroTarget>> getAllTargets();

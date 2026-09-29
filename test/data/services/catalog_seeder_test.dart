@@ -27,7 +27,9 @@ void main() {
   group('the asset', () {
     test('164 objects: 109 Messier (M102 is an OpenNGC duplicate) and 55 '
         'showpieces; J2000, sourced, unique ids', () {
-      expect(catalog.version, 2);
+      // Version 3 (S7.4) adds aliases and no object: every object is
+      // still from version 2, so an upgrade adds none.
+      expect(catalog.version, 3);
       expect(catalog.source, 'catalog:openngc@v20260501');
       expect(catalog.entries, hasLength(164));
       final messier = catalog.entries.where(
@@ -126,7 +128,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
         await seeder().seedIfNeeded();
         expect(await repository.getAllTargets(), hasLength(164));
-        expect(await storedVersion(), 2);
+        expect(await storedVersion(), 3);
 
         await seeder().seedIfNeeded();
         expect(await repository.getAllTargets(), hasLength(164));
@@ -153,19 +155,20 @@ void main() {
     });
 
     test('a newer catalog adds only what it introduced', () async {
-      SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
+      // S7.4: the bundled asset is version 3 now; a later one is 4.
+      SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 3});
       final data = jsonDecode(assetJson) as Map<String, dynamic>;
-      data['version'] = 3;
+      data['version'] = 4;
       (data['objects'] as List).add({
         ...(data['objects'] as List).first as Map<String, dynamic>,
         'id': 'NEW 1',
-        'since': 3,
+        'since': 4,
       });
       await seeder(json: jsonEncode(data)).seedIfNeeded();
 
       final all = await repository.getAllTargets();
       expect(all.map((t) => t.catalogId), ['NEW 1']);
-      expect(await storedVersion(), 3);
+      expect(await storedVersion(), 4);
     });
 
     test('upgrade from a pre-8.2 install: untouched old seeds are updated in '
@@ -222,7 +225,7 @@ void main() {
       );
       // 164 catalog objects + the user's M31 + the custom target.
       expect(all, hasLength(166));
-      expect(await storedVersion(), 2);
+      expect(await storedVersion(), 3);
     });
 
     // S1.2 (ENG-02, RT-02): failed inserts are not recorded as applied.
@@ -241,7 +244,7 @@ void main() {
 
         await seeder().seedIfNeeded();
         expect(await repository.getAllTargets(), hasLength(164));
-        expect(await storedVersion(), 2);
+        expect(await storedVersion(), 3);
       });
 
       test(
@@ -265,31 +268,31 @@ void main() {
           final all = await repository.getAllTargets();
           expect(all, hasLength(164));
           expect(all.where((t) => t.catalogId == 'M31'), hasLength(1));
-          expect(await storedVersion(), 2);
+          expect(await storedVersion(), 3);
         },
       );
 
       test('a failed upgrade keeps the old version and is retried', () async {
-        SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
+        SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 3});
         final data = jsonDecode(assetJson) as Map<String, dynamic>;
-        data['version'] = 3;
+        data['version'] = 4;
         (data['objects'] as List).add({
           ...(data['objects'] as List).first as Map<String, dynamic>,
           'id': 'NEW 1',
-          'since': 3,
+          'since': 4,
         });
         final json = jsonEncode(data);
         await CatalogSeeder(
           _FailingTargets(database, (_) => true),
           loadAsset: () async => json,
         ).seedIfNeeded();
-        expect(await storedVersion(), 2);
+        expect(await storedVersion(), 3);
 
         await seeder(json: json).seedIfNeeded();
         expect((await repository.getAllTargets()).map((t) => t.catalogId), [
           'NEW 1',
         ]);
-        expect(await storedVersion(), 3);
+        expect(await storedVersion(), 4);
       });
     });
 
