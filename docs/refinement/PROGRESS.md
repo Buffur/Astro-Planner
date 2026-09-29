@@ -4,19 +4,27 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S7.R2 done**: RG-10's research; the owner's decision is next).
-> **Next:** the owner decides RG-10 (six questions, `research/RG-10_CALIBRATION_WORKFLOWS.md` §10).
+> **Last updated:** 2026-09-29 (**S7.D done**: RG-10 decided; ADR-020 accepted).
+> **Next:** S7.R3, the RG-07 research (targets, names and search).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1 and S7.R2 done; RG-11 decided). Stage 6 closed 2026-09-28 |
+| Current Stage | **Stage 7 — Data Entry & Automation: In progress** (planned 2026-09-28; S7.R1, S7.R2 and S7.D done; RG-10 and RG-11 decided). Stage 6 closed 2026-09-28 |
 | Current Task | None in progress |
-| Next Task | **RG-10's owner decision**, then S7.D (below, "Next allowed action") |
+| Next Task | **S7.R3**, the RG-07 research (below, "Next allowed action") |
 | Code baseline | S6.V1 (`da4c53d`); documentation only since. Not pushed (S1.14, RD-17) |
 | Schema | v18 (S3.4) |
+
+**S7.D done, 2026-09-29** (documentation only): **RG-10 decided** by the owner in chat, every
+recommendation (L1, D1, T0, O0, N1, H1; DECISIONS E.1, "RG-10 decided"). **ADR-020 accepted:** the
+camera class on the rig, the light-block fields by class, "Time between frames", proposals, the
+calibration matrix and its match checks, dark flats, tips, and in-camera noise reduction as
+in-window calibration with new vectors E8–E8c (amends ADR-009; ADR-011 gains two camera fields).
+S7.2 split into **S7.2a** (the class on the rig) and **S7.2b** (the light-block form); S7.3 into
+**S7.3a** (calibration blocks) and **S7.3b** (noise reduction in the budget and the fit).
 
 **S7.R2 done, 2026-09-29** (RG-10 research; documentation only; `research/RG-10_CALIBRATION_WORKFLOWS.md`):
 - **From the sources** (Siril read directly; DeepSkyStacker and Canon through search results;
@@ -132,8 +140,8 @@ All defined in `POST_ROADMAP_PLAN.md` §7.
 | RG-07 | Target catalog expansion, names and search | 7 | Open; research **S7.R3** |
 | RG-08 | Site elevation: an automatic source, optional, or dropped | 7 | Open; research **S7.R4** (with RG-09) |
 | RG-09 | Bortle/SQM sources, whether SQM stays a field, and the light-pollution map provider | 7 | Open; research **S7.R4** (with RG-08) |
-| RG-10 | Calibration-frame workflows and inheritance | 7 | **Researched** 2026-09-29 (S7.R2, `research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's decision is open; recorded in ADR-020 (S7.D) |
-| RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | **Decided** 2026-09-29 (S7.R1; DECISIONS E.1, "RG-11 decided"): C1, B1, W1, F1, I1, P2; recorded in ADR-020 at S7.D |
+| RG-10 | Calibration-frame workflows and inheritance | 7 | **Decided** 2026-09-29 (S7.R2; DECISIONS E.1, "RG-10 decided"): L1, D1, T0, O0, N1, H1; ADR-020 |
+| RG-11 | Capture parameters (ISO or gain, binning, white balance, focus, interval) and their labels | 7 | **Decided** 2026-09-29 (S7.R1; DECISIONS E.1, "RG-11 decided"): C1, B1, W1, F1, I1, P2; ADR-020 |
 | RG-12 | Licence requirements against GPL-3.0 | 9 | Open |
 | RG-13 | Settings: real-world needs and where each setting belongs | 9 | Open |
 | RG-14 | Proprietary RAW compatibility and libraries (no ad hoc parsers) | 2 (S2.R3) | **Decided** 2026-09-26 (DECISIONS E.1): none in Stage 2; per-format adapters later, with samples; `ExifInterface` and LibRaw rejected |
@@ -223,9 +231,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **The owner decides RG-10:** the six questions of `research/RG-10_CALIBRATION_WORKFLOWS.md` §10
-   (inheritance, dark flats, temperature, offset, in-camera noise reduction, tips). The answers go into
-   DECISIONS E.1; then **S7.D** writes ADR-020 (RG-10 with RG-11) and completes S7.2 and S7.3.
+1. **S7.R3 — RG-07: targets, names and search (research)**: `POST_ROADMAP_PLAN.md`, "Stage 7 —
+   frozen Task sequence", S7.R3. Documentation only; the output is `research/RG-07_TARGET_CATALOG.md`,
+   ending with the owner's questions. Commit, then STOP.
 
 S7.1 (RD-08 = T3) is ungated: the owner may run it instead, or while a gate waits. No gated Task
 runs before its gate's decision.

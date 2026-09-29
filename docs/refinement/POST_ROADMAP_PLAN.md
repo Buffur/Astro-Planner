@@ -90,6 +90,8 @@
 > **Updated 2026-09-29 (RG-11 decided):** the owner accepted every recommendation (E.1); S7.R2 is next.
 > **Updated 2026-09-29 (S7.R2):** RG-10's research done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the
 > owner decides RG-10 next. No decision taken.
+> **Updated 2026-09-29 (S7.D):** RG-10 decided (every recommendation); ADR-020 accepted; S7.2 and S7.3
+> split into S7.2a, S7.2b, S7.3a and S7.3b ("S7.D — done"). S7.R3 is next.
 
 ## Contents
 
@@ -3974,21 +3976,25 @@ Stage 4):
 | Task | Title | Kind | Size | Depends on | Gate | State |
 | --- | --- | --- | --- | --- | --- | --- |
 | S7.R1 | RG-11: camera classes and light-frame parameters | Research (docs) | M | — | RG-11 | **Done 2026-09-29** (`research/RG-11_CAPTURE_PARAMETERS.md`); **RG-11 decided** 2026-09-29 (E.1): C1, B1, W1, F1, I1, P2 |
-| S7.R2 | RG-10: calibration workflows and the parameter matrix | Research (docs) | M | RG-11 decided | RG-10 | **Done 2026-09-29** (`research/RG-10_CALIBRATION_WORKFLOWS.md`); RG-10 awaits the owner |
-| S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | Frozen |
+| S7.R2 | RG-10: calibration workflows and the parameter matrix | Research (docs) | M | RG-11 decided | RG-10 | **Done 2026-09-29** (`research/RG-10_CALIBRATION_WORKFLOWS.md`); **RG-10 decided** 2026-09-29 (E.1): L1, D1, T0, O0, N1, H1 |
+| S7.D | ADR-020: capture parameters and calibration | Decision (docs) | S–M | RG-11 and RG-10 decided | records them | **Done 2026-09-29** (ADR-020 accepted; S7.2 and S7.3 split, below) |
 | S7.R3 | RG-07: targets, names and search | Research (docs) | M | — | RG-07 | Frozen |
 | S7.R4 | RG-08 and RG-09: elevation, sky darkness and the map link | Research (docs) | M | — | RG-08, RG-09 | Frozen |
 | S7.R5 | RG-03: equipment specification sources | Research (docs) | S–M | — | RG-03 | Frozen |
 | S7.1 | The plan's tracking (RD-08 = T3) | Implementation | M | — | — (decided) | Frozen; ungated |
-| S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | Frozen; S7.D adds the decided rules |
-| S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | Frozen; S7.D adds the decided cells |
+| S7.2 | Light-block parameters | Implementation | M | S7.D | RG-11 | **Split at S7.D** into S7.2a and S7.2b |
+| S7.2a | The camera class on the rig | Implementation | S | S7.D | — (decided) | Frozen |
+| S7.2b | The light-block form | Implementation | M | S7.2a | — (decided) | Frozen |
+| S7.3 | Calibration blocks: the matrix and the budget | Implementation | M–L | S7.2, S7.D | RG-10 | **Split at S7.D** into S7.3a and S7.3b |
+| S7.3a | Calibration blocks | Implementation | M | S7.2b | — (decided) | Frozen |
+| S7.3b | In-camera noise reduction in the budget and the fit | Implementation | S–M | S7.2a | — (decided) | Frozen |
 | S7.4 | Targets: names, aliases and search | Implementation | M | RG-07 decided | RG-07 | Frozen; the decision adds its source and rules |
 | S7.5 | The site form | Implementation | M | RG-08 and RG-09 decided | RG-08, RG-09 | Frozen; the decisions add their field rules |
-| S7.6 | The rig form | Implementation | S–M | S7.2 (if S7.D adds a camera class); RG-03 decided | RG-03 (the source path only) | Frozen |
+| S7.6 | The rig form | Implementation | S–M | S7.2a, S7.3b (the rig's new fields); RG-03 decided | RG-03 (the source path only) | Frozen |
 
 **Order:** S7.R1 → (RG-11 decided) → S7.R2 → (RG-10 decided) → S7.D → S7.R3 → (RG-07 decided) →
 S7.R4 → (RG-08, RG-09 decided) → S7.R5 → (RG-03 decided) → S7.1 → S7.2 → S7.3 → S7.4 → S7.5 →
-S7.6 → Stage 7 validation.
+S7.6 → Stage 7 validation. *(2026-09-29, S7.D: S7.2 is S7.2a → S7.2b, and S7.3 is S7.3a → S7.3b.)*
 - **S7.1 is ungated** and may run at any point, for example while the owner considers a gate. As in
   Stage 6, when a Task comes up with its gate still open, the next ungated or decided Task runs first;
   the others keep their order.
@@ -4350,6 +4356,54 @@ ADR-020; S7.2 and S7.3 implement it exactly):
   - existing plans and snapshots unchanged (a migration test if the schema changes);
   - a light edit updates what follows it, and nothing the user entered as independent;
   - the sweep, the E2E, the full gate.
+
+##### S7.D — done 2026-09-29: S7.2 and S7.3 completed and split
+ADR-020 records RG-11 and RG-10 (DECISIONS E.1, "RG-11 decided", "RG-10 decided"). By the rule under
+"Order", C1 (a rig field) splits S7.2, and N1 (a rig field and a budget-input change) splits S7.3. The
+frozen objectives, boundaries and criteria of S7.2 and S7.3 above stay; each part below adds only its
+decided rules. Every part ends with the full gate after its last code change.
+
+**S7.2a — The camera class on the rig** (ADR-020 §2; S)
+- **Scope:** a camera-module field (not null) with the five classes, `unknown` by default (the next
+  schema version; the migration adds the column, and every existing rig reads Unknown); the rig
+  editor's choice; `EquipmentDraft` carries it; the import review never proposes a class; the
+  snapshot's rig key; the Library's rig list may show it.
+- **Acceptance:** schema equality and data preservation; the example rig reads Unknown; no code path
+  sets a class from a name, a Make or Model string or a file (a test over the import flow); a class
+  change never touches a saved snapshot; the editor in the sweep and the fit test at 200 % text.
+
+**S7.2b — The light-block form** (ADR-020 §3–§5; M)
+- **Scope:** the block editor's light fields by class (ADR-020 §3's table); the previous light block's
+  proposal (§5); the Settings row "Per-frame overhead" relabelled "Time between frames" with §4's
+  help (label and help only; P9.3 keeps Settings' layout).
+- **Acceptance (added to S7.2's):** a widget test per class and Unknown for which fields show; a
+  phone or DSLR rig's block keeps a stored binning or gain without showing it, and the budget, the
+  snapshot and the export are unchanged by it; the proposal is marked and saved only by the user;
+  ADR-009's E1–E7 unchanged; the E2E follows any renamed label.
+
+**S7.3a — Calibration blocks** (ADR-020 §6, §7; M)
+- **Scope:** the calibration fields per RG-10 §4 as decided (L1 copy from a chosen light group, "Use
+  other values", the one-tap "Match the lights"/"Match the flats"); the pure domain match checks of
+  ADR-020 §6, shown in words on the block and never blocking; the **dark flat** frame type through
+  every reader (the parser compares names case-insensitively today, so `darkFlat` needs its test),
+  the snapshot, the export (`EXPORT_MANIFEST.md`'s frame types), the budget, the fit, reconciliation, progress and every screen that labels a frame type; the tips
+  (H1) with "Hide tips" remembered.
+- **Acceptance (added to S7.3's):** the matrix cell by cell per frame type and class; each match check
+  with a positive and a negative case, and unknown never failing; a dark flat round-trips through the
+  store, the snapshot and the export; hiding tips hides no warning; ADR-009's E1–E7 unchanged, and
+  calibration blocks stay on their policy's line.
+
+**S7.3b — In-camera noise reduction in the budget and the fit** (ADR-020 §8; S–M; high-risk: a
+calculation and a schema change)
+- **Scope:** the camera-module switch (the next schema version; off for every existing rig), shown
+  for DSLR/mirrorless and Unknown; `CaptureBudgetCalculator` adds it to in-window calibration and
+  `FitAnalyzer` to each light's atomic event; the assumptions panel's "not included"; the snapshot's
+  rig key; the "darks twice" check of ADR-020 §6 (with S7.3a's checks); `SCIENTIFIC_INTEGRITY.md`
+  (CALC-25, CALC-26 input change).
+- **Acceptance:** E8, E8b and E8c reproduced to the millisecond, with expected values derived
+  independently of the implementation; E1–E7 unchanged; the switch ignored for Phone and astro
+  classes; the migration's schema equality and data preservation; the memoization keys include it
+  (trap 16); the full gate.
 
 ##### S7.4 — Targets: names, aliases and search (gated on RG-07)
 - **Objective:** choosing a known object never requires looking up RA and Dec elsewhere.
@@ -4966,7 +5020,7 @@ any implementation Task is created.
 | RG-07 | How should the target catalog expand and search improve: sources and licences, common names, cross-identifiers, size on the device, suggestions; an offline catalog or an online name resolver? | 08 §4, §9 | 7 | Offline-first; CC BY-SA handling; the catalog is generated by `tool/build_catalog.dart` and versioned, never hand-edited, and deleted targets must not come back; no scraping. *2026-09-27:* the goal is that choosing a known object never requires looking up RA and Dec elsewhere; custom entry stays where it serves a real case; a large expansion is not assumed approved; no moving objects (ADR-010 §3); no unsourced object data. *2026-09-28 (Stage 7 planning):* researched by **S7.R3**; blocks S7.4 |
 | RG-08 | Should elevation be retrieved automatically (source, accuracy, licence, privacy), made optional, or dropped, given that no calculation uses it? | 08 §6; SCI-08; UX-21; F-07 | 7 | Unknown is not 0; privacy (a position leaves the device). *2026-09-27:* no automatic source is claimed before one is found reliable; no prominence while no calculation uses elevation. *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-09); blocks S7.5's elevation |
 | RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result). *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-08); blocks S7.5's sky darkness and link |
-| RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3. *2026-09-29:* S7.R2 done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's six questions are its §10 |
+| RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3. *2026-09-29:* S7.R2 done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's six questions are its §10. **Decided 2026-09-29 (DECISIONS E.1, "RG-10 decided"; ADR-020):** L1, D1, T0, O0, N1, H1 |
 | RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented. *2026-09-27:* each light input classed (required · optional · known automatically · context-dependent · not applicable); focus's meaning settled before any control is chosen (a slider is only a proposal); the interval reconciled with ADR-009's per-frame overhead, never counted twice; FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION kept apart. *2026-09-28 (Stage 7 planning):* researched by **S7.R1**; recorded in ADR-020 (S7.D); blocks S7.R2 and S7.2. *2026-09-29:* S7.R1 done (`research/RG-11_CAPTURE_PARAMETERS.md`); the owner's six questions are its §11. **Decided 2026-09-29 (DECISIONS E.1, "RG-11 decided"):** C1 (a camera class on the rig; the example rig stays Unknown), B1, W1, F1, I1, P2 |
 | RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
 | RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |

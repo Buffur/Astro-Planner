@@ -1,5 +1,9 @@
 # AstroPlan Decisions
 
+> **RG-10 decided and ADR-020 accepted, 2026-09-29 (Stage 7, S7.D):** L1, D1, T0, O0, N1, H1 (E.1,
+> "RG-10 decided"); ADR-020 records RG-10 and RG-11 (camera class on the rig, light-block fields,
+> "Time between frames", proposals, the calibration matrix, in-camera noise reduction). ADR-009 and
+> ADR-011 carry amendment pointers. Documentation only.
 > **RG-11 decided, 2026-09-29 (Stage 7):** C1 (a camera class on the rig, Unknown by default; the
 > example rig stays Unknown), B1, W1, F1, I1 (relabel only; no budget change), P2 (E.1, "RG-11
 > decided"). Recorded in ADR-020 at S7.D. Documentation only.
@@ -1749,6 +1753,25 @@ Stage 4 revalidation is still required.
 - **Rejected:** C2, C3; B1+, B2, B3; W2; F2, F3; I2–I4; P1, P3.
 - Documentation only. No code changed.
 
+### RG-10 decided: calibration workflows (Stage 7, 2026-09-29)
+
+- **Context:** S7.R2's research, `refinement/research/RG-10_CALIBRATION_WORKFLOWS.md` (`bae017e`),
+  with six questions (§10).
+- **Decided by:** the project owner, in chat, choosing "accept all recommended".
+- **L1 — inheritance:** an inherited value is copied from a chosen light group when a calibration
+  block is created, shown with its origin, and kept; a domain check warns (in words, never blocking)
+  when the block matches no light group, with a one-tap fix.
+- **D1 — dark flats:** a fifth frame type, optional for every class.
+- **T0 — sensor temperature:** not modelled. **O0 — offset:** not modelled.
+- **N1 — in-camera long-exposure noise reduction:** a camera switch shown for DSLR/mirrorless and
+  Unknown rigs, off by default; when on, each light frame adds a dark of its own exposure to in-window
+  calibration and to its atomic fit event. **Amends ADR-009** (§2, §4, §6), with new vectors.
+- **H1 — tips:** a one-line tip per calibration frame type, hideable; warnings are never hidden.
+- **Recorded as facts, not choices (RG-10 §4):** what darks, flats, bias and dark flats match; bias
+  optional for every class; flats' exposure independent, with no target-level guidance.
+- **Rejected:** L2, L3; D0; T1; O1; N0, N2; H2.
+- **Recorded in** ADR-020 (Part F, S7.D, the same day), with RG-11. Documentation only.
+
 # Part F — ADRs accepted after the Phase 0 baseline
 
 *Part A stays verbatim. New ADRs are added here, numbered after ADR-006.*
@@ -2380,6 +2403,8 @@ equipment data" (Part A, unchanged). **Implementation:** partial.
 
 ## ADR-009: Capture-budget semantics
 
+> **Amended by ADR-020 (owner, 2026-09-29, S7.D):** in-camera long-exposure noise reduction (N1): when a DSLR/mirrorless or Unknown rig's switch is on, each light frame adds a dark of its own exposure to **in-window calibration** (§2) and to its atomic fit event (§4, §6); new vectors E8–E8c in ADR-020 §8. The per-frame overhead is relabelled "Time between frames" (§4; no arithmetic change). Built by S7.3b and S7.2b.
+
 > **Amended by ADR-019 (owner, 2026-09-27, S4.D), display only:** §2's "each shown on its own line" is met **within the budget details**, one tap away (ADR-019 §7). The budget's definitions and calculations are unchanged.
 
 Status: accepted (owner, 2026-09-22, TASK 5.1). Resolves PD-08. **Implemented:**
@@ -2792,6 +2817,8 @@ Each fixture records its query and retrieval date (TASK 6.2).
   This ADR changes no code.
 
 ## ADR-011: Equipment model and aperture semantics (1.0)
+
+> **Amended by ADR-020 (owner, 2026-09-29, S7.D):** two camera-module fields join §3: the camera class (Phone · DSLR/mirrorless · Astro camera (colour) · Astro camera (mono) · Unknown; Unknown by default, never inferred) and the in-camera noise-reduction switch (off by default). The flat profile (§2) is unchanged. Built by S7.2a and S7.3b.
 
 Status: accepted (owner, 2026-09-23, TASK 8.3). Resolves PD-03 and PD-10. **Implemented
 2026-09-23 by TASK 8.4** (domain and schema v14; commit `445c781`); used by TASKs 8.5 (seeds)
@@ -4552,3 +4579,157 @@ Tonight stays a fixed view (PD-14), with four tabs (ADR-015 §2). The detail scr
   - the live mode is tested on its own path.
 - **Export:** a result recorded without a run adds no new required field. Any incompatible change
   bumps `manifest_version` (`EXPORT_MANIFEST.md`), decided in Stage 8.
+
+## ADR-020: Capture parameters and calibration workflows (Stage 7)
+
+Status: accepted (owner, 2026-09-29, S7.D). It records the owner's RG-11 and RG-10 decisions (DECISIONS
+E.1, "RG-11 decided" and "RG-10 decided"), each the recommended option of its research
+(`refinement/research/RG-11_CAPTURE_PARAMETERS.md`, `refinement/research/RG-10_CALIBRATION_WORKFLOWS.md`).
+It **amends ADR-009** (§2 and §4: in-camera noise reduction, §8 below) and **ADR-011** (§3: two camera
+fields, §2 and §8 below). **Implementation:** Stage 7, S7.2a, S7.2b, S7.3a and S7.3b
+(`refinement/POST_ROADMAP_PLAN.md`, "Stage 7 — frozen Task sequence"). This ADR changes no code.
+
+### 1. Context (verified at `bae017e`)
+
+- `CaptureBlock` has a frame type (light, dark, flat, bias), filter, exposure, count, binning (1–4),
+  `CaptureGain` (ISO, gain or not recorded; a record, SI-004) and, for calibration frames, a policy
+  (ADR-009 §3). Every block asks every field; nothing is inherited.
+- The rig (`EquipmentProfile`) has no camera class. Nothing tells the form which parameters apply.
+- ADR-009's per-frame overhead is the only "interval"; binning, white balance and focus feed no
+  calculation, and in-camera long-exposure noise reduction is not modelled.
+
+### 2. Decision: a camera class on the rig (RG-11, C1)
+
+- **The classes:** Phone · DSLR/mirrorless · Astro camera (colour) · Astro camera (mono) · Unknown.
+- A camera-module field, **Unknown by default**. Existing rigs read as Unknown; the migration adds the
+  column only. **The example rig stays Unknown** (the owner's choice).
+- Chosen by the user in the rig editor. **Never inferred** from a name, a Make or Model string, or a
+  file's format; the import ("Add from a photo") proposes none and leaves it Unknown.
+- The snapshot's rig records the class (an additive key).
+- It decides what the capture-block editor shows (§3, §6). It feeds no calculation.
+
+### 3. Decision: a light block's fields by class (RG-11)
+
+| Field | Phone | DSLR/mirrorless | Astro camera (colour, mono) | Unknown |
+| --- | --- | --- | --- | --- |
+| Exposure, frames | required | required | required | required |
+| ISO | optional | optional | not shown | the neutral choice: Not recorded · ISO · Camera gain |
+| Gain | not shown | not shown | optional | (as above) |
+| Binning (B1) | not shown (the rig's mode) | not shown | optional, 1 × 1 default | optional, 1 × 1 default |
+| Filter | optional | optional | optional | optional |
+
+- **ISO and gain** are never both on one block, never required, never converted (SI-004). Their
+  record is what calibration matches (§6).
+- **Binning is a record** (B1): no calculation reads it; ADR-009 L6 and the rig-pitch capability stay.
+- **Not modelled:** white balance (W1), focus (F1; ADR-009's refocus overhead stays the only focus
+  concept), offset (O0), sensor temperature (T0).
+- **A value a class does not show is kept,** unchanged, in the store, the snapshot and the export,
+  and never used to change a result.
+
+### 4. Decision: the time between frames (RG-11, I1)
+
+- ADR-009's per-frame overhead stays the one interval concept, **relabelled "Time between frames"**.
+- **Definition** (for its help): the time from the end of one frame to the start of the next —
+  download or processing plus any delay the capture device waits. A camera's interval timer counted
+  start to start gives *interval − exposure*. Settling after a dither belongs to the dither overhead,
+  never both (RG-11 §6's examples).
+- No budget change: ADR-009 §4 is unchanged except for the label.
+
+### 5. Decision: proposals (RG-11, P2)
+
+- A new **light** block proposes the previous light block's exposure, sensitivity (kind and value) and
+  binning. It is a proposal: shown as such, and stored only by the user's Save.
+- Not adopted: the rig's maximum sub as a proposal (P1); values from a sample photo (P3).
+
+### 6. Decision: calibration blocks (RG-10)
+
+- **The matrix** is RG-10 §4 (darks, flats, bias, dark flats per class), frozen as written there with
+  the options below: **inherited · prefilled and overridable · independent · not applicable**.
+- **Inheritance (L1):** an inherited value is copied when the block is created, from the light group
+  the user picks (the first light block's by default), shown with its origin, and stored in the block.
+  It does not follow later light edits. "Use other values" makes the field independent for that block.
+- **Match checks** (pure domain; warnings in words; **they never block a plan**):
+  - a dark whose exposure, sensitivity and binning match no light block;
+  - a flat whose filter no light block uses; a light filter without flats **when the plan has flats**;
+    a flat whose binning matches no light block;
+  - a bias whose sensitivity and binning match no light block;
+  - a dark flat whose exposure, sensitivity and binning match no flat block;
+  - in-camera noise reduction on (§8) together with a dark block that matches a light group (darks
+    twice).
+  - Unknown on either side never fails a check (a sensitivity "not recorded"; binning where the class
+    does not show it). Exposures compare in ADR-009's integer milliseconds.
+  - Each warning offers a one-tap "Match the lights" (or "Match the flats") that copies the values;
+    the user may keep the mismatch.
+- **Frame types (D1):** a fifth type, **dark flat**, optional for every class. Stored as text like the
+  others (every reader, parser, export and filter accepts it); its policy is ADR-009 §3's, default
+  outside the window.
+- **Bias** stays optional for every class, never removed; for astro cameras its help names dark flats
+  as the documented alternative.
+- **The budget:** inherited and prefilled values are stored in the block, so `CaptureBudgetCalculator`
+  reads them unchanged; every calibration block stays on its policy's line. Calibration never becomes
+  integration.
+
+### 7. Decision: tips (RG-10, H1)
+
+- One line per calibration frame type in the block editor (RG-10 §6's candidates), more one tap away,
+  and "Hide tips" remembered on the device.
+- Hiding tips never hides a match warning, a validation or a budget line.
+
+### 8. Decision: in-camera long-exposure noise reduction (RG-10, N1; amends ADR-009 §2 and §4)
+
+- **A camera-module switch,** "In-camera noise reduction", shown for the DSLR/mirrorless and Unknown
+  classes, **off by default**. It applies only while the class is one of those; for other classes a
+  stored value is kept and ignored. The snapshot's rig records it (an additive key).
+- **Budget (amends ADR-009 §2):** when it applies, **in-window calibration** gains Σ over light blocks
+  of count × exposure (one in-camera dark per light, of the light's exposure). Integration,
+  acquisition and √N are unchanged. The window load includes it.
+- **Fit (amends ADR-009 §4 and §6):** each light frame's atomic event lasts exposure + in-camera dark
+  + per-frame overhead; the dark is never split from its light.
+- **Assumption (documented):** the processing takes the exposure's length (Canon: "may take the same
+  amount of time as the exposure"); no extra per-frame overhead for it. It is the user's statement of
+  a camera setting, never inferred.
+- **When off,** the assumptions panel lists it as "not included" for those classes, as ADR-009 §4
+  lists its other optional overheads.
+- **New vectors** (computed by hand for this ADR; S7.3b's tests reproduce them and are derived
+  independently of the implementation, SCIENTIFIC_INTEGRITY Part C rule 3). Window W5 is 22:00–00:00
+  (7,200 s), margin 15 % (limit 6,120 s):
+
+| # | Plan and parameters | Integration | Acquisition | In-window cal | Window load | Fit | End | Lost tail |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| E8 | 30 × 60 s lights; per-frame 5 s; noise reduction on | 1,800 s | 1,950 s | 1,800 s | 3,750 s | fits | 23:02:30 | — |
+| E8b | 60 × 60 s lights; per-frame 5 s; noise reduction on; events of 125 s | 3,600 s | 3,900 s | 3,600 s | 7,500 s | doesn't fit: 3 light frames unplaced (57 placed) | — | 75 s |
+| E8c | E8b with noise reduction off | 3,600 s | 3,900 s | 0 | 3,900 s | fits | 23:05:00 | — |
+
+- ADR-009's E1–E7 are unchanged (noise reduction off, or not applicable).
+
+### 9. Out of scope
+
+- Flat-exposure or target-level guidance; exposure optimisation; any "optimal" setting.
+- A calibration library manager; scheduling calibration into twilight (ADR-009 L5).
+- Binning in any calculation (B1+ rejected); offset, temperature, white balance and focus fields.
+- Camera control of any kind.
+
+### 10. Alternatives considered
+
+| Alternative | Decision | Reason |
+| --- | --- | --- |
+| C2 (no class; the plan's first sensitivity choice) | Rejected (owner) | Cannot hide binning for phones and cameras; the class belongs to the camera |
+| C3 (class from metadata) | Rejected (owner) | No certain signal in any readable format |
+| B1+ (binning in pixel scale, NPF and storage) | Rejected (owner) | A formula-input change and a per-block capability, with no shown need |
+| W2, F2, F3 | Rejected (owner) | No planning consequence; a focus position does not transfer |
+| I2–I4 (the interval per rig, plan or block) | Rejected (owner) | Already modelled once; the problem was the label |
+| L2 (a live link to the lights) | Rejected (owner) | A reference that deletion, reorder, Undo and Copy must keep valid (S6.V1) |
+| L3 (proposals only) | Rejected (owner) | Does not answer 08 §16 |
+| D0, T1, O1 | Rejected (owner) | See RG-10 §6 |
+| N0, N2 (noise reduction not modelled; a global preference) | Rejected (owner) | N0 keeps a known optimistic fit; N2 charges it to every rig |
+| H2 (tips hidden until asked) | Rejected (owner) | The tip belongs where the choice is made |
+
+### 11. Consequences
+
+- **Tasks** (the plan's S7.D split rule):
+  - **S7.2a** — the camera class on the rig (schema, editor, import, snapshot);
+  - **S7.2b** — the light-block form (§3, §4's label and help, §5);
+  - **S7.3a** — calibration blocks (§6, §7; the dark-flat frame type);
+  - **S7.3b** — in-camera noise reduction in the budget and the fit (§8; schema; E8–E8c).
+- ADR-009 and ADR-011 carry pointers to this ADR. `SCIENTIFIC_INTEGRITY.md` records §8 as a CALC-25
+  and CALC-26 input change when S7.3b lands.
