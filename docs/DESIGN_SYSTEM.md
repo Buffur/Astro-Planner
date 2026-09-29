@@ -1,5 +1,7 @@
 # AstroPlan — Design System
 
+> **S9.9, 2026-09-29:** the secondary screens (the Library lists and editors, sites, About, Settings, backup, the detail screens, sky darkness, weather, results) use the text roles and `AppSpacing`/`AppRadius` only: the list titles' bold `TextStyle`s became `titleSmall`, "Saved sites" a header in `titleSmall`, every numeric `EdgeInsets` a spacing token (12 → `md`, the FAB clearance 88 as a token sum). `secondary_consistency_test.dart` keeps ad hoc styles out of those files. The planner and Tonight stay Stage 6's.
+
 > **S9.8, 2026-09-29:** messages: every `SnackBar` through `AppMessages.showMessage` (motion from `AppMotion`, none under reduced motion; TD-081). `showDone` after a save, delete, rename, export, backup, or a restore prepared or cancelled; none for a setting whose effect shows on the same screen (D9-5).
 
 > **S9.6, 2026-09-29:** two visualisations under the shared rules. "When is it dark tonight?": the twilight bar on Night & Moon (bands shaded from `chartTwilight` to `chartDark` by depth; the table of times is its text). "How cloudy is each hour?": a cloud bar under each hour's number on Weather (`muted` fill in a `chartGrid` frame; the number is its text). Neither computes a planning value; colour never carries the dew risk alone (an icon marks it).

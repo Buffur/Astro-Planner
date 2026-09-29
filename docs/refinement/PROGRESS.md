@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-29 (**S9.8 done**: feedback, messages (TD-081) and export polish).
-> **Next:** S9.9 (final visual consistency on secondary screens). The owner asked for the next Stage once Stage 8's findings were fixed.
+> **Last updated:** 2026-09-29 (**S9.9 done**: S9.1–S9.9 built; the owner gates S9.10–S9.12 prepared next).
+> **Next:** the Stage 9 validation, once the owner gates are prepared (S9.10–S9.12 are documents). The owner asked for the next Stage once Stage 8's findings were fixed.
 
 ## Current state
 
@@ -15,9 +15,17 @@
 | Current Stage | **Stage 9 — Secondary UX & Product Polish: In progress** (planned 2026-09-29). Stage 8 closed 2026-09-29 ([report](STAGE_8_VALIDATION.md)) |
 | Current Task | None in progress |
 | Next Task | **S9.9** (below, "Next allowed action") |
-| Code baseline | **S9.8** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Code baseline | **S9.9** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S9.9 done, 2026-09-29** (final visual consistency): the secondary screens use the text roles and
+spacing tokens only (list titles `titleSmall`, "Saved sites" a header, every numeric inset a token;
+12 became `md`). `secondary_consistency_test.dart` (2) keeps ad hoc styles out of the thirteen files;
+the sweep covers them in every theme at 100 % and 200 %. No content changed. Also corrected: S9.8's
+FEATURE_STATUS banner named F-42 for backups (F-42 is planned-versus-actual logging).
+- **Verification:** shared behaviour (thirteen presentation files): the full gate after the last code
+  change, **PASS** (1,825 tests, 2 skips; 2 host E2E; Flutter 3.47.4).
 
 **S9.8 done, 2026-09-29** (D9-5; TD-081 resolved): feedback, messages and export polish.
 - `showDone` after a rig, target or site saved, a name saved or removed, an export or backup file

@@ -5293,7 +5293,7 @@ GitHub identity (RD-01: the application id is permanent once published). The age
 | S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | **Done 2026-09-29** |
 | S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | **Done 2026-09-29** |
 | S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | **Done 2026-09-29** |
-| S9.9 | Final visual consistency on secondary screens | Stage 9 scope | M | S9.1–S9.8 | Frozen |
+| S9.9 | Final visual consistency on secondary screens | Stage 9 scope | M | S9.1–S9.8 | **Done 2026-09-29** |
 | S9.10 | The logo and the splash: analysis and alternatives | P9.4 | S | — | **Owner gate** (the owner chooses) |
 | S9.11 | RG-12: the licence (research) | RG-12; P9.5 | S | — | **Owner gate** (the owner decides) |
 | S9.12 | RD-01: the project's identity (options) | RD-01 | S | — | **Owner gate** (the owner decides) |
@@ -5431,7 +5431,8 @@ Stage's exit allows "deferred by the owner").
 - **Scope:** the Stage 5 text roles and `AppSpacing` replace the remaining ad hoc styles on the
   secondary screens (Library lists, sites, About, Settings, details, sky darkness, results), not the
   planner or Tonight (Stage 6); a test forbids new raw `TextStyle(fontSize:)` and raw `EdgeInsets`
-  numbers in those files.
+  numbers in those files. *(Built by S9.9: the test forbids any hand-built `TextStyle(` and any
+  numeric `EdgeInsets` there; gaps of 12 became `AppSpacing.md`.)*
 - **Acceptance:** the test; the sweep in every theme at 100 % and 200 %; no screen's content
   changes.
 

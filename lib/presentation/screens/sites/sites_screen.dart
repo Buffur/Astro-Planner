@@ -12,6 +12,7 @@ import '../../viewmodels/site_viewmodel.dart';
 import '../../shared/failure_feedback.dart';
 import 'site_editor_screen.dart';
 import '../../navigation/app_router.dart';
+import '../../../core/theme/app_spacing.dart';
 
 /// Saved sites and the current position (TASK 7.3): create, edit and delete
 /// sites; use the device position or a map pick as a transient position,
@@ -68,11 +69,13 @@ class SitesScreen extends StatelessWidget {
         title: Text(choosing ? AppWords.chooseSite : AppWords.sites),
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 88),
+        padding: const EdgeInsets.only(
+          bottom: AppSpacing.xxl + AppSpacing.xl + AppSpacing.sm,
+        ),
         children: [
           if (hasTransient)
             Card(
-              margin: const EdgeInsets.all(12),
+              margin: const EdgeInsets.all(AppSpacing.md),
               child: ListTile(
                 leading: const Icon(Icons.my_location),
                 title: Text(siteVm.locationName ?? 'Current position'),
@@ -95,14 +98,22 @@ class SitesScreen extends StatelessWidget {
             )
           else if (siteVm.isDefaultLocation)
             const Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                0,
+              ),
               child: Text(
                 'No site yet. Use your current position, pick a point on the '
                 'map, or add a site.',
               ),
             ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -121,16 +132,24 @@ class SitesScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              'Saved sites',
-              style: TextStyle(fontWeight: FontWeight.bold),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.md,
+              AppSpacing.xs,
+            ),
+            child: Semantics(
+              header: true,
+              child: Text(
+                'Saved sites',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
             ),
           ),
           if (sites.isEmpty)
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Text('No saved sites yet.'),
             ),
           for (final site in sites)

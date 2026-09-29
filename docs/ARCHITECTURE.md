@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S9.9, 2026-09-29:** presentation only: the secondary screens' ad hoc `TextStyle`s and numeric insets replaced by the text roles and spacing tokens; `test/presentation/secondary_consistency_test.dart` lists the covered files.
+
 > **S9.8, 2026-09-29:** `AppMessages.showMessage` (an extension on `ScaffoldMessengerState`) is the only way to show a `SnackBar` (TD-081; a test enforces it). `ShareSessionExporter.fileName`/`localFileStamp` and `FileBackupService.fileName`/`shareText` name files in local time. The Logbook's "Export all" moved into a `PopupMenuButton` (`logbook.menu`, item `logbook.exportAll`).
 
 > **S9.7, 2026-09-29:** `NightTimeFormatter.recordedDate(CalendarDate)` ("Aug 1, 2026") for recorded dates; `_SkyDarknessLine` shows one keyed reading per value (`sky.bortle`, `sky.sqm`) and `sky.unknown`; `_MapLink` uses the text roles. No ISO date is shown in the planner's sky detail or the site editor.

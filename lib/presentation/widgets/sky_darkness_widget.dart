@@ -17,6 +17,7 @@ import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/sky_darkness.dart';
 import '../../core/utils/quantity_text.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// The site's sky darkness in the planner (TASK 7.4): Bortle and SQM as
 /// entered, with their sources, or unknown. Since S6.5 the night's timeline
@@ -44,10 +45,13 @@ class SkyDarknessWidget extends StatelessWidget {
     final siteVm = context.watch<SiteViewModel>();
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: CollapsibleSection(
           sectionKey: PlannerSections.sky,
           title: 'Sky darkness',
@@ -101,11 +105,11 @@ class _MapLink extends StatelessWidget {
         }
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         child: Row(
           children: [
             const Icon(Icons.map_outlined),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +158,7 @@ class _SkyDarknessLine extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     if (darkness.isUnknown) {
       return Padding(
-        padding: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.only(top: AppSpacing.sm),
         child: Text(
           hasSite
               ? 'Unknown — pick a Bortle class above, or add Bortle or SQM in '
@@ -168,7 +172,7 @@ class _SkyDarknessLine extends StatelessWidget {
     }
     Widget reading(String value, String caption, Key key) => Padding(
       key: key,
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -194,7 +198,7 @@ class _SkyDarknessLine extends StatelessWidget {
           ),
         if (!darkness.isSaved)
           Padding(
-            padding: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
             child: Text(
               'Not saved: this position is not a site.',
               style: text.bodySmall,
@@ -240,19 +244,13 @@ class _BortleBadge extends StatelessWidget {
           items: [
             DropdownMenuItem<int?>(
               value: null,
-              child: Text(
-                'Bortle unknown',
-                style: TextStyle(color: text.bodyLarge?.color),
-              ),
+              child: Text('Bortle unknown', style: text.bodyLarge),
             ),
             ...List.generate(
               9,
               (index) => DropdownMenuItem<int?>(
                 value: index + 1,
-                child: Text(
-                  'Bortle ${index + 1}',
-                  style: TextStyle(color: text.bodyLarge?.color),
-                ),
+                child: Text('Bortle ${index + 1}', style: text.bodyLarge),
               ),
             ),
           ],
@@ -263,14 +261,14 @@ class _BortleBadge extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   swatch(i),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     i == 0 ? 'Bortle ?' : 'Bortle $i',
                     style: text.titleSmall?.copyWith(
                       color: palette.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                 ],
               );
             });
@@ -300,7 +298,9 @@ class NightTimelineSection extends StatelessWidget {
     if (timeline == null) {
       return Text(
         'Set your site to see the night.',
-        style: TextStyle(color: AppPalette.of(context).textSecondary),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: AppPalette.of(context).textSecondary,
+        ),
       );
     }
     String at(DateTime utc) => NightTimeFormatter.instant(
@@ -339,11 +339,11 @@ class NightTimelineSection extends StatelessWidget {
         // S9.6: the same crossings as a bar; the times below are its text.
         if (bands != null && bands.isNotEmpty) ...[
           TwilightBar(bands: bands),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
         for (final (label, time) in rows)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs / 2),
             // Wraps at large text rather than overflowing (TASK 15.3).
             child: Wrap(
               alignment: WrapAlignment.spaceBetween,
@@ -419,12 +419,12 @@ class MoonSection extends StatelessWidget {
         Row(
           children: [
             Icon(Icons.nightlight_round, color: AppPalette.of(context).moon),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             const Expanded(child: _SectionTitle('Moon')),
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 32),
+          padding: const EdgeInsets.only(left: AppSpacing.xl),
           child: Text(
             'Illumination at midnight: $lunarIllum',
             key: const Key('sky.moonIllumination'),
@@ -446,7 +446,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
     child: Semantics(
       header: true,
       child: Text(
@@ -492,7 +492,7 @@ class _MoonDetails extends StatelessWidget {
 
     if (sepText == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 32, top: 4),
+      padding: const EdgeInsets.only(left: AppSpacing.xl, top: AppSpacing.xs),
       child: Text(sepText, key: const Key('sky.moonSeparation'), style: style),
     );
   }

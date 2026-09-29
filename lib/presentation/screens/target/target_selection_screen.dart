@@ -18,6 +18,7 @@ import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_radius.dart';
 
 /// The targets (ADR-015; S9.1, D9-1): managed in the Library, where "Plan
 /// this target" starts a new plan; chosen for the plan from
@@ -203,7 +204,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                         validator: (v) =>
                             v == null || v.trim().isEmpty ? 'Required' : null,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       DropdownButtonFormField<String>(
                         initialValue: selectedType,
                         decoration: const InputDecoration(
@@ -222,10 +223,10 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                       ),
                       if (TargetTypes.isMoving(selectedType))
                         const Padding(
-                          padding: EdgeInsets.only(top: 8),
+                          padding: EdgeInsets.only(top: AppSpacing.sm),
                           child: Text(TargetTypes.movingWarning),
                         ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: raCtrl,
                         decoration: const InputDecoration(
@@ -234,7 +235,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                         ),
                         validator: TargetFormInput.validateRightAscension,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: decCtrl,
                         decoration: const InputDecoration(
@@ -243,7 +244,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                         ),
                         validator: TargetFormInput.validateDeclination,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: sizeCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -255,7 +256,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                         ),
                         validator: TargetFormInput.validateAngularSize,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: magCtrl,
                         keyboardType: const TextInputType.numberWithOptions(
@@ -359,7 +360,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -370,7 +371,7 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                     .colorScheme
                     .surfaceContainerHighest,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.large),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -414,12 +415,12 @@ class _TargetSelectionScreenState extends State<TargetSelectionScreen> {
                           : Theme.of(context).colorScheme.primary.withAlpha(0),
                       width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.large),
                   ),
                   child: ListTile(
                     title: Text(
                       _targetLabel(target),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     subtitle: Text(
                       TargetTypes.isMoving(target.type)

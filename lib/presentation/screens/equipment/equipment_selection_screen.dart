@@ -18,6 +18,7 @@ import 'equipment_editor.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_radius.dart';
 
 /// The rigs (ADR-015; S9.1, D9-1): managed in the Library, chosen for the
 /// plan from `/select/rig`. Deleting confirms (RD-09 = M + S1).
@@ -187,12 +188,12 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
                           : Theme.of(context).colorScheme.primary.withAlpha(0),
                       width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.large),
                   ),
                   child: ListTile(
                     title: Text(
                       eq.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     subtitle: Text(_subtitle(eq)),
                     trailing: choosing
@@ -243,7 +244,7 @@ class _EquipmentSelectionScreenState extends State<EquipmentSelectionScreen> {
               onPressed: _importFromPhoto,
               child: const Icon(Icons.add_photo_alternate_outlined),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
           FloatingActionButton(
             heroTag: 'rigs.add',

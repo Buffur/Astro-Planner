@@ -11,6 +11,7 @@ import '../viewmodels/session_plan_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../../core/theme/app_palette.dart';
 import '../shared/night_text.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// The chosen night's weather (ADR-012; TASK 9.4): sunset to sunrise only,
 /// per-hour indicators and per-variable ranges with explicit units, the
@@ -33,7 +34,7 @@ class WeatherForecastWidget extends StatelessWidget {
     );
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,7 +42,12 @@ class WeatherForecastWidget extends StatelessWidget {
           InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 8, 8),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.sm,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -86,7 +92,12 @@ class WeatherForecastWidget extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.sm,
+            ),
             child: switch (state) {
               NightWeatherIdle() => const Text(
                 "Set a site to see the night's forecast.",
@@ -95,7 +106,7 @@ class WeatherForecastWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   LinearProgressIndicator(),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   Text("Loading the night's forecast…"),
                 ],
               ),
@@ -108,7 +119,7 @@ class WeatherForecastWidget extends StatelessWidget {
                 key: const Key('weather.unavailable'),
                 children: [
                   Icon(Icons.cloud_off, color: AppPalette.of(context).muted),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +144,12 @@ class WeatherForecastWidget extends StatelessWidget {
             },
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
             child: InkWell(
               onTap: () => launchUrl(
                 Uri.parse('https://open-meteo.com/'),
@@ -188,7 +204,7 @@ class _AvailableBody extends StatelessWidget {
         _FreshnessLine(state: state),
         Text('Model: ${snapshot.provider} / ${snapshot.model}', style: small),
         if (s != null && start != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             _spanText(context, s, start),
             key: const Key('weather.span'),
@@ -198,7 +214,7 @@ class _AvailableBody extends StatelessWidget {
             'Times in ${NightTimeFormatter.zoneCaption(s.fromUtc, zoneId: zoneId)}',
             style: small,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           if (s.coveredHours == 0)
             const Text(
               'No forecast for these hours.',
@@ -213,10 +229,10 @@ class _AvailableBody extends StatelessWidget {
                 style: small,
               ),
             _Ranges(summary: s),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             _DewLine(summary: s),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _HourStrip(summary: s, zoneId: zoneId),
           Text(
             'Precipitation is the chance in the hour before each time.',
@@ -273,7 +289,7 @@ class _FreshnessLine extends StatelessWidget {
       children: [
         if (warn) ...[
           Icon(Icons.history, size: 16, color: theme.colorScheme.error),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppSpacing.xs),
         ],
         Expanded(
           child: Text(
@@ -328,13 +344,13 @@ class _Ranges extends StatelessWidget {
         Text('Night ranges', style: Theme.of(context).textTheme.labelLarge),
         for (final (label, value) in rows)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 1),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs / 4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: Text(label, style: style)),
                 // S1.10 (UX-31): never runs into the label at large text.
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   value,
                   style: style?.copyWith(fontWeight: FontWeight.bold),
@@ -380,7 +396,7 @@ class _DewLine extends StatelessWidget {
           size: 16,
           color: risk ? theme.colorScheme.error : null,
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Text(
             text,
@@ -436,7 +452,7 @@ class _HourStrip extends StatelessWidget {
                     Row(
                       children: [
                         Icon(icon, size: 12),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Flexible(
                           child: Text(
                             label,
