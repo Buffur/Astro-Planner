@@ -5842,7 +5842,7 @@ this plan names them.
 
 | Task | Title | Where | Size | Depends on | State |
 | --- | --- | --- | --- | --- | --- |
-| S11.1 | The validation matrix: the frozen contract, each row with its source, its required evidence level, its environment and whether it is mandatory for beta readiness | Documents | M | — | Not started |
+| S11.1 | The validation matrix: the frozen contract, each row with its source, its required evidence level, its environment and whether it is mandatory for beta readiness | Documents | M | — | **Done 2026-09-30** (`refinement/STAGE_11_MATRIX.md`) |
 | S11.2 | Host evidence: the matrix's host rows (tests, the accessibility sweep's coverage, degraded states, error handling of the changed writes, portability of names and results, the scientific invariants), and `TEST_PLAN.md`'s stale E2E and device text corrected | Host | M | S11.1 | Not started |
 | S11.3 | Emulator evidence: the E2E on the emulator (15.5), 2.4's America/Los_Angeles check, L1–L6 and L8, the refused-database flow (S1.5), backup and restore round trip and Auto Backup (14.4), permissions, offline, a release build installed and the core loop walked (16.1's install part) | Emulator | M | S11.1 | Not started |
 | S11.4 | Live providers and compliance: Open-Meteo, Nominatim (opt-in), OSM tiles, the light-pollution link from the emulator; AC7 (dependency licences, HTTPS only, no secrets, `COMPLIANCE.md` and the privacy policy against the code); Play's current closed-testing rules for 16.4 (web, cited) | Emulator; host; web | S–M | S11.1 | Not started |

@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**Stage 11 planned**: S11.1–S11.7 frozen; the phone rows wait for the phone).
-> **Next:** S11.1, the validation matrix.
+> **Last updated:** 2026-09-30 (**S11.1 done**: the Stage 11 validation matrix, 130 rows, 28 mandatory for beta readiness).
+> **Next:** S11.2 (host), S11.3 (emulator) and S11.4 (providers and compliance).
 
 ## Current state
 
@@ -14,10 +14,23 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.1** — the validation matrix |
+| Next Task | **S11.2–S11.4** — host, emulator, providers and compliance evidence |
 | Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.1 done, 2026-09-30** (the validation matrix, [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md); documentation only):
+- 130 rows in 17 groups (A core answer … Q owner decisions and go/no-go), each with its source, the
+  evidence level it needs, its environment (HOST, EMULATOR, PHONE, HUMAN, OWNER) and whether it is
+  mandatory for beta readiness (D11-2): **28 mandatory**. 62 rows already hold evidence at their level
+  (mostly TEST VERIFIED through the Stage 6–10 validations and S10.6's gate; M1–M3 DEVICE VERIFIED).
+  No EMULATOR, PHONE, HUMAN or OWNER row has evidence yet.
+- Coverage: every Appendix B item with Stage 11 as its destination and every Scope and "What it
+  checks" bullet maps to rows or to a stated exclusion (16.5 per D11-6; the beta run itself; the
+  retired tracker's device checks; the low-end phone kept as UNVERIFIED row M5).
+- Drift noted for S11.2: `TEST_PLAN.md`'s lifecycle header ("no emulator"), L7's "v17" (the schema is
+  v25), and the 15.3 and 12.4 checklists still walking the tracker.
+- **Verification:** the documentation class (V1): references resolve; `git diff --check`.
 
 **S10.C1, 2026-09-30** (a correction to Stage 10's record, found by S11.3's first emulator E2E attempt;
 V6 (a): new evidence; [record](evidence/STAGE_10_MEASUREMENTS.md), "Correction: typing on a device"):
@@ -721,8 +734,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S11.1 — the validation matrix** (the plan's "Stage 11 — frozen Task sequence"), then S11.2, S11.3
-   and S11.4, then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
+1. **S11.2, S11.3 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's "Stage 11 — frozen
+   Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
 2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5): connect the phone for S11.6;
    the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
    the go/no-go. The deferred gates S9.10 (logo) and S9.11 (RG-12) stay available.
