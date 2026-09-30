@@ -211,12 +211,25 @@ void main() {
     await settle(tester);
   }
 
-  /// Types [text] one character at a time, as a user does.
+  /// Types [text] one character at a time, as a user does, and checks it
+  /// arrived. On a device the test's text input must be registered first
+  /// (see the rig editor): otherwise the real keyboard owns the connection,
+  /// and in profile mode the framework drops the test's input.
   Future<void> type(WidgetTester tester, Finder field, String text) async {
     for (var i = 1; i <= text.length; i++) {
       await tester.enterText(field, text.substring(0, i));
       await tester.pump(const Duration(milliseconds: 80));
     }
+    expect(
+      tester
+          .widget<EditableText>(
+            find.descendant(of: field, matching: find.byType(EditableText)),
+          )
+          .controller
+          .text,
+      text,
+      reason: 'the typed text did not reach the field',
+    );
   }
 
   testWidgets('the Stage 10 scenarios', (tester) async {
@@ -289,15 +302,24 @@ void main() {
     await settle(tester);
     await watch('rigEditor.open', () => tap(tester, find.byTooltip('Add rig')));
     final pixel = find.byKey(const Key('equipmentEditor.pixelSize'));
+    // The focus step opens the real soft keyboard on a device.
     await watch('rigEditor.focus', () async {
       await tap(tester, pixel);
       await settle(tester, 20);
     });
-    await watch('rigEditor.type', () => type(tester, pixel, '3.7612'));
+    // From here on the test types (S10's correction): the test's text input
+    // takes the connection from the next field focused, so the typed text
+    // reaches the fields on a device in profile mode too.
+    binding.testTextInput.register();
+    addTearDown(binding.testTextInput.unregister);
     await watch('rigEditor.typeName', () async {
       final name = find.widgetWithText(TextFormField, 'Rig name');
       await tap(tester, name);
       await type(tester, name, 'Refractor 400');
+    });
+    await watch('rigEditor.type', () async {
+      await tap(tester, pixel);
+      await type(tester, pixel, '3.7612');
     });
     await tap(tester, find.text('Cancel'));
 

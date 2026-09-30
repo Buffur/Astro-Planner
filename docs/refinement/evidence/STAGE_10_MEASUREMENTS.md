@@ -431,3 +431,43 @@ to the owner, recorded. The 277 MB was a debug install (S10.1).
   number here is from an emulator with an emulated GPU. Carried to Stage 11 as phone runs of this
   suite (the rig editor's focus, the planner and timeline, the Logbook at 300 sessions, first-run
   seeding), with the same command.
+
+## Correction: typing on a device (S10.C1, 2026-09-30, found in Stage 11)
+
+- **Found** while running the E2E on the emulator (S11.3): a test's `enterText` sends its text with
+  client id −1, which the framework accepts only with asserts on (debug); **in profile mode it is
+  dropped**, and on a device the real keyboard's own connection also overwrites it. So in every profile
+  run above, the steps that type (the rig editor's "type in pixel size" and "tap and type the name",
+  the block dialog's Frame Count, the Logbook's search) **typed nothing**: their frames are the tap,
+  focus and animation only. Those rows are **not typing evidence** and are superseded below.
+- **Unaffected:** the host rebuild counts (debug: the text arrives); the rig editor's focus step with
+  the real keyboard (S10.3's device-side evidence); every step that edits through the ViewModel
+  (block edits, night, target); the section; the elapsed times.
+- **Fix (test code):** after the focus step the suite registers the test's text input
+  (`binding.testTextInput.register()`), so the next field focused takes its input from the test; the
+  typing helper now asserts the text reached the field, so a silent no-op cannot recur.
+- **The emulator changed between sessions.** The runs below are from a second emulator session
+  (the AVD rebooted for Stage 11; same image, same GPU emulation). It is much faster than the first:
+  first-run seeding 121 ms against 1.7–2.5 s, raster averages 2–6 ms against 5–45 ms. **Emulator numbers
+  are comparable only within one session**; every before/after above was taken within the first
+  session, so its ratios stand, but its absolute times are that session's.
+- **ENG-12 re-checked within the second session:** the catalog seed without the transaction (a
+  temporary revert, restored) 815 ms; with it 121 and 122 ms. About 6.7× faster, consistent with the
+  first session's 6–8×.
+- **Typing, second session, two profile runs (ms, run 9 / run 10):**
+
+  | Step | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster over |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | Rig editor: focus, the real keyboard opens | 31/31 | 0.9/0.9 | 2.0/2.1 | 4.1/4.2 | 0/0 | 2.8/3.5 | 0/1 |
+  | Rig editor: tap the name, type "Refractor 400" | 37/37 | 1.2/1.7 | 2.9/4.4 | 4.9/6.1 | 0/0 | 2.3/2.6 | 0/0 |
+  | Rig editor: tap the pixel size, type "3.7612" (derived sensor size) | 24/23 | 1.2/1.3 | 3.4/3.6 | 4.0/4.6 | 0/0 | 2.2/2.6 | 0/0 |
+  | Planner: a block through its dialog, "36" typed | 39/39 | 1.3/1.2 | 2.3/2.8 | 7.5/7.6 | 0/0 | 3.3/2.7 | 0/0 |
+  | Logbook (300): search, "M3" typed | 25/25 | 2.3/3.5 | 10.9/21.3 | 18.6/29.6 | 2/3 | 2.7/3.3 | 0/0 |
+
+  Typing in every form stays far inside the frame. The Logbook's search goes over the frame on 2–3
+  frames per run (worst 19–30 ms) while it filters 300 entries in memory per keystroke: practical, and
+  a phone trace (Stage 11) decides whether it needs work. The other scenarios of this session: build
+  averages 0.5–3.7 ms; the only frames over 16.7 ms are a screen's first frame (planner 43/13 ms,
+  Logbook 30/42 ms, rig editor 21/12 ms).
+- **Conclusions of S10.3 and S10.5 unchanged;** S10.4's and S10.5's "no change needed" readings hold
+  with real typing.

@@ -19,6 +19,21 @@
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S10.C1, 2026-09-30** (a correction to Stage 10's record, found by S11.3's first emulator E2E attempt;
+V6 (a): new evidence; [record](evidence/STAGE_10_MEASUREMENTS.md), "Correction: typing on a device"):
+- In profile mode a test's typed text never reached the field (the framework drops the test's client
+  id without asserts; on a device the real keyboard also overwrites it). Stage 10's profile rows that
+  type recorded taps and animation only; they are superseded. The host counts, the focus step with the
+  real keyboard, the ViewModel edits and the timings were unaffected.
+- `perf_scenarios_test.dart` registers the test's text input after the focus step and asserts every
+  typed text arrived. Two new runs: typing in the rig editor, the block dialog and the Logbook stays
+  within the frame (build averages 1–3.5 ms); the search has 2–3 frames over per run (worst 19–30 ms).
+- The emulator's second session is far faster than the first (seed 121 ms vs 1.7–2.5 s): numbers are
+  comparable only within a session. ENG-12 re-checked within it: 815 ms without the transaction, 121–122
+  ms with it (6.7×). Stage 10's conclusions stand.
+- **Verification:** test code only: analyze clean; the suite passes on the host; two emulator runs in
+  profile mode, plus one with the seed's transaction temporarily reverted (restored; `lib/` unchanged).
+
 **Stage 11 planned, 2026-09-30** (documentation only; the plan's "Stage 11 — frozen Task sequence"):
 - Inputs verified at `e6b6172` and on this machine: the emulator (Android 16, Google Play image, TalkBack
   installed, Backup Manager off, 4.8 GB free) can carry the E2E, most lifecycle rows, the refused
