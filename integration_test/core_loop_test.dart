@@ -169,6 +169,16 @@ class _Device {
       tester.runAsync(() async => db?.close()).then((_) {});
 }
 
+/// A 412 × 915 dp phone on the host. On a device or emulator the real
+/// screen is used (S11.3): overriding a live view's size breaks scrolling
+/// by drag there, and the test phone is already about 411 × 914 dp.
+void phoneSizedView(WidgetTester tester) {
+  if (Platform.isAndroid) return;
+  tester.view.physicalSize = const Size(412, 915);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 Future<void> settle(WidgetTester tester, [int rounds = 12]) async {
   for (var i = 0; i < rounds; i++) {
     await tester.runAsync(
@@ -249,14 +259,16 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  // S11.3: on a device the real keyboard owns the text connection and
+  // overwrites what the test types; the test's text input takes it instead.
+  setUp(binding.testTextInput.register);
+  tearDown(binding.testTextInput.unregister);
 
   testWidgets('the core loop: site to export, with a restart after the '
       'night', (tester) async {
-    tester.view.physicalSize = const Size(412, 915);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    phoneSizedView(tester);
     // 17:00 in Ljubljana on 10 November 2026: tonight is ahead.
     final device = _Device(_Clock(DateTime.utc(2026, 11, 10, 16)));
     await device.boot(tester);
@@ -367,9 +379,7 @@ void main() {
 
   testWidgets('time zones: a site in another zone than the device, and a '
       'result recorded across a DST change', (tester) async {
-    tester.view.physicalSize = const Size(412, 915);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    phoneSizedView(tester);
     // 21:00 on 31 October 2026 in New York (EDT, UTC−4); the device says
     // Ljubljana. New York leaves DST at 02:00 on 1 November.
     final device = _Device(
