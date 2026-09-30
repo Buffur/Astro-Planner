@@ -372,3 +372,33 @@ Nothing was left behind by the tracker's retirement (S8.4): keep-screen-on went 
 | `NOTICES.Z` | 120 KiB | Flutter's licence page (generated) | Keep (required) |
 
 No bundled font, image or unused asset exists; assets are 0.6 % of the APK. Nothing to remove.
+
+## S10.7 — Build and release options
+
+The current release workflow (`docs/RELEASE.md`) already has R8 code and resource shrinking, icon
+tree-shaking (Material Icons 6 KiB), 16 KB alignment and native symbols moved to `BUNDLE-METADATA`,
+and the bundle is split per ABI by Play. Two options remain that change what ships. Each was
+measured on an arm64-v8a release APK built at `43523bb` (`flutter build apk --release
+--target-platform android-arm64`):
+
+| Build | APK | `libapp.so` | Change |
+| --- | ---: | ---: | --- |
+| Today's release | 25,009,082 bytes | 9,962,376 bytes | — |
+| `--split-debug-info=<dir>` | 23,698,362 bytes | 8,651,656 bytes | −1.31 MB (−5.2 % of the APK); a 4.2 MB symbols file per build, kept outside the app |
+| `--split-debug-info=<dir> --obfuscate` | 23,501,754 bytes | 8,455,048 bytes | a further −0.20 MB |
+
+- **`--split-debug-info`:** −1.3 MB per phone. **Cost:** a release build's Dart stack traces are no
+  longer symbolic (the local `AppLog`, anything a user copies or a future diagnostics export, RD-15),
+  unless each release's symbols file is archived and `flutter symbolize` is run against it; losing
+  that file makes its traces unreadable for good. **Not adopted now:** the gain is small against a
+  28 MB install, and the symbols step belongs with the owner's release procedure and RD-15's
+  diagnostics decision. `RELEASE.md` records the measured option for the owner to adopt at release
+  time.
+- **`--obfuscate`:** −0.2 MB more. It hides Dart names in a GPL-3.0 app whose source is public, adds the
+  same symbols dependency, and can break code that relies on type names. **Not adopted.**
+- **Nothing else changes a user's size materially.** An APK split per ABI matters only for
+  side-loading (Play splits the bundle itself), and resources are 0.36 MiB.
+
+**Stage 10's size result:** the release baseline stands (arm64-v8a APK 24.8 MB, 27.8 MB installed on
+the emulator). No reduction is claimed; the only material options found cost diagnostics and are left
+to the owner, recorded. The 277 MB was a debug install (S10.1).

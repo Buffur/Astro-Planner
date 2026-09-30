@@ -4,20 +4,31 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.6 done**: dependencies and assets reviewed; `sqlite3_flutter_libs` removed).
-> **Next:** S10.7, the build and release options.
+> **Last updated:** 2026-09-30 (**S10.7 done**: build options measured; S10.1–S10.7 complete).
+> **Next:** the Stage 10 validation (a fresh, independent session).
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 frozen). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
+| Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 **done**; the validation is next). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S10.7** — build and release options |
+| Next Task | **The Stage 10 validation** (fresh session) |
 | Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S10.7 done, 2026-09-30** (build and release options; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.7):
+- Measured on an arm64 release APK: `--split-debug-info` −1.31 MB (−5.2 %), `--obfuscate` −0.20 MB
+  more. **Not adopted:** the first makes release stack traces unreadable without a per-release symbols
+  file (a release-procedure and RD-15 matter for the owner); the second hides nothing in an
+  open-source app. `RELEASE.md` gains a "Size" section (the baseline and the option) and "Build notes"
+  (the antivirus TLS and the cross-drive Kotlin workarounds). No build configuration changed.
+- **Stage 10's size result:** the release baseline stands (24.8 MB per arm64 phone, 27.8 MB
+  installed); no reduction claimed; the 277 MB was a debug install.
+- **Verification:** the documentation class (V1): no build file changed; references resolve;
+  `git diff --check`. S10.6's gate stays valid (V3).
 
 **S10.6 done, 2026-09-30** (dependencies and assets; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.6):
 - Every runtime dependency checked against its use: all used except **`sqlite3_flutter_libs
@@ -663,7 +674,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S10.7 — build and release options** (the plan's "Stage 10 — frozen Task sequence"), one Task per commit, then the Stage 10 validation in a fresh session.
+1. **The Stage 10 validation** (a fresh, independent session; the plan's "Stage 10 — frozen Task
+   sequence" and the Stage's exit): it judges S10.1–S10.7's acceptance and the exit against
+   [`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md), reusing the recorded runs (V3).
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
    P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
    must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB

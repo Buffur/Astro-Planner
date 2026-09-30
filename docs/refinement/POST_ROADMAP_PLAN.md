@@ -5616,7 +5616,7 @@ not set.
 | S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | **Done 2026-09-30** (measured; no change needed) |
 | S10.5 | The Logbook at a realistic volume; ENG-11 and ENG-12 on Android | ENG-11; ENG-12 | S–M | S10.2 | **Done 2026-09-30** |
 | S10.6 | Dependencies and assets by verified use (RD-02's `sqlite3_flutter_libs`) | RD-02; Stage 10 scope | S–M | S10.1 | **Done 2026-09-30** |
-| S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | Not started |
+| S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | **Done 2026-09-30** (measured; not adopted, recorded for the owner) |
 
 **Order:** S10.1 → S10.2 → S10.3 → S10.4 → S10.5 → S10.6 → S10.7, then the Stage 10 validation (a
 fresh session). S10.4, S10.5 and S10.7 may end with "measured, no change needed": that is a valid
