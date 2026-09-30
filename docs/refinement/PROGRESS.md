@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.1 done**: the Stage 11 validation matrix, 130 rows, 28 mandatory for beta readiness).
-> **Next:** S11.2 (host), S11.3 (emulator) and S11.4 (providers and compliance).
+> **Last updated:** 2026-09-30 (**S11.3 done** on the emulator: 17 rows pass; one blocker, TD-092 → S11.C1).
+> **Next:** S11.C1 (the Logbook after Save plan), then S11.2 and S11.4.
 
 ## Current state
 
@@ -14,10 +14,29 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.2–S11.4** — host, emulator, providers and compliance evidence |
+| Next Task | **S11.C1** — the Logbook's list after Save plan (TD-092), then S11.2 and S11.4 |
 | Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.3 done, 2026-09-30** (the emulator rows; [runs](evidence/STAGE_11_EMULATOR_RUNS.md); RUNTIME
+VERIFIED, emulator, D11-1):
+- **Passed:** L1 (fresh install offline), L2 (location denied, denied forever, services off), L3 (the
+  data), L4 (a kill during the saved night: Tonight's result line, one copy), L5 (rotation, dark mode),
+  L6 (a zone change after the night), L8 (a full disk, with notes), L9 (the core-loop E2E), B6 (2.4's
+  Los Angeles evening), F13 (backup, reinstall, restore; a newer backup refused), F14 (Auto Backup
+  through the local transport, release build), F15 (Share and Export), F16 (a newer database explained
+  with no reset; a below-floor file reset with `.v7.bak` kept), G7 (identity; the splash not captured),
+  J5 (offline with data), N2 (the whole session on the release build), N3 (the bundle check, failing
+  only on the debug signer, as designed). `TEST_PLAN.md` records them.
+- The E2E needed two test changes to run on a device (`1af00be`): the test's text input registered,
+  the view-size override kept on the host.
+- **Blocker S11F-01 = TD-092:** a saved plan is missing from an already-open Logbook until a restart
+  → **S11.C1**. **Follow-ups:** TD-093 (the restore confirmation lacks the backup's date), TD-094 (the
+  screen is not restored after a process death), TD-095 (the autosave banner after a successful Save);
+  wording notes in the runs file.
+- **Verification:** documentation of runs (the runs themselves are the evidence); no code changed in
+  this commit.
 
 **S11.1 done, 2026-09-30** (the validation matrix, [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md); documentation only):
 - 130 rows in 17 groups (A core answer … Q owner decisions and go/no-go), each with its source, the
@@ -734,8 +753,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S11.2, S11.3 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's "Stage 11 — frozen
-   Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
+1. **S11.C1** (TD-092), then **S11.2 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's
+   "Stage 11 — frozen Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
 2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5): connect the phone for S11.6;
    the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
    the go/no-go. The deferred gates S9.10 (logo) and S9.11 (RG-12) stay available.
