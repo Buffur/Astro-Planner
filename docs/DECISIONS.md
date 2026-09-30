@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **Stage 11 planning, 2026-09-30:** E.1 "Stage 11 decisions (delegated by the owner)": D11-1 to D11-6 (RD-15: no diagnostics export in the beta). Documentation only.
 > **Stage 10 planning, 2026-09-30:** E.1 "Stage 10 decisions (delegated by the owner)": D10-1 to D10-6. Documentation only.
 > **Stage 9 closed, 2026-09-30:** the owner deferred the logo (P9.4), the licence (RG-12) and the identity (RD-01); recorded under E.1 "Stage 9 decisions". Documentation only.
 > **Stage 9 planning, 2026-09-29:** E.1 "Stage 9 decisions (delegated by the owner)": D9-1 to D9-6;
@@ -1867,6 +1868,32 @@ Stage 4 revalidation is still required.
   source exists with an API and terms).
 - **Consequences:** S7.6 has no source path; its other scope is unchanged. RG-03 stays open only as
   the recorded candidate. Documentation only.
+
+### Stage 11 decisions (delegated by the owner, Stage 11 planning, 2026-09-30)
+
+- **Context:** Stage 11 planning (`refinement/POST_ROADMAP_PLAN.md`, "Stage 11 — frozen Task
+  sequence"), verified at `e6b6172`.
+- **Decided by:** the agent, under the owner's standing delegation in chat (2026-09-29: "do not ask me
+  anything; decide yourself"; 2026-09-30: "can Stage 11 be planned without a device?", then "start").
+  The owner may revisit any of them. The owner's own actions (the upload key, the policy URL, RD-01, a
+  store step, the go/no-go) are not decided here.
+- **D11-1 evidence by environment:** host tests → TEST VERIFIED; the emulator → RUNTIME VERIFIED
+  (emulator); the owner's phone → DEVICE VERIFIED; the owner or a participant → HUMAN VERIFIED. An
+  emulator run never satisfies a row that needs DEVICE, and a row's level is written in the matrix
+  before it is run.
+- **D11-2 what "mandatory for beta readiness" means:** the rows the release requirements make
+  mandatory (the plan's Stage 11 scope and exit, TASKs 15.4–16.4): the core loop on a physical Android
+  phone, the lifecycle rows, TalkBack on the core flow, the signed bundle and its install, the policy
+  live, no P0/P1 open, and the owner's go/no-go. S11.1 marks each row with its source.
+- **D11-3 the phone:** runs use a separate debug package (`.s2check`), never the owner's installed
+  app or data (S4.R1 §7); the owner's files are never uploaded or copied into the repository.
+- **D11-4 RD-15 (a local diagnostics export for the beta):** **not for the beta.** Stage 11 adds no
+  feature; beta triage uses the owner's reports, the in-memory `AppLog` and the recorded runs. Revisit
+  if triage lacks information.
+- **D11-5 RD-17 (push CI):** stays deferred by the owner's standing instruction (commit only, never
+  push); recorded as an OWNER ACTION row.
+- **D11-6 16.5 (listing and runbook):** not planned; only if the owner decides to release (Appendix B).
+- **Consequences:** S11.1–S11.7 follow them. Documentation only.
 
 ### Stage 10 decisions (delegated by the owner, Stage 10 planning, 2026-09-30)
 

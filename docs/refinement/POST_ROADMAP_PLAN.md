@@ -5803,6 +5803,103 @@ outcome, recorded with its evidence.
   the owner's go/no-go is recorded. *Amended 2026-09-27:* blockers are judged by V4 and the list
   above, and the readiness record exists.
 
+#### Stage 11 — frozen Task sequence (planning, 2026-09-30)
+
+Planned at `e6b6172`, after Stage 10 closed. **S10.6's full-gate PASS is Stage 11's baseline, reused
+(V3)**: 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart`
+(1); Flutter 3.47.4 (only test code and documents changed since). Planning is documentation only. The
+owner asked in chat (2026-09-30) whether Stage 11 can be planned without a device, then said to start.
+
+**Decisions.** Under the owner's standing delegation ("do not ask me anything; decide yourself"),
+recorded in DECISIONS E.1, "Stage 11 decisions (delegated by the owner)" (D11-1 to D11-6). The owner's
+own actions stay the owner's (the upload key, the policy URL, RD-01, a store step, the go/no-go), as
+this plan names them.
+
+**The inputs, verified at `e6b6172` and on this machine (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| Environments | The development machine now has an Android emulator (`Medium_Phone_API_36.1`: Android 16, x86_64, Google Play image, a user build without root; TalkBack, Chrome and the Play Store installed; the Backup Manager off with no transport; 4.8 GB free). Profile and release builds install and run on it (Stage 10). The owner's phone (Xiaomi 14T Pro, Android 16) passed M1–M4 on 2026-09-26 and is not connected now. No low-end phone | D11-1; S11.3, S11.5 |
+| Carried device rows | `TEST_PLAN.md`: L1–L8 "Not run"; the E2E "Emulator run: not done"; M1–M4 passed (seekable paths); S2V-06 (a non-seekable provider; a real backup's preview cancel) and S3V-08 unrun. Appendix B: 2.4 (America/Los_Angeles at 18:30 shows tonight), 10.4 and 15.2 (device timings; Stage 10's phone runs, S10V-04), 12.4 (red mode in darkness), 12.5 (owner walkthrough), 14.4 (emulator round trip; Auto Backup), 15.3 (TalkBack), 15.4, 15.5, 16.1–16.4 | S11.1 matrix; S11.3, S11.5, S11.6 |
+| Test documentation drift | `TEST_PLAN.md`'s end-to-end section still describes Save → Start → frames → the resume prompt → Finish (the tracker left in S8.4) and "no Android device or emulator"; trap 18 says the same | S11.2 (recorded, corrected there) |
+| Release | The upload key and `key.properties` do not exist (owner); `tool/check_bundle.dart` refuses a debug-signed bundle, as designed; the source and policy links return 404 (TD-088, RD-01 deferred by the owner) | OWNER ACTION rows |
+| Owner decisions open | RD-01 (deferred), RG-12 (deferred), the logo (deferred), RD-15 (a diagnostics export; this Stage's planning), RD-17 (the push; deferred by the owner's standing instruction to commit only) | D11-4, D11-5 |
+
+**Rules for every Task:**
+- **Contract only** (the plan's "one bounded final validation"): every check comes from S11.1's matrix;
+  nothing is added by "anything else". A newly exposed severe regression may still block (V4 C).
+- **Evidence levels** (D11-1) are stated per row; an emulator run is never recorded as DEVICE
+  VERIFIED, a widget test never as device evidence, code never as usability evidence.
+- **Corrections:** a blocker becomes a corrective Task `S11.Cn` in its owning scope, verified at its V1
+  class; only the affected row is rechecked (V5, V7). A non-blocking finding is recorded (FOLLOW-UP,
+  DEFERRED) and not fixed inside an evidence Task.
+- **Device safety:** a run on the owner's phone uses a separate debug package (`.s2check`, local build
+  change reverted) and never replaces or reads the owner's app data (S4.R1 §7); nothing is uploaded
+  from the owner's files; the emulator holds no owner data.
+- **No push** (the owner's instruction); signing material never touched (trap 21).
+- **One Task per commit**; `TEST_PLAN.md` records every device or emulator run (build, device, commit,
+  date, result), and `PROGRESS.md` the state.
+
+| Task | Title | Where | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S11.1 | The validation matrix: the frozen contract, each row with its source, its required evidence level, its environment and whether it is mandatory for beta readiness | Documents | M | — | Not started |
+| S11.2 | Host evidence: the matrix's host rows (tests, the accessibility sweep's coverage, degraded states, error handling of the changed writes, portability of names and results, the scientific invariants), and `TEST_PLAN.md`'s stale E2E and device text corrected | Host | M | S11.1 | Not started |
+| S11.3 | Emulator evidence: the E2E on the emulator (15.5), 2.4's America/Los_Angeles check, L1–L6 and L8, the refused-database flow (S1.5), backup and restore round trip and Auto Backup (14.4), permissions, offline, a release build installed and the core loop walked (16.1's install part) | Emulator | M | S11.1 | Not started |
+| S11.4 | Live providers and compliance: Open-Meteo, Nominatim (opt-in), OSM tiles, the light-pollution link from the emulator; AC7 (dependency licences, HTTPS only, no secrets, `COMPLIANCE.md` and the privacy policy against the code); Play's current closed-testing rules for 16.4 (web, cited) | Emulator; host; web | S–M | S11.1 | Not started |
+| S11.5 | The phone and owner runbook: every row that needs the phone or a person (Stage 10's phone runs, TalkBack on the new flows, red mode in darkness, the 12.5 walkthrough, the comprehension scenarios of 11.Z, S2V-06, S3V-08, L7 when a beta exists), with steps and what to record; and the OWNER ACTION list with what each unblocks | Documents | S | S11.1 | Not started |
+| S11.6 | Phone runs: the runbook's agent-run rows over USB, when the owner connects the phone | Phone | M | S11.5 | Waits for the phone |
+| S11.7 | The readiness record and the final validation (fresh session): VERIFIED, UNVERIFIED, OWNER ACTION, DEFERRED; readiness is not claimed while a mandatory row is unverified; the owner's go/no-go recorded | Documents | S | S11.2–S11.4 (S11.6 when run) | Not started |
+
+**Order:** S11.1, then S11.2, S11.3 and S11.4 (any order), S11.5; S11.6 whenever the phone is
+available; S11.7 last. S11.7 may run before S11.6: the phone rows are then UNVERIFIED, and readiness
+is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-go) are the owner's.
+
+##### S11.1 — The validation matrix
+- **Scope:** `refinement/STAGE_11_MATRIX.md`, built only from the sources this plan names (Stage 11's
+  "The contract"): the approved decisions (ADR-019 and the E.1 Stage decisions), the frozen acceptance
+  of Stages 6–10 and their validation reports, the release and regression requirements (TASKs 15.3–16.4,
+  Appendix B), the scientific and domain invariants (the traps, `SCIENTIFIC_INTEGRITY.md`), the
+  accessibility rules, and the device flows. Each row: an ID, the check, its source, the evidence level
+  it needs, the environment (HOST, EMULATOR, PHONE, HUMAN, OWNER), mandatory for beta readiness or not
+  (with the reason), and its current evidence where a passed validation already holds it (reused, V3).
+- **Acceptance:** every carried item of Appendix B and every "Scope" and "What it checks" bullet of
+  Stage 11 maps to at least one row or is recorded as out of scope with the reason; no row without a
+  source.
+
+##### S11.2 — Host evidence
+- **Scope:** the matrix's HOST rows, from the reused gate where it covers them (V3) and from targeted
+  reading or probes otherwise. Corrects `TEST_PLAN.md`'s stale E2E description and trap 18's "no
+  emulator" (documentation drift).
+- **Acceptance:** each HOST row PASS with its evidence, or a finding classified by V4.
+
+##### S11.3 — Emulator evidence
+- **Scope:** the matrix's EMULATOR rows, with the steps of `TEST_PLAN.md` where they exist; debug or
+  release builds as each row says; the emulator's settings (the zone, airplane mode, "Don't keep
+  activities", storage fill, the Backup Manager) may be changed and are restored afterwards.
+- **Acceptance:** each row RUNTIME VERIFIED (emulator) or a finding; `TEST_PLAN.md` records each run.
+
+##### S11.4 — Live providers and compliance
+- **Scope:** the matrix's provider and compliance rows. Live calls only as the app makes them (its user
+  agent, the opt-in for Nominatim, no bulk requests). Play's rules from Google's current help pages,
+  cited with dates.
+- **Acceptance:** each row with evidence; `COMPLIANCE.md` re-checked (its verification stamp).
+
+##### S11.5 — The phone and owner runbook
+- **Scope:** `refinement/STAGE_11_DEVICE_RUNBOOK.md`: for each PHONE and HUMAN row the steps, the build,
+  what to record, who runs it; the OWNER ACTION list (upload key, signed bundle, policy URL and
+  contact, RD-01/TD-088, Data Safety entry, the account, trademark search, the go/no-go).
+- **Acceptance:** every PHONE, HUMAN and OWNER row of the matrix has an entry.
+
+##### S11.6 — Phone runs
+- **Scope:** the runbook's agent rows on the owner's phone, when connected (D11-3).
+- **Acceptance:** each run recorded in `TEST_PLAN.md`; DEVICE VERIFIED rows updated in the matrix.
+
+##### S11.7 — The readiness record and the final validation
+- **Scope:** `refinement/STAGE_11_VALIDATION.md` in a fresh session: the matrix judged per V4, one
+  pass; the readiness record in four groups; the Stage exit ("no P0/P1 open; the owner's go/no-go
+  recorded").
+- **Acceptance:** as the Stage's exit; readiness claimed only if every mandatory row is VERIFIED.
+
 ---
 
 ## 6. Traceability: audit findings → Stages
@@ -5920,7 +6017,7 @@ any implementation Task is created.
 | RD-12 | **LAPSED 2026-09-27** (the tracker's retirement; DECISIONS E.1, "Stages 6–11 amended after Stage 5"): the resume prompt goes with the tracker. ADR-019 §4 already expected Finish to lead to the result form; how a run still in progress at the upgrade reaches it is P8.4's audit. *(Was: should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish?)* | RT-10, UX-26; ADR-016 §11 | 8 | — |
 | RD-13 | **DECIDED 2026-09-29 (Stage 8 planning; delegated by the owner; DECISIONS E.1, "Stage 8 decisions", D8-3):** "Reported as planned" labels Completed-as-planned counts; existing accepted estimates cannot be told apart and are not relabelled; CALC-37/38 note that counts are the user's statements. Built by S8.1. *(Was: should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? Narrowed 2026-09-27 to the existing accepted-estimate events and the "reported as planned" label.)* | SCI-07 | 8 | — |
 | RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
-| RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
+| RD-15 | Does the beta need a local diagnostics export (`AppLog`)? *Decided 2026-09-30 (Stage 11 planning, delegated; E.1, D11-4): not for the beta.* | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | **RESOLVED (owner, 2026-09-26, S3.D; ADR-018 §7):** visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. Earlier: **resolved for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
 | RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 

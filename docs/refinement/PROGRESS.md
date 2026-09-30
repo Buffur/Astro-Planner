@@ -4,20 +4,34 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**Stage 10 closed**: validation PASS; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11).
-> **Next:** Stage 11 planning (Full Validation & Beta Readiness), when the owner asks; it needs the owner's phone and decisions.
+> **Last updated:** 2026-09-30 (**Stage 11 planned**: S11.1–S11.7 frozen; the phone rows wait for the phone).
+> **Next:** S11.1, the validation matrix.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 11 — Full Validation & Beta Readiness: Not started.** Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
+| Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | Stage 11 planning (below, "Next allowed action") |
+| Next Task | **S11.1** — the validation matrix |
 | Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Stage 11 planned, 2026-09-30** (documentation only; the plan's "Stage 11 — frozen Task sequence"):
+- Inputs verified at `e6b6172` and on this machine: the emulator (Android 16, Google Play image, TalkBack
+  installed, Backup Manager off, 4.8 GB free) can carry the E2E, most lifecycle rows, the refused
+  database, backup and restore, permissions, offline, live providers and a release install as RUNTIME
+  VERIFIED (emulator); the phone rows (Stage 10's phone runs, TalkBack, red mode in darkness) and the
+  human rows (the walkthrough, comprehension, the go/no-go) wait for the phone and the owner.
+  `TEST_PLAN.md`'s E2E text still describes the tracker (S11.2 corrects it).
+- **Frozen:** S11.1 matrix → S11.2 host, S11.3 emulator, S11.4 providers and compliance → S11.5 phone and
+  owner runbook → S11.6 phone runs (when connected) → S11.7 readiness record and final validation.
+  Decisions D11-1 to D11-6 (E.1): evidence by environment; what is mandatory for readiness; the phone
+  through `.s2check` only; **RD-15: no diagnostics export in the beta**; RD-17 stays the owner's; 16.5
+  only on a release decision.
+- **Verification:** the documentation class (V1). S10.6's gate is Stage 11's baseline (V3).
 
 **Stage 10 closed, 2026-09-30** (validation PASS, [report](STAGE_10_VALIDATION.md), `08652ca`; fresh
 independent session; S10.6's gate reused, V3; its own probes P1–P4 run and deleted):
@@ -578,7 +592,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
 | 10 | Performance & Application Size | Complete | 2026-09-30 | 2026-09-30 | **PASS** at `3cb67be` (fresh-session independent validation, [report](STAGE_10_VALIDATION.md)); no blocker; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11 |
-| 11 | Full Validation & Beta Readiness | Not started | — | — | — |
+| 11 | Full Validation & Beta Readiness | In progress (planned; S11.1–S11.7 frozen) | 2026-09-30 | — | — |
 
 ## Open research gates
 
@@ -621,7 +635,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-12 | The resume prompt's Finish | 8 | **Lapsed** 2026-09-27: the resume prompt goes with the tracker (E.1, "Stages 6–11 amended after Stage 5"); P8.4's audit covers a run still in progress at the upgrade |
 | RD-13 | Provenance of an accepted estimate | 8 | **Decided** 2026-09-29 (Stage 8 planning, delegated by the owner; E.1, "Stage 8 decisions", D8-3): "Reported as planned"; old estimates not relabelled. Built by S8.1 |
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
-| RD-15 | A local diagnostics export for the beta | 11 | Open |
+| RD-15 | A local diagnostics export for the beta | 11 | **Decided** 2026-09-30 (Stage 11 planning, delegated; E.1, D11-4): not for the beta; revisit if triage lacks information |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
 | RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
 
@@ -692,12 +706,11 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **Stage 11 planning** (Full Validation & Beta Readiness; the plan's "Stage 11"), when the owner asks
-   for it. Much of Stage 11 needs the owner: a physical device run (the lifecycle rows L1–L8, TalkBack,
-   field mode in darkness, Stage 10's phone runs), the upload key, the policy URL, RD-01/TD-088 and the
-   go/no-go.
-2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
-   P), S9.12 (RD-01: C, B or B′; TD-088). RD-01 and TD-088 must be settled before any store upload.
+1. **S11.1 — the validation matrix** (the plan's "Stage 11 — frozen Task sequence"), then S11.2, S11.3
+   and S11.4, then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
+2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5): connect the phone for S11.6;
+   the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
+   the go/no-go. The deferred gates S9.10 (logo) and S9.11 (RG-12) stay available.
 
 **Carried:**
 - Stage 10's phone runs (S10V-04): `integration_test/perf_scenarios_test.dart` on a physical
