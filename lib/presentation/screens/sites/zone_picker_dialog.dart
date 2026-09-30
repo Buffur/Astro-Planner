@@ -54,6 +54,9 @@ class _ZonePickerDialogState extends State<_ZonePickerDialog> {
               title: const Text('Unknown'),
               subtitle: const Text('Night uses mean solar time'),
               selected: widget.current == null,
+              // S11.C2 (S11H-03): the current choice is marked by more than
+              // colour (red on red in field mode).
+              trailing: widget.current == null ? const Icon(Icons.check) : null,
               onTap: () => Navigator.of(context).pop((zoneId: null)),
             ),
             const Divider(height: 1),
@@ -66,6 +69,9 @@ class _ZonePickerDialogState extends State<_ZonePickerDialog> {
                     dense: true,
                     title: Text(zone),
                     selected: zone == widget.current,
+                    trailing: zone == widget.current
+                        ? const Icon(Icons.check)
+                        : null,
                     onTap: () => Navigator.of(context).pop((zoneId: zone)),
                   );
                 },

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/app_palette.dart';
+
 import '../../../domain/models/camera_class.dart';
 import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
@@ -380,8 +382,10 @@ class _EquipmentEditor {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
+                            // S11.C2 (S11H-01): a derived value, in the
+                            // secondary text role (AA), not the disabled one.
                             style: TextStyle(
-                              color: Theme.of(context).disabledColor,
+                              color: AppPalette.of(context).textSecondary,
                             ),
                             decoration: const InputDecoration(
                               hintText: '23.50',
@@ -399,8 +403,10 @@ class _EquipmentEditor {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
+                            // S11.C2 (S11H-01): a derived value, in the
+                            // secondary text role (AA), not the disabled one.
                             style: TextStyle(
-                              color: Theme.of(context).disabledColor,
+                              color: AppPalette.of(context).textSecondary,
                             ),
                             decoration: const InputDecoration(
                               hintText: '15.70',
@@ -417,8 +423,7 @@ class _EquipmentEditor {
                           'Auto-calculated from Resolution × Pixel Size',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface
-                                    .withAlpha(128),
+                                color: AppPalette.of(context).textTertiary,
                               ),
                         ),
                         prefillNote(context, EquipmentSpec.sensorSize),

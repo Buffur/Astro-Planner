@@ -28,6 +28,7 @@ import '../../widgets/sky_darkness_widget.dart';
 import '../../shared/night_text.dart';
 import '../details/night_moon_screen.dart';
 import '../../../core/theme/app_palette.dart';
+import '../../../core/utils/quantity_text.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../shared/app_words.dart';
 import '../../shared/context_line.dart';
@@ -124,15 +125,20 @@ class HomeScreen extends StatelessWidget {
                             if (conditionsVm.currentAltitude != null)
                               // UX-15 (3): the altitude now, not on
                               // the planned night.
-                              'Altitude now':
-                                  '${conditionsVm.currentAltitude?.toStringAsFixed(1)}°',
+                              'Altitude now': QuantityText.degrees(
+                                conditionsVm.currentAltitude!,
+                                digits: 1,
+                              ),
                             // TASK 10.3: inside tonight's windows, not
                             // at culmination (possibly in daylight).
                             if (conditionsVm.imagingOpportunity case final o?)
                               'Max altitude in windows':
                                   o.maxAltitudeInWindowsDeg == null
                                   ? 'no window tonight'
-                                  : '${o.maxAltitudeInWindowsDeg!.toStringAsFixed(1)}°',
+                                  : QuantityText.degrees(
+                                      o.maxAltitudeInWindowsDeg!,
+                                      digits: 1,
+                                    ),
                           },
                           onTap: () => context.push(AppRouter.selectTarget),
                         ),

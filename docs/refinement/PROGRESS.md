@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.2 done**: 67 of 70 host rows pass; three presentation blockers → S11.C2).
-> **Next:** S11.C2 (the three host blockers), then S11.7 (a fresh session).
+> **Last updated:** 2026-09-30 (**S11.C2 done**: the three host blockers fixed; S11.1–S11.5 complete).
+> **Next:** S11.7 (the readiness record and the final validation, a fresh session); S11.6 when the phone is connected.
 
 ## Current state
 
@@ -14,10 +14,20 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.C2** — the rig editor's contrast, "Altitude now", the zone picker's selection; then **S11.7** |
-| Code baseline | **S11.C1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S11.7** — the readiness record and the final validation (fresh session); S11.6 when the owner connects the phone |
+| Code baseline | **S11.C2** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.C2 done, 2026-09-30** (corrective; S11H-01 to S11H-03; V5):
+- The rig editor's derived sensor size uses `AppPalette.textSecondary` and its note `textTertiary` (both
+  AA), not the disabled colour and a half-transparent onSurface; "Altitude now" and "Max altitude in
+  windows" go through `QuantityText.degrees` (the typographic minus, never "-0.0°"); the zone picker
+  adds a check to the current zone (not colour alone; red on red in field mode).
+- `stage11_host_fixes_test.dart` (4: the editor's contrast in light and dark, scrolled to the derived
+  fields; the minus below the horizon; the check), each mutation-checked.
+- **Verification:** shared presentation: the full gate after the change, **PASS** (1,844 tests, 2 skips;
+  host E2E 2 + 1; Flutter 3.47.4).
 
 **S11.2 done, 2026-09-30** ([evidence](evidence/STAGE_11_HOST_EVIDENCE.md); the gate at `9668a13` reused, V3):
 - **70 HOST rows: 67 PASS**, each with its test, code location or validation citation; five probes run and
@@ -660,6 +670,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
+| **Full quality gate PASS** (S11.C2): Encoding; Format; Analyze (no issues); 1,844 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S11.C2's commit**, on Flutter 3.47.4 | Ran after S11.C2's last change; supersedes the S11.C1 row below. Reusable while `git diff --stat <S11.C2 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S11.C1): Encoding; Format; Analyze (no issues); 1,840 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S11.C1's commit**, on Flutter 3.47.4 | Ran after S11.C1's last change; supersedes the S10.6 row below. Reusable while `git diff --stat <S11.C1 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.6): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.6's commit** (the lockfile without `sqlite3_flutter_libs`), on Flutter 3.47.4 | Ran after S10.6's last change; supersedes the S10.5 row below. Reusable while `git diff --stat <S10.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.5): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.5's commit**, on Flutter 3.47.4 | Ran after S10.5's last code change; supersedes the S10.3 row below. Reusable while `git diff --stat <S10.5 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
@@ -807,8 +818,8 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S11.2 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's
-   "Stage 11 — frozen Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
+1. **S11.7** (a fresh session) against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) and the evidence files
+   (host, emulator, providers and compliance); S11.1–S11.5 and S11.C1–S11.C2 are done; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
 2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5; S11P-03, Google Play services
    location in a GPL-3.0 app, also waits for the owner): connect the phone for S11.6;
    the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;

@@ -1,5 +1,7 @@
 # AstroPlan Feature Status
 
+> **S11.C2, 2026-09-30 (the rig editor, F-05; the planner, F-10; sites, F-07):** the rig editor's calculated sensor size and its note are readable (AA contrast); "Altitude now" and "Max altitude in windows" use the typographic minus; the time-zone picker marks the current zone with a check as well as colour.
+
 > **S11.C1, 2026-09-30 (the Logbook, F-42):** a plan saved in the planner while the Logbook was already open now appears as soon as the Logbook is shown again (it used to need a restart; TD-092).
 
 > **S10.5, 2026-09-30 (first run, F-01; the catalog, F-02; the Logbook):** the first launch seeds the target catalog in one database transaction, so it opens several times sooner (on an emulator 13–15 s → about 2 s before the first screen). Nothing else changes: the same catalog, the same retry on a failed row. The Logbook was measured at 300 sessions and needs no change.
