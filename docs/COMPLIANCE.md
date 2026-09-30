@@ -1,5 +1,15 @@
 # Legal and compliance record (TASK 16.3, PD-12)
 
+> **Re-checked 2026-09-30 (S11.4, at `9668a13`):** the three services' terms re-read on their
+> pages (unchanged in substance; the tile policy now also says a library's default user agent is
+> blocked and tiles must be cached by the server's headers or for at least 7 days — the app sends
+> its own user agent and flutter_map 8.3.2's built-in cache follows the headers), and this record
+> checked against the code, the merged release manifest and the built APK. Three statements were
+> corrected: the Open-Meteo request cadence, the position sent for the weather (a chosen, unsaved
+> position is sent too), and what the licence page lists (the Dart packages only). Evidence:
+> `refinement/evidence/STAGE_11_PROVIDERS_COMPLIANCE.md`. The policy URL still answers 404 (TD-088,
+> RD-01), so "Before an upload" 1 and 2 remain open.
+
 > **S9.5, 2026-09-29 (checked, not re-verified against the providers' terms):** the About screen
 > now credits each source with a link: OpenNGC (its GitHub page), "© OpenStreetMap contributors"
 > with openstreetmap.org/copyright, "Weather data by Open-Meteo.com (CC BY 4.0)" (the weather
@@ -25,18 +35,20 @@
   <https://chacha12.github.io/astro-planner/privacy/> (the app links there).
 - **Place-name lookups are opt-in** (Settings → "Look up place names", off by default).
 
-## Third-party terms, checked 2026-09-24
+## Third-party terms, checked 2026-09-24, re-checked 2026-09-30
 
-| Service | Terms (checked 2026-09-24) | How the app complies |
+| Service | Terms (checked 2026-09-24; re-checked 2026-09-30, S11.4) | How the app complies |
 | --- | --- | --- |
-| **Open-Meteo** forecast API | Free for non-commercial use: apps "that do not have subscriptions or advertising"; data CC BY 4.0 (attribution); limits 600/min, 5 000/h, 10 000/day, 300 000/month; IP addresses logged 90 days. <https://open-meteo.com/en/terms> | Free, no ads (owner decision). At most one request per night shown, cached (3 h / 12 h freshness, ADR-012). Attribution "Weather data by Open-Meteo.com (CC BY 4.0)" on the weather card and the About screen. Requests carry the app's user agent (since S1.1, 2026-09-25). |
+| **Open-Meteo** forecast API | Free for non-commercial use: apps "that do not have subscriptions or advertising"; data CC BY 4.0 (attribution); limits 600/min, 5 000/h, 10 000/day, 300 000/month; IP addresses logged 90 days. <https://open-meteo.com/en/terms> | Free, no ads (owner decision). One request per site and night, cached and reused while under 3 h old (ADR-012); asked again when the cached forecast is older, when the user taps Refresh, or when the app returns to the foreground with an outdated forecast (12 h is when it is shown as stale). Attribution "Weather data by Open-Meteo.com (CC BY 4.0)" on the weather card and the About screen. Requests carry the app's user agent (since S1.1, 2026-09-25). |
 | **OpenStreetMap tiles** | Attribution on the map; a distinct, stable user agent naming the app, with a contact where possible; honour caching headers; no bulk or offline download; "best-effort", access can be withdrawn without notice. <https://operations.osmfoundation.org/policies/tiles/> | "© OpenStreetMap contributors" on the map (linking to the copyright page) and on the About screen; user agent `Astro Planner/<version> (+https://chacha12.github.io/astro-planner/; io.github.chacha12.astroplanner)`; tiles only for the visible map; no offline download. **Risk:** heavy use or a policy change can end access — the map picker is optional (typed coordinates always work). |
 | **Nominatim** reverse geocoding | Max 1 request/s; identifying user agent; caching; attribution; no autocomplete, no systematic or periodic queries; apps must be able to switch service without a software update; heavy/commercial use not permitted. <https://operations.osmfoundation.org/policies/nominatim/> | Opt-in, off by default; ≤ 1 request/s; results cached per ~1 km; only on a user-chosen position; attribution with every place name. **Remaining gap:** a user who switches it on still uses the built-in endpoint — there is no remotely switchable endpoint; mitigated by the opt-in and by failures showing no name (the app never depends on it). Recorded in TD-031. |
 | **OpenNGC** catalog | CC BY-SA 4.0 (attribution, share-alike). | Full notice bundled and shown (TASK 8.2). |
 | **lightpollutionmap.app** (since S7.5, RG-09 = M2; was lightpollutionmap.info) | Opened in the browser only, through its documented coordinate link (`?lat=…&lng=…&zoom=…`, its `llms.txt`); the app fetches nothing from it. | The link carries only the coordinates, when the user taps it; named on the About screen and in the privacy policy. |
 
 Dependency licences are shown by Flutter's licence page (About → Open-source licences),
-generated from the packages' own `LICENSE` files.
+generated from the Dart packages' own `LICENSE` files. *(Corrected 2026-09-30, S11.4:)* the
+Android libraries that the plugins add (AndroidX, Kotlin coroutines, Google Play services
+location) are not listed there.
 
 ## Google Play: Data Safety form (draft answers)
 
@@ -49,8 +61,9 @@ console's current help texts). Conservative where Play's definitions are unclear
     receives a rounded position only when the user switches it on) and *shared* with those
     third parties. Purpose: **App functionality**. Not used for ads, analytics or
     personalisation; not linked to the user's identity (no account). Collection is
-    **required** for the weather feature (a site's coordinates are sent automatically when
-    online); the GPS fix itself is optional.
+    **required** for the weather feature (the active site's coordinates, or those of a
+    chosen position not saved as a site — a map pick or GPS fix — are sent automatically when
+    online, unrounded); the GPS fix itself is optional.
   - Everything else — personal info, financial info, health, messages, photos and videos,
     audio, files, calendar, contacts, app activity, web browsing, app info and performance
     (no crash reporting), device or other IDs: **not collected**.

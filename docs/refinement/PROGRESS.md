@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.C1 done**: the Logbook's stale list fixed, TD-092; the S11.3 blocker closed).
-> **Next:** S11.2 (host evidence) and S11.4 (providers and compliance).
+> **Last updated:** 2026-09-30 (**S11.4 done**: providers and compliance; no blocker; live provider rows carried to the phone).
+> **Next:** S11.2 (host evidence), then S11.7 (the readiness record, a fresh session).
 
 ## Current state
 
@@ -14,10 +14,28 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.2** (host) and **S11.4** (providers and compliance) |
+| Next Task | **S11.2** (host), then **S11.7** |
 | Code baseline | **S11.C1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.4 done, 2026-09-30** ([evidence](evidence/STAGE_11_PROVIDERS_COMPLIANCE.md); no blocker):
+- **PASS:** N10 (target API 36; 16 KB pages), O5 (the providers' terms re-read), O7 (no secrets; HTTPS
+  only; no cleartext), O8 (`COMPLIANCE.md` and the policy against the code, after three factual
+  corrections to `COMPLIANCE.md`), Q2 (Play's rules, cited: a new personal account needs a closed test
+  with at least 12 testers for 14 days before production; API 36 from 31 Aug 2026; 16 KB pages).
+- **UNVERIFIED on this machine, carried to the phone (S11.6):** O1 Open-Meteo, O2 Nominatim, O3 OSM
+  tiles, O4 the light-pollution link, G6 About's page loads: the emulator's HTTPS is intercepted by the
+  host's antivirus ("Trust anchor … not found"); one host request each confirmed the request contract
+  (O2: see TD-097).
+- **PARTIAL:** O6 licences: the 114 runtime Dart packages are GPL-compatible and on the licence page;
+  the Android libraries' notices are not (TD-098); **S11P-03: `geolocator_android` bundles Google Play
+  services location (proprietary) in the GPL-3.0 app — an owner decision** (accept and state it, or use
+  the platform location manager: a code change).
+- **NOT MET (owner):** O9 the policy is unpublished (404) with `<CONTACT EMAIL>` (TD-088, RD-01).
+- Follow-ups: TD-097 (`municipality`), TD-098 (notices), TD-099 (the policy's weather wording). The
+  emulator's automatic time is back on.
+- **Verification:** documentation and evidence only; `COMPLIANCE.md` restamped.
 
 **S11.5 done, 2026-09-30** ([`STAGE_11_DEVICE_RUNBOOK.md`](STAGE_11_DEVICE_RUNBOOK.md); documentation only):
 every PHONE, HUMAN and OWNER row of the matrix has an entry: how phone runs are done (`.s2check`, never
@@ -776,7 +794,8 @@ These block a release, not refinement.
 
 1. **S11.2 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's
    "Stage 11 — frozen Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
-2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5): connect the phone for S11.6;
+2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5; S11P-03, Google Play services
+   location in a GPL-3.0 app, also waits for the owner): connect the phone for S11.6;
    the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
    the go/no-go. The deferred gates S9.10 (logo) and S9.11 (RG-12) stay available.
 
