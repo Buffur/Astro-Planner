@@ -3,7 +3,7 @@
 // timing; on an Android device or emulator, in profile mode, they record
 // frame timings (build and raster) and elapsed times:
 //
-//   flutter drive --profile -d <device> \
+//   flutter drive --profile --no-dds -d <device> \
 //     --driver=test_driver/perf_driver.dart \
 //     --target=integration_test/perf_scenarios_test.dart
 //
@@ -332,7 +332,17 @@ void main() {
       await tap(tester, find.byKey(const Key('blockDialog.submit')));
     });
     await watch('planner.blockEdit', () async {
-      for (final n in [40, 44, 48, 52]) {
+      // Two exposure edits, then two frame-count edits.
+      for (final s in [240.0, 180.0]) {
+        await tester.runAsync(
+          () => vm.plan.updateCaptureBlock(
+            0,
+            vm.plan.captureBlocks.first.copyWith(exposureTimeSeconds: s),
+          ),
+        );
+        await settle(tester, 3);
+      }
+      for (final n in [40, 44]) {
         await tester.runAsync(
           () => vm.plan.updateCaptureBlock(
             0,
@@ -355,10 +365,11 @@ void main() {
       });
       await settle(tester, 12);
     });
-    final section = find.byKey(const Key('section.budgetDetails'));
-    if (section.evaluate().isNotEmpty) {
-      await watch('planner.section', () => tap(tester, section));
-    }
+    // The budget's detail section (PlannerSections.budgetDetails).
+    final section = find.byKey(const Key('section.planner.budgetDetails'));
+    await tester.scrollUntilVisible(section, 300, scrollable: list);
+    await settle(tester, 3);
+    await watch('planner.section', () => tap(tester, section));
 
     // 3. The detail screens.
     await watch('detail.nightMoon', () async {

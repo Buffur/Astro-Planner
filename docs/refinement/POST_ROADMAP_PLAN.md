@@ -5619,7 +5619,8 @@ not set.
 | S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | **Done 2026-09-30** (measured; not adopted, recorded for the owner) |
 
 **Order:** S10.1 → S10.2 → S10.3 → S10.4 → S10.5 → S10.6 → S10.7, then the Stage 10 validation (a
-fresh session). S10.4, S10.5 and S10.7 may end with "measured, no change needed": that is a valid
+fresh session). *Closed 2026-09-30:* validation PASS (`refinement/STAGE_10_VALIDATION.md`); its four
+follow-ups fixed or carried (`PROGRESS.md`). S10.4, S10.5 and S10.7 may end with "measured, no change needed": that is a valid
 outcome, recorded with its evidence.
 
 ##### S10.1 — The size baseline

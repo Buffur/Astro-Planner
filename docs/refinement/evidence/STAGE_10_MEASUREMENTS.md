@@ -402,3 +402,32 @@ measured on an arm64-v8a release APK built at `43523bb` (`flutter build apk --re
 **Stage 10's size result:** the release baseline stands (arm64-v8a APK 24.8 MB, 27.8 MB installed on
 the emulator). No reduction is claimed; the only material options found cost diagnostics and are left
 to the owner, recorded. The 277 MB was a debug install (S10.1).
+
+## After the Stage 10 validation (S10V-01 to S10V-04, 2026-09-30)
+
+- **S10V-01 (the suite):** the "open a section" step looked for `section.budgetDetails`, but the key
+  is `section.planner.budgetDetails`, and an `if` skipped it silently; the block edits changed only
+  frame counts. Fixed: the step scrolls to the real key and always runs; `planner.blockEdit` now makes
+  two exposure edits (240 s, 180 s) and two frame-count edits. One emulator run (profile, indicative):
+
+  | Scenario | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster over |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | Planner: two exposure and two count edits | 11 | 4.8 | 9.1 | 9.5 | 0 | 13.1 | 1 |
+  | Planner: the budget's detail section opened | 10 | 4.1 | 8.1 | 12.5 | 0 | 25.6 | 6 |
+
+  Both within the frame for the app's work; S10.4's reading stands. The same run's seed took 2,637 ms
+  (S10.5's range).
+- **S10V-02:** the suite's header command now includes `--no-dds`.
+- **S10V-03 (the size record):** the two arm64 APK figures differ by build command, not by code.
+  `--split-per-abi` (S10.1, S10.6: 24,768,842 bytes) packs only arm64 libraries;
+  `--target-platform android-arm64` (S10.7: 25,009,082 bytes) also packs two plugins' prebuilt
+  libraries for armeabi-v7a and x86_64 (`libdartjni.so`, `libdatastore_shared_counter.so`: 209,032
+  bytes) and a longer `NativeAssetsManifest.json`. S10.7's savings compare builds made with one
+  command, so they stand. **D10-3's wording:** "what a phone receives" is measured as the
+  `--split-per-abi` APK, a proxy for the split Play serves from the bundle (Play serves the same
+  arm64 code and compresses the download); the store's exact download size is reported by Play after
+  an upload (owner, Stage 11).
+- **S10V-04:** "responsive on representative hardware" stays **UNVERIFIED** (D10-1): every frame
+  number here is from an emulator with an emulated GPU. Carried to Stage 11 as phone runs of this
+  suite (the rig editor's focus, the planner and timeline, the Logbook at 300 sessions, first-run
+  seeding), with the same command.

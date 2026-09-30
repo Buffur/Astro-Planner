@@ -4,20 +4,38 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S10.7 done**: build options measured; S10.1–S10.7 complete).
-> **Next:** the Stage 10 validation (a fresh, independent session).
+> **Last updated:** 2026-09-30 (**Stage 10 closed**: validation PASS; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11).
+> **Next:** Stage 11 planning (Full Validation & Beta Readiness), when the owner asks; it needs the owner's phone and decisions.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 10 — Performance & Application Size: In progress** (planned 2026-09-30; S10.1–S10.7 **done**; the validation is next). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
+| Current Stage | **Stage 11 — Full Validation & Beta Readiness: Not started.** Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **The Stage 10 validation** (fresh session) |
+| Next Task | Stage 11 planning (below, "Next allowed action") |
 | Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Stage 10 closed, 2026-09-30** (validation PASS, [report](STAGE_10_VALIDATION.md), `08652ca`; fresh
+independent session; S10.6's gate reused, V3; its own probes P1–P4 run and deleted):
+- No V4 blocker. Four follow-ups, handled at once (the owner's standing request to fix every finding):
+  - **S10V-01:** the suite's section step used a wrong key and skipped silently, and no exposure was
+    edited. Fixed; one emulator run recorded (both within the frame).
+  - **S10V-02:** the suite's header command gains `--no-dds`.
+  - **S10V-03:** the two arm64 APK sizes differ by build command (`--target-platform` also packs
+    other ABIs' plugin libraries, 209,032 bytes); D10-3's "what a phone receives" is the
+    `--split-per-abi` proxy. Recorded in the evidence file.
+  - **S10V-04:** "responsive on representative hardware" stays UNVERIFIED (D10-1). **Carried to
+    Stage 11:** phone runs of `perf_scenarios_test.dart` (the rig editor's focus, the planner and
+    timeline, the Logbook at 300 sessions, first-run seeding).
+- Notes kept: large text not profiled (nothing changed); ENG-11 closed for the session list; at a
+  future dependency upgrade check that `sqlite3_flutter_libs` 0.5.x does not return (N3); the gate
+  runs no E2E step if `integration_test/` were empty (N4).
+- **Verification (the follow-ups):** test code only: format and analyze clean; the suite passes on the
+  host and ran on the emulator. The gate's other inputs are unchanged since S10.6's PASS.
 
 **S10.7 done, 2026-09-30** (build and release options; [record](evidence/STAGE_10_MEASUREMENTS.md) §S10.7):
 - Measured on an arm64 release APK: `--split-debug-info` −1.31 MB (−5.2 %), `--obfuscate` −0.20 MB
@@ -559,7 +577,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 7 | Data Entry & Automation | Complete | 2026-09-28 | 2026-09-29 | **BLOCKED** at `d13fdab` (fresh-session independent validation): S7V-01 / TD-083 and S7V-02 / TD-084; S7.V1 (`46e7688`) and S7.V2 (`d28f5a8`); **V5 revalidation PASS** at `21e9cb1` ([report](STAGE_7_VALIDATION.md); same chat at the owner's request, disclosed) |
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
-| 10 | Performance & Application Size | In progress (planned; S10.1–S10.7 frozen) | 2026-09-30 | — | — |
+| 10 | Performance & Application Size | Complete | 2026-09-30 | 2026-09-30 | **PASS** at `3cb67be` (fresh-session independent validation, [report](STAGE_10_VALIDATION.md)); no blocker; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11 |
 | 11 | Full Validation & Beta Readiness | Not started | — | — | — |
 
 ## Open research gates
@@ -674,15 +692,16 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **The Stage 10 validation** (a fresh, independent session; the plan's "Stage 10 — frozen Task
-   sequence" and the Stage's exit): it judges S10.1–S10.7's acceptance and the exit against
-   [`evidence/STAGE_10_MEASUREMENTS.md`](evidence/STAGE_10_MEASUREMENTS.md), reusing the recorded runs (V3).
+1. **Stage 11 planning** (Full Validation & Beta Readiness; the plan's "Stage 11"), when the owner asks
+   for it. Much of Stage 11 needs the owner: a physical device run (the lifecycle rows L1–L8, TalkBack,
+   field mode in darkness, Stage 10's phone runs), the upload key, the policy URL, RD-01/TD-088 and the
+   go/no-go.
 2. The deferred owner gates stay available at any time: S9.10 (logo A–D), S9.11 (RG-12: G, N, S or
-   P), S9.12 (RD-01: C, B or B′; TD-088). A decision adds its implementing Task then; RD-01 and TD-088
-   must be settled before any store upload (Stage 11). Optionally, the owner may say where the 277 MB
-   was read (S10.1 classifies it either way).
+   P), S9.12 (RD-01: C, B or B′; TD-088). RD-01 and TD-088 must be settled before any store upload.
 
 **Carried:**
+- Stage 10's phone runs (S10V-04): `integration_test/perf_scenarios_test.dart` on a physical
+  phone in profile mode (Stage 11); until then "responsive on representative hardware" is UNVERIFIED;
 - S4-DEF-04 decided (R) and built by S6.3; S4-DEF-01 to S4-DEF-03 and S4-DEF-05 to S4-DEF-08 decided
   at Stage 8 planning (E.1, "Stage 8 decisions") and built by S8.1–S8.7;
 - S4V-02: done (S6.E step 1, 2026-09-28);
