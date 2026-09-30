@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.4 done**: providers and compliance; no blocker; live provider rows carried to the phone).
-> **Next:** S11.2 (host evidence), then S11.7 (the readiness record, a fresh session).
+> **Last updated:** 2026-09-30 (**S11.2 done**: 67 of 70 host rows pass; three presentation blockers → S11.C2).
+> **Next:** S11.C2 (the three host blockers), then S11.7 (a fresh session).
 
 ## Current state
 
@@ -14,10 +14,25 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.2** (host), then **S11.7** |
+| Next Task | **S11.C2** — the rig editor's contrast, "Altitude now", the zone picker's selection; then **S11.7** |
 | Code baseline | **S11.C1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.2 done, 2026-09-30** ([evidence](evidence/STAGE_11_HOST_EVIDENCE.md); the gate at `9668a13` reused, V3):
+- **70 HOST rows: 67 PASS**, each with its test, code location or validation citation; five probes run and
+  deleted (a name and results through two kills and v24 → v25; the map with every tile failing; the
+  editors and the filter panel in the sweep's audit, three themes at 100 % and 200 %; Roboto checks).
+- **Blockers (V4 A, each against a frozen row):** **S11H-01** the rig editor's auto-calculated sensor size
+  and its note fail AA contrast (2.66:1 and 2.81:1 in light; `disabledColor`, `onSurface.withAlpha(128)`;
+  H1); **S11H-02** "Altitude now" formatted by hand (`home_screen.dart:128`): a hyphen-minus and a
+  possible "-0.0°", not `QuantityText.degrees` (C8); **S11H-03** the zone picker marks the current zone by
+  colour alone (`ListTile.selected`; red on red in field mode; H5). → **S11.C2**.
+- Follow-ups: TD-100 (sweep coverage; the target editor's dropdown), TD-101 (hand-formatted quantities),
+  TD-102 (probe-only checks), TD-103 (a `print`).
+- Documentation drift corrected: `TEST_PLAN.md` (the lifecycle header, L2's button, L7's schema, the 15.3
+  and 12.4 checklists, the E2E section) and CLAUDE.md traps 18 and 19.
+- **Verification:** the documentation class (V1).
 
 **S11.4 done, 2026-09-30** ([evidence](evidence/STAGE_11_PROVIDERS_COMPLIANCE.md); no blocker):
 - **PASS:** N10 (target API 36; 16 KB pages), O5 (the providers' terms re-read), O7 (no secrets; HTTPS

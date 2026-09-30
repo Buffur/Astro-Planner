@@ -734,9 +734,12 @@ the ADR-012 variables, and a real out-of-range error):
   PD-06 schedule); Home's gating test expects the planner's field-mode button.
 - **Owner checklist (manual, not yet done):** on an Android device in real darkness, with
   field mode on, go through Tonight, the planner, the date picker, a delete confirmation,
-  a snackbar, the site map picker and Settings; look for any non-red or bright pixel and
-  any white flash on navigation or restart. The status and navigation bars are the
-  system's and are out of scope (no system-brightness control).
+  a snackbar, the site map picker, Settings, the result form and the Logbook; look for any
+  non-red or bright pixel and any white flash on navigation or restart. The status and
+  navigation bars are the system's and are out of scope (no system-brightness control).
+  *(Corrected S11.2, 2026-09-30: the result form and the Logbook, screens of Stage 8, were
+  added, as the Stage 11 matrix's row I2 lists them; the steps are in
+  `refinement/STAGE_11_DEVICE_RUNBOOK.md`.)*
 
 **Added by TASK 12.5** (Tonight dashboard, first run), 14 tests (665):
 - **`screens/tonight/tonight_home_screen_test.dart` (14):** no site (site prompt, no night
@@ -894,13 +897,20 @@ the ADR-012 variables, and a real out-of-range error):
   overflow in the sky card (even at 100 % on a 412 px phone), the chart legend, the
   candidates' dropdowns, the budget lines, the fit row and the Sequence Plan header at
   200 %; field-mode secondary text 2.71:1.
-- **Not covered:** dialogs, the map picker, the hidden metadata import.
+- **Not covered:** dialogs, the map picker, the hidden metadata import. *(S11.2, 2026-09-30:
+  the metadata import is in the sweep since S3.7, the result form since S8.2, and the Library
+  lists, Settings, About, Night & Moon and Weather since Stages 6–9; the rig, target and block
+  editors, the Logbook's filter panel and the map picker are still outside it.)*
 - **Owner checklist (manual, not yet done):** the roadmap asks for a recorded TalkBack
   walkthrough. On an Android device with TalkBack on and the font size at its largest:
-  first run → set a site → Tonight → open the planner, pick a target and a rig, hear the
-  altitude chart's description, save → start the run, confirm frames → finish and complete
-  → Sessions → the session's detail. Note anything unlabeled, read in a confusing order,
-  or cut off; repeat the tracker part in field mode.
+  first run → set a site → Tonight → the planner's answer → open a collapsible section →
+  pick a target and a rig → add, edit and delete a capture block, and Undo → hear the
+  timeline's description → Save plan → (after the saved night has ended) Tonight's "Last
+  night: … How did it go?" → the result form → Save result → the Logbook entry. Note
+  anything unlabeled, read in a confusing order, or cut off; repeat the core part in field
+  mode. *(Corrected S11.2, 2026-09-30: the steps walked the live tracker (start the run,
+  confirm frames, finish and complete), which left in S8.4; these are the steps of the Stage
+  11 matrix, row H6, and `refinement/STAGE_11_DEVICE_RUNBOOK.md`.)*
 
 **Added by TASK 15.4** (lifecycle matrix, host rows), 7 tests (878):
 - **`lifecycle/lifecycle_matrix_test.dart` (7):** L1, L3, L4, L5 (2), L6, L8 of the
@@ -911,8 +921,11 @@ the ADR-012 variables, and a real out-of-range error):
 
 The roadmap's device matrix. **Host** = automated in `flutter test` (runs in the quality
 gate); **Device** = the scripted manual step on an Android phone or emulator. Status as of
-2026-09-24: every host check passes; **no device row has been run** — no Android device or
-emulator exists on the development machine, and the Android build has never been run.
+2026-09-24 (history): every host check passed; no device row had been run, because no Android
+device or emulator existed on the development machine then. *(Corrected S11.2, 2026-09-30: that
+is no longer so. An Android 16 emulator exists on the development machine since 2026-09-30, and
+L1–L6 and L8 passed on it (S11.3; the note below). No row has been run on a physical phone yet,
+and L7 waits for a beta.)*
 Record each device run below the table (date, device, Android version, build, result).
 *2026-09-30 (S11.3):* the development machine now has an Android 16 emulator; L1–L6 and L8 were
 run on it (below). An emulator run is RUNTIME VERIFIED, not device evidence (Stage 11, D11-1); the
@@ -921,12 +934,12 @@ phone rows stay for S11.6.
 | Row | Scenario | Host (automated) | Device steps (manual) | Device result |
 | --- | --- | --- | --- | --- |
 | L1 | Fresh install while offline | `lifecycle/lifecycle_matrix_test.dart` L1: first-run page, location denied changes nothing, a typed site gives the night and the opportunity, forecast "unavailable" | Airplane mode on; install the APK on a clean device; open. Expect the first-run page. Skip; set a site by typing coordinates; open the planner: night times, the chart and the plan work; the weather card says no forecast, with Retry; no crash, no spinner that never ends. | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator)) |
-| L2 | Location permission denied, and denied forever | `location_picker_screen_test.dart` (services off, plain denial, denied forever with "Open settings"), `planner_location_test.dart` (each failure reported, nothing changed) | "Use current position" → Deny: an explanation, the site unchanged. Deny again with "Don't ask again" (or twice on Android 11+): the explanation offers "Open settings", which opens the app's settings page. Turn location services off: "Open location settings". | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator); the button reads "Open settings" in both cases, and opens the right page) |
+| L2 | Location permission denied, and denied forever | `location_picker_screen_test.dart` (services off, plain denial, denied forever with "Open settings"), `planner_location_test.dart` (each failure reported, nothing changed) | "Use current position" → Deny: an explanation, the site unchanged. Deny again with "Don't ask again" (or twice on Android 11+): the explanation offers "Open settings", which opens the app's settings page. Turn location services off: the explanation offers "Open settings", which opens the system's Location page. *(Corrected S11.2: the button was written here as "Open location settings"; the app says "Open settings" in both cases, as `location_picker_screen_test.dart` expects.)* | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator); the button reads "Open settings" in both cases, and opens the right page) |
 | L3 | "Don't keep activities" while planning | L3: plan, night, target, site and field mode restored after the database is closed and reopened | Developer options → Don't keep activities ON. Edit the plan (target, night, a block), turn field mode on, press Home, reopen from recents: everything is as left. Repeat after `adb shell am kill io.github.chacha12.astroplanner`. | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator) for the data; after a process kill the app reopens on Tonight, not the planner (the route is not restored; a follow-up)) |
 | L4 | Process death around a saved night *(replaced S8.4: the tracker left)* | L4: a kill after the saved night keeps the saved plan on its night and continues on one copy (no second copy on a second kill); an old run in progress keeps its counts across kills and can still be recorded. Also `saved_plan_transition_test` (restart), `drift_session_execution_test` (restart from events) | Save a plan; swipe the app away (or `adb shell am kill`) during the night; reopen after dawn: Tonight shows "Last night: … How did it go?", the planner is on a copy, the saved plan is in the Logbook on its night. Kill and reopen again: still one copy. | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator)) |
 | L5 | Rotation and theme changes | L5: typed site-editor input survives rotation, dark mode and field mode; every screen lays out in landscape (915 × 412) | Auto-rotate on. On the planner, the site editor (with typed text) and the result form: rotate both ways; switch system dark mode; toggle field mode. Nothing typed is lost, nothing is cut off, the form keeps its choice. *(S8.4: the tracker left the list.)* | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator)) |
 | L6 | A time-zone change after the night *(replaced S8.4)* | L6: moving to another site and zone changes nothing in the result form's review of a saved night (plan snapshot, UTC instants). `open_meteo_forecast_test` (UTC independent of the device zone), `session_night_resolver_test`; the E2E records a result across a DST change | Save a plan at a site with a zone. After the night, Settings → Date & time → automatic zone off → pick a zone several hours away; open the result form: the night and times are unchanged (the site's zone). Change back. A site without a zone shows times in the device zone, labelled so. | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator), first part; a site without a zone cannot be made in the UI) |
-| L7 | Upgrade from the beta database | `schema_migration_test.dart` (every schema v8–v16 → v17, data kept; refusal below v8 and above the app), `backup_restore_test.dart` (older schema accepted); L3/L4 reopen a v17 file | No beta has shipped; its schema will be v17. When the beta exists: install it, create sites, rigs, targets and sessions (one with a run), then install the next build over it (`adb install -r`): everything is kept, the run resumes. Any later schema bump must add a v17 → vN migration test (the TASK 3.2 workflow). | Not run (no beta yet) |
+| L7 | Upgrade from the beta database | `schema_migration_test.dart` (every schema v8–v24 → v25, each version's group, data kept; refusal below v8 and above the app), `backup_restore_test.dart` (older schema accepted); L3/L4 reopen a v25 file | No beta has shipped; its schema will be the one of the build uploaded (v25 today). When the beta exists: install it, create sites, rigs, targets and saved plans with results (one named), then install the next build over it (`adb install -r`): everything is kept (names, results, the Logbook). Any later schema bump must add a v25 → vN migration test (the TASK 3.2 workflow). *(Corrected S11.2, 2026-09-30: this row named the beta's schema as v17 and asked for a run that resumes; the schema is v25 since S8.6, and the live tracker left in S8.4.)* | Not run (no beta yet) |
 | L8 | Low storage | L8: a full disk (SQLITE_FULL) while planning (autosave banner, Save message) and recording a result (Save result message, nothing written, the choice kept) loses nothing stored and recovers; `storage_failure_test.dart` | Fill the device (e.g. `adb shell dd if=/dev/zero of=/sdcard/fill bs=1M count=<free MB>`), then edit a plan, Save, record a result, back up: each says it could not be saved; nothing crashes. Delete the fill file: the next edit and Save result work. *(S8.4 replaced the tracker's +1.)* | **Passed 2026-09-30 on the emulator** (RUNTIME VERIFIED, emulator; `evidence/STAGE_11_EMULATOR_RUNS.md`: Passed (emulator), with notes (one Save succeeded on the full disk; the autosave banner outlived that Save)) |
 
 **Found and fixed by TASK 15.4 (host rows):** with a full disk, the tracker's buttons
@@ -969,33 +982,45 @@ The Kotlin side of document access (`MetadataDocumentChannel.kt`) runs only on A
 `integration_test/core_loop_test.dart` (2 tests) drives the real UI; the database is a real
 SQLite file, the network (forecast), GPS, the device zone and the share sheet are fakes.
 
-- **The core loop, with a restart:** first-run Skip → a site typed in the Sites editor
-  (the zone defaults to the device zone) → Tonight → the planner → M31 and the seeded rig
-  through the pickers → the night (10 Nov 2026), the forecast, the opportunity's window →
-  Save → Start → three frames → the process dies (widgets gone, database file closed) →
-  45 minutes later the app starts again → the resume prompt → Keep going (three frames) →
-  More → Finish → Results → Complete → the session is completed in the Sessions log and
-  its detail → Export: the manifest v2 is re-parsed (status, zone, evening date, three
-  confirmed light frames).
+*(Corrected S11.2, 2026-09-30: the two bullets below described the TASK 15.5 loop through the
+live tracker (Save → Start → frames → a kill → the resume prompt → Finish → Complete); S8.4
+retired the tracker and replaced those steps with Save plan → result. They now describe the
+suite as it is.)*
+
+- **The core loop, with a restart after the night:** first-run Skip → a site typed in the
+  Sites editor (the zone defaults to the device zone) → Tonight → the planner → M31 and the
+  seeded rig through the pickers → the night (10 Nov 2026), the forecast, the opportunity's
+  window → Save plan ("Plan saved") → the process dies (widgets gone, database file closed)
+  → the next morning, after the night's dawn, the app starts again: the saved plan stays on
+  its night and the planner is on a copy → Tonight's "Last night: … How did it go?"
+  (`tonight.resultDue`) → the result form → Completed as planned → Save result ("Result
+  saved.", the line gone from Tonight) → the entry is completed in the Logbook and its
+  detail → Export as file: the manifest v2 is re-parsed (status, zone, evening date, the
+  first light block's confirmed frames equal to its planned count, `result_kind`
+  `asPlanned`).
 - **Time zones:** a site in America/New_York on a device in Europe/Ljubljana — the night is
   the site's evening (31 Oct) and equals an independent `SessionNightResolver`
-  resolution; a run from 01:30 EDT to 01:30 EST across the DST end has exactly two hours of
-  running time; after a restart the start instant is UTC and the zone is stored with it.
+  resolution; a plan saved at 01:30 EDT, then a restart, and its result recorded at 07:00
+  EST the next morning, after the DST end: the entry is completed, its completion instant is
+  UTC, the zone is stored on the entry and its snapshot, and the night stays 31 Oct.
 - **How to run:**
   - host (in the quality gate): `flutter test --no-pub integration_test -d flutter-tester`;
   - Android device or emulator (the roadmap's acceptance): `flutter test integration_test
-    -d <device id>`;
+    -d <device id>`, or `flutter drive --no-dds -d <device id>` with a driver (the generic
+    `integrationDriver()` of `test_driver/perf_driver.dart`) and
+    `--target=integration_test/core_loop_test.dart`, which is how S11.3 ran it (debug);
   - Windows desktop: `flutter run -d windows integration_test/core_loop_test.dart` —
     passed 2026-09-24 (the first native build of the app). `flutter test integration_test
     -d windows` fails inside flutter_tools (the `integration_test` plugin has no Windows
     part), not in the app.
-- **Mutation check:** with the resume offer suppressed after a restart, the core-loop test
-  fails.
-- **Emulator run:** not done — no Android device or emulator on the development machine.
+- **Mutation check (TASK 15.5, history):** with the resume offer suppressed after a restart,
+  the core-loop test failed. That check belonged to the tracker's loop, which S8.4 retired;
+  none is recorded for the current loop.
+- **Emulator run:** not done at TASK 15.5 — no Android device or emulator was on the
+  development machine then (2026-09-24).
 - *2026-09-30 (S11.3):* **passed on the Android 16 emulator** (both tests, `flutter drive --no-dds`,
   debug; the suite now registers the test's text input and keeps the view override on the host).
-  The paragraph above still describes the retired tracker's steps (S8.4 replaced them with Save →
-  result; S11.2 corrects it).
+  *(S11.2: the description above was corrected to the Save plan → result loop the suite runs.)*
 
 **Added by TASK 16.1** (app identity), 3 tests (881):
 - **`core/config/app_identity_test.dart` (3):** the owner-decided name and id; Gradle's
