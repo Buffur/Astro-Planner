@@ -19,6 +19,13 @@
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
 
+**S11.5 done, 2026-09-30** ([`STAGE_11_DEVICE_RUNBOOK.md`](STAGE_11_DEVICE_RUNBOOK.md); documentation only):
+every PHONE, HUMAN and OWNER row of the matrix has an entry: how phone runs are done (`.s2check`, never
+the owner's data); the agent rows for S11.6 (★ L10, M3, M4, E5–E7); the person rows (★ H6 TalkBack,
+H7, I2/I3 darkness, A8–A10, ★ Q3 dogfooding); the owner actions (★ N4, N5, N7, N8, N9, O9, O10, O11,
+Q5; N6, M6, P2, L7, M5). ★ marks the mandatory rows.
+- **Verification:** the documentation class (V1).
+
 **S11.C1 done, 2026-09-30** (corrective; S11F-01 / TD-092 resolved; V5):
 - `LogbookScreen` re-reads its list whenever it comes back into view (its tickers enabled again: a tab
   switch, or the planner or another root page closing over it), besides the revision bump of S8.6.
