@@ -1,5 +1,7 @@
 # AstroPlan Architecture
 
+> **S11.C1, 2026-09-30:** `LogbookScreen` re-reads its list when it comes back into view (`TickerMode.valuesOf(context).enabled` turning true: the shell's tab switch, a covering root route popping), besides `SessionsViewModel.revision` (TD-092).
+
 > **S10.5, 2026-09-30:** `TargetRepository.inOneTransaction(writes)` (Drift: `_db.transaction`); `CatalogSeeder` runs the first-run seed and a newer catalog's additions inside it (ENG-12), keeping its per-row failure handling and retry.
 
 > **S10.3, 2026-09-30:** presentation reads `MediaQuery` by aspect (`sizeOf`, `paddingOf`, …), never `MediaQuery.of`, which rebuilds a subtree on every keyboard frame (test-enforced, `media_query_aspects_test.dart`). The rig editor was the only use.

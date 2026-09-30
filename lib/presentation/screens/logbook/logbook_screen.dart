@@ -74,6 +74,9 @@ class _LogbookScreenState extends State<LogbookScreen> {
 
   /// The ViewModel's [SessionsViewModel.revision] this list was read at.
   int _seen = 0;
+
+  /// Whether this page was on screen at its last build (S11.C1, TD-092).
+  bool _wasVisible = true;
   ({Map<int, String> targets, Map<int, String> sites}) _options = (
     targets: const {},
     sites: const {},
@@ -131,7 +134,13 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SessionsViewModel>();
-    if (vm.revision != _seen) {
+    // S11.C1 (TD-092): the shell keeps this tab alive, and a covering page
+    // (the planner) hides it; a plan saved or edited meanwhile changes the
+    // list. Coming back into view (its tickers enabled again) reads it again.
+    final visible = TickerMode.valuesOf(context).enabled;
+    final cameBack = visible && !_wasVisible;
+    _wasVisible = visible;
+    if (vm.revision != _seen || cameBack) {
       // An entry changed elsewhere (a name, a result): read them again.
       _seen = vm.revision;
       WidgetsBinding.instance.addPostFrameCallback((_) {

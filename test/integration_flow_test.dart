@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -31,6 +32,12 @@ class MockWeatherRepository
     with NoSnapshotWeather
     implements WeatherRepository {}
 
+/// A fixed evening (S11.C1): the plan's night lies ahead, so a second Save
+/// replaces the saved plan. On the wall clock, between dawn and noon, the
+/// night had already ended and the planner moved to a copy (D8-1), so the
+/// test failed depending on the time of day it ran.
+final _clock = FixedClock(DateTime.utc(2026, 11, 10, 18));
+
 void main() {
   late AppDatabase database;
   late DriftTargetRepository targetRepo;
@@ -50,7 +57,7 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
-    sessionRepo = DriftSessionRepository(database);
+    sessionRepo = DriftSessionRepository(database, clock: _clock);
     locationRepo = DriftLocationRepository(database);
 
     // A saved location, so isDefaultLocation is false and sessionNight
@@ -113,6 +120,7 @@ void main() {
         locationRepo,
         locationService: FakeLocationService(),
         sessionRepository: sessionRepo,
+        clock: _clock,
       );
       await plannerViewModel.ready;
     });
@@ -200,6 +208,7 @@ void main() {
           locationRepo,
           locationService: FakeLocationService(),
           sessionRepository: sessionRepo,
+          clock: _clock,
         );
         await plannerViewModel.ready;
       });

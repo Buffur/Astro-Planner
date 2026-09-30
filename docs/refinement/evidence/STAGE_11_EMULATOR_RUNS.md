@@ -54,3 +54,9 @@
   - L2: `TEST_PLAN.md` calls the location-services button "Open location settings"; the app says
     "Open settings" (it opens the Location page);
   - J5: the map picker is titled "Select Location" (not the glossary's wording).
+
+## Re-check after S11.C1
+
+- **S11F-01 fixed (2026-09-30):** the release x86_64 APK with S11.C1 on the emulator: the Logbook opened
+  ("Nothing saved yet"), then Tonight → the planner → M31, the seeded rig → Save plan → back → the
+  Logbook tab: "Upcoming · Andromeda Galaxy · Thu, Oct 1 · Saved" at once, no restart.

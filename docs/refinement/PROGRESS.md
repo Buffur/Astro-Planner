@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.3 done** on the emulator: 17 rows pass; one blocker, TD-092 → S11.C1).
-> **Next:** S11.C1 (the Logbook after Save plan), then S11.2 and S11.4.
+> **Last updated:** 2026-09-30 (**S11.C1 done**: the Logbook's stale list fixed, TD-092; the S11.3 blocker closed).
+> **Next:** S11.2 (host evidence) and S11.4 (providers and compliance).
 
 ## Current state
 
@@ -14,10 +14,23 @@
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
 | Current Task | None in progress |
-| Next Task | **S11.C1** — the Logbook's list after Save plan (TD-092), then S11.2 and S11.4 |
-| Code baseline | **S10.6** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Next Task | **S11.2** (host) and **S11.4** (providers and compliance) |
+| Code baseline | **S11.C1** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**S11.C1 done, 2026-09-30** (corrective; S11F-01 / TD-092 resolved; V5):
+- `LogbookScreen` re-reads its list whenever it comes back into view (its tickers enabled again: a tab
+  switch, or the planner or another root page closing over it), besides the revision bump of S8.6.
+  `logbook_comes_back_test.dart` (2: a plan saved while another tab is shown; a plan saved in the
+  planner opened over the Logbook), mutation-checked (both fail without the change). Re-checked on the
+  emulator with a release build: the saved plan appears at once.
+- The gate also exposed a time-of-day failure: `integration_flow_test.dart`'s "Save twice" case used
+  the wall clock and failed between dawn and noon (the night had ended, so the second Save made a copy,
+  D8-1). Given a fixed evening clock; the wider sweep is **TD-096** (FOLLOW-UP).
+- **Verification:** shared behaviour (the Logbook screen): the full gate after the last change,
+  **PASS** (1,840 tests, 2 skips; host E2E 2 + 1; Flutter 3.47.4); the emulator re-check (V5: the
+  original finding, its criterion, the correction's own tests).
 
 **S11.3 done, 2026-09-30** (the emulator rows; [runs](evidence/STAGE_11_EMULATOR_RUNS.md); RUNTIME
 VERIFIED, emulator, D11-1):
@@ -607,6 +620,7 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
+| **Full quality gate PASS** (S11.C1): Encoding; Format; Analyze (no issues); 1,840 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S11.C1's commit**, on Flutter 3.47.4 | Ran after S11.C1's last change; supersedes the S10.6 row below. Reusable while `git diff --stat <S11.C1 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.6): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.6's commit** (the lockfile without `sqlite3_flutter_libs`), on Flutter 3.47.4 | Ran after S10.6's last change; supersedes the S10.5 row below. Reusable while `git diff --stat <S10.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.5): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.5's commit**, on Flutter 3.47.4 | Ran after S10.5's last code change; supersedes the S10.3 row below. Reusable while `git diff --stat <S10.5 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.3): Encoding; Format; Analyze (no issues); 1,837 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1), one step each | **S10.3's commit** (inputs as at `80dfadd` plus S10.3's editor change), on Flutter 3.47.4 | Ran after S10.3's last code change; supersedes the TD-089–TD-091 row below. Reusable while `git diff --stat <S10.3 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
@@ -753,7 +767,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S11.C1** (TD-092), then **S11.2 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's
+1. **S11.2 and S11.4** against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) (the plan's
    "Stage 11 — frozen Task sequence"), then S11.5; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
 2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5): connect the phone for S11.6;
    the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
