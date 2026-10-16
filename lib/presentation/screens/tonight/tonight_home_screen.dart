@@ -19,12 +19,9 @@ import '../../shared/night_time_formatter.dart';
 import '../../shared/plan_state.dart';
 import '../../shared/status_block.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
-import '../../../domain/models/execution.dart';
-import '../../viewmodels/execution_viewmodel.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../../viewmodels/night_conditions_viewmodel.dart';
-import '../../viewmodels/resume_run_viewmodel.dart';
 import '../../widgets/plan_status.dart';
-import 'resume_run_dialog.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
 import '../../viewmodels/plan_lifecycle_viewmodel.dart';
 import '../../viewmodels/site_viewmodel.dart';
@@ -34,15 +31,16 @@ import '../../shared/unsaved_plan_prompt.dart';
 import '../../shared/failure_feedback.dart';
 
 /// The Tonight tab's root (ADR-015, TASK 12.5; plan first since S6.13,
-/// ADR-019 §5): which site and night, the run in progress if any, the
+/// ADR-019 §5): which site and night, a result due (S8.3), the
 /// current plan with its answer, then the night, the Moon and the weather,
 /// each opening its detail, then the secondary actions. A summary only:
 /// every value comes from the ViewModels.
 ///
 /// S6.13 records two choices: no compact timeline here (ADR-019 §5's fixed
 /// order has none, the plan card gives the usable time, and the full
-/// timeline is one tap away in the planner); and no Start (UX-13): Track
-/// live stays in the planner's ⋮ (S6.2) until P8.4.
+/// timeline is one tap away in the planner); and no Start (UX-13). The live
+/// tracker, its run card and its resume prompt left in S8.4: a run still in
+/// progress from before is offered by the result line.
 class TonightHomeScreen extends StatelessWidget {
   const TonightHomeScreen({super.key});
 
@@ -56,15 +54,6 @@ class TonightHomeScreen extends StatelessWidget {
         if (context.mounted) context.push(AppRouter.welcome);
       });
     }
-    // A run left in progress (ADR-016 §5): ask once, at start.
-    final resumeVm = context.watch<ResumeRunViewModel?>();
-    if (resumeVm != null && resumeVm.promptDue && !startupVm.isLoading) {
-      resumeVm.markShown();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) showResumeRunDialog(context, resumeVm);
-      });
-    }
-
     final Widget body;
     if (startupVm.hasBootstrapError) {
       body = Center(
@@ -92,8 +81,7 @@ class TonightHomeScreen extends StatelessWidget {
         children: const [
           _Title(),
           _Context(),
-          _RunCard(),
-          // Stage 8 (P8.3) adds "Last night: … How did it go?" here.
+          _ResultDue(),
           _PlanCard(),
           _NightCard(),
           SizedBox(height: 8),
@@ -174,35 +162,36 @@ class _Context extends StatelessWidget {
   }
 }
 
-/// The session in progress, if any (ADR-016): tracked on its own screen,
-/// separate from the plan below (owner decision, TASK 13.3).
-class _RunCard extends StatelessWidget {
-  const _RunCard();
+/// "Last night: M42. How did it go?" (S8.3; ADR-019 §4–§5, I-8): the saved
+/// plan (or run in progress) whose night has ended most recently without a
+/// result; it opens the result form. Quiet, and gone once recorded; no
+/// notification.
+class _ResultDue extends StatelessWidget {
+  const _ResultDue();
 
   @override
   Widget build(BuildContext context) {
-    final execution = context.watch<ExecutionViewModel?>();
-    final session = execution?.session;
-    final state = execution?.state;
-    if (execution == null ||
-        session == null ||
-        state == null ||
-        !state.isActive) {
-      return const SizedBox.shrink();
-    }
-    final block = execution.block;
+    final s = context.watch<SessionsViewModel?>()?.dueResult;
+    final night = s?.eveningDate;
+    if (s == null || night == null) return const SizedBox.shrink();
+    final tonight = context.watch<SessionPlanViewModel>().tonightKey;
+    final lastNight = night == tonight || night.addDays(1) == tonight;
+    final target = s.record.targetName;
     return Card(
-      key: const Key('tonight.run'),
+      key: const Key('tonight.resultDue'),
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const Icon(Icons.radio_button_checked),
-        title: Text('In progress: ${session.record.targetName}'),
-        subtitle: Text(
-          '${state.phase == ExecutionPhase.running ? 'Running' : 'Paused'}'
-          '${block == null ? '' : ' · ${state.completedFor(block.id)} of ${block.frameCount} confirmed'}',
+        leading: const Icon(Icons.edit_note_outlined),
+        title: Text(
+          lastNight
+              ? AppWords.howDidItGo(target)
+              : AppWords.howDidItGoOn(
+                  target,
+                  NightTimeFormatter.eveningDate(night),
+                ),
         ),
-        trailing: const Text('Open tracker'),
-        onTap: () => context.push(AppRouter.run(session.id)),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(AppRouter.results(s.id)),
       ),
     );
   }

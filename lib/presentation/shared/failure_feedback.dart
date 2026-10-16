@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/diagnostics/app_log.dart';
 import '../../domain/models/session.dart';
+import '../../domain/models/session_result.dart';
 import '../../domain/repositories/storage_failure.dart';
+import 'app_messages.dart';
 
 /// User-facing wording for a failed action (TASK 15.1). The error itself
 /// goes to the log ([AppLog]), never onto the screen.
@@ -14,6 +16,13 @@ abstract final class FailureText {
       "Couldn't discard the changes: the saved plan can't be restored "
           '(it cannot be read, or its site, target or rig was deleted). '
           'Nothing was changed. Save the plan or cancel instead.',
+    // S8.2 (S4-DEF-08): nothing was written; the form was reloaded.
+    StaleResultForm() =>
+      'This entry changed since you opened it. Nothing was saved; check it '
+          'and save again.',
+    NightNotEnded() =>
+      "This night hasn't ended yet. Nothing was saved; record the result "
+          'after it.',
     StorageFailure() =>
       "Couldn't $action: the app's data on this device could not be read "
           'or written. Please try again.',
@@ -34,7 +43,7 @@ Future<bool> runWithFeedback(
     return true;
   } catch (e, s) {
     AppLog.error('ui', 'Could not $action', error: e, stackTrace: s);
-    messenger.showSnackBar(
+    messenger.showMessage(
       SnackBar(content: Text(FailureText.message(action, e))),
     );
     return false;
@@ -48,9 +57,18 @@ Future<bool> runWithFeedback(
 void showDone(BuildContext context, String message) {
   ScaffoldMessenger.maybeOf(context)
     ?..hideCurrentSnackBar()
-    ..showSnackBar(
+    ..showMessage(
       SnackBar(content: Text(message), duration: const Duration(seconds: 3)),
     );
+}
+
+/// Shows why an action failed (S9.2): the failure twin of [showDone], for a
+/// failure caught outside [runWithFeedback]. [text] comes from
+/// [FailureText] or is a validation message; never the raw error.
+void showFailure(BuildContext context, String text) {
+  ScaffoldMessenger.maybeOf(context)
+    ?..hideCurrentSnackBar()
+    ..showMessage(SnackBar(content: Text(text)));
 }
 
 /// A list or page that could not be loaded (TASK 15.1): says so, instead of

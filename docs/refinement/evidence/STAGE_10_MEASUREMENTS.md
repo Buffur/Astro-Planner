@@ -1,0 +1,473 @@
+# Stage 10 measurements
+
+> The Stage 10 record (DECISIONS E.1, D10-4): every measurement, with its method, build mode, ABI and
+> device, and every optimisation as claim → evidence → change → before → after → regression check.
+> Unlike measurements are never compared. Emulator numbers are RUNTIME VERIFIED and **indicative**
+> (D10-1); a physical device run is Stage 11's.
+
+## Environment
+
+| Item | Value |
+| --- | --- |
+| Commit | `8b62b87` (application code as at `0f09608`) |
+| Toolchain | Flutter 3.47.4 (Dart 3.13.3); AGP 9.1.0; Kotlin 2.4.0; Gradle 9.3.1 |
+| Emulator | AVD `Medium_Phone_API_36.1`: Android 16 (API 36), `sdk_gphone64_x86_64` (a user build, no root), x86_64 with arm64 translation, 6 vCPU, 2 GB RAM |
+| Host | Windows 11, the development machine |
+
+**Build notes (this machine only; nothing in the repository changed):**
+- An antivirus (Avast) intercepts HTTPS and re-signs it with its own root. The JDK Flutter uses
+  (Android Studio's JBR 21) does not trust that root and has no Windows trust-store provider, so
+  Gradle could not download its distribution or the Android and Kotlin plugins. The first build
+  therefore ran through `android/gradlew.bat` on the installed Oracle JDK 25 with
+  `JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT` (the JVM reads the Windows store;
+  no system or security setting was changed). Later builds ran through `flutter build` offline.
+- The project is on `D:` and the pub cache on `C:`. Kotlin's incremental compiler then fails ("Could
+  not close incremental caches") in a plugin module. The builds passed
+  `-Pkotlin.incremental=false` (`--android-project-arg=kotlin.incremental=false` for `flutter build`).
+- The release builds are signed with the debug key (no `key.properties` on this machine; trap 21).
+  Signing does not change the sizes measured below.
+
+## S10.1 — Size
+
+### The artifacts (commit `8b62b87`)
+
+| Artifact | Command | Bytes | MB (10⁶) |
+| --- | --- | ---: | ---: |
+| Release app bundle (three ABIs; includes `BUNDLE-METADATA`: debug symbols and the R8 map, which Play keeps and never sends to phones) | `gradlew bundleRelease` (as `flutter build appbundle --release`) | 68,546,061 | 68.5 |
+| Release APK, universal (three ABIs) | `gradlew assembleRelease` | 71,892,837 | 71.9 |
+| **Release APK, arm64-v8a** (what an arm64 phone receives; the owner's phone is arm64) | `flutter build apk --release --split-per-abi` | **24,768,842** | **24.8** |
+| Release APK, armeabi-v7a | same | 22,538,388 | 22.5 |
+| Release APK, x86_64 | same | 26,286,107 | 26.3 |
+| Debug APK (universal) | `gradlew assembleDebug` (as `flutter build apk --debug`) | 183,643,172 | 183.6 |
+
+TASK 16.2 recorded a 66.5 MB release bundle on the owner's machine (2026-09-24). Today's 68.5 MB is
+from a different machine and six Stages later. The two are close but are not treated as a
+before/after.
+
+### What the arm64 release APK contains
+
+From `flutter build apk --release --analyze-size --target-platform android-arm64`. The sizes are the
+analyzer's, and the shares are of the APK's 24,188 KiB; native libraries are stored uncompressed in the APK (16 KB alignment):
+
+| Part | Size | Share |
+| --- | ---: | ---: |
+| `libflutter.so`, the Flutter engine | 11,473 KiB | 47 % |
+| `libapp.so`, the app's compiled Dart (AOT) | 9,729 KiB | 40 % |
+| `libsqlite3.so`, SQLite (built by `package:sqlite3`'s build hook; see S10.6) | 1,692 KiB | 7 % |
+| `libdartjni.so` and `libdatastore_shared_counter.so` (plugins) | 135 KiB | 0.6 % |
+| Other ABIs' copies of those two plugin libraries (from the plugins' archives) | 204 KiB | 0.9 % |
+| `classes.dex` (Java/Kotlin, after R8) | 505 KiB | 2 % |
+| `resources.arsc` and `res/` (launcher icon, Android resources) | 362 KiB | 1.5 % |
+| `assets/flutter_assets` (the OpenNGC catalog, its notice, `NOTICES.Z` licences, shaders, the Material Icons subset) | 152 KiB | 0.6 % |
+
+The Dart AOT code (9.7 MiB), by package: `package:flutter` 3.5 MiB; `package:astroplan` 1.4 MiB;
+read-only strings and pools 0.8 MiB; `package:timezone` 446 KiB (the `latest_all` zone data, kept on
+purpose, trap 11); Dart core libraries about 1.6 MiB together (`dart:core`, `dart:ui`,
+`dart:typed_data`, `dart:io`, `dart:async`, `dart:_http` and others); `drift` 195 KiB; `flutter_map`
+185 KiB; `archive` 105 KiB; `go_router` 92 KiB; everything else under 80 KiB each.
+
+**Reading:** 87 % of a phone's app is the Flutter engine and the compiled Dart that every Flutter
+app ships. The app's own code is 1.4 MiB. Its assets are 0.15 MiB. No asset, font or image is a
+material contributor.
+
+### The installed footprint on the emulator
+
+Android's *Settings → Apps → Astro Planner → Storage & cache*, read with `uiautomator`, after one
+launch (the first-run screen, the catalog seeded), the app stopped:
+
+| Build | App size | User data | Cache | **Total** |
+| --- | ---: | ---: | ---: | ---: |
+| Debug (the universal debug APK) | 184 MB | 130 MB | 73.73 kB | **314 MB** |
+| Release (the x86_64 APK) | 27.42 MB | 193 kB | 197 kB | **27.81 MB** |
+
+What the debug build's 130 MB of user data holds (`run-as`, possible only on a debuggable build):
+`app_flutter/flutter_assets/kernel_blob.bin` 118,467,288 bytes and `isolate_snapshot_data`
+11,647,016 bytes (the JIT program that a debug build copies out of its APK on first start), and the
+database `astroplan.sqlite` 102,400 bytes. The debug APK itself holds that same kernel (118 MB before
+compression), debug engines for three ABIs (33–40 MB each before compression), a Vulkan validation
+layer (15 MB) and unshrunk dex (17 MB).
+
+### The ~277 MB of 08 §26: classified
+
+The dogfooding report gives no build type or screen. The only builds recorded on the owner's phone
+are debug builds (`PROGRESS_HISTORY.md`, M1–M4), and a debug install here totals 314 MB by the same
+Android screen a user reads, 94 % of it the debug program (the APK and its extracted JIT kernel).
+**Classification: the 277 MB is consistent with a debug build's installed total, not with a release
+build**. The exact number cannot be reproduced: the owner's build, device state and reading are
+unrecorded, and a phone's total also moves with its optimisation state. It stays recorded as the
+owner's HUMAN observation. The owner can confirm it by checking the build type installed on the
+phone.
+
+### The release baseline (D10-3)
+
+- **What a user receives:** the arm64-v8a release APK, **24.8 MB** (23.6 MiB). Play delivers the
+  same code from the bundle as split APKs and compresses the download, so the store's download size
+  is expected to be smaller. Play reports it after an upload (owner, Stage 11).
+- **Installed:** **27.8 MB** for a release build (x86_64 on the emulator, after the first run).
+- **Main contributors:** the Flutter engine (47 %), compiled Dart (40 %), SQLite (7 %). The app's
+  data after the first run is under 0.2 MB.
+- **Size target:** none (the plan: only if the owner sets one). A release that installs in about
+  28 MB is reasonable for a Flutter app with an embedded database, so no size reduction is claimed or
+  required. S10.6 and S10.7 still check the few options that exist (dependencies, symbols).
+
+## S10.2 — Performance scenarios and baselines
+
+### The suite
+
+- **`integration_test/perf_scenarios_test.dart`**, one test through the real UI and a real SQLite
+  file, with a fake forecast and fake position services. On Android it records each step's frames with
+  `IntegrationTestWidgetsFlutterBinding.watchPerformance` (engine `FrameTiming`: build and raster
+  times) and times the data work with a `Stopwatch`. On the host the quality gate runs it as a smoke
+  test, with no timing and a small history (D10-6).
+- **Run on a device or emulator** (results in `build/integration_response_data.json`):
+
+  ```
+  flutter drive --profile --no-dds -d <device> --driver=test_driver/perf_driver.dart --target=integration_test/perf_scenarios_test.dart
+  ```
+
+  `--no-dds` is required: with the Dart Development Service on, the binding cannot reach the VM
+  service it uses for timings. On this machine also add
+  `--android-project-arg=kotlin.incremental=false` (see "Build notes").
+- **Scenarios**, in the plan's priority: the rig editor (open "Add rig"; tap the pixel size, which
+  opens the real soft keyboard on a device; type "3.7612"; tap the name and type "Refractor 400"); the
+  planner (open; a block through its dialog: tap it, tap Frame Count, type "36", Save; four block edits;
+  a night change; a target change; a section opened); Night & Moon; Weather; the Logbook with 300 saved
+  plans, two in three with a result (open; search "M3"; a filter; an entry); first-run seeding on a new
+  file (ENG-12); the Logbook's list query (ENG-11); tonight's candidates (TASK 10.4).
+- **`test/presentation/performance/rig_editor_rebuilds_test.dart`**, host only: the elements rebuilt
+  while the keyboard's bottom inset grows over 12 frames (as Android animates it), and per keystroke.
+  The counts are deterministic.
+
+### Host counts (deterministic; `8b62b87`)
+
+| Rig editor step | Elements rebuilt | The dialog's content rebuilt |
+| --- | ---: | ---: |
+| The keyboard opens (12 frames) | 7,500 (625 per frame) | **12 of 12 frames** |
+| 6 keystrokes in the pixel size (its `onChanged` calls `setDialogState`) | 3,696 (616 per key) | 6 of 6 |
+| 6 keystrokes in the name (no `setDialogState`) | 2,646 (441 per key) | 0 |
+
+Reading: the dialog content (about 600 elements, every field) rebuilds on **every frame of the
+keyboard animation**. The only `MediaQuery.of(context)` in `lib/` is in that builder
+(`equipment_editor.dart:224`, for the screen width), and `MediaQuery.of` depends on every
+MediaQuery field, the keyboard inset included. A keystroke in a name field still rebuilds about 440
+elements, because Flutter's `Form` rebuilds all its fields when any one changes (framework
+behaviour).
+
+### Emulator, profile mode (two runs; D10-1, indicative)
+
+`8b62b87`, the x86_64 emulator above, profile build, 60 Hz (a 16.7 ms frame). Frame times in ms,
+run 1 / run 2. "Over" counts frames above 16.7 ms.
+
+| Scenario | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster p90 | Raster over |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Rig editor: open | 11/10 | 9.3/19.1 | 11.6/65.4 | 69/105 | 1/2 | 23.2/41.2 | 42.6/71.3 | 5/5 |
+| Rig editor: focus, keyboard opens | 31/30 | 6.8/4.3 | 16.0/7.6 | 73/48 | 3/2 | 30.4/15.6 | 50.6/33.2 | 25/8 |
+| Rig editor: type in pixel size | 11/11 | 1.7/1.0 | 3.5/1.9 | 7/3 | 0/0 | 9.3/14.2 | 13.7/25.2 | 0/3 |
+| Rig editor: tap and type the name | 37/37 | 4.1/2.8 | 6.8/4.6 | 43/29 | 1/1 | 35.3/14.5 | 63.9/25.8 | 33/11 |
+| Planner: open | 19/19 | 2.5/3.3 | 2.5/5.1 | 27/37 | 1/1 | 9.4/11.4 | 13.2/13.8 | 1/2 |
+| Planner: a block through its dialog | 39/39 | 6.1/9.6 | 17.1/16.5 | 52/90 | 5/6 | 44.9/33.2 | 94.7/63.7 | 26/26 |
+| Planner: four block edits | 10/11 | 5.5/6.2 | 10.3/11.9 | 14/18 | 0/1 | 9.9/11.3 | 14.4/15.4 | 0/1 |
+| Planner: night change | 11/11 | 2.1/2.5 | 2.8/6.2 | 9/14 | 0/0 | 9.1/8.6 | 14.2/14.1 | 1/0 |
+| Planner: target change | 11/11 | 2.0/1.7 | 1.3/2.6 | 16/10 | 0/0 | 7.3/7.0 | 11.7/11.4 | 0/0 |
+| Night & Moon: open | 11/11 | 1.8/2.0 | 4.1/3.8 | 7/9 | 0/0 | 5.7/8.5 | 10.2/11.9 | 0/1 |
+| Weather: open | 12/11 | 2.8/4.0 | 2.2/3.9 | 25/30 | 1/1 | 11.7/8.4 | 26.6/14.6 | 2/1 |
+| Logbook (300): open | 14/14 | 6.2/4.8 | 8.1/9.8 | 68/43 | 1/1 | 8.4/8.4 | 15.5/16.8 | 0/2 |
+| Logbook: search "M3" | 25/25 | 8.1/7.0 | 15.8/18.7 | 103/94 | 2/3 | 29.6/36.4 | 53.3/68.6 | 13/16 |
+| Logbook: a filter | 33/33 | 2.4/6.2 | 8.4/15.7 | 14/65 | 0/3 | 21.0/43.2 | 44.5/77.2 | 14/21 |
+| Logbook: an entry | 33/33 | 3.5/3.1 | 3.5/6.8 | 60/45 | 1/1 | 21.3/17.1 | 66.1/38.0 | 10/7 |
+
+| Work (elapsed) | Run 1 | Run 2 | Note |
+| --- | ---: | ---: | --- |
+| **First-run catalog seeding (164 entries; ENG-12)** | **14,804 ms** | **12,950 ms** | Before `runApp`: the first launch shows no app for this long |
+| First-run equipment seeding | 117 ms | 60 ms | |
+| The Logbook's list of 300 sessions with their blocks (ENG-11) | 48 ms | 52 ms | Two queries (`_blocksFor`); no N+1 |
+| Tonight's candidates (TASK 10.4: under 1 s) | 313 ms | 501 ms | Within the budget |
+| Test setup: 300 saved plans (900 writes) | 41,497 ms | 40,113 ms | Not a user path; about 45 ms per write transaction on this emulator |
+
+**Reading:**
+- **Build times** (the app's work per frame) are within the frame on average for every scenario.
+  They exceed it on the first frames of a newly opened screen or dialog (the worst values, 27–105
+  ms) and during the keyboard opening. Both runs agree on where the overruns are.
+- **Raster times** (drawing) dominate the misses, above all while the keyboard animates (focus,
+  the name, the block dialog, search). This emulator renders through host GPU emulation
+  (`ro.hardware.egl=emulation`), so raster numbers say little about a phone. **Not claimed as a
+  defect** without a device trace (Stage 11).
+- **Verified bottleneck 1 — first-run seeding (ENG-12):** 13–15 s on this emulator, before the first
+  frame. Each of the 164 catalog rows is its own autocommit transaction (a sync to storage per row;
+  about 45 ms per write transaction here). On a phone's faster storage it is shorter, but it is the
+  same 164 syncs. → S10.5.
+- **Verified bottleneck 2 — the rig editor rebuilds its whole form on every keyboard frame** (host
+  count 12 of 12; device: the focus step has the editor's worst build frames). → S10.3.
+- **Not bottlenecks:** ENG-11 (48–52 ms for 300 sessions); the candidates (313–501 ms); the planner's
+  edits, night and target changes (build averages 2–6 ms); the detail screens.
+- Run-to-run variation on the emulator is large (up to 2× for a worst frame), so single-run
+  differences under that are not evidence.
+
+## S10.3 — Form lag
+
+- **Claim:** the rig editor's form rebuilds on every frame while the soft keyboard opens (08 §22:
+  "lags when the user taps into editable text fields … particularly … device information").
+- **Evidence:** S10.2's host count: the dialog content (about 600 elements, every field) rebuilt on
+  12 of 12 keyboard frames. Cause: `equipment_editor.dart:224` read the screen width with
+  `MediaQuery.of(context).size`, which subscribes the `StatefulBuilder` holding the whole form to
+  every MediaQuery field, the keyboard's bottom inset included. It was the only `MediaQuery.of` in
+  `lib/`. The investigation's other categories, checked:
+  - storage or network on focus or typing: none (the editor writes only on Save);
+  - validation: runs on Save, not per keystroke (no `autovalidateMode`);
+  - calculation on typing: the sensor size and the focal ratio are derived with `setDialogState` in
+    seven fields, one rebuild per keystroke. Measured cheap on the emulator (build average 0.9–1.7 ms
+    while typing in the pixel size), so it is kept: it shows the derived values as the user types;
+  - `Form` rebuilds all its fields on any change (Flutter's own behaviour; about 440 elements per
+    keystroke in the name). Measured cheap (build average 2.4–4.1 ms), so it is kept;
+  - the target, site and block editors: no `MediaQuery.of` (the only such dependency was the rig
+    editor's).
+- **Change:** `MediaQuery.sizeOf(context).width` (the same width; only the dependency changes).
+  `test/presentation/performance/media_query_aspects_test.dart` keeps `MediaQuery.of` out of `lib/`.
+- **Before → after, host (deterministic):**
+
+  | Rig editor step | Before: elements / form | After: elements / form |
+  | --- | ---: | ---: |
+  | The keyboard opens (12 frames) | 7,500 / 12 | **456 / 0** |
+  | 6 keystrokes in the pixel size | 3,696 / 6 | 3,696 / 6 (unchanged, intended) |
+  | 6 keystrokes in the name | 2,646 / 0 | 2,646 / 0 |
+
+- **Before → after, emulator (profile; the same scenario; two runs each; indicative):**
+
+  | Step | Build avg | Build p90 | Build worst | Build over 16.7 ms |
+  | --- | --- | --- | --- | --- |
+  | Focus, the keyboard opens: before | 6.8 / 4.3 | 16.0 / 7.6 | 73 / 48 | 3 / 2 |
+  | Focus, the keyboard opens: after | 5.1 / 2.7 | 13.6 / 5.5 | **35 / 11** | 3 / 0 |
+  | Tap and type the name: before | 4.1 / 2.8 | 6.8 / 4.6 | 43 / 29 | 1 / 1 |
+  | Tap and type the name: after | 2.4 / 2.4 | 3.5 / 4.6 | 23 / 17 | 1 / 1 |
+
+  The worst build frames while the keyboard opens are lower in both runs after the change. The
+  emulator's run-to-run spread is large, so the host count is the evidence. Raster times did not
+  change (the emulated GPU; not the app's work).
+- **Regression check:** `rig_editor_rebuilds_test.dart` now asserts no form rebuild on keyboard
+  frames (mutation-checked: with `MediaQuery.of` restored it fails), one per keystroke in a derived
+  field, none in the name; every existing editor test passes unchanged (the full gate, below).
+  Behaviour and saved values are unchanged (the width is the same value).
+- **On a phone** the gain is unverified until a device trace (Stage 11): the owner's lag may also have
+  come from the debug build (S10.1), which runs JIT code several times slower than a release.
+- **Verification:** the full gate after the change, **PASS** (1,837 tests, 2 skips; host E2E core_loop 2 and perf_scenarios 1; Flutter 3.47.4).
+
+## S10.4 — The planner, the timeline and the detail screens
+
+- **Claim checked:** Stage 6's reactive planner (block edits → budget, fit, timeline, gain graph), the
+  timeline's redraw on night and target changes, and the detail screens might do unnecessary work.
+- **Evidence (S10.2's emulator runs, profile, indicative):** build averages 1.7–6.2 ms and p90 1.3–12
+  ms for opening the planner, four block edits, a night change, a target change, Night & Moon and
+  Weather; the only frames over 16.7 ms are the first frame of a newly opened screen (27–37 ms) and one
+  block-edit frame in one run (18 ms). Raster averages 5.7–11.7 ms.
+- **Evidence (host, a temporary probe, deleted):** elements rebuilt per event, through the real app and
+  database at 412 × 915:
+
+  | Event | Elements rebuilt | What rebuilds |
+  | --- | ---: | --- |
+  | The keyboard opens over the planner (12 frames) | 432 (36 per frame) | Only the `Scaffold`, `MediaQuery` and route machinery; no planner section |
+  | The keyboard opens over the block dialog (12 frames) | 588 (49 per frame) | The same, plus the dialog's frame; no planner section |
+  | 2 keystrokes in the block dialog's Frame Count | 646 | The dialog's fields (focus and decoration) |
+  | One block edit through the ViewModel (then settled) | 1,268 | The planner sections that show the plan: the capture plan, budget, fit, status and gain graph |
+
+- **Reading:** the memoization of trap 16 holds (a block edit costs one pass over the dependent
+  sections, 5–6 ms of build on the emulator); nothing rebuilds on keyboard frames outside the dialog;
+  the timeline and the detail screens draw within the frame after their first frame. The first-frame
+  spikes of a new screen are Flutter's first build and shader warm-up, not a repeated cost.
+- **Change:** none. **Outcome: measured, no change needed.** No cache added; sampling, grids and
+  calculations untouched. Large-text rendering was not profiled separately (no change was made; the
+  accessibility sweep keeps covering 200 % text).
+
+## S10.5 — The Logbook, ENG-11 and ENG-12
+
+### ENG-12, first-run seeding: fixed
+
+- **Claim:** the first launch waits for the catalog seed before its first frame, and the seed is slow
+  because each of the 164 rows is its own autocommit transaction (06: "plausible on a slow phone,
+  unmeasured").
+- **Evidence (S10.2):** 14,804 and 12,950 ms on the emulator (11,882 and 13,835 ms in S10.3's runs,
+  unchanged code); about 45 ms per write transaction on this emulator's storage. `main.dart` awaits it
+  before `runApp`.
+- **Change:** `TargetRepository.inOneTransaction(writes)` (Drift: `_db.transaction`), and
+  `CatalogSeeder` runs its inserts and legacy updates inside it: one commit instead of 164. The rest is
+  unchanged: a row whose insert fails is still caught and skipped, the version is still not recorded
+  then (S1.2), the next launch still retries, and an error thrown out of the seed is still logged by
+  `main.dart` and retried. A rollback now leaves no partial rows, which the retry path already allowed.
+- **Before → after (emulator, profile; the same scenario, a new database file):**
+
+  | Run | Catalog seed |
+  | --- | ---: |
+  | Before (four runs) | 14,804 · 12,950 · 11,882 · 13,835 ms |
+  | **After (two runs)** | **2,517 · 1,730 ms** |
+
+  About 6–8× faster. What remains is the asset parse, the alias rebuild (already one transaction)
+  and 164 inserts inside the transaction. A phone's storage is faster than this emulator's, so the
+  absolute times there are expected to be lower on both sides (Stage 11).
+- **Regression check:** `catalog_seeder_transaction_test.dart` (every catalog insert inside a
+  transaction; two transactions in all, the aliases and the targets; mutation-checked: without the
+  transaction it fails); `catalog_seeder_test.dart` unchanged and passing, including the failed-insert,
+  retry, newer-catalog and pre-8.2 upgrade cases; the full gate.
+
+### ENG-11 and the Logbook: measured, no change
+
+- **ENG-11:** the Logbook's list of 300 sessions with their blocks takes 48–75 ms on the emulator (six
+  runs). The list reads rows and then all their blocks in one query (`_blocksFor`); there is no N+1
+  in today's code. **Closed as measured.**
+- **The Logbook at 300 sessions** (S10.2's runs): open, build average 4.8–6.2 ms; search, 7.0–8.1 ms
+  (p90 15.8–18.7 ms; the worst frames, 94–103 ms, are while the search field opens with the
+  keyboard); a filter, 2.4–6.2 ms; an entry, 3.1–3.5 ms. The search filters in memory over the loaded
+  list (I-9). **Practical; no change.** A phone trace is Stage 11's.
+
+## S10.6 — Dependencies and assets
+
+### The runtime dependencies, by verified use (`pubspec.yaml` at `1117e41`)
+
+Imports counted in `lib/` (files), plus the platform role where there is one.
+
+| Package | Used by | Verdict |
+| --- | --- | --- |
+| `provider` | 36 files: the ViewModels' providers (ADR-002) | Keep |
+| `go_router` | 19 files: navigation (ADR-015) | Keep |
+| `drift` | 30 files: the database (ADR-003), migrations, export and backup | Keep |
+| `sqlite3_flutter_libs ^0.6.0+eol` | **No import and no native code.** The published 0.6.0 package holds only a README, a licence and an empty library. Its README says it "no longer does anything" and should be removed after moving to `package:sqlite3` 3.x (this app resolves `sqlite3` 3.5.2, whose build hook supplies `libsqlite3.so`). No other package depends on it | **Removed** (RD-02's dependency part; D10-5) |
+| `path_provider`, `path` | 4 files each: the database file, backup staging, export | Keep |
+| `http` | 2 files: Open-Meteo, Nominatim | Keep |
+| `share_plus` | 4 files: export and backup sharing | Keep |
+| `url_launcher` | 5 files: About's links, the light-pollution map, OSM copyright | Keep |
+| `shared_preferences` | 9 files: preferences, the plan's ids, backup of settings | Keep |
+| `geolocator` | 1 file: `GeolocatorLocationService` | Keep |
+| `flutter_map`, `latlong2` | the map picker (185 KiB of Dart code) | Keep: the site editor's "Pick on map" |
+| `timezone` | `IanaTimeContext`: the zone rules (446 KiB, `latest_all` on purpose, trap 11) | Keep |
+| `flutter_timezone` | the device zone (behind `DeviceTimeZone`) | Keep |
+| `file_picker` | backup restore's file choice | Keep |
+| `archive` | the backup archive (105 KiB) | Keep |
+
+Nothing was left behind by the tracker's retirement (S8.4): keep-screen-on went through the app's own
+`ScreenWake` channel, not a package. The dev dependencies (`flutter_test`, `integration_test`,
+`flutter_lints`, `drift_dev`, `build_runner`) do not ship.
+
+### Removing `sqlite3_flutter_libs`: before and after (HEAD, arm64-v8a release APK)
+
+| | Before | After |
+| --- | ---: | ---: |
+| APK size | 24,768,842 bytes | 24,768,830 bytes |
+| Native libraries | `libflutter.so`, `libapp.so`, `libsqlite3.so` (1,732,360 bytes), `libdartjni.so`, `libdatastore_shared_counter.so` | the same, with identical sizes |
+| Other entries | — | identical except `NOTICES.Z` (−12 bytes: the package's licence line) |
+
+- **Regression check:** `pubspec.lock` loses only that package; the full gate passes (1,838 tests, 2
+  skips; host E2E 2 + 1); the scenario suite runs on the emulator in profile mode on the new build
+  (a new database, 164 catalog rows, 1,200 session writes, the Logbook), so SQLite loads and works on
+  Android without it.
+- **Size effect:** none worth claiming (12 bytes). The change is hygiene: it removes an end-of-life
+  dependency whose maintainer asks for its removal.
+
+### Assets, by verified reference
+
+| Asset | Size | Referenced by | Verdict |
+| --- | ---: | --- | --- |
+| `assets/catalog/catalog_v2.json` | 57 KB | `CatalogSeeder.assetPath` | Keep (the catalog) |
+| `assets/catalog/OPENNGC_NOTICE.txt` | 1.6 KB | the About page; CC BY-SA 4.0 attribution | Keep (required) |
+| `assets/branding/icon_512.png` | 21.6 KB | `tool/make_launcher_icons.py` (the store icon); **not** a Flutter asset, not in the APK | Keep (not shipped) |
+| Launcher icon and splash (`android/app/src/main/res`) | about 150 KiB of `res/` in the APK | the manifest | Keep (never degraded) |
+| Material Icons | 6 KiB after tree-shaking | the UI | Keep |
+| `NOTICES.Z` | 120 KiB | Flutter's licence page (generated) | Keep (required) |
+
+No bundled font, image or unused asset exists; assets are 0.6 % of the APK. Nothing to remove.
+
+## S10.7 — Build and release options
+
+The current release workflow (`docs/RELEASE.md`) already has R8 code and resource shrinking, icon
+tree-shaking (Material Icons 6 KiB), 16 KB alignment and native symbols moved to `BUNDLE-METADATA`,
+and the bundle is split per ABI by Play. Two options remain that change what ships. Each was
+measured on an arm64-v8a release APK built at `43523bb` (`flutter build apk --release
+--target-platform android-arm64`):
+
+| Build | APK | `libapp.so` | Change |
+| --- | ---: | ---: | --- |
+| Today's release | 25,009,082 bytes | 9,962,376 bytes | — |
+| `--split-debug-info=<dir>` | 23,698,362 bytes | 8,651,656 bytes | −1.31 MB (−5.2 % of the APK); a 4.2 MB symbols file per build, kept outside the app |
+| `--split-debug-info=<dir> --obfuscate` | 23,501,754 bytes | 8,455,048 bytes | a further −0.20 MB |
+
+- **`--split-debug-info`:** −1.3 MB per phone. **Cost:** a release build's Dart stack traces are no
+  longer symbolic (the local `AppLog`, anything a user copies or a future diagnostics export, RD-15),
+  unless each release's symbols file is archived and `flutter symbolize` is run against it; losing
+  that file makes its traces unreadable for good. **Not adopted now:** the gain is small against a
+  28 MB install, and the symbols step belongs with the owner's release procedure and RD-15's
+  diagnostics decision. `RELEASE.md` records the measured option for the owner to adopt at release
+  time.
+- **`--obfuscate`:** −0.2 MB more. It hides Dart names in a GPL-3.0 app whose source is public, adds the
+  same symbols dependency, and can break code that relies on type names. **Not adopted.**
+- **Nothing else changes a user's size materially.** An APK split per ABI matters only for
+  side-loading (Play splits the bundle itself), and resources are 0.36 MiB.
+
+**Stage 10's size result:** the release baseline stands (arm64-v8a APK 24.8 MB, 27.8 MB installed on
+the emulator). No reduction is claimed; the only material options found cost diagnostics and are left
+to the owner, recorded. The 277 MB was a debug install (S10.1).
+
+## After the Stage 10 validation (S10V-01 to S10V-04, 2026-09-30)
+
+- **S10V-01 (the suite):** the "open a section" step looked for `section.budgetDetails`, but the key
+  is `section.planner.budgetDetails`, and an `if` skipped it silently; the block edits changed only
+  frame counts. Fixed: the step scrolls to the real key and always runs; `planner.blockEdit` now makes
+  two exposure edits (240 s, 180 s) and two frame-count edits. One emulator run (profile, indicative):
+
+  | Scenario | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster over |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | Planner: two exposure and two count edits | 11 | 4.8 | 9.1 | 9.5 | 0 | 13.1 | 1 |
+  | Planner: the budget's detail section opened | 10 | 4.1 | 8.1 | 12.5 | 0 | 25.6 | 6 |
+
+  Both within the frame for the app's work; S10.4's reading stands. The same run's seed took 2,637 ms
+  (S10.5's range).
+- **S10V-02:** the suite's header command now includes `--no-dds`.
+- **S10V-03 (the size record):** the two arm64 APK figures differ by build command, not by code.
+  `--split-per-abi` (S10.1, S10.6: 24,768,842 bytes) packs only arm64 libraries;
+  `--target-platform android-arm64` (S10.7: 25,009,082 bytes) also packs two plugins' prebuilt
+  libraries for armeabi-v7a and x86_64 (`libdartjni.so`, `libdatastore_shared_counter.so`: 209,032
+  bytes) and a longer `NativeAssetsManifest.json`. S10.7's savings compare builds made with one
+  command, so they stand. **D10-3's wording:** "what a phone receives" is measured as the
+  `--split-per-abi` APK, a proxy for the split Play serves from the bundle (Play serves the same
+  arm64 code and compresses the download); the store's exact download size is reported by Play after
+  an upload (owner, Stage 11).
+- **S10V-04:** "responsive on representative hardware" stays **UNVERIFIED** (D10-1): every frame
+  number here is from an emulator with an emulated GPU. Carried to Stage 11 as phone runs of this
+  suite (the rig editor's focus, the planner and timeline, the Logbook at 300 sessions, first-run
+  seeding), with the same command.
+
+## Correction: typing on a device (S10.C1, 2026-09-30, found in Stage 11)
+
+- **Found** while running the E2E on the emulator (S11.3): a test's `enterText` sends its text with
+  client id −1, which the framework accepts only with asserts on (debug); **in profile mode it is
+  dropped**, and on a device the real keyboard's own connection also overwrites it. So in every profile
+  run above, the steps that type (the rig editor's "type in pixel size" and "tap and type the name",
+  the block dialog's Frame Count, the Logbook's search) **typed nothing**: their frames are the tap,
+  focus and animation only. Those rows are **not typing evidence** and are superseded below.
+- **Unaffected:** the host rebuild counts (debug: the text arrives); the rig editor's focus step with
+  the real keyboard (S10.3's device-side evidence); every step that edits through the ViewModel
+  (block edits, night, target); the section; the elapsed times.
+- **Fix (test code):** after the focus step the suite registers the test's text input
+  (`binding.testTextInput.register()`), so the next field focused takes its input from the test; the
+  typing helper now asserts the text reached the field, so a silent no-op cannot recur.
+- **The emulator changed between sessions.** The runs below are from a second emulator session
+  (the AVD rebooted for Stage 11; same image, same GPU emulation). It is much faster than the first:
+  first-run seeding 121 ms against 1.7–2.5 s, raster averages 2–6 ms against 5–45 ms. **Emulator numbers
+  are comparable only within one session**; every before/after above was taken within the first
+  session, so its ratios stand, but its absolute times are that session's.
+- **ENG-12 re-checked within the second session:** the catalog seed without the transaction (a
+  temporary revert, restored) 815 ms; with it 121 and 122 ms. About 6.7× faster, consistent with the
+  first session's 6–8×.
+- **Typing, second session, two profile runs (ms, run 9 / run 10):**
+
+  | Step | Frames | Build avg | Build p90 | Build worst | Build over | Raster avg | Raster over |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | Rig editor: focus, the real keyboard opens | 31/31 | 0.9/0.9 | 2.0/2.1 | 4.1/4.2 | 0/0 | 2.8/3.5 | 0/1 |
+  | Rig editor: tap the name, type "Refractor 400" | 37/37 | 1.2/1.7 | 2.9/4.4 | 4.9/6.1 | 0/0 | 2.3/2.6 | 0/0 |
+  | Rig editor: tap the pixel size, type "3.7612" (derived sensor size) | 24/23 | 1.2/1.3 | 3.4/3.6 | 4.0/4.6 | 0/0 | 2.2/2.6 | 0/0 |
+  | Planner: a block through its dialog, "36" typed | 39/39 | 1.3/1.2 | 2.3/2.8 | 7.5/7.6 | 0/0 | 3.3/2.7 | 0/0 |
+  | Logbook (300): search, "M3" typed | 25/25 | 2.3/3.5 | 10.9/21.3 | 18.6/29.6 | 2/3 | 2.7/3.3 | 0/0 |
+
+  Typing in every form stays far inside the frame. The Logbook's search goes over the frame on 2–3
+  frames per run (worst 19–30 ms) while it filters 300 entries in memory per keystroke: practical, and
+  a phone trace (Stage 11) decides whether it needs work. The other scenarios of this session: build
+  averages 0.5–3.7 ms; the only frames over 16.7 ms are a screen's first frame (planner 43/13 ms,
+  Logbook 30/42 ms, rig editor 21/12 ms).
+- **Conclusions of S10.3 and S10.5 unchanged;** S10.4's and S10.5's "no change needed" readings hold
+  with real typing.

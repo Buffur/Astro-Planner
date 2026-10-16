@@ -8,6 +8,7 @@ import '../../../domain/models/capture_block.dart';
 import '../../shared/delete_patterns.dart';
 import '../../shared/failure_feedback.dart';
 import '../../viewmodels/session_plan_viewmodel.dart';
+import '../../shared/app_messages.dart';
 
 /// A way back from a one-tap change to the capture blocks (TD-079, S6.16;
 /// RD-09's Undo for edits inside a plan): Fill or Trim, a block edit saved
@@ -80,11 +81,11 @@ Future<void> _undo(
 ) async {
   try {
     if (!await undo()) {
-      messenger.showSnackBar(const SnackBar(content: Text(notUndone)));
+      messenger.showMessage(const SnackBar(content: Text(notUndone)));
     }
   } catch (e, s) {
     AppLog.error('ui', 'Could not undo the change', error: e, stackTrace: s);
-    messenger.showSnackBar(
+    messenger.showMessage(
       SnackBar(content: Text(FailureText.message('undo the change', e))),
     );
   }

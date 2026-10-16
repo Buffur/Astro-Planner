@@ -1,7 +1,7 @@
 // TASK 15.5: the end-to-end regression suite. The core loop through the
 // real UI — site → target → rig → night → opportunity → plan → save →
-// execute (with a restart) → complete → log → export — and time-zone
-// cases. The database is real (a SQLite file, closed and reopened for the
+// the night (a restart) → "How did it go?" → result → log → export — and
+// time-zone cases. Since S8.4 there is no live tracker in the loop. The database is real (a SQLite file, closed and reopened for the
 // restart); the network, GPS, the device zone and the share sheet are
 // fakes.
 //
@@ -21,7 +21,6 @@ import 'package:astroplan/data/repositories/drift_target_repository.dart';
 import 'package:astroplan/data/services/catalog_seeder.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/domain/models/calendar_date.dart';
-import 'package:astroplan/domain/models/execution.dart';
 import 'package:astroplan/domain/models/iana_time_context.dart';
 import 'package:astroplan/domain/models/location_profile.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
@@ -149,8 +148,6 @@ class _Device {
       await vm.ready;
       await vm.theme.load();
       await vm.tonight.load();
-      await vm.resumeRun?.load();
-      await vm.execution?.loadActive();
     });
     await tester.pumpWidget(
       MultiProvider(providers: vm.providers, child: const AstroPlanApp()),
@@ -172,6 +169,16 @@ class _Device {
       tester.runAsync(() async => db?.close()).then((_) {});
 }
 
+/// A 412 × 915 dp phone on the host. On a device or emulator the real
+/// screen is used (S11.3): overriding a live view's size breaks scrolling
+/// by drag there, and the test phone is already about 411 × 914 dp.
+void phoneSizedView(WidgetTester tester) {
+  if (Platform.isAndroid) return;
+  tester.view.physicalSize = const Size(412, 915);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 Future<void> settle(WidgetTester tester, [int rounds = 12]) async {
   for (var i = 0; i < rounds; i++) {
     await tester.runAsync(
@@ -188,12 +195,6 @@ Future<void> tap(WidgetTester tester, Finder finder) async {
   await settle(tester);
 }
 
-/// Track live, from the plan's ⋮ menu (S6.2; interim until P8.4).
-Future<void> trackLive(WidgetTester tester) async {
-  await tap(tester, find.byKey(const Key('planner.menu')));
-  await tap(tester, find.byKey(const Key('planner.start')));
-}
-
 /// Scrolls the page's main list from the top until [finder] is visible.
 Future<void> scrollTo(WidgetTester tester, Finder finder) async {
   final list = find
@@ -207,13 +208,16 @@ Future<void> scrollTo(WidgetTester tester, Finder finder) async {
 }
 
 /// Adds a site through the Sites screen and its editor, as a user types it.
+/// It opens the list to choose a site for planning (Tonight's "Set site"),
+/// where a new site becomes the active one; since TD-090 a site added from
+/// the Library's list is saved without being made active.
 Future<void> addSite(
   WidgetTester tester, {
   required String name,
   required String latitude,
   required String longitude,
 }) async {
-  AppRouter.router.go(AppRouter.librarySites);
+  AppRouter.router.go(AppRouter.selectSite);
   await settle(tester);
   await tap(tester, find.text('Add site'));
   await tester.enterText(find.widgetWithText(TextFormField, 'Name'), name);
@@ -229,7 +233,7 @@ Future<void> addSite(
     find.widgetWithText(TextFormField, 'Elevation (m)'),
     '300',
   );
-  await tap(tester, find.byTooltip('Save site'));
+  await tap(tester, find.byKey(const Key('siteEditor.save')));
 }
 
 /// Picks the target and the rig, then the capture plan, through the
@@ -239,7 +243,7 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
   await scrollTo(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Choose a target'), findsWidgets);
   await tap(tester, find.byKey(const Key('status.choose')));
-  expect(find.text('Select Target'), findsOneWidget);
+  expect(find.text('Choose a target'), findsOneWidget);
   await tester.enterText(find.byType(TextField).first, 'Andromeda');
   await settle(tester);
   await tap(tester, find.textContaining('(M31)').first);
@@ -247,7 +251,7 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
   await scrollTo(tester, find.byKey(const Key('status.choose')));
   expect(find.text('Choose a rig'), findsWidgets);
   await tap(tester, find.byKey(const Key('status.choose')));
-  expect(find.text('Select Equipment'), findsOneWidget);
+  expect(find.text('Choose a rig'), findsOneWidget);
   await tap(tester, find.textContaining('ASI2600MC').first);
 
   await scrollTo(tester, find.byKey(const Key('capturePlan.useExample')));
@@ -255,14 +259,16 @@ Future<void> chooseTargetAndRig(WidgetTester tester) async {
 }
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  // S11.3: on a device the real keyboard owns the text connection and
+  // overwrites what the test types; the test's text input takes it instead.
+  setUp(binding.testTextInput.register);
+  tearDown(binding.testTextInput.unregister);
 
-  testWidgets('the core loop: site to export, with a restart during the '
-      'run', (tester) async {
-    tester.view.physicalSize = const Size(412, 915);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+  testWidgets('the core loop: site to export, with a restart after the '
+      'night', (tester) async {
+    phoneSizedView(tester);
     // 17:00 in Ljubljana on 10 November 2026: tonight is ahead.
     final device = _Device(_Clock(DateTime.utc(2026, 11, 10, 16)));
     await device.boot(tester);
@@ -305,42 +311,29 @@ void main() {
     await tap(tester, find.text('Save plan'));
     expect(find.text('Plan saved'), findsOneWidget);
 
-    // Execute: Track live (the plan's ⋮ menu since S6.2), three frames.
-    await trackLive(tester);
-    expect(find.byKey(const Key('run.confirmed')), findsOneWidget);
-    for (var i = 0; i < 3; i++) {
-      await tap(tester, find.byKey(const Key('run.plus')));
-    }
-    expect(
-      tester.widget<Text>(find.byKey(const Key('run.confirmed'))).data,
-      startsWith('3 of '),
-    );
-    final runId = device.vm.execution!.session!.id;
+    final savedId = vm.plan.activeSessionId!;
 
-    // The process dies mid-run; 45 minutes later the app is opened again.
+    // The night: nothing to do in the app (S8.4: the tracker left). The
+    // process dies; the next morning the app is opened again.
     await device.kill(tester);
-    device.clock.now = device.clock.now.add(const Duration(minutes: 45));
+    device.clock.now = DateTime.utc(2026, 11, 11, 7); // after the dawn
     await device.boot(tester);
-    expect(find.byKey(const Key('resumeRun.keepGoing')), findsOneWidget);
-    await tap(tester, find.byKey(const Key('resumeRun.keepGoing')));
-    expect(
-      tester.widget<Text>(find.byKey(const Key('run.confirmed'))).data,
-      startsWith('3 of '),
-    );
-    expect(device.vm.execution!.state!.phase, ExecutionPhase.running);
+    // The saved plan stays on its night; the planner is on a copy (S8.3).
+    expect(device.vm.plan.activeSessionId, isNot(savedId));
 
-    // Complete: Finish opens the results; Complete completes.
-    await tap(tester, find.byKey(const Key('run.more')));
-    await tap(tester, find.byKey(const Key('run.finish')));
-    expect(find.textContaining('Results · '), findsOneWidget);
+    // "Last night: … How did it go?" opens the result form (S8.2, S8.3).
+    await tap(tester, find.byKey(const Key('tonight.resultDue')));
+    expect(find.byKey(const Key('results.review')), findsOneWidget);
+    await tap(tester, find.byKey(const Key('results.outcome.asPlanned')));
     await scrollTo(tester, find.byKey(const Key('results.save')));
     await tap(tester, find.byKey(const Key('results.save')));
-    expect(find.text('Session completed.'), findsOneWidget);
+    expect(find.text('Result saved.'), findsOneWidget);
     await tester.pump(const Duration(seconds: 6)); // the message goes
     await settle(tester);
-
+    expect(find.byKey(const Key('tonight.resultDue')), findsNothing);
+    final runId = savedId;
     // Log: the Sessions list and the detail.
-    expect(find.text('Sessions'), findsWidgets);
+    expect(find.text('Logbook'), findsWidgets);
     final stored = await tester.runAsync(
       () => DriftSessionRepository(device.db!).get(runId),
     );
@@ -377,17 +370,16 @@ void main() {
       for (final b in (session['blocks'] as List).cast<Map>())
         if (b['frame_type'] == 'light') b,
     ];
-    expect(lights.first['confirmed_frames'], 3);
+    expect(lights.first['confirmed_frames'], lights.first['frame_count']);
+    expect((session['results'] as Map)['result_kind'], 'asPlanned');
     final back = SessionManifestCodec.decode(json);
     expect(back.sessions.single.session.id, runId);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('time zones: a site in another zone than the device, and a '
-      'run across a DST change', (tester) async {
-    tester.view.physicalSize = const Size(412, 915);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+      'result recorded across a DST change', (tester) async {
+    phoneSizedView(tester);
     // 21:00 on 31 October 2026 in New York (EDT, UTC−4); the device says
     // Ljubljana. New York leaves DST at 02:00 on 1 November.
     final device = _Device(
@@ -427,32 +419,37 @@ void main() {
     expect(vm.plan.sessionNight, expected);
     expect(vm.plan.eveningDate, CalendarDate(2026, 10, 31));
 
-    // A run from 01:30 EDT to 01:30 EST: two hours of running time
-    // across the change, never one or three.
+    // A plan saved at 01:30 EDT, its result recorded the next morning
+    // (after the DST change at 02:00): the night stays the site's civil
+    // evening (31 Oct), in the site's zone, with UTC instants.
     AppRouter.router.go(AppRouter.session());
     await settle(tester);
     await chooseTargetAndRig(tester);
     device.clock.now = DateTime.utc(2026, 11, 1, 5, 30); // 01:30 EDT
-    // Since S6.2 Track live is offered for a saved plan.
     await tap(tester, find.text('Save plan'));
-    await trackLive(tester);
-    final run = vm.execution!.session!;
-    expect(run.executionStartSnapshot!.timeZoneId, 'America/New_York');
-    device.clock.now = DateTime.utc(2026, 11, 1, 7, 30); // 01:30 EST
+    final savedId = vm.plan.activeSessionId!;
+
+    // The next morning, after the change to EST and the night's dawn.
+    await device.kill(tester);
+    device.clock.now = DateTime.utc(2026, 11, 1, 12); // 07:00 EST
+    await device.boot(tester);
+    AppRouter.router.go(AppRouter.results(savedId));
     await settle(tester);
-    expect(vm.execution!.runningTime, const Duration(hours: 2));
+    await tap(tester, find.byKey(const Key('results.outcome.asPlanned')));
+    await scrollTo(tester, find.byKey(const Key('results.save')));
+    await tap(tester, find.byKey(const Key('results.save')));
 
     // Exported instants are UTC; the zone travels with them.
-    await device.kill(tester);
-    await device.boot(tester);
     final all = await tester.runAsync(
       () => DriftSessionRepository(device.db!).list(),
     );
-    final started = all!.firstWhere((s) => s.id == run.id);
-    expect(started.startedAtUtc!.isUtc, isTrue);
-    expect(started.startedAtUtc, DateTime.utc(2026, 11, 1, 5, 30));
-    expect(started.timeZoneId, 'America/New_York');
-    expect(started.eveningDate, CalendarDate(2026, 10, 31));
+    final done = all!.firstWhere((s) => s.id == savedId);
+    expect(done.status, SessionStatus.completed);
+    expect(done.completedAtUtc!.isUtc, isTrue);
+    expect(done.completedAtUtc, DateTime.utc(2026, 11, 1, 12));
+    expect(done.timeZoneId, 'America/New_York');
+    expect(done.planSnapshot!.timeZoneId, 'America/New_York');
+    expect(done.eveningDate, CalendarDate(2026, 10, 31));
     expect(tester.takeException(), isNull);
   });
 }

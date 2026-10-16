@@ -34,4 +34,11 @@ abstract class TargetRepository {
 
   /// Updates an existing target.
   Future<void> updateTarget(AstroTarget target);
+
+  /// Runs [writes], a sequence of this repository's writes, as one storage
+  /// transaction, so they are committed together rather than one by one
+  /// (S10.5, ENG-12: first-run seeding). A write that fails and is caught
+  /// inside [writes] does not undo the others; an error thrown out of
+  /// [writes] undoes them all.
+  Future<T> inOneTransaction<T>(Future<T> Function() writes);
 }

@@ -1,6 +1,5 @@
 import '../../core/time/clock.dart';
 import 'capture_block.dart';
-import '../../core/config/app_identity.dart';
 
 class SessionLog {
   final int id;
@@ -59,51 +58,8 @@ class SessionLog {
     this.processingNotes,
   });
 
-  String toShareableText() {
-    final buffer = StringBuffer();
-    buffer.writeln('${AppIdentity.appName} Session Log');
-    buffer.writeln('----------------------');
-    buffer.writeln('Target: $targetName');
-    buffer.writeln('Date: ${sessionDate.toLocal().toString().split(' ')[0]}');
-    if (locationName != null) buffer.writeln('Location: $locationName');
-
-    buffer.writeln('\n--- Equipment ---');
-    buffer.writeln('Rig: $equipmentName');
-    if (focalLength != null) buffer.writeln('Focal Length: ${focalLength}mm');
-    if (aperture != null) buffer.writeln('Aperture: f/$aperture');
-
-    buffer.writeln('\n--- Capture Plan ---');
-    buffer.writeln('Lights: $plannedLightFrames');
-    if (plannedDarkFrames != null) buffer.writeln('Darks: $plannedDarkFrames');
-    if (plannedFlatFrames != null) buffer.writeln('Flats: $plannedFlatFrames');
-    if (plannedBiasFrames != null) {
-      buffer.writeln('Bias/Dark-Flats: $plannedBiasFrames');
-    }
-    if (integrationTimeSeconds != null) {
-      buffer.writeln(
-        'Planned Integration: ${(integrationTimeSeconds! / 3600).toStringAsFixed(2)} hrs',
-      );
-    }
-
-    buffer.writeln('\n--- Environment ---');
-    if (temperature != null) buffer.writeln('Temperature: $temperature°C');
-    if (humidity != null) buffer.writeln('Humidity: $humidity%');
-    if (cloudCover != null) buffer.writeln('Cloud Cover: $cloudCover%');
-    if (bortleScale != null) buffer.writeln('Bortle Scale: $bortleScale');
-    if (environmentalNotes != null && environmentalNotes!.isNotEmpty) {
-      buffer.writeln('Conditions Notes: $environmentalNotes');
-    }
-
-    buffer.writeln('\n--- Results & Notes ---');
-    if (actualLightFrames != null) {
-      buffer.writeln('Actual Lights: $actualLightFrames');
-    }
-    if (rejectedFrames != null) buffer.writeln('Rejected: $rejectedFrames');
-    if (processingNotes != null && processingNotes!.isNotEmpty) {
-      buffer.writeln('Processing: $processingNotes');
-    }
-    return buffer.toString();
-  }
+  // S8.7: the old all-fields share text is gone; an entry is shared through
+  // `EntryShareText` (no notes, no coordinates; D8-4).
 
   // Serialization methods for Export/Interoperability
   Map<String, dynamic> toJson() {

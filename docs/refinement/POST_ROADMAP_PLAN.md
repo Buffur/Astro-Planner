@@ -110,6 +110,12 @@
 > **Updated 2026-09-29 (RG-03 decided):** Q1, no specification source; S7.6 has no source path.
 > **Updated 2026-09-29 (S7.6):** the rig form is built (UX-22). Every Stage 7 Task is done; Stage 7 validation is next.
 > **Updated 2026-09-29 (independent Stage 7 validation at `d13fdab`):** BLOCKED on S7V-01 / TD-083 and S7V-02 / TD-084; bounded corrections S7.V1/S7.V2 frozen below. No implementation or gate decision changed. **S7.V1 done 2026-09-29** (TD-083 resolved); **S7.V2 done 2026-09-29** (TD-084 resolved). **V5 revalidation PASS 2026-09-29; Stage 7 closed** (same chat at the owner's request, disclosed). Stage 8 planning is next.
+> **Updated 2026-09-29 (Stage 8 planning, verified at `836bbdf`):** Stage 8's Task sequence is frozen
+> ("Stage 8 — frozen Task sequence"): S8.1–S8.9. The owner delegated every Stage 8 decision to the
+> agent in chat; D8-1 to D8-4 (S4-DEF-02 = dawn, S4-DEF-01 = Save again, RD-13, Share) and the
+> implementation decisions (S4-DEF-03, 05–08, the event and storage model) are recorded in DECISIONS
+> E.1, "Stage 8 decisions (delegated by the owner)". §8 and the S4-DEF list updated. No other Stage
+> changed.
 
 ## Contents
 
@@ -2006,14 +2012,14 @@ decides them within ADR-019 §3.1's invariant):
 
 | ID | Question | Decided in |
 | --- | --- | --- |
-| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back* |
-| S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8 |
-| S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8 |
+| S4-DEF-01 | Save and version semantics after a plan is saved: what Save does on Saved · changed, including a changed night or site | Stage 6 or 8 planning. *Allocated to Stage 8 by Stage 6's planning (2026-09-27; its "Gates"): Stage 6 keeps today's Save. The owner may move it back.* **Decided 2026-09-29 (Stage 8 planning, delegated; E.1, "Stage 8 decisions", D8-2): Save again** before the night ends, a changed night or site included; S8.3 |
+| S4-DEF-02 | When a saved night counts as passed for the next-day transition (at startup, and while the app stays open), and from when a result may be reported. SessionNight defines planning semantics only | Stage 8. **Decided 2026-09-29 (D8-1): at dawn** at the snapshot's darkness limit, else the night's end (CALC-44); S8.1, S8.3 |
+| S4-DEF-03 | The working copy: which inputs and night it takes (for example, a future working night the user picked); how edits made before the transition reach it; recovery across failure and restart without lost or duplicated plans | Stage 8. **Decided 2026-09-29 (I-3):** S8.1's `settleSavedPlan`, S8.3 |
 | S4-DEF-04 | What Discard does with a Saved · changed plan's unsaved changes (the snapshot itself never changes) | Stage 6. **Decided 2026-09-28 by the owner: R**, revert to the saved plan (DECISIONS E.1, "S4-DEF-04 decided"). Built by S6.3 |
-| S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8 |
-| S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8 |
-| S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8 |
-| S4-DEF-08 | A result form left open while its entry changes; a cancelled or failed result write | Stage 8 |
+| S4-DEF-05 | How results and counts are stored against the snapshot's blocks, and how existing Saved · changed rows are upgraded (migration workflow) | Stage 8. **Decided 2026-09-29 (I-5):** events on the settled row's blocks; rows settled lazily, no migration step; S8.1 |
+| S4-DEF-06 | A missing or unreadable snapshot at the transition or at result time (SI-008 applies) | Stage 8. **Decided 2026-09-29 (I-4)**; S8.1–S8.3 |
+| S4-DEF-07 | What an opened Logbook entry offers besides its result (editing, a copy), and which night it is listed under | Stage 8. **Decided 2026-09-29 (I-6)**; S8.3, S8.7 |
+| S4-DEF-08 | A result form left open while its entry changes; a cancelled or failed result write | Stage 8. **Decided 2026-09-29 (I-7)**; S8.1, S8.2 |
 
 **S4.V3 — Bounded final validation** (the owner). The next independent validation is the final
 Stage 4 validation. It answers only whether:
@@ -4831,6 +4837,313 @@ and are provisional in the same way.*
     are updated where something changes;
   - a dependency left unused is removed only with evidence (Stage 10 reviews the rest).
 
+#### Stage 8 — frozen Task sequence (planning, 2026-09-29)
+
+Planned at `836bbdf`, right after Stage 7 closed. The application code is unchanged since `d28f5a8`
+(`git diff --stat d28f5a8 HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` is empty), so **S7.V2's
+full-gate PASS is Stage 8's baseline, reused (V3)**: Encoding; Format, 461 files; Analyze; 1,734
+tests, 2 expected skips; 2 host E2E. Planning is documentation only.
+
+**Decisions.** The owner delegated every Stage 8 decision to the agent in chat on 2026-09-29 ("do not
+ask me anything; decide yourself and choose the best solutions"). The four product decisions and the
+implementation decisions below are recorded in DECISIONS E.1, "Stage 8 decisions (delegated by the
+owner)". Each follows ADR-019 §3.1's invariant and the Stage's constraints; the owner may revisit any
+of them. **No gate is left open**, so every Task below is authorised in order.
+
+**The inputs, verified against the code at `836bbdf` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| Recording a result | Only through the tracker: `SessionRepository.complete` accepts `inProgress` only; `abandon` writes status only, with no reason and no time; `updateResults` accepts any non-legacy status. `/session/:id/results` (`ResultsViewModel`) edits counts with ±1 buttons per block (UX-25 confirmed) and is reached only from the tracker's Finish or "Edit results". A planned session cannot be completed | S8.1, S8.2 |
+| Result states | No `Partly`, no Not done reason and no name column exist. `PlanState.partly` exists in presentation only and `PlanState.from` never returns it | S8.1 |
+| Events | Nine kinds, a CHECK on `session_events.kind`; `ExecutionMachine` accepts confirm/reject while active or finished, nothing after `abandoned`; counters are a projection written in the same transaction and equal the replay (tested) | S8.1 |
+| Snapshot blocks | `SessionSnapshotBuilder` writes blocks without id or position; `_writePlan` re-inserts `capture_blocks` on every plan write, so block ids are not stable. A `planned` row's blocks equal its snapshot's (every plan edit sets `draft`); `revertToSaved` restores them (S6.3) | S8.1 (counts against the row's blocks once they equal the snapshot) |
+| The saved night | A snapshot's `night` is the SessionNight window (mean solar noon to noon) with the site and time context; its preferences hold the darkness limit. `VisibilityCalculator.calculateNightTimelineForNight(night, darknessLimitDeg:)` gives the dark span (CALC-41) | S8.1 (CALC-44) |
+| Rollover | `PlanLifecycleViewModel.load` and `followNight` move only never-saved drafts; a saved plan keeps a past `eveningDate` in the row while the planner shows tonight in memory (D1, "until Stage 8") | S8.3 |
+| Tonight | No result line; the slot is `tonight_home_screen.dart`'s comment at the plan card; `AppWords.howDidItGo` is defined and unused | S8.3 |
+| The tracker | Files only for live tracking: `execution_screen.dart`, `execution_viewmodel.dart`, `resume_run_viewmodel.dart`, `resume_run_dialog.dart`, `start_session.dart`, `execution_outlook.dart` (CALC-36), `screen_wake.dart`, `wakelock_screen_wake.dart`; the planner's ⋮ "Track live (optional)", Tonight's run card, the detail's "Open tracker", keep-screen-on in `DisplayPreferencesRepository`; `wakelock_plus` 1.8.0. `ExecutionMachine`'s estimate, running time and stale check are tracker-only; its fold is used by results, the export and progress. No `FeatureScope` flag | S8.4 |
+| TD-063 | **Still reproducible by its mechanism:** the detail screen caches its `Session`; `openSession` passes it to `CurrentSession.adopt`, which trusts `planEditable` without re-reading (`current_session.dart:172-180`) | S8.4 |
+| The Logbook list | Tab and app bar say "Sessions"; one flat list; filters are seven chips in widget state; swipe-only delete with a dialog; `sessionStatusLabel` with "Legacy log", "Draft", "Planned, unsaved changes"; no search; each row has a share icon | S8.5 |
+| Progress | `/library/progress` (`ProgressScreen`, `TargetProgress`, CALC-38), completed non-legacy sessions only, counts from the event fold | S8.5 |
+| The entry | `session_detail_screen.dart`: snapshot sections, "Window load", "Session budget", "Legacy", "Open tracker", "Export file" (the download icon: `ShareSessionExporter` writes a manifest v2 JSON and shares it); share text `SessionLog.toShareableText` includes both notes and legacy values, no coordinates | S8.7 |
+| TD-070's remainder | A snapshot's rig records a group's provenance only when every spec shares it; per-field provenance is not recorded | S8.8 |
+| TD-056 / ENG-14 | The backup archive holds the database and the manifest only; restore and reset keep every preference, including the ids `activeLocationId`, `targetId`, `equipmentId` and `editedSessionId` | S8.9 |
+| ViewModel headroom | `viewmodel_rules_test.dart`: 300 physical lines; every Task that grows a ViewModel checks it and splits first if needed | All |
+
+**Rules for every Stage 8 Task:**
+- **The shared rules** ("Stages 6–11: shared rules"), the Stage 8 constraints above and ADR-019 §3.1's
+  invariant apply: a snapshot never changes; an actual is only what the user reports (or confirms); a
+  passed night never marks a plan done; no new status.
+- **Events are the source of counts** (trap 14): every count a result writes is an event in the same
+  transaction as its counters, and the counters equal the replay.
+- **Schema changes** follow the migration workflow (`CLAUDE.md`, "After changing Drift tables"), with
+  schema-equality and data-preservation tests; nothing stored is reinterpreted. The export stays
+  manifest v2 with additive keys (the S7.3a precedent: an older app refuses a file holding a value it
+  does not know, whole); `manifest_version` changes only for an incompatible change.
+- **Words:** `AppWords` and the glossary; a Task that touches a screen removes its retired terms and
+  lowers the baseline in `retired_terms_test.dart`.
+- **Design system** (`DESIGN_SYSTEM.md` §9, as amended for Stage 8 above): `PlanStateLabel`, `showDone`,
+  `SwipeToDelete`, `DeleteButton`, `confirmDestructive`, `DetailScaffold` where the Task's screen fits.
+  The entry's items that §9.1/§9.3 still list under P8.5 belong to S8.7 (the amendment above moved them
+  to P8.7).
+- **Tests:** every changed or new screen stays in, or joins, the accessibility sweep (trap 17); the
+  core-loop E2E follows every renamed key or label (trap 19).
+- **Verification** (`CLAUDE.md` V1–V3): every Task below touches a schema, the night semantics, a
+  dependency, a backup or export format, or a screen on the E2E path, so each ends with **the full
+  gate after its last code change**, plus the migration tests of S8.1 and S8.6.
+- **Documentation:** each Task updates `FEATURE_STATUS.md`, ARCHITECTURE and DATA_MODEL Part B,
+  `TECH_DEBT.md`, `SCIENTIFIC_INTEGRITY.md` for a calculation, `DECISIONS.md` where a decision is
+  built, `EXPORT_MANIFEST.md` for the export, the privacy documents if anything leaving the device
+  changes, and `PROGRESS.md`.
+- **One Task per commit**, in the order below.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S8.1 | Results without a run: domain and data | P8.1 | M–L | — | **Done 2026-09-29** |
+| S8.2 | The result form | P8.2 | M | S8.1 | **Done 2026-09-29** |
+| S8.3 | The saved-plan transition and Tonight's line | P8.3 | M | S8.1, S8.2 | **Done 2026-09-29** |
+| S8.4 | Retire the live tracker safely; TD-063 | P8.4 | M | S8.2, S8.3 | **Done 2026-09-29** |
+| S8.5 | The Logbook list, search, filters and Progress | P8.5 | M | S8.3 | **Done 2026-09-29** |
+| S8.6 | An optional plan name | P8.6 | S–M | S8.5 | **Done 2026-09-29** |
+| S8.7 | The Logbook entry, Share and Export as file | P8.7 | M | S8.4, S8.6 | **Done 2026-09-29** |
+| S8.8 | Per-field provenance in new snapshots (TD-070's remainder) | Input | S | — | **Done 2026-09-29** |
+| S8.9 | Preferences in the backup; stale ids (TD-056, ENG-14) | Input | S–M | — | **Done 2026-09-29** |
+
+**Order:** S8.1 → S8.2 → S8.3 → S8.4 → S8.5 → S8.6 → S8.7 → S8.8 → S8.9 → Stage 8 validation. S8.8 and
+S8.9 depend on nothing and may run earlier. No other Task is added; the old TASK 17.3
+(metadata-assisted actuals) stays a later candidate (the result model can take a proposal later).
+
+##### S8.1 — Results without a run: domain and data
+- **Objective:** a saved plan whose night has ended can be recorded as Completed as planned, Partly or
+  Not done without a run and without Save plan; a run in progress at the upgrade can be finished the
+  same way; counts are events against the saved blocks.
+- **Scope:**
+  - **CALC-44 `SavedNightEnd`** (pure domain, D8-1): the instant a saved night ends, from the plan
+    snapshot: the dawn of the dark span at the snapshot's darkness limit (CALC-41's
+    `darkAtLimit`) inside the snapshot's night; no dawn in the window (no darkness that night,
+    darkness to the window's end, polar night) → the night's end (the next mean solar noon); an
+    unreadable or missing snapshot → the end of the night key's SessionNight computed conservatively
+    from the row's evening date and zone (documented in CALC-44). Registered in
+    `SCIENTIFIC_INTEGRITY.md` with tests (mid-latitude, a no-darkness summer night, polar night, an
+    unreadable snapshot).
+  - **Schema v24:** `session_logs.result_kind` (nullable; `asPlanned` or `partly`) and
+    `session_logs.not_done_reason` (nullable; clouds, wind, dew, equipment, other);
+    `session_events.kind` gains **`reported`** (the table is rebuilt with `alterTable`, every event
+    kept). Existing rows read as before: a live-run completion is Completed, an abandoned row Not done
+    without a reason.
+  - **`ExecutionMachine`:** `reported` is accepted only from not started and ends it (phase
+    finished); the existing post-finish confirm/reject rule then carries the counts. Nothing else
+    changes.
+  - **`SessionRepository.recordResult(id, report, {expectedUpdatedAtUtc})`**, one transaction:
+    - a Saved (`planned`) entry whose night has ended (CALC-44 against the injected clock): Completed
+      as planned writes `reported` and one `framesConfirmed` per light block with its planned count
+      (blocks with 0 skipped); Partly writes `reported` and the entered counts (0 or more, per light
+      block; above the plan allowed); Not done sets `abandoned` with the optional reason; results,
+      notes and conditions in the same write; `completed_at_utc_ms` set for a completion;
+    - an `inProgress` run (legacy live mode): `finished`, then corrections to the reported counts, or
+      Not done through the existing abandon path with the reason;
+    - a completed or Not done entry: an edit. Counts change by correction events (completed only);
+      Completed as planned ↔ Partly may change; completed ↔ Not done never does (ADR-014 §3);
+    - refused, with nothing written: legacy rows; drafts (a Saved · changed row is settled first,
+      below); a night that has not ended; an `expectedUpdatedAtUtc` that differs from the stored one
+      (`StaleResultForm`, S4-DEF-08); Completed or Partly for a Saved · changed row whose snapshot
+      cannot be read (S4-DEF-06);
+    - the result totals (`actual_light_frames`, `rejected_frames`) come from the replay, as today.
+  - **`SessionRepository.settleSavedPlan(id)`**, one transaction (S4-DEF-03, S4-DEF-05): for a Saved
+    · changed row, a new never-saved draft receives the row's working plan (its night, references,
+    blocks and tracking override) and the row goes back to its snapshot (`planned`, S6.3's revert
+    semantics); for an unreadable snapshot the row is left as it is and only the copy is made; for a
+    Saved row nothing is written. It returns the copy, if any. Idempotent.
+  - **Export:** `results.result_kind`, `results.not_done_reason` and the event kind `reported`,
+    additive; `EXPORT_MANIFEST.md` updated; `manifest_version` stays 2.
+  - **RD-13 (D8-3):** CALC-37 and CALC-38 note that counts are the user's statements: "Reported as
+    planned" for Completed as planned; existing accepted estimates cannot be told apart from counted
+    frames and are not relabelled (SCI-07 closed as documented).
+  - **Domain values** for the result (`ResultOutcome`, `ResultReport`, `NotDoneReason`), with
+    `Session.resultKind` and `notDoneReason`.
+- **Out of scope:** the form (S8.2); the planner's transition (S8.3); removing anything of the tracker
+  (S8.4); names (S8.6).
+- **Acceptance:**
+  1. a Saved entry after its night ends is completed as planned, partly (0, fewer, more) and Not done
+     (with and without a reason) with no run; its snapshot bytes are unchanged; replay equals counters;
+  2. before its night ends every outcome is refused and nothing is written;
+  3. a Saved · changed row settles into an unchanged saved entry plus a draft holding every working
+     edit; a second settle does nothing; an unreadable snapshot keeps the row and still makes the copy;
+  4. a run in progress is finished with reported counts, or Not done with a reason; its earlier events
+     are kept;
+  5. a stale `expectedUpdatedAtUtc` is refused with nothing written;
+  6. v23 → v24 keeps every row, event and counter (a data-preservation test with sessions in every
+     status, events and legacy rows); the schema-equality test passes;
+  7. the export round-trips the new keys and `reported`; a pre-S8.1 file still reads;
+  8. CALC-44's tests pass; CALC-37/38 unchanged in value.
+
+##### S8.2 — The result form
+- **Objective:** `/session/:id/results` becomes "How did it go?", the one form for every result.
+- **Scope:**
+  - **Review saved plan:** the night, target, site and rig, and the planned light blocks, from the
+    plan snapshot (the execution-start snapshot for a legacy run), never from the planner; what the
+    snapshot lacks is shown as unavailable (SI-008).
+  - **The outcome:** Completed as planned (one choice) · Partly (a number field per light block,
+    pre-filled from the plan, or from a run's confirmed counts; not ±1; UX-25) · Not done (optional
+    reason chips: clouds, wind, dew, equipment, other). Rejected counts are not asked; stored ones are
+    shown read-only.
+  - Optional notes ("Conditions and events", processing notes) and conditions (temperature, humidity,
+    cloud; empty = unknown), as today.
+  - **Save result** (the primary action; `showDone`); Back writes nothing. No Save plan and no Save ·
+    Discard · Cancel (U1) about the planner's working copy.
+  - **Saved · changed entries:** before the form opens, the entry is settled
+    (`CurrentSession.settle`, in the autosave chain); if it is the planner's current plan, the planner
+    continues on the copy; the form then reviews the saved plan.
+  - **Stale and failed writes (S4-DEF-08):** a stale form is refused with "This entry changed since you
+    opened it." and reloads; a storage failure is reported through `runWithFeedback`, the form keeps
+    its input.
+  - **Not ended yet:** the form is not offered; opened by route it says when the result can be
+    recorded (CALC-44's instant, in the site's zone) and offers nothing to save.
+  - **Entry points:** the tracker's Finish (until S8.4), the Logbook's "Edit results" → "Edit result"
+    and a new "Record result" (list rows and the entry) for an ended saved plan; Tonight's line (S8.3).
+  - `PlanStateLabel` for the entry's state; `AppWords` (Record result, Edit result, Completed as
+    planned, Partly, Not done, How did it go?). The retired ±1 editor and "Complete session" go.
+- **Out of scope:** the transition (S8.3); removing the tracker (S8.4); the list's redesign (S8.5).
+- **Acceptance:**
+  1. each outcome is recorded from the form for an ended Saved entry and for an ended Saved · changed
+     entry (whose working copy survives as the planner's plan);
+  2. the review shows the snapshot's plan even after the planner was edited;
+  3. Partly takes typed numbers per light block; Completed as planned needs no number;
+  4. Back writes nothing; a stale form and a failed write change nothing and say so;
+  5. an entry whose night has not ended offers no result;
+  6. the form joins the accessibility sweep (light, dark, field; 100 % and 200 %);
+  7. the core-loop E2E still passes (its Finish → result path now uses the new form's keys).
+
+##### S8.3 — The saved-plan transition and Tonight's line
+- **Objective:** ADR-019 §3.1's next day, delivered at once (D1).
+- **Scope:**
+  - **At restore and while the app runs** (`PlanLifecycleViewModel.load` and `followNight`, which
+    `NightClock` calls every minute and on resume): when the current plan is a saved plan whose night
+    has ended (CALC-44), the planner continues on a working copy for tonight, in the autosave chain:
+    - Saved: a new never-saved draft with the same site, target, rig, blocks and tracking override,
+      untouched (replacing it later asks nothing; the saved plan stays in the Logbook);
+    - Saved · changed: `settleSavedPlan`; the copy holds the working edits and counts as unsaved (U1);
+    - the copy's night: the working night if still ahead, else tonight (the roll-forward rule);
+    - a never-saved draft keeps its roll-forward; a run in progress keeps its copy rule.
+  - **Resume** never makes an ended saved plan current; `openSession` on an ended saved plan opens a
+    copy (S4-DEF-07).
+  - **Save (D8-2):** Save on a saved plan whose night has not ended replaces its snapshot, including
+    a changed night or site (ADR-014's Save again, unchanged and now tested).
+  - **Tonight's line** (ADR-019 §5, item 3): the most recent saved plan (or run in progress) whose
+    night has ended and has no result: "Last night: M42. How did it go?" when its night is the one
+    before tonight's, else "M42 · Sat 27 Sep: how did it go?"; it opens the result form; gone once a
+    result is recorded. No notification.
+- **Out of scope:** removing the tracker (S8.4); the Logbook (S8.5).
+- **Acceptance:**
+  1. Save Friday, then Friday's dawn passes with the app open and after a restart: Friday's entry is
+     Saved on Friday with its snapshot unchanged, and exactly one working copy is current;
+  2. Save Friday, move the working plan to Saturday and edit, then Friday ends: Friday's entry and
+     snapshot are unchanged, the Saturday edits are in the copy on Saturday;
+  3. a restart repeated after the transition creates no second copy; a storage failure at the
+     transition loses nothing and retries on the next check;
+  4. a never-saved past draft still rolls forward; a run in progress still gets its copy;
+  5. Save before the night ends replaces the snapshot, including a changed night;
+  6. Tonight's line appears only when due and opens the form; after Save result it is gone.
+
+##### S8.4 — Retire the live tracker safely; TD-063
+- **Objective:** the tracker leaves the product (the owner, 2026-09-27) with no data lost.
+- **Scope:**
+  - **The audit (A–E, "Notes on P8.4")** recorded in the commit and `ARCHITECTURE.md` Part B.
+  - **Removed (A):** the tracker screen and route, `ExecutionViewModel`, the resume prompt and its
+    ViewModel, `start_session.dart` (TD-073's last message), "Track live (optional)", Tonight's run
+    card, the detail's "Open tracker", keep-screen-on (`ScreenWake`, its preference methods) and the
+    `wakelock_plus` dependency once `grep` shows no use; `ExecutionOutlook` (CALC-36) and the
+    estimate and running-time functions (CALC-35) if nothing else uses them.
+  - **Kept (B, C):** the events, the fold and its invariant, `SessionRepository.start` only if a test
+    or migration still needs it (else removed from the interface), every stored run, event and
+    snapshot, the export and backup.
+  - **A run in progress at the upgrade:** listed as Tracking, offered on Tonight's line and in the
+    Logbook, finished or marked Not done through S8.2's form (S8.1's in-progress path). The planner's
+    copy rule for it stays.
+  - **TD-063:** `openSession` re-reads the session by id before deciding (S1.V5's fix), so a stale
+    detail never adopts a frozen entry; a UI-driven regression test (a detail cached, then the entry
+    gets a result from Tonight's line, then Open in planner).
+  - **Tests (D, E):** each removed test is listed with its reason; the core-loop E2E becomes Save →
+    (night ends) → result; `TEST_PLAN.md` L4–L6 and L8's tracker parts are replaced by the new
+    lifecycle (host rows re-pointed).
+  - **Documents:** ADR-016 amendment; CALC-35 and CALC-36 marked retired (history kept); UX-13,
+    UX-26 and TD-073 closed; TD-063 resolved; FEATURE_STATUS; the licence list and COMPLIANCE if the
+    dependency leaves.
+- **Out of scope:** the Logbook's redesign (S8.5, S8.7).
+- **Acceptance:**
+  1. no screen, route, menu item or card offers live tracking;
+  2. a database with a run in progress, one completed live run with corrections and one abandoned run
+     opens, lists, exports and backs up as before; the in-progress run can be recorded both ways;
+  3. the TD-063 regression test passes and fails on the old `openSession`;
+  4. the E2E covers Save → result; the full gate passes without the dependency.
+
+##### S8.5 — The Logbook list, search, filters and Progress
+- **Objective:** the tab labelled Logbook becomes a useful history (ADR-019 §2, §8, §10; 08 §24).
+- **Scope:**
+  - The tab and the screen are **Logbook**; **Upcoming** (saved plans whose night has not ended) and
+    **Past** (the rest, newest night first); rows show the identity (target · night; the name from
+    S8.6), `PlanStateLabel`, the integration when a result exists, and **Record result** when due.
+  - **Search** (the app bar): case-insensitive over the target, the site and both notes (and the name
+    from S8.6), in memory over the loaded list; no full-text dependency.
+  - **Filters in a panel** (UX-30): one Filters button with the number active, a sheet with today's
+    status, target, site and nights semantics, Clear; the state lives in `SessionsViewModel` and
+    survives navigation; search and filters combine (AND).
+  - **Delete:** `SwipeToDelete`, a visible `DeleteButton` on the entry, `confirmDestructive`.
+  - **Progress by target** moves to the Logbook (a row at the top of the list, route
+    `AppRouter.logbookProgress`), the Library's entry and `/library/progress` go (RD-07, ADR-019 §9);
+    CALC-38 unchanged.
+  - Retired terms out of `logbook_screen.dart` (the baseline lowered); "Export all as file".
+- **Out of scope:** the entry (S8.7); names (S8.6).
+- **Acceptance:** the groups, search, filters (together and cleared), delete with confirm, Progress's
+  new place, the retired terms, the sweep, and the E2E's tab label.
+
+##### S8.6 — An optional plan name
+- **Scope:** `session_logs.name` (nullable, schema v25); "Name (optional)" on the entry (trimmed, empty
+  = none, up to 80 characters); never asked at Save plan; not copied by Copy; not part of the snapshot;
+  the Logbook shows the name, else target · night; search includes it; the export's `name` key
+  (additive); backup carries it (the database).
+- **Acceptance:** migration tests (v24 → v25); a named and an unnamed plan list, search, export and
+  survive backup and restore; the id never changes.
+
+##### S8.7 — The Logbook entry, Share and Export as file
+- **Scope:**
+  - The entry, in order (P8.7): the identity; the night, target, site and rig from the snapshots; the
+    result; planned against actual (CALC-37); the blocks; notes; conditions; then Share and **Export
+    as file**. Older and legacy rows degrade honestly ("Old log — stored text only"); nothing is filled
+    from today's rig or site; "Time needed" and "Total time" replace "Window load" and "Session
+    budget"; `DetailScaffold` where it fits.
+  - **Actions (S4-DEF-07):** a saved plan whose night has not ended: Open in planner, Copy to another
+    night; ended and awaiting: Record result, Copy to another night; with a result: Edit result, Copy
+    to another night; Old log: Share and Export as file only. Never the tracker.
+  - **Share (D8-4):** structured, human-readable text with only the fields the entry holds: the
+    identity, the night (date and zone label), the site's name (no coordinates), the target, the rig,
+    the result, planned against actual per filter and exposure, the stored conditions. **No notes and
+    no coordinates.**
+  - **Export as file:** the download action classified (it is the manifest v2 export of one session:
+    renamed "Export as file", kept distinct from Share); no download history.
+- **Acceptance:** the order; each state's actions; Share's text for a completed, a Partly, a Not done,
+  a planned and an Old log entry (no notes, no coordinates); Export as file unchanged in content; the
+  retired terms; the sweep.
+
+##### S8.8 — Per-field provenance in new snapshots (TD-070's remainder)
+- **Scope:** a new snapshot's `rig` records each specification's own provenance
+  (`provenance: {field: {source, confidence}}`) beside the group pair; older snapshots keep their
+  group pair and are read as they are; nothing invents `user`; `v` stays 1 (additive keys); the export
+  embeds snapshots as stored. No screen change.
+- **Acceptance:** an imported rig's snapshot records its estimated and file-sourced fields as such;
+  an old snapshot still reads; TD-070 resolved.
+
+##### S8.9 — Preferences in the backup; stale ids (TD-056, ENG-14)
+- **Scope:** first a host probe that reproduces ENG-14 (a restore with other site ids keeps a stale
+  `activeLocationId`). Then: the archive gains `preferences.json` (`format_version` 2): the planning
+  preferences, the display preferences, the active site id and the first-run flag; not the transient
+  position, the catalog seed marker or the plan ids. Restore applies it; the plan ids
+  (`targetId`, `equipmentId`, `editedSessionId`) are cleared on restore and on a database reset; a
+  version 1 archive still restores. The privacy documents are checked (the backup stays a local file
+  the user shares).
+- **Acceptance:** the probe fails before and passes after; a round trip restores the preferences; a
+  version 1 archive restores; a reset leaves no stale id.
+
 ### Stage 9 — Secondary UX & Product Polish
 
 - **Scope:**
@@ -4921,6 +5234,229 @@ provisional in the same way.*
   the text roles and `CollapsibleSection` where RG-13 keeps advanced settings.)*
 - The deletion animations use `AppMotion` and `SwipeToDelete`.
 - See `docs/DESIGN_SYSTEM.md` §9.
+
+#### Stage 9 — frozen Task sequence (planning, 2026-09-29)
+
+Planned at `b378f16`, after Stage 8 closed and its three validation findings were fixed (TD-085 to
+TD-087). **The TD-087 commit's full-gate PASS is Stage 9's baseline, reused (V3)**: Encoding; Format,
+465 files; Analyze; 1,791 tests, 2 expected skips; 2 host E2E; Flutter 3.47.4. Planning is
+documentation only.
+
+**Decisions.** The owner delegated Stage 9's decisions to the agent in chat on 2026-09-29 ("once
+every finding is fixed, take the next Stage as the goal", after "do not ask me anything; decide
+yourself and choose the best solutions"). The decisions below are recorded in DECISIONS E.1, "Stage 9
+decisions (delegated by the owner)". **Three are not delegable and stay the owner's**, because this
+plan names the owner as the one who decides them: the final logo (P9.4: "an agent never picks the
+final mark"), the licence (RG-12, P9.5: "no change before the owner decides") and the project's
+GitHub identity (RD-01: the application id is permanent once published). The agent prepares each
+(S9.10–S9.12) and implements nothing that depends on them.
+
+**The inputs, verified against the code at `b378f16` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| The Library (TD-053, RD-07) | `/library/rigs`, `/library/targets` and `/library/sites` build the same screens as `/select/…`, titled "Select Equipment" and "Select Target". A tap sets the rig or target on the current plan and pops (`equipment_selection_screen.dart:166`, `target_selection_screen.dart:355`); a tap on a site makes it the active site (`sites_screen.dart:148`). The Library tab's tiles show the **plan's** rig and target as subtitles. No "Plan this target". Deleting: rigs and targets by a raw `Dismissible` with ad hoc dialogs ("Delete Equipment?"), sites by an icon with an ad hoc dialog; no `DeleteButton`, no `confirmDestructive`, no feedback. The Progress row is already gone (S8.5) | S9.1 |
+| Vocabulary and forms (P9.2) | The retired-terms baseline holds one entry: "No equipment profiles found." (`equipment_selection_screen.dart:126`). The rig editor is a dialog with a primary `FilledButton` ("Save Changes"/"Save" literals) and title-case labels; the target editor a dialog with an `ElevatedButton` Save and title-case labels ("Edit Target", "Target Name *"); the site editor a page whose only Save is an app-bar check icon, with raw paddings and ad hoc SnackBars | S9.2 |
+| Settings (RG-13, RD-11 = S9, TD-050) | "Planning Settings": Visibility (minimum altitude, darkness limit, dew margin, NPF k), Capture plan (feasibility margin; time between frames, a slider hard-coded 0–60 s while `PlanningPreferences.perFrameRange` is 0–120; five optional overheads whose values cannot be edited, though the text says to measure them), then, without a heading, field mode, place-name lookup, Backup and "About & data sources". **No control for the Moon and cloud gates anywhere**, while opportunity and fit messages say "your Moon gate". Slider saves have no failure handling; "Back up now", staging and cancelling a restore are not run through `runWithFeedback`; Restore confirms with an ad hoc dialog | S9.3, S9.4 |
+| About and identity (08 §23, RD-01) | "About & data sources": OpenNGC notice, OSM and Nominatim (the copyright page as text, not a link), Open-Meteo, lightpollutionmap.app, privacy, GPL-3.0, "Source code" (`AppIdentity.sourceUrl`), the licence page. **No authorship, no author links, no version line.** `AppIdentity` names `chacha12` (source, project site, policy, user agent, application id) while the git remote is `github.com/Buffur/Astro-Planner` (RD-01 open). `pubspec.yaml`'s description is still Flutter's template text | S9.5, S9.12 |
+| Detail screens | Night & Moon: a summary plus two text sections (twilight table; Moon illumination and closest approach); no graphic. Weather: the forecast card with an hourly **numeric** strip (cloud, precipitation, wind, temperature, T − Td), its header still offering "Tap to set location" with no action here | S9.6 |
+| Sky darkness | The planner's `SkyDarknessWidget`: a collapsible "Sky darkness" with a Bortle dropdown and swatch, a source line with raw ISO dates, and "Open Light Pollution Map" in a raw bold style; the site editor repeats Bortle and SQM | S9.7 |
+| Feedback and messages | `showDone` after a new plan, Save plan, Copy, Result saved and Entry deleted only. None after a rig, target or site save or delete, a setting, a backup, a staged or cancelled restore, a rename, an export (the share sheet only). TD-081: messages slide even with reduced motion | S9.8 |
+| Share and export | Backup `astroplan-backup-<UTC stamp>.astroplan`; export `astroplan-sessions-<UTC stamp>.json`; "Export all" is an icon with a tooltip only | S9.8 |
+| Consistency | Ad hoc `TextStyle`s on secondary screens (`sites_screen.dart`, `sky_darkness_widget.dart`, `equipment_selection_screen.dart`, `target_selection_screen.dart`, `about_screen.dart` paddings); the planner's (`home_screen.dart`, `capture_plan_widget.dart`) are Stage 6's and are left | S9.9 |
+| Logo and splash (P9.4) | A 108 dp vector (horizon, altitude arc, red imaging window, star) drawn twice (`ic_launcher_foreground.xml`, `tool/make_launcher_icons.py`); the adaptive monochrome layer reuses the colour foreground; the Android 12+ splash uses the same vector on #0B1230; the pre-12 launch background centres the bitmap; startup shows a bare progress indicator | S9.10 (owner gate) |
+| Licence (RG-12) | One `LICENSE` (GPL-3.0); About states GPL-3.0; the catalog is CC BY-SA 4.0 (OpenNGC); the owner's new requirements (08 §23) are free, no monetisation, no modification without permission | S9.11 (owner gate) |
+| Tonight's entry points | Each row opens its intended destination (Night and Moon → Night & Moon, Weather → Weather, the result line → the result form, Choose a target / What can I image tonight? → their pages); no "Draft" or "Analytics" left | Verified; no Task |
+| TD-074 ("What fits") | A capture-plan wording limited by `FitAnalyzer`'s API; the planner is Stage 6's and a joint-share answer needs new domain design | Deferred (E.1, D9-6); no Stage 9 Task |
+
+**Rules for every Task** (with "Stages 6–11: shared rules" and the Stage 5 system):
+- Presentation only unless a Task says otherwise: no schema change, no calculation in a widget, no
+  change to a formula; a preference whose meaning changes is recorded in `SCIENTIFIC_INTEGRITY.md`.
+- Every write a user starts goes through `runWithFeedback` (trap 18); every stored record is deleted
+  through `confirmDestructive`, with a visible Delete and a swipe shortcut (RD-09 = M + S1).
+- A new screen or state joins the accessibility sweep (trap 17); a renamed key or label updates the
+  E2E (trap 19); the retired-terms baseline only shrinks.
+- Documents in the same change: `FEATURE_STATUS.md`, `ARCHITECTURE.md` Part B, `TECH_DEBT.md`,
+  `DESIGN_SYSTEM.md` where a component or pattern is adopted or added, `COMPLIANCE.md` and the
+  privacy policy where a source, link or attribution changes, and `PROGRESS.md`.
+- **One Task per commit**, in the order below. Verification per the policy (V1): most Tasks are
+  shared behaviour and end with the full gate, because the affected screens cannot be bounded with
+  confidence.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S9.1 | The Library manages; one delete pattern for rigs, targets and sites | P9.1; TD-053 | M | — | **Done 2026-09-29** |
+| S9.2 | Secondary forms and the vocabulary completed | P9.2 | M | S9.1 | **Done 2026-09-29** |
+| S9.3 | RG-13: what each setting is for, and where it belongs (research) | P9.3 | S | — | **Done 2026-09-29** |
+| S9.4 | Settings rebuilt; the Moon and cloud gates (TD-050) | P9.3; RD-11 | M | S9.3 | **Done 2026-09-29** |
+| S9.5 | About: authorship, sources and attribution | 08 §23 | S | — | **Done 2026-09-29** |
+| S9.6 | The Weather and Night & Moon detail screens | Stage 9 scope | M | — | **Done 2026-09-29** |
+| S9.7 | Sky darkness made readable | Stage 9 scope; 08 §13 | S | — | **Done 2026-09-29** |
+| S9.8 | Feedback, messages (TD-081) and export polish | Stage 9 scope | S–M | S9.1, S9.4 | **Done 2026-09-29** |
+| S9.9 | Final visual consistency on secondary screens | Stage 9 scope | M | S9.1–S9.8 | **Done 2026-09-29** |
+| S9.10 | The logo and the splash: analysis and alternatives | P9.4 | S | — | **Prepared 2026-09-29** (`research/S9.10_LOGO.md`); **owner gate; deferred by the owner 2026-09-30** (today's icon stays) |
+| S9.11 | RG-12: the licence (research) | RG-12; P9.5 | S | — | **Prepared 2026-09-29** (`research/S9.11_LICENCE.md`); **owner gate; deferred by the owner 2026-09-30** (GPL-3.0 stays) |
+| S9.12 | RD-01: the project's identity (options) | RD-01 | S | — | **Prepared 2026-09-29** (`research/S9.12_PROJECT_IDENTITY.md`; TD-088); **owner gate; deferred by the owner 2026-09-30** (before any upload) |
+
+**Order:** S9.1 → S9.2 → S9.3 → S9.4 → S9.5 → S9.6 → S9.7 → S9.8 → S9.9; S9.10 to S9.12 are
+documents the agent prepares at any point and the owner answers. Their implementation (the chosen
+mark everywhere, trap 20; the licence text, About and `COMPLIANCE.md`; the identity in `AppIdentity`,
+the policy URL and the remote) is added as Tasks once the owner has decided. **The Stage 9 validation
+runs after S9.9**; S9.10–S9.12 are then either decided and built, or deferred by the owner (the
+Stage's exit allows "deferred by the owner"). *Closed 2026-09-30:* the owner deferred all three in
+chat; Stage 9 closed on its validation report (`PROGRESS.md`).
+
+##### S9.1 — The Library manages; one delete pattern for rigs, targets and sites
+- **Objective:** browsing the Library never changes the plan or the active site (RD-07; TD-053).
+- **Scope:**
+  - The rig, target and site lists take a **mode**: *manage* (the Library routes) or *choose* (the
+    `/select/…` routes, reached from the planner, Tonight's context line and the first run). In manage
+    mode a tap opens the item's editor; in choose mode it chooses, as today. Titles by mode: "Rigs",
+    "Targets", "Sites" in the Library; "Choose a rig", "Choose a target", "Choose a site" when choosing
+    (`AppWords`).
+  - The Library tab's tiles describe the Library, not the plan: counts ("3 rigs"), and for sites the
+    active site as information. *(Built by S9.1 as short descriptions instead of counts, which would
+    need an extra read on every visit; the sites tile keeps its count and active site.)*
+  - **"Plan this target"** on a target's editor in manage mode: a new plan with that target, under
+    the leave guard (`askBeforeLeavingPlan`, U1), then the planner.
+  - **Deleting** a rig, target or site: a visible Delete in its editor (`DeleteButton`) and a swipe
+    shortcut (`SwipeToDelete`) in both modes, one `confirmDestructive` wording, the existing
+    repository checks unchanged (saved plans keep their snapshots), and `showDone` after a delete.
+    *(Corrected at S9.1: no repository refuses deleting a rig or site in use: saved plans' references
+    are set null and their snapshots keep the values, ADR-014 §4. The site keeps its visible Delete in
+    the row, RD-09's S1.)*
+  - "Add from a photo" stays in both modes (ADR-018 §7).
+- **Out of scope:** the editors' own forms (S9.2); Settings.
+- **Acceptance:** (1) UI tests: tapping a rig, a target and a site in the Library opens its editor
+  and leaves the plan's rig, target and the active site unchanged; (2) the same taps from `/select/…`
+  still choose; (3) "Plan this target" asks when the plan has unsaved changes and starts a new plan
+  with the target; (4) each delete asks through `confirmDestructive` and a cancelled swipe returns the
+  row *(the "refusal for a rig in use" clause dropped at S9.1: no such refusal exists)*; (5) TD-053
+  resolved; the sweep covers the three lists in both modes.
+
+##### S9.2 — Secondary forms and the vocabulary completed
+- **Objective:** the rig, target and site editors follow Stage 5's form pattern and the glossary,
+  and the retired-terms baseline is empty (P9.2).
+- **Scope:** sentence-case labels and titles from `AppWords` ("Edit rig", "Add a target", "Edit
+  site"); one primary `FilledButton` Save in each editor (the site editor gains one; the app-bar check
+  stays as a shortcut or goes); the target editor's `ElevatedButton` replaced; "No equipment profiles
+  found." → the glossary's words; raw paddings → `AppSpacing`; the site editor's ad hoc SnackBars →
+  the shared feedback. Validation and saving are unchanged.
+- **Acceptance:** the retired-terms baseline is empty and the test enforces an empty baseline; the
+  editors' labels and Save buttons match in a widget test; `equipment_editor_fit_test.dart` and the
+  sweep pass; no saved value changes (the editors' existing tests unchanged in substance).
+
+##### S9.3 — RG-13: what each setting is for, and where it belongs (research)
+- **Objective:** answer RG-13 for every visible setting before Settings is rebuilt.
+- **Scope:** `refinement/research/S9.3_SETTINGS.md`: for each setting its class (A app-wide, B
+  planning preference, C one plan's choice, D a rig, target or site property, E display or
+  accessibility, F information), what it changes (a calculation, and which; or only the display), its
+  unit and range from the domain, whether a real amateur workflow needs it (with sources for
+  astrophotography facts: the NPF rule's primary source, published dithering, refocus and meridian-flip
+  practice), and where it belongs. The Moon and cloud gates (RD-11 = S9) are placed. No "recommended"
+  value without evidence; thresholds stay preferences (SI-006).
+- **Acceptance:** every setting listed in the verified inputs has a row with a class, an effect and a
+  placement; each factual claim cites a source; the owner is asked nothing (delegated), and the
+  placements are recorded in E.1's Stage 9 decisions.
+
+##### S9.4 — Settings rebuilt; the Moon and cloud gates (TD-050)
+- **Objective:** Settings shows each setting's value and consequence in sections, as S9.3 placed them,
+  and the optional gates become reachable.
+- **Scope:** sections with headings (from S9.3); each row: title, current value with its unit, a short
+  consequence ("Changes the imaging window"), detail on demand; the per-frame range from
+  `PlanningPreferences.perFrameRange`; the optional overheads' values editable within the model's
+  ranges; **the Moon and cloud gates**: a switch and a threshold each, with their consequence (ADR-013
+  G4/G5; off by default, unchanged); every write through `runWithFeedback`; Back up and the restore's
+  staging and cancelling through `runWithFeedback`, Restore through `confirmDestructive`; the screen
+  title "Settings".
+- **Out of scope:** the preferences' meanings and defaults (unchanged), the planner.
+- **Acceptance:** (1) a widget test turns each gate on, sets its threshold and sees the opportunity
+  change through the ViewModel (the calculator's tests unchanged); (2) the per-frame slider reaches
+  120 s; (3) an overhead value edited persists and changes the budget; (4) a failed save shows the
+  shared failure text; (5) Restore asks through `confirmDestructive`; (6) TD-050 resolved; the sweep
+  covers Settings with every section.
+
+##### S9.5 — About: authorship, sources and attribution
+- **Objective:** the author is visible and the sources are correct (08 §23).
+- **Scope:** an author block at the top of About: the author's name as the git history records it
+  *(built by S9.5 as the owner's public handle, "Buffur", from 08 §23's links: the git history records
+  two author names, and a personal name is not inferred from an e-mail address)*,
+  **Reddit (prominent) and GitHub profile links** (https://www.reddit.com/user/Buffur/,
+  https://github.com/Buffur), kept apart from third-party credit; the version line; every source link a
+  real link (OSM's copyright page, Open-Meteo, OpenNGC, lightpollutionmap.app) with the wording each
+  provider's terms require, consistent with the weather card and `COMPLIANCE.md`; the source-code,
+  project and policy links **unchanged until RD-01** (a working link is never broken, and none is
+  moved to an unverified account); `pubspec.yaml`'s template description replaced.
+- **Acceptance:** a widget test finds the author block and both profile links, and each attribution;
+  `COMPLIANCE.md` and the privacy policy checked (updated only where a wording or link changes); no
+  third-party credit removed.
+
+##### S9.6 — The Weather and Night & Moon detail screens
+- **Objective:** the detail screens' secondary presentation (Stage 9 scope, "the detail screens'
+  secondary presentation").
+- **Scope:** Weather: an hourly visual where it helps (a cloud-cover bar per hour with the value as
+  text, the dew-risk hours marked by a word or icon and not by colour alone), the numeric rows kept
+  for the other variables, a text alternative; the age, stale state, unknowns, units, attribution and
+  the horizontal-visibility wording kept (ADR-012); "Tap to set location" never shown where there is no
+  action. Night & Moon: the twilight sequence as a compact timeline from `NightTimeline` (domain
+  times only), the Moon's up-times and illumination, the dark span first; no planner duplication.
+- **Acceptance:** widget tests for the visuals' unknown, empty and available states with their text
+  alternatives; no computation in widgets (values from the ViewModels); the sweep covers both screens
+  with a full forecast.
+
+##### S9.7 — Sky darkness made readable
+- **Objective:** Bortle, SQM, source, date and unknown read clearly (08 §13).
+- **Scope:** the planner's sky-darkness section and the site editor's: the value first ("Bortle 4 ·
+  SQM 21.30 mag/arcsec²"), then its source and a local date (not an ISO string), unknown said as such
+  with the way to set it; the light-pollution map link's purpose stated ("Look it up on
+  lightpollutionmap.app", an external site) in the shared text roles; no inferred Bortle, no Bortle ↔
+  SQM conversion (trap 6).
+- **Acceptance:** widget tests for known, partly known and unknown; no raw ISO date shown; the sweep
+  passes.
+
+##### S9.8 — Feedback, messages (TD-081) and export polish
+- **Objective:** meaningful actions confirm themselves, messages honour reduced motion, and exported
+  files are named for people.
+- **Scope:** `showDone` after a rig, target or site save or delete, a restore staged or cancelled, a
+  backup shared, a rename and an export (after the share sheet returns); no message for a setting whose
+  effect is visible on the same screen. **TD-081:** one app-wide rule so messages do not slide when the
+  platform asks for less motion, with a test. File names in the device's local date
+  (`astroplan-backup-2026-09-29-2130.astroplan`, `astroplan-logbook-…json`), the stamp's zone stated
+  in the share text; "Export all" gets a visible label in the Logbook's menu.
+- **Acceptance:** tests for each new message; TD-081 resolved with a test under
+  `disableAnimations`; the file-name tests; the E2E updated if a label changes.
+
+##### S9.9 — Final visual consistency on secondary screens
+- **Objective:** the same hierarchy on every secondary screen (Stage 9 scope, "final visual
+  consistency").
+- **Scope:** the Stage 5 text roles and `AppSpacing` replace the remaining ad hoc styles on the
+  secondary screens (Library lists, sites, About, Settings, details, sky darkness, results), not the
+  planner or Tonight (Stage 6); a test forbids new raw `TextStyle(fontSize:)` and raw `EdgeInsets`
+  numbers in those files. *(Built by S9.9: the test forbids any hand-built `TextStyle(` and any
+  numeric `EdgeInsets` there; gaps of 12 became `AppSpacing.md`.)*
+- **Acceptance:** the test; the sweep in every theme at 100 % and 200 %; no screen's content
+  changes.
+
+##### S9.10 — The logo and the splash: analysis and alternatives (owner gate)
+- **Scope:** `refinement/research/S9.10_LOGO.md`: where the icon appears (launcher, adaptive and
+  monochrome layers, the Android 12+ splash, the pre-12 background, About); what does not work in its
+  execution; three or four coherent alternatives that keep the vector concept, drawn as vector
+  previews; a subtle splash proposal that never delays startup. **The owner chooses.** Then a Task
+  applies the choice in both drawings (trap 20) with a dedicated monochrome layer.
+
+##### S9.11 — RG-12: the licence (research; owner gate)
+- **Scope:** `refinement/research/S9.11_LICENCE.md`, per RG-12's steps, from authoritative sources
+  only (the licence texts and their stewards): what GPL-3.0 permits against the owner's three
+  requirements; the constraints from the bundled CC BY-SA 4.0 catalog and the dependencies' licences;
+  the options (keep GPL-3.0; a source-available non-commercial, no-derivatives licence; all rights
+  reserved with a published binary) and their consequences, including copies already shared. Not legal
+  advice; no licence chosen and no text written. **The owner decides.** P9.5 then implements it.
+
+##### S9.12 — RD-01: the project's identity (owner gate)
+- **Scope:** a short options note: `chacha12` (today's application id, policy and source URLs, user
+  agent; OD-07) or `Buffur` (the remote and the owner's links), what each changes before the first
+  upload (the application id is permanent after it), and which URLs resolve today. **The owner
+  decides**; a Task then applies it.
 
 #### Order across Stages for ADR-019 (S4.T)
 
@@ -5030,6 +5566,137 @@ provisional in the same way.*
   - the timeline and the Logbook stay responsive on representative hardware;
   - no visualisation or animation dependency was added without need.
 
+#### Stage 10 — frozen Task sequence (planning, 2026-09-30)
+
+Planned at `1aeee63`, after Stage 9 closed (S9.10–S9.12 deferred by the owner). **The TD-089–TD-091
+fix's full-gate PASS (`0f09608`) is Stage 10's baseline, reused (V3)**: Encoding; Format; Analyze;
+1,833 tests, 2 expected skips; 2 host E2E; Flutter 3.47.4. Planning is documentation only.
+
+**Decisions.** The owner's standing delegation (2026-09-29: "do not ask me anything; decide yourself";
+2026-09-30: "move on to Stage 10") covers Stage 10's engineering decisions, recorded in DECISIONS E.1,
+"Stage 10 decisions (delegated by the owner)" (D10-1 to D10-6). None of Stage 10's scope is named as
+the owner's, except a size target (the plan: "no size target unless the owner sets one"), which is
+not set.
+
+**The inputs, verified against the code and this machine at `1aeee63` (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| The 277 MB (08 §26) | The dogfooding report says only "the application currently takes up approximately 277 MB": no build type, no screen, no date. The only builds recorded on the owner's phone (Xiaomi 14T Pro, Android 16) are debug builds (`PROGRESS_HISTORY.md`, M1–M4); the owner's own install's build type is unrecorded. The one release measurement is the TASK 16.2 AAB, 66.5 MB with three ABIs (`RELEASE.md`) | S10.1 |
+| Measurement environments | **An Android emulator now exists on the development machine** (AVD `Medium_Phone_API_36.1`: Android 16, x86_64 with arm64 translation, 6 vCPU, 2 GB RAM); it booted and answered `adb` on 2026-09-30. The owner's phone is not connected. No low-end device. TASK 15.2's profile traces were never taken | D10-1; S10.1, S10.2 |
+| Packaged content | Two Flutter assets: `catalog_v2.json` (57 KB) and `OPENNGC_NOTICE.txt` (1.6 KB); `assets/branding/icon_512.png` (21.6 KB) is not a Flutter asset. No bundled fonts (Material Icons only, tree-shaken in release). 17 direct runtime dependencies, including `flutter_map` + `latlong2` (the map pick), `geolocator`, `file_picker`, `share_plus`, `archive`, `sqlite3_flutter_libs ^0.6.0+eol` (RD-02) | S10.1, S10.6 |
+| Form lag (08 §22) | The rig editor (`equipment_editor.dart`, 720 lines) is a dialog built by one `StatefulBuilder`; seven of its fourteen text fields call `setDialogState` on every change, so each keystroke in them rebuilds the whole dialog. That is a candidate, **not a verified cause** (no measurement exists) | S10.2, S10.3 |
+| Planner recalculation | Trap 16's memoization (`planner_memoization_test.dart`: invalidation cases and a tolerant host benchmark, a cached frame under 1 ms and the candidates under 1 s) | S10.2, S10.4 |
+| Timeline and detail screens | P6.11's timeline, S9.6's twilight and cloud bars; no profile of either | S10.2, S10.4 |
+| Logbook and Sessions | `DriftSessionRepository.list` loads rows, then blocks for all rows in one query (`_blocksFor`); in-memory search and filters (I-9). ENG-11's N+1 was measured on the host only (198 ms for 200 sessions, 04/P4) | S10.2, S10.5 |
+| First-run seeding (ENG-12) | `CatalogSeeder` inserts each catalog entry with its own autocommit `insertTarget` (no transaction); aliases are one transaction (`replaceAliases`). Host first run 885 ms (04/P2); never measured on Android | S10.2, S10.5 |
+| Release configuration | `RELEASE.md`: AAB with R8 on, symbols in `BUNDLE-METADATA`, 16 KB alignment checked by `tool/check_bundle.dart`; no `--split-debug-info` or `--obfuscate`; the upload key does not exist (owner) | S10.7 |
+
+**Rules for every Task** (with "Stages 6–11: shared rules"):
+- **Claim → evidence → change → before → after → regression check** for every optimisation, in the
+  Stage's record, `refinement/evidence/STAGE_10_MEASUREMENTS.md` (created by S10.1; each Task adds its
+  section). Unlike measurements are never compared (build mode, ABI, device and data volume stated).
+- No change without a measured problem; no architecture rewrite; no new dependency for drawing or
+  animation; scientific sampling and time grids unchanged; no function lost (the plan's list).
+- Regression tests only where deterministic (structure, rebuild counts, query counts); no timing
+  thresholds except the existing ones (TASK 10.4's candidates under 1 s on the host benchmark).
+- The owner's signing material is never touched (trap 21); a release build on this machine is
+  debug-signed and is used for measurement only.
+- Documents in the same change: `FEATURE_STATUS.md` where behaviour is visible, `ARCHITECTURE.md`
+  Part B, `TECH_DEBT.md`, `RELEASE.md` for any build change, `PROGRESS.md`.
+- **One Task per commit**, in the order below; verification at the Task's V1 class. S10.1 and S10.2's
+  measurements are documentation plus tooling; a Task that changes no code ends with the
+  documentation class.
+
+| Task | Title | From | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S10.1 | The size baseline: the 277 MB classified, the release artifact and the installed footprint broken down | 08 §26; Stage 10 scope | S–M | — | **Done 2026-09-30** |
+| S10.2 | Reproducible performance scenarios and baselines | Stage 10 scope (measurement first) | M | — | **Done 2026-09-30** |
+| S10.3 | Form lag: investigate from S10.2's scenario and fix the verified bottleneck | 08 §22 | M | S10.2 | **Done 2026-09-30** |
+| S10.4 | The planner, the timeline and the detail screens: verified bottlenecks only | Stage 10 scope | S–M | S10.2 | **Done 2026-09-30** (measured; no change needed) |
+| S10.5 | The Logbook at a realistic volume; ENG-11 and ENG-12 on Android | ENG-11; ENG-12 | S–M | S10.2 | **Done 2026-09-30** |
+| S10.6 | Dependencies and assets by verified use (RD-02's `sqlite3_flutter_libs`) | RD-02; Stage 10 scope | S–M | S10.1 | **Done 2026-09-30** |
+| S10.7 | Build and release options, measured | Stage 10 scope | S | S10.1, S10.6 | **Done 2026-09-30** (measured; not adopted, recorded for the owner) |
+
+**Order:** S10.1 → S10.2 → S10.3 → S10.4 → S10.5 → S10.6 → S10.7, then the Stage 10 validation (a
+fresh session). *Closed 2026-09-30:* validation PASS (`refinement/STAGE_10_VALIDATION.md`); its four
+follow-ups fixed or carried (`PROGRESS.md`). S10.4, S10.5 and S10.7 may end with "measured, no change needed": that is a valid
+outcome, recorded with its evidence.
+
+##### S10.1 — The size baseline
+- **Objective:** know what the app's size is, per measurement type, and what makes it up.
+- **Scope:** on this machine and the emulator, at one commit: the release AAB (as `RELEASE.md` builds
+  it); the per-device APK a phone would receive (arm64-v8a, the owner's phone's ABI, and x86_64 for the
+  emulator); `flutter build apk --analyze-size` for arm64-v8a (Dart code, native libraries, assets,
+  resources); a debug APK; the installed footprint of a debug and a release build on the emulator (code,
+  data, cache, as Android reports them). The 277 MB is classified against these (for example a debug
+  install's total) or recorded as the owner's unreproduced observation; the owner may confirm later
+  where it was read. No code change.
+- **Acceptance:** `STAGE_10_MEASUREMENTS.md` §Size: each measurement with its command, build mode, ABI
+  and device; the main contributors measured; the 277 MB classified or recorded as unreproduced; the
+  release baseline stated. Nothing called large without a number.
+
+##### S10.2 — Reproducible performance scenarios and baselines
+- **Objective:** a scenario suite that anyone can rerun, and its first numbers.
+- **Scope:** scenarios in the plan's priority: (1) the rig editor: open, focus a field, type (the
+  owner's lag); (2) the planner: open, edit a block's count and exposure, change the night and the
+  target, open a section; (3) Night & Moon and Weather; (4) the Logbook: open, search, filter, open an
+  entry, at a realistic volume; (5) first-run seeding; (6) the candidates. Each records the device,
+  build mode, steps and metric (frame build and raster times, or elapsed time for work). Tooling: a
+  profile-mode driver on the emulator where Flutter supports it, plus host counts (rebuilds, queries)
+  where they are deterministic. The scenario code lives where the quality gate still compiles it and
+  never makes the gate depend on timing.
+- **Acceptance:** the suite committed with instructions; `STAGE_10_MEASUREMENTS.md` §Baselines has
+  each scenario's first numbers with its environment; the gate passes.
+
+##### S10.3 — Form lag
+- **Objective:** find why focusing and typing in a form lags (08 §22), and fix what is verified.
+- **Scope:** the investigation categories of the plan (focus time, keyboard, input response, rebuild
+  scope and frequency, synchronous work on focus or typing, validation, state propagation, layout,
+  storage on the path), from S10.2's rig-editor scenario, then the other editors (target, site, block)
+  if the same pattern is present. A fix keeps the editor's behaviour, validation and saved values the
+  same (its existing tests pass unchanged). A deterministic rebuild-scope test where one is possible.
+- **Acceptance:** the cause stated with evidence; the scenario repeated after the fix with the same
+  setup, compared; behaviour and data unchanged; or, if nothing is found, the measurements recorded and
+  the finding documented for a device run (Stage 11).
+
+##### S10.4 — The planner, the timeline and the detail screens
+- **Objective:** keep what is fast, fix only what S10.2 shows to be slow.
+- **Scope:** reuse trap 16's memoization before any new cache; repaint and rebuild scope of the
+  timeline and the detail screens' bars; no change to sampling, grids or calculations.
+- **Acceptance:** each scenario's before and after, or "measured, no change needed"; the memoization
+  tests still pass; a new cache, if any, keyed on every input with an invalidation test.
+
+##### S10.5 — The Logbook, ENG-11 and ENG-12
+- **Objective:** the Logbook stays practical at a realistic volume; the two engineering risks are
+  measured on Android.
+- **Scope:** the Logbook's list, search, filters and an entry with a realistic local history (a few
+  hundred saved plans and results); ENG-11 (the session list's queries) and ENG-12 (first-run seeding)
+  timed on the emulator in release or profile mode. A fix only for a measured problem; seeding in one
+  transaction only with a migration-safe test (the seeder's idempotence and the catalog version rules
+  kept). History and snapshot semantics unchanged.
+- **Acceptance:** the numbers recorded; ENG-11 and ENG-12 closed as measured or fixed with before and
+  after; no semantic change (the seeder and session tests pass unchanged).
+
+##### S10.6 — Dependencies and assets
+- **Objective:** everything shipped is used.
+- **Scope:** each runtime dependency checked against its actual use (runtime, platform integration,
+  build, generated code, migration, export, backup, tests), including what the tracker's retirement
+  left; RD-02's `sqlite3_flutter_libs ^0.6.0+eol` against the current `sqlite3`/`drift` packaging, with
+  a build and a run on the emulator; assets against their references. Nothing removed on a name search
+  alone; no stable dependency replaced by custom code.
+- **Acceptance:** a table of dependencies and assets with the evidence; any removal measured before
+  and after (S10.1's method) and checked on the emulator; RD-02's dependency part decided (D10-5).
+
+##### S10.7 — Build and release options
+- **Objective:** apply only measured, safe release-size options.
+- **Scope:** options that fit the current workflow (`RELEASE.md`), for example
+  `--split-debug-info` (with the symbols kept for crash reports) or `--obfuscate`, each measured with
+  S10.1's method and checked for startup, plugins and the bundle check; the owner's signing untouched.
+  An option with no material gain, or a support cost that outweighs it, is recorded and not applied.
+- **Acceptance:** before and after for each option tried; `RELEASE.md` updated for any adopted
+  change; the Stage's size record final.
+
 ### Stage 11 — Full Validation & Beta Readiness
 
 - **Purpose:** independent final validation. **No release claim without the required
@@ -5136,6 +5803,105 @@ provisional in the same way.*
   the owner's go/no-go is recorded. *Amended 2026-09-27:* blockers are judged by V4 and the list
   above, and the readiness record exists.
 
+#### Stage 11 — frozen Task sequence (planning, 2026-09-30)
+
+Planned at `e6b6172`, after Stage 10 closed. **S10.6's full-gate PASS is Stage 11's baseline, reused
+(V3)**: 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart`
+(1); Flutter 3.47.4 (only test code and documents changed since). Planning is documentation only. The
+owner asked in chat (2026-09-30) whether Stage 11 can be planned without a device, then said to start.
+
+**Decisions.** Under the owner's standing delegation ("do not ask me anything; decide yourself"),
+recorded in DECISIONS E.1, "Stage 11 decisions (delegated by the owner)" (D11-1 to D11-6). The owner's
+own actions stay the owner's (the upload key, the policy URL, RD-01, a store step, the go/no-go), as
+this plan names them.
+
+**The inputs, verified at `e6b6172` and on this machine (§9.7):**
+
+| Area | Verified state | Goes to |
+| --- | --- | --- |
+| Environments | The development machine now has an Android emulator (`Medium_Phone_API_36.1`: Android 16, x86_64, Google Play image, a user build without root; TalkBack, Chrome and the Play Store installed; the Backup Manager off with no transport; 4.8 GB free). Profile and release builds install and run on it (Stage 10). The owner's phone (Xiaomi 14T Pro, Android 16) passed M1–M4 on 2026-09-26 and is not connected now. No low-end phone | D11-1; S11.3, S11.5 |
+| Carried device rows | `TEST_PLAN.md`: L1–L8 "Not run"; the E2E "Emulator run: not done"; M1–M4 passed (seekable paths); S2V-06 (a non-seekable provider; a real backup's preview cancel) and S3V-08 unrun. Appendix B: 2.4 (America/Los_Angeles at 18:30 shows tonight), 10.4 and 15.2 (device timings; Stage 10's phone runs, S10V-04), 12.4 (red mode in darkness), 12.5 (owner walkthrough), 14.4 (emulator round trip; Auto Backup), 15.3 (TalkBack), 15.4, 15.5, 16.1–16.4 | S11.1 matrix; S11.3, S11.5, S11.6 |
+| Test documentation drift | `TEST_PLAN.md`'s end-to-end section still describes Save → Start → frames → the resume prompt → Finish (the tracker left in S8.4) and "no Android device or emulator"; trap 18 says the same | S11.2 (recorded, corrected there) |
+| Release | The upload key and `key.properties` do not exist (owner); `tool/check_bundle.dart` refuses a debug-signed bundle, as designed; the source and policy links return 404 (TD-088, RD-01 deferred by the owner) | OWNER ACTION rows |
+| Owner decisions open | RD-01 (deferred), RG-12 (deferred), the logo (deferred), RD-15 (a diagnostics export; this Stage's planning), RD-17 (the push; deferred by the owner's standing instruction to commit only) | D11-4, D11-5 |
+
+**Rules for every Task:**
+- **Contract only** (the plan's "one bounded final validation"): every check comes from S11.1's matrix;
+  nothing is added by "anything else". A newly exposed severe regression may still block (V4 C).
+- **Evidence levels** (D11-1) are stated per row; an emulator run is never recorded as DEVICE
+  VERIFIED, a widget test never as device evidence, code never as usability evidence.
+- **Corrections:** a blocker becomes a corrective Task `S11.Cn` in its owning scope, verified at its V1
+  class; only the affected row is rechecked (V5, V7). A non-blocking finding is recorded (FOLLOW-UP,
+  DEFERRED) and not fixed inside an evidence Task.
+- **Device safety:** a run on the owner's phone uses a separate debug package (`.s2check`, local build
+  change reverted) and never replaces or reads the owner's app data (S4.R1 §7); nothing is uploaded
+  from the owner's files; the emulator holds no owner data.
+- **No push** (the owner's instruction); signing material never touched (trap 21).
+- **One Task per commit**; `TEST_PLAN.md` records every device or emulator run (build, device, commit,
+  date, result), and `PROGRESS.md` the state.
+
+| Task | Title | Where | Size | Depends on | State |
+| --- | --- | --- | --- | --- | --- |
+| S11.1 | The validation matrix: the frozen contract, each row with its source, its required evidence level, its environment and whether it is mandatory for beta readiness | Documents | M | — | **Done 2026-09-30** (`refinement/STAGE_11_MATRIX.md`) |
+| S11.2 | Host evidence: the matrix's host rows (tests, the accessibility sweep's coverage, degraded states, error handling of the changed writes, portability of names and results, the scientific invariants), and `TEST_PLAN.md`'s stale E2E and device text corrected | Host | M | S11.1 | **Done 2026-09-30** (`refinement/evidence/STAGE_11_HOST_EVIDENCE.md`); blockers S11H-01 to S11H-03 → S11.C2 |
+| S11.3 | Emulator evidence: the E2E on the emulator (15.5), 2.4's America/Los_Angeles check, L1–L6 and L8, the refused-database flow (S1.5), backup and restore round trip and Auto Backup (14.4), permissions, offline, a release build installed and the core loop walked (16.1's install part) | Emulator | M | S11.1 | **Done 2026-09-30** (`refinement/evidence/STAGE_11_EMULATOR_RUNS.md`); blocker S11F-01 → S11.C1 |
+| S11.C1 | Corrective: the Logbook lists a plan saved while it was out of view (S11F-01, TD-092) | Host; emulator | S | S11.3 | **Done 2026-09-30** |
+| S11.C2 | Corrective: the rig editor's derived-value contrast, "Altitude now" through `QuantityText`, the zone picker's check (S11H-01 to S11H-03) | Host | S | S11.2 | **Done 2026-09-30** |
+| S11.4 | Live providers and compliance: Open-Meteo, Nominatim (opt-in), OSM tiles, the light-pollution link from the emulator; AC7 (dependency licences, HTTPS only, no secrets, `COMPLIANCE.md` and the privacy policy against the code); Play's current closed-testing rules for 16.4 (web, cited) | Emulator; host; web | S–M | S11.1 | **Done 2026-09-30** (`refinement/evidence/STAGE_11_PROVIDERS_COMPLIANCE.md`) |
+| S11.5 | The phone and owner runbook: every row that needs the phone or a person (Stage 10's phone runs, TalkBack on the new flows, red mode in darkness, the 12.5 walkthrough, the comprehension scenarios of 11.Z, S2V-06, S3V-08, L7 when a beta exists), with steps and what to record; and the OWNER ACTION list with what each unblocks | Documents | S | S11.1 | **Done 2026-09-30** (`refinement/STAGE_11_DEVICE_RUNBOOK.md`) |
+| S11.6 | Phone runs: the runbook's agent-run rows over USB, when the owner connects the phone | Phone | M | S11.5 | Waits for the phone |
+| S11.7 | The readiness record and the final validation (fresh session): VERIFIED, UNVERIFIED, OWNER ACTION, DEFERRED; readiness is not claimed while a mandatory row is unverified; the owner's go/no-go recorded | Documents | S | S11.2–S11.4 (S11.6 when run) | Not started |
+
+**Order:** S11.1, then S11.2, S11.3 and S11.4 (any order), S11.5; S11.6 whenever the phone is
+available; S11.7 last. S11.7 may run before S11.6: the phone rows are then UNVERIFIED, and readiness
+is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-go) are the owner's.
+
+##### S11.1 — The validation matrix
+- **Scope:** `refinement/STAGE_11_MATRIX.md`, built only from the sources this plan names (Stage 11's
+  "The contract"): the approved decisions (ADR-019 and the E.1 Stage decisions), the frozen acceptance
+  of Stages 6–10 and their validation reports, the release and regression requirements (TASKs 15.3–16.4,
+  Appendix B), the scientific and domain invariants (the traps, `SCIENTIFIC_INTEGRITY.md`), the
+  accessibility rules, and the device flows. Each row: an ID, the check, its source, the evidence level
+  it needs, the environment (HOST, EMULATOR, PHONE, HUMAN, OWNER), mandatory for beta readiness or not
+  (with the reason), and its current evidence where a passed validation already holds it (reused, V3).
+- **Acceptance:** every carried item of Appendix B and every "Scope" and "What it checks" bullet of
+  Stage 11 maps to at least one row or is recorded as out of scope with the reason; no row without a
+  source.
+
+##### S11.2 — Host evidence
+- **Scope:** the matrix's HOST rows, from the reused gate where it covers them (V3) and from targeted
+  reading or probes otherwise. Corrects `TEST_PLAN.md`'s stale E2E description and trap 18's "no
+  emulator" (documentation drift).
+- **Acceptance:** each HOST row PASS with its evidence, or a finding classified by V4.
+
+##### S11.3 — Emulator evidence
+- **Scope:** the matrix's EMULATOR rows, with the steps of `TEST_PLAN.md` where they exist; debug or
+  release builds as each row says; the emulator's settings (the zone, airplane mode, "Don't keep
+  activities", storage fill, the Backup Manager) may be changed and are restored afterwards.
+- **Acceptance:** each row RUNTIME VERIFIED (emulator) or a finding; `TEST_PLAN.md` records each run.
+
+##### S11.4 — Live providers and compliance
+- **Scope:** the matrix's provider and compliance rows. Live calls only as the app makes them (its user
+  agent, the opt-in for Nominatim, no bulk requests). Play's rules from Google's current help pages,
+  cited with dates.
+- **Acceptance:** each row with evidence; `COMPLIANCE.md` re-checked (its verification stamp).
+
+##### S11.5 — The phone and owner runbook
+- **Scope:** `refinement/STAGE_11_DEVICE_RUNBOOK.md`: for each PHONE and HUMAN row the steps, the build,
+  what to record, who runs it; the OWNER ACTION list (upload key, signed bundle, policy URL and
+  contact, RD-01/TD-088, Data Safety entry, the account, trademark search, the go/no-go).
+- **Acceptance:** every PHONE, HUMAN and OWNER row of the matrix has an entry.
+
+##### S11.6 — Phone runs
+- **Scope:** the runbook's agent rows on the owner's phone, when connected (D11-3).
+- **Acceptance:** each run recorded in `TEST_PLAN.md`; DEVICE VERIFIED rows updated in the matrix.
+
+##### S11.7 — The readiness record and the final validation
+- **Scope:** `refinement/STAGE_11_VALIDATION.md` in a fresh session: the matrix judged per V4, one
+  pass; the readiness record in four groups; the Stage exit ("no P0/P1 open; the owner's go/no-go
+  recorded").
+- **Acceptance:** as the Stage's exit; readiness claimed only if every mandatory row is VERIFIED.
+
 ---
 
 ## 6. Traceability: audit findings → Stages
@@ -5164,7 +5930,7 @@ provisional in the same way.*
 | UX-09 capture-plan visuals and delete | Partially confirmed / owner decision | Stages 5–6 (RD-09); **S4.T:** RD-09 (Stage 5) → P5.6; visuals a Stage 6 candidate; **Stage 5 planning:** the pattern is S5.8 (after RD-09); the capture plan adopts it in Stage 6; **2026-09-27:** P6.8 |
 | UX-10 drill-downs; UX-11 night picker | Partially confirmed | Stage 4, then Stage 6; **S4.T:** decided (ADR-019 §5, §9; DEV-P9) → P6.5, P6.6 |
 | UX-12 unreachable drafts | Confirmed mechanism / owner decision | A7 checkpoint; RD-05 (Stage 4); Stages 6 and 8; **S4.T:** decided (ADR-019 §3) → P6.1 |
-| UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4; **2026-09-27:** closes when P8.4 retires the tracker |
+| UX-13 second card after Start | Partially confirmed | Stages 4 and 8; **S4.T:** decided (ADR-019 §4) → P6.6, P8.4; **2026-09-27:** closes when P8.4 retires the tracker; **closed by S8.4 (2026-09-29)** |
 | UX-14 Library lists act as pickers (TD-053) | Documented | RD-07 (Stage 4), then Stage 9; **S4.T:** decided (ADR-019 §8) → P9.1 |
 | UX-15(1) NPF warning on the seeded rig | Owner decision | RD-08 (Stage 7, decided before Stage 6's capture-plan work); **decided T3**; S6.9 (unknown tracking as a neutral missing input); **S7.1** (the plan's override) |
 | UX-17 Moon wording | Partially confirmed | Stage 6 |
@@ -5174,11 +5940,11 @@ provisional in the same way.*
 | UX-22 rig editor | Partially confirmed | Stage 7 (with Stage 3 import); **2026-09-28:** the duplicate pixel field and the unused rotation confirmed → **S7.6** |
 | UX-23 typing | Documented | Stage 7; **2026-09-28:** fewer typed fields only through decided inheritance and proposals (S7.2, S7.3) |
 | UX-24 first-run prefill (= ENG-15, SCI-12) | Owner decision | RD-04 (Stage 4); **S4.T:** decided (ADR-019 §3) → P6.2 |
-| UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2 |
-| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4 |
+| UX-25 reconciliation ±1 | Confirmed | Stage 8; **S4.T:** decided (ADR-019 §4) → P8.2; **resolved by S8.2 (2026-09-29)**: typed counts per light block, no ±1 |
+| UX-26 resume prompt (= RT-10) | Owner decision | RD-12 (Stage 8); **S4.T:** ADR-019 §4; RD-12 decided in P8.2; **2026-09-27:** RD-12 lapsed with the tracker; closes with P8.4; **closed by S8.4 (2026-09-29)**: the resume prompt is gone |
 | UX-28 tracker semantics | Requires verification | D3 (verify first); Stage 11 TalkBack; **2026-09-27:** the tracker retires (P8.4), and Stage 11's TalkBack covers the new flows |
 | UX-29 ties among candidates | Partially confirmed / owner decision | RD-10 (Stage 6) |
-| UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24); **2026-09-27:** P8.5 |
+| UX-30 Sessions filter bar | Documented (a preference) | Stage 8, as the owner's preference (08 §24); **2026-09-27:** P8.5; **done by S8.5 (2026-09-29)**: one Filters panel |
 | UX-34 button hierarchy; UX-38 swipe-only delete | Requires verification | Stage 5 (RD-09); Stage 11. **Stage 5 planning:** mechanisms verified at `38925dd`. UX-34's primary action is decided by ADR-019 §6 (Save plan); the visual hierarchy is S5.2, applied by P6.3. UX-38 is RD-09's Q2, then S5.8 |
 | UX-39 red-mode outlines and bands | Documented; requires verification | Stage 5 constraints; Stage 11 darkness test. **Stage 5 planning:** S5.2 records the field-mode control-boundary token; the bands stay Stage 6/11 |
 | ENG-04 planner tests on the preferences path | Partially confirmed | E4 (optional) |
@@ -5229,8 +5995,8 @@ any implementation Task is created.
 | RG-09 | Can Bortle or SQM be obtained reliably (a dataset or API; the uncertainty of conversions)? Does SQM need to be a user field at all? Should the external map move to lightpollutionmap.app? | 08 §6, §13; PD-05 options C and D (deferred); SI-007 | 7 | No scraping; no Bortle↔SQM conversion without a cited source; secrets outside the code (PD-05 D); privacy and compliance documents updated. *2026-09-27:* no Bortle inferred from coordinates; SQM's purpose settled before it is shown; another map link or an embed only through this gate (Stage 9 presents the result). *2026-09-28 (Stage 7 planning):* researched by **S7.R4** (with RG-08); blocks S7.5's sky darkness and link. *2026-09-29:* S7.R4 done (`research/RG-08_09_SITE_AUTOMATION.md`, §8 questions). **Decided 2026-09-29 (E.1):** S3 (manual, optional, one collapsed section; no automatic source) and M2 (lightpollutionmap.app) |
 | RG-10 | How do manual imagers actually take darks, flats, bias frames and dark flats; what can inherit from the light frames; how can it be explained briefly, with tips that can be dismissed? | 08 §16; ADR-009 §3; F-39 | 7 | ADR-009's budget semantics stand unless the owner amends them. *2026-09-27:* each workflow separately and per supported camera class, from primary or technical sources. The output is Stage 7's parameter matrix (inherited · prefilled and overridable · independent · not applicable, with the budget effect), before any form changes. No flat-exposure or target-ADU guidance unless separately approved; a hidden tip never hides a warning. *2026-09-28 (Stage 7 planning):* researched by **S7.R2**, after RG-11's decision; recorded in ADR-020 (S7.D); blocks S7.3. *2026-09-29:* S7.R2 done (`research/RG-10_CALIBRATION_WORKFLOWS.md`); the owner's six questions are its §10. **Decided 2026-09-29 (DECISIONS E.1, "RG-10 decided"; ADR-020):** L1, D1, T0, O0, N1, H1 |
 | RG-11 | Which capture parameters matter for each camera type (ISO or gain, binning, white balance, focus, interval); which feed a calculation and which are records only; how are they labelled? | 08 §15; SI-004; SCI-05 | 7 | ISO or gain is never "sensitivity"; no camera control; descriptive fields stay descriptive unless a formula is documented. *2026-09-27:* each light input classed (required · optional · known automatically · context-dependent · not applicable); focus's meaning settled before any control is chosen (a slider is only a proposal); the interval reconciled with ADR-009's per-frame overhead, never counted twice; FACT, OWNER PREFERENCE and IMPLEMENTATION OPTION kept apart. *2026-09-28 (Stage 7 planning):* researched by **S7.R1**; recorded in ADR-020 (S7.D); blocks S7.R2 and S7.2. *2026-09-29:* S7.R1 done (`research/RG-11_CAPTURE_PARAMETERS.md`); the owner's six questions are its §11. **Decided 2026-09-29 (DECISIONS E.1, "RG-11 decided"):** C1 (a camera class on the rig; the example rig stays Unknown), B1, W1, F1, I1, P2 |
-| RG-12 | Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
-| RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |
+| RG-12 | *Planned 2026-09-29: S9.11 prepares the research; the owner decides; P9.5 implements. Deferred by the owner 2026-09-30 (GPL-3.0 stays until a decision).* Does GPL-3.0 meet the owner's new requirements (free; no monetisation; no modification without the author's permission)? If not, which licence would, and what follows for the bundled CC BY-SA 4.0 data, the dependencies' licences, the store listing and copies already shared? | 08 §23; PD-12 (GPL-3.0 confirmed 2026-09-24); TASK 16.3 | 9 | A dedicated legal/licensing research decision; no change before the owner decides; not legal advice. *2026-09-27:* the steps: the current licence and distribution; its permissions and obligations against the owner's intent; the incompatibilities; approaches from authoritative licensing sources; the consequences for source availability, redistribution, modification, commercial use, the dependencies' and data licences, and store distribution; alternatives for the owner. No licence chosen from memory and no custom licence text; P9.5 implements the decision |
+| RG-13 | Which settings match real amateur and professional needs, are they understandable, and does each belong in Settings or in context? *Planned 2026-09-29: S9.3 (research), built by S9.4.* **Answered 2026-09-29 (S9.3; `research/S9.3_SETTINGS.md`; E.1, D9-3).** | 08 §18; TD-050 | 9 | Thresholds stay configurable; no score. *2026-09-27:* every visible setting classed as in P9.3; astrophotography facts from reliable sources, not anecdote; the owner is asked only for real product choices |
 | RG-14 | **DECIDED 2026-09-26 (DECISIONS E.1):** none in Stage 2; per-format adapters afterwards, only with samples; `ExifInterface` and LibRaw rejected. Proprietary RAW (CR2/CR3, NEF, ARW, RAF, RW2, ORF): which formats matter, whether their EXIF values are reachable in a bounded way, and which library or platform facility (if any) meets ADR-017 instead of ad hoc parsers? | Owner, 2026-09-26 (DECISIONS E.1, "Stage 2 format priorities"); `STAGE_2_ARCHITECTURE_REVIEW.md` | 2 (S2.R3) | No ad hoc parsers; bounded I/O; privacy exclusions; licence against GPL-3.0; no image decoding |
 
 ---
@@ -5239,8 +6005,8 @@ any implementation Task is created.
 
 | ID | Decision | Evidence and known options | Stage | Blocks |
 | --- | --- | --- | --- | --- |
-| RD-01 | Which GitHub account carries the project identity: `chacha12` (the application id `io.github.chacha12.astroplanner`, the `AppIdentity` source and policy URLs, the user agent, the git user) or `Buffur` (the remote `github.com/Buffur/Astro-Planner`; the owner's links in 08 §23)? | OD-07 asked for confirmation before the first upload; the application id is permanent once published | Before any store upload; before Stage 9's About and links | Upload; privacy-policy URL; About links; the CI remote. *2026-09-27:* the author's own profile links (08 §23) do not wait for it |
-| RD-02 | The TASK 0.3 holdovers: the Google ADK skill and `skills-lock.json`; retaining `docs/archive/`; `sqlite3_flutter_libs ^0.6.0+eol` | 01 TASK 0.3; `TECH_DEBT.md`'s cleanup list | 1 (hygiene); 10 (the dependency, with a device check) | — |
+| RD-01 | *Planned 2026-09-29: S9.12 prepares the options; the owner decides. Deferred by the owner 2026-09-30 (still required before any store upload; TD-088).* Which GitHub account carries the project identity: `chacha12` (the application id `io.github.chacha12.astroplanner`, the `AppIdentity` source and policy URLs, the user agent, the git user) or `Buffur` (the remote `github.com/Buffur/Astro-Planner`; the owner's links in 08 §23)? | OD-07 asked for confirmation before the first upload; the application id is permanent once published | Before any store upload; before Stage 9's About and links | Upload; privacy-policy URL; About links; the CI remote. *2026-09-27:* the author's own profile links (08 §23) do not wait for it |
+| RD-02 | The TASK 0.3 holdovers: the Google ADK skill and `skills-lock.json`; retaining `docs/archive/`; `sqlite3_flutter_libs ^0.6.0+eol` *(the dependency part decided and removed by S10.6, 2026-09-30, under the owner's delegation, D10-5; the other parts stay open)* | 01 TASK 0.3; `TECH_DEBT.md`'s cleanup list | 1 (hygiene); 10 (the dependency, with a device check) | — |
 | RD-03 | **RESOLVED 2026-09-25 (Stage 1 planning; DECISIONS E.1).** SCI-05: neutral label "ISO / gain (for your records)" now (S1.8). SCI-04: documentation only (S1.13). *(Was: wording rulings: the ISO/gain "Sensitivity setting" label (SCI-05); a resolution caveat for times on the 5-minute grid (SCI-04).)* | 07 §6 item 8 | 1 | B7 |
 | RD-04 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): nothing preselected on the first run; New keeps the site and rig and asks for the target; an empty capture plan with "Start from the example plan".** New-draft defaults: should a new draft pre-select M42 and the first rig, and how are defaults and the "Example plan" labelled or offered? 08 §14 asks whether the example plan adds value | ENG-15, SCI-12, UX-24; TASK 4.4 | 4 | Stage 6 |
 | RD-05 | **DECIDED 2026-09-27 (S4.R3; DECISIONS E.1): L1 (Draft internal; Not saved / Saved / Saved · changed; Save explicit), Y2 (yesterday's saved plan stays on its night; the planner continues on a copy), U1 (Save · Discard · Cancel; Discard deletes; V3 and W1 count as unsaved).** Drafts and "New session": is a separate draft stage needed (08 §2)? Are unsaved drafts listed, confirmed before being replaced, or cleaned up (UX-12)? What do "+", New Session and Duplicate do, and how is the state shown (08 §5)? | TASK 11.3's owner decision (drafts are not listed); ADR-014. **Interim decided 2026-09-25 (Stage 1 planning):** confirm before a draft with unsaved changes is replaced (S1.6); the rest stays open for Stage 4. **Input from Stage 1 validation (V3, owner, 2026-09-25):** a site change on a saved plan turns the stored session into a draft ("Planned, unsaved changes", still listed) but does not count as unsaved while the app runs, so New does not ask; after a restart it does. Decide whether a site change edits a saved plan | 4 (an interim safeguard can be decided in Stage 1) | A7; Stage 6 |
@@ -5251,9 +6017,9 @@ any implementation Task is created.
 | RD-10 | Ordering Tonight's candidates without a score: a secondary sort, thresholds, or grouping of ties | UX-29; ADR-013 §5. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **O1 usable time, then frame fill (recommended)** / O2 usable time, then max altitude / O3 thresholds and groups. **Decided 2026-09-28: O1** (DECISIONS E.1) | 6 | S6.14 |
 | RD-11 | Where the ADR-013 optional Moon and cloud gate controls live (TD-050): in Settings (Stage 9) or earlier, in the planner | 01; 07 §6 item 10. **Options prepared 2026-09-27 (Stage 6 planning; §5, "Stage 6 gates"):** **S9 Settings in Stage 9 with RG-13 (recommended)** / S6 Settings now, as S6.15 / P the planner. **Decided 2026-09-28: S9** (DECISIONS E.1); no S6.15 | 6 or 9 | P9.3 if Stage 9 (2026-09-27); S6.15 if Stage 6 |
 | RD-12 | **LAPSED 2026-09-27** (the tracker's retirement; DECISIONS E.1, "Stages 6–11 amended after Stage 5"): the resume prompt goes with the tracker. ADR-019 §4 already expected Finish to lead to the result form; how a run still in progress at the upgrade reaches it is P8.4's audit. *(Was: should the resume prompt's Finish complete the session at once, or open reconciliation like the tracker's Finish?)* | RT-10, UX-26; ADR-016 §11 | 8 | — |
-| RD-13 | Should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? *Narrowed 2026-09-27:* after P8.4 no new estimate is accepted, so it covers the existing accepted-estimate events and the "reported as planned" label (P8.1) | SCI-07 | 8 | — |
+| RD-13 | **DECIDED 2026-09-29 (Stage 8 planning; delegated by the owner; DECISIONS E.1, "Stage 8 decisions", D8-3):** "Reported as planned" labels Completed-as-planned counts; existing accepted estimates cannot be told apart and are not relabelled; CALC-37/38 note that counts are the user's statements. Built by S8.1. *(Was: should an accepted frame estimate carry "estimated" provenance (ADR-008 §6) instead of being stored as a confirmation (ADR-016 §3)? Narrowed 2026-09-27 to the existing accepted-estimate events and the "reported as planned" label.)* | SCI-07 | 8 | — |
 | RD-14 | **DECIDED 2026-09-27 (S4.R5; DECISIONS E.1): Rig; Plan; Logbook; the glossary in `research/S4.R5_LIBRARY_AND_VOCABULARY.md` §5.** Vocabulary: rig or equipment; Sessions or Logbook; the names of the dark window and the night key | UX-18; 08 uses "Logbook" and "Planner" | 4 | Stage 5's shared vocabulary; limits C4 |
-| RD-15 | Does the beta need a local diagnostics export (`AppLog`)? | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
+| RD-15 | Does the beta need a local diagnostics export (`AppLog`)? *Decided 2026-09-30 (Stage 11 planning, delegated; E.1, D11-4): not for the beta.* | ENG-13; crash reporting is deferred for privacy | 11 (planning) | Beta triage |
 | RD-16 | **RESOLVED (owner, 2026-09-26, S3.D; ADR-018 §7):** visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. Earlier: **resolved for Stage 2 (owner, 2026-09-26):** hidden throughout Stage 2; Stage 3 decides visibility. *(Was: when and where the metadata feature becomes visible (the PD-06 gate): at the end of Stage 2, or Stage 3.)* | PD-06; `FeatureScope` | 2 (3) | — |
 | RD-17 | Push the CI workflow to the remote and observe a first run (TASK 1.3), given RD-01 and the repository's visibility. **Included in Stage 1 (owner, 2026-09-25) as S1.14**; **the push was deferred by the owner when S1.14 ran (2026-09-25)**: open again, for Stage 11 or an owner request | 06 §2; 07 §9 | 1 (optional) or 11 | — |
 

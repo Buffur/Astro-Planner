@@ -1,6 +1,6 @@
 // S6.2 (UX-04, ADR-019 §3 and §6; TD-058): the planner says which plan it
-// shows and in what state; its plan actions sit in the ⋮ menu, Track live
-// only for a saved plan; each action says what happened; an edit made while
+// shows and in what state; its plan actions sit in the ⋮ menu (Track live
+// left with the tracker, S8.4); each action says what happened; an edit made while
 // New or Copy is creating the new draft lands in it. Driven through the
 // planner with the real database.
 
@@ -126,9 +126,8 @@ void main() {
     expect(find.text('Session planner'), findsNothing);
   });
 
-  testWidgets('Track live is in the menu only for a saved plan', (
-    tester,
-  ) async {
+  testWidgets('the menu holds New plan and Copy; Track live left with the '
+      'tracker (S8.4), saved or not', (tester) async {
     await start(tester);
     await openMenu(tester);
     expect(find.byKey(const Key('planner.newPlan')), findsOneWidget);
@@ -139,8 +138,8 @@ void main() {
 
     await save(tester);
     await openMenu(tester);
-    expect(find.text('Track live (optional)'), findsOneWidget);
-    expect(find.byKey(const Key('planner.start')), findsOneWidget);
+    expect(find.text('Track live (optional)'), findsNothing);
+    expect(find.byKey(const Key('planner.start')), findsNothing);
   });
 
   testWidgets('each action says what happened: Save, New plan, Copy, Open', (

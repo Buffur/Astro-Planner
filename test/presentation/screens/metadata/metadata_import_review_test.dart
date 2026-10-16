@@ -106,7 +106,7 @@ String _headline(WidgetTester tester) =>
 
 /// Save in the editor: "Save" for a new rig, "Save Changes" for an edit.
 Future<void> _save(WidgetTester tester, {bool edit = false}) async {
-  await tester.tap(find.text(edit ? 'Save Changes' : 'Save'));
+  await tester.tap(find.text('Save'));
   await tester.pumpAndSettle();
 }
 

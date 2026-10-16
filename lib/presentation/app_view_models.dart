@@ -19,12 +19,10 @@ import '../domain/services/opt_in_reverse_geocoder.dart';
 import '../domain/services/reverse_geocoder.dart';
 import '../domain/services/backup_service.dart';
 import '../domain/services/current_session.dart';
-import '../domain/services/screen_wake.dart';
 import '../domain/services/session_exporter.dart';
 import 'viewmodels/backup_viewmodel.dart';
 import 'viewmodels/candidates_viewmodel.dart';
 import 'viewmodels/capture_analysis_viewmodel.dart';
-import 'viewmodels/execution_viewmodel.dart';
 import 'viewmodels/library_viewmodels.dart';
 import 'viewmodels/metadata_import_viewmodel.dart';
 import 'viewmodels/night_conditions_viewmodel.dart';
@@ -36,7 +34,6 @@ import 'viewmodels/startup_viewmodel.dart';
 import 'viewmodels/disclosure_viewmodel.dart';
 import 'viewmodels/theme_viewmodel.dart';
 import 'viewmodels/results_viewmodel.dart';
-import 'viewmodels/resume_run_viewmodel.dart';
 import 'viewmodels/tonight_viewmodel.dart';
 
 /// The app's screen-scoped ViewModels and how they depend on each other
@@ -57,7 +54,6 @@ class AppViewModels {
     required Clock clock,
     required DisplayPreferencesRepository display,
     required FirstRunRepository firstRun,
-    required ScreenWake screenWake,
     required PrivacyPreferencesRepository privacy,
     SessionExporter? exporter,
     BackupService? backup,
@@ -94,6 +90,7 @@ class AppViewModels {
       equipmentRepository: equipment,
       stateRepository: plannerState,
       currentSession: current,
+      clock: clock,
     );
     conditions = NightConditionsViewModel(
       site: site,
@@ -127,13 +124,21 @@ class AppViewModels {
     targetList = TargetsViewModel(targets);
     sessionList = sessions == null
         ? null
-        : SessionsViewModel(sessions, exporter: exporter);
-    resumeRun = sessions == null ? null : ResumeRunViewModel(sessions, clock);
+        : SessionsViewModel(sessions, exporter: exporter, clock: clock);
+    // S8.3: a night check or a recorded result may change Tonight's line.
+    lifecycle.onNightChecked = sessionList?.refreshDue;
     this.backup = backup == null ? null : BackupViewModel(backup);
-    execution = sessions == null
+    results = sessions == null
         ? null
-        : ExecutionViewModel(sessions, clock, display, screenWake);
-    results = sessions == null ? null : ResultsViewModel(sessions);
+        : ResultsViewModel(
+            sessions,
+            clock,
+            settle: lifecycle.settle,
+            onRecorded: () async {
+              sessionList?.markChanged();
+              await sessionList?.refreshDue();
+            },
+          );
     theme = ThemeViewModel(display);
     disclosure = DisclosureViewModel(display);
     metadataImport = captureFiles == null
@@ -150,8 +155,8 @@ class AppViewModels {
   late final SettingsViewModel settings;
   late final SessionPlanViewModel plan;
 
-  /// Which plan the planner works on: restore, open, new, copy, save,
-  /// start (S6.1).
+  /// Which plan the planner works on: restore, open, new, copy, save
+  /// (S6.1).
   late final PlanLifecycleViewModel lifecycle;
   late final NightConditionsViewModel conditions;
 
@@ -163,12 +168,8 @@ class AppViewModels {
   late final TargetsViewModel targetList;
   late final SessionsViewModel? sessionList;
 
-  /// Null without a session repository (some tests).
-  late final ResumeRunViewModel? resumeRun;
-
   /// Null when no backup service is given (tests).
   late final BackupViewModel? backup;
-  late final ExecutionViewModel? execution;
   late final ResultsViewModel? results;
   late final ThemeViewModel theme;
 
@@ -192,12 +193,12 @@ class AppViewModels {
     ChangeNotifierProvider.value(value: gear),
     ChangeNotifierProvider.value(value: targetList),
     if (sessionList case final s?) ChangeNotifierProvider.value(value: s),
+    // S8.3: Tonight's result line reads it where there may be none (tests).
+    ChangeNotifierProvider<SessionsViewModel?>.value(value: sessionList),
     ChangeNotifierProvider.value(value: theme),
     ChangeNotifierProvider.value(value: disclosure),
     ChangeNotifierProvider.value(value: tonight),
-    ChangeNotifierProvider<ResumeRunViewModel?>.value(value: resumeRun),
     ChangeNotifierProvider<BackupViewModel?>.value(value: backup),
-    ChangeNotifierProvider<ExecutionViewModel?>.value(value: execution),
     ChangeNotifierProvider<ResultsViewModel?>.value(value: results),
     ChangeNotifierProvider<MetadataImportViewModel?>.value(
       value: metadataImport,

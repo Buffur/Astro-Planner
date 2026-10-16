@@ -5,6 +5,7 @@ import '../../domain/services/location_service.dart';
 import '../viewmodels/site_viewmodel.dart';
 import 'failure_feedback.dart';
 import 'location_failure_text.dart';
+import 'app_messages.dart';
 
 /// Shows why the device position is unavailable, with "Open settings" when
 /// a settings page fixes it (TASK 7.2).
@@ -14,7 +15,7 @@ void showLocationFailure(
   LocationFailure reason,
 ) {
   final target = LocationFailureText.settingsTarget(reason);
-  ScaffoldMessenger.of(context).showSnackBar(
+  ScaffoldMessenger.of(context).showMessage(
     SnackBar(
       content: Text(LocationFailureText.message(reason)),
       // TD-073, decided in S6.13: a failure the user can fix in settings
@@ -52,7 +53,7 @@ Future<void> useCurrentPositionWithFeedback(
   } catch (e) {
     AppLog.error('location', 'Could not get the position', error: e);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(context).showMessage(
         SnackBar(content: Text(FailureText.message('get your position', e))),
       );
     }

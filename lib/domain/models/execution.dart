@@ -11,7 +11,12 @@ enum ExecutionEventKind {
   framesConfirmed,
   framesRejected,
   finished,
-  abandoned;
+  abandoned,
+
+  /// A result recorded after the night without a run (S8.1; ADR-019 §4,
+  /// I-1): it ends a run that never started, and the reported counts
+  /// follow as `framesConfirmed` events.
+  reported;
 
   static ExecutionEventKind? tryParse(String? stored) {
     for (final k in values) {
@@ -162,17 +167,4 @@ class ExecutionState {
         ? this.lastInterruption
         : lastInterruption(),
   );
-}
-
-/// The frames a block has probably captured so far (ADR-016 §3): shown as
-/// "about N (estimated)", never stored unless the user accepts it.
-class FrameEstimate {
-  const FrameEstimate({required this.frames, required this.planReached});
-
-  /// Frames probably captured in the current block but not reported yet,
-  /// capped at the frames left in the plan.
-  final int frames;
-
-  /// The uncapped estimate reached or passed the frames left.
-  final bool planReached;
 }

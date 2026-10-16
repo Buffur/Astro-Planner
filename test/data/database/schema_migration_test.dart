@@ -39,7 +39,8 @@ import 'package:astroplan/data/database/app_database.dart';
 import 'package:astroplan/data/database/json_map_converter.dart';
 import 'package:astroplan/data/repositories/drift_session_repository.dart';
 import 'package:astroplan/domain/models/camera_class.dart';
-import 'package:astroplan/domain/models/session.dart' show SessionResults;
+import 'package:astroplan/domain/models/session.dart'
+    show SessionResults, SessionStatus;
 import 'package:astroplan/data/repositories/drift_equipment_repository.dart';
 import 'package:astroplan/data/repositories/drift_location_repository.dart';
 import 'package:astroplan/data/repositories/drift_target_repository.dart';
@@ -128,6 +129,198 @@ void main() {
       final connection = await verifier.startAt(9);
       final db = AppDatabase(connection);
       await verifier.migrateAndValidate(db, 10);
+      await db.close();
+    });
+  });
+
+  group('S8.6: v25 (the optional plan name)', () {
+    for (final from in [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, //
+    ]) {
+      test('v$from -> v25 matches the v25 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 25);
+        await db.close();
+      });
+    }
+
+    test('v24 -> v25: every session kept, with no name; a name can then be '
+        'stored', () async {
+      final schema = await verifier.schemaAt(24);
+      schema.rawDatabase.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "result_kind) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'completed', 0, '2026-12-15', "
+        "'partly'), "
+        "(2, 'Old', 'Old rig', 1690000000, 7, 'completed', 1, NULL, NULL);",
+      );
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.sessionLogs,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(rows.map((r) => (r.targetName, r.resultKind, r.name)), [
+        ('M42', 'partly', null),
+        ('Old', null, null),
+      ]);
+      final named = await DriftSessionRepository(db).rename(1, ' Orion ');
+      expect(named.name, 'Orion');
+      await db.close();
+    });
+  });
+
+  group('S8.1: v24 (results without a run, ADR-019 §4)', () {
+    for (final from in [
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, //
+    ]) {
+      test('v$from -> v24 matches the v24 snapshot exactly', () async {
+        final connection = await verifier.startAt(from);
+        final db = AppDatabase(connection);
+        await verifier.migrateAndValidate(db, 24);
+        await db.close();
+      });
+    }
+
+    test('v23 -> v24: every session (every status: a never-saved draft, a '
+        'Saved and a Saved · changed plan too), block, event and counter '
+        'kept; no result kind or reason is invented; `reported` can now be '
+        'stored', () async {
+      final schema = await verifier.schemaAt(23);
+      final raw = schema.rawDatabase;
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, started_at_utc_ms, completed_at_utc_ms, "
+        "actual_light_frames, rejected_frames, environmental_notes) VALUES "
+        "(1, 'M42', 'Rig', 1790000000, 10, 'completed', 0, '2026-12-15', "
+        "'Europe/Ljubljana', 1790000000000, 1790003600000, 3, 1, 'Dew'), "
+        "(2, 'M31', 'Rig', 1790000000, 5, 'abandoned', 0, '2026-12-16', "
+        "NULL, NULL, NULL, NULL, NULL, NULL), "
+        "(3, 'M45', 'Rig', 1790000000, 5, 'inProgress', 0, '2026-12-17', "
+        "NULL, 1790000000000, NULL, NULL, NULL, NULL), "
+        "(4, 'Old', 'Old rig', 1690000000, 7, 'completed', 1, NULL, "
+        "NULL, NULL, NULL, 7, 0, 'legacy');",
+      );
+      // TD-087 (S8V-03): the plans a v23 user has open, in every status.
+      raw.execute(
+        "INSERT INTO session_logs (id, target_name, equipment_name, "
+        "session_date, planned_light_frames, status, legacy, evening_date, "
+        "time_zone_id, planned_at_utc_ms, plan_snapshot) VALUES "
+        "(5, 'M1', 'Rig', 1790000000, 4, 'draft', 0, '2026-12-18', "
+        "'Europe/Ljubljana', NULL, NULL), "
+        "(6, 'M8', 'Rig', 1790000000, 6, 'planned', 0, '2026-12-19', "
+        "'Europe/Ljubljana', 1790000000000, '{\"v\":1,\"takenAtUtcMs\":1}'), "
+        "(7, 'M13', 'Rig', 1790000000, 8, 'draft', 0, '2026-12-21', "
+        "'Europe/Ljubljana', 1790000100000, '{\"v\":1,\"takenAtUtcMs\":2}');",
+      );
+      raw.execute(
+        "INSERT INTO capture_blocks (id, session_log_id, frame_type, "
+        "exposure_time_seconds, frame_count, position, completed_frames, "
+        "rejected_frames) VALUES (1, 1, 'light', 60.0, 10, 0, 3, 1), "
+        "(2, 3, 'light', 120.0, 5, 0, 2, 0), "
+        "(3, 5, 'light', 30.0, 4, 0, 0, 0), "
+        "(4, 6, 'light', 90.0, 6, 0, 0, 0), "
+        "(5, 7, 'light', 45.0, 8, 0, 0, 0);",
+      );
+      raw.execute(
+        "INSERT INTO session_events (id, session_log_id, seq, at_utc_ms, "
+        "kind, block_id, delta, reason, clock_adjusted) VALUES "
+        "(1, 1, 1, 1790000000000, 'started', 1, NULL, NULL, 0), "
+        "(2, 1, 2, 1790000060000, 'framesConfirmed', 1, 3, NULL, 0), "
+        "(3, 1, 3, 1790000070000, 'interrupted', NULL, NULL, 'clouds', 1), "
+        "(4, 1, 4, 1790000080000, 'resumed', NULL, NULL, NULL, 0), "
+        "(5, 1, 5, 1790000090000, 'framesRejected', 1, 1, NULL, 0), "
+        "(6, 1, 6, 1790003600000, 'finished', NULL, NULL, NULL, 0), "
+        "(7, 3, 1, 1790000000000, 'started', 2, NULL, NULL, 0), "
+        "(8, 3, 2, 1790000060000, 'framesConfirmed', 2, 2, NULL, 0);",
+      );
+
+      final db = AppDatabase(schema.newConnection());
+      final rows = await (db.select(
+        db.sessionLogs,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(rows.map((r) => r.status), [
+        'completed',
+        'abandoned',
+        'inProgress',
+        'completed',
+        'draft',
+        'planned',
+        'draft',
+      ]);
+      expect(rows.map((r) => (r.resultKind, r.notDoneReason)), [
+        for (var i = 0; i < 7; i++) (null, null),
+      ]);
+      expect(rows.skip(4).map((r) => (r.eveningDate, r.plannedAtUtcMs)), [
+        ('2026-12-18', null),
+        ('2026-12-19', 1790000000000),
+        ('2026-12-21', 1790000100000),
+      ]);
+      expect(rows.skip(4).map((r) => r.planSnapshot), [
+        null,
+        {'v': 1, 'takenAtUtcMs': 1},
+        {'v': 1, 'takenAtUtcMs': 2},
+      ]);
+      final open = await DriftSessionRepository(db).list(
+        statuses: {SessionStatus.draft, SessionStatus.planned},
+        includeLegacy: false,
+      );
+      open.sort((a, b) => a.id.compareTo(b.id));
+      expect(open.map((x) => (x.id, x.isSavedPlan, x.isSavedChanged)), [
+        (5, false, false),
+        (6, true, false),
+        (7, true, true),
+      ]);
+      expect((rows[0].actualLightFrames, rows[0].rejectedFrames), (3, 1));
+      expect(rows[0].environmentalNotes, 'Dew');
+      expect(rows[3].legacy, isTrue);
+      final events = await (db.select(
+        db.sessionEvents,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(events.map((e) => (e.sessionLogId, e.seq, e.kind)), [
+        (1, 1, 'started'),
+        (1, 2, 'framesConfirmed'),
+        (1, 3, 'interrupted'),
+        (1, 4, 'resumed'),
+        (1, 5, 'framesRejected'),
+        (1, 6, 'finished'),
+        (3, 1, 'started'),
+        (3, 2, 'framesConfirmed'),
+      ]);
+      expect(
+        (events[2].reason, events[2].clockAdjusted, events[1].delta),
+        ('clouds', true, 3),
+      );
+      final blocks = await (db.select(
+        db.captureBlocks,
+      )..orderBy([(t) => OrderingTerm.asc(t.id)])).get();
+      expect(
+        blocks.map((b) => (b.sessionLogId, b.frameCount, b.completedFrames)),
+        [(1, 10, 3), (3, 5, 2), (5, 4, 0), (6, 6, 0), (7, 8, 0)],
+      );
+      expect(blocks.map((b) => (b.completedFrames, b.rejectedFrames)), [
+        (3, 1),
+        (2, 0),
+        (0, 0),
+        (0, 0),
+        (0, 0),
+      ]);
+      final repo = DriftSessionRepository(db);
+      final replay = await repo.execution(1);
+      expect((replay.completedFor(1), replay.rejectedFor(1)), (3, 1));
+
+      await db.customStatement(
+        "INSERT INTO session_events (session_log_id, seq, at_utc_ms, kind) "
+        "VALUES (2, 1, 1790000000000, 'reported');",
+      );
+      await expectLater(
+        db.customStatement(
+          "INSERT INTO session_events (session_log_id, seq, at_utc_ms, kind) "
+          "VALUES (2, 2, 1790000000000, 'teleported');",
+        ),
+        throwsA(anything),
+      );
       await db.close();
     });
   });

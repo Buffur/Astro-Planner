@@ -85,6 +85,32 @@
 6. **Upload** the `.aab` to the Play Console (internal testing first). Check its App
    Bundle Explorer for warnings (16 KB, target API, permissions).
 
+## Size (Stage 10, 2026-09-30)
+
+Measured in `refinement/evidence/STAGE_10_MEASUREMENTS.md`: the release bundle is 68.5 MB (three ABIs
+plus the symbols Play keeps); an arm64 phone receives about 24.8 MB (the arm64-v8a release APK) and
+the app takes 27.8 MB installed. A **debug** build is 184 MB and about 314 MB installed; never judge
+the app's size from a debug install.
+
+**Optional, not adopted (the owner's call at release time):** `--split-debug-info=<dir>` makes the
+app 1.3 MB smaller (−5 %). Then each release's symbols file (about 4 MB) must be kept outside the
+repository, or that release's Dart stack traces cannot be read again (`flutter symbolize -i <trace>
+-d <symbols file>`). `--obfuscate` saves 0.2 MB more and is not recommended for this open-source app.
+
+## Build notes (a development machine)
+
+- **An antivirus that inspects HTTPS** (for example Avast) makes Gradle's downloads fail with "PKIX
+  path building failed", because the JDK Flutter uses (Android Studio's JBR) does not trust the
+  antivirus's root. Run the first build, which downloads Gradle and the plugins, with a JDK that has
+  the Windows trust store (for example Oracle JDK 25) from `android/`:
+  `JAVA_HOME=<that JDK> JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStoreType=Windows-ROOT gradlew.bat
+  bundleRelease`. Later builds work offline through `flutter build`. No system setting needs
+  changing.
+- **The project and the pub cache on different drives** (for example `D:` and `C:`) make Kotlin's
+  incremental compiler fail in a plugin ("Could not close incremental caches"). Add
+  `--android-project-arg=kotlin.incremental=false` to `flutter build`, or `-Pkotlin.incremental=false`
+  to `gradlew`.
+
 ## Status (2026-09-24)
 
 - A release bundle was built on the development machine (66.5 MB; 15 native libraries

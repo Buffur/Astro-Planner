@@ -295,8 +295,6 @@ void main() {
       expect(after.completed, before.completed);
       expect(after.runningMsBefore, before.runningMsBefore);
       expect(after.runningSinceUtc, before.runningSinceUtc);
-      // 20 min before the interruption + 10 + 50 min since resuming.
-      expect(ExecutionMachine.runningTime(after, clock.now).inMinutes, 80);
       await fileDb.close();
     },
   );

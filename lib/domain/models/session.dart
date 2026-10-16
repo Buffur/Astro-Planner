@@ -1,6 +1,7 @@
 import 'calendar_date.dart';
 import 'capture_block.dart';
 import 'session_log.dart';
+import 'session_result.dart';
 import 'session_snapshot.dart';
 import 'tracking_type.dart';
 
@@ -142,6 +143,10 @@ class Session {
     this.planSnapshot,
     this.executionStartSnapshot,
     this.hasUnreadableSnapshot = false,
+    this.unreadableSnapshotNight,
+    this.resultKind,
+    this.notDoneReason,
+    this.name,
   });
 
   /// The row's labels, counts, results, notes and blocks, in the shape the
@@ -175,7 +180,33 @@ class Session {
   final SessionSnapshot? executionStartSnapshot;
   final bool hasUnreadableSnapshot;
 
+  /// The evening date an unreadable plan snapshot still names, when it
+  /// does (TD-086). Only ever used to end a saved night later
+  /// (`SavedNightEnd`), never shown: the snapshot itself is not trusted.
+  final CalendarDate? unreadableSnapshotNight;
+
+  /// How a completed session's counts were reported (S8.1); null for one
+  /// completed live or before S8.1, and for every other status.
+  final ResultKind? resultKind;
+
+  /// Why an abandoned (Not done) session was not done, when the user said.
+  final NotDoneReason? notDoneReason;
+
+  /// The plan's optional name (S8.6); null = none (shown as target · night).
+  final String? name;
+
   int get id => record.id;
+
+  /// A saved plan: Saved (`planned`) or Saved · changed (a draft saved
+  /// before, ADR-019 §3.1).
+  bool get isSavedPlan =>
+      !legacy &&
+      (status == SessionStatus.planned ||
+          (status == SessionStatus.draft && plannedAtUtc != null));
+
+  /// Saved · changed: a saved plan edited since it was saved.
+  bool get isSavedChanged =>
+      !legacy && status == SessionStatus.draft && plannedAtUtc != null;
   List<CaptureBlock> get blocks => record.captureBlocks;
 
   /// Whether the plan (blocks, references, night) may still change.

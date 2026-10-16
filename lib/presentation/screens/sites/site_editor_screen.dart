@@ -1,3 +1,8 @@
+import '../../shared/night_time_formatter.dart';
+import '../../../domain/models/calendar_date.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../shared/app_words.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
@@ -24,12 +29,22 @@ import '../../navigation/app_router.dart';
 /// site pre-filled with [latitude]/[longitude]/[name] (e.g. "save the
 /// current position as a site").
 class SiteEditorArgs {
-  const SiteEditorArgs({this.site, this.latitude, this.longitude, this.name});
+  const SiteEditorArgs({
+    this.site,
+    this.latitude,
+    this.longitude,
+    this.name,
+    this.activate = true,
+  });
 
   final LocationProfile? site;
   final double? latitude;
   final double? longitude;
   final String? name;
+
+  /// Whether a new site becomes the active one; false when it is added from
+  /// the Library, which never changes the site used for planning (TD-090).
+  final bool activate;
 }
 
 /// Creates or edits a saved site (TASK 7.3). Saving is the explicit user
@@ -199,9 +214,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     } catch (e) {
       AppLog.error('location', 'Could not get the position', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(FailureText.message('get your position', e))),
-        );
+        showFailure(context, FailureText.message('get your position', e));
       }
     } finally {
       if (mounted) setState(() => _locating = false);
@@ -216,9 +229,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
     } catch (e) {
       AppLog.error('sites', 'Could not open the light-pollution map', error: e);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(FailureText.message('open the map', e))),
-        );
+        showFailure(context, FailureText.message('open the map', e));
       }
     }
   }
@@ -227,7 +238,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   /// Save saves and leaves when it succeeds.
   Future<void> _onBack() async {
     final label = _name.text.trim().isEmpty
-        ? (_isNew ? 'New site' : _original!.name)
+        ? (_isNew ? AppWords.newSite : _original!.name)
         : _name.text.trim();
     final choice = await askUnsavedChanges(context, plan: label);
     if (!mounted) return;
@@ -269,19 +280,20 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
         today: siteVm.today,
       );
     } on ArgumentError catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Invalid site: ${e.message}')));
+      showFailure(context, 'Invalid site: ${e.message}');
       return;
     }
     setState(() => _saving = true);
     final saved = await runWithFeedback(
       context,
       'save the site',
-      () => siteVm.saveSite(site),
+      () => siteVm.saveSite(site, activate: widget.args.activate),
     );
     if (!mounted) return;
     if (saved) {
       setState(() => _leaving = true);
+      // S9.8 (D9-5): a save says so; the message outlives this page.
+      showDone(context, 'Site saved');
       context.pop();
     } else {
       setState(() => _saving = false);
@@ -307,19 +319,23 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   Widget _form(BuildContext context, TextInputType numberKeyboard) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isNew ? 'New site' : 'Edit site'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            tooltip: 'Save site',
+        title: Text(_isNew ? AppWords.newSite : AppWords.editSite),
+      ),
+      // S9.2: one primary Save, always in reach (DESIGN_SYSTEM §9).
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: FilledButton(
+            key: const Key('siteEditor.save'),
             onPressed: _saving ? null : _save,
+            child: const Text(AppWords.saveSite),
           ),
-        ],
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
             TextFormField(
               controller: _name,
@@ -361,7 +377,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.schedule),
@@ -424,7 +440,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
               key: const Key('siteEditor.mapLink'),
               onPressed: link == null ? null : _openMap,
               icon: const Icon(Icons.open_in_new),
-              label: const Text('Look it up on the light-pollution map'),
+              label: const Text('Look it up on lightpollutionmap.app'),
             ),
           ),
         ],
@@ -436,19 +452,18 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
   /// unchanged on save.
   List<Widget> _skyDarknessFields() {
     final original = _original;
-    String? sourceCaption(String? source, Object? date) => source == null
+    // S9.7: the source and a readable date, never an ISO string.
+    String? sourceCaption(String? source, CalendarDate? date) => source == null
         ? null
-        : 'Source: $source${date == null ? '' : ', $date'}';
+        : 'Source: $source'
+              '${date == null ? '' : ' · ${NightTimeFormatter.recordedDate(date)}'}';
     return [
       DropdownButtonFormField<int?>(
         initialValue: _bortle,
         decoration: InputDecoration(
           labelText: 'Bortle class',
           helperText: _bortle != null && _bortle == original?.bortleClass
-              ? sourceCaption(
-                  original?.bortleSource,
-                  original?.bortleDate?.toIso8601String(),
-                )
+              ? sourceCaption(original?.bortleSource, original?.bortleDate)
               : null,
         ),
         items: [
@@ -463,10 +478,7 @@ class _SiteEditorScreenState extends State<SiteEditorScreen> {
         decoration: InputDecoration(
           labelText: 'SQM (mag/arcsec²)',
           helperText:
-              sourceCaption(
-                original?.sqmSource,
-                original?.sqmDate?.toIso8601String(),
-              ) ??
+              sourceCaption(original?.sqmSource, original?.sqmDate) ??
               'Empty = unknown',
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),

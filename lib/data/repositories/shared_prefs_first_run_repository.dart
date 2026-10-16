@@ -5,17 +5,18 @@ import 'storage_guard.dart';
 
 /// [FirstRunRepository] backed by SharedPreferences.
 class SharedPrefsFirstRunRepository implements FirstRunRepository {
-  static const _done = 'firstRunDone';
+  static const doneKey = 'firstRunDone';
 
   @override
   Future<bool> isDone() => guardStorage(
     'read the first-run state',
-    () async => (await SharedPreferences.getInstance()).getBool(_done) ?? false,
+    () async =>
+        (await SharedPreferences.getInstance()).getBool(doneKey) ?? false,
   );
 
   @override
   Future<void> markDone() => guardStorage(
     'save the first-run state',
-    () async => (await SharedPreferences.getInstance()).setBool(_done, true),
+    () async => (await SharedPreferences.getInstance()).setBool(doneKey, true),
   );
 }

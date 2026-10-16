@@ -9,8 +9,8 @@
 // Runs the encoding check (tool/check_encoding.dart), `dart format`,
 // `flutter analyze` and `flutter test` (all --no-pub, scoped to lib/ and
 // test/), then the end-to-end suite in integration_test/ on the host test
-// device (TASK 15.5; on an emulator run `flutter test integration_test -d
-// <device>`), and reports a summary. All steps run regardless of earlier
+// device, one run per file (TASK 15.5, S10.2; on an emulator run `flutter
+// test integration_test -d <device>`), and reports a summary. All steps run regardless of earlier
 // failures, so one pass shows every problem; the process exits non-zero if
 // any step failed.
 //
@@ -32,13 +32,16 @@ Future<void> main() async {
     ]),
     _Step('Analyze', 'flutter', ['analyze', '--no-pub']),
     _Step('Test', 'flutter', ['test', '--no-pub']),
-    _Step('E2E (host)', 'flutter', [
-      'test',
-      '--no-pub',
-      'integration_test',
-      '-d',
-      'flutter-tester',
-    ]),
+    // One run per file (S10.2): with two files in one run, flutter-tester
+    // fails to start the second app ("The log reader failed unexpectedly").
+    for (final file in _integrationTests())
+      _Step('E2E (host): ${file.split('/').last}', 'flutter', [
+        'test',
+        '--no-pub',
+        file,
+        '-d',
+        'flutter-tester',
+      ]),
   ];
 
   final results = <_Step, bool>{};
@@ -75,6 +78,13 @@ Future<void> main() async {
   }
   stdout.writeln('\nQuality gate passed.');
 }
+
+/// The end-to-end test files, in a stable order.
+List<String> _integrationTests() => [
+  for (final f in Directory('integration_test').listSync())
+    if (f is File && f.path.endsWith('_test.dart'))
+      f.path.replaceAll(Platform.pathSeparator, '/'),
+]..sort();
 
 class _Step {
   const _Step(this.name, this.executable, this.args);

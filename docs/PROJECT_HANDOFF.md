@@ -382,7 +382,7 @@ requires a very recent Dart.
 | provider | ^6.1.5+1 | State management / DI | — |
 | go_router | ^18.0.1 | Routing | Static singleton router |
 | drift, drift_dev, build_runner | ^2.35.0 / ^2.35.0 / ^2.16.1 | Database + codegen | Generated file committed |
-| sqlite3_flutter_libs | ^0.6.0+eol | Native SQLite | **EOL marker**; not imported; confirm the bundled SQLite on a device (resolved `sqlite3` 3.5.2) |
+| ~~sqlite3_flutter_libs~~ | — | — | **Removed** (S10.6, 2026-09-30): an empty end-of-life package; `sqlite3` 3.5.2's build hook supplies the native library, confirmed on an Android 16 emulator |
 | path_provider, path | ^2.1.6, ^1.9.1 | DB file location | — |
 | http | ^1.6.0 | Weather, Nominatim, ClearOutside | Used inline in the ViewModel and repositories |
 | shared_preferences | ^2.5.5 | Plan, ids, thresholds, weather cache | Used inline |

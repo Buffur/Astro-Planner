@@ -101,8 +101,9 @@ abstract final class SessionSnapshotBuilder {
   // A group's provenance is recorded only when every spec of the group
   // has it (S3.V7, S3S-01): an imported rig's group pair is `user`, but its
   // estimates and file values are not the user's, so the group is omitted
-  // (null) rather than invented. Per-field provenance in snapshots is left
-  // to Stage 8 (TD-070).
+  // (null) rather than invented. Since S8.8 (TD-070) `provenance` records
+  // each valued spec's own pair ([EquipmentProfile.provenanceOf]; null =
+  // unknown). Additive: a snapshot taken earlier has no key.
   static Map<String, Object?> _rig(EquipmentProfile r) {
     final camera = r.sharedProvenance(camera: true);
     final optics = r.sharedProvenance(camera: false);
@@ -129,6 +130,13 @@ abstract final class SessionSnapshotBuilder {
       'cameraConfidence': camera?.confidence?.name,
       'opticsSource': optics?.source,
       'opticsConfidence': optics?.confidence?.name,
+      'provenance': {
+        for (final camera in const [true, false])
+          for (final (spec, p) in r.groupProvenance(camera: camera))
+            spec.name: p == null
+                ? null
+                : {'source': p.source, 'confidence': p.confidence?.name},
+      },
     };
   }
 

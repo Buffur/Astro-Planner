@@ -29,6 +29,27 @@ class SharedPrefsPlanningPreferencesRepository
   static const _cloudGate = 'cloudGateEnabled';
   static const _cloudGatePct = 'cloudGateMaxPct';
 
+  /// Every key this repository stores, for the backup (S8.9, TD-056).
+  static const keys = {
+    _minAltitude,
+    _dewMargin,
+    _darknessLimit,
+    _margin,
+    _perFrame,
+    _ditherEvery,
+    _ditherSettle,
+    _refocusEvery,
+    _refocus,
+    _filterChange,
+    _flip,
+    _setup,
+    _npfK,
+    _moonGate,
+    _moonGatePct,
+    _cloudGate,
+    _cloudGatePct,
+  };
+
   @override
   Future<PlanningPreferences> load() =>
       guardStorage('read the planning preferences', _load);

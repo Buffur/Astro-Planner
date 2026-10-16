@@ -4,6 +4,7 @@ import '../models/session_snapshot.dart';
 import '../repositories/planner_state_repository.dart';
 import '../repositories/session_repository.dart';
 import 'example_capture_plan.dart';
+import 'saved_night_end.dart';
 
 /// The session the planner works on and its autosave (ADR-014 §3; TASK
 /// 11.4; moved out of the planner ViewModel in TASK 12.3). Writes are
@@ -150,6 +151,53 @@ class CurrentSession {
     _session = await _repository.revertToSaved(s.id);
   });
 
+  /// Settles the Saved · changed plan [id] (S8.1–S8.2; I-3), in the autosave
+  /// chain: it goes back to what was saved and its working edits move to a
+  /// never-saved copy. When [id] is the current session, the copy becomes
+  /// current and counts as unsaved (it holds the user's edits). Returns
+  /// whether anything was settled.
+  Future<bool> settle(int id) => _inChain(() async {
+    final copy = await _repository.settleSavedPlan(id);
+    if (copy == null) return false;
+    if (_session?.id == id) {
+      _session = copy;
+      _edited = true;
+      await _mark(copy.id);
+    }
+    return true;
+  });
+
+  /// The next day for a saved plan (S8.3; ADR-019 §3.1, D1; D8-1, I-3), in
+  /// the autosave chain: when the current session is a saved plan whose
+  /// night has ended at [nowUtc] (CALC-44), it stays on its night, awaiting
+  /// its result, and the planner continues on a working copy. A Saved plan
+  /// gets an untouched copy of [copy] (replacing it later asks nothing; the
+  /// saved plan stays in the Logbook); a Saved · changed one is settled, and
+  /// its copy holds the edits and counts as unsaved (U1). Returns whether it
+  /// moved; a repeat does nothing. A failure leaves everything as it was,
+  /// and the next check retries.
+  Future<bool> leaveEndedSavedPlan(
+    DateTime nowUtc,
+    SessionPlan Function() copy,
+  ) => _inChain(() async {
+    final s = _session;
+    if (s == null || !s.isSavedPlan || !SavedNightEnd.hasEnded(s, nowUtc)) {
+      return false;
+    }
+    if (s.isSavedChanged) {
+      final settled = await _repository.settleSavedPlan(s.id);
+      if (settled == null) return false;
+      _session = settled;
+      _edited = true;
+      await _mark(settled.id);
+    } else {
+      _session = await _repository.create(copy());
+      _edited = false;
+      await _mark(null);
+    }
+    return true;
+  });
+
   /// Runs an operation after which the plan counts as unedited; if it
   /// fails, the changes still count as unsaved (S1.6).
   Future<T> _replacing<T>(Future<T> Function() run) async {
@@ -173,10 +221,14 @@ class CurrentSession {
     Session session,
     SessionPlan Function() copy, {
     bool discard = false,
+    bool asCopy = false,
+    bool unsaved = false,
   }) => _switch(
-    () async =>
-        session.planEditable ? session : await _repository.create(copy()),
+    () async => session.planEditable && !asCopy
+        ? session
+        : await _repository.create(copy()),
     discard: discard,
+    unsaved: unsaved,
   );
 
   /// Autosaves [plan] into the current session (a planned one returns to
@@ -205,38 +257,43 @@ class CurrentSession {
     });
   }
 
-  /// Start (ADR-016): [plan] is written to the current session (or a new
-  /// one), which starts with [snapshot]; the planner then continues on a
-  /// fresh draft copy, so it never edits a running session (owner
-  /// decision, TASK 13.3). Returns the started session.
-  Future<Session> start(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(() => _inChain(() => _start(plan, snapshot)));
-
-  Future<Session> _start(SessionPlan plan, SessionSnapshot snapshot) async {
-    final current = _session;
-    final id = current != null && current.planEditable
-        ? (await _repository.updatePlan(current.id, plan)).id
-        : (await _repository.create(plan)).id;
-    final started = await _repository.start(id, snapshot);
-    _session = await _repository.create(plan);
-    return started;
-  }
+  /// Session [id] as stored now (TD-063, S8.4): a caller's copy may be
+  /// stale; null when it no longer exists.
+  Future<Session?> stored(int id) => _repository.get(id);
 
   /// Save: the current open session — or a new one — becomes planned with
-  /// [snapshot] (ADR-014 §3–§4).
-  Future<Session> save(SessionPlan plan, SessionSnapshot snapshot) =>
-      _replacing(
-        () => _inChain(() async {
-          final current = _session;
-          final id = current != null && current.planEditable
-              ? current.id
-              : (await _repository.create(plan)).id;
-          return _session = await _repository.savePlan(id, plan, snapshot);
-        }),
-      );
+  /// [snapshot] (ADR-014 §3–§4). A saved plan whose night has ended at
+  /// [nowUtc] (CALC-44) is never saved over, even before the night check
+  /// has moved the planner (TD-085, D8-2): it stays on its night (settled
+  /// when changed, as [leaveEndedSavedPlan] does) and the plan is saved as
+  /// its working copy. Decided inside the chain, so an edit made after the
+  /// tap still lands after the save (S1.12).
+  Future<Session> save(
+    SessionPlan plan,
+    SessionSnapshot snapshot, [
+    DateTime? nowUtc,
+  ]) => _replacing(
+    () => _inChain(() async {
+      final s = _session;
+      final ended =
+          s != null &&
+          nowUtc != null &&
+          s.isSavedPlan &&
+          SavedNightEnd.hasEnded(s, nowUtc);
+      final current = !ended
+          ? s
+          : s.isSavedChanged
+          ? await _repository.settleSavedPlan(s.id)
+          : null;
+      final id = current != null && current.planEditable
+          ? current.id
+          : (await _repository.create(plan)).id;
+      return _session = await _repository.savePlan(id, plan, snapshot);
+    }),
+  );
 
   /// Runs [op] after every write queued so far and queues later writes
-  /// after it, so an edit made while Save, Start, New or Open is running
+  /// after it, so an edit made while Save, New or Open is running
   /// can never land in the middle of it — before S1.12 (Save, Start) and
   /// S6.2 (New, Open; TD-058) it could reach the session being replaced
   /// (ENG-08, RT-04). A failure of [op] reaches the

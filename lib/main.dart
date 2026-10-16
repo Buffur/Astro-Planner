@@ -31,7 +31,6 @@ import 'data/repositories/shared_prefs_weather_snapshot_store.dart';
 import 'data/services/flutter_timezone_device_time_zone.dart';
 import 'data/services/geolocator_location_service.dart';
 import 'data/services/nominatim_reverse_geocoder.dart';
-import 'data/services/wakelock_screen_wake.dart';
 import 'data/export/share_session_exporter.dart';
 import 'data/backup/backup_staging.dart';
 import 'data/backup/file_backup_service.dart';
@@ -60,7 +59,8 @@ void main() async {
 /// screen resets a refused database (S1.5).
 Future<void> _start() async {
   // TASK 14.4: a restore confirmed last time replaces the database before
-  // it opens (the replaced file is kept as a safety copy).
+  // it opens (the replaced file is kept as a safety copy); since S8.9 the
+  // backup's settings come with it and no stale id survives (ENG-14).
   try {
     await BackupStaging.apply(
       await getApplicationDocumentsDirectory(),
@@ -143,7 +143,6 @@ Future<void> _start() async {
     display: SharedPrefsDisplayPreferencesRepository(),
     firstRun: SharedPrefsFirstRunRepository(),
     privacy: SharedPrefsPrivacyPreferencesRepository(),
-    screenWake: WakelockScreenWake(),
     exporter: ShareSessionExporter(),
     backup: FileBackupService(database, sessionRepo),
     sessions: sessionRepo,
@@ -161,8 +160,6 @@ Future<void> _start() async {
   await vms.tonight.load();
   try {
     await vms.backup?.load();
-    await vms.resumeRun?.load(); // a run left in progress (ADR-016 §5)
-    await vms.execution?.loadActive();
   } catch (e, s) {
     // TASK 15.1: the app still starts; its bootstrap shows the failure
     // with a retry instead of a blank screen.

@@ -169,7 +169,7 @@ List<Widget> _menus() => [
       tooltip: 'More',
       itemBuilder: (context) => const [
         PopupMenuItem(value: 1, child: Text('Copy to another night')),
-        PopupMenuItem(value: 2, child: Text('Track live (optional)')),
+        PopupMenuItem(value: 2, child: Text('New plan')),
       ],
     ),
   ),

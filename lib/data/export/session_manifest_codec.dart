@@ -3,6 +3,7 @@ import '../../domain/models/capture_block.dart';
 import '../../domain/models/execution.dart';
 import '../../domain/models/session.dart';
 import '../../domain/models/session_log.dart';
+import '../../domain/models/session_result.dart';
 import '../../domain/models/session_snapshot.dart';
 import '../../domain/models/tracking_type.dart';
 import '../../domain/services/execution_machine.dart';
@@ -95,6 +96,8 @@ abstract final class SessionManifestCodec {
     }
     return {
       'id': s.id,
+      // S8.6 (additive): the optional name; absent or null = none.
+      'name': s.name,
       'status': s.status.name,
       'legacy': s.legacy,
       'evening_date': s.eveningDate?.toIso8601String(),
@@ -140,6 +143,9 @@ abstract final class SessionManifestCodec {
         'temperature_c': log.temperature,
         'humidity_pct': log.humidity,
         'cloud_cover_pct': log.cloudCover,
+        // S8.1 (additive): how the result was reported, and why not done.
+        'result_kind': s.resultKind?.name,
+        'not_done_reason': s.notDoneReason?.name,
       },
       'legacy_values': {
         'bortle_scale': log.bortleScale,
@@ -232,6 +238,11 @@ abstract final class SessionManifestCodec {
       plannedAtUtc: _instant(j['planned_at_utc_ms'] as int?),
       startedAtUtc: _instant(j['started_at_utc_ms'] as int?),
       completedAtUtc: _instant(j['completed_at_utc_ms'] as int?),
+      resultKind: ResultKind.tryParse(results['result_kind'] as String?),
+      notDoneReason: NotDoneReason.tryParse(
+        results['not_done_reason'] as String?,
+      ),
+      name: j['name'] as String?,
       planSnapshot: plan == null
           ? null
           : SessionSnapshot.tryRead(Map<String, Object?>.from(plan as Map)),

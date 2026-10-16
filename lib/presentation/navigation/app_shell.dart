@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/feature_scope.dart';
+import '../shared/app_words.dart';
 
-/// The bottom-navigation shell of ADR-015 (TASK 12.2): Tonight · Sessions ·
+/// The bottom-navigation shell of ADR-015 (TASK 12.2): Tonight · Logbook ·
 /// Library · Settings, one navigator per tab.
 ///
 /// Back (ADR-015 §3): pops within the current tab first (go_router); at a
@@ -23,7 +24,7 @@ class AppShell extends StatelessWidget {
       const NavigationDestination(
         icon: Icon(Icons.book_outlined),
         selectedIcon: Icon(Icons.book),
-        label: 'Sessions',
+        label: AppWords.logbook, // S8.5 (RD-14)
       ),
     const NavigationDestination(
       icon: Icon(Icons.inventory_2_outlined),

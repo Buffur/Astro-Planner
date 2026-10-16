@@ -1,35 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_spacing.dart';
 import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/session.dart';
-import '../../viewmodels/library_viewmodels.dart';
-import '../../shared/night_time_formatter.dart';
-import '../../navigation/app_router.dart';
+import '../../../domain/services/result_action.dart';
 import '../../../domain/services/session_reconciliation.dart';
+import '../../navigation/app_router.dart';
+import '../../shared/app_words.dart';
+import '../../shared/confirmation_patterns.dart';
+import '../../shared/delete_patterns.dart';
+import '../../shared/entry_share_text.dart';
 import '../../shared/failure_feedback.dart';
+import '../../shared/night_time_formatter.dart';
+import '../../shared/plan_state.dart';
+import '../../viewmodels/library_viewmodels.dart';
 import '../execution/results_screen.dart';
 
-/// A session's status as the Sessions list and detail show it (TASK 11.3;
-/// "unsaved changes", TASK 11.4).
-String sessionStatusLabel(Session s) {
-  if (s.legacy) return 'Legacy log';
-  return switch (s.status) {
-    SessionStatus.draft =>
-      s.plannedAtUtc != null ? 'Planned, unsaved changes' : 'Draft',
-    SessionStatus.planned => 'Planned',
-    SessionStatus.inProgress => 'In progress',
-    SessionStatus.completed => 'Completed',
-    SessionStatus.abandoned => 'Abandoned',
-  };
+/// An entry's identity (S8.5–S8.6; RD-14): its name when it has one, else
+/// its target and night, "M42 · Mon, Dec 15" ([targetAndNight]).
+String entryTitle(Session s) => s.name ?? targetAndNight(s);
+
+/// "M42 · Mon, Dec 15": the target and the night (a legacy row's stored
+/// date, on the device's calendar).
+String targetAndNight(Session s) {
+  final night =
+      s.eveningDate ??
+      CalendarDate.fromDateTimeFields(s.record.sessionDate.toLocal());
+  return '${s.record.targetName} · ${NightTimeFormatter.eveningDate(night)}';
 }
 
-/// Saved sessions (TASK 11.3, owner decision): every non-draft session —
-/// planned, in progress, completed, abandoned — and the legacy logs, newest
-/// first, each with its status. Since TASK 14.1: filters by status, target,
-/// site and night date, and a tap opens the detail (owner decision).
+/// Deletes [s] after the shared confirmation (S5.8; RD-09 S1): a stored
+/// record. Returns whether it was deleted.
+Future<bool> deleteEntry(BuildContext context, Session s) async {
+  final sure = await confirmDestructive(
+    context,
+    title: 'Delete this entry?',
+    message:
+        '"${entryTitle(s)}" and its result are deleted from the '
+        'Logbook. This can\'t be undone.',
+  );
+  if (!sure || !context.mounted) return false;
+  final sessions = context.read<SessionsViewModel>();
+  final deleted = await runWithFeedback(
+    context,
+    'delete the entry',
+    () => sessions.delete(s.id),
+  );
+  if (deleted && context.mounted) showDone(context, 'Entry deleted');
+  return deleted;
+}
+
+/// The Logbook (S8.5; ADR-019 §2, §8, §10; 08 §24): saved plans and their
+/// results. Upcoming (saved plans whose night has not ended) and Past; a
+/// search over the target, the site and the notes; the status, target, site
+/// and night filters behind one Filters button (UX-30), kept by the
+/// ViewModel so they survive navigation; Progress by target (RD-07). A tap
+/// opens the entry; a swipe or the entry's Delete deletes, after a
+/// confirmation.
 class LogbookScreen extends StatefulWidget {
   const LogbookScreen({super.key});
 
@@ -39,7 +69,14 @@ class LogbookScreen extends StatefulWidget {
 
 class _LogbookScreenState extends State<LogbookScreen> {
   late Future<List<Session>> _sessionsFuture;
-  SessionFilter _filter = const SessionFilter();
+  final _search = TextEditingController();
+  bool _searching = false;
+
+  /// The ViewModel's [SessionsViewModel.revision] this list was read at.
+  int _seen = 0;
+
+  /// Whether this page was on screen at its last build (S11.C1, TD-092).
+  bool _wasVisible = true;
   ({Map<int, String> targets, Map<int, String> sites}) _options = (
     targets: const {},
     sites: const {},
@@ -51,13 +88,23 @@ class _LogbookScreenState extends State<LogbookScreen> {
   @override
   void initState() {
     super.initState();
+    final vm = context.read<SessionsViewModel>();
+    _search.text = vm.query;
+    _searching = vm.query.isNotEmpty;
+    _seen = vm.revision;
     _refresh();
+  }
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
   }
 
   void _refresh() {
     final sessions = context.read<SessionsViewModel>();
     setState(() {
-      _sessionsFuture = sessions.saved(_filter).then((list) async {
+      _sessionsFuture = sessions.saved(sessions.filter).then((list) async {
         final results = await sessions.reconciliations(list);
         final options = await sessions.filterOptions();
         if (mounted) {
@@ -72,192 +119,238 @@ class _LogbookScreenState extends State<LogbookScreen> {
   }
 
   void _setFilter(SessionFilter f) {
-    _filter = f;
+    context.read<SessionsViewModel>().setFilter(f);
     _refresh();
+  }
+
+  void _toggleSearch(SessionsViewModel vm) {
+    setState(() => _searching = !_searching);
+    if (!_searching) {
+      _search.clear();
+      vm.setQuery('');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<SessionsViewModel>();
+    // S11.C1 (TD-092): the shell keeps this tab alive, and a covering page
+    // (the planner) hides it; a plan saved or edited meanwhile changes the
+    // list. Coming back into view (its tickers enabled again) reads it again.
+    final visible = TickerMode.valuesOf(context).enabled;
+    final cameBack = visible && !_wasVisible;
+    _wasVisible = visible;
+    if (vm.revision != _seen || cameBack) {
+      // An entry changed elsewhere (a name, a result): read them again.
+      _seen = vm.revision;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refresh();
+      });
+    }
+    final count = vm.filter.count;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sessions'),
+        title: _searching
+            ? TextField(
+                key: const Key('logbook.search'),
+                controller: _search,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search name, target, site or notes',
+                  border: InputBorder.none,
+                ),
+                onChanged: vm.setQuery,
+              )
+            : const Text(AppWords.logbook),
         actions: [
-          // TASK 14.3 (owner): every saved session in one manifest file.
-          if (context.read<SessionsViewModel>().canExport)
-            IconButton(
-              key: const Key('logbook.exportAll'),
-              tooltip: 'Export all sessions',
-              icon: const Icon(Icons.file_download_outlined),
-              onPressed: () => runWithFeedback(
-                context,
-                'export the sessions',
-                context.read<SessionsViewModel>().exportAll,
-              ),
+          IconButton(
+            key: const Key('logbook.searchToggle'),
+            tooltip: _searching ? 'Close search' : 'Search',
+            icon: Icon(_searching ? Icons.close : Icons.search),
+            onPressed: () => _toggleSearch(vm),
+          ),
+          IconButton(
+            key: const Key('logbook.filters'),
+            tooltip: count == 0 ? 'Filters' : 'Filters, $count on',
+            icon: Badge(
+              isLabelVisible: count > 0,
+              label: Text('$count'),
+              child: const Icon(Icons.filter_list),
+            ),
+            onPressed: () => _FilterPanel.show(
+              context,
+              options: _options,
+              onChanged: _setFilter,
+            ),
+          ),
+          // TASK 14.3 (owner): every saved entry in one manifest file. S9.8:
+          // a labelled item in the Logbook's menu, not an icon alone.
+          if (vm.canExport)
+            PopupMenuButton<void>(
+              key: const Key('logbook.menu'),
+              tooltip: 'More',
+              itemBuilder: (_) => [
+                PopupMenuItem<void>(
+                  key: const Key('logbook.exportAll'),
+                  onTap: () async {
+                    final done = await runWithFeedback(
+                      context,
+                      'export the Logbook',
+                      vm.exportAll,
+                    );
+                    if (done && context.mounted) {
+                      showDone(context, 'Export file created');
+                    }
+                  },
+                  child: const ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(Icons.file_download_outlined),
+                    title: Text(AppWords.exportAllAsFile),
+                  ),
+                ),
+              ],
             ),
         ],
       ),
-      body: Column(
-        children: [
-          _FilterBar(filter: _filter, options: _options, onChanged: _setFilter),
-          Expanded(
-            child: FutureBuilder<List<Session>>(
-              future: _sessionsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.error case final error?) {
-                  return LoadFailureView(
-                    action: 'load the sessions',
-                    error: error,
-                    onRetry: _refresh,
-                  );
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      _filter.isEmpty
-                          ? 'No sessions saved yet.'
-                          : 'No sessions match these filters.',
-                      key: const Key('logbook.empty'),
+      body: FutureBuilder<List<Session>>(
+        future: _sessionsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.error case final error?) {
+            return LoadFailureView(
+              action: 'load the Logbook',
+              error: error,
+              onRetry: _refresh,
+            );
+          }
+          final all = snapshot.data ?? const <Session>[];
+          final groups = vm.grouped(vm.searched(all));
+          final narrowed = !vm.filter.isEmpty || vm.query.trim().isNotEmpty;
+          return ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            children: [
+              ListTile(
+                key: const Key('logbook.progress'),
+                leading: const Icon(Icons.stacked_line_chart),
+                title: const Text(AppWords.progressByTarget),
+                subtitle: const Text('Integration so far, from your results'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRouter.logbookProgress),
+              ),
+              if (count > 0)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    key: const Key('logbook.filter.clear'),
+                    onPressed: () => _setFilter(const SessionFilter()),
+                    icon: const Icon(Icons.filter_list_off),
+                    label: Text(
+                      '$count ${count == 1 ? 'filter' : 'filters'} on · Clear',
                     ),
-                  );
-                }
-                final sessions = snapshot.data!;
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: sessions.length,
-                  itemBuilder: (context, i) => _row(context, sessions[i]),
-                );
-              },
-            ),
-          ),
-        ],
+                  ),
+                ),
+              if (groups.upcoming.isEmpty && groups.past.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Text(
+                    narrowed
+                        ? 'Nothing matches the search or the filters.'
+                        : 'Nothing saved yet. Plans you save appear here, '
+                              'and their results once you record them.',
+                    key: const Key('logbook.empty'),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              if (groups.upcoming.isNotEmpty) ...[
+                const _GroupHeader('Upcoming', key: Key('logbook.upcoming')),
+                for (final s in groups.upcoming) _row(context, vm, s),
+              ],
+              if (groups.past.isNotEmpty) ...[
+                const _GroupHeader('Past', key: Key('logbook.past')),
+                for (final s in groups.past) _row(context, vm, s),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _row(BuildContext context, Session session) {
+  Widget _row(BuildContext context, SessionsViewModel vm, Session session) {
     final log = session.record;
-    // The night key; a legacy instant maps to its device-local calendar
-    // date, as it was shown before (ADR-007 §10).
-    final evening =
-        session.eveningDate ??
-        CalendarDate.fromDateTimeFields(log.sessionDate.toLocal());
-    return Dismissible(
-      key: ValueKey(session.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        color: Theme.of(context).colorScheme.error,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        child: Icon(Icons.delete, color: Theme.of(context).colorScheme.onError),
-      ),
-      confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Delete Session?'),
-            content: Text(
-              'Are you sure you want to delete "${log.targetName}"?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-        );
-      },
-      onDismissed: (_) async {
-        final sessions = context.read<SessionsViewModel>();
-        await runWithFeedback(
-          context,
-          'delete the session',
-          () => sessions.delete(session.id),
-        );
-        _refresh(); // a failed delete brings the row back
+    final action = vm.resultAction(session);
+    final record = action == ResultAction.record;
+    final details = [
+      if (session.name != null) targetAndNight(session),
+      log.equipmentName,
+      ?log.locationName,
+    ].join(' · ');
+    return SwipeToDelete(
+      itemKey: ValueKey('logbook_${session.id}'),
+      onDelete: () async {
+        if (await deleteEntry(context, session) && mounted) _refresh();
       },
       child: Card(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: ListTile(
-          contentPadding: const EdgeInsets.all(16.0),
           onTap: () async {
-            // TASK 14.1 (owner): the detail; the planner opens from there.
+            // TASK 14.1 (owner): the entry; the planner opens from there.
             await context.push(AppRouter.sessionDetail(session.id));
             if (mounted) _refresh();
           },
           title: Text(
-            '${NightTimeFormatter.eveningDate(evening)} - ${log.targetName}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            entryTitle(session),
+            key: Key('logbook.title.${session.id}'),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      sessionStatusLabel(session),
-                      key: Key('logbook.status.${session.id}'),
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  if (session.legacy) ...[
-                    const SizedBox(width: 8),
-                    Chip(
-                      key: Key('logbook.legacy.${session.id}'),
-                      label: const Text('Legacy'),
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ],
-                ],
+              const SizedBox(height: AppSpacing.xs),
+              PlanStateLabel(
+                PlanState.of(session),
+                key: Key('logbook.status.${session.id}'),
               ),
-              Text('Equipment: ${log.equipmentName}'),
-              if (log.locationName case final site?) Text('Site: $site'),
-              Text('Planned Frames: ${log.plannedLightFrames}'),
-              if (log.actualLightFrames != null)
-                Text('Actual Frames: ${log.actualLightFrames}'),
-              // TASK 13.4 (owner): planned vs actual integration and
-              // corrections for a completed session.
-              if (_results[session.id] case final r?) ...[
+              Text(details),
+              // TASK 13.4 (owner): planned vs actual for a result.
+              if (_results[session.id] case final r?)
                 Text(
                   ResultsText.integration(r),
                   key: Key('logbook.integration.${session.id}'),
                 ),
+              // S8.2 (I-6): Record result once the saved night has ended;
+              // Edit result for a result.
+              if (action != ResultAction.none)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton(
-                    key: Key('logbook.editResults.${session.id}'),
+                    key: Key(
+                      '${record ? 'logbook.recordResult' : 'logbook.editResults'}'
+                      '.${session.id}',
+                    ),
                     onPressed: () async {
                       await context.push(AppRouter.results(session.id));
                       if (mounted) _refresh();
                     },
-                    child: const Text('Edit results'),
+                    child: Text(
+                      record ? AppWords.recordResult : AppWords.editResult,
+                    ),
                   ),
-                ),
-              ],
-              if (log.rejectedFrames != null && log.rejectedFrames! > 0)
-                Text(
-                  'Rejected Frames: ${log.rejectedFrames}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
             ],
           ),
           trailing: IconButton(
             icon: const Icon(Icons.share),
             tooltip: 'Share',
-            onPressed: () {
-              SharePlus.instance.share(
-                ShareParams(text: log.toShareableText()),
-              );
-            },
+            onPressed: () => SharePlus.instance.share(
+              ShareParams(
+                text: EntryShareText.of(
+                  session,
+                  reconciliation: _results[session.id],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -265,40 +358,65 @@ class _LogbookScreenState extends State<LogbookScreen> {
   }
 }
 
-/// Status chips, target and site pickers and a night date range
-/// (TASK 14.1). Empty filters mean "all".
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({
-    required this.filter,
-    required this.options,
-    required this.onChanged,
-  });
+class _GroupHeader extends StatelessWidget {
+  const _GroupHeader(this.title, {super.key});
 
-  final SessionFilter filter;
-  final ({Map<int, String> targets, Map<int, String> sites}) options;
-  final ValueChanged<SessionFilter> onChanged;
+  final String title;
 
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(0, AppSpacing.md, 0, AppSpacing.sm),
+    child: Semantics(
+      header: true,
+      child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+    ),
+  );
+}
+
+/// The filters in one panel (S8.5; UX-30): today's status, target, site and
+/// night semantics (TASK 14.1), shown as they change and cleared at once.
+abstract final class _FilterPanel {
   static const _statusLabels = {
-    SessionListStatus.planned: 'Planned',
-    SessionListStatus.inProgress: 'In progress',
-    SessionListStatus.completed: 'Completed',
-    SessionListStatus.abandoned: 'Abandoned',
+    SessionListStatus.planned: AppWords.saved,
+    SessionListStatus.inProgress: AppWords.tracking,
+    SessionListStatus.completed: AppWords.completed,
+    SessionListStatus.abandoned: AppWords.notDone,
   };
 
-  SessionFilter _copy({
+  static Future<void> show(
+    BuildContext context, {
+    required ({Map<int, String> targets, Map<int, String> sites}) options,
+    required ValueChanged<SessionFilter> onChanged,
+  }) {
+    final vm = context.read<SessionsViewModel>();
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheet) => SafeArea(
+        child: ListenableBuilder(
+          listenable: vm,
+          builder: (context, _) =>
+              _body(context, vm.filter, options, onChanged),
+        ),
+      ),
+    );
+  }
+
+  static SessionFilter _copy(
+    SessionFilter f, {
     Set<SessionListStatus>? statuses,
     int? Function()? targetId,
     int? Function()? siteId,
     (CalendarDate?, CalendarDate?)? range,
   }) => SessionFilter(
-    statuses: statuses ?? filter.statuses,
-    targetId: targetId == null ? filter.targetId : targetId(),
-    siteId: siteId == null ? filter.siteId : siteId(),
-    from: range == null ? filter.from : range.$1,
-    to: range == null ? filter.to : range.$2,
+    statuses: statuses ?? f.statuses,
+    targetId: targetId == null ? f.targetId : targetId(),
+    siteId: siteId == null ? f.siteId : siteId(),
+    from: range == null ? f.from : range.$1,
+    to: range == null ? f.to : range.$2,
   );
 
-  Future<int?> _pick(
+  static Future<int?> _pick(
     BuildContext context,
     String title,
     Map<int, String> choices,
@@ -325,9 +443,12 @@ class _FilterBar extends StatelessWidget {
     ),
   );
 
-  @override
-  Widget build(BuildContext context) {
-    final f = filter;
+  static Widget _body(
+    BuildContext context,
+    SessionFilter f,
+    ({Map<int, String> targets, Map<int, String> sites}) options,
+    ValueChanged<SessionFilter> onChanged,
+  ) {
     String dates() {
       if (f.from == null && f.to == null) return 'Any night';
       final a = f.from == null ? '…' : NightTimeFormatter.eveningDate(f.from!);
@@ -335,53 +456,75 @@ class _FilterBar extends StatelessWidget {
       return '$a – $b';
     }
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 4,
+    final theme = Theme.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          for (final MapEntry(:key, :value) in _statusLabels.entries)
-            FilterChip(
-              key: Key('logbook.filter.${key.name}'),
-              label: Text(value),
-              selected: f.statuses.contains(key),
-              onSelected: (on) => onChanged(
-                _copy(
-                  statuses: on
-                      ? {...f.statuses, key}
-                      : ({...f.statuses}..remove(key)),
+          Text('Filters', style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          Text('State', style: theme.textTheme.bodySmall),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final MapEntry(:key, :value) in _statusLabels.entries)
+                FilterChip(
+                  key: Key('logbook.filter.${key.name}'),
+                  label: Text(value),
+                  selected: f.statuses.contains(key),
+                  onSelected: (on) => onChanged(
+                    _copy(
+                      f,
+                      statuses: on
+                          ? {...f.statuses, key}
+                          : ({...f.statuses}..remove(key)),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ActionChip(
+            ],
+          ),
+          ListTile(
             key: const Key('logbook.filter.target'),
-            label: Text(
-              'Target: ${f.targetId == null ? 'all' : options.targets[f.targetId] ?? 'selected'}',
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Target'),
+            subtitle: Text(
+              f.targetId == null
+                  ? 'All'
+                  : options.targets[f.targetId] ?? 'Selected',
             ),
-            onPressed: () async {
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
               final id = await _pick(context, 'Target', options.targets);
               if (id != null) {
-                onChanged(_copy(targetId: () => id < 0 ? null : id));
+                onChanged(_copy(f, targetId: () => id < 0 ? null : id));
               }
             },
           ),
-          ActionChip(
+          ListTile(
             key: const Key('logbook.filter.site'),
-            label: Text(
-              'Site: ${f.siteId == null ? 'all' : options.sites[f.siteId] ?? 'selected'}',
+            contentPadding: EdgeInsets.zero,
+            title: const Text(AppWords.site),
+            subtitle: Text(
+              f.siteId == null ? 'All' : options.sites[f.siteId] ?? 'Selected',
             ),
-            onPressed: () async {
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
               final id = await _pick(context, 'Site', options.sites);
               if (id != null) {
-                onChanged(_copy(siteId: () => id < 0 ? null : id));
+                onChanged(_copy(f, siteId: () => id < 0 ? null : id));
               }
             },
           ),
-          ActionChip(
+          ListTile(
             key: const Key('logbook.filter.dates'),
-            label: Text(dates()),
-            onPressed: () async {
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Nights'),
+            subtitle: Text(dates()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () async {
               final now = DateTime.now();
               final range = await showDateRangePicker(
                 context: context,
@@ -392,6 +535,7 @@ class _FilterBar extends StatelessWidget {
               if (range != null) {
                 onChanged(
                   _copy(
+                    f,
                     range: (
                       CalendarDate.fromDateTimeFields(range.start),
                       CalendarDate.fromDateTimeFields(range.end),
@@ -401,12 +545,28 @@ class _FilterBar extends StatelessWidget {
               }
             },
           ),
-          if (!f.isEmpty)
-            ActionChip(
-              key: const Key('logbook.filter.clear'),
-              label: const Text('Clear filters'),
-              onPressed: () => onChanged(const SessionFilter()),
-            ),
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  key: const Key('logbook.filters.clear'),
+                  onPressed: f.isEmpty
+                      ? null
+                      : () => onChanged(const SessionFilter()),
+                  child: const Text('Clear'),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: FilledButton(
+                  key: const Key('logbook.filters.done'),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Done'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

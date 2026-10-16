@@ -32,8 +32,6 @@ void main() {
       AppWords.oldLog: 'Old log',
       AppWords.recordResult: 'Record result',
       AppWords.editResult: 'Edit result',
-      AppWords.trackLive: 'Track live',
-      AppWords.trackLiveOptional: 'Track live (optional)',
       AppWords.completedAsPlanned: 'Completed as planned',
       AppWords.fits: 'Fits',
       AppWords.tight: 'Tight',

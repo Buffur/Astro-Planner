@@ -170,7 +170,7 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('tonight.chooseRig')));
     await settle(tester);
-    expect(find.text('Select Equipment'), findsWidgets);
+    expect(find.text('Choose a rig'), findsWidgets);
   });
 
   testWidgets('a small plan fits, with the reason and usable time', (
@@ -277,7 +277,7 @@ void main() {
       expect(find.byKey(const Key('tonight.planCandidates')), findsOneWidget);
       await tester.tap(find.byKey(const Key('tonight.chooseTarget')));
       await settle(tester);
-      expect(find.text('Select Target'), findsWidgets);
+      expect(find.text('Choose a target'), findsWidgets);
     });
 
     // S6.16 (the owner's decisions, DECISIONS E.1 "Stage 6 corrective pass
@@ -544,7 +544,7 @@ void main() {
       await start(tester, site: false, firstRunDone: false);
       await tester.tap(find.byKey(const Key('welcome.chooseRig')));
       await settle(tester);
-      expect(find.text('Select Equipment'), findsWidgets);
+      expect(find.text('Choose a rig'), findsWidgets);
       await tester.pageBack();
       await settle(tester);
       expect(find.text('Welcome to Astro Planner'), findsOneWidget);

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/theme/app_palette.dart';
+
 import '../../../domain/models/camera_class.dart';
 import '../../../domain/models/equipment_limits.dart';
 import '../../../domain/models/equipment_profile.dart';
@@ -11,6 +13,7 @@ import '../../../domain/models/spec_provenance.dart';
 import '../../../domain/models/tracking_type.dart';
 import '../../shared/app_words.dart';
 import '../../shared/collapsible_section.dart';
+import '../../shared/delete_patterns.dart';
 import '../../shared/equipment_draft.dart';
 import '../../shared/equipment_form_input.dart';
 import '../../shared/equipment_import_text.dart';
@@ -29,14 +32,20 @@ Future<bool> showEquipmentEditor(
   BuildContext context, {
   EquipmentProfile? existing,
   EquipmentDraft? draft,
-}) =>
-    _EquipmentEditor(draft ?? EquipmentDraft.fromProfile(existing))
-        .show(context);
+  Future<bool> Function()? onDelete,
+}) => _EquipmentEditor(
+  draft ?? EquipmentDraft.fromProfile(existing),
+  onDelete,
+).show(context);
 
 class _EquipmentEditor {
-  _EquipmentEditor(this.form);
+  _EquipmentEditor(this.form, this.onDelete);
 
   final EquipmentDraft form;
+
+  /// The visible Delete of a saved rig (S9.1; RD-09 = M + S1): confirms,
+  /// deletes, and returns whether it did; the editor then closes.
+  final Future<bool> Function()? onDelete;
 
   static String _trim(double value) =>
       value == value.roundToDouble() ? value.toInt().toString() : '$value';
@@ -212,9 +221,11 @@ class _EquipmentEditor {
             return AlertDialog(
               // S7.6: the glossary words; "Equipment profile" is retired.
               title: Text(isEdit ? AppWords.editRig : AppWords.addRig),
-              // Constrain width on larger screens.
+              // Constrain width on larger screens. `sizeOf`, not `of`: the
+              // form must not rebuild on every frame of the keyboard's
+              // inset animation (S10.3; 08 §22).
               content: SizedBox(
-                width: min(MediaQuery.of(context).size.width * 0.9, 480),
+                width: min(MediaQuery.sizeOf(context).width * 0.9, 480),
                 child: SingleChildScrollView(
                   child: Form(
                     key: formKey,
@@ -297,7 +308,7 @@ class _EquipmentEditor {
                         const SizedBox(height: 20),
                         // ── Sensor Section (Stellarium layout) ──────────
                         Text(
-                          'Camera Sensor',
+                          'Camera sensor',
                           style: Theme.of(context).textTheme.labelMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
@@ -362,7 +373,7 @@ class _EquipmentEditor {
                         prefillNote(context, EquipmentSpec.pixelPitch),
                         // Sensor Size W × H mm — auto-calculated
                         _StellariumRow(
-                          label: 'Sensor Size',
+                          label: 'Sensor size',
                           unit: 'mm',
                           fieldW: TextFormField(
                             controller: sensorWCtrl,
@@ -371,8 +382,10 @@ class _EquipmentEditor {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
+                            // S11.C2 (S11H-01): a derived value, in the
+                            // secondary text role (AA), not the disabled one.
                             style: TextStyle(
-                              color: Theme.of(context).disabledColor,
+                              color: AppPalette.of(context).textSecondary,
                             ),
                             decoration: const InputDecoration(
                               hintText: '23.50',
@@ -390,8 +403,10 @@ class _EquipmentEditor {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
+                            // S11.C2 (S11H-01): a derived value, in the
+                            // secondary text role (AA), not the disabled one.
                             style: TextStyle(
-                              color: Theme.of(context).disabledColor,
+                              color: AppPalette.of(context).textSecondary,
                             ),
                             decoration: const InputDecoration(
                               hintText: '15.70',
@@ -408,8 +423,7 @@ class _EquipmentEditor {
                           'Auto-calculated from Resolution × Pixel Size',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface
-                                    .withAlpha(128),
+                                color: AppPalette.of(context).textTertiary,
                               ),
                         ),
                         prefillNote(context, EquipmentSpec.sensorSize),
@@ -442,7 +456,7 @@ class _EquipmentEditor {
                           keyboardType: _decimal,
                           onChanged: (_) => setDialogState(deriveFocalRatio),
                           decoration: const InputDecoration(
-                            labelText: 'Effective Focal Length (mm)',
+                            labelText: 'Effective focal length (mm)',
                           ),
                           validator: EquipmentFormInput.required(
                             EquipmentLimits.focalLengthMm,
@@ -567,7 +581,7 @@ class _EquipmentEditor {
                                   onChanged: (_) => setDialogState(() {}),
                                   keyboardType: _decimal,
                                   decoration: const InputDecoration(
-                                    labelText: 'Average RAW File Size (MB)',
+                                    labelText: 'Average RAW file size (MB)',
                                     hintText: 'e.g. 50.0',
                                   ),
                                   validator: EquipmentFormInput.optional(
@@ -603,6 +617,16 @@ class _EquipmentEditor {
                 ),
               ),
               actions: [
+                if (onDelete case final delete?)
+                  DeleteButton(
+                    key: const Key('rigEditor.delete'),
+                    tooltip: 'Delete rig',
+                    onPressed: () async {
+                      if (await delete() && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
@@ -644,7 +668,7 @@ class _EquipmentEditor {
                     );
                     if (saved && context.mounted) Navigator.of(context).pop();
                   },
-                  child: Text(isEdit ? 'Save Changes' : 'Save'),
+                  child: const Text(AppWords.save),
                 ),
               ],
             );

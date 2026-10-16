@@ -74,7 +74,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('No equipment profiles found.'), findsOneWidget);
+    expect(find.text('No rigs yet.'), findsOneWidget);
 
     final button = find.byKey(const Key('rigs.addFromPhoto'));
     expect(button, findsOneWidget);

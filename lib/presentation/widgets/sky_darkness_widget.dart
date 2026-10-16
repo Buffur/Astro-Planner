@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../shared/twilight_bands.dart';
 import '../viewmodels/site_viewmodel.dart';
 import '../viewmodels/night_conditions_viewmodel.dart';
 import '../shared/app_words.dart';
@@ -11,10 +12,12 @@ import 'planner_sections.dart';
 import '../shared/night_time_formatter.dart';
 import '../../core/theme/app_palette.dart';
 import '../../../core/config/feature_scope.dart';
+import '../../../domain/models/calendar_date.dart';
 import '../../../domain/models/moon_conditions.dart';
 import '../../../domain/models/night_timeline.dart';
 import '../../../domain/models/sky_darkness.dart';
 import '../../core/utils/quantity_text.dart';
+import '../../core/theme/app_spacing.dart';
 
 /// The site's sky darkness in the planner (TASK 7.4): Bortle and SQM as
 /// entered, with their sources, or unknown. Since S6.5 the night's timeline
@@ -42,10 +45,13 @@ class SkyDarknessWidget extends StatelessWidget {
     final siteVm = context.watch<SiteViewModel>();
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: CollapsibleSection(
           sectionKey: PlannerSections.sky,
           title: 'Sky darkness',
@@ -79,7 +85,8 @@ class SkyDarknessWidget extends StatelessWidget {
 }
 
 /// Opens the light-pollution map at the site (TASK 7.4), to read a value
-/// and enter it as Bortle or SQM.
+/// and enter it as Bortle or SQM. Since S9.7 it names the external site and
+/// what to do there, in the text roles.
 class _MapLink extends StatelessWidget {
   const _MapLink({required this.lat, required this.lon});
 
@@ -88,35 +95,39 @@ class _MapLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
     return InkWell(
+      key: const Key('sky.mapLink'),
       onTap: () async {
         final url = LightPollutionMapLink.at(lat, lon);
         if (await canLaunchUrl(url)) {
           await launchUrl(url, mode: LaunchMode.externalApplication);
         }
       },
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         child: Row(
           children: [
-            Icon(Icons.map_outlined),
-            SizedBox(width: 12),
+            const Icon(Icons.map_outlined),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Open Light Pollution Map',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    'Look it up on lightpollutionmap.app',
+                    style: text.titleSmall,
                   ),
                   Text(
-                    'Centred here. Read the value, then enter it as Bortle '
-                    'or SQM for your site.',
+                    'An external map, opened in your browser at this '
+                    'position. Read the value there, then enter it as '
+                    'Bortle or SQM.',
+                    style: text.bodySmall,
                   ),
                 ],
               ),
             ),
-            Icon(Icons.open_in_browser),
+            const Icon(Icons.open_in_browser),
           ],
         ),
       ),
@@ -124,44 +135,76 @@ class _MapLink extends StatelessWidget {
   }
 }
 
-/// The known sky darkness with its source, or an explicit "unknown"
-/// (TASK 7.4; SI-007, SI-008). Bortle and SQM are shown as entered — never
-/// converted into each other.
+/// The known sky darkness, value first, then its source and the date it
+/// was recorded; or an explicit "unknown" with the way to set it (TASK 7.4;
+/// SI-007, SI-008; S9.7). Bortle and SQM are shown as entered — never
+/// converted into each other (trap 6), and never inferred.
 class _SkyDarknessLine extends StatelessWidget {
   const _SkyDarknessLine({required this.darkness, required this.hasSite});
 
   final SkyDarkness darkness;
   final bool hasSite;
 
-  static String _source(String? source, Object? date) {
-    if (source == null) return 'source unknown';
-    return date == null ? source : '$source, $date';
+  /// "Source: user · Nov 10, 2026", or "Source unknown".
+  static String source(String? source, CalendarDate? date) {
+    if (source == null) return 'Source unknown';
+    return date == null
+        ? 'Source: $source'
+        : 'Source: $source · ${NightTimeFormatter.recordedDate(date)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodySmall;
-    final String text;
+    final text = Theme.of(context).textTheme;
     if (darkness.isUnknown) {
-      text = hasSite
-          ? 'Sky darkness unknown — pick a Bortle class above, or add Bortle '
-                'or SQM in the site editor.'
-          : 'Sky darkness unknown — pick a Bortle class above; save this '
-                'position as a site to keep it or to record SQM.';
-    } else {
-      final parts = [
-        if (darkness.hasBortle)
-          'Bortle ${darkness.bortleClass} '
-              '(${_source(darkness.bortleSource, darkness.bortleDate?.toIso8601String())})',
-        if (darkness.hasSqm)
-          'SQM ${darkness.sqm!.toStringAsFixed(2)} mag/arcsec² '
-              '(${_source(darkness.sqmSource, darkness.sqmDate?.toIso8601String())})',
-      ];
-      text = parts.join(' · ') + (darkness.isSaved ? '' : ' — not saved');
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.sm),
+        child: Text(
+          hasSite
+              ? 'Unknown — pick a Bortle class above, or add Bortle or SQM in '
+                    'the site editor.'
+              : 'Unknown — pick a Bortle class above; save this position as a '
+                    'site to keep it or to record SQM.',
+          key: const Key('sky.unknown'),
+          style: text.bodySmall,
+        ),
+      );
     }
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Text(text, style: style),
+    Widget reading(String value, String caption, Key key) => Padding(
+      key: key,
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(value, style: text.bodyMedium),
+          Text(caption, style: text.bodySmall),
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (darkness.hasBortle)
+          reading(
+            'Bortle ${darkness.bortleClass}',
+            source(darkness.bortleSource, darkness.bortleDate),
+            const Key('sky.bortle'),
+          ),
+        if (darkness.hasSqm)
+          reading(
+            'SQM ${darkness.sqm!.toStringAsFixed(2)} mag/arcsec²',
+            source(darkness.sqmSource, darkness.sqmDate),
+            const Key('sky.sqm'),
+          ),
+        if (!darkness.isSaved)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              'Not saved: this position is not a site.',
+              style: text.bodySmall,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -201,19 +244,13 @@ class _BortleBadge extends StatelessWidget {
           items: [
             DropdownMenuItem<int?>(
               value: null,
-              child: Text(
-                'Bortle unknown',
-                style: TextStyle(color: text.bodyLarge?.color),
-              ),
+              child: Text('Bortle unknown', style: text.bodyLarge),
             ),
             ...List.generate(
               9,
               (index) => DropdownMenuItem<int?>(
                 value: index + 1,
-                child: Text(
-                  'Bortle ${index + 1}',
-                  style: TextStyle(color: text.bodyLarge?.color),
-                ),
+                child: Text('Bortle ${index + 1}', style: text.bodyLarge),
               ),
             ),
           ],
@@ -224,14 +261,14 @@ class _BortleBadge extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   swatch(i),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     i == 0 ? 'Bortle ?' : 'Bortle $i',
                     style: text.titleSmall?.copyWith(
                       color: palette.textPrimary,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                 ],
               );
             });
@@ -261,7 +298,9 @@ class NightTimelineSection extends StatelessWidget {
     if (timeline == null) {
       return Text(
         'Set your site to see the night.',
-        style: TextStyle(color: AppPalette.of(context).textSecondary),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: AppPalette.of(context).textSecondary,
+        ),
       );
     }
     String at(DateTime utc) => NightTimeFormatter.instant(
@@ -292,13 +331,19 @@ class NightTimelineSection extends StatelessWidget {
       (AppWords.civilDawn, dawn(timeline.civilTwilight)),
       ('Sunrise', dawn(timeline.sunriseSunset)),
     ];
+    final bands = TwilightBands.of(timeline);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _SectionTitle(title, key: const Key('night.timelineTitle')),
+        // S9.6: the same crossings as a bar; the times below are its text.
+        if (bands != null && bands.isNotEmpty) ...[
+          TwilightBar(bands: bands),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         for (final (label, time) in rows)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs / 2),
             // Wraps at large text rather than overflowing (TASK 15.3).
             child: Wrap(
               alignment: WrapAlignment.spaceBetween,
@@ -310,6 +355,46 @@ class NightTimelineSection extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The night from sunset to sunrise as the standard twilights (S9.6): each
+/// band's width is its duration and its shade its depth, from the chart's
+/// twilight to its dark token. Visual only: the table under it states the
+/// same times, so the bar is hidden from screen readers.
+class TwilightBar extends StatelessWidget {
+  const TwilightBar({super.key, required this.bands});
+
+  final List<TwilightBand> bands;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = AppPalette.of(context);
+    return ExcludeSemantics(
+      child: ClipRRect(
+        key: const Key('night.twilightBar'),
+        borderRadius: BorderRadius.circular(4),
+        child: SizedBox(
+          height: 16,
+          child: Row(
+            children: [
+              for (final (i, b) in bands.indexed)
+                Expanded(
+                  key: Key('night.band.$i.${b.depth}'),
+                  flex: b.length.inMinutes.clamp(1, 1 << 20),
+                  child: ColoredBox(
+                    color: Color.lerp(
+                      p.chartTwilight,
+                      p.chartDark,
+                      (b.depth - 1) / 3,
+                    )!,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -334,12 +419,12 @@ class MoonSection extends StatelessWidget {
         Row(
           children: [
             Icon(Icons.nightlight_round, color: AppPalette.of(context).moon),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             const Expanded(child: _SectionTitle('Moon')),
           ],
         ),
         Padding(
-          padding: const EdgeInsets.only(left: 32),
+          padding: const EdgeInsets.only(left: AppSpacing.xl),
           child: Text(
             'Illumination at midnight: $lunarIllum',
             key: const Key('sky.moonIllumination'),
@@ -361,7 +446,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
     child: Semantics(
       header: true,
       child: Text(
@@ -407,7 +492,7 @@ class _MoonDetails extends StatelessWidget {
 
     if (sepText == null) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(left: 32, top: 4),
+      padding: const EdgeInsets.only(left: AppSpacing.xl, top: AppSpacing.xs),
       child: Text(sepText, key: const Key('sky.moonSeparation'), style: style),
     );
   }

@@ -57,7 +57,7 @@ void main() {
     AppDatabase production() =>
         AppDatabase(openDatabaseConnection(() async => file));
 
-    for (final (version, newer) in [(7, false), (24, true)]) {
+    for (final (version, newer) in [(7, false), (26, true)]) {
       test('v$version is refused as ${newer ? 'newer' : 'below the floor'}, '
           'typed, and the file is unchanged', () async {
         await _stamp(file, version);
@@ -107,7 +107,8 @@ void main() {
 
   // S1.V2 (TD-060): the reset the app runs on confirmation seeds the new
   // database even when the old file's catalog seed marker is still stored,
-  // and keeps every other preference.
+  // and keeps every other preference but the ids that point into the old
+  // file: the active site and the plan ids (S8.9, ENG-14).
   group('the confirmed reset', () {
     AppDatabase production() =>
         AppDatabase(openDatabaseConnection(() async => file));
@@ -118,6 +119,11 @@ void main() {
         SharedPreferences.setMockInitialValues({
           if (marker) CatalogSeeder.versionKey: 2,
           'fieldMode': true,
+          'activeLocationId': 4,
+          'targetId': 9,
+          'equipmentId': 8,
+          'editedSessionId': 7,
+          'transientLatitude': 46.0,
         });
         await _stamp(file, 7);
         final before = file.readAsBytesSync();
@@ -134,13 +140,22 @@ void main() {
         await fresh.close();
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getBool('fieldMode'), isTrue, reason: 'kept');
+        expect(prefs.getDouble('transientLatitude'), 46.0, reason: 'kept');
+        for (final id in [
+          'activeLocationId',
+          'targetId',
+          'equipmentId',
+          'editedSessionId',
+        ]) {
+          expect(prefs.getInt(id), isNull, reason: '$id: no stale id');
+        }
         expect(prefs.getInt(CatalogSeeder.versionKey), 3, reason: 'reseeded');
       });
     }
 
     test('a newer database is refused before anything changes', () async {
       SharedPreferences.setMockInitialValues({CatalogSeeder.versionKey: 2});
-      await _stamp(file, 24); // newer than the app (v23 since S7.5)
+      await _stamp(file, 26); // newer than the app (v25 since S8.6)
       final before = file.readAsBytesSync();
       final db = production();
       final refused = (await refusedSchemaVersion(db))!;

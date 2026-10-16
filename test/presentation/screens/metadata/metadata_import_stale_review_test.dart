@@ -140,7 +140,7 @@ Future<void> _editElsewhere(
 }) async {
   app.router.pop();
   await _settle(t);
-  await t.tap(find.byTooltip('Edit'));
+  await t.tap(find.byTooltip('Edit rig'));
   await _settle(t);
   // S7.6: the RAW size is one tap away, in "More (optional)".
   if (find.widgetWithText(TextFormField, from).evaluate().isEmpty) {
@@ -148,7 +148,7 @@ Future<void> _editElsewhere(
   }
   await t.enterText(find.widgetWithText(TextFormField, from).first, to);
   await t.pump();
-  await t.tap(find.text('Save Changes'));
+  await t.tap(find.text('Save'));
   await _settle(t);
 }
 
@@ -165,7 +165,7 @@ void main() {
     await _settle(t);
     await _openMore(t); // S7.6: the rig's own RAW size, one tap away
     expect(find.widgetWithText(TextFormField, '45'), findsOneWidget);
-    await t.tap(find.text('Save Changes'));
+    await t.tap(find.text('Save'));
     await _settle(t);
 
     expect((await app.rig(t)).averageRawFileSizeMB, 45);
@@ -196,7 +196,7 @@ void main() {
 
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
-    await t.tap(find.text('Save Changes'));
+    await t.tap(find.text('Save'));
     await _settle(t);
 
     expect((await app.rig(t)).averageRawFileSizeMB, 45);
@@ -223,7 +223,7 @@ void main() {
     );
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
-    await t.tap(find.text('Save Changes'));
+    await t.tap(find.text('Save'));
     await _settle(t);
     expect((await app.rig(t)).pixelPitchUm, 2.5);
 
@@ -232,7 +232,7 @@ void main() {
     await _settle(t);
     await t.tap(find.byKey(const Key('import.open.1')));
     await _settle(t);
-    await t.tap(find.text('Save Changes'));
+    await t.tap(find.text('Save'));
     await _settle(t);
     expect((await app.rig(t)).pixelPitchUm, 2.414);
   });

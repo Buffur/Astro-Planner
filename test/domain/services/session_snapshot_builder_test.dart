@@ -9,6 +9,7 @@ import 'package:astroplan/domain/models/calendar_date.dart';
 import 'package:astroplan/domain/models/capture_block.dart';
 import 'package:astroplan/domain/models/equipment_profile.dart';
 import 'package:astroplan/domain/models/spec_confidence.dart';
+import 'package:astroplan/domain/models/spec_provenance.dart';
 import 'package:astroplan/domain/models/tracking_type.dart';
 import 'package:astroplan/domain/models/location_profile.dart';
 import 'package:astroplan/domain/models/night_weather.dart';
@@ -19,6 +20,7 @@ import 'package:astroplan/domain/models/weather_snapshot.dart';
 import 'package:astroplan/domain/services/capture_budget_calculator.dart';
 import 'package:astroplan/domain/services/imaging_opportunity_calculator.dart';
 import 'package:astroplan/domain/services/night_weather_summarizer.dart';
+import 'package:astroplan/domain/services/saved_plan_reader.dart';
 import 'package:astroplan/domain/services/session_night_resolver.dart';
 import 'package:astroplan/domain/services/session_snapshot_builder.dart';
 import 'package:astroplan/domain/services/visibility_calculator.dart';
@@ -209,7 +211,8 @@ void main() {
 
   // S3.V7 (S3S-01, TD-070): a snapshot keeps a group provenance only when
   // every spec of the group has it; it never records a rig-wide `user` for
-  // imported or estimated values. Per-field snapshot provenance is Stage 8's.
+  // imported or estimated values. Since S8.8 (TD-070) `provenance` records
+  // each valued spec's own pair.
   group('rig provenance', () {
     Map<Object?, Object?> rigOf(EquipmentProfile rig) =>
         _build(rig: rig).json['rig']! as Map;
@@ -234,6 +237,83 @@ void main() {
       final rig = rigOf(_rig);
       expect(rig['cameraSource'], isNull);
       expect(rig['opticsSource'], isNull);
+      expect(rig['provenance'], {
+        'resolution': null,
+        'pixelPitch': null,
+        'sensorSize': null,
+        'focalLength': null,
+        'focalRatio': null,
+      });
+    });
+
+    Map<String, Object?> pair(String source, SpecConfidence c) => {
+      'source': source,
+      'confidence': c.name,
+    };
+
+    test('S8.8: an imported rig records its estimated and file-sourced '
+        'fields as such, never as `user`', () {
+      final d = EquipmentDraft.fromCandidate(phoneCandidate());
+      final rig = rigOf(d.build(d.initial, TrackingType.unknown).profile!);
+      final file = pair('metadata:jpeg', SpecConfidence.reported);
+      final estimate = pair(
+        'derived:calc-40/metadata:jpeg',
+        SpecConfidence.estimated,
+      );
+      expect(rig['provenance'], {
+        'resolution': file,
+        'pixelPitch': estimate,
+        'sensorSize': estimate,
+        'focalLength': file,
+        'focalRatio': file,
+      });
+    });
+
+    test("S8.8: a typed rig is the user's per field; a field marked "
+        'unknown stays unknown', () {
+      final typed = _rig.withEditProvenance(null);
+      final rig = rigOf(
+        EquipmentProfile(
+          id: typed.id,
+          name: typed.name,
+          sensorWidthMm: typed.sensorWidthMm,
+          sensorHeightMm: typed.sensorHeightMm,
+          pixelPitchUm: typed.pixelPitchUm,
+          resolutionWidthPx: typed.resolutionWidthPx,
+          resolutionHeightPx: typed.resolutionHeightPx,
+          focalLengthMm: typed.focalLengthMm,
+          focalRatio: typed.focalRatio,
+          averageRawFileSizeMB: 25,
+          cameraSource: typed.cameraSource,
+          cameraConfidence: typed.cameraConfidence,
+          opticsSource: typed.opticsSource,
+          opticsConfidence: typed.opticsConfidence,
+          specProvenance: const {
+            EquipmentSpec.pixelPitch: SpecProvenance.unknown,
+          },
+        ),
+      );
+      final user = pair('user', SpecConfidence.reported);
+      expect(rig['provenance'], {
+        'resolution': user,
+        'pixelPitch': null,
+        'sensorSize': user,
+        'rawFileSize': user,
+        'focalLength': user,
+        'focalRatio': user,
+      });
+      expect(rig['cameraSource'], isNull);
+      expect(rig['opticsSource'], 'user');
+    });
+
+    test('S8.8: a snapshot taken before per-field provenance still reads', () {
+      final json = jsonDecode(jsonEncode(_build().json)) as Map;
+      (json['rig'] as Map).remove('provenance');
+      final old = SessionSnapshot.tryRead(json.cast<String, Object?>());
+      expect(old, isNotNull);
+      expect(old!.rigName, _rig.name);
+      expect(old.rigFocalLengthMm, _rig.focalLengthMm);
+      expect(SavedPlanReader.read(old)?.rigLabel, _rig.name);
     });
   });
 }

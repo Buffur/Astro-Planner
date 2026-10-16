@@ -13,6 +13,26 @@ import '../../domain/models/iana_time_context.dart';
 class NightTimeFormatter {
   const NightTimeFormatter._();
 
+  /// A recorded date with its year, for example "Sep 25, 2026" (S9.7: a
+  /// sky-darkness reading's date; never an ISO string on screen).
+  static String recordedDate(CalendarDate date) =>
+      '${_months[date.month - 1]} ${date.day}, ${date.year}';
+
+  static const _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
   /// A civil evening date, for example "Fri, Sep 25".
   static String eveningDate(CalendarDate date) {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

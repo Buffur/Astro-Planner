@@ -13,10 +13,17 @@ import 'storage_guard.dart';
 /// installs keep their state; the capture-plan JSON is versioned since
 /// TASK 5.3 and the pre-5.3 shape is still read.
 class SharedPrefsPlannerStateRepository implements PlannerStateRepository {
-  static const _activeLocationId = 'activeLocationId';
+  static const _activeLocationId = activeLocationIdKey;
   static const _targetId = 'targetId';
   static const _equipmentId = 'equipmentId';
   static const _captureBlocks = 'captureBlocks';
+
+  /// The active site's id: carried by a backup (S8.9, TD-056).
+  static const activeLocationIdKey = 'activeLocationId';
+
+  /// The ids of the plan being edited and its selection. They point into
+  /// one database, so a restore or a reset clears them (S8.9, ENG-14).
+  static const planIdKeys = {_targetId, _equipmentId, _editedSessionId};
 
   Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 

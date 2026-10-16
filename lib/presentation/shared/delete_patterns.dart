@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import 'app_messages.dart';
 
 // Deleting (S5.8; RD-09 = M + S1, DECISIONS E.1):
 // - an edit inside a plan (a capture block) happens at once, with an Undo
@@ -26,7 +27,7 @@ Future<bool> showUndo(
   final messenger = ScaffoldMessenger.of(context);
   messenger.hideCurrentSnackBar();
   final reason = await messenger
-      .showSnackBar(
+      .showMessage(
         SnackBar(
           content: Text(message),
           duration: duration,

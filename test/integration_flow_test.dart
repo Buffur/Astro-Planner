@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
+import 'package:astroplan/core/time/clock.dart';
 import 'package:astroplan/main.dart';
 import 'package:astroplan/presentation/navigation/app_router.dart';
 import 'package:astroplan/data/database/app_database.dart';
@@ -31,6 +32,12 @@ class MockWeatherRepository
     with NoSnapshotWeather
     implements WeatherRepository {}
 
+/// A fixed evening (S11.C1): the plan's night lies ahead, so a second Save
+/// replaces the saved plan. On the wall clock, between dawn and noon, the
+/// night had already ended and the planner moved to a copy (D8-1), so the
+/// test failed depending on the time of day it ran.
+final _clock = FixedClock(DateTime.utc(2026, 11, 10, 18));
+
 void main() {
   late AppDatabase database;
   late DriftTargetRepository targetRepo;
@@ -50,7 +57,7 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     targetRepo = DriftTargetRepository(database);
     equipmentRepo = DriftEquipmentRepository(database);
-    sessionRepo = DriftSessionRepository(database);
+    sessionRepo = DriftSessionRepository(database, clock: _clock);
     locationRepo = DriftLocationRepository(database);
 
     // A saved location, so isDefaultLocation is false and sessionNight
@@ -113,6 +120,7 @@ void main() {
         locationRepo,
         locationService: FakeLocationService(),
         sessionRepository: sessionRepo,
+        clock: _clock,
       );
       await plannerViewModel.ready;
     });
@@ -166,7 +174,7 @@ void main() {
     await tester.drag(listFinder, const Offset(0, 2000));
     await tester.pumpAndSettle();
 
-    // TASK 12.2: the logbook is the Sessions tab.
+    // TASK 12.2: the logbook is the second tab (labelled Logbook since S8.5).
     AppRouter.router.go(AppRouter.sessions);
     await tester.pump();
     await tester.runAsync(
@@ -174,16 +182,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Sessions'), findsWidgets);
+    expect(find.text('Logbook'), findsWidgets); // S8.5
     expect(find.textContaining('Orion Nebula'), findsOneWidget);
     expect(find.textContaining('ASI2600MC'), findsOneWidget);
-    // TASK 11.3: Save stores a planned session with a plan snapshot.
-    // The row's status (TASK 14.1 added a "Planned" filter chip).
+    // TASK 11.3: Save stores a planned session with a plan snapshot; S8.5
+    // shows its state as the plan-state label.
     expect(
-      find.descendant(
-        of: find.byType(ListTile),
-        matching: find.text('Planned'),
-      ),
+      find.descendant(of: find.byType(ListTile), matching: find.text('Saved')),
       findsOneWidget,
     );
   });
@@ -203,6 +208,7 @@ void main() {
           locationRepo,
           locationService: FakeLocationService(),
           sessionRepository: sessionRepo,
+          clock: _clock,
         );
         await plannerViewModel.ready;
       });

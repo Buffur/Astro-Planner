@@ -3,64 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:astroplan/domain/models/session_log.dart';
 
 void main() {
-  test('SessionLog toShareableText formats correctly', () {
-    final log = SessionLog(
-      id: 1,
-      targetName: 'Andromeda Galaxy',
-      equipmentName: 'Pixel 8 Pro',
-      sessionDate: DateTime(2026, 9, 17),
-      plannedLightFrames: 120,
-      actualLightFrames: 100,
-      environmentalNotes: 'Clear sky, windy',
-    );
-
-    final text = log.toShareableText();
-
-    expect(text.contains('Astro Planner Session Log'), isTrue);
-    expect(text.contains('Target: Andromeda Galaxy'), isTrue);
-    expect(text.contains('Date: 2026-09-17'), isTrue);
-    expect(text.contains('Rig: Pixel 8 Pro'), isTrue);
-    expect(text.contains('Lights: 120'), isTrue);
-    expect(text.contains('Actual Lights: 100'), isTrue);
-    expect(text.contains('Conditions Notes: Clear sky, windy'), isTrue);
-  });
-
-  test('SessionLog toShareableText formats expanded fields correctly', () {
-    final log = SessionLog(
-      id: 2,
-      targetName: 'Orion Nebula',
-      equipmentName: 'Deep Sky Rig',
-      sessionDate: DateTime(2026, 12, 01),
-      locationName: 'Backyard',
-      bortleScale: 4.5,
-      plannedLightFrames: 60,
-      plannedDarkFrames: 20,
-      plannedFlatFrames: 20,
-      plannedBiasFrames: 50,
-      integrationTimeSeconds: 3600.0,
-      focalLength: 400,
-      aperture: 5.6,
-      temperature: -2.5,
-      humidity: 85,
-      cloudCover: 10,
-    );
-
-    final text = log.toShareableText();
-
-    expect(text.contains('Location: Backyard'), isTrue);
-    expect(text.contains('Focal Length: 400.0mm'), isTrue);
-    expect(text.contains('Aperture: f/5.6'), isTrue);
-    expect(text.contains('Lights: 60'), isTrue);
-    expect(text.contains('Darks: 20'), isTrue);
-    expect(text.contains('Flats: 20'), isTrue);
-    expect(text.contains('Bias/Dark-Flats: 50'), isTrue);
-    expect(text.contains('Planned Integration: 1.00 hrs'), isTrue);
-    expect(text.contains('Temperature: -2.5°C'), isTrue);
-    expect(text.contains('Humidity: 85.0%'), isTrue);
-    expect(text.contains('Cloud Cover: 10%'), isTrue);
-    expect(text.contains('Bortle Scale: 4.5'), isTrue);
-  });
-
+  // S8.7: toShareableText (every field, notes included) was retired with
+  // its two tests; entry_share_text_test.dart covers the Share text now.
   test('SessionLog toJson and fromJson work correctly', () {
     final original = SessionLog(
       id: 3,

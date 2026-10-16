@@ -29,6 +29,7 @@ import '../../../support/fake_location_service.dart';
 import '../../../support/fake_reverse_geocoder.dart';
 import '../../../support/no_snapshot_weather.dart';
 import '../../../support/planner_harness.dart';
+import '../../../support/legacy_run.dart';
 
 class _NoForecast with NoSnapshotWeather implements WeatherRepository {}
 
@@ -113,7 +114,10 @@ void main() {
         ),
       );
       await vm.plan.idle;
-      final run = await vm.analysis.startSession();
+      final run = await startLegacyRun(
+        sessions,
+        await vm.analysis.saveSession(),
+      );
       completedId = run.id;
       await sessions.record(
         run.id,
@@ -154,13 +158,16 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('the Completed chip filters the list in the query', (
-    tester,
-  ) async {
+  testWidgets('the Completed filter (in the panel, S8.5) filters the list in '
+      'the query', (tester) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
     expect(find.byKey(Key('logbook.status.$plannedId')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('logbook.filters')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.filter.completed')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('logbook.filters.done')));
     await settle(tester);
     expect(find.byKey(Key('logbook.status.$completedId')), findsOneWidget);
     expect(find.byKey(const Key('logbook.status.$legacyId')), findsOneWidget);
@@ -175,26 +182,84 @@ void main() {
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
+    await tester.tap(find.byKey(const Key('logbook.filters')));
+    await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.filter.target')));
     await settle(tester);
     await tester.tap(find.byKey(const Key('logbook.pick.1')));
     await settle(tester);
+    expect(find.text('Orion Nebula'), findsOneWidget, reason: 'the panel');
+    await tester.tap(find.byKey(const Key('logbook.filters.done')));
+    await settle(tester);
     expect(find.byKey(Key('logbook.status.$completedId')), findsOneWidget);
     expect(find.byKey(const Key('logbook.status.$legacyId')), findsNothing);
-    expect(find.textContaining('Target: Orion Nebula'), findsOneWidget);
   });
 
-  testWidgets('the legacy row carries a badge; a tap opens the detail', (
+  testWidgets('the legacy row reads Old log (S8.5); a tap opens the detail', (
     tester,
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
-    expect(find.byKey(const Key('logbook.legacy.$legacyId')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('logbook.status.$legacyId')),
+        matching: find.text('Old log'),
+      ),
+      findsOneWidget,
+    );
     await tester.tap(find.textContaining('M31'));
     await settle(tester);
     expect(find.byKey(const Key('detail.legacy')), findsOneWidget);
   });
 
+  testWidgets('S8.6: a name is set on the entry, never asked at Save; the '
+      'Logbook shows it and searches it; removing it shows target · night', (
+    tester,
+  ) async {
+    await seed(tester);
+    await pumpAt(tester, AppRouter.sessionDetail(plannedId));
+    await tester.tap(find.byKey(const Key('detail.name')));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('detail.nameField')),
+      '  Orion, first light ',
+    );
+    await tester.tap(find.byKey(const Key('detail.nameSave')));
+    await settle(tester);
+    expect(find.text('Orion, first light'), findsWidgets);
+    expect(find.text('Name saved'), findsOneWidget); // S9.8
+
+    AppRouter.router.go(AppRouter.sessions);
+    await settle(tester);
+    expect(
+      tester.widget<Text>(find.byKey(Key('logbook.title.$plannedId'))).data,
+      'Orion, first light',
+    );
+    await tester.tap(find.byKey(const Key('logbook.searchToggle')));
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('logbook.search')), 'first l');
+    await settle(tester);
+    expect(find.byKey(Key('logbook.title.$plannedId')), findsOneWidget);
+    expect(find.byKey(Key('logbook.title.$completedId')), findsNothing);
+    await tester.tap(find.byKey(const Key('logbook.searchToggle')));
+    await settle(tester);
+
+    AppRouter.router.go(AppRouter.sessionDetail(plannedId));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('detail.name')));
+    await settle(tester);
+    await tester.enterText(find.byKey(const Key('detail.nameField')), '');
+    await tester.tap(find.byKey(const Key('detail.nameSave')));
+    await settle(tester);
+    expect(find.text('Name removed'), findsOneWidget); // S9.8
+    AppRouter.router.go(AppRouter.sessions);
+    await settle(tester);
+    final title = tester
+        .widget<Text>(find.byKey(Key('logbook.title.$plannedId')))
+        .data;
+    expect(title, isNot('Orion, first light'));
+    expect(title, contains(' · '), reason: 'target · night');
+  });
   testWidgets('acceptance: a completed run renders from its execution-start '
       'snapshot with plan vs actual and notes', (tester) async {
     await seed(tester);
@@ -209,12 +274,13 @@ void main() {
       find.textContaining('L · 300 s: 10 of 24', findRichText: true),
       findsOneWidget,
     );
+    // S8.7: once in the result summary, once in planned against actual.
     expect(
       find.textContaining(
         'Integration: 50 min of 2 h planned',
         findRichText: true,
       ),
-      findsOneWidget,
+      findsNWidgets(2),
     );
     expect(
       find.textContaining('Wind after 23:00', findRichText: true),
@@ -225,7 +291,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('detail.editResults')), findsOneWidget);
-    expect(find.text('Plan again (copy)'), findsOneWidget);
+    // S8.7 (I-6): a result offers Edit result and Copy to another night.
+    expect(find.text('Copy to another night'), findsOneWidget);
+    expect(find.byKey(const Key('detail.openInPlanner')), findsNothing);
     // S1.7 (UX-19): RA/Dec as in the target editor; typographic minus.
     expect(
       find.textContaining('05h35m16.8s, −05°23′24″', findRichText: true),
@@ -255,7 +323,8 @@ void main() {
       find.textContaining('Focal ratio: f/5.0', findRichText: true),
       findsOneWidget,
     );
-    expect(find.text('None recorded.'), findsOneWidget);
+    // S8.7: the notes and the conditions are two sections.
+    expect(find.text('None recorded.'), findsNWidgets(2));
     expect(find.textContaining('Notes: ', findRichText: true), findsNothing);
     expect(
       find.textContaining('Night span: ', findRichText: true),
@@ -280,6 +349,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('unknown'), findsWidgets);
+    // S8.7 (I-6): an old log offers Share and Export as file only.
+    expect(find.byKey(const Key('detail.copy')), findsNothing);
+    expect(find.byKey(const Key('detail.openInPlanner')), findsNothing);
+    expect(find.byKey(const Key('detail.share')), findsOneWidget);
   });
 
   testWidgets('a session without a snapshot says so, never zeros', (
@@ -297,7 +370,7 @@ void main() {
     expect(find.text('This target so far'), findsOneWidget);
     expect(find.text('50 min over 1 session'), findsOneWidget);
     expect(find.text('L: 50 min'), findsOneWidget);
-    AppRouter.router.go(AppRouter.libraryProgress);
+    AppRouter.router.go(AppRouter.logbookProgress);
     await settle(tester);
     expect(find.byKey(const Key('progress.1')), findsOneWidget);
     expect(find.text('Orion Nebula'), findsWidgets);
@@ -308,7 +381,7 @@ void main() {
   ) async {
     await seed(tester);
     await tester.runAsync(() => sessions.delete(completedId));
-    await pumpAt(tester, AppRouter.libraryProgress);
+    await pumpAt(tester, AppRouter.logbookProgress);
     expect(find.byKey(const Key('progress.empty')), findsOneWidget);
   });
 
@@ -319,6 +392,7 @@ void main() {
     await pumpAt(tester, AppRouter.sessionDetail(completedId));
     await tester.tap(find.byKey(const Key('detail.export')));
     await settle(tester);
+    expect(find.text('Export file created'), findsOneWidget); // S9.8
     final shared = exporter.shared.single.single;
     expect(shared.session.id, completedId);
     expect(shared.events.first.kind, ExecutionEventKind.started);
@@ -330,10 +404,15 @@ void main() {
   ) async {
     await seed(tester);
     await pumpAt(tester, AppRouter.sessions);
+    // S9.8: a labelled item in the Logbook's menu; it says it is done.
+    await tester.tap(find.byKey(const Key('logbook.menu')));
+    await settle(tester);
+    expect(find.text('Export all as file'), findsOneWidget);
     await tester.tap(find.byKey(const Key('logbook.exportAll')));
     await settle(tester);
     final ids = {for (final e in exporter.shared.single) e.session.id};
     expect(ids, {completedId, plannedId, legacyId, noSnapshotId});
+    expect(find.text('Export file created'), findsOneWidget);
   });
 
   testWidgets('no overflow at 200 % text on a 360 × 640 dp phone', (

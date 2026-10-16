@@ -11,6 +11,14 @@ abstract final class AppWords {
   static const addRig = 'Add rig';
   static const editRig = 'Edit rig';
   static const chooseRig = 'Choose a rig';
+  static const noRigs = 'No rigs yet.';
+
+  // What the plan images (S9.1).
+  static const targets = 'Targets';
+  static const chooseTarget = 'Choose a target';
+  static const planThisTarget = 'Plan this target';
+  static const addTarget = 'Add a target';
+  static const editTarget = 'Edit target';
 
   // What the user makes and saves in the planner.
   static const plan = 'Plan';
@@ -43,16 +51,19 @@ abstract final class AppWords {
   static const notDone = 'Not done';
   static const oldLog = 'Old log';
 
-  // Recording the outcome and the optional live mode (RG-04).
+  // Recording the outcome (RG-04; the live mode left in S8.4).
   static const recordResult = 'Record result';
   static const editResult = 'Edit result';
-  static const trackLive = 'Track live';
-  static const trackLiveOptional = 'Track live (optional)';
   static const completedAsPlanned = 'Completed as planned';
 
   /// Tonight's line after a saved night (ADR-019 §4).
   static String howDidItGo(String target) =>
       'Last night: $target. How did it go?';
+
+  /// The same line for an earlier night (S8.3): "M42 · Sat, Sep 27: how
+  /// did it go?". [night] comes formatted (`NightTimeFormatter`).
+  static String howDidItGoOn(String target, String night) =>
+      '$target · $night: how did it go?';
 
   // The verdict (RD-06): the status headline's first word.
   static const fits = 'Fits';
@@ -94,6 +105,14 @@ abstract final class AppWords {
 
   // Places, reusable things and history.
   static const site = 'Site';
+  static const sites = 'Sites';
+  static const chooseSite = 'Choose a site';
+  static const newSite = 'New site';
+  static const editSite = 'Edit site';
+  static const saveSite = 'Save site';
+
+  // Forms (S9.2): one primary Save in every editor.
+  static const save = 'Save';
   static const library = 'Library';
   static const progressByTarget = 'Progress by target';
 

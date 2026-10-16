@@ -1,3 +1,5 @@
+import '../../core/diagnostics/app_log.dart';
+import '../../core/time/clock.dart';
 import '../../domain/models/astro_target.dart';
 import '../../domain/models/calendar_date.dart';
 import '../../domain/models/capture_block.dart';
@@ -10,6 +12,7 @@ import '../../domain/repositories/storage_failure.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/current_session.dart';
 import '../../domain/services/example_capture_plan.dart';
+import '../../domain/services/saved_night_end.dart';
 import '../../domain/services/session_reference_resolver.dart';
 import 'session_plan_viewmodel.dart';
 import 'site_viewmodel.dart';
@@ -17,7 +20,7 @@ import 'site_viewmodel.dart';
 /// Which plan the planner works on (ADR-014 §3; TASKs 11.3–11.4, 13.3;
 /// split out of [SessionPlanViewModel] in S6.1): restoring it at startup,
 /// opening a stored one, starting a new one, copying it to another night,
-/// saving it and starting a run. The plan's contents, their edits and the
+/// and saving it. The plan's contents, their edits and the
 /// autosave stay in [SessionPlanViewModel], which notifies for both.
 class PlanLifecycleViewModel {
   PlanLifecycleViewModel({
@@ -27,9 +30,11 @@ class PlanLifecycleViewModel {
     required EquipmentRepository equipmentRepository,
     required this._stateRepository,
     CurrentSession? currentSession,
+    Clock? clock,
   }) : _targets = targetRepository,
        _equipment = equipmentRepository,
        _current = currentSession,
+       _clock = clock ?? const SystemClock(),
        _resolver = SessionReferenceResolver(
          targetRepository,
          equipmentRepository,
@@ -44,6 +49,11 @@ class PlanLifecycleViewModel {
   /// Null only in tests without a session repository (plan in preferences).
   final CurrentSession? _current;
   final SessionReferenceResolver _resolver;
+  final Clock _clock;
+
+  /// Called after every night check (restore, rollover, resume): a saved
+  /// night may have ended, so Tonight's result line refreshes (S8.3).
+  Future<void> Function()? onNightChecked;
 
   /// Restores the plan (call after the site has loaded): a plan still kept
   /// in preferences moves once into a new draft (ADR-014 §6); otherwise the
@@ -86,13 +96,42 @@ class PlanLifecycleViewModel {
         if (_neverSaved(open) && open.eveningDate != _plan.nightKey) {
           await current.write(_plan.currentPlan, edit: false);
         }
-        // A run in progress is tracked, never edited: plan on a copy
-        // (owner decision, TASK 13.3; TD-055).
+        // A run in progress is never edited: a copy (TASK 13.3; TD-055).
         if (!open.planEditable) await current.adopt(open, _plan.currentPlan);
+        await _leaveEndedSavedPlan(current);
       })
-      .then((_) {
+      .then((_) async {
         _tonight = _plan.tonightKey;
+        await onNightChecked?.call();
       });
+
+  /// S8.3 (ADR-019 §3.1, D1): a saved plan whose night has ended stays on
+  /// its night; the planner continues on a copy (its night if still ahead,
+  /// else tonight; written: it is never saved). Returns whether it moved.
+  Future<bool> _leaveEndedSavedPlan(CurrentSession current) async {
+    try {
+      if (!await current.leaveEndedSavedPlan(
+        _clock.nowUtc(),
+        _plan.currentPlan,
+      )) {
+        return false;
+      }
+    } catch (e, s) {
+      // Nothing moved (one transaction); the next night check retries.
+      AppLog.error(
+        'session',
+        'Saved-plan transition failed',
+        error: e,
+        stackTrace: s,
+      );
+      return false;
+    }
+    _plan.replaceNight(_keptNight(current.session?.eveningDate));
+    if (current.session?.eveningDate != _plan.nightKey) {
+      await current.write(_plan.currentPlan, edit: false);
+    }
+    return true;
+  }
 
   /// The only plan a new night moves (ADR-019 §3.1, D1): one never saved.
   static bool _neverSaved(Session s) =>
@@ -108,16 +147,17 @@ class PlanLifecycleViewModel {
   /// Tonight as of the last restore or rollover check (S6.4).
   CalendarDate? _tonight;
 
-  /// Follows a new night while the app runs (S6.4; TD-057), before the
-  /// forecast's check (`NightClock`, every minute and on resume). Only a
-  /// never-saved draft moves. When tonight has moved on since the last check,
-  /// a picked night that is no longer ahead rolls forward to tonight, as at
-  /// a restart; a night picked in the past meanwhile stays until then. Its
-  /// night key is written through the autosave chain, not as a user edit. A
-  /// saved plan keeps today's behaviour until Stage 8 (D1): nothing of it is
-  /// written. Screens that show the plan's night are told when it changes.
+  /// Follows a new night while the app runs (S6.4, TD-057; `NightClock`,
+  /// every minute and on resume, before the forecast's check). A saved plan
+  /// whose night has ended leaves the planner for a working copy (S8.3, D1);
+  /// a never-saved draft's picked night, once no longer ahead at a rollover,
+  /// rolls forward to tonight, written through the chain as no edit. Screens
+  /// that show the plan's night are told when it changes.
   Future<void> followNight() async {
     if (!_plan.isLoaded) return;
+    if (_current case final current?) {
+      if (await _leaveEndedSavedPlan(current)) _plan.markChanged();
+    }
     final tonight = _plan.tonightKey;
     final rolledOver = _tonight != null && tonight != _tonight;
     _tonight = tonight;
@@ -132,9 +172,11 @@ class PlanLifecycleViewModel {
       }
     }
     final night = _plan.nightKey;
-    if (night == _followedNight) return;
-    _followedNight = night;
-    _plan.markChanged();
+    if (night != _followedNight) {
+      _followedNight = night;
+      _plan.markChanged();
+    }
+    await onNightChecked?.call();
   }
 
   /// [session]'s references and blocks into the plan; what it lacks stays.
@@ -161,22 +203,49 @@ class PlanLifecycleViewModel {
   /// [SavedPlanUnavailable], and then nothing changes); a never-saved one is
   /// deleted after the switch. An untouched never-saved draft is deleted
   /// without being asked. The same holds for [newSession] and
-  /// [duplicateForNight].
-  Future<void> openSession(Session session, {bool discard = false}) async {
-    if (session.id == _plan.activeSessionId && session.planEditable) return;
+  /// [duplicateForNight]. [copyTo]: a new, unsaved copy on that night (S8.7).
+  Future<void> openSession(
+    Session opened, {
+    bool discard = false,
+    CalendarDate? copyTo,
+  }) async {
+    // TD-063 (S8.4): decide on the stored session, never a caller's copy,
+    // which may be stale; one deleted meanwhile opens as a copy.
+    final stored = await _current?.stored(opened.id);
+    final gone = _current != null && stored == null;
+    final session = stored ?? opened;
+    final same = session.id == _plan.activeSessionId && session.planEditable;
+    if (copyTo == null && same) return;
     if (discard) await _current?.revertSavedChanges();
+    // S8.3 (I-6): a saved plan whose night has ended is never made current
+    // again; it opens as a copy for tonight (or its night, if still ahead).
+    final ended =
+        copyTo != null ||
+        gone ||
+        session.isSavedPlan && SavedNightEnd.hasEnded(session, _clock.nowUtc());
     // Switching the site here is opening, not an edit.
     await _plan.restoring(() async {
       if (session.siteId case final id?) await _site.selectSite(id);
-      _plan.replaceNight(
-        session.eveningDate ??
-            CalendarDate.fromDateTimeFields(
-              session.record.sessionDate.toLocal(),
-            ),
-      );
+      final night =
+          session.eveningDate ??
+          CalendarDate.fromDateTimeFields(session.record.sessionDate.toLocal());
+      _plan.replaceNight(copyTo ?? (ended ? _keptNight(night) : night));
       await _apply(session);
-      await _current?.adopt(session, _plan.currentPlan, discard: discard);
+      await _current?.adopt(
+        session,
+        _plan.currentPlan,
+        discard: discard,
+        asCopy: ended,
+        unsaved: copyTo != null,
+      );
     });
+  }
+
+  /// Settles the Saved · changed entry [id] before its result is recorded
+  /// (S8.2; I-3): the entry goes back to what was saved; when it is the
+  /// planner's plan, the planner continues on the copy holding its edits.
+  Future<void> settle(int id) async {
+    if (await _current?.settle(id) ?? false) _plan.markChanged();
   }
 
   /// A new draft for tonight (RD-04, S6.8): it keeps the site and the rig,
@@ -213,17 +282,9 @@ class PlanLifecycleViewModel {
     _plan.markChanged();
   }
 
-  /// Save (ADR-014 §3): the current open session — or a new one — becomes
+  /// Save (ADR-014 §3; TD-085): the open session, or a new one, becomes
   /// planned with [snapshot]. Needs a repository, a night, target and rig.
-  Future<Session> savePlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.save(_plan.currentPlan(), snapshot));
-
-  /// Start (ADR-016; owner: same requirements as Save): the plan starts
-  /// with [snapshot] and the planner continues on a fresh draft copy.
-  Future<Session> startPlan(SessionSnapshot snapshot) =>
-      _commit((c) => c.start(_plan.currentPlan(), snapshot));
-
-  Future<Session> _commit(Future<Session> Function(CurrentSession) f) async {
+  Future<Session> savePlan(SessionSnapshot snapshot) async {
     final current = _current;
     if (current == null ||
         _plan.sessionNight == null ||
@@ -231,7 +292,8 @@ class PlanLifecycleViewModel {
         _plan.selectedEquipment == null) {
       throw StateError('Saving needs a site, a target and a rig.');
     }
-    final result = await f(current);
+    final now = _clock.nowUtc();
+    final result = await current.save(_plan.currentPlan(), snapshot, now);
     _plan.markChanged();
     return result;
   }

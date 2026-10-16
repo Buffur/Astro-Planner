@@ -63,4 +63,10 @@ class FlakyTargetRepository implements TargetRepository {
     _check();
     return _delegate.updateTarget(target);
   }
+
+  @override
+  Future<T> inOneTransaction<T>(Future<T> Function() writes) async {
+    _check();
+    return _delegate.inOneTransaction(writes);
+  }
 }

@@ -130,7 +130,8 @@ void main() {
     expect(vm.plan.hasUnsavedChanges, isFalse);
   });
 
-  test('a saved plan\'s row is not written at the rollover (D1)', () async {
+  test('a saved plan\'s row is not written at the rollover; since S8.3 the '
+      'planner continues on a copy (D1: both sides at once)', () async {
     final vm = await boot();
     await vm.choosePlan(); // S6.8: Save needs a target and a rig
     await vm.saveSession();
@@ -143,7 +144,9 @@ void main() {
     await vm.lifecycle.followNight();
     await vm.plan.idle;
 
-    final after = await stored(vm);
+    expect(vm.activeSessionId, isNot(before.id), reason: 'S8.3: a copy');
+    expect(vm.eveningDate, nov11);
+    final after = (await sessions.get(before.id))!;
     expect(after.eveningDate, nov10);
     expect(after.status, SessionStatus.planned);
     expect(after.updatedAtUtc, before.updatedAtUtc);
@@ -207,30 +210,34 @@ void main() {
     expect(after.blocks.last.frameCount, 7);
   });
 
-  test('at a restart, a never-saved draft\'s rolled-forward night is stored '
-      'at once; a saved plan\'s is not', () async {
-    final draft = await boot();
-    await draft.choosePlan(); // S6.8: Save needs a target and a rig
-    final draftId = draft.activeSessionId!;
-    moveTo(11);
-    final restarted = await boot();
-    await restarted.plan.idle;
-    expect(restarted.activeSessionId, draftId);
-    expect(restarted.eveningDate, nov11);
-    expect((await sessions.get(draftId))!.eveningDate, nov11);
+  test(
+    'at a restart, a never-saved draft\'s rolled-forward night is stored '
+    'at once; a saved plan\'s is not (since S8.3 the planner is on a copy)',
+    () async {
+      final draft = await boot();
+      await draft.choosePlan(); // S6.8: Save needs a target and a rig
+      final draftId = draft.activeSessionId!;
+      moveTo(11);
+      final restarted = await boot();
+      await restarted.plan.idle;
+      expect(restarted.activeSessionId, draftId);
+      expect(restarted.eveningDate, nov11);
+      expect((await sessions.get(draftId))!.eveningDate, nov11);
 
-    await restarted.saveSession();
-    await restarted.plan.idle;
-    final saved = (await sessions.get(draftId))!;
-    expect(saved.status, SessionStatus.planned);
-    moveTo(12);
-    final again = await boot();
-    await again.plan.idle;
-    expect(again.eveningDate, CalendarDate(2026, 11, 12), reason: 'as today');
-    final after = (await sessions.get(draftId))!;
-    expect(after.eveningDate, nov11, reason: 'not written (D1)');
-    expect(after.updatedAtUtc, saved.updatedAtUtc);
-  });
+      await restarted.saveSession();
+      await restarted.plan.idle;
+      final saved = (await sessions.get(draftId))!;
+      expect(saved.status, SessionStatus.planned);
+      moveTo(12);
+      final again = await boot();
+      await again.plan.idle;
+      expect(again.eveningDate, CalendarDate(2026, 11, 12));
+      expect(again.activeSessionId, isNot(draftId), reason: 'S8.3: a copy');
+      final after = (await sessions.get(draftId))!;
+      expect(after.eveningDate, nov11, reason: 'not written (D1)');
+      expect(after.updatedAtUtc, saved.updatedAtUtc);
+    },
+  );
 
   testWidgets(
     "NightClock's minute tick makes the plan follow the night, before the "
