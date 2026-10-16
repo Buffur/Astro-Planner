@@ -6,8 +6,7 @@
 > (`docs/refinement/prompts/STAGE_0_REFINEMENT_BASELINE.md`, §4–§8 and §10) and the
 > post-roadmap governance in `CLAUDE.md`.
 > **Verified against:** `main` @ `becae04` (2026-09-24, the last roadmap commit). Audits
-> 01–07 in `docs/audit/` were captured against that commit, and no application code has
-> changed since.
+> 01–07 in `docs/audit/` were captured against that commit, this statement describes that historical baseline, not the current checkout.
 > **Read with:** `POST_ROADMAP_PLAN.md` (Stages, gates, workflow rules) and `PROGRESS.md`
 > (current state).
 > **History is not rewritten.** Where this direction replaces an older product statement,
@@ -20,6 +19,8 @@
 > **Updated 2026-09-27 (Stages 6–11 amended after Stage 5; the owner's brief
 > `prompts/AMEND_STAGES_6_11_AFTER_STAGE5.md`):** the dedicated tracker leaves the target product
 > (§3, §4, §9, §10); §5.2 says what disclosure never hides. Nothing else changed.
+
+> **2026-10-17 reassessment:** the owner requested the Product Reassessment planning amendment in POST_ROADMAP_PLAN.md. Existing product decisions remain the implementation baseline; the reassessment may propose changes for explicit decision. It does not itself approve feature removal, a renamed app, a new provider or a new scientific model.
 
 ## 1. Primary product job
 

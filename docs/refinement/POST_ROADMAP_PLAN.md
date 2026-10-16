@@ -1,5 +1,21 @@
 # AstroPlan — Post-Roadmap Refinement Plan
 
+## Active amendment — Product Reassessment (2026-10-17)
+
+The owner requested a plan/instruction correction after the review of CLAUDE.md and the live-test brief. The next planning work is the bounded reassessment in [PRODUCT_REASSESSMENT.md](prompts/PRODUCT_REASSESSMENT.md). This amendment authorizes its planning scope, not the owner's individual redesign suggestions as implementation decisions.
+
+| Task | Dependency | Result / stop boundary |
+| --- | --- | --- |
+| RA.R1 | Current code, review coverage, current decisions | Evidence and coverage matrix; no application changes |
+| RA.R2 | RA.R1 and explicit task request | Targeted external research, options and recommendations |
+| RA.D | Research/options | Explicit owner decisions, with links to affected prior decisions |
+| RA.P | RA.D | Revised Stages → Tasks through release, acceptance criteria and dependencies; no implementation |
+
+The complete coverage and acceptance contract live in the prompt, not a second checklist here. Existing Stages and IDs below remain preserved. Stage 11 stays open; S11.6 phone checks, S11.7 readiness, existing release blockers and deferred owner decisions are carried into RA.P, never erased or marked passed. A baseline readiness assessment may be requested separately; it must name the baseline and does not approve a redesigned product. No product decision is reopened merely by reading this amendment, and no current scientific/data invariant is waived.
+
+RA.P must distinguish reusable baseline evidence from checks invalidated by accepted changes, and assign new prospective UX criteria without retroactively changing old validation contracts. Current task selection is recorded in PROGRESS.md. Do not continue the old next-task instruction from a dated history entry.
+
+
 > **Status:** the active strategic plan for post-roadmap refinement, set by **Stage 0 —
 > Refinement Baseline** on 2026-09-25. Changing a Stage's definition, the Stage order or a
 > gate needs the owner's approval. Each Stage's planning session turns its candidate work

@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **Updated 2026-10-17:** E.1 records the owner-requested instruction correction and Product Reassessment planning scope; no redesign implementation decisions made.
+
 > **Stage 11 planning, 2026-09-30:** E.1 "Stage 11 decisions (delegated by the owner)": D11-1 to D11-6 (RD-15: no diagnostics export in the beta). Documentation only.
 > **Stage 10 planning, 2026-09-30:** E.1 "Stage 10 decisions (delegated by the owner)": D10-1 to D10-6. Documentation only.
 > **Stage 9 closed, 2026-09-30:** the owner deferred the logo (P9.4), the licence (RG-12) and the identity (RD-01); recorded under E.1 "Stage 9 decisions". Documentation only.
@@ -484,6 +486,12 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### Product Reassessment planning and instruction correction (2026-10-17)
+
+The owner explicitly requested changes based on the CLAUDE.md analysis, then clarified: “Править план и инструкции в репозитории”. This authorizes the documentation correction and bounded reassessment planning scope in `docs/refinement/prompts/PRODUCT_REASSESSMENT.md` and the active plan amendment. It does not constitute approval of the individual redesign proposals, closure of Stage 11, release/publication, or changes to scientific/data behavior. Existing decisions remain the implementation baseline until RA.D records actual replacement decisions. RA.R1 is the next analysis Task; no reassessment or implementation is claimed completed by this documentation change.
+
+The scope rules in CLAUDE.md apply to supplemental `.agents/rules` and general skills: an approved Task needs no second approval just because it spans multiple files; new unresolved decisions and material scope changes still have their decision gate. Verification Policy remains canonical in CLAUDE.md. Detailed traps are read on demand in `docs/ENGINEERING_GUARDRAILS.md`; historical “CLAUDE.md trap N” references retain their numbered meaning.
 
 ### PD-06 — Active scope and gating of features built ahead of their phase (RESOLVED 2026-09-21)
 
