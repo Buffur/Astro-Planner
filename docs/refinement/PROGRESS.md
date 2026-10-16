@@ -4,8 +4,8 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-09-30 (**S11.C2 done**: the three host blockers fixed; S11.1–S11.5 complete).
-> **Next:** S11.7 (the readiness record and the final validation, a fresh session); S11.6 when the phone is connected.
+> **Last updated:** 2026-10-17 (RA.R1 report preserved in `research/RA_R1_PHASE_A_ASSESSMENT.md`; TD-104 recorded; RA.R2 plan approved by the owner (G0) and running; no application changes).
+> **Next:** RA.R2 (in progress) stops at the decision package (G2); Stage 11 readiness and phone evidence remain outstanding.
 
 ## Current state
 
@@ -13,11 +13,17 @@
 | --- | --- |
 | Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
 | Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
-| Current Task | None in progress |
-| Next Task | **S11.7** — the readiness record and the final validation (fresh session); S11.6 when the owner connects the phone |
-| Code baseline | **S11.C2** (its commit). Not pushed: the owner asked for commits only (2026-09-29) |
+| Current Task | **RA.R2** — research and options, run as one approved group (R2a–R2d in parallel, then R2e; [plan](prompts/RA_R2_RESEARCH_PLAN.md), approved 2026-10-17, G0). Stops at the decision package |
+| Next Task | **RA.R2** — [Product Reassessment](prompts/PRODUCT_REASSESSMENT.md), only when requested; targeted research/options, not implementation. S11.6/S11.7 remain open. |
+| Code baseline | **S11.C2** (its commit). Pushed by the owner: `origin/main` = `b1df679` (PR #1 `develop` → `main`, merged 2026-10-16); the remote is public. **Remote CI has never passed:** one test fails on Linux (TD-104, open) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
+
+**Documentation correction, 2026-10-17:** CLAUDE.md condensed with V1–V8 retained; numbered traps moved to `docs/ENGINEERING_GUARDRAILS.md`; old full text archived. Duplicate approval in `.agents/rules/00-project-governance.md` corrected; optional skills and animation scope clarified. Product Reassessment scope added without approving UI implementation or closing Stage 11. Application checks were not run (V1 documentation class); reference/consistency checks and `git diff --check` passed; V1–V8 text preserved except for the relocated guardrails reference, all 22 trap numbers and nine review coverage groups retained. The pre-existing modified macOS plugin registrant is outside this Task; no new claim of full-gate evidence reuse is made for the working tree.
+
+**RA.R1 complete, 2026-10-17:** read-only assessment of code at HEAD `b1df679` plus the existing working-tree documentation amendment; all nine review areas covered (RA-A through RA-I); the report is preserved in [`research/RA_R1_PHASE_A_ASSESSMENT.md`](research/RA_R1_PHASE_A_ASSESSMENT.md) (it replaces the earlier chat-only report). Six original reference images were recovered and viewed; the Moon concept project (Moonlit) was inspected too (its own code carries no licence: concept only); the prior generated prompt remains unavailable. Code findings: Welcome is pushed after the first Tonight frame (RA-B01; duration/device reproduction unverified); Home keeps an action-only toolbar (RA-D01); Open planner and New plan have distinct lifecycle effects (RA-D06). ADR-020 explains absent WB/focus, camera-class fields, previous-light proposals and calibration copying (RA-F05–RA-F10); weather already has wind/humidity in detail, but Home summarizes cloud/age (RA-E02). Core capture outputs and record-management surfaces exist; usability is not proven by source/tests. No app/test changes or runs, no fresh gate/phone/CI PASS, no new product decisions. Remaining research: minimum onboarding; Home priorities; compact night/weather presentation; camera parameter intent and proposal clarity; naming/logo/assets; record/settings discoverability. Reuse RG-10/RG-11 and S9.3 before new research. The old "device or emulator" owner-action wording below is historical drift: emulator evidence does not replace the outstanding physical-phone/human checks. Next RA.R2 only on request; do not start implementation. Documentation whitespace check passed; source/test evidence was inspected, not executed.
+
+**RA.R1 follow-up, 2026-10-17 (documentation only):** K2/K3 corrected here: the code is pushed (`origin/main` = `b1df679`) and the repository is public; every CI run failed (`836bbdf`: 1,730 passed, 1 failed; `718c19b` and `b1df679`: 1,840 passed, 1 failed; 2 skipped), recorded as **TD-104** (`TECH_DEBT.md`; the failing test needs the signed-in log; the local gate at S11.C2 stays valid evidence on its inputs, V3). The owner approved the RA.R2 plan (G0).
 
 **S11.C2 done, 2026-09-30** (corrective; S11H-01 to S11H-03; V5):
 - The rig editor's derived sensor size uses `AppPalette.textSecondary` and its note `textTertiary` (both
@@ -749,7 +755,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
 | RD-15 | A local diagnostics export for the beta | 11 | **Decided** 2026-09-30 (Stage 11 planning, delegated; E.1, D11-4): not for the beta; revisit if triage lacks information |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
-| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | Open; **push deferred by the owner** when S1.14 ran (2026-09-25; the remote is public) |
+| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | **Pushed by the owner** (observed 2026-10-17: `origin/main` = `b1df679`, PR #1 merged 2026-10-16). Three CI runs observed, **all failed** (TD-104). Open until a run passes |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
 `PRODUCT_DIRECTION.md` §2. Modes stay open as RG-06.
@@ -761,7 +767,7 @@ These block a release, not refinement.
 - TASK 16.2: create the upload key and `android/key.properties`; install the SDK cmdline-tools;
   build and check a signed bundle (`docs/RELEASE.md`).
 - TASK 16.3: publish the privacy policy with the contact email filled in; confirm the URL is
-  live; make the repository public; fill in the Data Safety form (`docs/COMPLIANCE.md`).
+  live; ~~make the repository public~~ (public, observed 2026-10-17); fill in the Data Safety form (`docs/COMPLIANCE.md`).
 - OD-07: a formal trademark search before the first upload; RD-01.
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
@@ -788,8 +794,7 @@ These block a release, not refinement.
   - S4V-02's script correction: **done 2026-09-28** as S6.E's first step.
 - **Stage 5 (closed 2026-09-27):** nothing blocks.
   - Carried: TD-073 (two messages with an action persist: the site prompt's in S6.13, the Start
-    message's in P8.4); UX-39's field-mode card borders (Stage 11 darkness test); `CLAUDE.md`'s
-    stale test count.
+    message's in P8.4); UX-39's field-mode card borders (Stage 11 darkness test); the stale CLAUDE.md test count (removed from permanent instructions on 2026-10-17).
   - Optional: the owner's review of the S5.9 images.
   - The adoption plan (`DESIGN_SYSTEM.md` §9) feeds Stages 6, 8 and 9.
 - **Stage 6 (closed 2026-09-28):** nothing blocks. S6V-01 / TD-082 was resolved by S6.V1 and its
@@ -818,12 +823,9 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S11.7** (a fresh session) against [`STAGE_11_MATRIX.md`](STAGE_11_MATRIX.md) and the evidence files
-   (host, emulator, providers and compliance); S11.1–S11.5 and S11.C1–S11.C2 are done; S11.6 when the owner connects the phone; S11.7 last (a fresh session).
-2. **Owner actions** that unblock readiness (none blocks S11.1–S11.5; S11P-03, Google Play services
-   location in a GPL-3.0 app, also waits for the owner): connect the phone for S11.6;
-   the upload key and a signed bundle (16.2); the policy URL with a contact (16.3); RD-01 and TD-088;
-   the go/no-go. The deferred gates S9.10 (logo) and S9.11 (RG-12) stay available.
+1. **RA.R2**, when requested, using [PRODUCT_REASSESSMENT.md](prompts/PRODUCT_REASSESSMENT.md) and the RA.R1 handoff above: research only decision-relevant unknowns and present options. Reuse existing research; do not repeat the repository assessment or start implementation/RA.D automatically.
+2. **Stage 11 remains open:** S11.6 phone checks when connected; S11.7 readiness against the existing matrix and named baseline when requested. RA.P must carry all unresolved release checks and decide their scheduling after the product decisions; no previous PASS is reopened without V3/V6 grounds.
+3. **Owner actions** remain: phone, signing/upload key, published privacy policy/contact, RD-01/TD-088, S11P-03, go/no-go and deferred identity/logo/provider gates. The reassessment does not silently resolve any of them.
 
 **Carried:**
 - Stage 10's phone runs (S10V-04): `integration_test/perf_scenarios_test.dart` on a physical
@@ -839,7 +841,7 @@ These block a release, not refinement.
 - TD-063: resolved (S8.4);
 - TD-057 and TD-058: resolved (S6.4, S6.2);
 - TD-074: allocated to Stage 9's planning (not data entry); the owner may pull it into Stage 7;
-- RD-17 (the push is deferred);
+- RD-17 (pushed; CI red, TD-104);
 - the S1.5 and S1.11 device checks (Stage 11);
 - S2V-06's device checks (a non-seekable provider; a real backup's preview cancel): the next
   time the phone is connected, or Stage 11;
