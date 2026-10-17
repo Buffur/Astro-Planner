@@ -1,15 +1,16 @@
 ---
-title: Astro Planner — Privacy policy
+title: Culmina — Privacy policy
 ---
 
-# Astro Planner — Privacy policy
+# Culmina — Privacy policy
 
-*Effective 24 September 2026; updated 26 September 2026 ("Add from a photo") and 29 September
-2026 (backups include settings). Applies to
-Astro Planner for Android
+*Effective 24 September 2026; updated 26 September 2026 ("Add from a photo"), 29 September
+2026 (backups include settings) and 17 October 2026 (the new name and address, the position sent
+for the weather, the multi-night forecast, links you open). Applies to Culmina for Android
+(`io.github.buffur.culmina`), and to its earlier builds named Astro Planner
 (`io.github.chacha12.astroplanner`).*
 
-Astro Planner is a free, open-source planner and logbook for astrophotography. It has
+Culmina is a free, open-source planner and logbook for astrophotography. It has
 **no account, no advertising, no analytics and no tracking**, and it contains no
 third-party advertising or analytics code.
 
@@ -47,13 +48,15 @@ any internet request does.
 
 | Service | When | What it receives |
 | --- | --- | --- |
-| **Open-Meteo** (open-meteo.com), weather forecasts | when a site is set and the forecast for a night is loaded or refreshed | the site's latitude and longitude, and the night's hours. Open-Meteo states that it keeps IP addresses in server logs for 90 days, not linked to identities ([terms](https://open-meteo.com/en/terms)). |
+| **Open-Meteo** (open-meteo.com), weather forecasts | when a forecast is loaded or refreshed: for a night you plan, or for the overview of the coming nights (up to 16 days ahead) | the latitude and longitude of the saved site, or of a position you chose but did not save (a point picked on the map or your current position), as precise as the app holds it; and the hours requested. Open-Meteo states that it keeps IP addresses in server logs for 90 days, not linked to identities ([terms](https://open-meteo.com/en/terms)). |
 | **OpenStreetMap tile servers** (tile.openstreetmap.org), map images | while you look at the map to pick a position | the map tiles for the area on screen ([policy](https://operations.osmfoundation.org/policies/tiles/), [privacy](https://osmfoundation.org/wiki/Privacy_Policy)) |
 | **OpenStreetMap Nominatim** (nominatim.openstreetmap.org), place names | **only if you switch on "Look up place names" in Settings** (off by default) | the chosen position, rounded to about 1 km ([policy](https://operations.osmfoundation.org/policies/nominatim/), [privacy](https://osmfoundation.org/wiki/Privacy_Policy)) |
 
 Links you open yourself (the light-pollution map at lightpollutionmap.app, which receives the
-site's or the typed coordinates in the link; the data sources' pages; this policy) open in your
-browser; the site you visit then receives what your browser sends.
+site's or the typed coordinates in the link; the Clear Outside forecast at clearoutside.com, for
+seeing and transparency, which the app does not forecast, and which receives the coordinates the
+link carries; the data sources' pages; this policy)
+open in your browser; the site you visit then receives what your browser sends.
 
 Requests identify the app by name and version (its "user agent"), as these services ask.
 They carry no account, advertising or device identifier.
@@ -70,4 +73,4 @@ A change to this policy is published on this page with a new effective date.
 
 Questions about this policy: **&lt;CONTACT EMAIL&gt;**
 
-Source code (GPL-3.0): <https://github.com/chacha12/astro-planner>
+Source code (GPL-3.0): <https://github.com/Buffur/Culmina>
