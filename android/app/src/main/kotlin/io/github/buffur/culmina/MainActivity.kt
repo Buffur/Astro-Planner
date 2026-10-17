@@ -1,4 +1,4 @@
-package io.github.chacha12.astroplanner
+package io.github.buffur.culmina
 
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity

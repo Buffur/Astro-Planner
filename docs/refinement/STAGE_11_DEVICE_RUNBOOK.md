@@ -12,10 +12,11 @@
   `android/app/build.gradle.kts`, add `applicationIdSuffix = ".s2check"` to the debug build type
   (never committed; reverted after the run). The test app then installs beside the owner's app.
 - Connect the phone over USB with USB debugging on; `adb devices` must list it.
+- **Identity (S13.2, 2026-10-17):** the app is now Culmina, `io.github.buffur.culmina`; its test package is `io.github.buffur.culmina.s2check`. The owner's Astro Planner app (`io.github.chacha12.astroplanner`) is never touched; the owner moves the data by backup and restore (`docs/RELEASE.md`, "Moving from Astro Planner").
 - **Install and run:** `flutter run --debug -d <id>` for walkthroughs, `flutter drive --profile
   --no-dds -d <id> --driver=test_driver/perf_driver.dart --target=integration_test/<file>` for the
   suites (on the development machine add `--android-project-arg=kotlin.incremental=false`).
-- **Afterwards:** `adb uninstall io.github.chacha12.astroplanner.s2check`; revert the local build change;
+- **Afterwards:** `adb uninstall io.github.buffur.culmina.s2check` (before S13.2: `io.github.chacha12.astroplanner.s2check`); revert the local build change;
   delete anything copied to the phone. No owner file is ever uploaded, copied into the repository, or
   quoted.
 - **Record** in `TEST_PLAN.md` → "Device runs": date, phone (model, Android version), build (commit,

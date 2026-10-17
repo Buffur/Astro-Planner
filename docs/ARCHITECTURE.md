@@ -895,7 +895,7 @@ opening it if the traversal exceeds the remainder. Budget refusal maps to
 budget; another file-open starts a new read operation. No cache or URI persistence.
 The production helper is covered by host JVM tests in addition to Dart channel tests.
 
-**The app's own platform channel (S2.4, ADR-017 §6):** `io.github.chacha12.astroplanner/metadata_document` (`MetadataDocumentChannel.kt`, `android_capture_file_access.dart`). Picking goes through the system document picker, and bytes are read in place; no network, no copy, no persistable grant. Android only; desktop and host have no implementation (S2.5 wires the platform choice).
+**The app's own platform channel (S2.4, ADR-017 §6):** `io.github.buffur.culmina/metadata_document` (renamed in S13.2 from `io.github.chacha12.astroplanner/metadata_document`) (`MetadataDocumentChannel.kt`, `android_capture_file_access.dart`). Picking goes through the system document picker, and bytes are read in place; no network, no copy, no persistable grant. Android only; desktop and host have no implementation (S2.5 wires the platform choice).
 
 | Service | Purpose | Where | Key | Policy / risk notes | Failure behavior |
 | --- | --- | --- | --- | --- | --- |

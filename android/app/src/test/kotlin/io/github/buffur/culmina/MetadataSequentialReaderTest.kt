@@ -1,4 +1,4 @@
-package io.github.chacha12.astroplanner
+package io.github.buffur.culmina
 
 import java.io.ByteArrayInputStream
 import java.io.IOException

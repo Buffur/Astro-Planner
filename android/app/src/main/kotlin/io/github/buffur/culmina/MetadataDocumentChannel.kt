@@ -1,4 +1,4 @@
-package io.github.chacha12.astroplanner
+package io.github.buffur.culmina
 
 import android.app.Activity
 import android.content.Intent
@@ -29,7 +29,7 @@ class MetadataDocumentChannel(
 ) : MethodChannel.MethodCallHandler {
 
     companion object {
-        const val NAME = "io.github.chacha12.astroplanner/metadata_document"
+        const val NAME = "io.github.buffur.culmina/metadata_document"
         private const val PICK_REQUEST = 0x4D44 // "MD"
     }
 

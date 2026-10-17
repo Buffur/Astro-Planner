@@ -1,6 +1,6 @@
-# Astro Planner (AstroPlan)
+# Culmina (AstroPlan)
 
-Astro Planner is an Android-focused Flutter/Dart application for planning
+Culmina (earlier builds: Astro Planner) is an Android-focused Flutter/Dart application for planning
 astrophotography sessions. It helps you choose a target, night, site and rig,
 build a realistic capture plan, and understand whether it fits the available
 imaging opportunity.

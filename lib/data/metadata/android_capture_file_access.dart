@@ -12,8 +12,7 @@ class AndroidCaptureFileAccess implements CaptureFileAccess {
   AndroidCaptureFileAccess({MethodChannel? channel})
     : _channel = channel ?? const MethodChannel(channelName);
 
-  static const channelName =
-      'io.github.chacha12.astroplanner/metadata_document';
+  static const channelName = 'io.github.buffur.culmina/metadata_document';
 
   final MethodChannel _channel;
 

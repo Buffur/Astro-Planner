@@ -45,7 +45,7 @@ class BackupSection extends StatelessWidget {
       context,
       title: 'Restore this backup?',
       message:
-          'Made ${NightTimeFormatter.deviceZoneCaption(p.createdAtUtc)} '
+          'Made ${NightTimeFormatter.deviceDateTime(context, p.createdAtUtc)} '
           'by ${AppIdentity.appName} ${p.appVersion}, with ${p.sessionCount} '
           'sessions.\n\nAll current sessions, sites, rigs, targets and '
           'settings are replaced when ${AppIdentity.appName} next starts. '

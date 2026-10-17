@@ -12,14 +12,14 @@ const _res = 'android/app/src/main/res';
 String _read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('the owner-decided name and id (DECISIONS OD-07)', () {
-    expect(AppIdentity.appName, 'Astro Planner');
-    expect(AppIdentity.packageName, 'io.github.chacha12.astroplanner');
+  test('the owner-decided name and id (RA.D ID-1 to ID-4; S13.2)', () {
+    expect(AppIdentity.appName, 'Culmina');
+    expect(AppIdentity.packageName, 'io.github.buffur.culmina');
     expect(
       AppIdentity.userAgent,
-      'Astro Planner/${AppIdentity.version} '
-      '(+https://chacha12.github.io/astro-planner/; '
-      'io.github.chacha12.astroplanner)',
+      'Culmina/${AppIdentity.version} '
+      '(+https://buffur.github.io/Culmina/; '
+      'io.github.buffur.culmina)',
     );
   });
 
@@ -73,5 +73,47 @@ void main() {
       );
     }
     expect(File('assets/branding/icon_512.png').lengthSync(), greaterThan(0));
+  });
+  // S13.2 (RA_D_IDENTITY_TRANSITION.md §3, criterion 2): no trace of the
+  // earlier id in code, platform files, tests or tools. The needles are
+  // split so this file does not match itself.
+  test('the earlier id is gone everywhere', () {
+    const oldOwner =
+        'chacha'
+        '12';
+    const oldPackage =
+        'astro'
+        'planner';
+    final skip = RegExp(r'[\\/](build|\.gradle|\.dart_tool)[\\/]');
+    final hits = <String>[];
+    for (final dir in ['lib', 'android', 'test', 'integration_test', 'tool']) {
+      for (final f in Directory(dir).listSync(recursive: true)) {
+        if (f is! File || skip.hasMatch(f.path)) continue;
+        if (!RegExp(r'\.(dart|kt|kts|xml|py|gradle|properties)$')
+            .hasMatch(f.path)) {
+          continue;
+        }
+        final text = f.readAsStringSync().toLowerCase();
+        if (text.contains(oldOwner) || text.contains(oldPackage)) {
+          hits.add(f.path);
+        }
+      }
+    }
+    expect(hits, isEmpty);
+  });
+
+  test('the metadata channel has one name on both sides (S13.2)', () {
+    const channel = 'io.github.buffur.culmina/metadata_document';
+    expect(
+      _read('lib/data/metadata/android_capture_file_access.dart'),
+      contains("'$channel'"),
+    );
+    expect(
+      _read(
+        'android/app/src/main/kotlin/io/github/buffur/culmina/'
+        'MetadataDocumentChannel.kt',
+      ),
+      contains('"$channel"'),
+    );
   });
 }

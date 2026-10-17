@@ -1032,7 +1032,7 @@ suite as it is.)*
   install. `flutter build apk --debug`, install, and check: the launcher shows "Astro
   Planner" with the new icon (and a themed icon on Android 13+ with themed icons on); the
   splash is night navy with the icon on Android 12+ and before; Settings → Apps lists
-  `io.github.chacha12.astroplanner`.
+  `io.github.chacha12.astroplanner`. *(Since S13.2: "Culmina", `io.github.buffur.culmina`.)*
 
 **Added by TASK 16.2** (release build and signing), 8 tests (889):
 - **`tool/release_config_test.dart` (8):** the bundle check's ELF reader on synthetic

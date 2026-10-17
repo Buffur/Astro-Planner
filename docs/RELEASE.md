@@ -7,6 +7,20 @@
 > the owner's: they are created and kept by the owner, never committed, and never given
 > to an agent (MASTER_ROADMAP 16.2).
 
+## Moving from Astro Planner (the earlier id)
+
+Culmina has a new application id, so Android installs it **beside** Astro Planner with an empty
+database; Android's Auto Backup is per app and carries nothing over. To move your data:
+
+1. In Astro Planner: Settings → Back up now; keep the `.astroplan` file.
+2. Install Culmina.
+3. In Culmina: Settings → Restore, pick that file, confirm (the confirmation shows when the backup
+   was made), and reopen the app.
+4. Check your sessions, sites, rigs and targets, then uninstall Astro Planner yourself.
+
+A backup from an older version restores into a newer one; a backup from a newer version is refused
+with an explanation. Use these steps in the release notes of the first Culmina release.
+
 ## What is set up in the repository
 
 - `android/app/build.gradle.kts` signs release builds with the upload key described by
@@ -14,7 +28,9 @@
   **debug** key and Gradle warns — Google Play rejects a debug-signed bundle, so such a
   build cannot be uploaded by mistake.
 - `key.properties`, `*.jks` and `*.keystore` are gitignored (root and `android/`).
-- Application id `io.github.chacha12.astroplanner`, label "Astro Planner" (OD-07).
+- Application id `io.github.buffur.culmina`, label "Culmina" (RA.D ID-1 to ID-3; S13.2). Builds
+  before S13.2 used `io.github.chacha12.astroplanner` ("Astro Planner"); see "Moving from Astro
+  Planner" below.
 - `minSdk` 24 and `targetSdk` 36 come from Flutter 3.47.4's defaults. Google Play requires
   target API 36 for new apps and updates from 31 August 2026.
 - R8 (code and resource shrinking) is on for release builds, as the Flutter Gradle plugin

@@ -312,6 +312,28 @@ void main() {
       expect(problem(archive(12, 12)), isNull);
     });
 
+    // S13.2 (RA_D_IDENTITY_TRANSITION.md §3, criteria 4 and 6): the archive
+    // names no application id, so a backup from the earlier id restores into
+    // Culmina; only the format and the schema are checked.
+    test('a backup carries no application id, so it restores across ids', () {
+      final bytes = archive(12, 12);
+      final header = jsonDecode(
+        utf8.decode(
+          ZipDecoder().decodeBytes(bytes).files.first.content as List<int>,
+        ),
+      ) as Map<String, Object?>;
+      expect(header.keys.toSet(), {
+        'format',
+        'format_version',
+        'schema_version',
+        'app_version',
+        'created_at_utc_ms',
+        'session_count',
+      });
+      expect(header.values, isNot(contains(AppIdentity.packageName)));
+      expect(problem(bytes), isNull);
+    });
+
     test('a header that disagrees with the database is refused', () {
       expect(problem(archive(17, 16)), BackupProblem.notABackup);
     });

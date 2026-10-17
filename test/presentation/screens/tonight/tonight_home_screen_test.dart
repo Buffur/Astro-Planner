@@ -229,7 +229,7 @@ void main() {
     testWidgets('the first-run page', (tester) async {
       await big(tester);
       await start(tester, site: false, firstRunDone: false);
-      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
+      expect(find.text('Welcome to Culmina'), findsOneWidget);
       await tester.drag(find.byType(ListView).last, const Offset(0, -3000));
       await settle(tester);
       expect(tester.takeException(), isNull);
@@ -515,12 +515,12 @@ void main() {
       tester,
     ) async {
       await start(tester, site: false, firstRunDone: false);
-      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
+      expect(find.text('Welcome to Culmina'), findsOneWidget);
       expect(find.textContaining('asks for location permission'), findsOne);
 
       await tester.tap(find.byKey(const Key('welcome.skip')));
       await settle(tester);
-      expect(find.text('Welcome to Astro Planner'), findsNothing);
+      expect(find.text('Welcome to Culmina'), findsNothing);
       expect(find.byKey(const Key('tonight.noSite')), findsOneWidget);
       expect(firstRun.done, isTrue);
     });
@@ -534,7 +534,7 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('welcome.done')));
       await settle(tester);
-      expect(find.text('Welcome to Astro Planner'), findsNothing);
+      expect(find.text('Welcome to Culmina'), findsNothing);
       expect(firstRun.done, isTrue);
     });
 
@@ -547,7 +547,7 @@ void main() {
       expect(find.text('Choose a rig'), findsWidgets);
       await tester.pageBack();
       await settle(tester);
-      expect(find.text('Welcome to Astro Planner'), findsOneWidget);
+      expect(find.text('Welcome to Culmina'), findsOneWidget);
     });
 
     // S6.8 (RD-04, UX-24): no step reads as done that the user did not do;
@@ -583,12 +583,12 @@ void main() {
 
     testWidgets('not offered when a site is already set', (tester) async {
       await start(tester, firstRunDone: false);
-      expect(find.text('Welcome to Astro Planner'), findsNothing);
+      expect(find.text('Welcome to Culmina'), findsNothing);
     });
 
     testWidgets('not offered again once done', (tester) async {
       await start(tester, site: false);
-      expect(find.text('Welcome to Astro Planner'), findsNothing);
+      expect(find.text('Welcome to Culmina'), findsNothing);
     });
   });
 }

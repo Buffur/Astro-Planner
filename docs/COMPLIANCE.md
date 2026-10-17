@@ -32,7 +32,7 @@
   is CC BY-SA 4.0, which Creative Commons declared one-way compatible with GPL-3.0; its
   notice ships in `assets/catalog/OPENNGC_NOTICE.txt` and on the About screen.
 - **Privacy policy on GitHub Pages:** `docs/privacy/index.md`, to be served at
-  <https://chacha12.github.io/astro-planner/privacy/> (the app links there).
+  <https://buffur.github.io/Culmina/privacy/> (the app links there; live since 2026-10-17, S12.3).
 - **Place-name lookups are opt-in** (Settings → "Look up place names", off by default).
 
 ## Third-party terms, checked 2026-09-24, re-checked 2026-09-30
@@ -40,7 +40,7 @@
 | Service | Terms (checked 2026-09-24; re-checked 2026-09-30, S11.4) | How the app complies |
 | --- | --- | --- |
 | **Open-Meteo** forecast API | Free for non-commercial use: apps "that do not have subscriptions or advertising"; data CC BY 4.0 (attribution); limits 600/min, 5 000/h, 10 000/day, 300 000/month; IP addresses logged 90 days. <https://open-meteo.com/en/terms> | Free, no ads (owner decision). One request per site and night, cached and reused while under 3 h old (ADR-012); asked again when the cached forecast is older, when the user taps Refresh, or when the app returns to the foreground with an outdated forecast (12 h is when it is shown as stale). Attribution "Weather data by Open-Meteo.com (CC BY 4.0)" on the weather card and the About screen. Requests carry the app's user agent (since S1.1, 2026-09-25). |
-| **OpenStreetMap tiles** | Attribution on the map; a distinct, stable user agent naming the app, with a contact where possible; honour caching headers; no bulk or offline download; "best-effort", access can be withdrawn without notice. <https://operations.osmfoundation.org/policies/tiles/> | "© OpenStreetMap contributors" on the map (linking to the copyright page) and on the About screen; user agent `Astro Planner/<version> (+https://chacha12.github.io/astro-planner/; io.github.chacha12.astroplanner)`; tiles only for the visible map; no offline download. **Risk:** heavy use or a policy change can end access — the map picker is optional (typed coordinates always work). |
+| **OpenStreetMap tiles** | Attribution on the map; a distinct, stable user agent naming the app, with a contact where possible; honour caching headers; no bulk or offline download; "best-effort", access can be withdrawn without notice. <https://operations.osmfoundation.org/policies/tiles/> | "© OpenStreetMap contributors" on the map (linking to the copyright page) and on the About screen; user agent `Culmina/<version> (+https://buffur.github.io/Culmina/; io.github.buffur.culmina)` (S13.2); tiles only for the visible map; no offline download. **Risk:** heavy use or a policy change can end access — the map picker is optional (typed coordinates always work). |
 | **Nominatim** reverse geocoding | Max 1 request/s; identifying user agent; caching; attribution; no autocomplete, no systematic or periodic queries; apps must be able to switch service without a software update; heavy/commercial use not permitted. <https://operations.osmfoundation.org/policies/nominatim/> | Opt-in, off by default; ≤ 1 request/s; results cached per ~1 km; only on a user-chosen position; attribution with every place name. **Remaining gap:** a user who switches it on still uses the built-in endpoint — there is no remotely switchable endpoint; mitigated by the opt-in and by failures showing no name (the app never depends on it). Recorded in TD-031. |
 | **OpenNGC** catalog | CC BY-SA 4.0 (attribution, share-alike). | Full notice bundled and shown (TASK 8.2). |
 | **lightpollutionmap.app** (since S7.5, RG-09 = M2; was lightpollutionmap.info) | Opened in the browser only, through its documented coordinate link (`?lat=…&lng=…&zoom=…`, its `llms.txt`); the app fetches nothing from it. | The link carries only the coordinates, when the user taps it; named on the About screen and in the privacy policy. |
@@ -93,7 +93,7 @@ console's current help texts). Conservative where Play's definitions are unclear
 - **Can users request deletion?** The developer holds no user data; everything is on the
   device and is deleted by clearing the app's data or uninstalling.
 - **Account creation:** none. **Ads:** none. **Target audience:** not children.
-- **Privacy policy URL:** <https://chacha12.github.io/astro-planner/privacy/>.
+- **Privacy policy URL:** <https://buffur.github.io/Culmina/privacy/>.
 
 ## Permissions and their rationale
 
@@ -111,8 +111,8 @@ background location, no storage, camera, contacts or notification permission.
 
 1. Publish `docs/privacy/index.md` at the policy URL (GitHub Pages from the repository's
    `docs/` folder), with **`<CONTACT EMAIL>` replaced** by the contact address you want
-   public; confirm the URL opens.
-2. Make the source repository public at <https://github.com/chacha12/astro-planner> (the
+   public; confirm the URL opens. *(Done 2026-10-17, S12.3.)*
+2. Make the source repository public at <https://github.com/Buffur/Culmina> (done; the
    About screen links it; GPL-3.0 asks that the source be offered).
 3. Fill in the Data Safety form from the draft above and the store listing's contact
    details (the OSM policy asks that the contact be published there too).

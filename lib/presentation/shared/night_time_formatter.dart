@@ -109,6 +109,19 @@ class NightTimeFormatter {
         '${_utcOffset(ctx.offsetAt(utc))}';
   }
 
+  /// A recorded moment on this device, with its date, clock time and zone,
+  /// for example "Dec 16, 2026, 08:00 (device zone, UTC+00:00)" (S13.2,
+  /// TD-093: the restore confirmation names when the backup was made).
+  static String deviceDateTime(BuildContext context, DateTime utcInstant) {
+    final local = utcInstant.toLocal();
+    final date = recordedDate(CalendarDate.fromDateTimeFields(local));
+    final time = TimeOfDay(
+      hour: local.hour,
+      minute: local.minute,
+    ).format(context);
+    return '$date, $time (${deviceZoneCaption(utcInstant)})';
+  }
+
   /// The device zone and its UTC offset at [utcInstant], for example
   /// "device zone, UTC−07:00" (used when a site has no zone).
   static String deviceZoneCaption(DateTime utcInstant) =>

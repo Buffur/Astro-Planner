@@ -106,6 +106,29 @@ void main() {
     await tester.tap(find.byKey(const Key('backup.restore')));
     await tester.pumpAndSettle();
     expect(find.textContaining('with 12 sessions'), findsOneWidget);
+    // S13.2, TD-093: the confirmation names the backup's date and time.
+    final made = DateTime.utc(2026, 12, 16, 8).toLocal();
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    expect(
+      find.textContaining(
+        'Made ${months[made.month - 1]} ${made.day}, ${made.year}, ',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('(device zone, UTC'), findsOneWidget);
     expect(backup.staged, isFalse, reason: 'nothing before confirmation');
     await tester.tap(find.byKey(const Key('confirm.action')) /* S9.4 */);
     await tester.pumpAndSettle();
@@ -139,10 +162,7 @@ void main() {
     backup.refuse = BackupProblem.newerSchema;
     await tester.tap(find.byKey(const Key('backup.restore')));
     await tester.pumpAndSettle();
-    expect(
-      find.textContaining('newer version of Astro Planner'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('newer version of Culmina'), findsOneWidget);
     expect(backup.staged, isFalse);
   });
 }

@@ -19,7 +19,7 @@ val keystoreProperties = Properties().apply {
 val hasUploadKey = keystorePropertiesFile.exists()
 
 android {
-    namespace = "io.github.chacha12.astroplanner"
+    namespace = "io.github.buffur.culmina"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,8 +29,8 @@ android {
     }
 
     defaultConfig {
-        // Owner decision OD-07 (TASK 16.1); permanent once published.
-        applicationId = "io.github.chacha12.astroplanner"
+        // RA.D ID-3 (S13.2; replaces OD-07's id); permanent from the first public release.
+        applicationId = "io.github.buffur.culmina"
         // Flutter's defaults (Flutter 3.47.4: min 24, target 36). Play requires
         // target 36 for new apps and updates from 31 Aug 2026 (TASK 16.2).
         minSdk = flutter.minSdkVersion

@@ -66,7 +66,7 @@ class ShareSessionExporter implements SessionExporter {
   static String shareText(List<ExportedSession> sessions, DateTime nowUtc) =>
       '${summary(sessions)} Exported ${localStampWithOffset(nowUtc)}.';
 
-  /// "Astro Planner export: 3 sessions (M42, M31, …)".
+  /// "Culmina export: 3 sessions (M42, M31, …)".
   static String summary(List<ExportedSession> sessions) {
     final names = sessions.map((e) => e.session.record.targetName).toSet();
     final shown = names.take(3).join(', ');

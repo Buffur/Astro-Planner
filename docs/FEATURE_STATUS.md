@@ -883,7 +883,7 @@ see DATA_MODEL.md B2/B8.)
 
 ## F-50 — Platform support
 - **Status:** Partial
-- **Current implementation:** Android is configured (`io.github.chacha12.astroplanner` since TASK 16.1; corrected S1.15, it read `com.astroplan.astroplan`; location and internet permissions, Java 17); iOS, web, Windows, Linux and macOS folders are Flutter scaffolds.
+- **Current implementation:** Android is configured (`io.github.buffur.culmina` since S13.2, 2026-10-17, earlier `io.github.chacha12.astroplanner` from TASK 16.1; corrected S1.15, it read `com.astroplan.astroplan`; location and internet permissions, Java 17); iOS, web, Windows, Linux and macOS folders are Flutter scaffolds.
 - **Relevant files:** `android/`, `ios/`, `pubspec.yaml`.
 - **Known issues:** *(updated TASK 16.2, 2026-09-24: a debug APK and a release bundle build on the development machine; the release build is signed with the owner's upload key from `android/key.properties` when present — not created yet — and the app has not been installed or run on an Android device.)* no Android build or device run was performed in this audit (Unknown); release signing uses the debug key; iOS `Info.plist` lacks location and photo usage strings; `dart:io` file access makes the web target unsupported; `sdk: ^3.13.3` is a very tight Dart constraint (TD-031).
 - **Dependencies:** —
