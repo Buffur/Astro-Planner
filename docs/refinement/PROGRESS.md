@@ -4,17 +4,17 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-10-17 (RA.R2 complete: research R2a–R2d and the R2e decision package; no application changes, no decisions).
-> **Next:** RA.D — the owner's answers on [RA_D_DECISION_SHEET.md](research/RA_D_DECISION_SHEET.md) (round 1 identity, round 2 product); Stage 11 readiness and phone evidence remain outstanding.
+> **Last updated:** 2026-10-17 (G3: the Culmina release roadmap, Stages 12–17, approved; the Product Reassessment is complete; no application changes).
+> **Next:** **S12.1** (TD-104: remote CI green), only on the owner's start instruction.
 
 ## Current state
 
 | Item | State |
 | --- | --- |
-| Phase | Post-roadmap refinement, Stages 0–11 (`POST_ROADMAP_PLAN.md`) |
-| Current Stage | **Stage 11 — Full Validation & Beta Readiness: In progress** (planned 2026-09-30; S11.1–S11.7 frozen). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)). Stage 9 closed 2026-09-30 ([report](STAGE_9_VALIDATION.md); S9.10–S9.12 deferred by the owner) |
-| Current Task | **RA.P proposed** (Stages 12–17 in `POST_ROADMAP_PLAN.md` §5), awaiting G3. RA.D complete ([package](research/RA_D_ROUND2_PACKAGE.md)). **RA.D round 1 (identity) complete** (ID-1 to ID-6). **RA.R2 complete** (2026-10-17): [R2a](research/RA_R2A_LANDSCAPE.md), [R2b](research/RA_R2B_CAPTURE_SCIENCE.md), [R2c](research/RA_R2C_NIGHT_CONDITIONS.md), [R2d](research/RA_R2D_IDENTITY.md), [R2e options](research/RA_R2E_DIRECTION_OPTIONS.md), [decision sheet](research/RA_D_DECISION_SHEET.md) |
-| Next Task | The owner's approval of the roadmap (**G3**); then **S12.1** (TD-104: remote CI green), only on the owner's start instruction. No implementation before the roadmap is approved (G3). S11.6/S11.7 remain open. |
+| Phase | Post-roadmap refinement: Stages 0–11 done or closed; **Culmina release roadmap, Stages 12–17** (`POST_ROADMAP_PLAN.md` §5, approved G3 2026-10-17) |
+| Current Stage | **Stage 12 — Release foundation: Not started** (approved G3, 2026-10-17). Stage 11 closed as superseded by Stage 17 (2026-10-17). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)) |
+| Current Task | None in progress. The Product Reassessment is complete; RA.P approved (G3). RA.D ([package](research/RA_D_ROUND2_PACKAGE.md)). **RA.D round 1 (identity) complete** (ID-1 to ID-6). **RA.R2 complete** (2026-10-17): [R2a](research/RA_R2A_LANDSCAPE.md), [R2b](research/RA_R2B_CAPTURE_SCIENCE.md), [R2c](research/RA_R2C_NIGHT_CONDITIONS.md), [R2d](research/RA_R2D_IDENTITY.md), [R2e options](research/RA_R2E_DIRECTION_OPTIONS.md), [decision sheet](research/RA_D_DECISION_SHEET.md) |
+| Next Task | **S12.1** (TD-104: remote CI green), only on the owner's start instruction; it needs the failing CI job's log or `gh` access. S12.2 (the owner's trademark search) and S12.3's text may run alongside as owner actions and documentation |
 | Code baseline | **S11.C2** (its commit). Pushed by the owner: `origin/main` = `b1df679` (PR #1 `develop` → `main`, merged 2026-10-16); the remote is public. **Remote CI has never passed:** one test fails on Linux (TD-104, open) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\tools\flutter-3.47.4`, put first on `PATH` for the gate. This machine's default Flutter 3.44.2 is below the project's SDK constraint (`^3.13.3`) |
@@ -22,6 +22,8 @@
 **Documentation correction, 2026-10-17:** CLAUDE.md condensed with V1–V8 retained; numbered traps moved to `docs/ENGINEERING_GUARDRAILS.md`; old full text archived. Duplicate approval in `.agents/rules/00-project-governance.md` corrected; optional skills and animation scope clarified. Product Reassessment scope added without approving UI implementation or closing Stage 11. Application checks were not run (V1 documentation class); reference/consistency checks and `git diff --check` passed; V1–V8 text preserved except for the relocated guardrails reference, all 22 trap numbers and nine review coverage groups retained. The pre-existing modified macOS plugin registrant is outside this Task; no new claim of full-gate evidence reuse is made for the working tree.
 
 **RA.R1 complete, 2026-10-17:** read-only assessment of code at HEAD `b1df679` plus the existing working-tree documentation amendment; all nine review areas covered (RA-A through RA-I); the report is preserved in [`research/RA_R1_PHASE_A_ASSESSMENT.md`](research/RA_R1_PHASE_A_ASSESSMENT.md) (it replaces the earlier chat-only report). Six original reference images were recovered and viewed; the Moon concept project (Moonlit) was inspected too (its own code carries no licence: concept only); the prior generated prompt remains unavailable. Code findings: Welcome is pushed after the first Tonight frame (RA-B01; duration/device reproduction unverified); Home keeps an action-only toolbar (RA-D01); Open planner and New plan have distinct lifecycle effects (RA-D06). ADR-020 explains absent WB/focus, camera-class fields, previous-light proposals and calibration copying (RA-F05–RA-F10); weather already has wind/humidity in detail, but Home summarizes cloud/age (RA-E02). Core capture outputs and record-management surfaces exist; usability is not proven by source/tests. No app/test changes or runs, no fresh gate/phone/CI PASS, no new product decisions. Remaining research: minimum onboarding; Home priorities; compact night/weather presentation; camera parameter intent and proposal clarity; naming/logo/assets; record/settings discoverability. Reuse RG-10/RG-11 and S9.3 before new research. The old "device or emulator" owner-action wording below is historical drift: emulator evidence does not replace the outstanding physical-phone/human checks. Next RA.R2 only on request; do not start implementation. Documentation whitespace check passed; source/test evidence was inspected, not executed.
+
+**G3 approved, 2026-10-17** (documentation only): the owner approved the RA.P roadmap, Stages 12–17 (`POST_ROADMAP_PLAN.md` §5; DECISIONS E.1, "RA.P — the Culmina release roadmap approved (G3)"). Stage 11 is closed as superseded by Stage 17 (S11.6 → S17.5, S11.7 → S17.7). The Product Reassessment is complete. Nothing is implemented; S12.1 waits for the owner's start instruction.
 
 **RA.D complete and RA.P proposed, 2026-10-17** (documentation only): the owner answered Q1–Q4 (scope kept, demoted; MF-c; no seeing/transparency provider, a link; the AstroBin CSV export included). RA.P adds **Stages 12–17** to `POST_ROADMAP_PLAN.md` §5 (release foundation; identity; Capture Plan completeness with ADR-021 and v26; night conditions with ADR-022; screens and flow; final validation folding in S11.6 and S11.7), each Task with dependencies, acceptance, its V1 class and stop conditions, and a traceability table for every RA.R1 finding and open TD item. **Awaiting the owner's approval (G3);** nothing is implemented. Starting Task after G3: **S12.1** (TD-104).
 
@@ -722,8 +724,13 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 8 | Sessions / Execution / Actuals / Logbook | Complete | 2026-09-29 | 2026-09-29 | **PASS** at `690b94a` (fresh-session independent validation, [report](STAGE_8_VALIDATION.md)); no blocker; S8V-01 to S8V-03 recorded as TD-085 to TD-087 (non-blocking) |
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
 | 10 | Performance & Application Size | Complete | 2026-09-30 | 2026-09-30 | **PASS** at `3cb67be` (fresh-session independent validation, [report](STAGE_10_VALIDATION.md)); no blocker; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11 |
-| 11 | Full Validation & Beta Readiness | In progress (planned; S11.1–S11.7 frozen). **RA.P proposes folding S11.6 and S11.7 into Stage 17** (effective at G3) | 2026-09-30 | — | — |
-| 12–17 | Culmina release roadmap (RA.P) | **Proposed**, awaiting G3 | — | — | — |
+| 11 | Full Validation & Beta Readiness | **Closed — superseded by Stage 17** (G3): S11.1–S11.5, S11.C1, S11.C2 done; S11.6 → S17.5, S11.7 → S17.7 | 2026-09-30 | 2026-10-17 | No readiness claimed; the final validation is S17.7 |
+| 12 | Release foundation | Not started | — | — | — |
+| 13 | Identity: Culmina | Not started | — | — | — |
+| 14 | Capture Plan completeness | Not started | — | — | — |
+| 15 | Night conditions | Not started | — | — | — |
+| 16 | Screens and flow | Not started | — | — | — |
+| 17 | Final validation and release readiness | Not started | — | — | — |
 
 ## Open research gates
 
@@ -836,7 +843,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **G3:** the owner approves (or amends) the RA.P roadmap, `POST_ROADMAP_PLAN.md` §5, "Stages 12–17". Then **S12.1** (TD-104) on the owner's start instruction; it needs the failing CI job's log or `gh` access. No implementation before G3. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
+1. **S12.1** (TD-104) on the owner's start instruction, per `POST_ROADMAP_PLAN.md` §5, "Stage 12": it needs the failing CI job's log (the owner, signed in) or `gh` access; fallback, reproduce on Linux. Then the Stage 12–17 Tasks in order, each on its own start instruction. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
 2. **Stage 11 remains open:** S11.6 phone checks when connected; S11.7 readiness against the existing matrix and named baseline when requested. RA.P must carry all unresolved release checks and decide their scheduling after the product decisions; no previous PASS is reopened without V3/V6 grounds.
 3. **Owner actions** remain: phone, signing/upload key, published privacy policy/contact, RD-01/TD-088, S11P-03, go/no-go and deferred identity/logo/provider gates. The reassessment does not silently resolve any of them.
 

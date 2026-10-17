@@ -2,7 +2,7 @@
 
 ## Active amendment — Product Reassessment (2026-10-17)
 
-> **RA.P, 2026-10-17:** the reassessment's release roadmap is §5, "Stages 12–17 — Culmina release roadmap (RA.P)", **proposed and awaiting the owner's approval (G3)**. RA.R1, RA.R2 and RA.D are complete (DECISIONS E.1).
+> **RA.P, 2026-10-17:** the reassessment's release roadmap is §5, "Stages 12–17 — Culmina release roadmap (RA.P)", **approved by the owner (G3) on 2026-10-17**. RA.R1, RA.R2 and RA.D are complete (DECISIONS E.1). Each Task starts only on the owner's start instruction.
 
 The owner requested a plan/instruction correction after the review of CLAUDE.md and the live-test brief. The next planning work is the bounded reassessment in [PRODUCT_REASSESSMENT.md](prompts/PRODUCT_REASSESSMENT.md). This amendment authorizes its planning scope, not the owner's individual redesign suggestions as implementation decisions.
 
@@ -275,12 +275,12 @@ an overlap. Research gates may run earlier than their Stage (§4).
 | 9 | Secondary UX & Product Polish | Implementation, plus licence research | RG-12, RG-13; RD-01, RD-11; the owner's logo choice | 5 (and 4 for the Library) |
 | 10 | Performance & Application Size | Measurement first, then optimisation | RD-02 (dependency) | 6–9 |
 | 11 | Full Validation & Beta Readiness | Independent validation | RD-15; owner actions | 1–10 |
-| 12 | Release foundation (RA.P; proposed) | CI fix; owner actions | S11P-03; trademark search | 11 (S11.C2) |
-| 13 | Identity: Culmina (RA.P; proposed) | Implementation; owner artwork approval | ID-1 to ID-6 | 12 |
-| 14 | Capture Plan completeness (RA.P; proposed) | ADR-021, then implementation (v26) | Round 2A | 12 (13 for device evidence) |
-| 15 | Night conditions (RA.P; proposed) | ADR-022, then implementation | Q2 (MF-c), PD-16, PD-17, Q3 | 12 |
-| 16 | Screens and flow (RA.P; proposed) | Implementation | Round 2B, Q1, Q4 | 14, 15 |
-| 17 | Final validation and release readiness (RA.P; proposed; folds in S11.6, S11.7) | Independent validation; owner release actions | Go/no-go | 12–16 |
+| 12 | Release foundation (RA.P) | CI fix; owner actions | S11P-03; trademark search | 11 (S11.C2) |
+| 13 | Identity: Culmina (RA.P) | Implementation; owner artwork approval | ID-1 to ID-6 | 12 |
+| 14 | Capture Plan completeness (RA.P) | ADR-021, then implementation (v26) | Round 2A | 12 (13 for device evidence) |
+| 15 | Night conditions (RA.P) | ADR-022, then implementation | Q2 (MF-c), PD-16, PD-17, Q3 | 12 |
+| 16 | Screens and flow (RA.P) | Implementation | Round 2B, Q1, Q4 | 14, 15 |
+| 17 | Final validation and release readiness (RA.P; folds in S11.6, S11.7) | Independent validation; owner release actions | Go/no-go | 12–16 |
 
 Current status of each Stage: `PROGRESS.md`.
 
@@ -5930,9 +5930,9 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 
 ### Stages 12–17 — Culmina release roadmap (RA.P, 2026-10-17)
 
-> **Status: PROPOSED — awaits the owner's approval (gate G3).** Nothing here authorizes
-> implementation until G3 is recorded. After G3, each Task still runs one at a time, under its own
-> start instruction (CLAUDE.md: no automatic next Task).
+> **Status: APPROVED by the owner (gate G3), 2026-10-17:** "Approve G3: the RA.P roadmap (Stages 12–17) as proposed. Do not start S12.1 until I send its start instruction."
+> Each Task runs one at a time, under its own start instruction from the owner (CLAUDE.md: no
+> automatic next Task). Approval of the roadmap is not a start instruction for any Task.
 >
 > **Sources:**
 > - the decisions in DECISIONS E.1: "RA.D — ID-1", "RA.D — round 1 identity", "RA.D — release scope
@@ -5943,8 +5943,8 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 >
 > **Stage 11:** S11.1–S11.5, S11.C1 and S11.C2 are done and their evidence stays reusable under V3.
 > The open S11.6 and S11.7 are **folded into Stage 17** (S17.5, S17.7): the redesign changes the
-> inputs of their rows, so they must run on the final build. With G3 Stage 11 closes as "superseded
-> by Stage 17"; no earlier PASS is reopened without V3/V6 grounds.
+> inputs of their rows, so they must run on the final build. **Since G3 (2026-10-17) Stage 11 is closed
+> as "superseded by Stage 17"**; no earlier PASS is reopened without V3/V6 grounds.
 
 #### Shared rules for Stages 12–17
 

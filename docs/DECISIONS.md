@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **G3, 2026-10-17:** E.1 "RA.P — the Culmina release roadmap approved (G3)": Stages 12–17 approved; Stage 11 closed as superseded by Stage 17; S12.1 waits for the owner's start instruction. Documentation only.
 > **RA.D complete, 2026-10-17:** E.1 "RA.D — Q1 to Q4": the scope kept (demoted), MF-c, no seeing/transparency provider (a link), the AstroBin CSV export included. RA.P proposed in `refinement/POST_ROADMAP_PLAN.md` (Stages 12–17), awaiting G3. Documentation only.
 > **RA.D round 2, 2026-10-17:** E.1 "RA.D — release scope principle", "RA.D round 2A — Capture Plan" (PD-05 to PD-14, PD-21, approved by the owner) and "RA.D round 2B/2C — resolved from the owner's direction" (PD-02, PD-03, PD-04, PD-16, PD-17, PD-19, PD-20); four questions open (`refinement/research/RA_D_ROUND2_PACKAGE.md` Part C). Documentation only.
 > **RA.D round 1 complete, 2026-10-17:** E.1 "RA.D — round 1 identity (ID-2 to ID-6)": Buffur identity, intended id `io.github.buffur.culmina`, intended repository `Buffur/Culmina`, logo direction A + C hybrid (artwork not approved), splash S2; RD-01 decided (B). Nothing implemented; the current identity stays until an approved Task. Documentation only.
@@ -491,6 +492,13 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### RA.P — the Culmina release roadmap approved (G3, 2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: "Approve G3: the RA.P roadmap (Stages 12–17) as proposed. Do not start S12.1 until I send its start instruction."
+- **Approved:** `refinement/POST_ROADMAP_PLAN.md` §5, "Stages 12–17 — Culmina release roadmap (RA.P)", as proposed: Stage 12 release foundation, 13 identity, 14 Capture Plan completeness, 15 night conditions, 16 screens and flow, 17 final validation and release readiness; their Tasks, dependencies, acceptance criteria, verification classes, stop conditions and traceability.
+- **Stage 11:** closed as superseded by Stage 17. S11.1–S11.5, S11.C1 and S11.C2 stay done and their evidence reusable under V3; S11.6 and S11.7 are folded into S17.5 and S17.7.
+- **Not authorized:** starting any Task. The starting Task is **S12.1** (TD-104), and it begins only on the owner's start instruction. The Product Reassessment (RA.R1, RA.R2, RA.D, RA.P) is complete.
 
 ### RA.D — Q1 to Q4 (2026-10-17)
 
