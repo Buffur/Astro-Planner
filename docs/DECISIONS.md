@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **S13.1 done, 2026-10-17:** E.1 "S13.1 — the final Culmina mark approved: R3-final" (orbit centred; the splash animation concept accepted for S13.3). Documentation only.
 > **S12.3/S12.4, 2026-10-17:** E.1 "S12.4 — Google Play services location: accept and state it" (option a, a GPL-3.0 §7 exception) and "S12.3 — the policy contact". Documentation only.
 > **Readiness corrections, 2026-10-17:** E.1 "Stages 12–17 readiness review corrections approved": C1–C6 applied to `refinement/POST_ROADMAP_PLAN.md` §5 and `refinement/PRODUCT_DIRECTION.md` §9 (Stage 17 order, the identity migration rehearsal, S14.9's dependencies, S12.4 (a), register omissions). Documentation only.
 > **Distribution, 2026-10-17:** E.1 "Distribution: GitHub Releases only": Culmina is distributed as a signed APK through GitHub Releases; Google Play and other stores are deferred; quality, privacy, licensing and device-validation requirements unchanged. Stages 12, 13 and 17 aligned. Documentation only.
@@ -501,6 +502,13 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Decided by:** the owner, in chat, 2026-10-17: option "(a) Принять и указать" ["(a) accept and state it"], from `refinement/research/S12.4_PLAY_SERVICES_LOCATION.md`.
 - **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
 - **Not chosen:** (b) the platform location manager (a dependency change).
+
+### S13.1 — the final Culmina mark approved: R3-final (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: «Утверждаю этот дизайн. Orbit centred, анимация хорошая» ["I approve this design. Orbit centred; the animation is good."]
+- **Approved artwork (S13.1 acceptance 4):** `refinement/evidence/identity/round5/R3-final-colour.svg` and `R3-final-monochrome.svg`: the C4 Orbit C mark, R3 Ice star, with the orbit centred on the 108-unit canvas (54, 54); orbit R 22 stroke 6.0 `#E6EBF7`, inner orbit 0.6 R stroke 2.4 `#7F8DC0`, ice-blue curved sparkle `#8CCBFF` on the 40° axis; background night navy `#0B1230`. **S13.1 is done.**
+- **Splash animation concept accepted for S13.3:** `round5/README.md` §2 (outer orbit 0–450 ms, inner orbit 120–520 ms, star 420–720 ms; ends on the static icon; the Flutter continuation only while loading, static under reduced motion). `R3-splash-avd-draft.xml` is a starting draft; S13.3's own acceptance (device measurement, no new package) still applies.
+- **Supersedes:** ID-5's A + C hybrid as the mark (the direction moved to C4 in this round's decisions); P9.4 satisfied (the owner chose).
 
 ### S13.1 — the owner selects R3 Ice star (2026-10-17)
 

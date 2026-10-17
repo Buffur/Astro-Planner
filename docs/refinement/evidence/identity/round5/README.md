@@ -1,5 +1,7 @@
 # S13.1 round 5 — R3 Ice star: centring correction, splash animation, assessment
 
+> **APPROVED 2026-10-17 (owner):** `R3-final` (orbit centred) is the final Culmina mark and the animation concept is accepted (DECISIONS E.1, "S13.1 — the final Culmina mark approved: R3-final").
+>
 > **Status:** 2026-10-17. The owner chose **R3 Ice star** (round 4) and noted by eye that it is not
 > centred; asked for a re-check, a splash-animation concept and a final assessment. **The corrected
 > artwork (`R3-final-*`) awaits the owner's confirmation** before DECISIONS E.1 records it as the
