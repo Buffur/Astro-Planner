@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **RA.D round 2, 2026-10-17:** E.1 "RA.D — release scope principle", "RA.D round 2A — Capture Plan" (PD-05 to PD-14, PD-21, approved by the owner) and "RA.D round 2B/2C — resolved from the owner's direction" (PD-02, PD-03, PD-04, PD-16, PD-17, PD-19, PD-20); four questions open (`refinement/research/RA_D_ROUND2_PACKAGE.md` Part C). Documentation only.
 > **RA.D round 1 complete, 2026-10-17:** E.1 "RA.D — round 1 identity (ID-2 to ID-6)": Buffur identity, intended id `io.github.buffur.culmina`, intended repository `Buffur/Culmina`, logo direction A + C hybrid (artwork not approved), splash S2; RD-01 decided (B). Nothing implemented; the current identity stays until an approved Task. Documentation only.
 > **RA.D round 1, 2026-10-17:** E.1 "RA.D — ID-1: the application name": **Culmina**, chosen by the owner, pending formal trademark clearance before store publication. A product-direction decision only; no code is renamed. Documentation only.
 
@@ -489,6 +490,41 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### RA.D — release scope principle (owner clarification, 2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17.
+- **Principle:** the reassessment produces a complete, technically grounded roadmap for a fully functional Culmina release. Scope is not minimised to shorten the path to 1.0; essential Capture Plan functionality is not deferred because it needs implementation, migrations or tests; the product does not expand into unrelated functionality. Priorities: completeness, usability, scientific correctness, maintainability.
+- **Effect:** earlier agent recommendations that deferred work for release scope are re-read under it (PD-09 and PD-11 are in the release). Approving product requirements is not approval to implement: implementation follows the RA.P roadmap (gate G3).
+
+### RA.D round 2A — Capture Plan (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17, after the round 2A package. Requirements and constraints in `refinement/research/RA_D_ROUND2_PACKAGE.md` Part A.
+- **PD-05 = O2b:** relative stacking improvement against integration time, normalised to the plan; never an absolute physical SNR. Changes CALC-42's presentation only; SI-003 holds.
+- **PD-06:** a complete storage workflow: measured file size first (any readable format; extends ADR-018 D4), a format-aware theoretical size only where the format is evidenced (file metadata, or a format the user declares and confirms), otherwise Unknown. Camera class is never evidence of format, compression or bit depth. **Supersedes** the Stage 11 row "storage, known and unknown, with no theoretical size introduced" and the theoretical-payload deferrals of PRODUCT_DIRECTION §8 and POST_ROADMAP_PLAN; SI-013 and ADR-009 §7/L6 are amended by the implementing Task's ADR (binning in storage settled there with vectors).
+- **PD-07 = C1-b + C1-d:** camera class chosen explicitly at rig creation and in onboarding; the example rig gets a class from its cited source. **Supersedes** ADR-020 §2's "the example rig stays Unknown"; "never inferred" stands.
+- **PD-08 = P2b:** visible provenance for every suggested or inherited parameter (ADR-020 §5's presentation).
+- **PD-09 = W2, in the release:** white balance is recorded to repeat capture settings, without claiming identical output. **Supersedes** ADR-020 §3 W1 and §10's rejection of W2.
+- **PD-10 = F2:** focus guidance; no numeric value or slider. Extends ADR-020 F1.
+- **PD-11:** metadata-assisted Capture Plan population in the release, reusing the existing metadata foundation (ADR-017 readers, `CaptureFileAccess`, ADR-018 provenance rules); the contract is extended (DNG BitsPerSample, Compression, AsShotNeutral; EXIF WhiteBalance, LightSource) by an ADR-017 amendment. **Supersedes** ADR-020 §5's rejection of P3.
+- **PD-12 = CAL-1:** assisted generation of calibration blocks from the light blocks with inheritance, a preview, user confirmation and ADR-020's constraints (no darks with in-camera noise reduction; no duplicates).
+- **PD-13:** the example-plan action is removed after PD-08, PD-11 and PD-12 are implemented and verified; the test fixtures stay. **Supersedes** RD-04's "Start from the example plan".
+- **PD-14:** the assumptions panel shows the effective assumptions; Settings keep every control.
+- **PD-21 = I1:** the time between frames stays global unless implementation evidence shows a need for another model.
+- **Data:** one schema migration v26 (capture-block white balance and value sources; camera-module capture format, bits per sample and compression with provenance), additive snapshot and export keys — designed and frozen in RA.P.
+
+### RA.D round 2B/2C — resolved from the owner's direction (2026-10-17)
+
+- **Basis:** the owner's live-test review (review-01.10.2026) and the release scope principle above, with RA.R2 evidence; recorded under the owner's 2026-10-17 instruction to resolve items the owner's direction already settles. Details and quotes in `refinement/research/RA_D_ROUND2_PACKAGE.md` Part B.
+- **PD-02 = O-2′:** one onboarding screen — site and camera class/rig, both optional; no target step; no Skip; a large title; the route chosen before the first frame. Supersedes TASK 12.5's first-run content.
+- **PD-03 = H-W:** Home leads with the night card, then Your plan and Open planner; no New plan on Home; site and night as a subtitle; no empty app bar. **Supersedes** ADR-019 §5's order and RG-05 T1 (plan-first).
+- **PD-04:** the planner's empty state becomes a checklist; the duplicated weather row leaves the planner (window cloud annotations stay). Amends ADR-019 §6's contents; the order stands.
+- **PD-16:** a 16-night forecast overview from one Open-Meteo request per site. **Amends** ADR-012 §4 and §6; privacy and COMPLIANCE wording change in the same Task (trap 22).
+- **PD-17:** a monthly Moon calendar and a combined night bar in Night & Moon (the Moonlit concept, not its code); its definition follows open question Q2.
+- **PD-19:** Progress by target as a Logbook segment; a visible Delete for rigs and targets; Plan this target on the row; the stored night forecast in the entry. RD-07's roles stand.
+- **PD-20:** Appearance (System, Light, Dark) and a units preference in Settings; overheads stay global.
+- **PD-22:** the order is set in RA.P and approved with it (G3).
+- **Open for the owner:** Q1 product scope (PD-01), Q2 the Moon-up definition (PD-15, SI-015), Q3 seeing and transparency (PD-18), Q4 AstroBin CSV export.
 
 ### RA.D — round 1 identity (ID-2 to ID-6) (2026-10-17)
 

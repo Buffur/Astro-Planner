@@ -1,5 +1,6 @@
 # RA.D — Owner decision sheet
 
+> Round 2 answers and open questions: [RA_D_ROUND2_PACKAGE.md](RA_D_ROUND2_PACKAGE.md) (2026-10-17).
 > Prepared 2026-10-17 from the results of RA.R2; translated into English 2026-10-17 (CLAUDE.md
 > language policy). The reasoning is in [RA_R2E_DIRECTION_OPTIONS.md](RA_R2E_DIRECTION_OPTIONS.md)
 > and the R2a–R2d reports.
@@ -26,28 +27,28 @@
 
 | ID | Question | Options | Supersedes | Source | Your answer |
 | --- | --- | --- | --- | --- | --- |
-| PD-01 | Product scope | ★ S-A demote, do not remove · S-B remove "What can I image tonight?" and the detailed weather · S-C "all in one" | PRODUCT_DIRECTION §1 (clarification) | R2a §5.1; R2e §2 | |
-| PD-02 | Onboarding | ★ O-2′ (site + camera class/rig, no target step, one button, no Skip) · O-1 (no Welcome; a site card on Home). The flash is fixed under either option | TASK 12.5 | R2a §4 (RA-B); R2e §3.1 | |
-| PD-03 | Home order | ★ H-W (the night first, then the plan, no "New plan", context as a subtitle) · H-P (the plan first, the night second) | ADR-019 §5, RG-05 T1 | R2c §6; R2e §5 | |
-| PD-04 | Planner empty state and the duplicated weather | ★ a checklist instead of the empty status; the duplicated weather row removed · as now | ADR-019 §6 (contents) | R2e §4.3 | |
-| PD-05 | SNR | ★ O2 (√N over integration time, relative) · O1 (as now) · O4 after 1.0 (a sub-exposure hint for astro cameras) · absolute SNR — not recommended | CALC-42 (presentation); SI-003 stays | R2b §2, §6 (D-SNR) | |
-| PD-06 | Storage | ★ ST3 + ST2-lite (size from any file; without one, an estimate labelled "16-bit uncompressed", no schema change) · ST3 + ST2 full (format and bit-depth fields, migration v26; R2b's recommendation) · ST3 only | The Stage 11 line "no theoretical size", SI-013 | R2b §3, §6 (D-STO) recommends ST3 + ST2; ST2-lite is R2e §4.1's lower-cost variant | |
-| PD-07 | Camera class | ★ C1-b + C1-d (ask explicitly; the example rig gets a class) · C1-c (proposed from metadata with confirmation) · as now | ADR-020 §2 | R2b §4.6 | |
-| PD-08 | Prefilled values | ★ P2b (a "from block …" marker on each field; filter default by class) · P2c · P0 (no proposals) | ADR-020 §5 (presentation) | R2b §4.5 | |
-| PD-09 | White balance | ★ W2 (a record, no calculation; v26) · W1 | ADR-020 W1 | R2b §4.2 | |
-| PD-10 | Focus | ★ F2 (a reminder) · F1 · F3 (a slider — not recommended) | ADR-020 F1 | R2b §4.3 | |
-| PD-11 | "Take from a photo" in the block | ★ after 1.0 · in 1.0 · never | ADR-020 P3 | R2b §4.4 leaves it to the owner without a recommendation; ★ from R2e §4.2 (release scope) | |
-| PD-12 | Calibration | ★ CAL-1 (one action, "Build calibration from lights") · CAL-0 | — | R2b §4.7 | |
-| PD-13 | The example plan | ★ remove the button · move it to ⋮ and fix it | RD-04 | R2e §4.2 | |
-| PD-14 | Assumptions | ★ only the enabled items · as now | — | R2e §4.2 | |
-| PD-15 | Moon: moon-free dark time | ★ MF-b (by the displayed rise and set) · MF-a (as is, with a label) · MF-c (one h₀ everywhere, high risk) | CALC-43 (a new derived quantity) | R2b §5.3 | |
-| PD-16 | Night overview (16 days, one request) | ★ yes · no | ADR-012 §4, §6; the privacy wording | R2c §7 (W1) | |
-| PD-17 | Monthly Moon calendar | ★ yes, in the details · only 7 nights | — | R2c §7 (M2) | |
-| PD-18 | Seeing and transparency | ★ not in 1.0 + a link the user opens themselves · 7Timer opt-in · nothing | ADR-012 §2/§3 (with 7Timer) | R2c §7 (W4) | |
-| PD-19 | Records | ★ Progress as a Logbook segment, a visible Delete, "Plan this target" on the row, the forecast in the entry; AstroBin CSV after 1.0 · no change | — | R2a §5.6; R2e §6 | |
-| PD-20 | Settings | ★ add Appearance (System/Light/Dark); units after 1.0; overheads stay global · no change | — | R2a §5.7; R2e §7 | |
-| PD-21 | Time between frames | ★ I1 global · I2 per rig (v26) | — | R2b §4.8 | |
-| PD-22 | Order of work to release | ★ CI → identity → redesign → v26 (if needed) → Stage 11 on the final build · another order | Input to RA.P | R2e §10 | |
+| PD-01 | Product scope | ★ S-A demote, do not remove · S-B remove "What can I image tonight?" and the detailed weather · S-C "all in one" | PRODUCT_DIRECTION §1 (clarification) | R2a §5.1; R2e §2 | **Open — Q1** |
+| PD-02 | Onboarding | ★ O-2′ (site + camera class/rig, no target step, one button, no Skip) · O-1 (no Welcome; a site card on Home). The flash is fixed under either option | TASK 12.5 | R2a §4 (RA-B); R2e §3.1 | **O-2′** — resolved from the owner's review (round 2B record) |
+| PD-03 | Home order | ★ H-W (the night first, then the plan, no "New plan", context as a subtitle) · H-P (the plan first, the night second) | ADR-019 §5, RG-05 T1 | R2c §6; R2e §5 | **H-W** — resolved from the owner's review |
+| PD-04 | Planner empty state and the duplicated weather | ★ a checklist instead of the empty status; the duplicated weather row removed · as now | ADR-019 §6 (contents) | R2e §4.3 | **Checklist; duplicated weather row removed** — resolved from the owner's review |
+| PD-05 | SNR | ★ O2 (√N over integration time, relative) · O1 (as now) · O4 after 1.0 (a sub-exposure hint for astro cameras) · absolute SNR — not recommended | CALC-42 (presentation); SI-003 stays | R2b §2, §6 (D-SNR) | **O2b** — the owner, 2026-10-17 |
+| PD-06 | Storage | ★ ST3 + ST2-lite (size from any file; without one, an estimate labelled "16-bit uncompressed", no schema change) · ST3 + ST2 full (format and bit-depth fields, migration v26; R2b's recommendation) · ST3 only | The Stage 11 line "no theoretical size", SI-013 | R2b §3, §6 (D-STO) recommends ST3 + ST2; ST2-lite is R2e §4.1's lower-cost variant | **Storage evidence chain** (measured → format-aware theoretical where evidenced → Unknown; class is never evidence) — the owner, 2026-10-17 |
+| PD-07 | Camera class | ★ C1-b + C1-d (ask explicitly; the example rig gets a class) · C1-c (proposed from metadata with confirmation) · as now | ADR-020 §2 | R2b §4.6 | **C1-b + C1-d** — the owner |
+| PD-08 | Prefilled values | ★ P2b (a "from block …" marker on each field; filter default by class) · P2c · P0 (no proposals) | ADR-020 §5 (presentation) | R2b §4.5 | **P2b** — the owner |
+| PD-09 | White balance | ★ W2 (a record, no calculation; v26) · W1 | ADR-020 W1 | R2b §4.2 | **W2, in the release** — the owner |
+| PD-10 | Focus | ★ F2 (a reminder) · F1 · F3 (a slider — not recommended) | ADR-020 F1 | R2b §4.3 | **F2** — the owner |
+| PD-11 | "Take from a photo" in the block | ★ after 1.0 · in 1.0 · never | ADR-020 P3 | R2b §4.4 leaves it to the owner without a recommendation; ★ from R2e §4.2 (release scope) | **In the release**, reusing the metadata foundation — the owner |
+| PD-12 | Calibration | ★ CAL-1 (one action, "Build calibration from lights") · CAL-0 | — | R2b §4.7 | **CAL-1** (preview and confirmation) — the owner |
+| PD-13 | The example plan | ★ remove the button · move it to ⋮ and fix it | RD-04 | R2e §4.2 | **Remove after the replacements are verified**; fixtures kept — the owner |
+| PD-14 | Assumptions | ★ only the enabled items · as now | — | R2e §4.2 | **Effective assumptions shown** — the owner |
+| PD-15 | Moon: moon-free dark time | ★ MF-b (by the displayed rise and set) · MF-a (as is, with a label) · MF-c (one h₀ everywhere, high risk) | CALC-43 (a new derived quantity) | R2b §5.3 | **Open — Q2** (SI-015) |
+| PD-16 | Night overview (16 days, one request) | ★ yes · no | ADR-012 §4, §6; the privacy wording | R2c §7 (W1) | **Yes** — resolved from the owner's review |
+| PD-17 | Monthly Moon calendar | ★ yes, in the details · only 7 nights | — | R2c §7 (M2) | **Yes** — resolved from the owner's review |
+| PD-18 | Seeing and transparency | ★ not in 1.0 + a link the user opens themselves · 7Timer opt-in · nothing | ADR-012 §2/§3 (with 7Timer) | R2c §7 (W4) | **Open — Q3** |
+| PD-19 | Records | ★ Progress as a Logbook segment, a visible Delete, "Plan this target" on the row, the forecast in the entry; AstroBin CSV after 1.0 · no change | — | R2a §5.6; R2e §6 | **★ items adopted; AstroBin CSV open (Q4)** — resolved from the owner's review |
+| PD-20 | Settings | ★ add Appearance (System/Light/Dark); units after 1.0; overheads stay global · no change | — | R2a §5.7; R2e §7 | **Appearance + units preference** — resolved from the owner's review and the scope principle |
+| PD-21 | Time between frames | ★ I1 global · I2 per rig (v26) | — | R2b §4.8 | **I1** — the owner |
+| PD-22 | Order of work to release | ★ CI → identity → redesign → v26 (if needed) → Stage 11 on the final build · another order | Input to RA.P | R2e §10 | **Set in RA.P (G3)** |
 
 ## Needed from the owner, outside the decisions
 

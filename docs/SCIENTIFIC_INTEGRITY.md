@@ -147,6 +147,7 @@ Correct Interpretation → Required Future Action.**
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
 | SI-014 | Camera specs copied into another output mode (equipment import) | **Resolved 2026-09-27 (S3.V8)** | TD-071 (resolved) |
+| SI-015 | Two definitions of "the Moon is up" (displayed rise/set vs the Moon-up predicate) | **Open** (found 2026-10-17, RA.R2b; owner decision RA.D Q2) | RA.P |
 
 ---
 
@@ -824,6 +825,24 @@ notes.
 **Resolved 2026-09-27 (S3.V8, owner option (a)):** a saved rig's pixel size and sensor size are not copied into a file with another pixel count (compared orientation-free, `EquipmentMatcher.samePixelCount`). They stay unknown until the user enters the pixel size, and the editor says why. The equal-pixel-count copy and the file's own estimate are unchanged. No formula changed.
 
 **Status:** Resolved. **Work item:** TD-071 (resolved).
+
+---
+
+## SI-015 — Two definitions of "the Moon is up"
+
+**Scientific Issue**
+The displayed moonrise and moonset (CALC-28, `MoonCalculator.riseSetForNight`) use Meeus' standard altitude h₀ = 0.7275 π − 0.5667° (upper limb, standard refraction, parallax), while the Moon-up time inside the dark span and the Moon gate (CALC-29, CALC-33, CALC-43; `moon_conditions.dart:95`, `imaging_opportunity_calculator.dart:175`) count the Moon as up while its topocentric airless **centre** is above 0°.
+
+**Current Behavior**
+The two disagree by about 5–10 minutes per rise or set (about 0.83° of altitude); the moon-free time implied by CALC-43 is longer than the interval between the displayed set and rise (`refinement/research/RA_R2B_CAPTURE_SCIENCE.md` §5.2, synthetic vector: 2 h 53 min against 3 h 00 min).
+
+**Correct Interpretation**
+Either one definition is used everywhere, or each quantity states its definition. Moonlit and USNO use the upper limb with refraction.
+
+**Required Future Action**
+Owner decision RA.D Q2 (PD-15): MF-c (h₀ everywhere; recommended) or MF-b (h₀ for the new moon-free hours, the existing predicates documented). Found 2026-10-17 (RA.R2b), verified in code by the main session.
+
+**Status:** Open. **Work item:** the RA.P Task that implements the decision.
 
 ---
 
