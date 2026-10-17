@@ -41,6 +41,18 @@ centre; the second row shows the splash):
 - **The startup mark (Flutter):** on this phone startup completes before the loading view is drawn,
   so the mark was not observed on the device; it is covered by `startup_mark_test.dart`.
 
+## The one-second splash (owner decision, 2026-10-17)
+
+The owner asked for a longer, smoother animation (about a second) and chose to hold the splash until
+it has played (DECISIONS E.1). Built and recorded on the phone (release `.s2check`): the orbit
+draws, the inner orbit follows, the star settles into the opening over the full second, then the
+splash leaves the screen. The owner then noticed the mark stayed visible over the main screen while
+the whole splash faded (200 ms); corrected: the mark fades first on the navy background (120 ms), then
+the background fades into the app (150 ms), so the mark never shows over the app — re-recorded on the
+phone (`identity/s13_3_splash_frames_1s.png`, 30 fps). The app's
+own first frame is unchanged ("Displayed" measures it); what the user sees first is the splash for
+about 1.0–1.2 s on a cold start instead of about 0.3 s.
+
 ## Owner apps
 
 Unchanged (`io.github.chacha12.astroplanner` 2026-09-30 11:48:37; `com.astroplan.astroplan`

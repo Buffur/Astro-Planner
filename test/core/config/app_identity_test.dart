@@ -72,7 +72,7 @@ void main() {
       expect(styles, contains('windowSplashScreenBackground'));
       // S13.3 (ID-6 = S2): the animated mark, at most 1,000 ms, no delay.
       expect(styles, contains('@drawable/splash_icon_animated'));
-      expect(styles, contains('windowSplashScreenAnimationDuration">380<'));
+      expect(styles, contains('windowSplashScreenAnimationDuration">1000<'));
     }
     for (final d in ['drawable', 'drawable-v21']) {
       expect(
@@ -95,8 +95,15 @@ void main() {
       final total = int.parse(m[1]!) + int.parse(m[2] ?? '0');
       if (total > end) end = total;
     }
-    expect(end, 380); // the star settles last (140 + 240 ms)
+    expect(end, 1000); // the star settles last (500 + 500 ms)
     expect(end, lessThanOrEqualTo(1000));
+    // Owner, 2026-10-17: the splash is held until the animation has played,
+    // and not held when animations are off.
+    final activity = _read(
+      'android/app/src/main/kotlin/io/github/buffur/culmina/MainActivity.kt',
+    );
+    expect(activity, contains('setOnExitAnimationListener'));
+    expect(activity, contains('ValueAnimator.areAnimatorsEnabled()'));
     for (final m in RegExp(r'android:pathData="([^"]+)"').allMatches(icon)) {
       expect(avd, contains(m[1]!));
     }

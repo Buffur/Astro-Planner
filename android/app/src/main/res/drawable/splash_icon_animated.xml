@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12+ splash icon (S13.3, ID-6 = S2; concept approved in S13.1):
-     the orbit is drawn (0-300 ms), the inner orbit follows (60-320 ms), the
-     ice-blue star arrives at the opening (140-380 ms). Compressed from the
-     approved 720 ms storyboard after the phone showed the splash removed at
-     about 300-350 ms, before the star arrived (S13.3). Ends on the static
-     icon (ic_launcher_foreground.xml, same geometry). No start delay; the
-     system shows the end state when animations are off, and removes the
-     splash at the app's first frame, so it never delays startup. -->
+<!-- Android 12+ splash icon (S13.3, ID-6 as amended by the owner on
+     2026-10-17): a one-second, smooth sequence. The orbit is drawn
+     (0-650 ms), the inner orbit follows (150-750 ms), the ice-blue star
+     settles into the opening (500-1000 ms). Ends on the static icon
+     (ic_launcher_foreground.xml, same geometry). MainActivity keeps the
+     splash until this sequence ends, then fades it out; with animations off
+     the end state is shown and nothing is held. -->
 <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
     <aapt:attr name="android:drawable">
@@ -33,9 +32,9 @@
                 android:name="star"
                 android:pivotX="70.85"
                 android:pivotY="39.86"
-                android:rotation="-45"
-                android:scaleX="0.4"
-                android:scaleY="0.4">
+                android:rotation="-30"
+                android:scaleX="0.5"
+                android:scaleY="0.5">
                 <path
                     android:name="starFill"
                     android:fillAlpha="0"
@@ -47,7 +46,7 @@
     <target android:name="outer">
         <aapt:attr name="android:animation">
             <objectAnimator
-                android:duration="300"
+                android:duration="650"
                 android:interpolator="@android:interpolator/fast_out_slow_in"
                 android:propertyName="trimPathEnd"
                 android:valueFrom="0"
@@ -58,10 +57,10 @@
     <target android:name="inner">
         <aapt:attr name="android:animation">
             <objectAnimator
-                android:duration="260"
+                android:duration="600"
                 android:interpolator="@android:interpolator/fast_out_slow_in"
                 android:propertyName="trimPathEnd"
-                android:startOffset="60"
+                android:startOffset="150"
                 android:valueFrom="0"
                 android:valueTo="1"
                 android:valueType="floatType" />
@@ -71,27 +70,27 @@
         <aapt:attr name="android:animation">
             <set android:ordering="together">
                 <objectAnimator
-                    android:duration="240"
-                    android:interpolator="@android:anim/overshoot_interpolator"
+                    android:duration="500"
+                    android:interpolator="@android:interpolator/decelerate_cubic"
                     android:propertyName="scaleX"
-                    android:startOffset="140"
-                    android:valueFrom="0.4"
+                    android:startOffset="500"
+                    android:valueFrom="0.5"
                     android:valueTo="1"
                     android:valueType="floatType" />
                 <objectAnimator
-                    android:duration="240"
-                    android:interpolator="@android:anim/overshoot_interpolator"
+                    android:duration="500"
+                    android:interpolator="@android:interpolator/decelerate_cubic"
                     android:propertyName="scaleY"
-                    android:startOffset="140"
-                    android:valueFrom="0.4"
+                    android:startOffset="500"
+                    android:valueFrom="0.5"
                     android:valueTo="1"
                     android:valueType="floatType" />
                 <objectAnimator
-                    android:duration="240"
+                    android:duration="500"
                     android:interpolator="@android:interpolator/fast_out_slow_in"
                     android:propertyName="rotation"
-                    android:startOffset="140"
-                    android:valueFrom="-45"
+                    android:startOffset="500"
+                    android:valueFrom="-30"
                     android:valueTo="0"
                     android:valueType="floatType" />
             </set>
@@ -100,9 +99,10 @@
     <target android:name="starFill">
         <aapt:attr name="android:animation">
             <objectAnimator
-                android:duration="80"
+                android:duration="250"
+                android:interpolator="@android:interpolator/linear"
                 android:propertyName="fillAlpha"
-                android:startOffset="140"
+                android:startOffset="500"
                 android:valueFrom="0"
                 android:valueTo="1"
                 android:valueType="floatType" />

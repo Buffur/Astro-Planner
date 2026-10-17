@@ -503,7 +503,13 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
 - **Not chosen:** (b) the platform location manager (a dependency change).
 
-### S13.3 — splash timing compressed to 380 ms (implementation deviation, 2026-10-17)
+### S13.3 — a one-second splash, held until it has played (owner, 2026-10-17; amends ID-6)
+
+- **Decided by:** the owner, in chat, 2026-10-17: «Анимацию стоит сделать дольше и плавнее. К примеру целую секунду» ["The animation should be longer and smoother, for example a whole second"], then, offered the trade-off, chose to keep the splash until the animation ends ("Держать до конца").
+- **Decision:** the Android 12+ splash animation lasts 1,000 ms (outer orbit 0–650 ms, inner orbit 150–750 ms, star 500–1000 ms; smoother interpolators), and `MainActivity` keeps the splash until it has played, then fades the mark out on the navy background (120 ms) and the background into the app (150 ms), so the mark never shows over the app (the owner's follow-up, the same day); with animations off nothing is held. The app keeps loading underneath.
+- **Amends ID-6** ("lasting only as long as real initialization") and S13.3 acceptance (2)'s "never delays startup" reading: on a cold start the app's content now appears about 0.7–0.9 s later than its first frame on a fast phone. Supersedes the 380 ms deviation below.
+
+### S13.3 — splash timing compressed to 380 ms (implementation deviation, 2026-10-17; superseded the same day)
 
 - **Evidence:** on the owner's phone the system removed the splash at the app's first frame, about 300–350 ms after launch, so with the approved 720 ms storyboard the star never appeared (`refinement/evidence/S13_3_DEVICE_CHECKS.md`).
 - **Applied:** the same storyboard, compressed: outer orbit 0–300 ms, inner orbit 60–320 ms, star 140–380 ms (`drawable/splash_icon_animated.xml`). The sequence, the meaning and the end state are unchanged; startup is not delayed.
