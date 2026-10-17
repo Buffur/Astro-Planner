@@ -147,7 +147,7 @@ Correct Interpretation → Required Future Action.**
 | SI-012 | Target coordinates, epoch and object types | **Largely resolved** (TASK 8.1) | TD-016 |
 | SI-013 | Storage estimate assumptions | Partial | TD-013 |
 | SI-014 | Camera specs copied into another output mode (equipment import) | **Resolved 2026-09-27 (S3.V8)** | TD-071 (resolved) |
-| SI-015 | Two definitions of "the Moon is up" (displayed rise/set vs the Moon-up predicate) | **Open** (found 2026-10-17, RA.R2b; owner decision RA.D Q2) | RA.P |
+| SI-015 | Two definitions of "the Moon is up" (displayed rise/set vs the Moon-up predicate) | **Open** (found 2026-10-17, RA.R2b); decided MF-c (RA.D Q2) | S15.2 |
 
 ---
 
@@ -842,7 +842,9 @@ Either one definition is used everywhere, or each quantity states its definition
 **Required Future Action**
 Owner decision RA.D Q2 (PD-15): MF-c (h₀ everywhere; recommended) or MF-b (h₀ for the new moon-free hours, the existing predicates documented). Found 2026-10-17 (RA.R2b), verified in code by the main session.
 
-**Status:** Open. **Work item:** the RA.P Task that implements the decision.
+**Decided 2026-10-17 (owner, RA.D Q2): MF-c** — h₀ everywhere; implemented by S15.2 after ADR-022 (S15.1).
+
+**Status:** Open until S15.2. **Work item:** S15.2.
 
 ---
 

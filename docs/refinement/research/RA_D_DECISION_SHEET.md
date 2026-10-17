@@ -27,7 +27,7 @@
 
 | ID | Question | Options | Supersedes | Source | Your answer |
 | --- | --- | --- | --- | --- | --- |
-| PD-01 | Product scope | ★ S-A demote, do not remove · S-B remove "What can I image tonight?" and the detailed weather · S-C "all in one" | PRODUCT_DIRECTION §1 (clarification) | R2a §5.1; R2e §2 | **Open — Q1** |
+| PD-01 | Product scope | ★ S-A demote, do not remove · S-B remove "What can I image tonight?" and the detailed weather · S-C "all in one" | PRODUCT_DIRECTION §1 (clarification) | R2a §5.1; R2e §2 | **Keep all three, demoted** — the owner, 2026-10-17 (Q1) |
 | PD-02 | Onboarding | ★ O-2′ (site + camera class/rig, no target step, one button, no Skip) · O-1 (no Welcome; a site card on Home). The flash is fixed under either option | TASK 12.5 | R2a §4 (RA-B); R2e §3.1 | **O-2′** — resolved from the owner's review (round 2B record) |
 | PD-03 | Home order | ★ H-W (the night first, then the plan, no "New plan", context as a subtitle) · H-P (the plan first, the night second) | ADR-019 §5, RG-05 T1 | R2c §6; R2e §5 | **H-W** — resolved from the owner's review |
 | PD-04 | Planner empty state and the duplicated weather | ★ a checklist instead of the empty status; the duplicated weather row removed · as now | ADR-019 §6 (contents) | R2e §4.3 | **Checklist; duplicated weather row removed** — resolved from the owner's review |
@@ -41,11 +41,11 @@
 | PD-12 | Calibration | ★ CAL-1 (one action, "Build calibration from lights") · CAL-0 | — | R2b §4.7 | **CAL-1** (preview and confirmation) — the owner |
 | PD-13 | The example plan | ★ remove the button · move it to ⋮ and fix it | RD-04 | R2e §4.2 | **Remove after the replacements are verified**; fixtures kept — the owner |
 | PD-14 | Assumptions | ★ only the enabled items · as now | — | R2e §4.2 | **Effective assumptions shown** — the owner |
-| PD-15 | Moon: moon-free dark time | ★ MF-b (by the displayed rise and set) · MF-a (as is, with a label) · MF-c (one h₀ everywhere, high risk) | CALC-43 (a new derived quantity) | R2b §5.3 | **Open — Q2** (SI-015) |
+| PD-15 | Moon: moon-free dark time | ★ MF-b (by the displayed rise and set) · MF-a (as is, with a label) · MF-c (one h₀ everywhere, high risk) | CALC-43 (a new derived quantity) | R2b §5.3 | **MF-c** — the owner, 2026-10-17 (Q2; SI-015) |
 | PD-16 | Night overview (16 days, one request) | ★ yes · no | ADR-012 §4, §6; the privacy wording | R2c §7 (W1) | **Yes** — resolved from the owner's review |
 | PD-17 | Monthly Moon calendar | ★ yes, in the details · only 7 nights | — | R2c §7 (M2) | **Yes** — resolved from the owner's review |
-| PD-18 | Seeing and transparency | ★ not in 1.0 + a link the user opens themselves · 7Timer opt-in · nothing | ADR-012 §2/§3 (with 7Timer) | R2c §7 (W4) | **Open — Q3** |
-| PD-19 | Records | ★ Progress as a Logbook segment, a visible Delete, "Plan this target" on the row, the forecast in the entry; AstroBin CSV after 1.0 · no change | — | R2a §5.6; R2e §6 | **★ items adopted; AstroBin CSV open (Q4)** — resolved from the owner's review |
+| PD-18 | Seeing and transparency | ★ not in 1.0 + a link the user opens themselves · 7Timer opt-in · nothing | ADR-012 §2/§3 (with 7Timer) | R2c §7 (W4) | **No provider; a link the user opens** — the owner, 2026-10-17 (Q3) |
+| PD-19 | Records | ★ Progress as a Logbook segment, a visible Delete, "Plan this target" on the row, the forecast in the entry; AstroBin CSV after 1.0 · no change | — | R2a §5.6; R2e §6 | **★ items adopted** — resolved from the owner's review; **AstroBin CSV included** — the owner, 2026-10-17 (Q4) |
 | PD-20 | Settings | ★ add Appearance (System/Light/Dark); units after 1.0; overheads stay global · no change | — | R2a §5.7; R2e §7 | **Appearance + units preference** — resolved from the owner's review and the scope principle |
 | PD-21 | Time between frames | ★ I1 global · I2 per rig (v26) | — | R2b §4.8 | **I1** — the owner |
 | PD-22 | Order of work to release | ★ CI → identity → redesign → v26 (if needed) → Stage 11 on the final build · another order | Input to RA.P | R2e §10 | **Set in RA.P (G3)** |

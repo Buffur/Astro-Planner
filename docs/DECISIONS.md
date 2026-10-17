@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **RA.D complete, 2026-10-17:** E.1 "RA.D — Q1 to Q4": the scope kept (demoted), MF-c, no seeing/transparency provider (a link), the AstroBin CSV export included. RA.P proposed in `refinement/POST_ROADMAP_PLAN.md` (Stages 12–17), awaiting G3. Documentation only.
 > **RA.D round 2, 2026-10-17:** E.1 "RA.D — release scope principle", "RA.D round 2A — Capture Plan" (PD-05 to PD-14, PD-21, approved by the owner) and "RA.D round 2B/2C — resolved from the owner's direction" (PD-02, PD-03, PD-04, PD-16, PD-17, PD-19, PD-20); four questions open (`refinement/research/RA_D_ROUND2_PACKAGE.md` Part C). Documentation only.
 > **RA.D round 1 complete, 2026-10-17:** E.1 "RA.D — round 1 identity (ID-2 to ID-6)": Buffur identity, intended id `io.github.buffur.culmina`, intended repository `Buffur/Culmina`, logo direction A + C hybrid (artwork not approved), splash S2; RD-01 decided (B). Nothing implemented; the current identity stays until an approved Task. Documentation only.
 > **RA.D round 1, 2026-10-17:** E.1 "RA.D — ID-1: the application name": **Culmina**, chosen by the owner, pending formal trademark clearance before store publication. A product-direction decision only; no code is renamed. Documentation only.
@@ -490,6 +491,15 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### RA.D — Q1 to Q4 (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: "Q1: keep all three, demoted. Q2: MF-c. Q3: no provider, link only. Q4: include AstroBin CSV. Then proceed to RA.P."
+- **Q1 (PD-01):** "What can I image tonight?", the planner's altitude chart and the Weather screen stay, demoted: the candidates as a secondary action, the chart compact, the Weather screen as the night card's details. PRODUCT_DIRECTION §1's questions 1–2 become supporting.
+- **Q2 (PD-15, SI-015): MF-c.** One Moon-up definition everywhere: the upper limb above the horizon with standard refraction (h₀), for the moon-free hours, the Moon gate (ADR-013 G4) and CALC-28/29/33/43. Amends ADR-010 and ADR-013 through ADR-022 (S15.1), with re-derived vectors.
+- **Q3 (PD-18):** no seeing or transparency provider; the Weather details say they are not forecast and offer a link the user opens (Clear Outside). ADR-012 §2 stands (Open-Meteo the only provider).
+- **Q4:** a Logbook export in AstroBin's acquisition CSV format is in the release, versioned in `EXPORT_MANIFEST.md` (S16.5).
+- **RA.D is complete.** RA.P: `refinement/POST_ROADMAP_PLAN.md` §5, "Stages 12–17", proposed for the owner's approval (G3).
 
 ### RA.D — release scope principle (owner clarification, 2026-10-17)
 

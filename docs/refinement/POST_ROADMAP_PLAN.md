@@ -2,6 +2,8 @@
 
 ## Active amendment — Product Reassessment (2026-10-17)
 
+> **RA.P, 2026-10-17:** the reassessment's release roadmap is §5, "Stages 12–17 — Culmina release roadmap (RA.P)", **proposed and awaiting the owner's approval (G3)**. RA.R1, RA.R2 and RA.D are complete (DECISIONS E.1).
+
 The owner requested a plan/instruction correction after the review of CLAUDE.md and the live-test brief. The next planning work is the bounded reassessment in [PRODUCT_REASSESSMENT.md](prompts/PRODUCT_REASSESSMENT.md). This amendment authorizes its planning scope, not the owner's individual redesign suggestions as implementation decisions.
 
 | Task | Dependency | Result / stop boundary |
@@ -273,6 +275,12 @@ an overlap. Research gates may run earlier than their Stage (§4).
 | 9 | Secondary UX & Product Polish | Implementation, plus licence research | RG-12, RG-13; RD-01, RD-11; the owner's logo choice | 5 (and 4 for the Library) |
 | 10 | Performance & Application Size | Measurement first, then optimisation | RD-02 (dependency) | 6–9 |
 | 11 | Full Validation & Beta Readiness | Independent validation | RD-15; owner actions | 1–10 |
+| 12 | Release foundation (RA.P; proposed) | CI fix; owner actions | S11P-03; trademark search | 11 (S11.C2) |
+| 13 | Identity: Culmina (RA.P; proposed) | Implementation; owner artwork approval | ID-1 to ID-6 | 12 |
+| 14 | Capture Plan completeness (RA.P; proposed) | ADR-021, then implementation (v26) | Round 2A | 12 (13 for device evidence) |
+| 15 | Night conditions (RA.P; proposed) | ADR-022, then implementation | Q2 (MF-c), PD-16, PD-17, Q3 | 12 |
+| 16 | Screens and flow (RA.P; proposed) | Implementation | Round 2B, Q1, Q4 | 14, 15 |
+| 17 | Final validation and release readiness (RA.P; proposed; folds in S11.6, S11.7) | Independent validation; owner release actions | Go/no-go | 12–16 |
 
 Current status of each Stage: `PROGRESS.md`.
 
@@ -5919,6 +5927,179 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 - **Acceptance:** as the Stage's exit; readiness claimed only if every mandatory row is VERIFIED.
 
 ---
+
+### Stages 12–17 — Culmina release roadmap (RA.P, 2026-10-17)
+
+> **Status: PROPOSED — awaits the owner's approval (gate G3).** Nothing here authorizes
+> implementation until G3 is recorded. After G3, each Task still runs one at a time, under its own
+> start instruction (CLAUDE.md: no automatic next Task).
+>
+> **Sources:**
+> - the decisions in DECISIONS E.1: "RA.D — ID-1", "RA.D — round 1 identity", "RA.D — release scope
+>   principle", "RA.D round 2A — Capture Plan", "RA.D round 2B/2C", "RA.D — Q1 to Q4";
+> - the requirements in `refinement/research/RA_D_ROUND2_PACKAGE.md` (Parts A, B, D) and
+>   `refinement/research/RA_D_IDENTITY_TRANSITION.md`;
+> - the evidence in RA.R1 and RA.R2.
+>
+> **Stage 11:** S11.1–S11.5, S11.C1 and S11.C2 are done and their evidence stays reusable under V3.
+> The open S11.6 and S11.7 are **folded into Stage 17** (S17.5, S17.7): the redesign changes the
+> inputs of their rows, so they must run on the final build. With G3 Stage 11 closes as "superseded
+> by Stage 17"; no earlier PASS is reopened without V3/V6 grounds.
+
+#### Shared rules for Stages 12–17
+
+- **Workflow.** One Task per cycle: READ → VERIFY → PLAN → IMPLEMENT → VERIFY → SELF-REVIEW → DOCS →
+  COMMIT → STOP. The next Task waits for the owner's start instruction.
+- **Verification class.** Each Task's V1 class is stated below; the highest class among the files
+  it changes wins (CLAUDE.md). "Full gate" means `dart run tool/check.dart` after the last change.
+- **UI Tasks (K14).**
+  - Host renders of every changed screen: light, dark and field themes; 100 % and 200 % text; 412 px.
+  - The renders are reviewed by the owner before the Task closes.
+  - The accessibility sweep covers the changed screens (trap 17).
+- **Device checks.**
+  - Run on the separate `.s2check` package, never on the owner's app (the runbook's rules).
+  - From S13.2 onward, under the new id.
+- **Registers in the same change.** Decisions in DECISIONS E.1 and ADRs; calculations in
+  SCIENTIFIC_INTEGRITY (new CALCs with hand-computed vectors, Part C); findings in TECH_DEBT;
+  FEATURE_STATUS, DATA_MODEL and EXPORT_MANIFEST where touched; privacy and COMPLIANCE for anything
+  that leaves the device (trap 22). All in English.
+- **Stage close.** Each Stage ends with a bounded validation in a fresh session where practical
+  (V4, V8), against that Stage's acceptance only. Corrections follow V5.
+- **Stop conditions, every Task:**
+  - its acceptance is met and committed;
+  - or a new unresolved product, scientific, provider or data decision appears — STOP, present the
+    options to the owner;
+  - or a prerequisite owner action is missing — STOP, report it.
+
+#### Stage 12 — Release foundation
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S12.1** | **TD-104: make the remote CI gate pass** | The failing job's log: the owner downloads it while signed in, or authorizes `gh`. Fallback: reproduce on Linux (WSL or a container) if available | (1) The failing test is named, citing the log. (2) The root cause is recorded in TD-104 (and in TD-096 if the wall clock is involved). (3) The cause is fixed; no test is skipped or weakened. (4) The workflow's announced breakages are handled: `actions/checkout` on Node 20, and the runner image pinned instead of `ubuntu-latest` (moving to Ubuntu 26). (5) The local full gate passes. (6) After an owner-authorized push, a remote run on `main` passes, read from GitHub. (7) TD-104 and RD-17 are updated with the run | Full gate (tests or tooling change); a CI-only change also needs its syntax and path logic checked |
+| **S12.2** | **(Owner) formal trademark search for "Culmina"**: classes 9 and 42; WIPO GBD, EUIPO, USPTO; optionally UKRNOIVI | — | The result is recorded in DECISIONS E.1. A conflict reopens ID-1 (and ID-3, ID-4) before Stage 13 | Owner action |
+| **S12.3** | **Privacy-policy text and the URL transition**: the agent prepares the text; the owner renames and publishes (`RA_D_IDENTITY_TRANSITION.md` §4, steps 1–5) | S12.2 clear | (1) `docs/privacy/index.md` corrected: TD-099's weather wording; the 16-night request (PD-16); links the user opens (Clear Outside, Q3); the contact email supplied by the owner. (2) (Owner) the repository is renamed `Buffur/Culmina`, Pages are enabled, and the policy, project and source URLs answer 200 (recorded). (3) Never recreate `Astro-Planner` | Documentation; owner actions |
+| **S12.4** | **(Owner decision) S11P-03:** `geolocator_android` bundles Google Play services location in a GPL-3.0 app | Options from S11.4's evidence | The owner chooses: (a) accept it and state it in COMPLIANCE and About; or (b) use the platform location manager — then a code Task is added to Stage 16 (S16.8) | Owner decision; documentation |
+
+#### Stage 13 — Identity: Culmina
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S13.1** | **Logo sketches and the review sheet** for the A + C hybrid (`RA_D_IDENTITY_TRANSITION.md` §5, steps 1–4) | ID-5 | (1) Three or four SVG variants: horizon, altitude arc, star at the apex, one stroke system, amber and red accents for comparison, centred in the 66 dp safe zone. (2) The review sheet per variant: adaptive masks, 48 and 24 px, the themed monochrome icon on light and dark wallpaper, the 512 px Play icon, the 288 dp splash, beside "Culmina". (3) Stored under `docs/refinement/evidence/identity/`. (4) The owner's approval of the final artwork is recorded in DECISIONS E.1 (P9.4: the agent never picks) | Documentation and assets outside the app |
+| **S13.2** | **Application id, name and URLs:** `io.github.buffur.culmina`, "Culmina", `AppIdentity` pointing at S12.3's live URLs; TD-088 and TD-093 closed | S12.1, S12.2, S12.3 | `RA_D_IDENTITY_TRANSITION.md` §3, criteria 1–10, including: (1) no old id left in code; (2) the metadata channel works on a device, M1 and M4; (3) backup and restore across ids on test packages, counts and fields equal; (4) the owner's migration path documented in the release notes and the runbook; (5) the restore confirmation shows the backup's date (TD-093); (6) trap 20, COMPLIANCE, RELEASE, README and the runbook updated | **High-risk:** full gate, device checks |
+| **S13.3** | **Launcher icon and splash (S2)** | S13.1 (approved artwork), S13.2 | (1) The approved mark is drawn in `ic_launcher_foreground.xml` and `tool/make_launcher_icons.py` (trap 20), with a separate monochrome layer, legacy PNGs and `icon_512.png`. (2) An AnimatedVectorDrawable splash on Android 12+, at most 1,000 ms, no start delay; the static icon before 12. (3) The Flutter continuation shows the mark only while startup really loads; no deterministic progress; static when animations are disabled; nothing added before the first frame. (4) Cold start measured on the phone before and after (logcat "Displayed"). (5) No new package | Shared behaviour + platform assets: full gate; device measurement |
+
+#### Stage 14 — Capture Plan completeness (round 2A)
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S14.1** | **ADR-021 "Capture Plan completeness"**, the technical design of PD-05 to PD-14 and PD-21 | RA.D round 2A | The ADR records:<br>• the white-balance model;<br>• per-field value sources and their persistence;<br>• the storage evidence chain, with the **binning-in-storage rule and its vectors**;<br>• the metadata contract extension, with the tags and their provenance;<br>• the FITS keywords and limits;<br>• CAL-1's rules;<br>• O2b's axis and normalisation;<br>• the v26 schema design.<br>It names its amendments: ADR-009 §7/L6, ADR-017, ADR-018 D4, ADR-020 §2/§3/§5/§10, SI-013, CALC-16, CALC-42, and the superseded Stage 11 storage row. **The owner accepts the ADR** (the binning rule and the persistence choice are the technical points to confirm) | Documentation |
+| **S14.2** | **Camera class first (PD-07)** | S14.1 | (1) The rig editor asks the class first; "Not sure" is an explicit Unknown. (2) The example rig's class comes from its cited source, for new installs only, with the source cited in the seeder; existing rows are never reinterpreted. (3) The block form shows only the class's fields (ADR-020 §3). (4) Sweep and regression tests of the editor and the block form | Shared behaviour |
+| **S14.3** | **Schema v26** (data only) | S14.1 | (1) The columns per ADR-021: block white balance and value sources; camera-module capture format, bits per sample and compression, with provenance. (2) The `drift_schemas` snapshot, the generated steps, `from25To26` written against the step's shapes. (3) Additive snapshot keys; export manifest v2 additive (`EXPORT_MANIFEST.md`); backup by table. (4) Schema-equality and data-preservation tests; the pinned versions in `backup_restore_test` and `unsupported_database_test`. (5) DATA_MODEL updated | **High-risk:** full gate, migration tests |
+| **S14.4** | **Metadata contract extension** | S14.1 | (1) `CaptureMetadata` gains DNG BitsPerSample (258), Compression (259), AsShotNeutral, and EXIF WhiteBalance (41987) and LightSource (37384), each with tag provenance, through the existing readers. No second parser. (2) Synthetic fixtures. (3) The local real-sample test extended and passing. (4) The ADR-017 amendment applied | **High-risk:** full gate, real-sample test |
+| **S14.5** | **FITS header reader** | S14.1; **at least one real astro-camera FITS file**: the owner's, kept outside Git (ADR-017 §9), or a public sample whose licence allows a fixture | (1) Reads the mandatory keywords (SIMPLE, BITPIX, NAXIS, NAXISn), plus EXPTIME/EXPOSURE, GAIN, OFFSET, XBINNING/YBINNING, CCD-TEMP, FILTER, DATE-OBS and INSTRUME where present. (2) Bounded reads: 2,880-byte records up to END, with limits against untrusted input (as S2.V4). (3) Recognition becomes reading in the registry. (4) Tests: synthetic headers and the real-sample test. **If no sample exists when Stage 14's other Tasks are done, this Task blocks Stage 14's close**, and the owner is asked for a sample | **High-risk:** full gate |
+| **S14.6** | **Provenance of proposed and inherited values (PD-08)** | S14.2, S14.3 | (1) Every proposed or inherited field shows its origin until changed. (2) Value sources persisted per ADR-021. (3) The filter default follows the class. (4) RA-F05 (exposure kept after a type switch) verified, then fixed. (5) Widget tests | Shared behaviour; data via v26 |
+| **S14.7** | **Storage evidence chain (PD-06)** | S14.3, S14.4 (S14.5 for FITS) | (1) Measured size from any readable format, for the rig or a file picked for a block. (2) A format-aware theoretical size only from evidence: an uncompressed DNG (Compression = 1 and its BitsPerSample), FITS BITPIX/NAXIS with its 2,880-byte records, or a format the user declares and confirms. (3) Unknown otherwise, with "pick one file". (4) Labels that name the source and the assumption. (5) Camera class never selects a branch. (6) Vectors S1–S4 and the compressed → Unknown boundary; the binning rule's vectors. (7) SI-013 and CALC-16 updated | **High-risk (scientific):** full gate |
+| **S14.8** | **White-balance record (PD-09)** | S14.3, S14.6 | (1) Fields per class: Phone, DSLR/mirrorless, Unknown; hidden for astro cameras. (2) A proposal from a file: JPEG/HEIC give the mode only; a DNG's AsShotNeutral is stored as read, never converted to Kelvin. (3) Shown in the snapshot, the entry, the export and the share text. (4) Wording that it is recorded only and guarantees no identical colours | Shared behaviour |
+| **S14.9** | **"Take from a photo" in the light block (PD-11)** | S14.4, S14.6 (S14.5 for FITS) | (1) It reuses `CaptureFileAccess` and the reader registry, the path of "Add from a photo". (2) It proposes exposure, ISO with its kind, the white-balance mode, and the file's size and format evidence for S14.7, all with P2b markers, stored only by Save. (3) Exposure and ISO never touch the rig (ADR-018 §4). (4) A pixel count different from the rig's is flagged (SI-014). (5) TD-072's order-sensitive size conflicts are fixed on this path. (6) Device check with DNG, JPEG and HEIC (and FITS) | **High-risk (metadata):** full gate, device |
+| **S14.10** | **"Build calibration from lights" (PD-12)** | S14.6 | (1) A preview before anything is added: a dark per distinct (exposure, sensitivity, binning) triple; a flat per filter; bias and dark flats offered by class. (2) No darks with in-camera noise reduction on. (3) No duplicate of an existing matching block (`CalibrationMatch`). (4) Counts are proposals. (5) Stored on confirmation; Undo (RD-09). (6) The budget reads the blocks unchanged (calibration never becomes integration). (7) Tests for each rule | Shared behaviour; budget regression |
+| **S14.11** | **Relative improvement over integration time (PD-05)** | S14.1 | (1) CALC-42 plotted against T = N · t per group, normalised to the plan. (2) Never the word "SNR"; SI-003's help kept. (3) A text alternative. (4) Vectors R-O2 (0.5 → 0.7071, 1 → 1, 2 → 1.4142) | **High-risk (scientific presentation):** full gate |
+| **S14.12** | **Effective assumptions, fit guidance and focus (PD-14, PD-10, TD-074, K12)** | S14.7 | (1) The panel shows the assumptions that affect the result, with a "Change in Settings" link; the stale label fixed. (2) The focus reminder, with no value. (3) TD-074: "what fits" answers for every block the fit can evaluate, with wording only from `FitAnalyzer` outputs | Shared behaviour |
+| **S14.13** | **Remove the example-plan action (PD-13)** | S14.6, S14.9 and S14.10 accepted | (1) The action is gone from the UI; `ExampleCapturePlan` stays as a test fixture. (2) Tests that used `capturePlan.useExample` move to the replacement flows; the E2E updated | Shared behaviour |
+
+#### Stage 15 — Night conditions (weather and Moon)
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S15.1** | **ADR-022 "Night conditions"** | RA.D Q2, PD-16, PD-17, Q3 | The ADR records:<br>• MF-c: the Moon is up while its upper limb is above the horizon with standard refraction (h₀), everywhere — amending ADR-010, ADR-013 G4 and CALC-28/29/33/43;<br>• moon-free hours and their evening/morning/all-night classification;<br>• the phase name from the phase longitude;<br>• the 16-night request and cache, amending ADR-012 §4/§6;<br>• the seeing/transparency statement and link;<br>• the monthly calendar's computation and cache.<br>Hand-computed vectors, including SI-015's synthetic case and a USNO-referenced case. **The owner accepts the ADR** | Documentation |
+| **S15.2** | **One Moon-up definition (MF-c)** | S15.1 | (1) The Moon-up predicate of CALC-29/33/43 and the Moon gate use h₀. (2) ADR-013's affected vectors re-derived independently and documented. (3) SI-015 resolved. (4) The batch-equals-single test kept (trap 2) | **High-risk (scientific):** full gate |
+| **S15.3** | **Moon-free hours and phase** | S15.2 | (1) A new CALC: dark span ∩ Moon below h₀, classified evening ↘, morning ↗ or all night •. (2) The phase name. (3) Wording through `night_text`. (4) Vectors. (5) No fixed "good night" threshold | **High-risk:** full gate |
+| **S15.4** | **16-night forecast overview** | S15.1 | (1) One Open-Meteo request per site covers the horizon; nights are slices. (2) The cache keyed per site; the freshness states unchanged. (3) Old cache entries migrated or dropped safely, with TD-049's legacy keys removed. (4) Offline and out-of-range behaviour kept. (5) The call budget recorded. (6) Privacy and COMPLIANCE wording in the same change (trap 22) | **High-risk (persistence):** full gate |
+| **S15.5** | **Weather details** | S15.4 | (1) Per-night cards: cloud in the dark span, precipitation, wind and gusts, dew hours, Moon % and moon-free hours; values only, no verdict (ADR-012). (2) The hourly strip extended: cloud layers, gusts, humidity and dew point. (3) "Seeing and transparency are not forecast here" plus the Clear Outside link (Q3; privacy "links you open"). (4) Icons: Material first; a targeted set only if Material lacks the metaphor (licence and the full gate if a dependency) | Shared behaviour (full gate if a dependency) |
+| **S15.6** | **Night & Moon details** | S15.3 | (1) The monthly calendar: offline, in an isolate, cached per month, a week view at large text. (2) The combined night bar with a Moon layer and a legend; the text alternative; field-mode hatching. (3) Calendar timing on the phone is an acceptance check | Shared behaviour; device timing |
+
+#### Stage 16 — Screens and flow
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S16.1** | **Onboarding (PD-02) and the first-frame route (RA-B01)** | S14.2 | (1) The route is chosen before the first frame from the loaded first-run flag; no flash of Tonight. (2) One screen: site (GPS on tap, or choose) and "What do you shoot with?" (class → rig), both optional; no target step; a large title; short texts that keep the permission rationale; "Start planning"; no Skip. (3) First-run tests and `core_loop_test` updated | Shared behaviour (router): full gate |
+| **S16.2** | **Home (PD-03, Q1)** | S15.3, S15.4 | (1) The title row with field mode; no empty app bar. (2) The site and night as a compact, tappable subtitle. (3) The night card first: dark window, Moon phase and moon-free hours, cloud range with freshness, the values row, a link to the details. (4) Your plan with Open planner. (5) "What can I image tonight?" as a secondary action. (6) No New plan | Shared behaviour |
+| **S16.3** | **Planner hierarchy (PD-04, Q1, RA-F01–F03, TD-095)** | S14.12 | (1) The empty state is a checklist (site · target · rig · capture), each item leading to its choice. (2) Status once computable; one mention of the target. (3) The duplicated weather row removed; window cloud annotations kept; one link to Night & Moon and Weather. (4) The altitude chart compact. (5) TD-095: the autosave banner clears on a successful save | Shared behaviour |
+| **S16.4** | **Records (PD-19)** | — | (1) Progress by target as a Logbook segment. (2) RA-G03 verified, then a visible Delete for rigs and targets (RD-09). (3) Plan this target on the target row. (4) The stored night forecast in the entry. (5) RD-07's roles kept | Shared behaviour |
+| **S16.5** | **AstroBin acquisition CSV export (Q4)** | S14.3 (fields) | (1) The current CSV contract read at the Task's start and cited, with the date. (2) A field mapping from the snapshot and the result: date, filter, number, duration, binning, gain/ISO and the rest the contract defines; unknown is empty, never 0. (3) Versioned in `EXPORT_MANIFEST.md`. (4) Exported through the existing share and export path. (5) Fixture tests | **High-risk (export format):** full gate |
+| **S16.6** | **Settings (PD-20)** | — | (1) Appearance: System, Light or Dark, persisted and backed up. (2) A units preference: temperature °C/°F, wind km/h, mph or m/s, elevation m/ft, through `QuantityText` everywhere. (3) New keys join `BackupPreferences` (trap 5) | Shared behaviour across screens: **full gate** |
+| **S16.7** | **Consistency and accessibility (K14, TD-100, TD-101)** | S16.1–S16.6 | (1) The sweep covers the editors, the filter panel, the map picker and every new screen (TD-100). (2) A source test enforces `QuantityText` (TD-101). (3) The owner's final visual review of all changed screens | Shared behaviour: full gate |
+| **S16.8** | **Remaining follow-ups** | — | Fix:<br>• TD-094 (restore the open screen after a process death);<br>• TD-096 (wall-clock tests);<br>• TD-097 (`municipality`);<br>• TD-098 (Android notices on the licence page);<br>• TD-102 (probes become tests);<br>• TD-103 (`AppLog`);<br>• TD-038 (`unawaited_futures`);<br>• S12.4 (b) if chosen.<br>Re-check and close or update TD-020, TD-025 and TD-031 against the code. TD-045 (Drift renames) is **excluded**: the documented workaround has no user impact | Per item; full gate at the end |
+
+#### Stage 17 — Final validation and release readiness (folds in S11.6 and S11.7)
+
+| Task | Objective | Depends on | Acceptance | V1 class |
+| --- | --- | --- | --- | --- |
+| **S17.1** | **Re-baseline the validation matrix** | Stages 12–16 closed | (1) Rows from `STAGE_11_MATRIX.md` whose inputs changed are marked for re-run (V3); unchanged rows keep PASS with a one-line reuse record. (2) New rows for every Stage 12–16 acceptance and RA.D decision. (3) Frozen before evidence (V4) | Documentation |
+| **S17.2** | **Host evidence** | S17.1 | The full gate on the final inputs; a green remote CI run on the final commit; the host rows | Full gate |
+| **S17.3** | **Emulator evidence** | S17.1 | The invalidated emulator rows re-run: lifecycle L1–L6 and L8, the backup round trip, permissions, offline, the release build | Runtime |
+| **S17.4** | **Providers and compliance** | S17.1 | Live Open-Meteo (the 16-night request), Nominatim (opt-in), OSM tiles, the opened links, About's pages; COMPLIANCE, Data Safety and the policy against the code; the licences (TD-098 done); S12.4 reflected | Documentation, runtime |
+| **S17.5** | **Phone runs** (the runbook updated for Culmina) | S17.1, the phone | The core loop (L10); TalkBack (H6, H7); field mode in darkness; perf M3, M4 and the new heavy screens (calendar, overview); metadata (Add and Take from a photo; DNG, JPEG, HEIC, FITS); CAL-1; S2V-06 and S3V-08; lifecycle on the phone; the signed release installed (N5); the cold start and splash | Device |
+| **S17.6** | **(Owner) release actions** | S17.2–S17.5 | (1) The upload key and a signed bundle (16.2; `check_bundle`). (2) The policy live. (3) Data Safety. (4) The owner's data moved from the old app by backup and restore (transition §3, item 5). (5) The store listing, with the descriptor approved by the owner (16.5). (6) A Play closed test with at least 12 testers for 14 days (Q2) | Owner |
+| **S17.7** | **Readiness record and go/no-go** (fresh session) | S17.2–S17.6 | VERIFIED, UNVERIFIED, OWNER ACTION and DEFERRED; readiness claimed only when every mandatory row is VERIFIED; the owner's go/no-go recorded | Documentation |
+
+#### Starting Task
+
+**S12.1 — TD-104, remote CI green.**
+- A green remote gate should guard the redesign before any code changes.
+- Its only input is the failing job's log (or `gh` access); without it the Task starts by trying to
+  reproduce on Linux.
+- S12.2 (the owner's trademark search) and S12.3's text can run alongside, because they are the
+  owner's actions and documentation.
+
+#### Traceability (every RA.R1 finding)
+
+| Findings | Planned in | Disposition |
+| --- | --- | --- |
+| RA-A01, A05, A07, A08, A09; K14 | S16.7 (owner reviews), every UI Task's K14 rule; R2a for the alternatives | Usability is verified by owner render reviews and the phone runs (S17.5) |
+| RA-A02, A03, F10; K5 | S14.11 | O2b; absolute SNR excluded (DECISIONS: PD-05) |
+| RA-A04; K6 | S14.3, S14.4, S14.5, S14.7 | The storage evidence chain |
+| RA-A06; K4 | S16.2, S16.3 (Q1: keep, demoted) | — |
+| RA-A10, I01 | This roadmap | — |
+| RA-B01–B06 | S16.1 (B01 the route; B02 no Skip; B03 the title; B04 site and class; B05 texts; B06 the owner's review) | — |
+| RA-C01 | S12.2, S13.2 | — |
+| RA-C02 | S13.1, S13.3 | — |
+| RA-C03, C04 | S13.3 (splash); S15.5 (icons) | — |
+| RA-D01–D06; K9 | S16.2 (D04: New plan removed; D06: the candidates demoted) | — |
+| RA-E01 | S15.1, S15.2, S15.3, S15.6 | — |
+| RA-E02, E03, E04 | S15.4, S15.5 | Seeing and transparency: no provider (Q3), a link |
+| RA-E05 | Invariant in S15.4, S15.5 | — |
+| RA-E06 | S16.4 | — |
+| RA-F01–F03 | S16.3 | — |
+| RA-F04; K8 | S14.13 | — |
+| RA-F05 | S14.6 | — |
+| RA-F06 | S14.2, S16.1 | — |
+| RA-F07; K7 | S14.4, S14.8, S14.9, S14.12 | WB recorded; focus reminder; no focus value (F3 excluded, no evidence) |
+| RA-F08 | S14.10 | — |
+| RA-F09; K12 | S14.12 | — |
+| RA-F11 | S14.1 (ADR-021 records the scope: records, not device control) | — |
+| RA-G01, G02, G04 | S16.4 | — |
+| RA-G03; K11 | S16.4 | — |
+| RA-G05 | S17.5 | — |
+| RA-H01–H03 | S16.6; PD-21 (I1) | — |
+| RA-I02; K3 | S12.1 | — |
+| RA-I03 | S12.2, S12.3, S12.4, S17.6 | — |
+| RA-I04; K10 | S12.2, S13.1–S13.3; licence: GPL-3.0 stays (RG-12, owner deferral) | — |
+| RA-I05 | Stage order 12 → 17; S17.1 | — |
+| K1, K2 | Closed (`333e1e8`) | — |
+| K13 | Historical record; not rewritten | — |
+
+Open technical-debt items:
+- TD-104 → S12.1;
+- TD-088, TD-093 → S13.2;
+- TD-072 → S14.9;
+- TD-074 → S14.12;
+- TD-049 → S15.4;
+- TD-095 → S16.3;
+- TD-100, TD-101 → S16.7;
+- TD-094, TD-096, TD-097, TD-098, TD-102, TD-103, TD-038, TD-020, TD-025, TD-031 → S16.8;
+- TD-045 excluded (S16.8).
+- Carried device items S2V-06 and S3V-08 → S17.5.
+- RD-02's remaining holdovers (an ADK skill, `skills-lock.json`, `docs/archive/`) stay owner housekeeping, outside the release.
 
 ## 6. Traceability: audit findings → Stages
 

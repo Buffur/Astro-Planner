@@ -241,6 +241,8 @@ still object.
 
 ## Part C — Decisions still open for the owner
 
+> **Answered by the owner, 2026-10-17:** Q1 keep all three, demoted; Q2 MF-c; Q3 no provider, a link only; Q4 include the AstroBin CSV export (DECISIONS E.1, "RA.D — Q1 to Q4").
+
 Four decisions remain. Each changes established functionality, a scientific model, an external
 provider or the release scope, so none of them may be settled by the agent.
 
