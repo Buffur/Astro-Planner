@@ -16,11 +16,11 @@
 | ID | Question | Options | Source | Your answer |
 | --- | --- | --- | --- | --- |
 | ID-1 | The app's name | Culmina · AltArc · Astrarc · Arcwindow · Noctarc · PhotonPlan · your own (then screened as in R2d §1) · keep "Astro Planner" (high collision risk). No ★: the owner chooses | [R2d](RA_R2D_IDENTITY.md) §2–§3 (screening, not legal advice) | **Culmina** — the owner, 2026-10-17 (DECISIONS E.1, "RA.D — ID-1"); pending formal trademark clearance before store publication; "Culmina: Astrophoto Planner" is a provisional descriptor only. No code renamed |
-| ID-2 | The project's account (RD-01) | ★ B — Buffur · B′ — Buffur links, id under chacha12 · C — chacha12 | ★ from R2e §9; R2d §8 and S9.12 list the options without a recommendation | |
-| ID-3 | App id | ★ I-2 `io.github.buffur.<name>` · I-1 keep `io.github.chacha12.astroplanner` · I-3 `io.github.chacha12.<name>` | ★ from R2e §9; consequences in R2d §4 (on the owner's phone the new id installs separately; data moves by backup and restore) | |
-| ID-4 | Repository name and policy URL | Keep `Astro-Planner` · rename to the brand (the GitHub Pages URL changes) | R2d §4, §8 (D4) | |
-| ID-5 | Logo direction | A · B · C · D (S9.10) · E (monogram) · a mix. Sketches for the chosen name come after the answer; only the owner chooses the final mark (P9.4) | R2d §5, S9.10 | |
-| ID-6 | Loading screen | ★ S2 (an animated mark in the system splash + the mark in Flutter for the real loading time only) · S1 (system splash only) · S0 (as now) · S3 (Lottie/Rive, a new dependency) | R2d §6, §8 (D6); R2e §3.2 | |
+| ID-2 | The project's account (RD-01) | ★ B — Buffur · B′ — Buffur links, id under chacha12 · C — chacha12 | ★ from R2e §9; R2d §8 and S9.12 list the options without a recommendation | **B — Buffur** — the owner, 2026-10-17 (RD-01 decided) |
+| ID-3 | App id | ★ I-2 `io.github.buffur.<name>` · I-1 keep `io.github.chacha12.astroplanner` · I-3 `io.github.chacha12.<name>` | ★ from R2e §9; consequences in R2d §4 (on the owner's phone the new id installs separately; data moves by backup and restore) | **I-2 `io.github.buffur.culmina`** (intended) — the owner, 2026-10-17; not changed yet |
+| ID-4 | Repository name and policy URL | Keep `Astro-Planner` · rename to the brand (the GitHub Pages URL changes) | R2d §4, §8 (D4) | **`Buffur/Culmina`** (intended) — the owner, 2026-10-17; rename only after the URL transition plan ([transition](RA_D_IDENTITY_TRANSITION.md) §4) |
+| ID-5 | Logo direction | A · B · C · D (S9.10) · E (monogram) · a mix. Sketches for the chosen name come after the answer; only the owner chooses the final mark (P9.4) | R2d §5, S9.10 | **Hybrid of A + C** (provisional direction) — the owner, 2026-10-17; final artwork after the visual review ([transition](RA_D_IDENTITY_TRANSITION.md) §5) |
+| ID-6 | Loading screen | ★ S2 (an animated mark in the system splash + the mark in Flutter for the real loading time only) · S1 (system splash only) · S0 (as now) · S3 (Lottie/Rive, a new dependency) | R2d §6, §8 (D6); R2e §3.2 | **S2** — the owner, 2026-10-17 |
 
 ## Round 2 — product direction (gate G2)
 

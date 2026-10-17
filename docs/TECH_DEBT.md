@@ -1,5 +1,6 @@
 # AstroPlan Technical Debt Register
 
+> **RA.D round 1, 2026-10-17:** TD-088's direction decided (RD-01 = B; intended URLs under `Buffur/Culmina`, `refinement/research/RA_D_IDENTITY_TRANSITION.md` §4); it stays open until implemented. Documentation only.
 > **RA.R1 follow-up, 2026-10-17:** TD-104 recorded (the remote CI gate fails on Linux; one test, not yet identified). Documentation only.
 > **S11.2, 2026-09-30:** TD-100 to TD-103 recorded (sweep coverage, hand-formatted quantities, probe-only checks, a `print`); the three S11.2 blockers go to S11.C2.
 > **S11.4, 2026-09-30:** TD-097 (Nominatim's `municipality`), TD-098 (Android libraries' notices), TD-099 (the policy's weather wording) recorded; S11P-03 (Google Play services location in a GPL-3.0 app) is an owner decision (`PROGRESS.md`).

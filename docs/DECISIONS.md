@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **RA.D round 1 complete, 2026-10-17:** E.1 "RA.D — round 1 identity (ID-2 to ID-6)": Buffur identity, intended id `io.github.buffur.culmina`, intended repository `Buffur/Culmina`, logo direction A + C hybrid (artwork not approved), splash S2; RD-01 decided (B). Nothing implemented; the current identity stays until an approved Task. Documentation only.
 > **RA.D round 1, 2026-10-17:** E.1 "RA.D — ID-1: the application name": **Culmina**, chosen by the owner, pending formal trademark clearance before store publication. A product-direction decision only; no code is renamed. Documentation only.
 
 > **Updated 2026-10-17:** E.1 records the owner-requested instruction correction and Product Reassessment planning scope; no redesign implementation decisions made.
@@ -489,6 +490,18 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 
 ## E.1 Resolved decisions
 
+### RA.D — round 1 identity (ID-2 to ID-6) (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17, after the agent's briefing of the RA.R2d options. The owner stated that Buffur (`https://github.com/Buffur`; Reddit `https://www.reddit.com/user/Buffur/`) is the public developer identity and the repository is `https://github.com/Buffur/Astro-Planner`.
+- **ID-2 = B:** `Buffur` is the public GitHub and developer identity. **RD-01 decided (B).**
+- **ID-3 = I-2:** the intended Android application id is `io.github.buffur.culmina`.
+- **ID-4:** the intended repository name is `Buffur/Culmina`; the URL transition plan comes before any rename.
+- **ID-5:** a provisional hybrid of logo directions A and C (S9.10): the altitude arc, horizon and star at culmination from A; consistent strokes, small-size legibility and a working monochrome layer from C. A design direction, **not approved artwork**; the final mark needs the owner's approval after a visual review (P9.4 stands).
+- **ID-6 = S2:** a lightweight animated splash of the selected mark, lasting only as long as real initialization and honouring reduced motion; no new package.
+- **Supersedes, as direction:** OD-07's application id; the deferrals of S9.12 and S9.10/P9.4 (2026-09-30). TD-088's direction is set; it stays open until implemented.
+- **Not authorized:** renaming the repository, changing the application id or code, replacing the icon or splash, publishing GitHub Pages. The current identity ("Astro Planner", `io.github.chacha12.astroplanner`, the current icon, `Buffur/Astro-Planner`) stays until an implementation Task approved through RA.P.
+- **Preparation:** `refinement/research/RA_D_IDENTITY_TRANSITION.md`: proposed acceptance criteria for the id migration (including backup and restore across ids, which the backup format allows: `backup_archive.dart` checks the format and schema, not the package), the repository and policy-URL checklist, the logo review step, and the release-order check (the formal trademark search for "Culmina" should precede the id change).
+
 ### RA.D — ID-1: the application name (2026-10-17)
 
 - **Decided by:** the owner, in chat, 2026-10-17, choosing from the RA.R2d shortlist (Culmina, AltArc, Astrarc, Arcwindow; reserve Noctarc, PhotonPlan) after the agent's comparison.
@@ -496,7 +509,7 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Supersedes (as product direction):** OD-07's name "Astro Planner" (TASK 16.1). Until an implementation Task approved through RA.P renames the app, the shipped name stays `AppIdentity.appName` = "Astro Planner" (trap 20); this decision authorizes no code, manifest, application-id or repository change.
 - **Store descriptor:** "Culmina: Astrophoto Planner" is kept as a **provisional** descriptor, not an approved final store title.
 - **Evidence kept:** `refinement/research/RA_R2D_IDENTITY.md` §2–§3 (preliminary screening, 2026-10-17, not legal clearance): no Culmina app on Google Play or the App Store; Culmina Family Estate Winery (Canada, class 33 — wine), registrations UNKNOWN; `.com` and `.app` domains taken; WIPO, EUIPO and USPTO not searched directly (CAPTCHA/JavaScript). The owner's formal search (OD-07; classes 9 and 42) remains a release prerequisite.
-- **Open in round 1:** ID-2 to ID-6 (`refinement/research/RA_D_DECISION_SHEET.md`).
+- **Round 1:** completed the same day (ID-2 to ID-6, above).
 
 ### Product Reassessment planning and instruction correction (2026-10-17)
 
