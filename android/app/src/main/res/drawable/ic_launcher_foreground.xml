@@ -1,33 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Astro Planner icon (TASK 16.1): a target's altitude arc over the
-     horizon, its imaging window in red, a star at the peak. 108 dp adaptive
-     canvas; everything stays inside the 66 dp safe zone. The PNG launcher
-     icons are drawn from the same geometry by tool/make_launcher_icons.py. -->
+<!-- Culmina mark (S13.1 approved, S13.3): an open orbit forming a C, an inner
+     orbit, and an ice-blue sparkle at its opening, the culmination. 108 dp
+     adaptive canvas, the orbits centred on it; everything inside the 66 dp
+     safe zone. The PNG launcher icons are drawn from the same geometry by
+     tool/make_launcher_icons.py (trap 20); the themed icon is
+     ic_launcher_monochrome.xml, the Android 12+ splash splash_icon_animated.xml. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- horizon -->
+    <!-- the inner orbit -->
     <path
-        android:pathData="M26,70 L82,70"
-        android:strokeWidth="3"
-        android:strokeColor="#6F7BA8"
+        android:pathData="M53.06,40.83 A13.2,13.2 0 1 0 66.8,57.21"
+        android:strokeWidth="2.4"
+        android:strokeColor="#7F8DC0"
         android:strokeLineCap="round" />
-    <!-- the target's altitude through the night -->
+    <!-- the orbit: the C of Culmina -->
     <path
-        android:pathData="M28,70 Q54,22 80,70"
-        android:strokeWidth="5"
-        android:strokeColor="#E8ECF8"
+        android:pathData="M60.77,33.07 A22,22 0 1 0 75.79,50.96"
+        android:strokeWidth="6"
+        android:strokeColor="#E6EBF7"
         android:strokeLineCap="round" />
-    <!-- the imaging window -->
+    <!-- the star at culmination -->
     <path
-        android:pathData="M43.6,49.84 Q54,42.16 64.4,49.84"
-        android:strokeWidth="7"
-        android:strokeColor="#FF4D3D"
-        android:strokeLineCap="round" />
-    <!-- the star -->
-    <path
-        android:pathData="M54,24 L56,29 L61,31 L56,33 L54,38 L52,33 L47,31 L52,29 Z"
-        android:fillColor="#FFFFFF" />
+        android:pathData="M70.85,30.26 Q72.39,38.32 80.45,39.86 Q72.39,41.39 70.85,49.46 Q69.32,41.39 61.25,39.86 Q69.32,38.32 70.85,30.26 Z"
+        android:fillColor="#8CCBFF" />
 </vector>

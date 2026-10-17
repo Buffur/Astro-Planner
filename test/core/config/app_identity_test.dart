@@ -53,6 +53,12 @@ void main() {
     expect(adaptive, contains('@drawable/ic_launcher_foreground'));
     expect(adaptive, contains('@color/ic_launcher_background'));
     expect(adaptive, contains('<monochrome'));
+    // S13.3: the themed icon is its own one-colour layer.
+    expect(adaptive, contains('@drawable/ic_launcher_monochrome'));
+    expect(
+      File('$_res/drawable/ic_launcher_monochrome.xml').existsSync(),
+      isTrue,
+    );
     expect(
       File('$_res/drawable/ic_launcher_foreground.xml').existsSync(),
       isTrue,
@@ -64,7 +70,9 @@ void main() {
     for (final d in ['values-v31', 'values-night-v31']) {
       final styles = _read('$_res/$d/styles.xml');
       expect(styles, contains('windowSplashScreenBackground'));
-      expect(styles, contains('@drawable/ic_launcher_foreground'));
+      // S13.3 (ID-6 = S2): the animated mark, at most 1,000 ms, no delay.
+      expect(styles, contains('@drawable/splash_icon_animated'));
+      expect(styles, contains('windowSplashScreenAnimationDuration">380<'));
     }
     for (final d in ['drawable', 'drawable-v21']) {
       expect(
@@ -74,6 +82,26 @@ void main() {
     }
     expect(File('assets/branding/icon_512.png').lengthSync(), greaterThan(0));
   });
+  // S13.3: the splash animation stays under 1,000 ms with no start delay
+  // above 166 ms (Android splash-screen guidance), and its paths are the
+  // launcher icon's.
+  test('the animated splash is short and draws the icon', () {
+    final avd = _read('$_res/drawable/splash_icon_animated.xml');
+    final icon = _read('$_res/drawable/ic_launcher_foreground.xml');
+    var end = 0;
+    for (final m in RegExp(
+      r'android:duration="(\d+)"(?:[^>]*?android:startOffset="(\d+)")?',
+    ).allMatches(avd)) {
+      final total = int.parse(m[1]!) + int.parse(m[2] ?? '0');
+      if (total > end) end = total;
+    }
+    expect(end, 380); // the star settles last (140 + 240 ms)
+    expect(end, lessThanOrEqualTo(1000));
+    for (final m in RegExp(r'android:pathData="([^"]+)"').allMatches(icon)) {
+      expect(avd, contains(m[1]!));
+    }
+  });
+
   // S13.2 (RA_D_IDENTITY_TRANSITION.md §3, criterion 2): no trace of the
   // earlier id in code, platform files, tests or tools. The needles are
   // split so this file does not match itself.

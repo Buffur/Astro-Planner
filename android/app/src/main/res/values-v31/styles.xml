@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 12+ splash (TASK 16.1): the system splash with the icon's
-         foreground on night navy, in light and dark mode alike. -->
+    <!-- Android 12+ splash (TASK 16.1; animated since S13.3, ID-6 = S2): the
+         system splash with the animated mark on night navy, in light and dark
+         mode alike. The duration is read on Android 12 (API 31-32) only. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_animated</item>
+        <item name="android:windowSplashScreenAnimationDuration">380</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">

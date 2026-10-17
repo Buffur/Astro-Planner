@@ -503,6 +503,12 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
 - **Not chosen:** (b) the platform location manager (a dependency change).
 
+### S13.3 — splash timing compressed to 380 ms (implementation deviation, 2026-10-17)
+
+- **Evidence:** on the owner's phone the system removed the splash at the app's first frame, about 300–350 ms after launch, so with the approved 720 ms storyboard the star never appeared (`refinement/evidence/S13_3_DEVICE_CHECKS.md`).
+- **Applied:** the same storyboard, compressed: outer orbit 0–300 ms, inner orbit 60–320 ms, star 140–380 ms (`drawable/splash_icon_animated.xml`). The sequence, the meaning and the end state are unchanged; startup is not delayed.
+- **Status:** an implementation deviation from the approved concept, **for the owner's confirmation**; the alternative (keeping the splash on screen until 720 ms) would delay startup, which ID-6 excludes.
+
 ### S13.1 — the final Culmina mark approved: R3-final (2026-10-17)
 
 - **Decided by:** the owner, in chat, 2026-10-17: «Утверждаю этот дизайн. Orbit centred, анимация хорошая» ["I approve this design. Orbit centred; the animation is good."]

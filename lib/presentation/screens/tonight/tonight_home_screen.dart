@@ -17,6 +17,7 @@ import '../../shared/location_feedback.dart';
 import '../../shared/night_text.dart';
 import '../../shared/night_time_formatter.dart';
 import '../../shared/plan_state.dart';
+import '../../shared/startup_mark.dart';
 import '../../shared/status_block.dart';
 import '../../viewmodels/capture_analysis_viewmodel.dart';
 import '../../viewmodels/library_viewmodels.dart';
@@ -69,7 +70,8 @@ class TonightHomeScreen extends StatelessWidget {
         ),
       );
     } else if (startupVm.isLoading) {
-      body = const Center(child: CircularProgressIndicator());
+      // S13.3: the mark continues the splash while startup really loads.
+      body = const Center(child: StartupMark());
     } else {
       body = ListView(
         padding: const EdgeInsets.fromLTRB(

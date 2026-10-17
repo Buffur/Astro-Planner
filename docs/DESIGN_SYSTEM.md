@@ -121,6 +121,10 @@ route sweep caught it on Settings' segmented control). Dark keeps Material's der
 `AppPalette` also holds the night-event, Moon, chart and Bortle colours (TASK 12.4) and `caution`
 (S1.9).
 
+The Culmina mark's colours (S13.3) are `AppColors.markNavy`, `markOrbit`, `markInnerOrbit` and
+`markStar`: brand colours, the same in every theme (as the launcher icon and the splash), used only
+by the startup mark; field mode's filter still turns them red.
+
 ### 2.5 Status and state tokens (S5.4)
 
 | Token | Light | Dark | Field | Used for |
@@ -470,6 +474,13 @@ addendum §3.4–§3.5), top to bottom:
 caption.** The gallery sweeps a sample Night & Moon page (not a route) in the three themes at
 100 % and 200 % text. Stage 6 adds the real detail routes (`AppRouter` constants) to the route
 sweep (trap 17).
+
+### The startup mark (S13.3; `lib/presentation/shared/startup_mark.dart`)
+
+Shown by Tonight only while startup really loads, in place of a bare progress indicator: the
+Culmina mark on a navy disc (112 dp), continuing the Android 12+ splash. The star breathes (opacity
+1 → 0.6 → 1, 1.6 s) while the mark is on screen and is still when the platform asks for less motion
+(`AppMotion.duration`); no progress value is implied. Announced as "Loading".
 
 ### Confirmation, feedback and deleting (S5.8; RD-09 = M + S1, DECISIONS E.1)
 

@@ -1,15 +1,18 @@
-"""Draws Astro Planner's PNG launcher icons (TASK 16.1).
+"""Draws Culmina's PNG launcher icons (S13.3; the mark approved in S13.1,
+`docs/refinement/evidence/identity/round5/R3-final-colour.svg`).
 
 The adaptive icon (Android 8+) is the vector
 android/app/src/main/res/drawable/ic_launcher_foreground.xml on the
 ic_launcher_background colour; this script draws the same geometry as PNGs
 for older Android (mipmap-*/ic_launcher.png, rounded square) and the 512 px
-store icon (assets/branding/icon_512.png, full square, as Google Play wants).
+mark for the repository and release pages (assets/branding/icon_512.png,
+full square).
 
 Needs Pillow:  python tool/make_launcher_icons.py
-Change the geometry here and in the vector together.
+Change the geometry here and in the vector together (trap 20).
 """
 
+import math
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -18,21 +21,39 @@ ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / 'android' / 'app' / 'src' / 'main' / 'res'
 
 NAVY = (0x0B, 0x12, 0x30, 255)
-HORIZON = (0x6F, 0x7B, 0xA8, 255)
-ARC = (0xE8, 0xEC, 0xF8, 255)
-WINDOW = (0xFF, 0x4D, 0x3D, 255)
-STAR = (0xFF, 0xFF, 0xFF, 255)
+ORBIT = (0xE6, 0xEB, 0xF7, 255)
+INNER = (0x7F, 0x8D, 0xC0, 255)
+STAR = (0x8C, 0xCB, 0xFF, 255)
 
-# Geometry in the vector's 108-unit canvas.
-P0, P1, P2 = (28, 70), (54, 22), (80, 70)
-STAR_POINTS = [(54, 24), (56, 29), (61, 31), (56, 33), (54, 38), (52, 33),
-               (47, 31), (52, 29)]
+# Geometry in the vector's 108-unit canvas: both orbits are centred on
+# (54, 54); angles in degrees, counter-clockwise from east with y up, as in
+# the vector's arcs (outer: 60.77,33.07 -> 75.79,50.96; inner: 53.06,40.83 ->
+# 66.8,57.21).
+CENTRE = (54.0, 54.0)
+OUTER = (22.0, 72.07, 367.94, 6.0)    # radius, from, to, stroke width
+INNER_ORBIT = (13.2, 94.08, 345.92, 2.4)
+# The sparkle: four quadratic curves through a pinched centre.
+STAR_PATH = [((70.85, 30.26), (72.39, 38.32), (80.45, 39.86)),
+             ((80.45, 39.86), (72.39, 41.39), (70.85, 49.46)),
+             ((70.85, 49.46), (69.32, 41.39), (61.25, 39.86)),
+             ((61.25, 39.86), (69.32, 38.32), (70.85, 30.26))]
 
 
-def quad(t):
-    x = (1 - t) ** 2 * P0[0] + 2 * (1 - t) * t * P1[0] + t ** 2 * P2[0]
-    y = (1 - t) ** 2 * P0[1] + 2 * (1 - t) * t * P1[1] + t ** 2 * P2[1]
-    return x, y
+def arc_points(radius, start, end, steps=180):
+    cx, cy = CENTRE
+    return [(cx + radius * math.cos(math.radians(start + (end - start) * i / steps)),
+             cy - radius * math.sin(math.radians(start + (end - start) * i / steps)))
+            for i in range(steps + 1)]
+
+
+def star_points(steps=24):
+    pts = []
+    for p0, p1, p2 in STAR_PATH:
+        for i in range(steps):
+            t = i / steps
+            pts.append(((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t * t * p2[0],
+                        (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t * t * p2[1]))
+    return pts
 
 
 def stroke(draw, points, width, colour, s):
@@ -49,8 +70,8 @@ def stroke(draw, points, width, colour, s):
 
 
 def icon(size, rounded):
-    """The icon at [size] px. A legacy icon shows the full 108-unit canvas
-    zoomed so the 66-unit safe zone fills most of it, as launchers did."""
+    """The icon at [size] px. A legacy icon shows the 108-unit canvas zoomed
+    so the 66-unit safe zone fills most of it, as launchers did."""
     scale_up = 4  # draw large, then downsample for smooth edges
     big = size * scale_up
     img = Image.new('RGBA', (big, big), (0, 0, 0, 0))
@@ -64,11 +85,11 @@ def icon(size, rounded):
     def shift(points):
         return [(x - offset, y - offset) for x, y in points]
 
-    stroke(d, shift([(26, 70), (82, 70)]), 3, HORIZON, s)
-    stroke(d, shift([quad(i / 64) for i in range(65)]), 5, ARC, s)
-    stroke(d, shift([quad(0.3 + 0.4 * i / 32) for i in range(33)]), 7,
-           WINDOW, s)
-    d.polygon([(x * s, y * s) for x, y in shift(STAR_POINTS)], fill=STAR)
+    r, a0, a1, w = INNER_ORBIT
+    stroke(d, shift(arc_points(r, a0, a1)), w, INNER, s)
+    r, a0, a1, w = OUTER
+    stroke(d, shift(arc_points(r, a0, a1)), w, ORBIT, s)
+    d.polygon([(x * s, y * s) for x, y in shift(star_points())], fill=STAR)
     return img.resize((size, size), Image.LANCZOS)
 
 
