@@ -1,286 +1,286 @@
-# RA.R2 → RA.D → RA.P — план оставшейся переоценки продукта
+# RA.R2 → RA.D → RA.P — plan for the remaining product reassessment
 
-> **Статус: УТВЕРЖДЁН владельцем 2026-10-17 (шлюз G0):** «Approve G0: make the two documentation commits as proposed, then run RA.R2 (R2a–R2d in parallel, then R2e) and stop at the decision package.» Опциональные разрешения §6 не выдавались.
-> Подготовлено 2026-10-17 после RA.R1
-> ([отчёт Phase A](../research/RA_R1_PHASE_A_ASSESSMENT.md)). Детализирует RA.R2, RA.D и RA.P из
-> [PRODUCT_REASSESSMENT.md](PRODUCT_REASSESSMENT.md); не заменяет активный план и не меняет решений.
-> Правила проверки — только
-> CLAUDE.md (V1–V8); здесь не дублируются.
+> **Status: APPROVED by the owner 2026-10-17 (gate G0):** «Approve G0: make the two documentation commits as proposed, then run RA.R2 (R2a–R2d in parallel, then R2e) and stop at the decision package.» The optional permissions in §6 were not granted.
+> Prepared 2026-10-17 after RA.R1
+> ([Phase A report](../research/RA_R1_PHASE_A_ASSESSMENT.md)). Details RA.R2, RA.D and RA.P from
+> [PRODUCT_REASSESSMENT.md](PRODUCT_REASSESSMENT.md); does not replace the active plan and does not change decisions.
+> Verification rules are
+> only in CLAUDE.md (V1–V8); they are not duplicated here.
 
-## 1. Что осталось
+## 1. What remains
 
-RA.R1 закрыла сверку: у каждой из 56 находок ревью (RA-A01…RA-I05) и 14 противоречий (K1…K14) есть
-ID и диспозиция. Остаётся:
+RA.R1 closed the reconciliation: each of the 56 review findings (RA-A01…RA-I05) and 14 contradictions (K1…K14) has
+an ID and a disposition. What remains:
 
-1. **Исследовать то, что код не отвечает** (R1–R10 из Phase A): ожидания пользователей и аналоги,
-   научные и модельные варианты, источники погоды и подача Луны, идентичность. Затем свести это в
-   пакет вариантов направления продукта.
-2. **Получить решения владельца** (RA.D). Восемь вопросов Phase A плюс имя и логотип. Почти все они
-   отменяют или меняют ранее утверждённые решения: RD-04, ADR-019/RG-05, ADR-020 (P2, C1, W1/F1),
-   SI-003, строку Stage 11 о теоретическом объёме, OD-07 и отсрочку S9.10.
-3. **Перестроить дорожную карту до релиза** (RA.P) с учётом открытого Stage 11, действий владельца и
+1. **Research what the code cannot answer** (R1–R10 from Phase A): user expectations and comparable products,
+   scientific and model options, weather sources and Moon presentation, identity. Then consolidate this into a
+   package of product-direction options.
+2. **Obtain the owner's decisions** (RA.D). The eight Phase A questions plus name and logo. Almost all of them
+   reverse or change previously approved decisions: RD-04, ADR-019/RG-05, ADR-020 (P2, C1, W1/F1),
+   SI-003, the Stage 11 row on theoretical size, OD-07 and the S9.10 deferral.
+3. **Rebuild the roadmap to release** (RA.P), taking into account the open Stage 11, owner actions and
    TD-104.
-4. **Закрыть хвосты Phase A:** git-checkpoint документации (§8), TD-104 (CI), подтверждение трёх
-   дефектов-кандидатов.
+4. **Close the Phase A loose ends:** documentation git checkpoint (§8), TD-104 (CI), confirmation of three
+   candidate defects.
 
-Не требует нового исследования, потому что уже исследовано и переиспользуется:
-- RG-10 и RG-11 — калибровка и параметры съёмки; обновляются только оспоренные пункты (W/F, P2, C1);
-- S9.3 — настройки;
-- S9.10 — альтернативы логотипа;
-- S9.11 — лицензия;
-- S9.12 — идентичность и app id;
-- RG-05/06 — Tonight и планировщик;
-- аудиты кода из Phase A — повторный аудит репозитория не нужен.
+Not requiring new research, because it has already been researched and is reused:
+- RG-10 and RG-11 — calibration and capture parameters; only the contested points are updated (W/F, P2, C1);
+- S9.3 — settings;
+- S9.10 — logo alternatives;
+- S9.11 — licence;
+- S9.12 — identity and app id;
+- RG-05/06 — Tonight and the planner;
+- the Phase A code audits — a repeat repository audit is not needed.
 
-## 2. Структура: три задачи переоценки плюс одна техническая
+## 2. Structure: three reassessment Tasks plus one technical Task
 
 ```text
-RA.R2  исследование и варианты (одна утверждённая задача, внутренние шаги a–e)
-  ├─ R2a  рынок и ожидания пользователей ─┐
-  ├─ R2b  наука и модель Capture Plan  ───┤  параллельно
-  ├─ R2c  ночные условия: погода и Луна ──┤
-  ├─ R2d  идентичность: имя, знак, splash ┘ → может уйти на решение раньше (RA.D, раунд 1)
-  └─ R2e  синтез: направление продукта и пакет решений (зависит от a–c, учитывает d)
-          ── STOP: пакет решений владельцу ──
-RA.D   решения владельца (раунд 1: идентичность после R2d; раунд 2: продукт после R2e)
+RA.R2  research and options (one approved Task, internal steps a–e)
+  ├─ R2a  market and user expectations ───────┐
+  ├─ R2b  science and Capture Plan model ─────┤  in parallel
+  ├─ R2c  night conditions: weather and Moon ─┤
+  ├─ R2d  identity: name, mark, splash        ┘ → may go to decision earlier (RA.D, round 1)
+  └─ R2e  synthesis: product direction and decision package (depends on a–c, considers d)
+          ── STOP: decision package to the owner ──
+RA.D   owner decisions (round 1: identity after R2d; round 2: product after R2e)
           ── STOP ──
-RA.P   дорожная карта Stages → Tasks до релиза (только документы)
-          ── STOP: утверждение карты; реализация не начинается ──
+RA.P   roadmap Stages → Tasks to release (documents only)
+          ── STOP: roadmap approval; implementation does not start ──
 
-Отдельно, не блокирует RA.R2:  T-CI  диагностика TD-104 (нужен лог)
+Separately, does not block RA.R2:  T-CI  TD-104 diagnosis (log needed)
 ```
 
-Почему пять шагов, а не десять: R1–R10 сгруппированы по общим источникам и общему выходу.
-- **R4** (онбординг), **R5** (Home и поток планировщика), **R9** (записи) и **R10** (настройки) — это
-  синтез из одних и тех же входов (аналоги, решения, код Phase A), поэтому они идут в R2e.
-- **R6** (параметры, SNR) и **R7** (объём) опираются на одни технические источники и меняют один
-  домен (Capture Plan), поэтому они идут в R2b.
-- **R2** (погода) и **R3** (Луна) — это один экран и один круг провайдеров, поэтому они идут в R2c.
+Why five steps rather than ten: R1–R10 are grouped by shared sources and shared output.
+- **R4** (onboarding), **R5** (Home and the planner flow), **R9** (records) and **R10** (settings) are a
+  synthesis from the same inputs (comparable products, decisions, Phase A code), so they go into R2e.
+- **R6** (parameters, SNR) and **R7** (size) rely on the same technical sources and change one
+  domain (Capture Plan), so they go into R2b.
+- **R2** (weather) and **R3** (Moon) are one screen and one set of providers, so they go into R2c.
 
-## 3. Задачи
+## 3. Tasks
 
-### R2a — Рынок и ожидания пользователей (R1)
+### R2a — Market and user expectations (R1)
 
-- **Вопрос:** какие задачи планирования решают аналоги, как они подают capture plan, погоду, Луну,
-  онбординг и записи, и что реально ценят пользователи.
-- **Охват (≥ 8 продуктов):**
+- **Question:** which planning jobs comparable products address, how they present the capture plan, weather, Moon,
+  onboarding and records, and what users actually value.
+- **Coverage (≥ 8 products):**
   - Telescopius;
   - Astrospheric;
   - Clear Outside;
   - PhotoPills;
   - Stellarium Mobile;
-  - Sky Tonight или SkySafari;
+  - Sky Tonight or SkySafari;
   - AstroPlanner (Rodman);
   - DarkScout;
-  - приложение с референса `com.twtapp`;
-  - модель плана в N.I.N.A. и ASIAIR — только как образец capture plan.
-- **Отзывы пользователей:** сторы, Cloudy Nights, r/astrophotography. Анекдот и повторяющийся мотив
-  разделяются явно.
-- **Выход:** `research/RA_R2A_LANDSCAPE.md`. Матрица «продукт × задача». Для каждой области RA-A…RA-H —
-  «что ожидают» и «чем мы отличаемся или что дублируем». Отдельно — список того, что разумно
-  **не делать** (дублирование полного планетария или погодного приложения).
-- **Готово, когда:** у каждого продукта есть первичный источник с датой обращения; у каждой области
-  RA-A…RA-H есть хотя бы один вывод с источником; утверждения о функциях разделены на «подтверждено»
-  и «по описанию».
-- **Внешний поиск:** да. Субагент — да.
+  - the app from the reference `com.twtapp`;
+  - the plan model in N.I.N.A. and ASIAIR — only as a capture plan example.
+- **User reviews:** stores, Cloudy Nights, r/astrophotography. Anecdote and recurring theme
+  are explicitly separated.
+- **Output:** `research/RA_R2A_LANDSCAPE.md`. A "product × job" matrix. For each area RA-A…RA-H —
+  "what users expect" and "how we differ or what we duplicate". Separately — a list of what it is reasonable
+  **not to do** (duplicating a full planetarium or a weather app).
+- **Done when:** each product has a primary source with an access date; each area
+  RA-A…RA-H has at least one sourced conclusion; feature claims are separated into "confirmed"
+  and "per description".
+- **External search:** yes. Subagent — yes.
 
-### R2b — Наука и модель Capture Plan (R6, R7, научная часть R3)
+### R2b — Science and the Capture Plan model (R6, R7, scientific part of R3)
 
-- **Вопросы:**
-  1. Можно ли честно оценить абсолютный SNR. Нужны входы (апертура, QE, яркость неба,
-     поверхностная яркость цели) и подача неопределённости. Каковы варианты: только относительный
-     √N; √N по оси времени интеграции; опциональная модель по CCD-уравнению с явными допущениями.
-  2. Теоретический объём (пиксели × битность для RAW, DNG, FITS; сжатие) против эмпирического, и как
-     помечать каждый.
-  3. Поля «про-режима» по классам камер:
-     - телефон (Camera2: ISO, выдержка, WB, фокус);
+- **Questions:**
+  1. Whether absolute SNR can be estimated honestly. The inputs needed (aperture, QE, sky brightness,
+     target surface brightness) and the presentation of uncertainty. What the options are: relative
+     √N only; √N along the integration-time axis; an optional CCD-equation model with explicit assumptions.
+  2. Theoretical size (pixels × bit depth for RAW, DNG, FITS; compression) versus empirical, and how
+     to label each.
+  3. "Pro mode" fields by camera class:
+     - phone (Camera2: ISO, exposure time, WB, focus);
      - DSLR;
-     - астрокамеры (gain, offset, температура);
-     - что записывать, что моделировать. Пересмотр W1/F1 → W2/F2, P2 (визуально «предложено»), C1
-       (как получить класс камеры без вывода «за спиной»).
-  4. Определение «тёмного времени без Луны» (Moonlit: Солнце ≤ −18° и верхний край Луны под
-     горизонтом) против ADR-010 и CALC-43.
-- **Выход:** `research/RA_R2B_CAPTURE_SCIENCE.md`. Для каждого варианта:
-  - рекомендация и реалистичная альтернатива;
-  - затронутые ADR, SI и CALC;
-  - последствия для данных (миграция, снимки, экспорт v2, бэкап);
-  - эталонные векторы, посчитанные вручную, если предлагается новая формула (SCIENTIFIC_INTEGRITY
+     - astro cameras (gain, offset, temperature);
+     - what to record, what to model. Revisiting W1/F1 → W2/F2, P2 (visually "proposed"), C1
+       (how to obtain the camera class without inferring it "behind the user's back").
+  4. Definition of "dark time without the Moon" (Moonlit: Sun ≤ −18° and the Moon's upper limb below
+     the horizon) versus ADR-010 and CALC-43.
+- **Output:** `research/RA_R2B_CAPTURE_SCIENCE.md`. For each option:
+  - recommendation and a realistic alternative;
+  - affected ADRs, SIs and CALCs;
+  - data consequences (migration, snapshots, export v2, backup);
+  - hand-computed reference vectors, if a new formula is proposed (SCIENTIFIC_INTEGRITY
     Part C).
-- **Готово, когда:** каждое предложение изменить расчёт или модель имеет первичный источник,
-  допущения, векторы и влияние на данные. Ничего не помечено как решённое.
-- **Внешний поиск:** да (литература по CCD-уравнению, спецификации DNG/FITS, Android Camera2,
-  документация камер). Субагент — да. Ключевые формулы главный агент проверяет сам.
+- **Done when:** every proposal to change a calculation or model has a primary source,
+  assumptions, vectors and data impact. Nothing is marked as decided.
+- **External search:** yes (CCD-equation literature, DNG/FITS specifications, Android Camera2,
+  camera documentation). Subagent — yes. The main agent verifies the key formulas itself.
 
-### R2c — Ночные условия: погода и Луна (R2, R3 — подача)
+### R2c — Night conditions: weather and Moon (R2, R3 — presentation)
 
-- **Вопросы:**
-  1. Какие параметры ночи значимы для съёмки, по источникам и отзывам из R2a.
-  2. Обзор нескольких ночей из одного запроса Open-Meteo: объём, кэш, свежесть.
-  3. Источники seeing и transparency (7Timer, Meteoblue и другие): данные, лицензия, условия,
-     коммерческие ограничения, надёжность, приватность, поведение при отказе.
-  4. Мобильный месячный календарь Луны по концепту Moonlit: что показывать, стоимость расчёта
-     30 ночей офлайн. Перенос только концепта: у кода Moonlit нет лицензии.
-- **Выход:** `research/RA_R2C_NIGHT_CONDITIONS.md`. Матрица провайдеров. Рекомендованный состав
-  «ночной сводки» для Home и деталей с сохранением ADR-012: без оценки и без раскраски
-  «хорошо/плохо», свежесть, «unknown, не 0».
-- **Готово, когда:** у каждого предлагаемого параметра и провайдера есть источник, условия и
-  поведение при отказе; влияние на privacy/COMPLIANCE описано (trap 22). Новый провайдер — только как
-  вариант для RA.D.
-- **Внешний поиск:** да. Субагент — да.
+- **Questions:**
+  1. Which night parameters matter for capture, according to the sources and reviews from R2a.
+  2. A multi-night overview from a single Open-Meteo request: volume, cache, freshness.
+  3. Seeing and transparency sources (7Timer, Meteoblue and others): data, licence, terms,
+     commercial restrictions, reliability, privacy, failure behavior.
+  4. A mobile monthly Moon calendar following the Moonlit concept: what to show, the cost of computing
+     30 nights offline. Only the concept is carried over: the Moonlit code has no licence.
+- **Output:** `research/RA_R2C_NIGHT_CONDITIONS.md`. A provider matrix. The recommended composition
+  of the "night summary" for Home and the detail screens, preserving ADR-012: no score and no "good/bad"
+  colouring, freshness, "unknown, not 0".
+- **Done when:** each proposed parameter and provider has a source, terms and
+  failure behavior; the impact on privacy/COMPLIANCE is described (trap 22). A new provider — only as an
+  option for RA.D.
+- **External search:** yes. Subagent — yes.
 
-### R2d — Идентичность (R8)
+### R2d — Identity (R8)
 
-- **Вопросы:**
-  1. 8–12 кандидатов имени со скринингом коллизий: Google Play, App Store, WIPO Global Brand
-     Database, EUIPO, USPTO, домен и GitHub. **Это не юридическое заключение.**
-  2. Судьба app id: он постоянен после первой загрузки. Связь с RD-01 и TD-088.
-  3. Направления знака: переиспользовать S9.10, адаптировать под выбранное имя.
-  4. Splash: AnimatedVectorDrawable в системном SplashScreen Android 12+ против Flutter-анимации,
-     reduced motion, бюджет старта.
-  5. Наборы иконок и анимационные пакеты: лицензия, GPL-3.0-совместимость, размер.
-- **Выход:** `research/RA_R2D_IDENTITY.md` с короткими списками для выбора. Финальный знак выбирает
-  только владелец (P9.4).
-- **Готово, когда:** у каждого кандидата имени есть результаты скрининга с датой; у каждой
-  библиотеки — лицензия и проверка совместимости.
-- **Внешний поиск:** да. Субагент — да. Независим от остальных: может уйти на решение
-  (RA.D, раунд 1) сразу.
+- **Questions:**
+  1. 8–12 name candidates with collision screening: Google Play, App Store, WIPO Global Brand
+     Database, EUIPO, USPTO, domain and GitHub. **This is not a legal opinion.**
+  2. The fate of the app id: it is permanent after the first upload. Relationship to RD-01 and TD-088.
+  3. Mark directions: reuse S9.10, adapt to the chosen name.
+  4. Splash: AnimatedVectorDrawable in the Android 12+ system SplashScreen versus a Flutter animation,
+     reduced motion, startup budget.
+  5. Icon sets and animation packages: licence, GPL-3.0 compatibility, size.
+- **Output:** `research/RA_R2D_IDENTITY.md` with shortlists to choose from. Only the owner chooses
+  the final mark (P9.4).
+- **Done when:** each name candidate has dated screening results; each
+  library has a licence and a compatibility check.
+- **External search:** yes. Subagent — yes. Independent of the rest: can go to decision
+  (RA.D, round 1) immediately.
 
-### R2e — Синтез: направление продукта и пакет решений (R4, R5, R9, R10 + итоги a–d)
+### R2e — Synthesis: product direction and decision package (R4, R5, R9, R10 + results of a–d)
 
-- **Вопросы:**
-  1. Минимальный онбординг и запрос разрешений.
-  2. Иерархия Home: погода или план первым, контекст места и ночи.
-  3. Цепочка планировщика и пустые состояния.
-  4. Capture-блок по классу камеры.
+- **Questions:**
+  1. Minimal onboarding and permission requests.
+  2. Home hierarchy: weather or plan first, site and night context.
+  3. The planner chain and empty states.
+  4. The Capture block by camera class.
   5. Assumptions.
   6. Logbook, Library, Settings.
-  7. Охват продукта (RA-A06: кандидаты, график высоты, детальная погода).
-- **Визуальная база:**
-  - скриншоты текущих экранов от владельца с телефона — **предпочтительно**, это реальное
-    устройство;
-  - либо временные host-рендеры (только с разрешением, §6).
-- **Выход:**
-  - `research/RA_R2E_DIRECTION_OPTIONS.md`: для каждого вопроса RA.D — рекомендация, альтернатива,
-    компромиссы, заменяемое решение, что требует одобрения;
-  - каркасы (wireframes) Welcome, Home, планировщика, Capture-блока, Logbook, Library и Settings —
-    в Markdown по образцу `IA_WIREFRAMES`, плюс по желанию HTML-макеты как приватный Artifact для
-    просмотра;
-  - **лист решений** — один документ с вариантами, который владелец заполняет.
-- **Подтверждение дефектов-кандидатов** (RA-F04 — Flat без фильтра в примере, RA-F05 — перенос
-  экспозиции при смене типа, RA-G03 — нет видимой Delete): пробой, если разрешено (§6); иначе они
-  переходят в RA.P как задачи «проверить, затем исправить».
-- **Готово, когда:**
-  - каждая находка RA-A…RA-H из Phase A имеет в пакете рекомендацию или явное «без изменений,
-    потому что …»;
-  - каждый пункт, требующий решения, указывает заменяемое решение и последствия для данных и тестов;
-  - нет ни одной новой UX-рекомендации без источника или обоснования.
-- **Внешний поиск:** точечно, только для R4: Material и Android guidance.
+  7. Product scope (RA-A06: candidates, altitude chart, detailed weather).
+- **Visual baseline:**
+  - screenshots of the current screens from the owner's phone — **preferred**, as it is a real
+    device;
+  - or temporary host renders (only with permission, §6).
+- **Output:**
+  - `research/RA_R2E_DIRECTION_OPTIONS.md`: for each RA.D question — recommendation, alternative,
+    trade-offs, the decision being replaced, what requires approval;
+  - wireframes of Welcome, Home, the planner, the Capture block, Logbook, Library and Settings —
+    in Markdown following the `IA_WIREFRAMES` pattern, plus optional HTML mock-ups as a private Artifact for
+    viewing;
+  - **decision sheet** — a single document with options that the owner fills in.
+- **Confirmation of candidate defects** (RA-F04 — Flat without a filter in the example, RA-F05 — exposure
+  carried over on a type change, RA-G03 — no visible Delete): a probe, if permitted (§6); otherwise they
+  go to RA.P as "verify, then fix" Tasks.
+- **Done when:**
+  - every RA-A…RA-H finding from Phase A has a recommendation in the package or an explicit "no change,
+    because …";
+  - every item requiring a decision names the decision being replaced and the consequences for data and tests;
+  - there is no new UX recommendation without a source or justification.
+- **External search:** targeted, only for R4: Material and Android guidance.
 
-### RA.D — Решения владельца
+### RA.D — Owner decisions
 
-- **Раунд 1:** имя, app id и направление знака — после R2d.
-- **Раунд 2:** направление продукта по листу решений — после R2e.
-- **Фиксация:** только реальные ответы владельца, в DECISIONS E.1. Там же поправки ADR-019, ADR-020,
-  SI-003 и строки Stage 11 либо новый ADR-021 «Направление продукта 2026-10». Рекомендация агента
-  решением не является.
-- **Готово, когда:** у каждого вопроса листа есть ответ владельца или явная отсрочка с причиной.
+- **Round 1:** name, app id and mark direction — after R2d.
+- **Round 2:** product direction via the decision sheet — after R2e.
+- **Recording:** only the owner's actual answers, in DECISIONS E.1. In the same place, amendments to ADR-019, ADR-020,
+  SI-003 and the Stage 11 rows, or a new ADR-021 "Product direction 2026-10". An agent's recommendation
+  is not a decision.
+- **Done when:** each question on the sheet has an owner answer or an explicit deferral with a reason.
 
-### RA.P — Дорожная карта до релиза
+### RA.P — Roadmap to release
 
-- **Содержание:**
-  - новые Stages → Tasks: одна цель, зависимости, исключения, критерии приёмки, класс проверки V1,
-    условие остановки;
-  - каждая находка ревью сопоставлена с Task или явной отсрочкой;
-  - перенос всего, что уже есть:
-    - S11.6 и S11.7;
-    - строки Stage 11, которые инвалидирует редизайн, и строки, сохраняющие PASS (V3);
-    - действия владельца: подпись, политика, RD-01, S11P-03, ТЗ, закрытый тест Play;
-    - TD-104 и отложенные S9.10–S9.12.
-- **Рекомендуемый принцип (решает RA.P):** сначала UI-изменения, затем телефонные проверки и
-  readiness на финальной сборке. Иначе S11.6 придётся повторять.
-- **Новые UX-критерии приёмки** (рендеры и обзор владельцем для UI-Tasks — по K14) действуют только на
-  новые изменения и не переоткрывают прошлые PASS.
-- **Выход:** поправка `POST_ROADMAP_PLAN.md` и `PROGRESS.md`. Документы только.
-- **STOP:** владелец утверждает карту. Реализация — отдельные Tasks.
+- **Contents:**
+  - new Stages → Tasks: one objective, dependencies, exclusions, acceptance criteria, V1 verification class,
+    stop condition;
+  - each review finding mapped to a Task or an explicit deferral;
+  - carry-over of everything that already exists:
+    - S11.6 and S11.7;
+    - Stage 11 rows invalidated by the redesign, and rows that keep their PASS (V3);
+    - owner actions: signing, policy, RD-01, S11P-03, the specification, the Play closed test;
+    - TD-104 and the deferred S9.10–S9.12.
+- **Recommended principle (decided by RA.P):** UI changes first, then phone checks and
+  readiness on the final build. Otherwise S11.6 will have to be repeated.
+- **New UX acceptance criteria** (renders and owner review for UI Tasks — per K14) apply only to
+  new changes and do not reopen past PASSes.
+- **Output:** an amendment to `POST_ROADMAP_PLAN.md` and `PROGRESS.md`. Documents only.
+- **STOP:** the owner approves the roadmap. Implementation — separate Tasks.
 
-### T-CI — Диагностика TD-104 (отдельный технический трек)
+### T-CI — TD-104 diagnosis (separate technical track)
 
-- **Нужно:** лог упавшего job (вы — войдя в GitHub, или авторизованный `gh`).
-- **Порядок:** определить тест, классифицировать (платформа, окружение или реальный дефект), затем
-  предложить корректирующий Task.
-- **Почему не блокирует RA.R2:** локальный gate S11.C2 на Windows остаётся валидным доказательством
-  на тех же входах (V3), а исследование не меняет код. **Становится блокером** для любой строки
-  Stage 11 о CI и до первой загрузки в стор.
+- **Needed:** the log of the failed job (you — signed in to GitHub, or an authorized `gh`).
+- **Order:** identify the test, classify it (platform, environment or real defect), then
+  propose a corrective Task.
+- **Why it does not block RA.R2:** the local S11.C2 gate on Windows remains valid evidence
+  on the same inputs (V3), and research does not change code. **It becomes a blocker** for any Stage 11
+  row about CI and before the first store upload.
 
-## 4. Трассировка находок Phase A
+## 4. Phase A finding traceability
 
-| Задача | Находки |
+| Task | Findings |
 | --- | --- |
-| R2a | RA-A01, A06, A07, D05, E04, F01, G01, G02, G04, H03 (входы); K4, K14 (контекст) |
-| R2b | RA-A02, A03, A04, A08, F05, F06, F07, F08, F09, F10, F11, H02; научная часть E01; K5, K6, K7 |
-| R2c | RA-E01, E02, E03, E05, E06; погодная часть D03 |
-| R2d | RA-C01, C02, C03, C04, A09, часть I04 (имя; лицензия — переиспользуется S9.11); K10 |
-| R2e | RA-B01–B06, D01–D06, F01–F04, F09, G01–G05, H01–H03, A01, A05, A06, A08; K4, K8, K9, K11, K14; дефекты-кандидаты F04, F05, G03 |
-| RA.D | вопросы 1–8 из Phase A §5; имя, app id и знак; лицензия (RG-12), если владелец захочет пересмотреть |
-| RA.P | RA-A10, I01, I03, I05, всё принятое в RA.D, K12, K13 |
+| R2a | RA-A01, A06, A07, D05, E04, F01, G01, G02, G04, H03 (inputs); K4, K14 (context) |
+| R2b | RA-A02, A03, A04, A08, F05, F06, F07, F08, F09, F10, F11, H02; scientific part of E01; K5, K6, K7 |
+| R2c | RA-E01, E02, E03, E05, E06; weather part of D03 |
+| R2d | RA-C01, C02, C03, C04, A09, part of I04 (name; licence — S9.11 is reused); K10 |
+| R2e | RA-B01–B06, D01–D06, F01–F04, F09, G01–G05, H01–H03, A01, A05, A06, A08; K4, K8, K9, K11, K14; candidate defects F04, F05, G03 |
+| RA.D | questions 1–8 from Phase A §5; name, app id and mark; licence (RG-12), if the owner wishes to revisit it |
+| RA.P | RA-A10, I01, I03, I05, everything accepted in RA.D, K12, K13 |
 | T-CI | RA-I02, K3 (TD-104) |
-| Checkpoint (§8) | K1, K2, K3 (записи PROGRESS) |
+| Checkpoint (§8) | K1, K2, K3 (PROGRESS entries) |
 
-Каждая находка Phase A входит хотя бы в одну строку. Пересечения намеренные: R2e получает выводы
-профильных шагов и формулирует их как решения.
+Every Phase A finding appears in at least one row. Overlaps are intentional: R2e receives the conclusions
+of the specialised steps and formulates them as decisions.
 
-## 5. Шлюзы одобрения
+## 5. Approval gates
 
-| Шлюз | Что одобряет владелец | Когда |
+| Gate | What the owner approves | When |
 | --- | --- | --- |
-| G0 | Этот план; git-checkpoint (§8); опциональные разрешения (§6) | Сейчас |
-| G1 | Имя, app id, направление знака | После R2d |
-| G2 | Направление продукта: охват, Home, поток планировщика, Capture-поля, SNR, объём, погода, Луна, провайдеры, Settings | После R2e |
-| G3 | Дорожная карта до релиза | После RA.P |
-| G4+ | Каждый Task реализации или их группа (как сейчас) | После G3 |
+| G0 | This plan; git checkpoint (§8); optional permissions (§6) | Now |
+| G1 | Name, app id, mark direction | After R2d |
+| G2 | Product direction: scope, Home, planner flow, Capture fields, SNR, size, weather, Moon, providers, Settings | After R2e |
+| G3 | Roadmap to release | After RA.P |
+| G4+ | Each implementation Task or group of Tasks (as now) | After G3 |
 
-Шлюзы соответствуют списку из запроса: удаление или изменение функций, научные модели, крупные
-потоки, провайдеры, идентичность, итоговое направление и карта. Исследование внутри RA.R2 идёт без
-промежуточных вопросов. Владелец спрашивается только тогда, когда без ответа исследование
-невозможно (§7).
+The gates correspond to the list from the request: removal or change of features, scientific models, major
+flows, providers, identity, the final direction and the roadmap. Research inside RA.R2 proceeds without
+intermediate questions. The owner is asked only when research is
+impossible without an answer (§7).
 
-## 6. Опциональные разрешения (ускоряют, но не обязательны)
+## 6. Optional permissions (they speed things up but are not required)
 
-1. **Скриншоты текущих экранов с телефона** (Welcome, Home, планировщик пустой и заполненный, диалог
-   блока, Logbook, Library, Settings) — лучшая визуальная база для R2e.
-2. **Временные пробы:** файлы под `test/`, только для подтверждения RA-F04, F05, G03 и host-рендеров
-   экранов. Не коммитятся и удаляются после; результат записывается одной строкой с исходным
-   состоянием. Без этого разрешения дефекты-кандидаты идут в RA.P.
-3. **Лог CI** (T-CI).
+1. **Screenshots of the current screens from the phone** (Welcome, Home, the planner empty and filled, the block
+   dialog, Logbook, Library, Settings) — the best visual baseline for R2e.
+2. **Temporary probes:** files under `test/`, only to confirm RA-F04, F05, G03 and host renders
+   of screens. Not committed and deleted afterwards; the result is recorded in one line with the starting
+   state. Without this permission the candidate defects go to RA.P.
+3. **CI log** (T-CI).
 
-## 7. Автономия и условия остановки RA.R2
+## 7. RA.R2 autonomy and stop conditions
 
-- **Внутри утверждённой RA.R2 без вопросов:** чтение, поиск в вебе, сравнение, субагенты для R2a–R2d,
-  запись файлов `research/RA_R2*.md`.
-- **Запрещено:**
-  - код приложения, тесты (кроме разрешения §6.2), зависимости;
-  - изменение существующих решений и governance;
-  - переход в RA.D или RA.P без шлюза.
-- **STOP-условия:**
-  1. Пакет R2e доставлен, это нормальный конец.
-  2. Найдено противоречие, которое делает невозможным дальнейший анализ без решения владельца.
-  3. Нужна правка вне разрешений.
-- **Недоступный источник или инструмент** — это зафиксированный пробел, а не повод останавливаться
-  или догадываться.
+- **Inside the approved RA.R2, without questions:** reading, web search, comparison, subagents for R2a–R2d,
+  writing `research/RA_R2*.md` files.
+- **Prohibited:**
+  - application code, tests (except under permission §6.2), dependencies;
+  - changing existing decisions and governance;
+  - moving to RA.D or RA.P without a gate.
+- **STOP conditions:**
+  1. The R2e package is delivered; this is the normal end.
+  2. A contradiction is found that makes further analysis impossible without an owner decision.
+  3. An edit outside the permissions is needed.
+- **An unavailable source or tool** is a recorded gap, not a reason to stop
+  or guess.
 
-## 8. Документация, проверка, git
+## 8. Documentation, verification, git
 
-- **Класс V1:** «документация». Проверяется, что ссылки и ID разрешаются, текст согласован с
-  цитируемыми документами, `git diff --check` чист. Gate не запускается.
-- **Исследовательские утверждения:** URL, дата обращения, факт или вывод. Конкуренты — без
-  копирования чужих ассетов.
-- **Приватность:** репозиторий **публичный**. Скриншоты-референсы владельца показывают его адрес и
-  координаты, поэтому **их не коммитить**; при необходимости — обрезанные копии без местоположения.
-  Отвечает на K1: ревью можно положить в `docs/refinement/owner-review/` только как текст, без этих
-  изображений.
-- **PROGRESS:** обновляется на границах RA.R2, RA.D и RA.P, одной строкой, с одобрения.
-- **Предлагаемый checkpoint (G0)** — два коммита только с документацией, без
-  `macos/Flutter/GeneratedPluginRegistrant.swift` (там только смена окончаний строк):
+- **V1 class:** "documentation". It is checked that links and IDs resolve, the text is consistent with
+  the cited documents, and `git diff --check` is clean. The gate is not run.
+- **Research claims:** URL, access date, fact or conclusion. Competitors — without
+  copying their assets.
+- **Privacy:** the repository is **public**. The owner's reference screenshots show his address and
+  coordinates, so **do not commit them**; if needed — cropped copies without location.
+  Answers K1: the review may be placed in `docs/refinement/owner-review/` only as text, without these
+  images.
+- **PROGRESS:** updated at the RA.R2, RA.D and RA.P boundaries, in one line, with approval.
+- **Proposed checkpoint (G0)** — two documentation-only commits, without
+  `macos/Flutter/GeneratedPluginRegistrant.swift` (it contains only a line-ending change):
   1. *docs: instruction correction and Product Reassessment scope (2026-10-17)*:
      - CLAUDE.md;
      - `.agents/rules/00`, `.agents/rules/05`, `.agents/skills/README.md`;
@@ -291,33 +291,33 @@ RA.P   дорожная карта Stages → Tasks до релиза (толь�
   2. *docs: RA.R1 assessment, TD-104, RA.R2 plan proposal*:
      - `research/RA_R1_PHASE_A_ASSESSMENT.md`;
      - `TECH_DEBT.md` (TD-104);
-     - этот файл;
-     - PROGRESS с поправками K2/K3:
-       - отчёт RA.R1 — в файле;
-       - проект Moonlit доступен;
-       - код запушен владельцем, `origin/main` = `b1df679`, PR #1 2026-10-16;
-       - репозиторий публичный;
-       - CI красный, TD-104;
-       - RD-17 и «make the repository public» обновлены как факты, а не решения.
-- **Push:** не входит, нужна отдельная команда владельца. CI-фильтр всё равно пропустил бы
-  изменения, состоящие только из документации.
+     - this file;
+     - PROGRESS with the K2/K3 corrections:
+       - the RA.R1 report — in a file;
+       - the Moonlit project is available;
+       - code pushed by the owner, `origin/main` = `b1df679`, PR #1 2026-10-16;
+       - the repository is public;
+       - CI is red, TD-104;
+       - RD-17 and «make the repository public» updated as facts, not decisions.
+- **Push:** not included; requires a separate owner command. The CI filter would skip
+  documentation-only changes anyway.
 
-## 9. Рекомендуемый первый шаг
+## 9. Recommended first step
 
-После G0 запустить RA.R2 одной группой: R2a, R2b, R2c и R2d параллельно (субагенты; ключевые
-утверждения главный агент проверяет сам), затем R2e. Если владелец предпочитает последовательный
-порядок, начать с **R2a**: она питает все остальные выводы о том, что нужно пользователю.
-R2d можно отдать на решение (G1), не дожидаясь R2e.
+After G0, run RA.R2 as one group: R2a, R2b, R2c and R2d in parallel (subagents; the main agent verifies the key
+claims itself), then R2e. If the owner prefers a sequential
+order, start with **R2a**: it feeds all the other conclusions about what the user needs.
+R2d can be handed over for decision (G1) without waiting for R2e.
 
-## 10. Уточнение governance (минимальное)
+## 10. Governance clarification (minimal)
 
-Менять CLAUDE.md не нужно: утверждённый групповой запуск с названными шагами и условиями остановки
-уже разрешён («A grouped run must explicitly name its authorized Tasks and stop conditions»). Нужна
-одна ясность в [PRODUCT_REASSESSMENT.md](PRODUCT_REASSESSMENT.md): строка «Outputs go in the chat
-unless the active Task explicitly authorizes a report file» противоречит практике. Отчёт RA.R1 уже
-однажды был потерян в чате. Предлагаемая формулировка, после одобрения:
+CLAUDE.md does not need to change: an approved grouped run with named steps and stop conditions
+is already permitted («A grouped run must explicitly name its authorized Tasks and stop conditions»). One
+clarification is needed in [PRODUCT_REASSESSMENT.md](PRODUCT_REASSESSMENT.md): the line «Outputs go in the chat
+unless the active Task explicitly authorizes a report file» contradicts practice. The RA.R1 report was already
+lost in the chat once. Proposed wording, after approval:
 
 > RA.R2–RA.P write their reports to `docs/refinement/research/RA_R2*.md` (and RA.P to the plan and
 > PROGRESS); the chat carries the summary.
 
-Одобрение этого плана (G0) можно считать явным разрешением файлов отчётов и без правки текста.
+Approval of this plan (G0) can be considered explicit permission for report files even without the text edit.

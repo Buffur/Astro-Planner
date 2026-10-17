@@ -1,310 +1,310 @@
-# RA.R2c — Ночные условия: погода и Луна (R2, R3 — подача)
+# RA.R2c — Night conditions: weather and Moon (R2, R3 — presentation)
 
-> Исследование для RA.R2, шаг R2c ([план](../prompts/RA_R2_RESEARCH_PLAN.md) §3 «R2c»), 2026-10-17.
-> Охват: RA-E01, E02, E03, E05, E06 и погодная часть RA-D03 ([Phase A](RA_R1_PHASE_A_ASSESSMENT.md)).
-> **Только исследование.** Ничего здесь не решено. Каждый вариант в §7 — вход для RA.D. Новый
-> провайдер возможен только как вариант для решения владельца (ADR-012 §2, trap 22).
-> Метки: **FACT** — проверено по первичному источнику или замеру (URL или `file:line`, дата
-> обращения 2026-10-17); **INFERENCE** — вывод агента; **ПО ОПИСАНИЮ** — вторичный источник или
-> форум, не подтверждено.
+> Research for RA.R2, step R2c ([plan](../prompts/RA_R2_RESEARCH_PLAN.md) §3 "R2c"), 2026-10-17.
+> Coverage: RA-E01, E02, E03, E05, E06 and the weather part of RA-D03 ([Phase A](RA_R1_PHASE_A_ASSESSMENT.md)).
+> **Research only.** Nothing here is decided. Every option in §7 is an input to RA.D. A new
+> provider is possible only as an option for the owner's decision (ADR-012 §2, trap 22).
+> Labels: **FACT** — verified against a primary source or a measurement (URL or `file:line`, access
+> date 2026-10-17); **INFERENCE** — the agent's conclusion; **AS DESCRIBED** — a secondary source or
+> forum, not confirmed.
 
-## 1. Метод
+## 1. Method
 
-- **Базовая линия кода не перепроверялась целиком.** Взяты строки Phase A RA-E01…E06 и D03.
-  Выборочно прочитаны только места, нужные для оценок:
-  - `lib/data/repositories/open_meteo_weather_repository.dart` — запрос (`start_hour..end_hour`
-    одной ночи, `models=best_match`, горизонт 16 дней);
-  - `lib/data/services/open_meteo_forecast_parser.dart:15-27` — 11 часовых переменных;
-  - `lib/domain/repositories/weather_snapshot_store.dart` — ключ кэша: сайт, модель и ночь;
-  - `lib/domain/models/night_weather.dart:17-27` — `WeatherFreshness` 3 ч / 12 ч;
-  - `lib/domain/services/moon_calculator.dart:410-470` — сетка 5 мин, rise/set, `conditionsForNight`;
-  - `lib/domain/services/moon_calculator.dart:385-390` — `phaseLongitudeDeg` уже есть;
+- **The code baseline was not fully re-verified.** The Phase A rows RA-E01…E06 and D03 were taken as given.
+  Only the places needed for the estimates were read selectively:
+  - `lib/data/repositories/open_meteo_weather_repository.dart` — the request (`start_hour..end_hour`
+    of one night, `models=best_match`, 16-day horizon);
+  - `lib/data/services/open_meteo_forecast_parser.dart:15-27` — 11 hourly variables;
+  - `lib/domain/repositories/weather_snapshot_store.dart` — cache key: site, model and night;
+  - `lib/domain/models/night_weather.dart:17-27` — `WeatherFreshness` 3 h / 12 h;
+  - `lib/domain/services/moon_calculator.dart:410-470` — 5-min grid, rise/set, `conditionsForNight`;
+  - `lib/domain/services/moon_calculator.dart:385-390` — `phaseLongitudeDeg` already exists;
   - `lib/domain/models/moon_conditions.dart:80-148` — `MoonDuringDark`, CALC-43;
-  - `lib/domain/services/visibility_calculator.dart:171` — `sampleStep` 5 мин;
-  - `lib/domain/models/session_night.dart:37` — длина ночи 24 ч;
-  - `lib/presentation/viewmodels/night_conditions_viewmodel.dart:180-192` — Луна считается
-    синхронно в ViewModel и кэшируется по ключу;
-  - `lib/presentation/viewmodels/candidates_viewmodel.dart:40` — образец `Isolate.run`.
-- **Решения:** ADR-010, ADR-012 и ADR-013 (`docs/DECISIONS.md`). CALC-32 и CALC-43, а также запись
-  S1.13 / SCI-03 (`docs/SCIENTIFIC_INTEGRITY.md`). Privacy и COMPLIANCE. Trap 22
+  - `lib/domain/services/visibility_calculator.dart:171` — `sampleStep` 5 min;
+  - `lib/domain/models/session_night.dart:37` — night length 24 h;
+  - `lib/presentation/viewmodels/night_conditions_viewmodel.dart:180-192` — the Moon is computed
+    synchronously in the ViewModel and cached by key;
+  - `lib/presentation/viewmodels/candidates_viewmodel.dart:40` — the `Isolate.run` pattern.
+- **Decisions:** ADR-010, ADR-012 and ADR-013 (`docs/DECISIONS.md`). CALC-32 and CALC-43, as well as the
+  S1.13 / SCI-03 entry (`docs/SCIENTIFIC_INTEGRITY.md`). Privacy and COMPLIANCE. Trap 22
   (`docs/ENGINEERING_GUARDRAILS.md`).
-- **Замеры у провайдеров (FACT, 2026-10-17):** выполнено несколько ручных HTTP-запросов `curl`
-  к публичным API. Координаты — нейтральная точка Гринвич (51.48, 0.0), не данные пользователя.
-  Ответы хранились во временном каталоге сессии, в репозиторий не попали. Сборка, тесты и код
-  приложения не запускались.
-- **Moonlit:** читались только `README.md`, `index.html`, фрагменты `app.js` и `astronomy.js`,
-  перечень `vendor/`. Ничего не исполнялось. Файла лицензии в корне нет (FACT: `ls` корня; есть
-  только `vendor/*-LICENSE.txt`). Переносится **только концепт**.
-- **Веб:** WebSearch и WebFetch. Цитаты короче 15 слов. Отзывы и форумы помечены как анекдот.
+- **Provider measurements (FACT, 2026-10-17):** several manual `curl` HTTP requests were made
+  to public APIs. Coordinates: the neutral Greenwich point (51.48, 0.0), not user data.
+  Responses were kept in the session's temporary directory and did not enter the repository. No build, tests or
+  application code were run.
+- **Moonlit:** only `README.md`, `index.html`, fragments of `app.js` and `astronomy.js`, and the
+  `vendor/` listing were read. Nothing was executed. There is no licence file at the root (FACT: `ls` of the root; there
+  is only `vendor/*-LICENSE.txt`). **Only the concept** is carried over.
+- **Web:** WebSearch and WebFetch. Quotes are shorter than 15 words. Reviews and forums are marked as anecdotal.
 
-## 2. Значимые параметры ночи
+## 2. Significant night parameters
 
-| Параметр | Почему важен для съёмки | Источник | Есть в AstroPlan сейчас |
+| Parameter | Why it matters for imaging | Source | Present in AstroPlan now |
 | --- | --- | --- | --- |
-| **Облачность общая** | Главный фактор «можно ли снимать». Модельная доля площади, а не вид неба. Точность падает с упреждением: у CMC при «в основном ясно» ≈80 % верных прогнозов до 12 ч и ≈76 % на 36–48 ч; дальше 48 ч точность неизвестна (FACT, Clear Sky Chart key) | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [Open-Meteo docs](https://open-meteo.com/en/docs) | Да; на Home — диапазон и возраст |
-| **Облачность по ярусам** (low < 3 км, mid 3–8 км, high > 8 км) | Тонкие высокие облака портят снимок даже при малой общей облачности (ADR-012 §3). Частичная облачность в двух ярусах может закрыть всё небо (FACT, meteoblue) | [Open-Meteo docs](https://open-meteo.com/en/docs); [meteoblue seeing help](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | Да, в деталях |
-| **Осадки** (вероятность) | Риск для оборудования. В Open-Meteo это вероятность > 0,1 мм за **предыдущий** час. Значение всегда берётся из ансамблей (GFS, ICON, IFS) (FACT) | [Open-Meteo docs](https://open-meteo.com/en/docs) | Да |
-| **Ветер и порывы** | Ветер не решает, можно ли наблюдать, но для длиннофокусной съёмки нужен слабый ветер (FACT, CSC). На практике ветер срывает гидирование и раскачивает гид-трубу и кабели (ПО ОПИСАНИЮ: форумы AstroBin, [astropix](https://astropix.com/html/astrophotography/phd2_autoguiding.html)). Порыв в Open-Meteo — максимум за предыдущий час | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [AstroBin](https://app.astrobin.com/forum/topic/84913/phd2-not-giving-sufficient-corrections-causing-severe-star-trails) | Да, в деталях |
-| **Влажность и точка росы** | Риск росы на оптике. Роса вероятнее при ясном небе, падающей температуре и слабом ветре, и она не сводится к одной влажности (FACT, CSC). В AstroPlan это эвристика CALC-32: T − Td ≤ запас. Подписана как эвристика | [CSC key](https://www.cleardarksky.com/c/WAkey.html); CALC-32 | Да, в деталях |
-| **Температура** | Охлаждение толстых зеркал и токи в трубе; ёмкость батарей на холоде (FACT, CSC). Уход фокуса при изменении температуры: пользователи N.I.N.A. ставят перефокусировку на ΔT ≈ 1 °C, но сами называют порог произвольным (ПО ОПИСАНИЮ, [AstroBin](https://app.astrobin.com/forum/topic/186916/autofocus-questions)) | [CSC key](https://www.cleardarksky.com/c/WAkey.html) | Да |
-| **Seeing** (турбулентность, ″) | Ограничивает мелкие детали. Мало связан с водяным паром, поэтому хороший seeing часто совпадает с плохой прозрачностью (FACT, CSC). Шкала CSC откалибрована под инструменты 11–14″. **INFERENCE:** масштаб = 206,265 × пиксель (µм) / фокус (мм). У телефона (≈6,5 мм, 1,2 µм) ≈38″/px, у DSLR с объективом 50 мм и пикселем 4,3 µм ≈18″/px. Оба много больше seeing 1–3″. Seeing существенен только для длинного фокуса: при 500 мм и пикселе 4 µм это ≈1,7″/px | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [meteoblue](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | **Нет:** ни одна переменная Open-Meteo его не даёт (ADR-012 §3) |
-| **Transparency** (прозрачность столба) | Глубина и контраст снимка. У CSC прозрачность считается из полного количества водяного пара, без дыма. При облачности > 30 % CSC её не прогнозирует (FACT) | [CSC key](https://www.cleardarksky.com/c/WAkey.html) | **Нет.** Горизонтальная видимость сознательно не выдаётся за прозрачность (ADR-012 §8) |
-| **Дым и аэрозоль (AOD)** | Любой дым, кроме «нет дыма», вероятно снижает прозрачность (FACT, CSC: строка Smoke, модель FireWork). В Astrospheric дым входит в Transparency, источник — модель RAP (FACT) | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [Astrospheric](https://www.astrospheric.com/DynamicContent/astrospheric.php) | Нет |
-| **Струйное течение** (ветер ≈ 200–250 гПа) | Признак плохого seeing. По meteoblue плохой seeing обычно бывает при скорости > 35 м/с и < 5 м/с. Это эмпирическое правило провайдера, не физический порог | [meteoblue](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | Нет |
-| **Lifted index / CAPE** | Неустойчивость атмосферы: конвекция, грозы. Входит в 7Timer ASTRO. Для ночной съёмки вторично (INFERENCE) | [7Timer doc](https://www.7timer.info/doc.php?lang=en) | Нет |
-| **Луна** | Освещённость и время над горизонтом в тёмный период. Это факт, а не «влияние» (ADR-010) | CALC-28 и CALC-43 | Да: «Moon up X of Y dark» |
+| **Total cloud cover** | The main "can I image" factor. A modelled area fraction, not the look of the sky. Accuracy drops with lead time: for CMC, "mostly clear" forecasts are ≈80 % correct up to 12 h and ≈76 % at 36–48 h; beyond 48 h the accuracy is unknown (FACT, Clear Sky Chart key) | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [Open-Meteo docs](https://open-meteo.com/en/docs) | Yes; on Home — range and age |
+| **Cloud cover by layer** (low < 3 km, mid 3–8 km, high > 8 km) | Thin high clouds spoil an image even at low total cloud cover (ADR-012 §3). Partial cloud in two layers can cover the whole sky (FACT, meteoblue) | [Open-Meteo docs](https://open-meteo.com/en/docs); [meteoblue seeing help](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | Yes, in details |
+| **Precipitation** (probability) | Risk to equipment. In Open-Meteo this is the probability of > 0.1 mm over the **preceding** hour. The value always comes from ensembles (GFS, ICON, IFS) (FACT) | [Open-Meteo docs](https://open-meteo.com/en/docs) | Yes |
+| **Wind and gusts** | Wind does not decide whether observing is possible, but long-focal-length imaging needs light wind (FACT, CSC). In practice wind breaks guiding and shakes the guide scope and cables (AS DESCRIBED: AstroBin forums, [astropix](https://astropix.com/html/astrophotography/phd2_autoguiding.html)). A gust in Open-Meteo is the maximum over the preceding hour | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [AstroBin](https://app.astrobin.com/forum/topic/84913/phd2-not-giving-sufficient-corrections-causing-severe-star-trails) | Yes, in details |
+| **Humidity and dew point** | Risk of dew on optics. Dew is more likely with clear sky, falling temperature and light wind, and it does not reduce to humidity alone (FACT, CSC). In AstroPlan this is the CALC-32 heuristic: T − Td ≤ margin. Labelled as a heuristic | [CSC key](https://www.cleardarksky.com/c/WAkey.html); CALC-32 | Yes, in details |
+| **Temperature** | Cooling of thick mirrors and tube currents; battery capacity in the cold (FACT, CSC). Focus drift with temperature change: N.I.N.A. users set refocusing at ΔT ≈ 1 °C but themselves call the threshold arbitrary (AS DESCRIBED, [AstroBin](https://app.astrobin.com/forum/topic/186916/autofocus-questions)) | [CSC key](https://www.cleardarksky.com/c/WAkey.html) | Yes |
+| **Seeing** (turbulence, ″) | Limits fine detail. Weakly related to water vapour, so good seeing often coincides with poor transparency (FACT, CSC). The CSC scale is calibrated for 11–14″ instruments. **INFERENCE:** scale = 206,265 × pixel (µm) / focal length (mm). For a phone (≈6.5 mm, 1.2 µm) ≈38″/px, for a DSLR with a 50 mm lens and a 4.3 µm pixel ≈18″/px. Both are much larger than 1–3″ seeing. Seeing matters only for long focal lengths: at 500 mm and a 4 µm pixel it is ≈1.7″/px | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [meteoblue](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | **No:** no Open-Meteo variable provides it (ADR-012 §3) |
+| **Transparency** (column transparency) | Depth and contrast of the image. CSC computes transparency from total water vapour, without smoke. At cloud cover > 30 % CSC does not forecast it (FACT) | [CSC key](https://www.cleardarksky.com/c/WAkey.html) | **No.** Horizontal visibility is deliberately not presented as transparency (ADR-012 §8) |
+| **Smoke and aerosol (AOD)** | Any smoke other than "no smoke" probably reduces transparency (FACT, CSC: the Smoke row, FireWork model). In Astrospheric smoke is part of Transparency, sourced from the RAP model (FACT) | [CSC key](https://www.cleardarksky.com/c/WAkey.html); [Astrospheric](https://www.astrospheric.com/DynamicContent/astrospheric.php) | No |
+| **Jet stream** (wind at ≈ 200–250 hPa) | An indicator of poor seeing. According to meteoblue, poor seeing usually occurs at speeds > 35 m/s and < 5 m/s. This is the provider's empirical rule, not a physical threshold | [meteoblue](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing) | No |
+| **Lifted index / CAPE** | Atmospheric instability: convection, thunderstorms. Part of 7Timer ASTRO. Secondary for night imaging (INFERENCE) | [7Timer doc](https://www.7timer.info/doc.php?lang=en) | No |
+| **Moon** | Illumination and time above the horizon during the dark period. This is a fact, not an "impact" (ADR-010) | CALC-28 and CALC-43 | Yes: "Moon up X of Y dark" |
 
-**Вывод (INFERENCE).** У AstroPlan уже есть все «наземные» параметры, которые показывают Clear
-Outside и Clear Sky Chart:
-- облачность по ярусам;
-- осадки;
-- ветер и порывы;
-- температура, точка росы и влажность;
-- видимость.
+**Conclusion (INFERENCE).** AstroPlan already has all the "ground-level" parameters that Clear
+Outside and Clear Sky Chart show:
+- cloud cover by layer;
+- precipitation;
+- wind and gusts;
+- temperature, dew point and humidity;
+- visibility.
 
-Clear Outside показывает тот же набор строк (FACT, [clearoutside.com/forecast](https://clearoutside.com/forecast/51.48/0.00)).
-Пробел не в данных, а в подаче. Данные запрашиваются только на одну ночь, на Home из них видна
-только облачность (RA-E02, E03).
+Clear Outside shows the same set of rows (FACT, [clearoutside.com/forecast](https://clearoutside.com/forecast/51.48/0.00)).
+The gap is not in the data but in the presentation. Data are requested for one night only, and of these only
+cloud cover is visible on Home (RA-E02, E03).
 
-Чего нет совсем: seeing, transparency, дыма и AOD. Seeing важен только для длиннофокусных
-установок. Для класса «телефон/DSLR широкоугольно» он вторичен (INFERENCE, масштаб выше).
+What is missing entirely: seeing, transparency, smoke and AOD. Seeing matters only for long-focal-length
+setups. For the "phone/DSLR wide-field" class it is secondary (INFERENCE, scale above).
 
-## 3. Матрица провайдеров
+## 3. Provider matrix
 
-| Провайдер | Данные | Лицензия и условия | Стоимость | Атрибуция | Приватность (что уходит) | Поведение при отказе и надёжность |
+| Provider | Data | Licence and terms | Cost | Attribution | Privacy (what leaves the device) | Failure behaviour and reliability |
 | --- | --- | --- | --- | --- | --- | --- |
-| **Open-Meteo Forecast** (текущий) | 11 переменных ADR-012, ежечасно, до 16 дней, `best_match`. **Доступны без нового провайдера** (FACT, замер 2026-10-17, 384 ч): `total_column_integrated_water_vapour`, `wind_speed_250hPa` и `wind_speed_200hPa`, `cape`, `boundary_layer_height`. `lifted_index` для `best_match` в точке замера — все 384 значения null. Seeing и transparency нет | Бесплатно для некоммерческого использования. Определение — «без подписок и рекламы». Лимиты: < 10 000 в сутки, 5 000 в час, 600 в минуту, 300 000 в месяц. Запрос с > 10 переменных или > 2 недель считается дробно, например 1,5 вызова (FACT, [terms](https://open-meteo.com/en/terms), [pricing](https://open-meteo.com/en/pricing)) | 0 при текущей модели (free, no ads) | CC BY 4.0, «Weather data by Open-Meteo.com» уже показывается | Координаты сайта и интервал времени. IP-адреса и координаты в логах хранятся 90 дней (FACT, terms) | SLA нет: бесперебойность не гарантируется, злоупотребления блокируются (FACT, terms). Отказы уже обработаны: Unavailable, Malformed, OutOfRange, кэш с возрастом (RA-E05) |
-| **Open-Meteo Air Quality** (тот же оператор, другой хост `air-quality-api.open-meteo.com`) | `aerosol_optical_depth` (550 нм) и `dust` из CAMS global: 0,4° (≈45 км), 3-часовой шаг, прогноз 5 дней, обновление каждые 12 ч (FACT, [docs](https://open-meteo.com/en/docs/air-quality-api)). Замер: 168 ч в ответе, последние 35 — null (≈5 дней) | Те же условия Open-Meteo | 0 | Нужна атрибуция **CAMS** и ссылка на Open-Meteo (FACT, docs) | Те же координаты, но **новый хост и новое поле** → обновить privacy и COMPLIANCE (trap 22) | Как у Open-Meteo. Горизонт 5 дней короче 16 → в остальные ночи «нет данных» |
-| **7Timer! ASTRO** | Облачность, seeing и transparency (коды 1–8; seeing < 0,5″ … > 2,5″; transparency в mag/airmass), lifted index, RH, ветер 10 м, тип осадок, T. Модель — GFS, обновление 4 раза в сутки (FACT, [doc](https://www.7timer.info/doc.php?lang=en)). **Замер:** шаг 3 ч, 24 точки = 72 ч; поле `init` = время прогона (UTC); ответ 5,3 КБ; HTTPS работает; ключ не нужен | Данные бесплатны, использование и распространение разрешены для **некоммерческих** целей. Разработчиков просят уведомить оператора. Использование — на свой риск (FACT, doc) | 0 | Оператор: Shanghai Astronomical Observatory, CAS. Формальной строки атрибуции нет; разумно указать «7Timer!» (INFERENCE) | **Новый получатель** (Китай): координаты до 0,001° и IP. Политику конфиденциальности оператора найти не удалось (пробел в доказательствах) | SLA нет. Были многодневные «замороженные» данные: сбои дисков и межсетевого экрана (ПО ОПИСАНИЮ: [форум 2014](https://www.iceinspace.com.au/forum/showthread.php?p=1059455), [блог оператора](https://y234.cn/?p=508)). В трекере 2 открытые задачи, последняя от 2020 г. (FACT, [GitHub](https://github.com/Yeqzids/7timer-issues/issues)). Независимой валидации seeing и transparency не найдено. Свежесть нужно считать от `init`, а не от времени загрузки (INFERENCE) |
-| **Meteoblue** | Seeing в ″, индексы Seeing 1/2, «bad layers» (градиент > 0,5 K на 100 м), струйное течение, облака по трём ярусам (FACT, [help](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing)). На сайте бесплатно на 3 дня, с point+ — на 7 дней | В API **пакета seeing не найдено**. Free Weather API: 10 млн кредитов в год, ≈2 500 вызовов, коммерческое использование разрешено; пакеты Basic, Air (CAPE, LI), Clouds/Trend; пакет Sun & Moon недоступен (FACT, [free API](https://business.meteoblue.com/products/weather-apis/free-weather-api)). Платные API — от 2 400 € в год (FACT, [pricing](https://business.meteoblue.com/pricing)). Seeing есть в потребительском point+ и в виджете-iframe | Платно для seeing | Ссылка meteoblue в виджете; условия не прочитаны | Координаты и ключ API. Виджет-iframe потребовал бы WebView и сторонние запросы | Неприменим: seeing через API не подтверждён |
-| **Astrospheric** | Облачность, transparency с дымом (RAP), seeing по модели Rahill, точка росы. По описанию — модели CMC/RDPS (Северная Америка) | API только с **Astrospheric Professional**. На странице есть баннер о непроизводственных эндпойнтах; «All rights reserved» (FACT, [api info](https://www.astrospheric.com/dynamiccontent/api_info.php)) | Подписка пользователя | — | Ключ и координаты | Неприменим: ключ платной подписки и неясные условия |
-| **ECCC / CMC (RDPS)**: seeing и transparency, источник Clear Sky Chart и Photo Ephemeris | Индексы seeing и sky transparency: GRIB2, 10 км, ежечасно до 84 ч, на повёрнутой сетке RDPS (ПО ОПИСАНИЮ: [рассылка MSC Datamart](https://comm.collab.science.gc.ca/mailman3/hyperkitty/list/dd_info@comm.collab.science.gc.ca/thread/BH3KXVL63I2TJJCQYJUQVRITVGPY7NCO/)). Покрытие: Северная Америка и север Европы (ПО ОПИСАНИЮ, [Photo Ephemeris](https://photoephemeris.com/articles/new-seeing-and-transparency-forecasts)) | ECCC Data Server End-use Licence, коммерческое использование разрешено, атрибуция обязательна (FACT, [licence](https://eccc-msc.github.io/open-data/licence/readme_en/)) | 0 | «Data Source: Environment and Climate Change Canada» | Скачиваются целые GRIB2-файлы: точечного API нет | Неприменим без собственного сервера. Покрытие не глобальное |
-| **MET Norway Locationforecast** | Глобальный прогноз на 9 дней (FACT, [docs](https://api.met.no/weatherapi/locationforecast/2.0/documentation)). Seeing нет | CC BY 4.0, обязательный User-Agent, ≤ 20 запросов/с. Браузерам и мобильным приложениям рекомендован **собственный прокси** (FACT, [ToS](https://api.met.no/doc/TermsOfService)) | 0 | CC BY 4.0 | — | Неприменим напрямую: нужен прокси, бэкенда у AstroPlan нет |
-| **Clear Outside** (только ссылка) | 7 дней ежечасно: ярусы облаков, видимость, туман, осадки, ветер, точка росы, влажность, Луна. Работает на «Meteosource Weather API» (FACT, [страница прогноза](https://clearoutside.com/forecast/51.48/0.00)). Экспериментальный seeing — из 7Timer (ПО ОПИСАНИЮ, [SGL](https://stargazerslounge.com/topic/340555-clear-outside-update)) | Публичного API нет | — | — | Только при открытии ссылки самим пользователем. Координаты попадают в URL, как у lightpollutionmap.app | Отказ — внешняя страница не открылась; приложение не затронуто |
+| **Open-Meteo Forecast** (current) | The 11 ADR-012 variables, hourly, up to 16 days, `best_match`. **Available without a new provider** (FACT, measurement 2026-10-17, 384 h): `total_column_integrated_water_vapour`, `wind_speed_250hPa` and `wind_speed_200hPa`, `cape`, `boundary_layer_height`. `lifted_index` for `best_match` at the measurement point — all 384 values null. No seeing or transparency | Free for non-commercial use. Definition — "no subscriptions and no ads". Limits: < 10,000 per day, 5,000 per hour, 600 per minute, 300,000 per month. A request with > 10 variables or > 2 weeks is counted fractionally, e.g. 1.5 calls (FACT, [terms](https://open-meteo.com/en/terms), [pricing](https://open-meteo.com/en/pricing)) | 0 under the current model (free, no ads) | CC BY 4.0, "Weather data by Open-Meteo.com" is already shown | Site coordinates and time interval. IP addresses and coordinates are kept in logs for 90 days (FACT, terms) | No SLA: uptime is not guaranteed, abuse is blocked (FACT, terms). Failures are already handled: Unavailable, Malformed, OutOfRange, cache with age (RA-E05) |
+| **Open-Meteo Air Quality** (same operator, different host `air-quality-api.open-meteo.com`) | `aerosol_optical_depth` (550 nm) and `dust` from CAMS global: 0.4° (≈45 km), 3-hourly step, 5-day forecast, updated every 12 h (FACT, [docs](https://open-meteo.com/en/docs/air-quality-api)). Measurement: 168 h in the response, the last 35 null (≈5 days) | Same Open-Meteo terms | 0 | **CAMS** attribution and a link to Open-Meteo required (FACT, docs) | Same coordinates, but a **new host and a new field** → update privacy and COMPLIANCE (trap 22) | As for Open-Meteo. The 5-day horizon is shorter than 16 → "no data" for the remaining nights |
+| **7Timer! ASTRO** | Cloud cover, seeing and transparency (codes 1–8; seeing < 0.5″ … > 2.5″; transparency in mag/airmass), lifted index, RH, 10 m wind, precipitation type, T. Model — GFS, updated 4 times a day (FACT, [doc](https://www.7timer.info/doc.php?lang=en)). **Measurement:** 3 h step, 24 points = 72 h; `init` field = run time (UTC); response 5.3 KB; HTTPS works; no key needed | Data are free; use and redistribution are permitted for **non-commercial** purposes. Developers are asked to notify the operator. Use is at one's own risk (FACT, doc) | 0 | Operator: Shanghai Astronomical Observatory, CAS. No formal attribution string; citing "7Timer!" is reasonable (INFERENCE) | **New recipient** (China): coordinates to 0.001° and IP. The operator's privacy policy could not be found (evidence gap) | No SLA. There have been multi-day "frozen" data: disk and firewall failures (AS DESCRIBED: [2014 forum](https://www.iceinspace.com.au/forum/showthread.php?p=1059455), [operator blog](https://y234.cn/?p=508)). The tracker has 2 open issues, the latest from 2020 (FACT, [GitHub](https://github.com/Yeqzids/7timer-issues/issues)). No independent validation of seeing and transparency was found. Freshness must be computed from `init`, not from download time (INFERENCE) |
+| **Meteoblue** | Seeing in ″, Seeing indices 1/2, "bad layers" (gradient > 0.5 K per 100 m), jet stream, clouds in three layers (FACT, [help](https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing)). Free on the website for 3 days, with point+ for 7 days | **No seeing package found** in the API. Free Weather API: 10 million credits per year, ≈2,500 calls, commercial use permitted; packages Basic, Air (CAPE, LI), Clouds/Trend; the Sun & Moon package is unavailable (FACT, [free API](https://business.meteoblue.com/products/weather-apis/free-weather-api)). Paid APIs from €2,400 per year (FACT, [pricing](https://business.meteoblue.com/pricing)). Seeing is available in the consumer point+ and in the iframe widget | Paid for seeing | meteoblue link in the widget; terms not read | Coordinates and API key. The iframe widget would require a WebView and third-party requests | Not applicable: seeing via the API is not confirmed |
+| **Astrospheric** | Cloud cover, transparency with smoke (RAP), seeing from the Rahill model, dew point. As described — CMC/RDPS models (North America) | API only with **Astrospheric Professional**. The page has a banner about non-production endpoints; "All rights reserved" (FACT, [api info](https://www.astrospheric.com/dynamiccontent/api_info.php)) | User subscription | — | Key and coordinates | Not applicable: paid subscription key and unclear terms |
+| **ECCC / CMC (RDPS)**: seeing and transparency, the source of Clear Sky Chart and Photo Ephemeris | Seeing and sky transparency indices: GRIB2, 10 km, hourly up to 84 h, on the rotated RDPS grid (AS DESCRIBED: [MSC Datamart mailing list](https://comm.collab.science.gc.ca/mailman3/hyperkitty/list/dd_info@comm.collab.science.gc.ca/thread/BH3KXVL63I2TJJCQYJUQVRITVGPY7NCO/)). Coverage: North America and northern Europe (AS DESCRIBED, [Photo Ephemeris](https://photoephemeris.com/articles/new-seeing-and-transparency-forecasts)) | ECCC Data Server End-use Licence, commercial use permitted, attribution mandatory (FACT, [licence](https://eccc-msc.github.io/open-data/licence/readme_en/)) | 0 | "Data Source: Environment and Climate Change Canada" | Whole GRIB2 files are downloaded: there is no point API | Not applicable without an own server. Coverage is not global |
+| **MET Norway Locationforecast** | Global 9-day forecast (FACT, [docs](https://api.met.no/weatherapi/locationforecast/2.0/documentation)). No seeing | CC BY 4.0, mandatory User-Agent, ≤ 20 requests/s. Browsers and mobile apps are advised to use **their own proxy** (FACT, [ToS](https://api.met.no/doc/TermsOfService)) | 0 | CC BY 4.0 | — | Not directly applicable: a proxy is needed, and AstroPlan has no backend |
+| **Clear Outside** (link only) | 7 days hourly: cloud layers, visibility, fog, precipitation, wind, dew point, humidity, Moon. Powered by the "Meteosource Weather API" (FACT, [forecast page](https://clearoutside.com/forecast/51.48/0.00)). Experimental seeing comes from 7Timer (AS DESCRIBED, [SGL](https://stargazerslounge.com/topic/340555-clear-outside-update)) | No public API | — | — | Only when the user opens the link themselves. Coordinates go into the URL, as with lightpollutionmap.app | Failure — the external page did not open; the app is unaffected |
 
-**Вывод (INFERENCE).**
-- **Open-Meteo остаётся единственным реалистичным источником** для многодневного обзора: ничего
-  не меняется в лицензии, приватности и стоимости.
-- **Единственный бесплатный точечный JSON-источник seeing и transparency** с глобальным покрытием —
-  7Timer!. Его ограничения:
-  - горизонт 72 ч, шаг 3 ч;
-  - грубые коды на основе GFS;
-  - условие «некоммерческое использование»;
-  - нет SLA и нет найденной политики приватности;
-  - нет независимой валидации.
-- Meteoblue, Astrospheric, ECCC и MET Norway отпадают по условиям, цене или архитектуре: нет
-  бэкенда, ключа, точечного API.
+**Conclusion (INFERENCE).**
+- **Open-Meteo remains the only realistic source** for a multi-day overview: nothing
+  changes in licence, privacy or cost.
+- **The only free point JSON source of seeing and transparency** with global coverage is
+  7Timer!. Its limitations:
+  - 72 h horizon, 3 h step;
+  - coarse GFS-based codes;
+  - the "non-commercial use" condition;
+  - no SLA and no privacy policy found;
+  - no independent validation.
+- Meteoblue, Astrospheric, ECCC and MET Norway drop out on terms, price or architecture: no
+  backend, key or point API.
 
-## 4. Многодневный обзор
+## 4. Multi-day overview
 
-### 4.1. Один запрос на 16 дней (FACT, замер 2026-10-17)
+### 4.1. One request for 16 days (FACT, measurement 2026-10-17)
 
-| Запрос (те же 11 переменных, `best_match`, `timeformat=unixtime`) | Ответ | gzip | Часы | null в хвосте |
+| Request (same 11 variables, `best_match`, `timeformat=unixtime`) | Response | gzip | Hours | Trailing nulls |
 | --- | --- | --- | --- | --- |
-| Одна ночь (`start_hour..end_hour`, как сейчас) | 1 539 Б | — | ≈16 | — |
-| `forecast_days=16` | **21 878 Б** | **6 181 Б** | 384 | 9 ч у большинства переменных; `precipitation_probability` — 21 ч (с часа 363); `visibility` — 11 ч |
+| One night (`start_hour..end_hour`, as now) | 1,539 B | — | ≈16 | — |
+| `forecast_days=16` | **21,878 B** | **6,181 B** | 384 | 9 h for most variables; `precipitation_probability` — 21 h (from hour 363); `visibility` — 11 h |
 
-- **Учёт вызовов:** по правилу Open-Meteo 11 переменных за 16 дней ≈ 11/10 × 16/14 ≈ **1,26
-  вызова** (INFERENCE по [pricing](https://open-meteo.com/en/pricing)). Сейчас ночь стоит 1,1
-  вызова, и смена ночи вызывает новый запрос. С обзором смена ночи в пределах горизонта не
-  требует запроса, так что общее число вызовов **снижается** (INFERENCE).
-- **Сжатие:** `autoUncompress` в `dart:io` по умолчанию `true` (FACT,
-  [api.dart.dev](https://api.dart.dev/dart-io/HttpClient/autoUncompress.html)). Что клиент по
-  умолчанию отправляет `Accept-Encoding: gzip`, не подтверждено (INFERENCE; проверить при
-  реализации).
-- **Хвост горизонта:** последние часы приходят как null. Существующий парсер уже превращает их в
-  unknown, а не в 0 (SI-008, `open_meteo_forecast_parser.dart`). Подача «no forecast» сохраняется
+- **Call accounting:** under the Open-Meteo rule, 11 variables over 16 days ≈ 11/10 × 16/14 ≈ **1.26
+  calls** (INFERENCE from [pricing](https://open-meteo.com/en/pricing)). Currently a night costs 1.1
+  calls, and changing the night triggers a new request. With the overview, changing the night within the horizon does not
+  require a request, so the total number of calls **decreases** (INFERENCE).
+- **Compression:** `autoUncompress` in `dart:io` defaults to `true` (FACT,
+  [api.dart.dev](https://api.dart.dev/dart-io/HttpClient/autoUncompress.html)). Whether the client
+  sends `Accept-Encoding: gzip` by default is not confirmed (INFERENCE; verify during
+  implementation).
+- **Horizon tail:** the last hours arrive as null. The existing parser already turns them into
+  unknown, not 0 (SI-008, `open_meteo_forecast_parser.dart`). The "no forecast" presentation is preserved
   (ADR-012 §5).
 
-### 4.2. Карточка ночи: значения без вердикта (совместимо с ADR-012)
+### 4.2. Night card: values without a verdict (compatible with ADR-012)
 
-Интервал — тот же, что у CALC-32 (закат…восход, h = −0,833°). Новый расчётный интервал не нужен.
-Вариант «только тёмный промежуток на пользовательском пределе» означал бы изменение CALC-32,
-и это решение владельца.
+The interval is the same as CALC-32's (sunset…sunrise, h = −0.833°). No new computed interval is needed.
+An option of "only the dark span at the user's limit" would mean changing CALC-32,
+and that is the owner's decision.
 
-| Поле | Значение | Подача |
+| Field | Value | Presentation |
 | --- | --- | --- |
-| Дата и день недели | «Sat 18 Oct» в зоне сайта | `NightTimeFormatter` (ADR-007) |
-| Облачность | **Диапазон** общей облачности min–max, в % | Иконка — только визуальный класс значения, число всегда рядом. Цвет не «хорошо/плохо». Если известна лишь часть часов — «known N of M h» |
-| Осадки | Максимум вероятности, % | При отсутствии у модели — «—, unknown», никогда не 0 |
-| Ветер | Максимум ветра и порывов, км/ч | Порыв — максимум предыдущего часа (подпись как сейчас) |
-| Роса | Часы с риском росы, «N of M h» | Подпись «heuristic» (CALC-32) |
-| Температура | min–max, °C | — |
-| Луна | Освещённость %, **тёмные часы без Луны** и тип окна (↘ вечер / ↗ утро / • вся ночь / нет) | Считается офлайн. Показывается и вне 16-дневного горизонта |
+| Date and weekday | "Sat 18 Oct" in the site's zone | `NightTimeFormatter` (ADR-007) |
+| Cloud cover | **Range** of total cloud cover min–max, in % | The icon is only a visual class of the value; the number is always beside it. Colour does not mean "good/bad". If only some hours are known — "known N of M h" |
+| Precipitation | Maximum probability, % | When the model lacks it — "—, unknown", never 0 |
+| Wind | Maximum wind and gusts, km/h | Gust — maximum of the preceding hour (label as now) |
+| Dew | Hours with dew risk, "N of M h" | "heuristic" label (CALC-32) |
+| Temperature | min–max, °C | — |
+| Moon | Illumination %, **moon-free dark hours** and window type (↘ evening / ↗ morning / • all night / none) | Computed offline. Shown also beyond the 16-day horizon |
 
-- **Не показывать:**
-  - словесные вердикты («отличная ночь»);
-  - сортировку «лучшая ночь первой»;
-  - цветовую шкалу пригодности;
-  - составной индекс.
+- **Do not show:**
+  - verbal verdicts ("excellent night");
+  - "best night first" sorting;
+  - a suitability colour scale;
+  - a composite index.
 
-  Всё это запрещают ADR-012 §3 и §8 и CLAUDE.md («no black-box Astro Score»).
-- **Слово состояния**, как в референсе `com.twtapp` («Clear», «Cloudy»), — это граница по
-  облачности, придуманная приложением (INFERENCE: произвольный порог). Альтернатива —
-  `weather_code` (WMO) провайдера. Это 12-я переменная и поправка ADR-012 §3, и она описывает
-  погоду в целом, а не астрономические условия. Рекомендация: без слова; число и иконка.
-- **Упреждение:** CMC сам не знает точности дальше 48 ч ([CSC key](https://www.cleardarksky.com/c/WAkey.html)).
-  Поэтому у дальних ночей уместна фактическая подпись «прогноз на N дней вперёд» вместо оценки
-  достоверности (INFERENCE). Ансамблевый разброс Open-Meteo — возможное расширение, вне 1.0.
+  All of these are prohibited by ADR-012 §3 and §8 and by CLAUDE.md ("no black-box Astro Score").
+- **A condition word**, as in the `com.twtapp` reference ("Clear", "Cloudy"), is a cloud-cover
+  boundary invented by the app (INFERENCE: an arbitrary threshold). The alternative is the provider's
+  `weather_code` (WMO). That is a 12th variable and an amendment to ADR-012 §3, and it describes
+  weather in general, not astronomical conditions. Recommendation: no word; number and icon.
+- **Lead time:** CMC itself does not know its accuracy beyond 48 h ([CSC key](https://www.cleardarksky.com/c/WAkey.html)).
+  Therefore for distant nights a factual label "forecast N days ahead" is appropriate instead of a reliability
+  estimate (INFERENCE). Open-Meteo ensemble spread is a possible extension, outside 1.0.
 
-### 4.3. Кэш и свежесть
+### 4.3. Cache and freshness
 
-- **Один снимок на сайт:** ключ из координат, округлённых до 0,01°, модели и **диапазона**
-  запроса, а не одной ночи. Это поправка `WeatherSnapshotStore.keyFor` и ADR-012 §4/§6. Ночи —
-  срезы этого снимка по `[startUtc, endUtc)`. Правило «данные другого сайта никогда не
-  показываются» сохраняется.
-- **Свежесть:**
-  - у всех ночей одна `fetchedAt`, поэтому одно состояние `WeatherFreshness` на весь обзор:
-    current < 3 ч, aging 3–12 ч, stale ≥ 12 ч (`night_weather.dart:18-19`);
-  - метка свежести — одна в шапке обзора и повторяется в карточке выбранной ночи;
-  - устаревший кэш никогда не выдаётся за текущий; ошибка обновления показывается (ADR-012 §6).
-- **Каденция:** обновлять при смене сайта, по явному Refresh и при возврате приложения с aging
-  или stale данными, как сейчас. Смена ночи внутри горизонта больше не делает запрос. Ночь за
-  горизонтом — «no forecast yet», а Луна для неё считается.
-- **Снимок плана (ADR-014):** при сохранении в план, как и сейчас, записывается срез выбранной
-  ночи, а не все 16 дней. RA-E06 (показать этот срез в Logbook) не зависит от обзора и передаётся
-  в R2e.
-- **Объём хранения:** ≈22 КБ JSON на сайт в SharedPreferences (INFERENCE по замеру). Разумно
-  хранить снимки для N последних сайтов. Решается при реализации.
+- **One snapshot per site:** a key from coordinates rounded to 0.01°, the model and the request **range**,
+  not a single night. This is an amendment to `WeatherSnapshotStore.keyFor` and ADR-012 §4/§6. Nights are
+  slices of this snapshot by `[startUtc, endUtc)`. The rule "another site's data are never
+  shown" is preserved.
+- **Freshness:**
+  - all nights share one `fetchedAt`, hence one `WeatherFreshness` state for the whole overview:
+    current < 3 h, aging 3–12 h, stale ≥ 12 h (`night_weather.dart:18-19`);
+  - the freshness label appears once in the overview header and is repeated in the selected night's card;
+  - a stale cache is never presented as current; a refresh error is shown (ADR-012 §6).
+- **Cadence:** refresh on site change, on explicit Refresh and when the app returns with aging
+  or stale data, as now. Changing the night within the horizon no longer makes a request. A night beyond the
+  horizon is "no forecast yet", while the Moon is computed for it.
+- **Plan snapshot (ADR-014):** when saving to a plan, as now, the slice of the selected
+  night is written, not all 16 days. RA-E06 (show this slice in the Logbook) does not depend on the overview and is passed
+  to R2e.
+- **Storage volume:** ≈22 KB of JSON per site in SharedPreferences (INFERENCE from the measurement). It is reasonable to
+  keep snapshots for the N most recent sites. To be decided during implementation.
 
-## 5. Луна: мобильная подача, календарь, стоимость расчёта
+## 5. Moon: mobile presentation, calendar, computation cost
 
-### 5.1. Что показывать (концепт Moonlit, без его кода)
+### 5.1. What to show (Moonlit concept, without its code)
 
-| Элемент | Откуда в AstroPlan | Примечание |
+| Element | Source in AstroPlan | Note |
 | --- | --- | --- |
-| **Название фазы** | `MoonCalculator.phaseLongitudeDeg` уже вычисляет разность долгот: 0 — новолуние, 90 — первая четверть, 180 — полнолуние, 270 — последняя четверть (`moon_calculator.dart:385-390`, Meeus гл. 49) | Границы секторов — **соглашение именования**, не физика. У Moonlit четверти занимают ±5°. Соглашение нужно документировать (SCIENTIFIC_INTEGRITY) и выбрать (RA.D или R2b) |
-| **Освещённость** | CALC-28, в средний солнечный полдень + 12 ч, подпись «at midnight» (SCI-09) | Без изменений |
-| **Тёмные часы без Луны** (крупно) | dark − moonUp из `MoonDuringDark` (CALC-43) | Определение «Луна над горизонтом» и предел темноты — вопрос R2b §4. Здесь требование одно: **календарь, карточка ночи и полоса используют одно определение и одну сетку 5 мин**. Так делает Moonlit, и иначе числа расходятся |
-| **Тип окна и время** (↘ вечер: сумерки→восход Луны; ↗ утро: заход→рассвет; • вся ночь) | Нужен новый вывод: **интервалы** «темно ∧ Луна не над горизонтом» из тех же отсчётов, а не только суммы. Это новый CALC | Символ всегда с текстом («evening», «morning»), а не только стрелка |
-| **Восход и заход Луны** | `riseSetForNight` (h₀ по Meeus) | Уже задокументировано: h₀ и «Moon up» (центр > 0°) расходятся на 5–10 мин (SCI-03, S1.13). Если окна показывают время восхода по h₀, а длительность по центру, концы могут не совпасть с длительностью. Это подаётся как в SCI-03 или унифицируется решением R2b |
+| **Phase name** | `MoonCalculator.phaseLongitudeDeg` already computes the longitude difference: 0 — new moon, 90 — first quarter, 180 — full moon, 270 — last quarter (`moon_calculator.dart:385-390`, Meeus ch. 49) | Sector boundaries are a **naming convention**, not physics. In Moonlit the quarters span ±5°. The convention must be documented (SCIENTIFIC_INTEGRITY) and chosen (RA.D or R2b) |
+| **Illumination** | CALC-28, at mean solar noon + 12 h, label "at midnight" (SCI-09) | Unchanged |
+| **Moon-free dark hours** (large) | dark − moonUp from `MoonDuringDark` (CALC-43) | The definition of "Moon above the horizon" and the darkness limit are a question for R2b §4. The only requirement here: **the calendar, the night card and the strip use one definition and one 5-min grid**. Moonlit does this, and otherwise the numbers diverge |
+| **Window type and time** (↘ evening: twilight→moonrise; ↗ morning: moonset→dawn; • all night) | A new output is needed: **intervals** of "dark ∧ Moon not above the horizon" from the same samples, not just totals. This is a new CALC | The symbol always comes with text ("evening", "morning"), not just an arrow |
+| **Moonrise and moonset** | `riseSetForNight` (h₀ per Meeus) | Already documented: h₀ and "Moon up" (centre > 0°) differ by 5–10 min (SCI-03, S1.13). If windows show rise time by h₀ and duration by the centre, the ends may not match the duration. This is presented as in SCI-03 or unified by an R2b decision |
 
-**Не переносить из Moonlit:** подсветку дня «good» при ≥ 4 ч без Луны (`app.js:147`,
-`styles.css:66`). Это фиксированный порог-вердикт, а запрещают его CLAUDE.md («no arbitrary
-universal scientific thresholds») и ADR-010 («факт, не влияние»).
+**Do not carry over from Moonlit:** highlighting a day as "good" at ≥ 4 h without the Moon (`app.js:147`,
+`styles.css:66`). This is a fixed threshold verdict, and it is prohibited by CLAUDE.md ("no arbitrary
+universal scientific thresholds") and ADR-010 ("fact, not impact").
 
-### 5.2. Месячный календарь (мобильный)
+### 5.2. Monthly calendar (mobile)
 
-- **Сетка:** 7 столбцов, ячейка ≥ 48 dp (DESIGN_SYSTEM: field use). В ячейке:
-  - число месяца;
-  - мини-фаза как изображение без собственной семантики;
-  - «3h 20m» и символ окна.
+- **Grid:** 7 columns, cell ≥ 48 dp (DESIGN_SYSTEM: field use). In a cell:
+  - the day of the month;
+  - a mini phase as an image without its own semantics;
+  - "3h 20m" and the window symbol.
 
-  Пустые дни — «0 h» с причиной в семантике ячейки: «Солнце не опускается ниже предела» или
-  «Луна над горизонтом весь тёмный период» (так делает Moonlit). При 200 % текста или на узком
-  экране — **неделя вместо месяца**; Moonlit делает то же на коротких экранах.
-- **Нажатие:** выбирает ночь. Это та же `SessionNight`, что выбор ночи в планировщике. Вне
-  16-дневного горизонта погоды календарь показывает только Луну. Погодные значения для ночей
-  1–16 можно наложить строкой ниже. Объединять ли календарь с обзором §4 — вопрос RA.D.
-- **Доступность:**
-  - у каждой ячейки один семантический ярлык: «18 October: waxing gibbous, 72 % illuminated,
-    3 h 20 min moon-free dark, evening window»;
-  - цвет не единственный носитель смысла: символ + слово + число;
-  - **режим поля (красный):** различия только по яркости и форме, без оттенка, все роли
-    красные или чёрные (DESIGN_SYSTEM §Field mode). Сегменты полосы различаются заливкой и
-    штриховкой, у легенды есть текст.
+  Empty days — "0 h" with the reason in the cell's semantics: "The Sun does not go below the limit" or
+  "The Moon is above the horizon for the whole dark period" (as Moonlit does). At 200 % text or on a narrow
+  screen — **a week instead of a month**; Moonlit does the same on short screens.
+- **Tap:** selects the night. This is the same `SessionNight` as night selection in the planner. Beyond the
+  16-day weather horizon the calendar shows only the Moon. Weather values for nights
+  1–16 can be overlaid in a row below. Whether to merge the calendar with the §4 overview is a question for RA.D.
+- **Accessibility:**
+  - each cell has one semantic label: "18 October: waxing gibbous, 72 % illuminated,
+    3 h 20 min moon-free dark, evening window";
+  - colour is not the only carrier of meaning: symbol + word + number;
+  - **field mode (red):** differences only by brightness and shape, no hue, all roles
+    red or black (DESIGN_SYSTEM §Field mode). Strip segments differ by fill and
+    hatching; the legend has text.
 
-### 5.3. Полоса ночи (полдень→полдень)
+### 5.3. Night strip (noon→noon)
 
-- **Сегменты:** день, сумерки по порогам −0,833° / −6° / −12° / −18°, «Луна над горизонтом»
-  поверх тёмной части, «без Луны». Данные уже есть: `NightTimeline` и отсчёты Луны. Нынешний
-  `sky_darkness_widget.dart:340-400` не имеет слоя Луны и легенды (RA-E01).
-- **Текстовая альтернатива:** одна строка, например «Noon to noon: 9 h 50 min dark at −18°;
-  6 h 30 min moon-free, 23:10–05:40». Так устроен `aria-label` у Moonlit. Видимая легенда
-  обязательна.
+- **Segments:** day, twilight at the −0.833° / −6° / −12° / −18° thresholds, "Moon above the horizon"
+  over the dark part, "moon-free". The data already exist: `NightTimeline` and the Moon samples. The current
+  `sky_darkness_widget.dart:340-400` has no Moon layer and no legend (RA-E01).
+- **Text alternative:** one line, for example "Noon to noon: 9 h 50 min dark at −18°;
+  6 h 30 min moon-free, 23:10–05:40". This is how Moonlit's `aria-label` works. A visible legend
+  is mandatory.
 
-### 5.4. Стоимость расчёта 30 ночей офлайн
+### 5.4. Cost of computing 30 nights offline
 
-- **На одну ночь сейчас** (FACT, код):
-  - Солнце — 289 отсчётов (24 ч / 5 мин + 1), формула низкой точности;
-  - Луна — 289 топоцентрических позиций (Meeus гл. 47 с полными таблицами периодических членов,
-    плюс нутация и параллакс);
-  - `riseSetForNight` — ещё 289 геоцентрических позиций.
+- **Per night now** (FACT, code):
+  - Sun — 289 samples (24 h / 5 min + 1), low-accuracy formula;
+  - Moon — 289 topocentric positions (Meeus ch. 47 with the full tables of periodic terms,
+    plus nutation and parallax);
+  - `riseSetForNight` — another 289 geocentric positions.
 
-  Всё синхронно, в `NightConditionsViewModel.moonConditions`, с кэшем по ключу
+  All synchronous, in `NightConditionsViewModel.moonConditions`, with a keyed cache
   (`night_conditions_viewmodel.dart:180-192`).
-- **Косвенный замер** (FACT, `docs/refinement/evidence/STAGE_10_MEASUREMENTS.md:170`): «Planner:
-  night change», эмулятор x86_64, profile — худший кадр build **9 и 14 мс**, кадров дольше
-  16,7 мс нет. **INFERENCE:** если пересчёт Луны и Солнца для ночи происходит в этом build (геттеры
-  ленивые и читаются при построении), полный пересчёт ночи с целью стоит ≤ ≈14 мс на эмуляторе.
-  Расчёт без цели дешевле.
-- **Оценка 30 ночей (INFERENCE):** ≤ ≈30 × 14 мс ≈ **0,3–0,4 с на эмуляторе** в худшем случае. На
-  современном телефоне вероятно меньше, но не измерено. Это больше бюджета кадра (16,7 мс),
-  поэтому:
-  1. **Вне UI-потока.** `Isolate.run` — тот же образец, что `candidates_viewmodel.dart:40`.
-  2. **Кэш.** Ключ: сайт (0,01°), предел темноты, зона, месяц. Результат детерминирован и не
-     зависит от сети. Пересчёт только при смене ключа. Соседний месяц можно считать заранее
-     после первого кадра.
-  3. **Та же сетка 5 мин**, без огрубления. Огрубление до 10–15 мин с уточнением событий
-     бисекцией дало бы ускорение в 2–3 раза. Но тогда календарь разойдётся с карточкой ночи на
-     минуты, а Moonlit как раз требует единой классификации. Рекомендация — не огрублять,
-     пока замер не покажет необходимость.
-  4. **Замер на телефоне** — критерий приёмки будущего Task, а не допущение этого отчёта.
-- **16 ночей погоды:** свёртка 384 часов по ночам — микросекунды (INFERENCE). Для неё нужно
-  Солнце по 16 ночам (интервал CALC-32), и его можно взять из того же кэша календаря.
+- **Indirect measurement** (FACT, `docs/refinement/evidence/STAGE_10_MEASUREMENTS.md:170`): "Planner:
+  night change", x86_64 emulator, profile — worst build frame **9 and 14 ms**, no frames longer than
+  16.7 ms. **INFERENCE:** if the Moon and Sun recomputation for the night happens in this build (the getters
+  are lazy and read during build), a full night recomputation with a target costs ≤ ≈14 ms on the emulator.
+  Computation without a target is cheaper.
+- **Estimate for 30 nights (INFERENCE):** ≤ ≈30 × 14 ms ≈ **0.3–0.4 s on the emulator** in the worst case. On a
+  modern phone probably less, but not measured. This exceeds the frame budget (16.7 ms),
+  therefore:
+  1. **Off the UI thread.** `Isolate.run` — the same pattern as `candidates_viewmodel.dart:40`.
+  2. **Cache.** Key: site (0.01°), darkness limit, zone, month. The result is deterministic and does not
+     depend on the network. Recompute only on key change. The adjacent month can be precomputed
+     after the first frame.
+  3. **The same 5-min grid**, without coarsening. Coarsening to 10–15 min with event refinement by
+     bisection would give a 2–3× speed-up. But then the calendar would diverge from the night card by
+     minutes, and Moonlit specifically requires a single classification. Recommendation: do not coarsen
+     until a measurement shows the need.
+  4. **Measurement on a phone** is an acceptance criterion of a future Task, not an assumption of this report.
+- **16 nights of weather:** folding 384 hours into nights — microseconds (INFERENCE). It needs the
+  Sun for 16 nights (the CALC-32 interval), which can be taken from the same calendar cache.
 
-## 6. Рекомендованная ночная сводка: Home и детали
+## 6. Recommended night summary: Home and details
 
-**Home — одна карточка «Tonight»** (INFERENCE; порядок карточек на Home решает RA.D по K9 и
-RA-D03, вместе с R2e):
+**Home — one "Tonight" card** (INFERENCE; the order of cards on Home is decided by RA.D per K9 and
+RA-D03, together with R2e):
 
-1. **Темнота:** «Dark 19:42–05:31 (−18°)». Это время на пользовательском пределе (CALC-41).
-2. **Луна:** название фазы, освещённость %, «moon-free 3 h 20 min · evening ↘ 19:42–23:02». При
-   отсутствии данных: «Moon up all dark» или «no darkness at −18°».
-3. **Облачность:** диапазон «Cloud 10–45 %» и свежесть («updated 2 h ago» или «stale»). Без
-   данных: «no forecast yet».
-4. **Строка значений:** максимум осадков %, порывы (максимум), часы риска росы «2 of 9 h». Минимум
-   температуры — опционально. Только при наличии данных; unknown — «—».
-5. Ссылка «Night details», атрибуция Open-Meteo (уже есть).
+1. **Darkness:** "Dark 19:42–05:31 (−18°)". This is the time at the user's limit (CALC-41).
+2. **Moon:** phase name, illumination %, "moon-free 3 h 20 min · evening ↘ 19:42–23:02". When
+   there is none: "Moon up all dark" or "no darkness at −18°".
+3. **Cloud cover:** range "Cloud 10–45 %" and freshness ("updated 2 h ago" or "stale"). Without
+   data: "no forecast yet".
+4. **Value row:** maximum precipitation %, gusts (maximum), dew-risk hours "2 of 9 h". Minimum
+   temperature — optional. Only when data are available; unknown — "—".
+5. "Night details" link, Open-Meteo attribution (already present).
 
-**В деталях** («Night & Moon» и «Weather»):
-- **часовая лента** (5 строк сейчас): облачность по ярусам, осадки, ветер и порывы,
-  T/Td/RH, видимость, роса. Формат по референсам владельца: 24-часовая полоса с иконками и
-  ветром (MIUI, Google);
-- **обзор 16 ночей** (§4.2), горизонтальной лентой или списком;
-- **месячный календарь Луны** (§5.2) и **полоса ночи** (§5.3);
-- **seeing и transparency** — только если RA.D выберет провайдера (§7, W4).
+**In details** ("Night & Moon" and "Weather"):
+- **hourly band** (5 rows now): cloud cover by layer, precipitation, wind and gusts,
+  T/Td/RH, visibility, dew. Format per the owner's references: a 24-hour strip with icons and
+  wind (MIUI, Google);
+- **16-night overview** (§4.2), as a horizontal band or a list;
+- **monthly Moon calendar** (§5.2) and **night strip** (§5.3);
+- **seeing and transparency** — only if RA.D chooses a provider (§7, W4).
 
-**Что убирается с Home:** ничего из ответа. Облачность внутри окон (аннотации ADR-013, cloud gate)
-остаётся частью ответа планировщика, а не дублем (RA-D03). Убрать можно только **строку-дубль**
-погоды в планировщике, если Home и детали её покрывают. Это решение R2e и RA.D.
+**What is removed from Home:** nothing from the answer. Cloud cover within windows (ADR-013 annotations, cloud gate)
+remains part of the planner's answer, not a duplicate (RA-D03). Only the **duplicate weather row** in the
+planner can be removed, if Home and details cover it. That is a decision for R2e and RA.D.
 
-## 7. Варианты для RA.D
+## 7. Options for RA.D
 
-| ID | Вопрос | Рекомендация | Альтернатива | Компромиссы | Заменяемое решение | Privacy/COMPLIANCE (trap 22) | Нужно одобрение |
+| ID | Question | Recommendation | Alternative | Trade-offs | Superseded decision | Privacy/COMPLIANCE (trap 22) | Approval needed |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **W1** | Многодневный обзор | Один запрос Open-Meteo `forecast_days=16` на сайт. Ночи — срезы. Один кэш и одна свежесть | Оставить запрос на одну ночь; обзора нет | ≈22 КБ (6 КБ gzip) вместо 1,5 КБ. Меньше запросов при смене ночи. Нужно мигрировать ключ кэша | ADR-012 §4 («запрос покрывает эту ночь»), §6 (ключ кэша по ночи); `WeatherSnapshotStore.keyFor` | Получатель и данные те же (координаты и время). **Нужно обновить формулировки:** privacy `docs/privacy/index.md:50` («the night's hours» → «the next 16 days») и COMPLIANCE `docs/COMPLIANCE.md:42` (каденция «one request per site and night»). Категория Data Safety не меняется | Да (поправка ADR-012) |
-| **W2** | Состав карточки ночи | §4.2: облачность (диапазон), осадки (максимум), ветер и порывы (максимум), часы росы, T, Луна (%, без Луны, тип окна). Без вердиктов, цвета пригодности и сортировки | Минимум как у `com.twtapp`: облачность % + Луна % | Больше значений — больше плотность. Минимум проще, но скрывает ветер и росу (RA-E03) | Нет (в рамках ADR-012). Интервал — CALC-32 | Нет | Да (продукт) |
-| **W3** | Новые переменные **того же** Open-Meteo | Не добавлять в 1.0. Записать как будущие опции: TCWV (сырой вход прозрачности по образцу CSC), ветер 250 гПа (струйное течение), AOD из Air Quality API | Добавить в детали TCWV и ветер 250 гПа как **сырые значения** с пояснением «proxy, not seeing/transparency». Без порогов: правило meteoblue > 35 / < 5 м/с — эвристика провайдера | Полезно для длинного фокуса, но легко принять за индекс. Нужны тексты и SI-запись. AOD — только 5 дней и отдельная атрибуция CAMS | ADR-012 §3 (таблица переменных; «Deferred: seeing and transparency») | TCWV и 250 гПа: новых данных, уходящих с устройства, нет; только поправка ADR. **AOD:** новый хост `air-quality-api.open-meteo.com` и атрибуция CAMS → privacy, COMPLIANCE и About в том же изменении | Да (ADR) |
-| **W4** | Seeing и transparency | **Не вводить провайдера в 1.0.** Указать честно: «seeing/transparency not forecast here». Опционально — ссылка, которую пользователь открывает сам (Clear Outside или страница 7Timer), по образцу lightpollutionmap.app (M2, RG-08/09) | **7Timer! ASTRO** как opt-in, по образцу Nominatim (выключено по умолчанию), только в деталях, с подписью «7Timer! (GFS), 3-hourly, 72 h». Свежесть по `init`. Координаты огрублены до 0,1° (INFERENCE: сетка GFS всё равно грубая). Уведомить оператора | 7Timer: 72 ч, грубые коды, нет SLA и валидации, некоммерческое использование, новый получатель в Китае. Для телефона и DSLR польза мала (§2). Ссылка: ноль кода и рисков, но данные вне приложения | ADR-012 §2 («Open-Meteo stays the only provider for 1.0»), §3 Deferred | **Opt-in 7Timer:** новый получатель (координаты и IP) → privacy, COMPLIANCE (Data Safety: location shared; новый получатель), About, атрибуция, переключатель в Settings. Политику оператора найти не удалось. **Ссылка:** добавить в privacy, раздел «Links you open yourself» | Да (новый провайдер или ссылка) |
-| **M1** | Луна на Home и в карточке ночи | Название фазы + освещённость + **крупно «тёмные часы без Луны»** + тип окна со временем | Оставить «Moon up X of Y dark» и добавить фазу | Нужен новый CALC: интервалы без Луны и их классификация. Определение — из R2b §4 | ADR-010 сохраняется (факт). CALC-43 расширяется | Нет (офлайн) | Да (продукт; определение — R2b) |
-| **M2** | Месячный календарь | Офлайн, в деталях «Night & Moon». Неделя при крупном тексте. Без подсветки «good». `Isolate.run` + кэш по месяцу. Замер на телефоне — критерий приёмки | Только 7-дневная лента Луны в обзоре W1 | Месяц покрывает планирование за пределами погодного горизонта; цена — новый экран, расчёт ≈0,3–0,4 с (эмулятор, оценка) вне UI-потока | Нет. Вопрос охвата RA-A06 | Нет (офлайн) | Да (охват) |
-| **M3** | Полоса ночи полдень→полдень | Слой Луны и легенда в `sky_darkness_widget`, текстовая альтернатива, штриховка для режима поля | Отдельная полоса Луны под полосой сумерек | Одна полоса нагляднее, но плотнее при 200 % текста | Нет | Нет | Да (UI, вместе с R2e) |
-| **H1** | Сводка на Home | §6: темнота, Луна, облачность со свежестью, строка значений | Только облачность и Луна | См. K9 и RA-D03: порядок карточек — вопрос R2e | ADR-019 §5/§6, RG-05 T1 (порядок) — только если меняется порядок | Нет | Да (R2e, RA.D) |
-| **L1** | Погода в Logbook (RA-E06) | Передать в R2e. Снимок уже хранит часы (`session_snapshot_builder.dart:246-275`) | — | — | ADR-014 (отображение) | Нет | R2e |
+| **W1** | Multi-day overview | One Open-Meteo `forecast_days=16` request per site. Nights are slices. One cache and one freshness | Keep the one-night request; no overview | ≈22 KB (6 KB gzip) instead of 1.5 KB. Fewer requests on night change. The cache key must be migrated | ADR-012 §4 ("the request covers this night"), §6 (per-night cache key); `WeatherSnapshotStore.keyFor` | Same recipient and data (coordinates and time). **Wording must be updated:** privacy `docs/privacy/index.md:50` ("the night's hours" → "the next 16 days") and COMPLIANCE `docs/COMPLIANCE.md:42` (cadence "one request per site and night"). The Data Safety category does not change | Yes (ADR-012 amendment) |
+| **W2** | Night card content | §4.2: cloud cover (range), precipitation (maximum), wind and gusts (maximum), dew hours, T, Moon (%, moon-free, window type). No verdicts, suitability colour or sorting | Minimum as in `com.twtapp`: cloud cover % + Moon % | More values — more density. The minimum is simpler but hides wind and dew (RA-E03) | None (within ADR-012). Interval — CALC-32 | None | Yes (product) |
+| **W3** | New variables from the **same** Open-Meteo | Do not add in 1.0. Record as future options: TCWV (raw transparency input, following CSC), 250 hPa wind (jet stream), AOD from the Air Quality API | Add TCWV and 250 hPa wind to details as **raw values** with the note "proxy, not seeing/transparency". No thresholds: the meteoblue > 35 / < 5 m/s rule is a provider heuristic | Useful for long focal lengths but easily mistaken for an index. Needs copy and an SI entry. AOD — only 5 days and separate CAMS attribution | ADR-012 §3 (variable table; "Deferred: seeing and transparency") | TCWV and 250 hPa: no new data leaving the device; only an ADR amendment. **AOD:** new host `air-quality-api.open-meteo.com` and CAMS attribution → privacy, COMPLIANCE and About in the same change | Yes (ADR) |
+| **W4** | Seeing and transparency | **Do not introduce a provider in 1.0.** State honestly: "seeing/transparency not forecast here". Optionally — a link the user opens themselves (Clear Outside or the 7Timer page), following lightpollutionmap.app (M2, RG-08/09) | **7Timer! ASTRO** as opt-in, following Nominatim (off by default), only in details, labelled "7Timer! (GFS), 3-hourly, 72 h". Freshness from `init`. Coordinates coarsened to 0.1° (INFERENCE: the GFS grid is coarse anyway). Notify the operator | 7Timer: 72 h, coarse codes, no SLA or validation, non-commercial use, new recipient in China. Little benefit for phone and DSLR (§2). Link: zero code and risk, but the data stay outside the app | ADR-012 §2 ("Open-Meteo stays the only provider for 1.0"), §3 Deferred | **Opt-in 7Timer:** new recipient (coordinates and IP) → privacy, COMPLIANCE (Data Safety: location shared; new recipient), About, attribution, a toggle in Settings. The operator's policy could not be found. **Link:** add to privacy, section "Links you open yourself" | Yes (new provider or link) |
+| **M1** | Moon on Home and in the night card | Phase name + illumination + **large "moon-free dark hours"** + window type with time | Keep "Moon up X of Y dark" and add the phase | A new CALC is needed: moon-free intervals and their classification. Definition — from R2b §4 | ADR-010 is preserved (fact). CALC-43 is extended | None (offline) | Yes (product; definition — R2b) |
+| **M2** | Monthly calendar | Offline, in "Night & Moon" details. A week at large text. No "good" highlighting. `Isolate.run` + per-month cache. Phone measurement is an acceptance criterion | Only a 7-day Moon band in the W1 overview | A month covers planning beyond the weather horizon; the cost is a new screen and ≈0.3–0.4 s of computation (emulator, estimate) off the UI thread | None. A scope question for RA-A06 | None (offline) | Yes (scope) |
+| **M3** | Noon→noon night strip | Moon layer and legend in `sky_darkness_widget`, text alternative, hatching for field mode | A separate Moon strip below the twilight strip | One strip is clearer but denser at 200 % text | None | None | Yes (UI, together with R2e) |
+| **H1** | Home summary | §6: darkness, Moon, cloud cover with freshness, value row | Only cloud cover and Moon | See K9 and RA-D03: card order is a question for R2e | ADR-019 §5/§6, RG-05 T1 (order) — only if the order changes | None | Yes (R2e, RA.D) |
+| **L1** | Weather in the Logbook (RA-E06) | Pass to R2e. The snapshot already stores the hours (`session_snapshot_builder.dart:246-275`) | — | — | ADR-014 (display) | None | R2e |
 
-**Не подлежит изменению при любом выборе** (RA-E05, ADR-012):
-- состояния Idle, Loading, OutOfRange, Unavailable, Available;
-- возраст 3 ч / 12 ч;
-- «no forecast» вместо 0;
-- атрибуция;
+**Not subject to change under any choice** (RA-E05, ADR-012):
+- the Idle, Loading, OutOfRange, Unavailable, Available states;
+- the 3 h / 12 h age;
+- "no forecast" instead of 0;
+- attribution;
 - unknown ≠ 0;
-- без оценки и без раскраски «хорошо/плохо».
+- no score and no "good/bad" colouring.
 
-## 8. Источники
+## 8. Sources
 
-Дата обращения ко всем источникам — 2026-10-17.
+All sources accessed on 2026-10-17.
 
-**Первичные и официальные**
+**Primary and official**
 - Open-Meteo Forecast API docs: <https://open-meteo.com/en/docs>
 - Open-Meteo Terms: <https://open-meteo.com/en/terms>
-- Open-Meteo Pricing (подсчёт вызовов): <https://open-meteo.com/en/pricing>
+- Open-Meteo Pricing (call counting): <https://open-meteo.com/en/pricing>
 - Open-Meteo Air Quality API (CAMS, AOD): <https://open-meteo.com/en/docs/air-quality-api>
-- Замеры ответов `api.open-meteo.com/v1/forecast` (1 ночь и 16 дней, 11 переменных; переменные
-  уровней давления, TCWV, CAPE, LI) и `air-quality-api.open-meteo.com/v1/air-quality` (AOD, dust):
-  точка 51.48, 0.0; файлы во временном каталоге сессии, не в репозитории
+- Measurements of `api.open-meteo.com/v1/forecast` responses (1 night and 16 days, 11 variables; pressure-level
+  variables, TCWV, CAPE, LI) and `air-quality-api.open-meteo.com/v1/air-quality` (AOD, dust):
+  point 51.48, 0.0; files in the session's temporary directory, not in the repository
 - 7Timer! documentation: <https://www.7timer.info/doc.php?lang=en>
-- Замер `https://www.7timer.info/bin/api.pl?...&product=astro&output=json`
+- Measurement of `https://www.7timer.info/bin/api.pl?...&product=astro&output=json`
 - 7Timer issues: <https://github.com/Yeqzids/7timer-issues/issues>
 - Clear Sky Chart, legend (key): <https://www.cleardarksky.com/c/WAkey.html>
 - meteoblue, Astronomy Seeing help: <https://content.meteoblue.com/en/private-customers/website-help/outdoor-and-sports/astronomy-seeing>
@@ -317,21 +317,21 @@ RA-D03, вместе с R2e):
 - ECCC open data licence: <https://eccc-msc.github.io/open-data/licence/readme_en/>
 - MET Norway Terms of Service: <https://api.met.no/doc/TermsOfService>
 - MET Norway Locationforecast docs: <https://api.met.no/weatherapi/locationforecast/2.0/documentation>
-- Clear Outside, страница прогноза: <https://clearoutside.com/forecast/51.48/0.00>
+- Clear Outside, forecast page: <https://clearoutside.com/forecast/51.48/0.00>
 - Dart `HttpClient.autoUncompress`: <https://api.dart.dev/dart-io/HttpClient/autoUncompress.html>
-- Meeus J., *Astronomical Algorithms*, 2nd ed., гл. 47–49 (через код и ADR-010)
+- Meeus J., *Astronomical Algorithms*, 2nd ed., ch. 47–49 (via code and ADR-010)
 
-**Вторичные, форумы, анекдоты**
-- MSC Datamart, рассылка о seeing и transparency RDPS: <https://comm.collab.science.gc.ca/mailman3/hyperkitty/list/dd_info@comm.collab.science.gc.ca/thread/BH3KXVL63I2TJJCQYJUQVRITVGPY7NCO/>
-- Photo Ephemeris, seeing и transparency (ECCC): <https://photoephemeris.com/articles/new-seeing-and-transparency-forecasts>
-- Stargazers Lounge, обновление Clear Outside: <https://stargazerslounge.com/topic/340555-clear-outside-update>
-- IceInSpace, данные 7Timer «замерли»: <https://www.iceinspace.com.au/forum/showthread.php?p=1059455>
-- Блог оператора 7Timer о сбоях: <https://y234.cn/?p=508>
-- AstroBin: ветер и гидирование: <https://app.astrobin.com/forum/topic/84913/phd2-not-giving-sufficient-corrections-causing-severe-star-trails>
-- AstroBin: перефокусировка по температуре: <https://app.astrobin.com/forum/topic/186916/autofocus-questions>
-- Astropix, PHD2 и ветер: <https://astropix.com/html/astrophotography/phd2_autoguiding.html>
+**Secondary, forums, anecdotes**
+- MSC Datamart, mailing list on RDPS seeing and transparency: <https://comm.collab.science.gc.ca/mailman3/hyperkitty/list/dd_info@comm.collab.science.gc.ca/thread/BH3KXVL63I2TJJCQYJUQVRITVGPY7NCO/>
+- Photo Ephemeris, seeing and transparency (ECCC): <https://photoephemeris.com/articles/new-seeing-and-transparency-forecasts>
+- Stargazers Lounge, Clear Outside update: <https://stargazerslounge.com/topic/340555-clear-outside-update>
+- IceInSpace, 7Timer data "froze": <https://www.iceinspace.com.au/forum/showthread.php?p=1059455>
+- 7Timer operator's blog on outages: <https://y234.cn/?p=508>
+- AstroBin: wind and guiding: <https://app.astrobin.com/forum/topic/84913/phd2-not-giving-sufficient-corrections-causing-severe-star-trails>
+- AstroBin: temperature-based refocusing: <https://app.astrobin.com/forum/topic/186916/autofocus-questions>
+- Astropix, PHD2 and wind: <https://astropix.com/html/astrophotography/phd2_autoguiding.html>
 
-**Локальные**
-- Moonlit (концепт, без лицензии на собственный код): `C:\Users\zalub\OneDrive\Desktop\52\moonlit-main\README.md`,
+**Local**
+- Moonlit (concept, no licence for its own code): `C:\Users\zalub\OneDrive\Desktop\52\moonlit-main\README.md`,
   `index.html`, `app.js:147`, `astronomy.js:120-129`, `vendor/`
-- Код и документы AstroPlan: ссылки `file:line` в §1–§7
+- AstroPlan code and documents: `file:line` references in §1–§7

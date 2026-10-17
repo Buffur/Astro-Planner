@@ -1,219 +1,219 @@
-# RA.R2e — Направление продукта: варианты и рекомендации
+# RA.R2e — Product direction: options and recommendations
 
-> **Статус:** итог RA.R2 (шаг R2e), 2026-10-17. Это пакет вариантов для шлюза G2 (RA.D, раунд 2) и
-> вход для раунда 1 (идентичность). **Ничего не решено:** рекомендация агента не является решением
-> владельца. Код, тесты и существующие решения не менялись.
-> **Входы:** [Phase A](RA_R1_PHASE_A_ASSESSMENT.md) · [R2a рынок](RA_R2A_LANDSCAPE.md) ·
-> [R2b наука и Capture](RA_R2B_CAPTURE_SCIENCE.md) · [R2c погода и Луна](RA_R2C_NIGHT_CONDITIONS.md) ·
-> [R2d идентичность](RA_R2D_IDENTITY.md) · ADR-019 §5–§6, ADR-020, RD-04, S9.3.
-> **Лист для ответов:** [RA_D_DECISION_SHEET.md](RA_D_DECISION_SHEET.md).
-> **Онбординг (R4):** Android, «Request runtime permissions»
-> (developer.android.com/training/permissions/requesting) и NN/g, «Mobile-App Onboarding»
-> (nngroup.com/articles/mobile-app-onboarding/). Оба обращения — 2026-10-17.
+> **Status:** outcome of RA.R2 (step R2e), 2026-10-17. This is the options package for gate G2 (RA.D, round 2) and
+> the input for round 1 (identity). **Nothing is decided:** the agent's recommendation is not an owner
+> decision. Code, tests and existing decisions were not changed.
+> **Inputs:** [Phase A](RA_R1_PHASE_A_ASSESSMENT.md) · [R2a market](RA_R2A_LANDSCAPE.md) ·
+> [R2b science and Capture](RA_R2B_CAPTURE_SCIENCE.md) · [R2c weather and Moon](RA_R2C_NIGHT_CONDITIONS.md) ·
+> [R2d identity](RA_R2D_IDENTITY.md) · ADR-019 §5–§6, ADR-020, RD-04, S9.3.
+> **Answer sheet:** [RA_D_DECISION_SHEET.md](RA_D_DECISION_SHEET.md).
+> **Onboarding (R4):** Android, "Request runtime permissions"
+> (developer.android.com/training/permissions/requesting) and NN/g, "Mobile-App Onboarding"
+> (nngroup.com/articles/mobile-app-onboarding/). Both accessed 2026-10-17.
 
-## 0. Как это читать
+## 0. How to read this
 
-- **Каждый блок построен одинаково:** проблема (ID из Phase A), рекомендация, реалистичная
-  альтернатива, заменяемое решение, влияние на данные и тесты, нужен ли шлюз.
-- **Принципы, по которым выбраны рекомендации:**
-  1. Направление владельца — лёгкий планировщик-органайзер с Capture Plan в центре.
-  2. Доказательства R2a–R2d.
-  3. Минимальная цена до релиза.
-  4. Инварианты CLAUDE.md не нарушаются: unknown ≠ 0, √N относителен, без оценки ночи, провенанс.
-- **Визуальная база — пробел.** Скриншоты и рендеры текущих экранов не предоставлялись (разрешения §6
-  плана не выдавались). Поэтому каркасы ниже фиксируют порядок, содержание и поток, но не вид.
-  Визуальный дизайн — в Tasks реализации, с обзором рендеров владельцем (K14).
+- **Every block has the same structure:** problem (ID from Phase A), recommendation, realistic
+  alternative, superseded decision, data and test impact, whether a gate is needed.
+- **Principles used to choose the recommendations:**
+  1. The owner's direction — a lightweight planner-organizer with the Capture Plan at its center.
+  2. The evidence from R2a–R2d.
+  3. Minimum cost before release.
+  4. CLAUDE.md invariants are not violated: unknown ≠ 0, √N is relative, no night score, provenance.
+- **Visual baseline — gap.** Screenshots and renders of the current screens were not provided (the §6
+  permissions of the plan were not granted). The wireframes below therefore fix order, content and flow, but not appearance.
+  Visual design belongs to the implementation Tasks, with owner review of renders (K14).
 
-## 1. Главный вывод
+## 1. Main conclusion
 
-**R2a:** ни один из найденных мобильных планировщиков не отвечает до выезда на вопрос «кадры ×
-выдержки → интеграция, объём, влезает ли в ночь». Это ниша AstroPlan (вывод по описаниям в сторах).
-Ближайшие аналоги этой логики — N.I.N.A. и ASIAIR, но они работают у телескопа, а не при
-планировании.
+**R2a:** none of the mobile planners found answers, before leaving home, the question "frames ×
+exposures → integration, storage, does it fit in the night". This is AstroPlan's niche (conclusion based on store descriptions).
+The closest analogues of this logic are N.I.N.A. and ASIAIR, but they work at the telescope, not during
+planning.
 
-Отсюда рекомендуемая позиция:
+Hence the recommended position:
 
-> **AstroPlan — планировщик и журнал съёмочного плана.** Условия ночи (погода, Луна, темнота) — это
-> компактный контекст ответа «влезает ли мой план сегодня», а не отдельный погодный продукт.
+> **AstroPlan — a planner and log for the Capture Plan.** Night conditions (weather, Moon, darkness) are
+> compact context for the answer "does my plan fit tonight", not a separate weather product.
 
-Что для этого нужно:
-- **Ничего полезного не удаляется.** Дубли убираются, второстепенное понижается в иерархии,
-  экраны деталей остаются.
-- **Обязательные изменения приходятся на четыре места:** Capture-блок, пустые состояния, Home и
-  онбординг.
-- **Научные инварианты сохраняются.** Пожелание «примерного SNR» выполняется формой графика
-  (кривая по времени интеграции), но без абсолютного числа (§4.1).
+What this requires:
+- **Nothing useful is removed.** Duplicates are removed, secondary items are lowered in the hierarchy,
+  detail screens remain.
+- **Mandatory changes fall in four places:** the Capture block, empty states, Home and
+  onboarding.
+- **Scientific invariants are preserved.** The wish for «примерного SNR» [an approximate SNR] is met through the shape of the chart
+  (a curve over integration time), but without an absolute number (§4.1).
 
-## 2. Охват продукта (RA-A06, K4)
+## 2. Product scope (RA-A06, K4)
 
-| | Рекомендация **S-A: понизить, не удалять** | Альтернатива S-B: удалить | Альтернатива S-C: «всё в одном» |
+| | Recommendation **S-A: demote, do not remove** | Alternative S-B: remove | Alternative S-C: "all-in-one" |
 | --- | --- | --- | --- |
-| «What can I image tonight?» | Вторичная текстовая кнопка на Home; экран остаётся | Убрать экран и кнопку | Расширять |
-| График высоты в планировщике | Остаётся. Окно и fit без высоты цели невозможны; подача компактнее | Только список окон | — |
-| Экран Weather (детали) | Остаётся. Получает обзор ночей (§5) | Заменить ссылкой на внешнее приложение | Добавить seeing и прочее |
-| Чего не делать (R2a §5.8) | Планетарий и AR, фрейминг и мозаики, собственный seeing, карты засветки, сообщество, индекс-оценка ночи, управление железом | — | — |
+| "What can I image tonight?" | Secondary text button on Home; the screen remains | Remove the screen and the button | Expand |
+| Altitude chart in the planner | Remains. The imaging window and fit are impossible without target altitude; more compact presentation | Window list only | — |
+| Weather screen (details) | Remains. Gains a nights overview (§5) | Replace with a link to an external app | Add seeing and more |
+| What not to do (R2a §5.8) | Planetarium and AR, framing and mosaics, own seeing, light-pollution maps, community, night score index, hardware control | — | — |
 
-- **Почему S-A.**
-  - Функции уже построены и проверены (Stages 6–10).
-  - Удаление стоит работы, тестов и миграции привычек и ничего не даёт пользователю.
-  - Владелец назвал их «сырыми», а не ненужными.
-  - R2a: часть пользователей ценит «всё в одном» (T8), поэтому полное удаление — риск без выигрыша.
-- **Что меняется:** PRODUCT_DIRECTION §1 — уточнение формулировки (вопросы 1–2 становятся
-  поддерживающими). Без влияния на данные.
+- **Why S-A.**
+  - The features are already built and verified (Stages 6–10).
+  - Removal costs work, tests and migration of habits, and gives the user nothing.
+  - The owner called them «сырыми» [raw], not unnecessary.
+  - R2a: some users value "all-in-one" (T8), so full removal is a risk with no gain.
+- **What changes:** PRODUCT_DIRECTION §1 — wording clarification (questions 1–2 become
+  supporting). No data impact.
 
-## 3. Онбординг и запуск (RA-B01–B06, RA-C03)
+## 3. Onboarding and launch (RA-B01–B06, RA-C03)
 
-### 3.1 Рекомендация O-2′: короткий Welcome — место + риг
+### 3.1 Recommendation O-2′: short Welcome — site + rig
 
-- **Вспышка (B01).** Маршрут выбирается **до первого кадра**: redirect по уже загруженному флагу
-  `firstRun` (`main.dart:160`). Сегодня Welcome пушится из `build()` Tonight. Это исправление
-  нужно при любом варианте.
-- **Заголовок (B03).** Крупный заголовок в теле, в роли headline; одна строка подзаголовка.
-- **Шаги (B04).**
-  - **«Где вы снимаете?»** Две кнопки: «Use current position» и «Choose on map or list».
-    Обоснование разрешения — одна строка: «Location is asked only when you tap».
-  - **«Чем снимаете?»** Выбор класса камеры (Phone · Camera · Astro camera colour · mono · Not sure),
-    затем «Choose a rig» или «Add rig» с уже выбранным классом. Это C1-b из R2b §4.6.
-  - **Шаг «цель» убирается.** Цель — задача, а не контекст. NN/g: в онбординге уместно только то,
-    без чего приложение не работает или что зависит от контекста пользователя.
-- **Кнопки (B02).** Одна основная кнопка «Start planning», без Skip. Её роль играет системный Back,
-  который теперь работает как «позже». Выбранное сохраняется сразу.
-- **Тексты (B05).** Не длиннее строки; смысл приватности сохраняется (PD-12).
-- **Альтернатива O-1: без Welcome.** Приложение сразу открывает Home с карточкой «Set your site».
-  - Это уже есть на Tonight; так делают DarkScout и Clear Outside (R2a).
-  - Меньше кода. Но теряется место для брендового первого впечатления, которого хочет владелец.
-- **Заменяемые решения:** TASK 12.5 (состав first run). TASK 7.3 («GPS только по нажатию»)
-  соблюдено.
-- **Данные:** нет. **Тесты:** first run, `welcome_screen` tests, `core_loop_test` (шаг first run),
+- **Flash (B01).** The route is chosen **before the first frame**: redirect on the already loaded flag
+  `firstRun` (`main.dart:160`). Today Welcome is pushed from Tonight's `build()`. This fix
+  is needed under any option.
+- **Title (B03).** A large title in the body, in the headline role; one subtitle line.
+- **Steps (B04).**
+  - **"Where do you shoot?"** Two buttons: "Use current position" and "Choose on map or list".
+    The permission rationale is one line: "Location is asked only when you tap".
+  - **"What do you shoot with?"** Camera class choice (Phone · Camera · Astro camera colour · mono · Not sure),
+    then "Choose a rig" or "Add rig" with the class already selected. This is C1-b from R2b §4.6.
+  - **The "target" step is removed.** A target is a task, not context. NN/g: onboarding should contain only what
+    the app cannot work without or what depends on the user's context.
+- **Buttons (B02).** One primary button "Start planning", no Skip. Its role is played by the system Back,
+  which now works as "later". Choices are saved immediately.
+- **Copy (B05).** No longer than a line; the privacy meaning is preserved (PD-12).
+- **Alternative O-1: no Welcome.** The app opens Home directly with a "Set your site" card.
+  - This already exists on Tonight; DarkScout and Clear Outside do this (R2a).
+  - Less code. But the place for the branded first impression the owner wants is lost.
+- **Superseded decisions:** TASK 12.5 (first-run composition). TASK 7.3 ("GPS only on tap")
+  is respected.
+- **Data:** none. **Tests:** first run, `welcome_screen` tests, `core_loop_test` (first-run step),
   sweep.
 
-### 3.2 Загрузочный экран
+### 3.2 Loading screen
 
-Вариант D6 из R2d, рекомендация **S2**:
-- AnimatedVectorDrawable выбранного знака в системном splash Android 12+, не дольше 1 000 мс
-  (developer.android.com, проверено 2026-10-17).
-- Затем во Flutter тот же знак показывается **ровно столько, сколько идёт реальная загрузка**:
-  без фейкового прогресса, статично при reduced motion.
-- Новых пакетов не нужно. Зависит от выбора знака (раунд 1).
+Option D6 from R2d, recommendation **S2**:
+- AnimatedVectorDrawable of the chosen mark in the Android 12+ system splash, no longer than 1 000 ms
+  (developer.android.com, checked 2026-10-17).
+- Then, in Flutter, the same mark is shown **exactly as long as the real loading takes**:
+  no fake progress, static under reduced motion.
+- No new packages needed. Depends on the mark choice (round 1).
 
-## 4. Планировщик и Capture Plan (RA-F01–F11)
+## 4. Planner and Capture Plan (RA-F01–F11)
 
-### 4.1 Научные вопросы (решение владельца обязательно)
+### 4.1 Scientific questions (owner decision required)
 
-| Вопрос | Рекомендация | Альтернатива | Заменяет | Данные |
+| Question | Recommendation | Alternative | Supersedes | Data |
 | --- | --- | --- | --- | --- |
-| **SNR** (A03, F10, K5) | **O2:** та же кривая √N, но по оси **времени интеграции** и нормированная на план (√(T/T_plan)): «×1.41 при удвоении времени». Это форма концепта владельца без абсолютного числа | O4 (после 1.0): подсказка минимальной выдержки для астрокамер при введённом read noise | Подача CALC-42; SI-003 сохраняется | Нет схемы; тесты CALC-42 |
-| **Абсолютный SNR** | **Не вводить.** R2b §2: нужны QE, read noise, dark current, полоса фильтра и поверхностная яркость цели. Ничего из этого нет в модели, RG-03 запретил внешние спецификации, а ±0,5 mag цели даёт результат от 6,9 до 16,3 | O3 с явными допущениями — не рекомендуется | — | — |
-| **Объём** (A04, K6) | **ST3 + ST2-lite.** Размер из **любого** файла рига (сейчас только DNG). Если размер неизвестен — оценка «пиксели × 2 байта, как несжатый 16-битный DNG или FITS» с этой подписью. Измеренный размер всегда главнее | ST2 полный: поля формата и битности, миграция v26 | Строка Stage 11 «no theoretical size introduced»; SI-013; ADR-009 §7 | ST2-lite: нет схемы (размеры в пикселях уже хранятся, `equipment_profile.dart:33-34`). ST2: v26 |
-| **Тёмное время без Луны** (E01) | **MF-b:** темнота ∩ (Луна под горизонтом по показанному восходу и заходу). Совпадает с Moonlit и USNO при −18° | MF-a: как есть, с подписью «Луна выше = центр выше 0°» | Новая производная величина. Шлюз Луны ADR-013 не трогается | Нет схемы |
+| **SNR** (A03, F10, K5) | **O2:** the same √N curve, but on the **integration time** axis and normalized to the plan (√(T/T_plan)): "×1.41 when time doubles". This is the form of the owner's concept without an absolute number | O4 (after 1.0): minimum-exposure hint for astro cameras when read noise is entered | Presentation of CALC-42; SI-003 is preserved | No schema; CALC-42 tests |
+| **Absolute SNR** | **Do not introduce.** R2b §2: requires QE, read noise, dark current, filter bandwidth and target surface brightness. None of these is in the model, RG-03 ruled out external specifications, and ±0.5 mag of the target gives a result from 6.9 to 16.3 | O3 with explicit assumptions — not recommended | — | — |
+| **Storage** (A04, K6) | **ST3 + ST2-lite.** Size from **any** rig file (currently DNG only). If the size is unknown — an estimate "pixels × 2 bytes, as uncompressed 16-bit DNG or FITS" with this label. Measured size always takes precedence | ST2 full: format and bit-depth fields, migration v26 | Stage 11 line "no theoretical size introduced"; SI-013; ADR-009 §7 | ST2-lite: no schema (pixel dimensions are already stored, `equipment_profile.dart:33-34`). ST2: v26 |
+| **Moon-free dark time** (E01) | **MF-b:** darkness ∩ (Moon below the horizon per the displayed rise and set). Matches Moonlit and USNO at −18° | MF-a: as is, with the label "Moon up = center above 0°" | New derived quantity. The Moon gate of ADR-013 is not touched | No schema |
 
-**Попутная находка** (R2b §5.2, проверено по коду): «Луна над горизонтом» в CALC-29/33/43 — это
-центр Луны выше 0° без атмосферы (`moon_conditions.dart:95`), а показанные восход и заход считаются
-по Meeus h₀ (`moon_calculator.dart:408-417`). Расхождение — 5–10 минут на каждое событие.
-Рекомендуется записать как SI-находку. Вариант MF-c (единый h₀ везде) — высокий риск, только
-решением владельца.
+**Incidental finding** (R2b §5.2, verified against code): "Moon above the horizon" in CALC-29/33/43 is
+the Moon's center above 0° without atmosphere (`moon_conditions.dart:95`), while the displayed rise and set are computed
+with Meeus h₀ (`moon_calculator.dart:408-417`). The discrepancy is 5–10 minutes per event.
+Recommended to record as an SI finding. Option MF-c (a single h₀ everywhere) is high risk, owner
+decision only.
 
-### 4.2 Capture-блок
+### 4.2 Capture block
 
-| Пункт | Рекомендация | Альтернатива | Заменяет | Данные |
+| Item | Recommendation | Alternative | Supersedes | Data |
 | --- | --- | --- | --- | --- |
-| **Класс камеры** (F06) | **C1-b + C1-d.** Класс — первый вопрос при создании рига и в онбординге; у примерного рига класс по цитированной странице ZWO. Это и уберёт Binning и выбор ISO/Gain для телефона и DSLR | C1-c: класс предлагается из метаданных с причиной и явным подтверждением | C1-d: выбор владельца «example rig stays Unknown» (ADR-020 §2); C1-c — ещё и «never inferred» | C1-d: сид, только новые установки |
-| **Предзаполнение** (F05) | **P2b:** у каждого предложенного поля пометка «из блока Ha · 300 с ×»; стиль «предложено», пока поле не тронуто. Фильтр по умолчанию по классу: None для Phone и DSLR | P2c: пустое поле с подсказкой и кнопкой «Use» | Подача ADR-020 §5 (в его рамках) | Нет |
-| **WB** (F07) | **W2:** необязательная запись для Phone и DSLR, без расчёта, с подписью «for your records» | W1: как сейчас | ADR-020 W1 | Столбец блока, v26 |
-| **Фокус** (F07) | **F2:** напоминание «Focus before the first frame» плюс существующий refocus в допущениях. Ползунок (F3) не подтверждён доказательствами: позиция не переносится | F1: как сейчас | ADR-020 F1 | Нет |
-| **«Данные из про-режима»** (F07) | **P3′ после 1.0:** «Take from a photo» заполняет выдержку и ISO из метаданных с пометкой источника. Инфраструктура импорта уже есть | P3′ в 1.0 | ADR-020 P3 (отклонён) | Нет схемы |
-| **Калибровка** (F08) | **CAL-1:** одно действие «Build calibration from lights» — dark-блок на каждую тройку (выдержка, чувствительность, бининг) и flat-блок на фильтр, с количествами-предложениями | CAL-0: сначала проверка UX на устройстве | Нет (в рамках L1) | Нет |
-| **Пример плана** (F04, K8) | **Убрать кнопку.** CAL-1 и P2b закрывают ту же потребность «быстро начать». Доменная фикстура остаётся для тестов (`PlannerHarness.choosePlan`). Дефект «Flat без фильтра» исчезает вместе с кнопкой | Перенести в ⋮ «Fill with an example» и исправить фильтр Flat | RD-04 (в части «Start from the example plan») | Нет; тесты с ключом `capturePlan.useExample` |
-| **Пауза между кадрами** (H02) | **I1:** глобальная, как сейчас. Перенос в риг грозит двойным счётом (RG-11 §6) | I2: по ригу, v26 | — | — |
-| **Assumptions** (F09) | Показывать только **включённые и влияющие** пункты плюс «Change in Settings» (исправить устаревшую подпись) | Как сейчас | Нет | Нет |
+| **Camera class** (F06) | **C1-b + C1-d.** Class is the first question when creating a rig and in onboarding; the example rig gets its class from the cited ZWO page. This also removes Binning and the ISO/Gain choice for phone and DSLR | C1-c: class proposed from metadata with a reason and explicit confirmation | C1-d: the owner's choice "example rig stays Unknown" (ADR-020 §2); C1-c — also "never inferred" | C1-d: seed, new installs only |
+| **Prefill** (F05) | **P2b:** each proposed field carries the marker "from block Ha · 300 s ×"; "proposed" style until the field is touched. Default filter by class: None for Phone and DSLR | P2c: empty field with a hint and a "Use" button | Presentation of ADR-020 §5 (within its bounds) | None |
+| **WB** (F07) | **W2:** optional record for Phone and DSLR, no calculation, labeled "for your records" | W1: as now | ADR-020 W1 | Block column, v26 |
+| **Focus** (F07) | **F2:** reminder "Focus before the first frame" plus the existing refocus in assumptions. A slider (F3) is not supported by evidence: the position does not transfer | F1: as now | ADR-020 F1 | None |
+| **«Данные из про-режима»** [data from pro mode] (F07) | **P3′ after 1.0:** "Take from a photo" fills exposure and ISO from metadata with a source marker. The import infrastructure already exists | P3′ in 1.0 | ADR-020 P3 (rejected) | No schema |
+| **Calibration** (F08) | **CAL-1:** a single action "Build calibration from lights" — a dark block for each triple (exposure, sensitivity, binning) and a flat block per filter, with suggested counts | CAL-0: UX check on device first | None (within L1) | None |
+| **Example plan** (F04, K8) | **Remove the button.** CAL-1 and P2b cover the same "quick start" need. The domain fixture stays for tests (`PlannerHarness.choosePlan`). The "Flat without filter" defect disappears with the button | Move to ⋮ "Fill with an example" and fix the Flat filter | RD-04 (the "Start from the example plan" part) | None; tests with key `capturePlan.useExample` |
+| **Time between frames** (H02) | **I1:** global, as now. Moving it to the rig risks double counting (RG-11 §6) | I2: per rig, v26 | — | — |
+| **Assumptions** (F09) | Show only **enabled and effective** items plus "Change in Settings" (fix the stale label) | As now | None | None |
 
-### 4.3 Поток и пустые состояния (F01–F03)
+### 4.3 Flow and empty states (F01–F03)
 
-**Рекомендация.** Концептуальный порядок ADR-019 §6 сохраняется (статус → контекст → цель → риг →
-план → окна → условия), но меняется заполнение экрана, пока плана ещё нет:
+**Recommendation.** The conceptual order of ADR-019 §6 is preserved (status → context → target → rig →
+plan → windows → conditions), but what fills the screen while there is no plan yet changes:
 
-- **Пока не хватает входов** — вместо карточки «Needs a target · Integration 0 min» и трёх
-  повторов показывается **чек-лист**: ✓ Site · ○ Target · ○ Rig · ○ Capture blocks. Каждый
-  пункт ведёт в нужный выбор. Статус с вердиктом появляется, когда его можно посчитать.
-- **Полоса идентичности** показывает цель и ночь один раз; повтор «No target» убирается.
-- **«Conditions»** — строка погоды-дубля удаляется. Остаются аннотации облачности в окнах (часть
-  ответа) и одна ссылка «Night & Moon · Weather».
+- **While inputs are missing** — instead of the "Needs a target · Integration 0 min" card and three
+  repeats, a **checklist** is shown: ✓ Site · ○ Target · ○ Rig · ○ Capture blocks. Each
+  item leads to the relevant choice. The status with a verdict appears once it can be computed.
+- **The identity strip** shows the target and night once; the "No target" repeat is removed.
+- **"Conditions"** — the duplicate weather row is removed. The cloud annotations in the windows (part of the
+  answer) and a single "Night & Moon · Weather" link remain.
 
-**Альтернатива — пошаговый мастер.** Не рекомендуется: замедляет правку, а режимы отклонены RG-06.
+**Alternative — step-by-step wizard.** Not recommended: slows editing, and modes were rejected by RG-06.
 
-**Заменяет:** ADR-019 §6 — не порядок, а состав пустого состояния; RD-06 («answer first»)
-сохраняется. **Данные:** нет.
+**Supersedes:** ADR-019 §6 — not the order, but the composition of the empty state; RD-06 ("answer first")
+is preserved. **Data:** none.
 
-## 5. Home и ночные условия (RA-D01–D06, RA-E01–E06)
+## 5. Home and night conditions (RA-D01–D06, RA-E01–E06)
 
-**Рекомендация H-W: условия первыми, план сразу под ними** (каркас §8.2):
+**Recommendation H-W: conditions first, plan directly below** (wireframe §8.2):
 
-1. **Шапка.** «Tonight» плюс подзаголовок «Kryvyi Rih · Fri 17 Oct ▾» — компактный, по нажатию
-   выбор места и ночи. Переключатель field mode — в той же строке; пустой AppBar убирается.
-   Контекст ответа не теряется.
-2. **Карточка ночи** (R2c §6):
-   - тёмное окно;
-   - Луна: фаза, %, **крупно тёмные часы без Луны** (MF-b) и тип окна ↘/↗/•;
-   - облачность (диапазон) со свежестью;
-   - строка значений: осадки (максимум), порывы (максимум), часы росы;
-   - → детали.
-   Без вердикта и без цвета «хорошо/плохо» (ADR-012).
-3. **Карточка «Your plan»:** цель, вердикт, «Open planner» (основная кнопка).
-4. Вторичная текстовая кнопка «What can I image tonight?».
-5. **«New plan» убирается** с Home (D04). Он остаётся в ⋮ планировщика.
+1. **Header.** "Tonight" plus the subtitle "Kryvyi Rih · Fri 17 Oct ▾" — compact, tap to
+   choose site and night. The field mode toggle is on the same row; the empty AppBar is removed.
+   The answer's context is not lost.
+2. **Night card** (R2c §6):
+   - dark window;
+   - Moon: phase, %, **Moon-free dark hours in large type** (MF-b) and window type ↘/↗/•;
+   - cloud cover (range) with freshness;
+   - values row: precipitation (maximum), gusts (maximum), dew hours;
+   - → details.
+   No verdict and no "good/bad" color (ADR-012).
+3. **"Your plan" card:** target, verdict, "Open planner" (primary button).
+4. Secondary text button "What can I image tonight?".
+5. **"New plan" is removed** from Home (D04). It remains in the planner's ⋮.
 
-**Альтернатива H-P:** план первым (как сейчас, ADR-019 §5, RG-05 T1), а карточка ночи компактнее и
-стоит второй. Довод за H-P — «answer first» для пользователя с готовым планом. Довод за H-W — прямое
-пожелание владельца и практика аналогов (DarkScout, Clear Outside начинают с условий ночи).
+**Alternative H-P:** plan first (as now, ADR-019 §5, RG-05 T1), with a more compact night card
+placed second. The argument for H-P is "answer first" for a user with a ready plan. The argument for H-W is the owner's direct
+wish and the practice of analogues (DarkScout, Clear Outside start with night conditions).
 
-**Заменяет:** ADR-019 §5 (порядок), RG-05 T1. **Данные:** нет. **Тесты:** Tonight, sweep,
+**Supersedes:** ADR-019 §5 (order), RG-05 T1. **Data:** none. **Tests:** Tonight, sweep,
 `core_loop_test`.
 
-**Детали ночи** (R2c §7):
+**Night details** (R2c §7):
 
-| Пункт | Рекомендация | Альтернатива | Заменяет | Privacy |
+| Item | Recommendation | Alternative | Supersedes | Privacy |
 | --- | --- | --- | --- | --- |
-| **Обзор ночей (W1)** | Один запрос Open-Meteo на 16 дней на место. Лента карточек ночей: облачность в тёмное время, Луна % и тёмные часы без Луны, ветер, роса | Без обзора | ADR-012 §4, §6 (ключ кэша) | Получатель тот же. Обновить формулировки privacy и COMPLIANCE |
-| **Состав карточки (W2)** | Как выше; unknown — «—» | Минимум: облачность и Луна | — | — |
-| **Месячный календарь Луны (M2)** | В деталях «Night & Moon», офлайн, `Isolate.run` + кэш по месяцу. Без подсветки «good». Время на телефоне — критерий приёмки | Только 7 ночей в обзоре | — (охват) | Нет |
-| **Полоса ночи (M3)** | Слой Луны и легенда в полосе сумерек, текстовая альтернатива | — | — | Нет |
-| **Seeing и transparency (W3, W4)** | **Не в 1.0.** Честная строка «not forecast here» и ссылка, которую пользователь открывает сам (Clear Outside) | 7Timer ASTRO как opt-in: 72 ч, некоммерческий, новый получатель | ADR-012 §2 и §3 при альтернативе | Ссылка: раздел «Links you open yourself». 7Timer: новый получатель |
-| **Погода в Logbook (E06)** | Показать сохранённый в снимке прогноз ночи в записи (сводкой) | — | — | Нет |
+| **Nights overview (W1)** | One 16-day Open-Meteo request per site. A strip of night cards: cloud cover during dark time, Moon % and Moon-free dark hours, wind, dew | No overview | ADR-012 §4, §6 (cache key) | Same recipient. Update privacy and COMPLIANCE wording |
+| **Card composition (W2)** | As above; unknown — "—" | Minimum: cloud cover and Moon | — | — |
+| **Monthly Moon calendar (M2)** | In "Night & Moon" details, offline, `Isolate.run` + per-month cache. No "good" highlighting. Time on the phone is an acceptance criterion | Only 7 nights in the overview | — (scope) | None |
+| **Night band (M3)** | Moon layer and legend in the twilight band, text alternative | — | — | None |
+| **Seeing and transparency (W3, W4)** | **Not in 1.0.** An honest "not forecast here" line and a link the user opens themselves (Clear Outside) | 7Timer ASTRO as opt-in: 72 h, non-commercial, new recipient | ADR-012 §2 and §3 under the alternative | Link: section "Links you open yourself". 7Timer: new recipient |
+| **Weather in Logbook (E06)** | Show the night forecast saved in the snapshot in the entry (as a summary) | — | — | None |
 
-## 6. Записи (RA-G01–G05)
+## 6. Records (RA-G01–G05)
 
-R2a, тема T1 (≥ 4 источника): пользователи хотят видеть **суммарную интеграцию по цели за несколько
-ночей** и сегодня ведут её в таблицах. «Progress by target» у AstroPlan уже есть — это отличие,
-которое стоит показать.
+R2a, theme T1 (≥ 4 sources): users want to see **total integration per target across several
+nights** and today track it in spreadsheets. AstroPlan already has "Progress by target" — this is a differentiator
+worth showing.
 
-Рекомендации:
-1. Progress — **сегмент «By target» вверху Logbook**, а не плитка (G01).
-2. **Видимая Delete** у ригов и целей в Library (G03; соответствие RD-09). Сначала подтвердить.
-3. «Plan this target» — в строке цели (меню), а не только в диалоге редактирования (G02).
-4. Прогноз ночи в записи (E06).
-5. **После 1.0:** экспорт в AstroBin CSV — переиспользование стандарта (R2a, F 38). Нужно решение о
-   формате экспорта (EXPORT_MANIFEST).
+Recommendations:
+1. Progress — a **"By target" segment at the top of Logbook**, not a tile (G01).
+2. **Visible Delete** for rigs and targets in Library (G03; consistent with RD-09). Confirm first.
+3. "Plan this target" — in the target row (menu), not only in the edit dialog (G02).
+4. Night forecast in the entry (E06).
+5. **After 1.0:** export to AstroBin CSV — reuse of a standard (R2a, F 38). Requires a decision on the
+   export format (EXPORT_MANIFEST).
 
-**Альтернатива:** оставить как есть. **Данные:** нет, кроме п. 5 (после 1.0).
+**Alternative:** leave as is. **Data:** none, except item 5 (after 1.0).
 
-## 7. Настройки (RA-H01–H03)
+## 7. Settings (RA-H01–H03)
 
-1. Структура S9.3 остаётся: она логична, и R2a не нашёл лучшего образца.
-2. **«Appearance»:** System · Light · Dark плюс field mode. Сегодня тема только системная
-   (`main.dart:199`); астро-приложения обычно тёмные.
-3. **Единицы** (°C/°F, км/ч/mph) — после 1.0, если нужна англоязычная аудитория США.
-4. Накладные расходы — глобальные (I1).
+1. The S9.3 structure remains: it is logical, and R2a found no better model.
+2. **"Appearance":** System · Light · Dark plus field mode. Today the theme is system-only
+   (`main.dart:199`); astro apps are usually dark.
+3. **Units** (°C/°F, km/h/mph) — after 1.0, if a US English-speaking audience is needed.
+4. Overheads — global (I1).
 
-**Альтернатива:** без изменений. **Данные:** п. 2 — одна настройка отображения
-(`DisplayPreferencesRepository`, ключ бэкапа).
+**Alternative:** no changes. **Data:** item 2 — one display setting
+(`DisplayPreferencesRepository`, backup key).
 
-## 8. Каркасы (порядок и содержание, не вид)
+## 8. Wireframes (order and content, not appearance)
 
 ### 8.1 Welcome (O-2′)
 
 ```
 ┌──────────────────────────────────┐
-│ [знак]                           │
+│ [mark]                           │
 │ Plan your night's capture        │  ← headline
 │ Two quick things, both optional. │
 │                                  │
@@ -253,7 +253,7 @@ Kryvyi Rih · Fri 17 Oct ▾
 What can I image tonight? ›
 ```
 
-### 8.3 Планировщик: пустое состояние
+### 8.3 Planner: empty state
 
 ```
 Plan                             ⋮
@@ -264,7 +264,7 @@ Getting started
  ○ Capture    Add light frames ›
 ```
 
-### 8.4 Capture-блок (DSLR, предложено)
+### 8.4 Capture block (DSLR, proposed)
 
 ```
 Light frames
@@ -274,10 +274,10 @@ Frames         [   ]  e.g. 30
 ISO            [800]  from Ha · ×   (for your records)
 White balance  [Daylight ▾]          (for your records)
 ──────────────
-[Build calibration from lights]   (на уровне плана)
+[Build calibration from lights]   (at plan level)
 ```
 
-### 8.5 Night & Moon: месяц
+### 8.5 Night & Moon: month
 
 ```
 October 2026          ‹  ›
@@ -286,65 +286,65 @@ Mo Tu We Th Fr Sa Su
           ↘0:25 ↘1:27 …
 …
 16 ◑ ↗ 8 h 31 min (selected)
-[полоса: день|сумерки|Луна|темно]  + текстовая альтернатива
+[band: day|twilight|Moon|dark]  + text alternative
 ```
 
-## 9. Идентичность (раунд 1, сводка R2d)
+## 9. Identity (round 1, R2d summary)
 
-- **Переименование до первой загрузки рекомендуется.** Имя «Astro Planner» занято многократно,
-  проверено 2026-10-17: «Astro Planner: Night Sky Photo», «AstroPlanner», «AstroPlan» (iOS,
+- **Renaming before the first upload is recommended.** The name "Astro Planner" is taken many times over,
+  checked 2026-10-17: "Astro Planner: Night Sky Photo", "AstroPlanner", "AstroPlan" (iOS,
   2026), AstroPlanner (Rodman).
-- **Шорт-лист R2d** (скрининг, не юридическое заключение): **Culmina**, **AltArc**, **Astrarc**,
-  **Arcwindow**; резерв — Noctarc, PhotonPlan. Имя выбирает владелец.
-- **App id** — рекомендация агента I-2 `io.github.buffur.<name>` вместе с RD-01 = B (Buffur —
-  аккаунт, где реально живёт репозиторий). Следствие: на телефоне владельца приложение встанет
-  отдельно, данные переносятся через бэкап и восстановление.
-- **Знак** — направления S9.10, адаптированные под имя. Выбирает только владелец (P9.4).
-- **Splash** — S2 (§3.2). **Иконки** — Material; точечный набор для погоды и Луны только при
-  нехватке метафор (раунд 2).
+- **R2d shortlist** (screening, not a legal opinion): **Culmina**, **AltArc**, **Astrarc**,
+  **Arcwindow**; reserve — Noctarc, PhotonPlan. The owner chooses the name.
+- **App id** — agent recommendation I-2 `io.github.buffur.<name>` together with RD-01 = B (Buffur is the
+  account where the repository actually lives). Consequence: on the owner's phone the app will install
+  separately; data is transferred via backup and restore.
+- **Mark** — the S9.10 directions, adapted to the name. Chosen by the owner only (P9.4).
+- **Splash** — S2 (§3.2). **Icons** — Material; a targeted set for weather and Moon only if
+  metaphors are lacking (round 2).
 
-## 10. Последовательность до релиза (вход для RA.P; I05, TD-104)
+## 10. Sequence before release (input for RA.P; I05, TD-104)
 
-Рекомендуемый порядок (решается в RA.P):
-1. **TD-104 (CI) — первым.** Зелёный CI должен охранять редизайн. Нужен лог (владелец).
-2. **Идентичность:** имя, app id, знак, splash. Смена id затрагивает Kotlin, Gradle, тесты и данные
-   на телефоне — лучше до остальных UI-работ.
-3. **Редизайн:**
-   - онбординг и Home;
-   - планировщик и Capture;
-   - ночные условия;
-   - записи и настройки.
-   Каждый пункт — с обзором рендеров владельцем (K14).
-4. **Одна миграция v26,** если выбраны W2, ST2 или I2.
-5. **Stage 11 на финальной сборке:** S11.6 (телефон, TalkBack, perf), S11.7 (readiness); host-строки,
-   не затронутые изменениями, сохраняют PASS (V3).
-6. **Действия владельца:** подпись, политика по новому URL, ТЗ-поиск, закрытый тест Play (≥ 12
-   тестеров, 14 дней).
+Recommended order (decided in RA.P):
+1. **TD-104 (CI) — first.** A green CI must guard the redesign. A log is needed (owner).
+2. **Identity:** name, app id, mark, splash. Changing the id affects Kotlin, Gradle, tests and data
+   on the phone — better before the rest of the UI work.
+3. **Redesign:**
+   - onboarding and Home;
+   - planner and Capture;
+   - night conditions;
+   - records and settings.
+   Each item — with owner review of renders (K14).
+4. **A single v26 migration,** if W2, ST2 or I2 is chosen.
+5. **Stage 11 on the final build:** S11.6 (phone, TalkBack, perf), S11.7 (readiness); host rows
+   not touched by the changes keep their PASS (V3).
+6. **Owner actions:** signing, policy at the new URL, trademark search, Play closed test (≥ 12
+   testers, 14 days).
 
-## 11. Трассировка
+## 11. Traceability
 
-| Находки Phase A | Где в этом документе |
+| Phase A findings | Where in this document |
 | --- | --- |
 | RA-A01, A05, A06, A07, A08, A09, K4 | §1, §2 (A09 — §9, R2d §7) |
 | RA-A02, A03, A04, K5, K6 | §4.1 |
 | RA-A10, I01, I03, I05, K12, K13 | §10 → RA.P |
 | RA-B01–B06 | §3.1 |
-| RA-C01–C04, I04, K10 | §3.2, §9 (детали — R2d) |
+| RA-C01–C04, I04, K10 | §3.2, §9 (details — R2d) |
 | RA-D01–D06, K9 | §5 |
 | RA-E01–E06 | §4.1 (MF-b), §5 |
 | RA-F01–F03 | §4.3 |
-| RA-F04, K8 | §4.2 (пример плана) |
+| RA-F04, K8 | §4.2 (example plan) |
 | RA-F05–F11, H02, K7 | §4.1, §4.2 |
-| RA-G01–G05, K11 | §6 (G05 — проверки на устройстве в RA.P) |
+| RA-G01–G05, K11 | §6 (G05 — device checks in RA.P) |
 | RA-H01–H03 | §7 |
 | RA-I02, K3 | §10 (TD-104) |
-| K1, K2 | закрыты checkpoint `333e1e8` |
-| K14 | §0, §10 (критерий обзора рендеров) |
+| K1, K2 | closed by checkpoint `333e1e8` |
+| K14 | §0, §10 (render review criterion) |
 
-**Дефекты-кандидаты без пробы** (разрешение не выдавалось) переходят в RA.P как задачи «проверить,
-затем исправить»:
-- RA-F05 — перенос выдержки при смене типа;
-- RA-G03 — нет видимой Delete;
-- K12 — устаревшая подпись.
+**Candidate defects without a probe** (permission was not granted) move to RA.P as "verify,
+then fix" tasks:
+- RA-F05 — exposure carried over when the type changes;
+- RA-G03 — no visible Delete;
+- K12 — stale label.
 
-RA-F04 снимается при удалении кнопки примера.
+RA-F04 is withdrawn when the example button is removed.

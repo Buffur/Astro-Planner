@@ -1,53 +1,56 @@
-# RA.D — Лист решений владельца
+# RA.D — Owner decision sheet
 
-> Подготовлен 2026-10-17 по итогам RA.R2. Обоснования — в
-> [RA_R2E_DIRECTION_OPTIONS.md](RA_R2E_DIRECTION_OPTIONS.md) и в отчётах R2a–R2d.
-> **★ = рекомендация агента; это не решение.**
+> Prepared 2026-10-17 from the results of RA.R2; translated into English 2026-10-17 (CLAUDE.md
+> language policy). The reasoning is in [RA_R2E_DIRECTION_OPTIONS.md](RA_R2E_DIRECTION_OPTIONS.md)
+> and the R2a–R2d reports.
+> **★ = the agent's recommendation; it is not a decision.** The "Source" column says which report
+> the recommendation comes from. Where R2e's synthesis differs from a research step, both are
+> shown.
 >
-> **Как ответить:** назовите в чате ID и вариант, например «ID-1 Culmina, ID-3 I-2, PD-03 H-P».
-> Можно ответить «★ на всё, кроме …». В DECISIONS E.1 записываются только ваши ответы. Пункт без
-> ответа остаётся открытым или отложенным с причиной.
+> **How to answer:** name the ID and the option in the chat, for example "ID-1 Culmina, ID-3 I-2,
+> PD-03 H-P", or "★ for everything except …". Only the owner's answers are recorded in DECISIONS
+> E.1. An item without an answer stays open, or is deferred with a reason.
 
-## Раунд 1 — идентичность (шлюз G1)
+## Round 1 — identity (gate G1)
 
-| ID | Вопрос | Варианты | Ваш ответ |
-| --- | --- | --- | --- |
-| ID-1 | Имя приложения | Culmina · AltArc · Astrarc · Arcwindow · Noctarc · PhotonPlan · своё (тогда скрининг по R2d §1) · оставить «Astro Planner» (риск коллизий высокий) | |
-| ID-2 | Аккаунт проекта (RD-01) | ★ B — Buffur · B′ — ссылки Buffur, id под chacha12 · C — chacha12 | |
-| ID-3 | App id | ★ I-2 `io.github.buffur.<name>` · I-1 оставить `io.github.chacha12.astroplanner` · I-3 `io.github.chacha12.<name>` | |
-| ID-4 | Имя репозитория и URL политики | Оставить `Astro-Planner` · переименовать под бренд (URL GitHub Pages изменится) | |
-| ID-5 | Направление знака | A · B · C · D (S9.10) · E (монограмма) · смешанное. Эскизы под имя — после ответа; финальный знак выбираете только вы | |
-| ID-6 | Загрузочный экран | ★ S2 (анимированный знак в системном splash + знак во Flutter на время реальной загрузки) · S1 (только системный) · S0 (как сейчас) · S3 (Lottie/Rive, новая зависимость) | |
-
-## Раунд 2 — направление продукта (шлюз G2)
-
-| ID | Вопрос | Варианты | Заменяет | Ваш ответ |
+| ID | Question | Options | Source | Your answer |
 | --- | --- | --- | --- | --- |
-| PD-01 | Охват продукта | ★ S-A понизить, не удалять · S-B удалить «What can I image tonight?» и детальную погоду · S-C «всё в одном» | PRODUCT_DIRECTION §1 (уточнение) | |
-| PD-02 | Онбординг | ★ O-2′ (место + класс камеры/риг, без шага «цель», одна кнопка, без Skip) · O-1 (без Welcome, карточка места на Home). При любом варианте исправляется вспышка | TASK 12.5 | |
-| PD-03 | Порядок Home | ★ H-W (ночь первой, затем план, без «New plan», контекст подзаголовком) · H-P (план первым, ночь второй) | ADR-019 §5, RG-05 T1 | |
-| PD-04 | Пустое состояние планировщика и дубль погоды | ★ чек-лист вместо пустого статуса; строка погоды-дубля удаляется · как сейчас | ADR-019 §6 (состав) | |
-| PD-05 | SNR | ★ O2 (√N по времени интеграции, относительный) · O1 (как сейчас) · O4 после 1.0 (подсказка выдержки для астрокамер) · абсолютный SNR — не рекомендуется | CALC-42 (подача); SI-003 сохраняется | |
-| PD-06 | Объём | ★ ST3 + ST2-lite (размер из любого файла; без него — подписанная оценка «16 бит без сжатия») · ST3 · ST2 полный (миграция v26) | Строка Stage 11 «no theoretical size», SI-013 | |
-| PD-07 | Класс камеры | ★ C1-b + C1-d (спрашивать явно; у примерного рига — класс) · C1-c (предлагать из метаданных с подтверждением) · как сейчас | ADR-020 §2 | |
-| PD-08 | Предзаполнение | ★ P2b (пометка «из блока …» у поля; фильтр по классу) · P2c · P0 (без предложений) | ADR-020 §5 (подача) | |
-| PD-09 | Баланс белого | ★ W2 (запись, без расчёта; v26) · W1 | ADR-020 W1 | |
-| PD-10 | Фокус | ★ F2 (напоминание) · F1 · F3 (ползунок — не рекомендуется) | ADR-020 F1 | |
-| PD-11 | «Взять из фото» в блоке | ★ после 1.0 · в 1.0 · никогда | ADR-020 P3 | |
-| PD-12 | Калибровка | ★ CAL-1 (одно действие «Build calibration from lights») · CAL-0 | — | |
-| PD-13 | Пример плана | ★ убрать кнопку · перенести в ⋮ с исправлением | RD-04 | |
-| PD-14 | Assumptions | ★ только включённые пункты · как сейчас | — | |
-| PD-15 | Луна: тёмное время без Луны | ★ MF-b (по показанному восходу и заходу) · MF-a (как есть, с подписью) · MF-c (единый h₀ везде, высокий риск) | CALC-43 (новая производная) | |
-| PD-16 | Обзор ночей (16 дней, один запрос) | ★ да · нет | ADR-012 §4, §6; формулировки privacy | |
-| PD-17 | Месячный календарь Луны | ★ да, в деталях · только 7 ночей | — | |
-| PD-18 | Seeing и transparency | ★ не в 1.0 + ссылка, которую пользователь открывает сам · 7Timer opt-in · ничего | ADR-012 §2/§3 (при 7Timer) | |
-| PD-19 | Записи | ★ Progress сегментом в Logbook, видимая Delete, «Plan this target» в строке, прогноз в записи; AstroBin CSV после 1.0 · без изменений | — | |
-| PD-20 | Настройки | ★ добавить Appearance (System/Light/Dark); единицы после 1.0; накладные расходы глобальные · без изменений | — | |
-| PD-21 | Пауза между кадрами | ★ I1 глобальная · I2 по ригу (v26) | — | |
-| PD-22 | Порядок работ до релиза | ★ CI → идентичность → редизайн → v26 (если нужна) → Stage 11 на финальной сборке · иной | Вход RA.P | |
+| ID-1 | The app's name | Culmina · AltArc · Astrarc · Arcwindow · Noctarc · PhotonPlan · your own (then screened as in R2d §1) · keep "Astro Planner" (high collision risk). No ★: the owner chooses | [R2d](RA_R2D_IDENTITY.md) §2–§3 (screening, not legal advice) | |
+| ID-2 | The project's account (RD-01) | ★ B — Buffur · B′ — Buffur links, id under chacha12 · C — chacha12 | ★ from R2e §9; R2d §8 and S9.12 list the options without a recommendation | |
+| ID-3 | App id | ★ I-2 `io.github.buffur.<name>` · I-1 keep `io.github.chacha12.astroplanner` · I-3 `io.github.chacha12.<name>` | ★ from R2e §9; consequences in R2d §4 (on the owner's phone the new id installs separately; data moves by backup and restore) | |
+| ID-4 | Repository name and policy URL | Keep `Astro-Planner` · rename to the brand (the GitHub Pages URL changes) | R2d §4, §8 (D4) | |
+| ID-5 | Logo direction | A · B · C · D (S9.10) · E (monogram) · a mix. Sketches for the chosen name come after the answer; only the owner chooses the final mark (P9.4) | R2d §5, S9.10 | |
+| ID-6 | Loading screen | ★ S2 (an animated mark in the system splash + the mark in Flutter for the real loading time only) · S1 (system splash only) · S0 (as now) · S3 (Lottie/Rive, a new dependency) | R2d §6, §8 (D6); R2e §3.2 | |
 
-## Нужно от вас вне решений
+## Round 2 — product direction (gate G2)
 
-- **Лог упавшего CI** (TD-104), или разрешение войти в `gh`.
-- **По желанию:** скриншоты текущих экранов с телефона — для визуальных задач редизайна.
-- **Лицензия (RG-12):** остаётся GPL-3.0, если вы не захотите пересмотреть.
+| ID | Question | Options | Supersedes | Source | Your answer |
+| --- | --- | --- | --- | --- | --- |
+| PD-01 | Product scope | ★ S-A demote, do not remove · S-B remove "What can I image tonight?" and the detailed weather · S-C "all in one" | PRODUCT_DIRECTION §1 (clarification) | R2a §5.1; R2e §2 | |
+| PD-02 | Onboarding | ★ O-2′ (site + camera class/rig, no target step, one button, no Skip) · O-1 (no Welcome; a site card on Home). The flash is fixed under either option | TASK 12.5 | R2a §4 (RA-B); R2e §3.1 | |
+| PD-03 | Home order | ★ H-W (the night first, then the plan, no "New plan", context as a subtitle) · H-P (the plan first, the night second) | ADR-019 §5, RG-05 T1 | R2c §6; R2e §5 | |
+| PD-04 | Planner empty state and the duplicated weather | ★ a checklist instead of the empty status; the duplicated weather row removed · as now | ADR-019 §6 (contents) | R2e §4.3 | |
+| PD-05 | SNR | ★ O2 (√N over integration time, relative) · O1 (as now) · O4 after 1.0 (a sub-exposure hint for astro cameras) · absolute SNR — not recommended | CALC-42 (presentation); SI-003 stays | R2b §2, §6 (D-SNR) | |
+| PD-06 | Storage | ★ ST3 + ST2-lite (size from any file; without one, an estimate labelled "16-bit uncompressed", no schema change) · ST3 + ST2 full (format and bit-depth fields, migration v26; R2b's recommendation) · ST3 only | The Stage 11 line "no theoretical size", SI-013 | R2b §3, §6 (D-STO) recommends ST3 + ST2; ST2-lite is R2e §4.1's lower-cost variant | |
+| PD-07 | Camera class | ★ C1-b + C1-d (ask explicitly; the example rig gets a class) · C1-c (proposed from metadata with confirmation) · as now | ADR-020 §2 | R2b §4.6 | |
+| PD-08 | Prefilled values | ★ P2b (a "from block …" marker on each field; filter default by class) · P2c · P0 (no proposals) | ADR-020 §5 (presentation) | R2b §4.5 | |
+| PD-09 | White balance | ★ W2 (a record, no calculation; v26) · W1 | ADR-020 W1 | R2b §4.2 | |
+| PD-10 | Focus | ★ F2 (a reminder) · F1 · F3 (a slider — not recommended) | ADR-020 F1 | R2b §4.3 | |
+| PD-11 | "Take from a photo" in the block | ★ after 1.0 · in 1.0 · never | ADR-020 P3 | R2b §4.4 leaves it to the owner without a recommendation; ★ from R2e §4.2 (release scope) | |
+| PD-12 | Calibration | ★ CAL-1 (one action, "Build calibration from lights") · CAL-0 | — | R2b §4.7 | |
+| PD-13 | The example plan | ★ remove the button · move it to ⋮ and fix it | RD-04 | R2e §4.2 | |
+| PD-14 | Assumptions | ★ only the enabled items · as now | — | R2e §4.2 | |
+| PD-15 | Moon: moon-free dark time | ★ MF-b (by the displayed rise and set) · MF-a (as is, with a label) · MF-c (one h₀ everywhere, high risk) | CALC-43 (a new derived quantity) | R2b §5.3 | |
+| PD-16 | Night overview (16 days, one request) | ★ yes · no | ADR-012 §4, §6; the privacy wording | R2c §7 (W1) | |
+| PD-17 | Monthly Moon calendar | ★ yes, in the details · only 7 nights | — | R2c §7 (M2) | |
+| PD-18 | Seeing and transparency | ★ not in 1.0 + a link the user opens themselves · 7Timer opt-in · nothing | ADR-012 §2/§3 (with 7Timer) | R2c §7 (W4) | |
+| PD-19 | Records | ★ Progress as a Logbook segment, a visible Delete, "Plan this target" on the row, the forecast in the entry; AstroBin CSV after 1.0 · no change | — | R2a §5.6; R2e §6 | |
+| PD-20 | Settings | ★ add Appearance (System/Light/Dark); units after 1.0; overheads stay global · no change | — | R2a §5.7; R2e §7 | |
+| PD-21 | Time between frames | ★ I1 global · I2 per rig (v26) | — | R2b §4.8 | |
+| PD-22 | Order of work to release | ★ CI → identity → redesign → v26 (if needed) → Stage 11 on the final build · another order | Input to RA.P | R2e §10 | |
+
+## Needed from the owner, outside the decisions
+
+- **The failed CI run's log** (TD-104), or permission to sign in with `gh`.
+- **Optional:** screenshots of the current screens from the phone, for the redesign's visual tasks.
+- **Licence (RG-12):** stays GPL-3.0 unless the owner wants to revisit it.

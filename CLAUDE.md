@@ -55,6 +55,7 @@ Read on demand:
 
 ### Documentation and Git
 
+- **Language (owner, 2026-10-17; every task and session):** write all persistent project documentation in English: research reports, roadmaps and plans, ADRs and decisions, progress records, decision sheets, task prompts, technical findings and registers. Conversational replies to the owner stay in Russian by default. The owner's own words and historical source material (reviews, quotes) are kept in their original language, with an English gloss where a document relies on them.
 - Update only documents whose statements the change invalidates; record stable finding/decision IDs without renumbering. Keep intent separate from actual state and preserve superseded history.
 - A code change may require FEATURE_STATUS/TECH_DEBT, architecture/data-model actual-state sections, scientific assumptions or ADRs; update the relevant ones in the same change, not every register indiscriminately.
 - Keep CLAUDE.md and docs tracked. Record resolved findings with date and available commit evidence, never fabricate a future hash.
