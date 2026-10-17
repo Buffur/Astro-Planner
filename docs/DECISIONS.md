@@ -502,6 +502,11 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
 - **Not chosen:** (b) the platform location manager (a dependency change).
 
+### S13.1 — logo direction: C4 Orbit C (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: «Дорабатываем направление C4 Orbit C.» ["We refine the C4 Orbit C direction."]
+- **Decision:** the direction for refinement is round 2's C4 Orbit C (`refinement/evidence/identity/round2/`): an open orbit forming the C of Culmina, the star in its opening. Replaces ID-5's A + C hybrid as the logo direction. **Not yet approved artwork:** the owner approves the final mark after the refinement round (S13.1 acceptance 4; P9.4).
+
 ### S13.1 — logo round 1 not approved; round 2 brief (2026-10-17)
 
 - **Decided by:** the owner, in chat, 2026-10-17, after the round-1 review sheet (`refinement/evidence/identity/`, V1–V4): the current direction is not approved; a new round of 3–5 clearly different concepts, not tweaks of V1/V2/V4.
