@@ -5,8 +5,6 @@
 // loads Roboto (the Android default font) from the Flutter SDK, because the
 // test font draws every character a full em wide and would exaggerate.
 
-import 'dart:io';
-
 import 'package:astroplan/core/theme/app_theme.dart';
 import 'package:astroplan/data/services/equipment_seeder.dart';
 import 'package:astroplan/presentation/screens/equipment/equipment_editor.dart';
@@ -20,29 +18,19 @@ import 'package:provider/provider.dart';
 
 import '../../../support/in_memory_equipment_repository.dart';
 import '../../../support/metadata_candidates.dart';
+import '../../../support/sdk_fonts.dart';
 
 /// Loads Roboto from the SDK that runs the test (`bin/cache/artifacts`).
 Future<void> _loadRoboto() async {
-  final root =
-      Platform.environment['FLUTTER_ROOT'] ??
-      Platform.resolvedExecutable.substring(
-        0,
-        Platform.resolvedExecutable.indexOf(
-          '${Platform.pathSeparator}bin${Platform.pathSeparator}cache',
-        ),
-      );
-  final dir = [
-    root,
-    'bin',
-    'cache',
-    'artifacts',
-    'material_fonts',
-  ].join(Platform.pathSeparator);
   final loader = FontLoader('Roboto');
   for (final f in ['roboto-regular.ttf', 'roboto-medium.ttf']) {
-    final file = File('$dir${Platform.pathSeparator}$f');
-    expect(file.existsSync(), isTrue, reason: 'Roboto not found at $dir');
-    loader.addFont(file.readAsBytes().then((b) => ByteData.sublistView(b)));
+    final file = sdkMaterialFont(f);
+    expect(
+      file,
+      isNotNull,
+      reason: '$f not found in ${sdkMaterialFontsDirectory().path}',
+    );
+    loader.addFont(file!.readAsBytes().then((b) => ByteData.sublistView(b)));
   }
   await loader.load();
 }

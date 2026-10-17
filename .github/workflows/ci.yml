@@ -30,9 +30,12 @@ on:
 
 jobs:
   quality-gate:
-    runs-on: ubuntu-latest
+    # Pinned (S12.1): ubuntu-latest moves to Ubuntu 26 from 2026-10-19; a new
+    # image is adopted deliberately, with its own green run.
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      # v5 runs on Node 24; v4's Node 20 runtime is deprecated on the runners.
+      - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.4'

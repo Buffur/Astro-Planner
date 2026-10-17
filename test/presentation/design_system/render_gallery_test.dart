@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import '../../support/in_memory_display_preferences.dart';
+import '../../support/sdk_fonts.dart';
 import 'gallery_entries.dart';
 import 'gallery_harness.dart';
 
@@ -31,25 +32,16 @@ const _shot = Key('render');
 
 /// Loads Roboto and the Material icons from the SDK that runs the test.
 Future<void> _loadFonts() async {
-  final root =
-      Platform.environment['FLUTTER_ROOT'] ??
-      Platform.resolvedExecutable.substring(
-        0,
-        Platform.resolvedExecutable.indexOf(
-          '${Platform.pathSeparator}bin${Platform.pathSeparator}cache',
-        ),
-      );
-  final dir = [
-    root,
-    'bin',
-    'cache',
-    'artifacts',
-    'material_fonts',
-  ].join(Platform.pathSeparator);
-  Future<ByteData> read(String f) =>
-      File('$dir${Platform.pathSeparator}$f')
-          .readAsBytes()
-          .then((b) => ByteData.sublistView(b));
+  // S12.1 (TD-104): found case-insensitively; the file names' case differs
+  // between the Windows and Linux SDKs.
+  Future<ByteData> read(String f) {
+    final file = sdkMaterialFont(f);
+    if (file == null) {
+      throw StateError('$f not found in ${sdkMaterialFontsDirectory().path}');
+    }
+    return file.readAsBytes().then((b) => ByteData.sublistView(b));
+  }
+
   final roboto = FontLoader('Roboto');
   for (final f in [
     'roboto-regular.ttf',
