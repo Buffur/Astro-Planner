@@ -22,6 +22,8 @@
 
 > **2026-10-17 reassessment:** the owner requested the Product Reassessment planning amendment in POST_ROADMAP_PLAN.md. Existing product decisions remain the implementation baseline; the reassessment may propose changes for explicit decision. It does not itself approve feature removal, a renamed app, a new provider or a new scientific model.
 
+> **Updated 2026-10-17 (RA.D, G3 and the GitHub-only distribution; recorded by the roadmap readiness review, C5, owner-approved):** the owner's RA.D decisions now supersede parts of this direction. §9 lists each superseded statement with its decision in DECISIONS E.1 and the implementing Task in `POST_ROADMAP_PLAN.md` §5 (Stages 12–17). The historical text of §1, §8 and §10 is kept unchanged; where it differs from §9, §9 and DECISIONS E.1 win.
+
 ## 1. Primary product job
 
 AstroPlan (shipped as **Astro Planner**, `AppIdentity.appName`) is primarily a
@@ -249,6 +251,13 @@ A deferred item comes back only through the research and decision gate
 | "No visual redesign until the domain and Session are stable" | MASTER_ROADMAP §3.3 | The condition is met. UX refinement is planned through Stages 4–6 and 9, on a design system built first (Stage 5) |
 | `MASTER_ROADMAP.md` is the approved scope, and `ROADMAP.md`'s active-task line is the current position (OD-06) | DECISIONS Part C; ROADMAP "Adopted plan"; PROJECT_HANDOFF header and §0 | After Stage 0, `POST_ROADMAP_PLAN.md` is the strategy and `PROGRESS.md` the state (CLAUDE.md). The roadmap's open items are carried (`POST_ROADMAP_PLAN.md` Appendix B) |
 | "The live tracker stays, but as an optional mode" (RG-04, B) *(added 2026-09-27)* | §3–§4 before 2026-09-27; DECISIONS E.1, "RG-04 decided"; ADR-019 §2, §4 | The dedicated tracker leaves the target product. Stage 8 retires its UI after a dependency audit, keeping the data (§4) |
+| The product is shipped as "Astro Planner" with the id `io.github.chacha12.astroplanner` (OD-07) *(added 2026-10-17)* | §1; §9 "Not superseded" (OD-07) | **Culmina**, intended id `io.github.buffur.culmina`, repository `Buffur/Culmina` (E.1, "RA.D — ID-1", "RA.D — round 1 identity"); the shipped values stay until S13.2 |
+| Questions 1–2 ("What can I image? When?") lead the product job *(added 2026-10-17)* | §1 | Supporting: the candidates, the altitude chart and the Weather screen stay, demoted (E.1, "RA.D — Q1 to Q4", Q1; S16.2, S16.3) |
+| Deferred: "a theoretical storage payload" *(added 2026-10-17)* | §8 | A storage evidence chain: measured size first, a theoretical size only from evidenced format, otherwise Unknown (PD-06; S14.7) |
+| Deferred: "localisation and unit preferences" *(added 2026-10-17)* | §8 | Unit preferences are in the release (PD-20; S16.6); localisation stays deferred |
+| RD-04: the capture plan starts empty, "with Start from the example plan" *(added 2026-10-17)* | §10 | The example-plan action is removed once its replacement flows pass (PD-13; S14.13); the fixture stays for tests |
+| RG-05: "Tonight puts the plan first, under a site · night context line" *(added 2026-10-17)* | §10 | Home leads with the night card, then Your plan; site and night as a subtitle; no New plan on Home (PD-03; S16.2) |
+| A store release (Play) and MASTER_ROADMAP §9's store items *(added 2026-10-17)* | §9 "Not superseded" | A signed APK on GitHub Releases; store-only requirements deferred, every quality, privacy, licensing and device requirement kept (E.1, "Distribution: GitHub Releases only"; S17.6, S17.8) |
 
 **Not superseded.** These stay in force until an explicit owner decision or ADR changes
 them:

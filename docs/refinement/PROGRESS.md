@@ -4,7 +4,7 @@
 > evidence can be reused, and the one next allowed action. Strategy lives in `POST_ROADMAP_PLAN.md`,
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
-> **Last updated:** 2026-10-17 (G3: the Culmina release roadmap, Stages 12–17, approved; the Product Reassessment is complete; no application changes).
+> **Last updated:** 2026-10-17 (the Stages 12–17 readiness review; corrections C1–C6 applied to the roadmap; no application changes).
 > **Next:** S12.3 (the policy text; needs the owner's contact email) and S12.4 (the owner's S11P-03 decision); S12.2 recommended, not a gate. Each on the owner's start instruction.
 
 ## Current state
@@ -19,7 +19,7 @@
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\flutter` (checked 2026-10-17; the earlier `C:\tools\flutter-3.47.4` path no longer exists). Linux reproduction: WSL Ubuntu with the official 3.47.4 Linux archive at `~/ci/flutter` (S12.1) |
 
-**Roadmap readiness review, 2026-10-17** (documentation only; [report](STAGES_12_17_READINESS_REVIEW.md)): Stages 12–17 cover every RA.D decision and every finding of the owner's review. One order defect (G1: S17.5 and S17.6 depend on each other; no remote CI run on the release commit) and smaller gaps (G2: the cross-id, cross-schema backup rehearsal on the final build; G3: S14.9's dependencies on S14.7/S14.8; G4: S12.4 option (a)'s About change; G5: `PRODUCT_DIRECTION.md` still states superseded direction; G6: register omissions). Corrections C1–C6 are **proposed, not applied**: they amend frozen Task text and await the owner's approval. Next Task unchanged (S12.3 with S12.4; S13.1 is the unblocked alternative). No application checks run (V1 documentation class).
+**Roadmap readiness review, 2026-10-17** (documentation only; [report](STAGES_12_17_READINESS_REVIEW.md)): Stages 12–17 cover every RA.D decision and every finding of the owner's review. One order defect (G1: S17.5 and S17.6 depend on each other; no remote CI run on the release commit) and smaller gaps (G2: the cross-id, cross-schema backup rehearsal on the final build; G3: S14.9's dependencies on S14.7/S14.8; G4: S12.4 option (a)'s About change; G5: `PRODUCT_DIRECTION.md` still states superseded direction; G6: register omissions). Corrections C1–C6 **approved by the owner and applied** the same day (DECISIONS E.1, "Stages 12–17 readiness review corrections approved"): `POST_ROADMAP_PLAN.md` §5 (S14.1, S14.3, S14.7, S14.9, S16.8, S17.5, S17.6, traceability) and `PRODUCT_DIRECTION.md` §9. Next Task unchanged (S12.3 with S12.4; S13.1 is the unblocked alternative). No application checks run (V1 documentation class).
 
 **Documentation correction, 2026-10-17:** CLAUDE.md condensed with V1–V8 retained; numbered traps moved to `docs/ENGINEERING_GUARDRAILS.md`; old full text archived. Duplicate approval in `.agents/rules/00-project-governance.md` corrected; optional skills and animation scope clarified. Product Reassessment scope added without approving UI implementation or closing Stage 11. Application checks were not run (V1 documentation class); reference/consistency checks and `git diff --check` passed; V1–V8 text preserved except for the relocated guardrails reference, all 22 trap numbers and nine review coverage groups retained. The pre-existing modified macOS plugin registrant is outside this Task; no new claim of full-gate evidence reuse is made for the working tree.
 

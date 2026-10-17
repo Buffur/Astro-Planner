@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **Readiness corrections, 2026-10-17:** E.1 "Stages 12–17 readiness review corrections approved": C1–C6 applied to `refinement/POST_ROADMAP_PLAN.md` §5 and `refinement/PRODUCT_DIRECTION.md` §9 (Stage 17 order, the identity migration rehearsal, S14.9's dependencies, S12.4 (a), register omissions). Documentation only.
 > **Distribution, 2026-10-17:** E.1 "Distribution: GitHub Releases only": Culmina is distributed as a signed APK through GitHub Releases; Google Play and other stores are deferred; quality, privacy, licensing and device-validation requirements unchanged. Stages 12, 13 and 17 aligned. Documentation only.
 > **G3, 2026-10-17:** E.1 "RA.P — the Culmina release roadmap approved (G3)": Stages 12–17 approved; Stage 11 closed as superseded by Stage 17; S12.1 waits for the owner's start instruction. Documentation only.
 > **RA.D complete, 2026-10-17:** E.1 "RA.D — Q1 to Q4": the scope kept (demoted), MF-c, no seeing/transparency provider (a link), the AstroBin CSV export included. RA.P proposed in `refinement/POST_ROADMAP_PLAN.md` (Stages 12–17), awaiting G3. Documentation only.
@@ -493,6 +494,13 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### Stages 12–17 readiness review corrections approved (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: «Примени исправления C1–C6 из отчёта о готовности одним документационным коммитом, без push.» ["Apply corrections C1–C6 from the readiness report in one documentation commit, without a push."]
+- **Basis:** `refinement/STAGES_12_17_READINESS_REVIEW.md` (findings G1–G6).
+- **Applied:** C1 S17.6 depends on S17.1–S17.4 and adds a green remote CI run on the release commit; S17.5 runs on S17.6's signed release candidate, and the owner's data step moves to the end of S17.5. C2 S17.5 adds the cross-id, cross-schema backup rehearsal on test packages. C3 S14.9 depends on S14.7 and S14.8; S14.1 decides whether a block's measured size is persisted; S14.3 (1) and S14.7 (1) reworded. C4 S16.8 implements S12.4 (a)'s About statement if chosen. C5 `refinement/PRODUCT_DIRECTION.md` records the RA.D, Q1 and distribution supersessions (§9). C6 TD-002 re-check in S16.8; TD-099 → S12.3 in the list; RA-H03 language deferred and RA-C04's small animations within `AppMotion` in the traceability table.
+- **Not changed:** no Task renumbered, no functionality added, no RA.D decision reopened; the next Task stays S12.3 with S12.4.
 
 ### Distribution: GitHub Releases only (2026-10-17)
 

@@ -13,6 +13,8 @@
 > review-01.10.2026); `prompts/PRODUCT_REASSESSMENT.md`; `PRODUCT_DIRECTION.md`; `TECH_DEBT.md` and
 > `SCIENTIFIC_INTEGRITY.md` (open items); `STAGE_11_MATRIX.md` (mandatory rows); code facts in
 > `lib/data/backup/backup_archive.dart` and `lib/data/repositories/shared_prefs_weather_snapshot_store.dart`.
+> **Applied 2026-10-17:** the owner approved C1–C6; they are applied in `POST_ROADMAP_PLAN.md` §5 and
+> `PRODUCT_DIRECTION.md` §9 (DECISIONS E.1, "Stages 12–17 readiness review corrections approved").
 
 ## 1. Verdict
 
@@ -105,7 +107,7 @@ v26 migration and snapshot/manifest keys; MF-c re-deriving ADR-013's vectors; th
 change; the release-key permanence from the first public release; volume (41 Tasks plus six Stage
 validations).
 
-## 5. Proposed minimal corrections (await the owner's approval)
+## 5. Minimal corrections (approved and applied 2026-10-17)
 
 | # | Fixes | Correction |
 | --- | --- | --- |
