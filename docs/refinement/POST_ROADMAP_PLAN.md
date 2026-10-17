@@ -2,6 +2,7 @@
 
 ## Active amendment — Product Reassessment (2026-10-17)
 
+> **Distribution, 2026-10-17:** Culmina ships through **GitHub Releases only** (a signed APK); store publication is deferred (DECISIONS E.1, "Distribution: GitHub Releases only"). Stages 12, 13 and 17 are aligned; the Stage numbering is unchanged.
 > **RA.P, 2026-10-17:** the reassessment's release roadmap is §5, "Stages 12–17 — Culmina release roadmap (RA.P)", **approved by the owner (G3) on 2026-10-17**. RA.R1, RA.R2 and RA.D are complete (DECISIONS E.1). Each Task starts only on the owner's start instruction.
 
 The owner requested a plan/instruction correction after the review of CLAUDE.md and the live-test brief. The next planning work is the bounded reassessment in [PRODUCT_REASSESSMENT.md](prompts/PRODUCT_REASSESSMENT.md). This amendment authorizes its planning scope, not the owner's individual redesign suggestions as implementation decisions.
@@ -280,7 +281,7 @@ an overlap. Research gates may run earlier than their Stage (§4).
 | 14 | Capture Plan completeness (RA.P) | ADR-021, then implementation (v26) | Round 2A | 12 (13 for device evidence) |
 | 15 | Night conditions (RA.P) | ADR-022, then implementation | Q2 (MF-c), PD-16, PD-17, Q3 | 12 |
 | 16 | Screens and flow (RA.P) | Implementation | Round 2B, Q1, Q4 | 14, 15 |
-| 17 | Final validation and release readiness (RA.P; folds in S11.6, S11.7) | Independent validation; owner release actions | Go/no-go | 12–16 |
+| 17 | Final validation and GitHub release (RA.P; folds in S11.6, S11.7; GitHub-only distribution) | Independent validation; owner release actions | Go/no-go | 12–16 |
 
 Current status of each Stage: `PROGRESS.md`.
 
@@ -5941,6 +5942,10 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 >   `refinement/research/RA_D_IDENTITY_TRANSITION.md`;
 > - the evidence in RA.R1 and RA.R2.
 >
+> **Distribution amendment (GitHub-only distribution, 2026-10-17; DECISIONS E.1):** the release is a signed APK on GitHub Releases. Store-only
+> requirements are marked **Deferred (store distribution)** in place; every quality, privacy, licensing, accessibility and
+> device requirement stays. New: S17.6 is GitHub release packaging, S17.8 publishes the release.
+>
 > **Stage 11:** S11.1–S11.5, S11.C1 and S11.C2 are done and their evidence stays reusable under V3.
 > The open S11.6 and S11.7 are **folded into Stage 17** (S17.5, S17.7): the redesign changes the
 > inputs of their rows, so they must run on the final build. **Since G3 (2026-10-17) Stage 11 is closed
@@ -5976,16 +5981,16 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 | Task | Objective | Depends on | Acceptance | V1 class |
 | --- | --- | --- | --- | --- |
 | **S12.1** | **TD-104: make the remote CI gate pass** | The failing job's log: the owner downloads it while signed in, or authorizes `gh`. Fallback: reproduce on Linux (WSL or a container) if available | (1) The failing test is named, citing the log. (2) The root cause is recorded in TD-104 (and in TD-096 if the wall clock is involved). (3) The cause is fixed; no test is skipped or weakened. (4) The workflow's announced breakages are handled: `actions/checkout` on Node 20, and the runner image pinned instead of `ubuntu-latest` (moving to Ubuntu 26). (5) The local full gate passes. (6) After an owner-authorized push, a remote run on `main` passes, read from GitHub. (7) TD-104 and RD-17 are updated with the run | Full gate (tests or tooling change); a CI-only change also needs its syntax and path logic checked |
-| **S12.2** | **(Owner) formal trademark search for "Culmina"**: classes 9 and 42; WIPO GBD, EUIPO, USPTO; optionally UKRNOIVI | — | The result is recorded in DECISIONS E.1. A conflict reopens ID-1 (and ID-3, ID-4) before Stage 13 | Owner action |
-| **S12.3** | **Privacy-policy text and the URL transition**: the agent prepares the text; the owner renames and publishes (`RA_D_IDENTITY_TRANSITION.md` §4, steps 1–5) | S12.2 clear | (1) `docs/privacy/index.md` corrected: TD-099's weather wording; the 16-night request (PD-16); links the user opens (Clear Outside, Q3); the contact email supplied by the owner. (2) (Owner) the repository is renamed `Buffur/Culmina`, Pages are enabled, and the policy, project and source URLs answer 200 (recorded). (3) Never recreate `Astro-Planner` | Documentation; owner actions |
-| **S12.4** | **(Owner decision) S11P-03:** `geolocator_android` bundles Google Play services location in a GPL-3.0 app | Options from S11.4's evidence | The owner chooses: (a) accept it and state it in COMPLIANCE and About; or (b) use the platform location manager — then a code Task is added to Stage 16 (S16.8) | Owner decision; documentation |
+| **S12.2** | **(Owner, recommended) formal trademark search for "Culmina"**: classes 9 and 42; WIPO GBD, EUIPO, USPTO; optionally UKRNOIVI. *Amended (GitHub-only distribution, 2026-10-17): no longer a store-publication gate; recommended before the public rename (S12.3) because the name is used publicly on GitHub* | — | The result is recorded in DECISIONS E.1. A conflict is put to the owner, who decides whether to reopen ID-1 (and ID-3, ID-4) before S13.2. If the owner skips the search, the documented naming risk stays the record (`RA_R2D_IDENTITY.md` §2–§3) | Owner action |
+| **S12.3** | **Privacy-policy text and the URL transition**: the agent prepares the text; the owner renames and publishes (`RA_D_IDENTITY_TRANSITION.md` §4, steps 1–5). The policy stays mandatory under GitHub-only distribution: the app sends data to third parties and links the policy | — (S12.2 recommended before the rename; amended GitHub-only distribution, 2026-10-17) | (1) `docs/privacy/index.md` corrected: TD-099's weather wording; the 16-night request (PD-16); links the user opens (Clear Outside, Q3); the contact email supplied by the owner. (2) (Owner) the repository is renamed `Buffur/Culmina`, Pages are enabled, and the policy, project and source URLs answer 200 (recorded). (3) Never recreate `Astro-Planner` | Documentation; owner actions |
+| **S12.4** | **(Owner decision) S11P-03:** `geolocator_android` bundles Google Play services location in a GPL-3.0 app. Unchanged by GitHub-only distribution: the APK is still distributed under GPL-3.0 | Options from S11.4's evidence | The owner chooses: (a) accept it and state it in COMPLIANCE and About; or (b) use the platform location manager — then a code Task is added to Stage 16 (S16.8) | Owner decision; documentation |
 
 #### Stage 13 — Identity: Culmina
 
 | Task | Objective | Depends on | Acceptance | V1 class |
 | --- | --- | --- | --- | --- |
-| **S13.1** | **Logo sketches and the review sheet** for the A + C hybrid (`RA_D_IDENTITY_TRANSITION.md` §5, steps 1–4) | ID-5 | (1) Three or four SVG variants: horizon, altitude arc, star at the apex, one stroke system, amber and red accents for comparison, centred in the 66 dp safe zone. (2) The review sheet per variant: adaptive masks, 48 and 24 px, the themed monochrome icon on light and dark wallpaper, the 512 px Play icon, the 288 dp splash, beside "Culmina". (3) Stored under `docs/refinement/evidence/identity/`. (4) The owner's approval of the final artwork is recorded in DECISIONS E.1 (P9.4: the agent never picks) | Documentation and assets outside the app |
-| **S13.2** | **Application id, name and URLs:** `io.github.buffur.culmina`, "Culmina", `AppIdentity` pointing at S12.3's live URLs; TD-088 and TD-093 closed | S12.1, S12.2, S12.3 | `RA_D_IDENTITY_TRANSITION.md` §3, criteria 1–10, including: (1) no old id left in code; (2) the metadata channel works on a device, M1 and M4; (3) backup and restore across ids on test packages, counts and fields equal; (4) the owner's migration path documented in the release notes and the runbook; (5) the restore confirmation shows the backup's date (TD-093); (6) trap 20, COMPLIANCE, RELEASE, README and the runbook updated | **High-risk:** full gate, device checks |
+| **S13.1** | **Logo sketches and the review sheet** for the A + C hybrid (`RA_D_IDENTITY_TRANSITION.md` §5, steps 1–4) | ID-5 | (1) Three or four SVG variants: horizon, altitude arc, star at the apex, one stroke system, amber and red accents for comparison, centred in the 66 dp safe zone. (2) The review sheet per variant: adaptive masks, 48 and 24 px, the themed monochrome icon on light and dark wallpaper, the 288 dp splash, beside "Culmina"; the 512 px Play icon is **deferred (store distribution)**, while a 512 px mark for the repository and the release page stays optional. (3) Stored under `docs/refinement/evidence/identity/`. (4) The owner's approval of the final artwork is recorded in DECISIONS E.1 (P9.4: the agent never picks) | Documentation and assets outside the app |
+| **S13.2** | **Application id, name and URLs:** `io.github.buffur.culmina`, "Culmina", `AppIdentity` pointing at S12.3's live URLs; TD-088 and TD-093 closed. The id and the signing key become permanent at the first public GitHub release (updates need both unchanged) | S12.1, S12.3 (S12.2 recommended) | `RA_D_IDENTITY_TRANSITION.md` §3, criteria 1–10, including: (1) no old id left in code; (2) the metadata channel works on a device, M1 and M4; (3) backup and restore across ids on test packages, counts and fields equal; (4) the owner's migration path documented in the release notes and the runbook; (5) the restore confirmation shows the backup's date (TD-093); (6) trap 20, COMPLIANCE, RELEASE, README and the runbook updated | **High-risk:** full gate, device checks |
 | **S13.3** | **Launcher icon and splash (S2)** | S13.1 (approved artwork), S13.2 | (1) The approved mark is drawn in `ic_launcher_foreground.xml` and `tool/make_launcher_icons.py` (trap 20), with a separate monochrome layer, legacy PNGs and `icon_512.png`. (2) An AnimatedVectorDrawable splash on Android 12+, at most 1,000 ms, no start delay; the static icon before 12. (3) The Flutter continuation shows the mark only while startup really loads; no deterministic progress; static when animations are disabled; nothing added before the first frame. (4) Cold start measured on the phone before and after (logcat "Displayed"). (5) No new package | Shared behaviour + platform assets: full gate; device measurement |
 
 #### Stage 14 — Capture Plan completeness (round 2A)
@@ -6030,26 +6035,24 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 | **S16.7** | **Consistency and accessibility (K14, TD-100, TD-101)** | S16.1–S16.6 | (1) The sweep covers the editors, the filter panel, the map picker and every new screen (TD-100). (2) A source test enforces `QuantityText` (TD-101). (3) The owner's final visual review of all changed screens | Shared behaviour: full gate |
 | **S16.8** | **Remaining follow-ups** | — | Fix:<br>• TD-094 (restore the open screen after a process death);<br>• TD-096 (wall-clock tests);<br>• TD-097 (`municipality`);<br>• TD-098 (Android notices on the licence page);<br>• TD-102 (probes become tests);<br>• TD-103 (`AppLog`);<br>• TD-038 (`unawaited_futures`);<br>• S12.4 (b) if chosen.<br>Re-check and close or update TD-020, TD-025 and TD-031 against the code. TD-045 (Drift renames) is **excluded**: the documented workaround has no user impact | Per item; full gate at the end |
 
-#### Stage 17 — Final validation and release readiness (folds in S11.6 and S11.7)
+#### Stage 17 — Final validation and GitHub release (folds in S11.6 and S11.7)
 
 | Task | Objective | Depends on | Acceptance | V1 class |
 | --- | --- | --- | --- | --- |
 | **S17.1** | **Re-baseline the validation matrix** | Stages 12–16 closed | (1) Rows from `STAGE_11_MATRIX.md` whose inputs changed are marked for re-run (V3); unchanged rows keep PASS with a one-line reuse record. (2) New rows for every Stage 12–16 acceptance and RA.D decision. (3) Frozen before evidence (V4) | Documentation |
 | **S17.2** | **Host evidence** | S17.1 | The full gate on the final inputs; a green remote CI run on the final commit; the host rows | Full gate |
 | **S17.3** | **Emulator evidence** | S17.1 | The invalidated emulator rows re-run: lifecycle L1–L6 and L8, the backup round trip, permissions, offline, the release build | Runtime |
-| **S17.4** | **Providers and compliance** | S17.1 | Live Open-Meteo (the 16-night request), Nominatim (opt-in), OSM tiles, the opened links, About's pages; COMPLIANCE, Data Safety and the policy against the code; the licences (TD-098 done); S12.4 reflected | Documentation, runtime |
-| **S17.5** | **Phone runs** (the runbook updated for Culmina) | S17.1, the phone | The core loop (L10); TalkBack (H6, H7); field mode in darkness; perf M3, M4 and the new heavy screens (calendar, overview); metadata (Add and Take from a photo; DNG, JPEG, HEIC, FITS); CAL-1; S2V-06 and S3V-08; lifecycle on the phone; the signed release installed (N5); the cold start and splash | Device |
-| **S17.6** | **(Owner) release actions** | S17.2–S17.5 | (1) The upload key and a signed bundle (16.2; `check_bundle`). (2) The policy live. (3) Data Safety. (4) The owner's data moved from the old app by backup and restore (transition §3, item 5). (5) The store listing, with the descriptor approved by the owner (16.5). (6) A Play closed test with at least 12 testers for 14 days (Q2) | Owner |
-| **S17.7** | **Readiness record and go/no-go** (fresh session) | S17.2–S17.6 | VERIFIED, UNVERIFIED, OWNER ACTION and DEFERRED; readiness claimed only when every mandatory row is VERIFIED; the owner's go/no-go recorded | Documentation |
+| **S17.4** | **Providers and compliance** | S17.1 | Live Open-Meteo (the 16-night request), Nominatim (opt-in), OSM tiles, the opened links, About's pages; COMPLIANCE and the policy against the code (Play's Data Safety form **deferred**, store distribution); the licences (TD-098 done); S12.4 reflected | Documentation, runtime |
+| **S17.5** | **Phone runs** (the runbook updated for Culmina) | S17.1, the phone | The core loop (L10); TalkBack (H6, H7); field mode in darkness; perf M3, M4 and the new heavy screens (calendar, overview); metadata (Add and Take from a photo; DNG, JPEG, HEIC, FITS); CAL-1; S2V-06 and S3V-08; lifecycle on the phone; **the signed release APK from S17.6 installed from its release artifact, and installed as an update over the previous public build when one exists (same id and key; data kept)** (N5, amended GitHub-only distribution, 2026-10-17); the cold start and splash | Device |
+| **S17.6** | **GitHub release packaging** (amended GitHub-only distribution, 2026-10-17) | S17.2–S17.5 | (1) **(Owner)** the release keystore created and backed up by the owner, never in the repository (trap 21); losing it makes later updates impossible. (2) A signed release APK built from the release commit (`flutter build apk --release`; a universal APK, split per ABI only if the owner asks). (3) A release check replacing `check_bundle` for APKs: signed with the release key, never the debug key (`apksigner verify --print-certs`); `versionName` equals `pubspec.yaml`'s X.Y.Z and `AppIdentity.version`; `versionCode` greater than the previous release's; the application id; min and target SDK; 16 KB page alignment of native libraries. (4) `RELEASE.md` rewritten for GitHub: semantic versions and the tag `vX.Y.Z` matching the `pubspec.yaml` `X.Y.Z+N`; the artifact name `culmina-X.Y.Z.apk`; a `SHA256SUMS` file; the signing certificate's SHA-256 fingerprint published for verification; a release-notes template (changes, known issues, data notes); installation instructions (allow installs from this source; verify the checksum and the fingerprint); update instructions (install over the existing app; on a signature mismatch: back up, uninstall, reinstall, restore); the migration from the old id (`RA_D_IDENTITY_TRANSITION.md` §3). (5) The policy live (S12.3). (6) The owner's data moved from the old app by backup and restore (transition §3, item 5). **Deferred (store distribution):** the upload key for Play and Play App Signing, the AAB and `check_bundle` as a release requirement, the Data Safety form, the store listing (16.5), the Play closed test with at least 12 testers for 14 days (Q2) | Release tooling (`tool/`) is **high-risk**: full gate; packaging documents; owner actions |
+| **S17.7** | **Readiness record and go/no-go** (fresh session) | S17.2–S17.6 | VERIFIED, UNVERIFIED, OWNER ACTION and DEFERRED; readiness claimed only when every mandatory row is VERIFIED; the store-only rows recorded as DEFERRED (store distribution), never as passed; the owner's go/no-go recorded | Documentation |
+| **S17.8** | **(Owner) publish the GitHub Release** (added GitHub-only distribution, 2026-10-17) | S17.7 "go" | (1) The tag `vX.Y.Z` on the release commit. (2) The release with the signed APK, `SHA256SUMS`, the certificate fingerprint and the notes from S17.6's template. (3) The published APK downloaded from the release page, its checksum verified, installed on the phone, and the core loop run once. (4) The README's install link. (5) Recorded in PROGRESS | Owner action; device check |
 
 #### Starting Task
 
-**S12.1 — TD-104, remote CI green.**
-- A green remote gate should guard the redesign before any code changes.
-- Its only input is the failing job's log (or `gh` access); without it the Task starts by trying to
-  reproduce on Linux.
-- S12.2 (the owner's trademark search) and S12.3's text can run alongside, because they are the
-  owner's actions and documentation.
+**S12.1 — TD-104, remote CI green.** *Done 2026-10-17 (`461e38c`; the remote run 39020770255 passed).*
+
+**Next (GitHub-only distribution, 2026-10-17):** S12.3 (the policy text, which needs the owner's contact email; then the owner renames the repository and publishes Pages) and S12.4 (the owner's S11P-03 decision). S12.2 is recommended before the rename but no longer gates anything. Then Stage 13.
 
 #### Traceability (every RA.R1 finding)
 
@@ -6082,7 +6085,7 @@ is not claimed. Human rows (the walkthrough, comprehension, darkness, the go/no-
 | RA-G05 | S17.5 | — |
 | RA-H01–H03 | S16.6; PD-21 (I1) | — |
 | RA-I02; K3 | S12.1 | — |
-| RA-I03 | S12.2, S12.3, S12.4, S17.6 | — |
+| RA-I03 | S12.2 (recommended), S12.3, S12.4, S17.6, S17.8 | Store items deferred (GitHub-only distribution) |
 | RA-I04; K10 | S12.2, S13.1–S13.3; licence: GPL-3.0 stays (RG-12, owner deferral) | — |
 | RA-I05 | Stage order 12 → 17; S17.1 | — |
 | K1, K2 | Closed (`333e1e8`) | — |

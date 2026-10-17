@@ -52,6 +52,8 @@ location) are not listed there.
 
 ## Google Play: Data Safety form (draft answers)
 
+> **Deferred, 2026-10-17 (GitHub-only distribution; DECISIONS E.1):** Google Play is not a distribution channel, so this form is not submitted. The draft is kept for a future store release. The privacy policy, the third-party terms and the licence obligations elsewhere in this document still apply to the GitHub release.
+
 Answers for the owner to review in the Play Console (definitions change; read the
 console's current help texts). Conservative where Play's definitions are unclear.
 

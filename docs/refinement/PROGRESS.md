@@ -5,7 +5,7 @@
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-10-17 (G3: the Culmina release roadmap, Stages 12–17, approved; the Product Reassessment is complete; no application changes).
-> **Next:** S12.2–S12.4 (owner actions and the policy text), then Stage 13, each on the owner's start instruction.
+> **Next:** S12.3 (the policy text; needs the owner's contact email) and S12.4 (the owner's S11P-03 decision); S12.2 recommended, not a gate. Each on the owner's start instruction.
 
 ## Current state
 
@@ -14,7 +14,7 @@
 | Phase | Post-roadmap refinement: Stages 0–11 done or closed; **Culmina release roadmap, Stages 12–17** (`POST_ROADMAP_PLAN.md` §5, approved G3 2026-10-17) |
 | Current Stage | **Stage 12 — Release foundation: In progress** (approved G3, 2026-10-17). Stage 11 closed as superseded by Stage 17 (2026-10-17). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)) |
 | Current Task | None in progress. **S12.1 done** (TD-104 resolved; remote CI green, run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255)) |
-| Next Task | S12.2–S12.4 (owner actions and the policy text), then Stage 13 — each on the owner's start instruction |
+| Next Task | **S12.3** (the policy text; needs the owner's contact email) and **S12.4** (the owner's S11P-03 decision); S12.2 recommended, not a gate; then Stage 13 — each on the owner's start instruction |
 | Code baseline | **S12.1** (`461e38c`: tests and the CI workflow only; application code unchanged since S11.C2). Pushed: `origin/main` = `461e38c` (owner-authorized, 2026-10-17); later documentation commits are local until pushed. The remote is public. **Remote CI green** since run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255) (TD-104 resolved) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\flutter` (checked 2026-10-17; the earlier `C:\tools\flutter-3.47.4` path no longer exists). Linux reproduction: WSL Ubuntu with the official 3.47.4 Linux archive at `~/ci/flutter` (S12.1) |
@@ -22,6 +22,8 @@
 **Documentation correction, 2026-10-17:** CLAUDE.md condensed with V1–V8 retained; numbered traps moved to `docs/ENGINEERING_GUARDRAILS.md`; old full text archived. Duplicate approval in `.agents/rules/00-project-governance.md` corrected; optional skills and animation scope clarified. Product Reassessment scope added without approving UI implementation or closing Stage 11. Application checks were not run (V1 documentation class); reference/consistency checks and `git diff --check` passed; V1–V8 text preserved except for the relocated guardrails reference, all 22 trap numbers and nine review coverage groups retained. The pre-existing modified macOS plugin registrant is outside this Task; no new claim of full-gate evidence reuse is made for the working tree.
 
 **RA.R1 complete, 2026-10-17:** read-only assessment of code at HEAD `b1df679` plus the existing working-tree documentation amendment; all nine review areas covered (RA-A through RA-I); the report is preserved in [`research/RA_R1_PHASE_A_ASSESSMENT.md`](research/RA_R1_PHASE_A_ASSESSMENT.md) (it replaces the earlier chat-only report). Six original reference images were recovered and viewed; the Moon concept project (Moonlit) was inspected too (its own code carries no licence: concept only); the prior generated prompt remains unavailable. Code findings: Welcome is pushed after the first Tonight frame (RA-B01; duration/device reproduction unverified); Home keeps an action-only toolbar (RA-D01); Open planner and New plan have distinct lifecycle effects (RA-D06). ADR-020 explains absent WB/focus, camera-class fields, previous-light proposals and calibration copying (RA-F05–RA-F10); weather already has wind/humidity in detail, but Home summarizes cloud/age (RA-E02). Core capture outputs and record-management surfaces exist; usability is not proven by source/tests. No app/test changes or runs, no fresh gate/phone/CI PASS, no new product decisions. Remaining research: minimum onboarding; Home priorities; compact night/weather presentation; camera parameter intent and proposal clarity; naming/logo/assets; record/settings discoverability. Reuse RG-10/RG-11 and S9.3 before new research. The old "device or emulator" owner-action wording below is historical drift: emulator evidence does not replace the outstanding physical-phone/human checks. Next RA.R2 only on request; do not start implementation. Documentation whitespace check passed; source/test evidence was inspected, not executed.
+
+**Distribution aligned, 2026-10-17** (documentation only; DECISIONS E.1, "Distribution: GitHub Releases only"): Culmina ships as a signed APK on GitHub Releases. Deferred (store distribution): Play upload key and App Signing, the AAB and `check_bundle` as a release requirement, the Data Safety form, the store listing, the Play closed test, Play-only rules. Changed: S12.2 recommended, not a gate (S12.3 and S13.2 no longer wait for it); S13.1 drops the Play icon; S17.4 drops Data Safety; S17.5's N5 becomes "install the release APK and an update"; **S17.6 becomes GitHub release packaging** (release keystore, signed APK, an APK check, `RELEASE.md` with versioning, checksums, install and update instructions); **S17.8 added** (the owner publishes the GitHub Release). Unchanged: privacy, terms, licences (S11P-03 still open), signing, id and update compatibility, backup/restore, accessibility, device validation. `RELEASE.md`, `COMPLIANCE.md` and the identity plan carry deferral notes.
 
 **S12.1 done, 2026-10-17** (TD-104 resolved; commit `461e38c`; remote CI run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255) PASS on `461e38c`, every step success, after the owner-authorized push `b1df679..461e38c`):
 - **Cause, reproduced:** on Linux `equipment_editor_fit_test.dart`'s `setUpAll` could not find `roboto-regular.ttf`: the Flutter 3.47.4 Linux SDK names it `Roboto-Regular.ttf`, the Windows SDK `roboto-regular.ttf`, and only Windows names are case-insensitive. Reproduced in WSL (Ubuntu 26.04, the official 3.47.4 archive, sha256 checked, a fresh LF clone) with the CI's exact count "+1840 ~2 -1".
@@ -733,12 +735,12 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
 | 10 | Performance & Application Size | Complete | 2026-09-30 | 2026-09-30 | **PASS** at `3cb67be` (fresh-session independent validation, [report](STAGE_10_VALIDATION.md)); no blocker; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11 |
 | 11 | Full Validation & Beta Readiness | **Closed — superseded by Stage 17** (G3): S11.1–S11.5, S11.C1, S11.C2 done; S11.6 → S17.5, S11.7 → S17.7 | 2026-09-30 | 2026-10-17 | No readiness claimed; the final validation is S17.7 |
-| 12 | Release foundation | In progress (S12.1 done; S12.2–S12.4 open) | 2026-10-17 | — | — |
+| 12 | Release foundation | In progress (S12.1 done; S12.3, S12.4 open; S12.2 recommended) | 2026-10-17 | — | — |
 | 13 | Identity: Culmina | Not started | — | — | — |
 | 14 | Capture Plan completeness | Not started | — | — | — |
 | 15 | Night conditions | Not started | — | — | — |
 | 16 | Screens and flow | Not started | — | — | — |
-| 17 | Final validation and release readiness | Not started | — | — | — |
+| 17 | Final validation and GitHub release | Not started | — | — | — |
 
 ## Open research gates
 
@@ -790,13 +792,13 @@ Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1
 
 ## Owner actions outstanding
 
-These block a release, not refinement.
+These block a release, not refinement. *Aligned 2026-10-17 (GitHub-only distribution): store items are deferred; the release is a signed APK on GitHub (S17.6, S17.8).*
 
-- TASK 16.2: create the upload key and `android/key.properties`; install the SDK cmdline-tools;
-  build and check a signed bundle (`docs/RELEASE.md`).
+- TASK 16.2 (now S17.6): create the **release** keystore and `android/key.properties` (no Play upload key); install the SDK cmdline-tools;
+  build and check a signed release APK (S17.6; the AAB is deferred, store distribution).
 - TASK 16.3: publish the privacy policy with the contact email filled in; confirm the URL is
-  live; ~~make the repository public~~ (public, observed 2026-10-17); fill in the Data Safety form (`docs/COMPLIANCE.md`).
-- OD-07: a formal trademark search before the first upload; RD-01.
+  live (S12.3); ~~make the repository public~~ (public, observed 2026-10-17); the Data Safety form is **deferred** (store distribution).
+- OD-07: a formal trademark search for "Culmina" (S12.2) — recommended, no longer a store gate; RD-01 is decided (B).
 - A device or emulator for the device rows (`TEST_PLAN.md` L1–L8, and the other checks in
   `POST_ROADMAP_PLAN.md` Appendix B).
 - Stage 3: say which cameras and optics you use besides the phone (a DSLR/mirrorless JPEG, or a
@@ -851,7 +853,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. Each on its own start instruction: **S12.2** (the owner's trademark search for "Culmina"), **S12.3** (the agent drafts the policy text; the owner renames the repository and publishes Pages), **S12.4** (the owner's S11P-03 decision); then Stage 13. S12.1 is done. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
+1. Each on its own start instruction: **S12.3** (the agent drafts the policy text with the owner's contact email; the owner renames the repository and publishes Pages) and **S12.4** (the owner's S11P-03 decision); **S12.2** (the owner's trademark search) is recommended before the rename but gates nothing (GitHub-only distribution). Then Stage 13. S12.1 is done. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
 2. **Stage 11 remains open:** S11.6 phone checks when connected; S11.7 readiness against the existing matrix and named baseline when requested. RA.P must carry all unresolved release checks and decide their scheduling after the product decisions; no previous PASS is reopened without V3/V6 grounds.
 3. **Owner actions** remain: phone, signing/upload key, published privacy policy/contact, RD-01/TD-088, S11P-03, go/no-go and deferred identity/logo/provider gates. The reassessment does not silently resolve any of them.
 

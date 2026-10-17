@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **Distribution, 2026-10-17:** E.1 "Distribution: GitHub Releases only": Culmina is distributed as a signed APK through GitHub Releases; Google Play and other stores are deferred; quality, privacy, licensing and device-validation requirements unchanged. Stages 12, 13 and 17 aligned. Documentation only.
 > **G3, 2026-10-17:** E.1 "RA.P — the Culmina release roadmap approved (G3)": Stages 12–17 approved; Stage 11 closed as superseded by Stage 17; S12.1 waits for the owner's start instruction. Documentation only.
 > **RA.D complete, 2026-10-17:** E.1 "RA.D — Q1 to Q4": the scope kept (demoted), MF-c, no seeing/transparency provider (a link), the AstroBin CSV export included. RA.P proposed in `refinement/POST_ROADMAP_PLAN.md` (Stages 12–17), awaiting G3. Documentation only.
 > **RA.D round 2, 2026-10-17:** E.1 "RA.D — release scope principle", "RA.D round 2A — Capture Plan" (PD-05 to PD-14, PD-21, approved by the owner) and "RA.D round 2B/2C — resolved from the owner's direction" (PD-02, PD-03, PD-04, PD-16, PD-17, PD-19, PD-20); four questions open (`refinement/research/RA_D_ROUND2_PACKAGE.md` Part C). Documentation only.
@@ -492,6 +493,15 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### Distribution: GitHub Releases only (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: Culmina will be distributed through GitHub only; there are no current plans to publish it on Google Play or any other application store. The goal stays a complete, reliable, polished application; no functionality or quality requirement is reduced.
+- **Channel:** GitHub Releases of the project repository (`Buffur/Culmina` after the rename, ID-4): a **signed, installable Android APK** per release, built with the owner's release key (owner-managed, never in the repository, trap 21), with a version tag, release notes, a SHA-256 checksum, and installation and update instructions. Defined by `refinement/POST_ROADMAP_PLAN.md` §5, S17.6 and S17.8.
+- **Deferred (not deleted; would return only with a future store decision):** the Play Console and its upload key and Play App Signing; the Android App Bundle (AAB) and `tool/check_bundle.dart` as a release requirement; the Data Safety form; the store listing (16.5) and its 512 px store icon; the mandatory Play closed test (at least 12 testers for 14 days); Play-specific submission rules (for example the target-API deadline as a store gate; the current target API stays as a quality baseline).
+- **Unchanged and mandatory:** the published privacy policy and its accuracy (the app sends data to Open-Meteo and, when the user opts in, Nominatim, and loads OSM tiles); third-party terms; licences and GPL-3.0 obligations (a GitHub release does not resolve S11P-03); release signing integrity; package identity and update compatibility (Android installs an update only with the same application id and signing certificate, so the id and the key are permanent from the first public release, and a lost key forces users to reinstall); backup and restore; scientific, functional, UX, security, accessibility and physical-device validation.
+- **Trademark:** formal clearance is no longer a store-publication gate. Naming risk remains documented (`refinement/research/RA_D_IDENTITY_TRANSITION.md`, `RA_R2D_IDENTITY.md`): S12.2 becomes a recommended owner check, best done before the public rename, not a prerequisite.
+- **Supersedes, as mandatory release requirements:** S17.6's bundle, Data Safety, listing and closed-test items; S12.2's gating role; the Stage 11 matrix rows that check Play's rules (Q2) and Play's target-API deadline (N10's store part); the Play procedure in `RELEASE.md`; the "before the first Play upload" ordering in the identity plan (now: before the first public GitHub release). OD-07 and PD-12 history is kept.
 
 ### RA.P — the Culmina release roadmap approved (G3, 2026-10-17)
 

@@ -11,6 +11,8 @@
 > **Evidence:** [RA_R2D_IDENTITY.md](RA_R2D_IDENTITY.md) (screening, app id, logo, splash, licences);
 > `S9.10_LOGO.md`; `S9.12_PROJECT_IDENTITY.md`.
 >
+> **Distribution amended, 2026-10-17 (GitHub-only; DECISIONS E.1):** read "the first Play upload" below as "the first public GitHub release": from then on Android accepts an update only with the same application id and signing key. The Play Console, listing, closed test and 512 px Play icon items are deferred; the policy URL, the backup-and-restore migration and the formal trademark search (now recommended, not a gate) stay documented.
+>
 > **This document feeds RA.P.** Its acceptance criteria are proposals for the implementation Tasks.
 > They become binding only when RA.P freezes those Tasks.
 

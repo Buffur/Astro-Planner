@@ -1,5 +1,7 @@
 # Release build and signing (Android)
 
+> **Distribution changed, 2026-10-17 (DECISIONS E.1, "Distribution: GitHub Releases only"):** Culmina is released as a signed APK on GitHub Releases. The Google Play procedure below (upload key, App Bundle, `tool/check_bundle.dart`, Play's rules) is **deferred**: it describes the current build setup and a possible future store release, not the release path. S17.6 (`refinement/POST_ROADMAP_PLAN.md` §5) rewrites this document for the GitHub APK release: versioning, the APK check, checksums, installation and update instructions.
+
 > Written for TASK 16.2 (2026-09-24). Follows Flutter's Android deployment guide
 > (<https://docs.flutter.dev/deployment/android>). The upload key and its passwords are
 > the owner's: they are created and kept by the owner, never committed, and never given
