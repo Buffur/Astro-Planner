@@ -117,6 +117,15 @@ Supporting references:
 - [Privacy policy](docs/privacy/index.md), [compliance](docs/COMPLIANCE.md),
   [license](LICENSE) and [catalog attribution](assets/catalog/OPENNGC_NOTICE.txt).
 
+**License exception.** The app is GPL-3.0. Its Android build includes Google Play services
+location (through `geolocator`), so the licensors add:
+
+> Additional permission under GNU GPL version 3 section 7: if you modify this program, or any
+> covered work, by linking or combining it with the Google Play services libraries (or a modified
+> version of those libraries), containing parts covered by the terms of the Android Software
+> Development Kit License, the licensors of this program grant you additional permission to convey
+> the resulting work.
+
 Earlier roadmaps and audits are historical evidence, not the active task queue.
 Agent guidance is in [CLAUDE.md](CLAUDE.md), with supporting rules and skills in
 `.agents/`.

@@ -1,5 +1,6 @@
 # AstroPlan Decisions
 
+> **S12.3/S12.4, 2026-10-17:** E.1 "S12.4 — Google Play services location: accept and state it" (option a, a GPL-3.0 §7 exception) and "S12.3 — the policy contact". Documentation only.
 > **Readiness corrections, 2026-10-17:** E.1 "Stages 12–17 readiness review corrections approved": C1–C6 applied to `refinement/POST_ROADMAP_PLAN.md` §5 and `refinement/PRODUCT_DIRECTION.md` §9 (Stage 17 order, the identity migration rehearsal, S14.9's dependencies, S12.4 (a), register omissions). Documentation only.
 > **Distribution, 2026-10-17:** E.1 "Distribution: GitHub Releases only": Culmina is distributed as a signed APK through GitHub Releases; Google Play and other stores are deferred; quality, privacy, licensing and device-validation requirements unchanged. Stages 12, 13 and 17 aligned. Documentation only.
 > **G3, 2026-10-17:** E.1 "RA.P — the Culmina release roadmap approved (G3)": Stages 12–17 approved; Stage 11 closed as superseded by Stage 17; S12.1 waits for the owner's start instruction. Documentation only.
@@ -494,6 +495,22 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### S12.4 — Google Play services location: accept and state it (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: option "(a) Принять и указать" ["(a) accept and state it"], from `refinement/research/S12.4_PLAY_SERVICES_LOCATION.md`.
+- **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
+- **Not chosen:** (b) the platform location manager (a dependency change).
+
+### S13.1 — logo round 1 not approved; round 2 brief (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17, after the round-1 review sheet (`refinement/evidence/identity/`, V1–V4): the current direction is not approved; a new round of 3–5 clearly different concepts, not tweaks of V1/V2/V4.
+- **Brief:** a dark-blue/navy palette, calm and technical, astronomy-oriented; closer to Siril or Stellarium — clean, minimal, scientific, elegant, not playful; suited to an astrophotography planning app; strong icon readability, clean geometry, a more polished identity; works on dark backgrounds with a usable monochrome/adaptive version; some concepts may leave the arc/window/star construction; each with a rationale (what it symbolises, why it fits Culmina, small-size behaviour). The owner chooses a direction first, then a refinement round.
+- **Effect on ID-5:** the A + C hybrid direction is no longer binding for the concept round; the owner's choice from round 2 sets the direction. P9.4 stands.
+
+### S12.3 — the policy contact (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: the public contact in the privacy policy is `zalubovskyi.vadym@gmail.com`, for now (the owner may change it later; a change is a policy edit with a new date).
 
 ### Stages 12–17 readiness review corrections approved (2026-10-17)
 

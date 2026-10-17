@@ -71,6 +71,6 @@ A change to this policy is published on this page with a new effective date.
 
 ## Contact
 
-Questions about this policy: **&lt;CONTACT EMAIL&gt;**
+Questions about this policy: **[zalubovskyi.vadym@gmail.com](mailto:zalubovskyi.vadym@gmail.com)**
 
 Source code (GPL-3.0): <https://github.com/Buffur/Culmina>

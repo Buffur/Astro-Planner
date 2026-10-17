@@ -1,5 +1,7 @@
 # S13.1 — Culmina logo sketches and review sheet
 
+> **Round 1 not approved (owner, 2026-10-17):** a new round with clearly different concepts was requested; see [`round2/`](round2/README.md). This round stays as history.
+
 > **Status:** 2026-10-17, proposals for the owner's review (`POST_ROADMAP_PLAN.md` S13.1;
 > `research/RA_D_IDENTITY_TRANSITION.md` §5 steps 1–4). **Not approved artwork:** the agent never picks
 > the mark (P9.4); the owner's choice is recorded in DECISIONS E.1 before S13.3 uses it. Nothing in

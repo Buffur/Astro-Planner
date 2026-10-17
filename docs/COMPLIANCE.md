@@ -50,6 +50,19 @@ generated from the Dart packages' own `LICENSE` files. *(Corrected 2026-09-30, S
 Android libraries that the plugins add (AndroidX, Kotlin coroutines, Google Play services
 location) are not listed there.
 
+**Google Play services location (S11P-03; owner decision S12.4 = (a), 2026-10-17):** `geolocator_android`
+bundles the proprietary `play-services-location` 21.2.0 (with `-base`, `-basement`, `-tasks`) in the
+GPL-3.0 APK; it is used only when the user taps "Use current position". The owner accepts it and grants
+this exception as the copyright holder (also in `README.md`; the About statement follows in S16.8):
+
+> Additional permission under GNU GPL version 3 section 7: if you modify this program, or any
+> covered work, by linking or combining it with the Google Play services libraries (or a modified
+> version of those libraries), containing parts covered by the terms of the Android Software
+> Development Kit License, the licensors of this program grant you additional permission to convey
+> the resulting work.
+
+Options and facts: `refinement/research/S12.4_PLAY_SERVICES_LOCATION.md`.
+
 ## Google Play: Data Safety form (draft answers)
 
 > **Deferred, 2026-10-17 (GitHub-only distribution; DECISIONS E.1):** Google Play is not a distribution channel, so this form is not submitted. The draft is kept for a future store release. The privacy policy, the third-party terms and the licence obligations elsewhere in this document still apply to the GitHub release.
