@@ -5,7 +5,7 @@
 > direction in `PRODUCT_DIRECTION.md`, verification rules in `CLAUDE.md` ("Verification Policy"),
 > and history in [`PROGRESS_HISTORY.md`](PROGRESS_HISTORY.md) and the `STAGE_N_*.md` reports.
 > **Last updated:** 2026-10-17 (G3: the Culmina release roadmap, Stages 12–17, approved; the Product Reassessment is complete; no application changes).
-> **Next:** S12.1's remote confirmation needs the owner's push authorization; otherwise the next Task (S12.2–S12.4 are owner actions; S13.1 after them) on the owner's start instruction.
+> **Next:** S12.2–S12.4 (owner actions and the policy text), then Stage 13, each on the owner's start instruction.
 
 ## Current state
 
@@ -13,9 +13,9 @@
 | --- | --- |
 | Phase | Post-roadmap refinement: Stages 0–11 done or closed; **Culmina release roadmap, Stages 12–17** (`POST_ROADMAP_PLAN.md` §5, approved G3 2026-10-17) |
 | Current Stage | **Stage 12 — Release foundation: In progress** (approved G3, 2026-10-17). Stage 11 closed as superseded by Stage 17 (2026-10-17). Stage 10 closed 2026-09-30 ([report](STAGE_10_VALIDATION.md)) |
-| Current Task | **S12.1** — done locally (TD-104 fixed; full gate PASS on Linux and Windows); remote confirmation awaits the owner's push authorization |
-| Next Task | S12.1's remote run (needs a push, owner-authorized); then S12.2–S12.4 (owner actions and the policy text) and Stage 13, each on the owner's start instruction |
-| Code baseline | **S12.1** (its commit: tests and the CI workflow only; application code unchanged since S11.C2). Pushed by the owner: `origin/main` = `b1df679` (PR #1 `develop` → `main`, merged 2026-10-16); the remote is public. **Remote CI has never passed:** one test fails on Linux (TD-104, open) |
+| Current Task | None in progress. **S12.1 done** (TD-104 resolved; remote CI green, run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255)) |
+| Next Task | S12.2–S12.4 (owner actions and the policy text), then Stage 13 — each on the owner's start instruction |
+| Code baseline | **S12.1** (`461e38c`: tests and the CI workflow only; application code unchanged since S11.C2). Pushed: `origin/main` = `461e38c` (owner-authorized, 2026-10-17); later documentation commits are local until pushed. The remote is public. **Remote CI green** since run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255) (TD-104 resolved) |
 | Schema | **v25** (S8.6) |
 | Toolchain | Flutter **3.47.4** (the CI's pinned version; Dart 3.13.3) at `C:\flutter` (checked 2026-10-17; the earlier `C:\tools\flutter-3.47.4` path no longer exists). Linux reproduction: WSL Ubuntu with the official 3.47.4 Linux archive at `~/ci/flutter` (S12.1) |
 
@@ -23,11 +23,11 @@
 
 **RA.R1 complete, 2026-10-17:** read-only assessment of code at HEAD `b1df679` plus the existing working-tree documentation amendment; all nine review areas covered (RA-A through RA-I); the report is preserved in [`research/RA_R1_PHASE_A_ASSESSMENT.md`](research/RA_R1_PHASE_A_ASSESSMENT.md) (it replaces the earlier chat-only report). Six original reference images were recovered and viewed; the Moon concept project (Moonlit) was inspected too (its own code carries no licence: concept only); the prior generated prompt remains unavailable. Code findings: Welcome is pushed after the first Tonight frame (RA-B01; duration/device reproduction unverified); Home keeps an action-only toolbar (RA-D01); Open planner and New plan have distinct lifecycle effects (RA-D06). ADR-020 explains absent WB/focus, camera-class fields, previous-light proposals and calibration copying (RA-F05–RA-F10); weather already has wind/humidity in detail, but Home summarizes cloud/age (RA-E02). Core capture outputs and record-management surfaces exist; usability is not proven by source/tests. No app/test changes or runs, no fresh gate/phone/CI PASS, no new product decisions. Remaining research: minimum onboarding; Home priorities; compact night/weather presentation; camera parameter intent and proposal clarity; naming/logo/assets; record/settings discoverability. Reuse RG-10/RG-11 and S9.3 before new research. The old "device or emulator" owner-action wording below is historical drift: emulator evidence does not replace the outstanding physical-phone/human checks. Next RA.R2 only on request; do not start implementation. Documentation whitespace check passed; source/test evidence was inspected, not executed.
 
-**S12.1 done locally, 2026-10-17** (TD-104; the commit is "fix(ci): find the SDK fonts case-insensitively; pin the CI runner (S12.1)"):
+**S12.1 done, 2026-10-17** (TD-104 resolved; commit `461e38c`; remote CI run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255) PASS on `461e38c`, every step success, after the owner-authorized push `b1df679..461e38c`):
 - **Cause, reproduced:** on Linux `equipment_editor_fit_test.dart`'s `setUpAll` could not find `roboto-regular.ttf`: the Flutter 3.47.4 Linux SDK names it `Roboto-Regular.ttf`, the Windows SDK `roboto-regular.ttf`, and only Windows names are case-insensitive. Reproduced in WSL (Ubuntu 26.04, the official 3.47.4 archive, sha256 checked, a fresh LF clone) with the CI's exact count "+1840 ~2 -1".
 - **Fix:** `test/support/sdk_fonts.dart` (a case-insensitive lookup) used by the fit test and the opt-in render gallery; `.github/workflows/ci.yml` pins `ubuntu-24.04` and uses `actions/checkout@v5`.
 - **Verification (high-risk class: tests and CI steps):** the full gate PASS on **Linux** (WSL, CI-equivalent) and on **Windows**: Encoding, Format, Analyze, 1,844 tests with 2 skips, host E2E 2 + 1. The failing test alone on Linux 4/4; the render gallery on Linux 15 images.
-- **Not yet verified:** a remote GitHub Actions run. Acceptance 6 and 7 of S12.1 need an owner-authorized push; TD-104 and RD-17 stay open until a run passes.
+- **Remote:** the owner authorized the push of `main`; the GitHub Actions run on `461e38c` passed (run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255)). Acceptance 1–7 met; TD-104 and RD-17 closed.
 
 **G3 approved, 2026-10-17** (documentation only): the owner approved the RA.P roadmap, Stages 12–17 (`POST_ROADMAP_PLAN.md` §5; DECISIONS E.1, "RA.P — the Culmina release roadmap approved (G3)"). Stage 11 is closed as superseded by Stage 17 (S11.6 → S17.5, S11.7 → S17.7). The Product Reassessment is complete. Nothing is implemented; S12.1 waits for the owner's start instruction.
 
@@ -696,7 +696,8 @@ Per `CLAUDE.md`, Verification Policy V3: reuse while the inputs are unchanged.
 
 | Evidence | Ran at | Still valid because |
 | --- | --- | --- |
-| **Full quality gate PASS on Linux and Windows** (S12.1): Encoding; Format; Analyze (no issues); 1,844 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1). Linux: WSL Ubuntu 26.04, Flutter 3.47.4 Linux archive (CI-equivalent, not a GitHub run) | **S12.1's commit** | Ran after S12.1's last change; supersedes the S11.C2 row below. Reusable while `git diff --stat <S12.1 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
+| **Remote CI PASS** (run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255)): the workflow's gate on `ubuntu-24.04`, Flutter 3.47.4 | **`461e38c`** | The same inputs as the row below |
+| **Full quality gate PASS on Linux and Windows** (S12.1): Encoding; Format; Analyze (no issues); 1,844 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1). Linux: WSL Ubuntu 26.04, Flutter 3.47.4 Linux archive (CI-equivalent, not a GitHub run) | **`461e38c`** | Ran after S12.1's last change; supersedes the S11.C2 row below. Reusable while `git diff --stat 461e38c HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S11.C2): Encoding; Format; Analyze (no issues); 1,844 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S11.C2's commit**, on Flutter 3.47.4 | Ran after S11.C2's last change; supersedes the S11.C1 row below. Reusable while `git diff --stat <S11.C2 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S11.C1): Encoding; Format; Analyze (no issues); 1,840 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S11.C1's commit**, on Flutter 3.47.4 | Ran after S11.C1's last change; supersedes the S10.6 row below. Reusable while `git diff --stat <S11.C1 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
 | **Full quality gate PASS** (S10.6): Encoding; Format; Analyze (no issues); 1,838 tests, 2 expected skips; host E2E `core_loop_test.dart` (2) and `perf_scenarios_test.dart` (1) | **S10.6's commit** (the lockfile without `sqlite3_flutter_libs`), on Flutter 3.47.4 | Ran after S10.6's last change; supersedes the S10.5 row below. Reusable while `git diff --stat <S10.6 commit> HEAD -- . ':!docs' ':!CLAUDE.md' ':!README.md'` stays empty |
@@ -732,7 +733,7 @@ Vocabulary: Not started · Planning · In progress · In validation · Complete.
 | 9 | Secondary UX & Product Polish | Complete | 2026-09-29 | 2026-09-30 | **S9.1–S9.9 PASS** at `8e53479` (fresh-session independent validation, [report](STAGE_9_VALIDATION.md)); no blocker; S9V-01 to S9V-03 recorded as TD-089 to TD-091 and fixed (`0f09608`). S9.10–S9.12 **deferred by the owner** 2026-09-30 |
 | 10 | Performance & Application Size | Complete | 2026-09-30 | 2026-09-30 | **PASS** at `3cb67be` (fresh-session independent validation, [report](STAGE_10_VALIDATION.md)); no blocker; S10V-01 to S10V-03 fixed, S10V-04 carried to Stage 11 |
 | 11 | Full Validation & Beta Readiness | **Closed — superseded by Stage 17** (G3): S11.1–S11.5, S11.C1, S11.C2 done; S11.6 → S17.5, S11.7 → S17.7 | 2026-09-30 | 2026-10-17 | No readiness claimed; the final validation is S17.7 |
-| 12 | Release foundation | In progress (S12.1 done locally) | 2026-10-17 | — | — |
+| 12 | Release foundation | In progress (S12.1 done; S12.2–S12.4 open) | 2026-10-17 | — | — |
 | 13 | Identity: Culmina | Not started | — | — | — |
 | 14 | Capture Plan completeness | Not started | — | — | — |
 | 15 | Night conditions | Not started | — | — | — |
@@ -782,7 +783,7 @@ All defined in `POST_ROADMAP_PLAN.md` §8.
 | RD-14 | Vocabulary (rig or equipment; Sessions or Logbook; window names) | 4 | **Decided** 2026-09-27 (S4.R5; E.1): Rig, Plan, Logbook; the glossary |
 | RD-15 | A local diagnostics export for the beta | 11 | **Decided** 2026-09-30 (Stage 11 planning, delegated; E.1, D11-4): not for the beta; revisit if triage lacks information |
 | RD-16 | When the metadata feature becomes visible (PD-06 gate) | 2 (3) | **Resolved** 2026-09-26 (S3.D, ADR-018 §7): visible at the end of Stage 3 (S3.7), as "Add from a photo" on the equipment screen. It stayed hidden throughout Stage 2 |
-| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | **Pushed by the owner** (observed 2026-10-17: `origin/main` = `b1df679`, PR #1 merged 2026-10-16). Three CI runs observed, **all failed** (TD-104); the cause is fixed locally by S12.1 (full gate PASS on Linux and Windows). Open until an owner-authorized push produces a passing run |
+| RD-17 | Push the CI workflow to the remote and observe a first run | 1 (optional) / 11 | **Pushed by the owner** (observed 2026-10-17: `origin/main` = `b1df679`, PR #1 merged 2026-10-16). Three CI runs failed (TD-104); after S12.1 the owner-authorized push produced the first passing run, run 39020770255 (https://github.com/Buffur/Astro-Planner/actions/runs/39020770255). **Resolved 2026-10-17** |
 
 Answered in part by Stage 0: the direction part of 07 §6 item 11 (the primary 1.0 user), in
 `PRODUCT_DIRECTION.md` §2. Modes stay open as RG-06.
@@ -850,7 +851,7 @@ These block a release, not refinement.
 
 ## Next allowed action
 
-1. **S12.1's remote confirmation:** with the owner's authorization, push `main` and read the workflow run on GitHub; a pass closes TD-104, RD-17 and S12.1 (acceptance 6–7). Then, each on its own start instruction: S12.2 (the owner's trademark search), S12.3 (the policy text; the owner renames and publishes), S12.4 (the owner's S11P-03 decision), then Stage 13. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
+1. Each on its own start instruction: **S12.2** (the owner's trademark search for "Culmina"), **S12.3** (the agent drafts the policy text; the owner renames the repository and publishes Pages), **S12.4** (the owner's S11P-03 decision); then Stage 13. S12.1 is done. **RA.D**: record only the owner's answers on the [decision sheet](research/RA_D_DECISION_SHEET.md) in DECISIONS E.1 (with the ADR amendments they imply); then **RA.P** after G2. Do not start implementation; TD-104 needs the CI log from the owner.
 2. **Stage 11 remains open:** S11.6 phone checks when connected; S11.7 readiness against the existing matrix and named baseline when requested. RA.P must carry all unresolved release checks and decide their scheduling after the product decisions; no previous PASS is reopened without V3/V6 grounds.
 3. **Owner actions** remain: phone, signing/upload key, published privacy policy/contact, RD-01/TD-088, S11P-03, go/no-go and deferred identity/logo/provider gates. The reassessment does not silently resolve any of them.
 
