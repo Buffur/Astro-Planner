@@ -1,5 +1,7 @@
 # AstroPlan Decisions
 
+> **RA.D round 1, 2026-10-17:** E.1 "RA.D — ID-1: the application name": **Culmina**, chosen by the owner, pending formal trademark clearance before store publication. A product-direction decision only; no code is renamed. Documentation only.
+
 > **Updated 2026-10-17:** E.1 records the owner-requested instruction correction and Product Reassessment planning scope; no redesign implementation decisions made.
 
 > **Stage 11 planning, 2026-09-30:** E.1 "Stage 11 decisions (delegated by the owner)": D11-1 to D11-6 (RD-15: no diagnostics export in the beta). Documentation only.
@@ -486,6 +488,15 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 | PD-21 *(placeholder, registered 2026-09-21; **RESOLVED 2026-09-26**: E.1 "Stage 2 decisions", ADR-017)* | Supported image-metadata formats for assisted logging | TD-018, F-45; MASTER_ROADMAP G17 | Decided in TASK 17.1, against real sample files | — | Metadata-assisted logging (G17, v1.1) |
 
 ## E.1 Resolved decisions
+
+### RA.D — ID-1: the application name (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17, choosing from the RA.R2d shortlist (Culmina, AltArc, Astrarc, Arcwindow; reserve Noctarc, PhotonPlan) after the agent's comparison.
+- **Decision:** the new application name is **Culmina**, *pending formal trademark clearance before store publication*.
+- **Supersedes (as product direction):** OD-07's name "Astro Planner" (TASK 16.1). Until an implementation Task approved through RA.P renames the app, the shipped name stays `AppIdentity.appName` = "Astro Planner" (trap 20); this decision authorizes no code, manifest, application-id or repository change.
+- **Store descriptor:** "Culmina: Astrophoto Planner" is kept as a **provisional** descriptor, not an approved final store title.
+- **Evidence kept:** `refinement/research/RA_R2D_IDENTITY.md` §2–§3 (preliminary screening, 2026-10-17, not legal clearance): no Culmina app on Google Play or the App Store; Culmina Family Estate Winery (Canada, class 33 — wine), registrations UNKNOWN; `.com` and `.app` domains taken; WIPO, EUIPO and USPTO not searched directly (CAPTCHA/JavaScript). The owner's formal search (OD-07; classes 9 and 42) remains a release prerequisite.
+- **Open in round 1:** ID-2 to ID-6 (`refinement/research/RA_D_DECISION_SHEET.md`).
 
 ### Product Reassessment planning and instruction correction (2026-10-17)
 
