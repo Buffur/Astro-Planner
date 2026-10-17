@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- DRAFT for S13.3 (not in the app): the Culmina R3 splash icon as an AnimatedVectorDrawable.
+     108-unit adaptive canvas; outer orbit 0-450 ms, inner orbit 120-520 ms, star 420-720 ms. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:width="108dp" android:height="108dp"
+            android:viewportWidth="108" android:viewportHeight="108">
+            <path android:name="outer" android:pathData="M60.77,33.07 A22,22 0 1 0 75.79,50.96"
+                android:strokeColor="#E6EBF7" android:strokeWidth="6" android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+            <path android:name="inner" android:pathData="M53.06,40.83 A13.2,13.2 0 1 0 66.8,57.21"
+                android:strokeColor="#7F8DC0" android:strokeWidth="2.4" android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+            <group android:name="star" android:pivotX="70.85" android:pivotY="39.86"
+                android:scaleX="0.4" android:scaleY="0.4" android:rotation="-45">
+                <path android:name="starFill" android:pathData="M70.85,30.26 Q72.39,38.32 80.45,39.86 Q72.39,41.39 70.85,49.46 Q69.32,41.39 61.25,39.86 Q69.32,38.32 70.85,30.26 Z"
+                    android:fillColor="#8CCBFF" android:fillAlpha="0" />
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="outer">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1"
+                android:duration="450" android:interpolator="@android:interpolator/fast_out_slow_in" />
+        </aapt:attr>
+    </target>
+    <target android:name="inner">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="120" android:duration="400"
+                android:interpolator="@android:interpolator/fast_out_slow_in" />
+        </aapt:attr>
+    </target>
+    <target android:name="star">
+        <aapt:attr name="android:animation">
+            <set android:ordering="together">
+                <objectAnimator android:propertyName="scaleX" android:valueFrom="0.4" android:valueTo="1"
+                    android:startOffset="420" android:duration="300" android:interpolator="@android:anim/overshoot_interpolator" />
+                <objectAnimator android:propertyName="scaleY" android:valueFrom="0.4" android:valueTo="1"
+                    android:startOffset="420" android:duration="300" android:interpolator="@android:anim/overshoot_interpolator" />
+                <objectAnimator android:propertyName="rotation" android:valueFrom="-45" android:valueTo="0"
+                    android:startOffset="420" android:duration="300" android:interpolator="@android:interpolator/fast_out_slow_in" />
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="starFill">
+        <aapt:attr name="android:animation">
+            <objectAnimator android:propertyName="fillAlpha" android:valueFrom="0" android:valueTo="1"
+                android:startOffset="420" android:duration="120" />
+        </aapt:attr>
+    </target>
+</animated-vector>

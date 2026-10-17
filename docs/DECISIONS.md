@@ -502,6 +502,11 @@ registered by TASK 0.2; each is decided in its own ADR task in `docs/MASTER_ROAD
 - **Decision:** `geolocator` and its bundled `play-services-location` stay. The licensors grant a GPL-3.0 §7 additional permission for linking with the Google Play services libraries, stated in `COMPLIANCE.md` and `README.md`; the About statement is a code change in S16.8 (S12.4 (a), readiness review C4). Resolves S11P-03 as a decision; S11P-04 (TD-098, the Android notices on the licence page) stays in S16.8. S17.4 checks the statement.
 - **Not chosen:** (b) the platform location manager (a dependency change).
 
+### S13.1 — the owner selects R3 Ice star (2026-10-17)
+
+- **Decided by:** the owner, in chat, 2026-10-17: «Я выбираю R3» ["I choose R3"] (round 4), with the remark that it does not look centred.
+- **Follow-up:** confirmed off-centre (round 4 centred the ink centroid); the orbit-centred form `R3-final` and the splash-animation concept are in `refinement/evidence/identity/round5/`. **Final artwork approval (S13.1 acceptance 4) is pending the owner's confirmation of `R3-final`.**
+
 ### S13.1 — logo direction: C4 Orbit C (2026-10-17)
 
 - **Decided by:** the owner, in chat, 2026-10-17: «Дорабатываем направление C4 Orbit C.» ["We refine the C4 Orbit C direction."]
